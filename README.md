@@ -45,8 +45,6 @@ Go to:
 
 You can find the detailed changelog [here](docs/source/changelog/changelog.md).
 
-## Roadmap
-
 ## Contributors
 
 | Name                | Github Account                                              |
