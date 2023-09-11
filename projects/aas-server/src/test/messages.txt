@@ -1,0 +1,3 @@
+{"level":"info","message":"This is an info.","timestamp":"2022-01-03T18:42:24.474Z"}
+{"level":"error","message":"Scanning OPC-UA server 'opc.tcp://172.16.160.188:30001/I4AASServer' failed: The connection cannot be established with server opc.tcp://172.16.160.188:30001/I4AASServer .\nPlease check that the server is up and running or your network configuration.\nErr = (connect ECONNREFUSED 172.16.160.188:30001)","timestamp":"2022-01-03T18:42:40.173Z"}
+{"level":"warn","message":"This is a warning","timestamp":"2022-01-03T18:43:17.745Z"}

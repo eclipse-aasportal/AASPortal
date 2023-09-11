@@ -1,0 +1,11 @@
+{
+    "modelType": {
+        "name": "SubmodelElementCollection"
+    },
+    "ordered": false,
+    "allowDuplicates": false,
+    "idShort": "SubmodelElementCollection",
+    "constraints": [],
+    "kind": "Instance",
+    "category": "CONSTANT"
+}

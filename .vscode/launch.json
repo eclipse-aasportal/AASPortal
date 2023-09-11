@@ -1,0 +1,93 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Start aas-portal",
+            "type": "chrome",
+            "request": "launch",
+            "preLaunchTask": "start",
+            "url": "http://localhost:4200/",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Start aas-server",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "build-aas-server",
+            "program": "${workspaceFolder}/projects/aas-server/build/aas-server.js",
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/projects/aas-server/build/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "NODE_SERVER_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-server/build",
+                "WEB_ROOT": "projects/aas-portal/dist",
+                "ASSETS": "projects/aas-server/src/assets",
+                "ENDPOINTS": "[\"file:///samples?name=Samples\"]"
+            }
+        },
+        {
+            "name": "Run aas-server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/projects/aas-server/dist/aas-server.js",
+            "cwd": "${workspaceFolder}",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "NODE_SERVER_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-server/dist",
+                "WEB_ROOT": "projects/aas-portal/dist",
+                "ASSETS": "projects/aas-server/src/assets",
+                "ENDPOINTS": "[\"file:///samples?name=Samples\"]"
+            }
+        },
+        {
+            "name": "Test aas-portal",
+            "type": "chrome",
+            "request": "launch",
+            "preLaunchTask": "test",
+            "url": "http://localhost:9876/debug.html",
+        },
+        {
+            "name": "Test aas-lib",
+            "type": "chrome",
+            "request": "launch",
+            "preLaunchTask": "test-aas-lib",
+            "url": "http://localhost:9876/debug.html",
+        },
+        {
+            "name": "Test aas-server",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test:debug",
+                "-w",
+                "aas-server"
+            ],
+        },
+        {
+            "name": "Test common",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "common"
+            ]
+        }
+    ]
+}

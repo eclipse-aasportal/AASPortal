@@ -1,0 +1,17 @@
+{
+  "branches": ["main", "development"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    ["@semantic-release/npm", {
+      "npmPublish": false
+    }],
+    ["@semantic-release/gitlab", {
+      "gitlabUrl": "https://gitlab.cc-asp.fraunhofer.de/"
+    }],
+    ["@semantic-release/git", {
+      "assets": ["package.json"],
+      "message": "chore(Release): ${nextRelease.version}\n\n${nextRelease.notes}"
+    }]
+  ]
+}

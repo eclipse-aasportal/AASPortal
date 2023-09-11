@@ -1,0 +1,87 @@
+stages:
+  - tag
+  - build
+  - test
+  - deploy
+
+tag:
+  image: node:18.10
+  stage: tag
+  rules:
+    - if: '$CI_COMMIT_MESSAGE !~ /(Release)/'
+  script:
+    - npm install @semantic-release/gitlab -D
+    - npm install @semantic-release/git -D
+    - npx semantic-release
+
+build:
+  image: node:lts-alpine3.16
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /(Release)/'
+  script:
+    - npm ci
+    - npm run build -ws
+
+test:
+  image: node:lts-alpine3.16
+  stage: test
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /(Release)/'
+  script:
+    - apk add --no-cache chromium && export CHROME_BIN='/usr/bin/chromium-browser'
+    - npm ci
+    - npm run build -ws
+    - npm run test -ws
+    - npm run coverage
+  coverage: '/Lines \W+: (\d+\.\d+)%.*/'
+  artifacts:
+    paths:
+      - reports/aas-portal.xml
+      - reports/aas-server.xml
+      - reports/common.xml
+    reports:
+      junit: [reports/aas-portal.xml, reports/aas-server.xml, reports/common.xml]
+      coverage_report:
+        coverage_format: cobertura
+        path: reports/**/cobertura-coverage.xml
+
+deploy_aas-server-app:
+  stage: deploy
+  only:
+    refs:
+      - development
+      - main
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /(Release)/
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile.aas-server"
+      --destination "${CI_REGISTRY_IMAGE}:node.${CI_COMMIT_BRANCH}"
+
+deploy_aas-web-app:
+  stage: deploy
+  only:
+    refs:
+      - development
+      - main
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /(Release)/
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile.aas-portal"
+      --destination "${CI_REGISTRY_IMAGE}:nginx.${CI_COMMIT_BRANCH}"

@@ -1,0 +1,40 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<table class="table table-sm table-striped table-borderless">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col" translate>COLUMN_PACKAGE</th>
+            <th scope="col" translate>COLUMN_VERSION</th>
+            <th scope="col" translate>COLUMN_LICENSE</th>
+            <th scope="col" translate>COLUMN_DESCRIPTION</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let library of libraries">
+            <th scope="row">{{library.id}}</th>
+            <td [noWrap]="true">
+                <a *ngIf="library.homepage" target="_blank" [href]="library.homepage">{{library.name}}</a>
+                <div *ngIf="!library.homepage" class="text-nowrap">{{library.name}}</div>
+            </td>
+            <td [noWrap]="true">{{library.version}}</td>
+            <td [noWrap]="true">{{library.license}}</td>
+            <td [noWrap]="true">{{library.description}}</td>
+        </tr>
+    </tbody>
+    <tbody>
+        <td [colSpan]="5">
+            <div *ngIf="pageSize > 0 && size > pageSize" class="d-flex align-items-start">
+                <ngb-pagination [collectionSize]="size" [(page)]="page" [pageSize]="pageSize" size="sm"
+                    (pageChange)="refreshLibraries()">
+                </ngb-pagination>
+            </div>
+        </td>
+    </tbody>
+</table>

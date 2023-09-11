@@ -1,0 +1,87 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (ngSubmit)="call()">
+    <div class="modal-header">
+        <h4 class="modal-title text-info">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span class="ms-2">{{name}}</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="close()"></button>
+    </div>
+    <div class="modal-body">
+        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+            <div class="d-flex">
+                <div class="flex-grow-1">{{message}}</div>
+            </div>
+        </ngb-toast>
+        <table class="table table-sm table-borderless table-condensed">
+            <caption class="top">
+                <div class="bg-secondary text-white ti-1" translate translate>CAPTION_INPUT_ARGUMENTS</div>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col" translate>COLUMN_NAME</th>
+                    <th scope="col" translate>COLUMN_VALUE</th>
+                    <th scope="col" translate>COLUMN_DATA_TYPE</th>
+                    <th scope="col" translate>COLUMN_DESCRIPTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let variable of inputVariables">
+                    <td>{{variable.name}}</td>
+                    <td *ngIf="variable.inputType === 'text'">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="variable.value"
+                            name="{{variable.name}}">
+                    </td>
+                    <td *ngIf="variable.inputType === 'checkbox'">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="variable.value"
+                                name="{{variable.name}}">
+                        </div>
+                    </td>
+                    <td>{{variable.type}}</td>
+                    <td>{{variable.description}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <!--Output Section-->
+        <table class="table table-sm table-borderless table-condensed">
+            <caption class="top">
+                <div class="bg-secondary text-white ti-1" translate>CAPTION_OUTPUT_ARGUMENTS</div>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col" translate>COLUMN_NAME</th>
+                    <th scope="col" translate>COLUMN_VALUE</th>
+                    <th scope="col" translate>COLUMN_DATA_TYPE</th>
+                    <th scope="col" translate>COLUMN_DESCRIPTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let variable of outputVariables">
+                    <td>{{variable.name}}</td>
+                    <td *ngIf="variable.inputType === 'text'">
+                        <input type="text" class="form-control form-control-sm" readonly="true" [value]="variable.value">
+                    </td>
+                    <td *ngIf="variable.inputType === 'checkbox'">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" readonly="true" [checked]="variable.value">
+                        </div>
+                    </td>
+                    <td>{{variable.type}}</td>
+                    <td>{{variable.description}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" (click)="call()" [disabled]="!canCall" translate>CMD_OPERATION_CALL</button>
+        <button type="button" class="btn btn-secondary" (click)="close()" translate>CMD_CLOSE</button>
+    </div>
+</form>

@@ -1,0 +1,134 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (ngSubmit)="submit()">
+    <div class="modal-header">
+        <h4 class="modal-title text-info">
+            <i class="bi bi-pencil"></i>
+            <span class="ms-2">{{modelType}}</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="cancel()"></button>
+    </div>
+    <div class="modal-body">
+        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+            <div class="d-flex">
+                <div class="flex-grow-1">{{ message }}</div>
+            </div>
+        </ngb-toast>
+        <div class="form-floating mb-3">
+            <input id="inputIdShort" type="text" class="form-control form-control-sm" readonly="true"
+                [(ngModel)]="idShort" name="idShort" placeholder="idShort">
+            <label for="inputIdShort" translate>LABEL_NAME</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input id="inputSemanticId" type="text" class="form-control form-control-sm" readonly="true"
+                [(ngModel)]="semanticId" name="semanticId" placeholder="semanticId">
+            <label for="inputSemanticId" translate>LABEL_SEMANTIC_ID</label>
+        </div>
+        <div class="form-floating mb-3">
+            <select #selectCategory class="form-select form-control-sm" id="selectCategory" [(ngModel)]="category"
+                name="category">
+                <option *ngFor="let item of categories" [ngValue]="item">{{item}}</option>
+            </select>
+            <label for="selectCategory" translate>LABEL_CATEGORY</label>
+        </div>
+        <ng-container *ngIf="modelType === 'Property'">
+            <div class="form-floating mb-3">
+                <select class="form-select" id="selectValueType" [(ngModel)]="valueType" name="valueType">
+                    <option *ngFor="let item of valueTypes" [ngValue]="item">{{item}}</option>
+                </select>
+                <label for="selectValueType" translate>LABEL_VALUE_TYPE</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input id="inputValue" type="text" class="form-control form-control-sm" [(ngModel)]="value" name="value"
+                    placeholder="Value">
+                <label for="inputValue" translate>LABEL_VALUE</label>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="modelType === 'MultiLanguageProperty'">
+            <div class="container px-0">
+                <div class="row">
+                    <div class="col-12 small text-secondary" translate>LABEL_VALUE</div>
+                </div>
+                <div class="row">
+                    <div class="col-12" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm table-striped table-borderless">
+                            <thead>
+                                <th [style.width.px]="16"></th>
+                                <th [style.width.px]="64"></th>
+                                <th></th>
+                                <th [style.width.px]="16"></th>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let langString of langStrings">
+                                    <td>
+                                        <input type="checkbox" class="form-check-input" [checked]="langString.selected"
+                                            (change)="select(langString)" [hidden]="langString.index < 0" />
+                                    </td>
+                                    <td>
+                                        <div *ngIf="!langString.selected" class="small">{{langString.language}}</div>
+                                        <input #inputLanguage *ngIf="langString.selected" type="text"
+                                            class="form-control form-control-sm" [value]="langString.language"
+                                            (change)="setLanguage(langString, inputLanguage.value)" />
+                                    </td>
+                                    <td>
+                                        <div *ngIf="!langString.selected" class="small">{{langString.text}}</div>
+                                        <input #inputText *ngIf="langString.selected" type="text"
+                                            class="form-control form-control-sm" [value]="langString.text"
+                                            (change)="setText(langString, inputText.value)" />
+
+                                    </td>
+                                    <td>
+                                        <a *ngIf="langString.index < 0" class="text-primary" href="javascript:void(0)"
+                                            (click)="addLangString()">
+                                            <i class="bi bi-plus"></i>
+                                        </a>
+                                        <a *ngIf="langString.index >= 0" class="text-danger" href="javascript:void(0)"
+                                            (click)="removeLangString(langString)">
+                                            <i class="bi bi-dash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="modelType === 'Range'">
+            <div class="form-floating mb-3">
+                <select class="form-select" id="selectValueType" [(ngModel)]="valueType" name="valueType">
+                    <option *ngFor="let item of valueTypes" [ngValue]="item">{{item}}</option>
+                </select>
+                <label for="selectValueType" translate>LABEL_VALUE_TYPE</label>
+            </div>
+            <div class="form-floating mb-3">
+            </div>
+            <div class="form-floating mb-3">
+                <input id="inputValue" type="text" class="form-control form-control-sm" [(ngModel)]="max" name="max"
+                    placeholder="Value">
+                <label for="inputValue" translate>LABEL_MAX</label>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="modelType === 'Blob'">
+            <div class="form-floating mb-3">
+                <input id="inputValue" type="text" class="form-control form-control-sm" [(ngModel)]="contentType"
+                    name="contentType" placeholder="MIME type">
+                <label for="inputValue" translate>LABEL_MIME_TYPE</label>
+            </div>
+            <div class="mb-3">
+                <input #fileInput type="file" class="form-control" id="input-file" [multiple]="false"
+                    [(ngModel)]="files" name="files" (change)="readFile(fileInput.files)">
+            </div>
+        </ng-container>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
+    </div>
+</form>

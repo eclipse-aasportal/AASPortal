@@ -1,0 +1,46 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="container border rounded">
+    <div class="row">
+        <div class="col fs-3 text-start">
+            <span translate>CustomerFeedback.OverallRating</span><span>&nbsp;</span><span>({{count | number}})</span>
+        </div>
+        <div class="col fs-3 text-warning text-end">
+            <ng-container *ngFor="let starClassName of starClassNames">
+                <i [class]="starClassName"></i><span>&nbsp;</span>
+            </ng-container>
+            <span class="text-body">{{stars | number: '1.1-1'}}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col fw-light fst-italic">{{name}}</div>
+    </div>
+    <div *ngFor="let item of items" class="row">
+        <div class="col-5">{{item.name}}</div>
+        <div class="col-7">
+            <fhg-score [score]="item.score"></fhg-score>
+        </div>
+    </div>
+</div>
+<div class="container mt-3">
+    <ng-container *ngFor="let feedback of feedbacks; index as i">
+        <div [class]="i % 2 === 0 ? 'd-flex flex-column mb-3' : 'd-flex flex-column mb-3 bg-secondary bg-opacity-10'">
+            <div class="d-flex">
+                <div class="text-warning">
+                    <ng-container *ngFor="let star of feedback.stars">
+                        <i [class]="star"></i><span>&nbsp;</span>
+                    </ng-container>
+                </div>
+                <div class="mx-2">{{feedback.createdAt}}</div>
+                <div class="fw-light fst-italic">{{feedback.subject}}</div>
+            </div>
+            <div>{{feedback.message}}</div>
+        </div>
+    </ng-container>
+</div>

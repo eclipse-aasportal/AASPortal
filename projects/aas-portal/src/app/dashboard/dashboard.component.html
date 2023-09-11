@@ -1,0 +1,67 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div id="fhg-dashboard-container" class="container">
+    <div *ngFor="let row of rows" class="row">
+        <div *ngFor="let column of row.columns"
+            [ngClass]="'col border border-3 rounded m-1 ' + (selected(column) ? 'border-primary' : 'border-secondary')"
+            (click)="toggleSelection(column)">
+            <ng-container *ngIf="!editMode">
+                <canvas #chart [id]="column.id"></canvas>
+            </ng-container>
+            <ng-container *ngIf="editMode">
+                <form class="pt-2">
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-form-lable text-nowrap" translate>LABEL_NAME</div>
+                        <div class="col-sm-10">
+                            <select #sourceSelect class="form-select"
+                                (change)="changeSource(column, sourceSelect.value)">
+                                <option *ngFor="let source of getSources(column)" [value]="source">{{source}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-form-lable text-nowrap" translate>LABEL_COLOR</div>
+                        <div class="col-sm-10">
+                            <input #colorInput type="color" class="form-control form-control-color"
+                                [value]="getColor(column)" (change)="changeColor(column, colorInput.value)">
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-form-lable text-nowrap" translate>LABEL_CHART_TYPE</div>
+                        <div class="col-sm-10">
+                            <select #chartTypeSelect class="form-select"
+                                (change)="changeChartType(column, chartTypeSelect.value)">
+                                <option value="Line" [selected]="getChartType(column) === 'Line'" translate>
+                                    OPTION_TIMELINE_CHART</option>
+                                <option value="BarVertical" [selected]="getChartType(column) === 'BarVertical'"
+                                    translate>OPTION_BAR_VERTICAL_CHART</option>
+                                <option value="BarHorizontal" [selected]="getChartType(column) === 'BarHorizontal'"
+                                    translate>OPTION_BAR_HORIZONTAL_CHART</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label [for]="'inputMin' + column.id" class="col-sm-2 col-form-label" translate>LABEL_MIN</label>
+                        <div class="col-sm-10">
+                            <input #inputMin type="text" class="form-control" [id]="'inputMin' + column.id"
+                                [value]="getMin(column)" (change)="changeMin(column, inputMin.value)">
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label [for]="'inputMax' + column.id" class="col-sm-2 col-form-label"translate>LABEL_MAX</label>
+                        <div class="col-sm-10">
+                            <input #inputMax type="text" class="form-control" [id]="'inputMax' + column.id"
+                                [value]="getMax(column)" (change)="changeMax(column, inputMax.value)">
+                        </div>
+                    </div>
+                </form>
+            </ng-container>
+        </div>
+    </div>
+</div>

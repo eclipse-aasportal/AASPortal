@@ -1,0 +1,75 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2022 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css");
+
+:root {
+    --fhg-green: #009374;
+    --fhg-blue: #1f82c0;
+    --fhg-abc: #33B8CA;
+    --fhg-def: #B1C800;
+    --fhg-ghi: #6DBFA9;
+    --fhg-klm: #B4CA3C;
+    --fhg-nop: #1D9B83;
+    --fhg-qrs: #5D5299;
+    --fhg-tuv: #F7C727;
+    --fhg-xyz: #E78E26;
+    --fhg-123: #8B3F4B;
+    --fhg-456: #5EB0BE;
+    --fhg-red: #C52523;
+}
+
+$primary: #009374;
+$info: #1f82c0;
+
+th[sortable] {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+th[sortable].asc:before {
+    content: '';
+    display: block;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16"><path d="M3.204 5h9.592L8 10.481 3.204 5zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z"/></svg>') center center no-repeat;
+    background-size: 16px;
+    width: 22px;
+    height: 22px;
+    float: left;
+    margin-left: 0px;
+}
+
+th[sortable].desc:before {
+    content: '';
+    display: block;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up" viewBox="0 0 16 16"><path d="M3.204 11h9.592L8 5.519 3.204 11zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z"/></svg>') center center no-repeat;
+    background-size: 16px;
+    width: 22px;
+    height: 22px;
+    float: left;
+    margin-left: 0px;
+}
+
+.ts-small {
+    font-size: small;
+}
+
+.ts-smaller {
+    font-size: smaller;
+}
+
+.ts-x-small {
+    font-size: x-small;
+}
+
+.ts-xx-small {
+    font-size: xx-small;
+}
+
+/* Importing Bootstrap SCSS file. */
+@import 'bootstrap/scss/bootstrap';

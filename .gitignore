@@ -1,0 +1,53 @@
+﻿# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+**/bin
+**/obj
+./aas-server/users
+./aas-server/test/users
+nginx
+*.user
+*.log
+*.~dx
+node_modules
+build
+dist
+coverage
+**/users
+mongo-volume
+
+# Miscellaneous
+.angular
+.sass-cache/9
+connect.lock
+coverage
+libpeerconnection.log
+testem.log
+typings
+./aas-server-config.json
+reports
+.nyc_output
+temp
+*-audit.json
+swagger.json
+swagger.yaml
+projects/aas-server/src/app/routes
+
+# System files
+.DS_Store
+Thumbs.db
+.VSCodeCounter

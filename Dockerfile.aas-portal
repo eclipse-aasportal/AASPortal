@@ -1,0 +1,11 @@
+# Dockerfile to build server and client parts
+FROM node:lts-alpine3.16 as build
+WORKDIR /usr/src/app
+COPY . .
+RUN npm ci -w=aas-portal
+RUN npm run aas-portal:build
+
+FROM nginx:latest as aas-portal
+COPY --from=build /usr/src/app/projects/aas-portal/dist/ /usr/share/nginx/html/
+COPY --from=build /usr/src/app/projects/aas-portal/nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80

@@ -1,0 +1,57 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (ngSubmit)="submit()">
+    <div class="modal-header">
+        <h5 class="modal-title text-info">
+            <i class="bi bi-person-circle"></i>
+            <span class="ms-2" translate>CAPTION_PROFILE</span>
+        </h5>
+        <button type="button" class="btn-close" (click)="cancel()" aria-label="Cancel"></button>
+    </div>
+    <div class="modal-body">
+        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+            <div class="d-flex">{{message}}</div>
+        </ngb-toast>
+        <div class="form-floating mb-3">
+            <input #inputEMail type="email" class="form-control" id="intputProfileEMail" [(ngModel)]="id"
+                name="userId" placeholder="example@email.com" (input)="onInputEMail()">
+            <label for="intputProfileEMail" translate>LABEL_EMAIL</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="intputProfileName" [(ngModel)]="name" name="name"
+                [placeholder]="defaultName" aria-hidden="true">
+            <label for="intputProfileName" translate>LABEL_NAME</label>
+        </div>
+        <button type="button" class="btn btn-outline-primary mb-1" (click)="collapse.toggle()"
+            translate>CMD_CHANGE_PASSWORD</button>
+        <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" class="mb-2">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="inputProfilePassword" [(ngModel)]="password1"
+                            name="password1" placeholder="password">
+                        <label for="inputProfilePassword" translate>LABEL_PASSWORD</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="inputProfileConfirmPassword"
+                            [(ngModel)]="password2" name="password2" placeholder="confirm password">
+                        <label for="inputProfileConfirmPassword" translate>LABEL_CONFIRM_PASSWORD</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p>
+            <a href="javascript:void(0);" (click)="deleteUser()" translate>CMD_DELETE_USER</a>
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
+    </div>
+</form>

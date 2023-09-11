@@ -1,0 +1,73 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<table class="table table-sm table-hover table-striped align-middle">
+    <thead>
+        <tr>
+            <th class="aas-tree-th-checkbox">
+                <input type="checkbox" class="form-check-input" (change)="toggleSelections()"
+                    [disabled]="state === 'online'" [checked]="someSelected | async">
+            </th>
+            <th>
+                <a class="link-secondary" href="javascript:void(0);" (click)="collapse()">
+                    <i class="bi bi-dash-square-dotted"></i>
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let node of nodes | async" [ngClass]="visualState(node)" [id]="node.id">
+            <td>
+                <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)" [checked]="node.selected"
+                    [disabled]="state === 'online'" />
+            </td>
+            <td [colSpan]="node.isLeaf ? 1 : 2">
+                <div class="d-flex" style="overflow-x: hidden">
+                    <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
+                    <a *ngIf="!node.isLeaf && !node.expanded && node.hasChildren" (click)="expand(node)"
+                        href="javascript:void(0);">
+                        <div class="text-dark">
+                            <i class="bi bi-plus-square"></i>
+                        </div>
+                    </a>
+                    <div *ngIf="!node.isLeaf && !node.expanded && !node.hasChildren" class="text-muted">
+                        <i class="bi bi-square"></i>
+                    </div>
+                    <a *ngIf="!node.isLeaf && node.expanded" href="javascript:void(0);" (click)="collapse(node)">
+                        <div class="text-dark">
+                            <i class="bi bi-dash-square"></i>
+                        </div>
+                    </a>
+                    <div *ngIf="node.isLeaf" class="wh-4"></div>
+                    <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
+                        {{node.abbreviation}}</div>
+                    <div *ngIf="node.hasSemantic" class="ms-1 flex-grow-1 text-nowrap">
+                        <a (click)="open(node)" href="javascript:void(0);">{{node.name}}</a>
+                        <span class="text-secondary">&nbsp;[</span>
+                        <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
+                        <span class="text-secondary">]</span>
+                    </div>
+                    <div *ngIf="!node.hasSemantic" class="ms-1 flex-grow-1 text-nowrap">
+                        <b>{{node.name}}</b>
+                        <span class="text-secondary">&nbsp;[</span>
+                        <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
+                        <span class="text-secondary">]</span>
+                    </div>
+                </div>
+            </td>
+            <td *ngIf="node.isLeaf" align="right">
+                <div *ngIf="node.displayType === 'text'" class="text-nowrap me-2">{{getValue(node)}}</div>
+                <input *ngIf="node.displayType === 'boolean'" class="form-check-input" [readonly]="true"
+                    [checked]="getValue(node)">
+                <a *ngIf="node.displayType === 'url'" href="javascript:void(0);" class="text-nowrap me-2"
+                    (click)="open(node)">{{node.value}}</a>
+            </td>
+        </tr>
+    </tbody>
+</table>

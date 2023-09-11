@@ -1,0 +1,15 @@
+{
+    "modelType": {
+        "name": "Property"
+    },
+    "idShort": "Property",
+    "constraints": [],
+    "valueType": {
+        "dataObjectType": {
+            "name": "string"
+        }
+    },
+    "value": "Lorem ipsum dolor",
+    "kind": "Instance",
+    "category": "CONSTANT"
+}

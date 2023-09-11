@@ -1,0 +1,21 @@
+{
+    "modelType": {
+        "name": "MultiLanguageProperty"
+    },
+    "idShort": "MultiLanguageProperty",
+    "constraints": [],
+    "value": {
+        "langString": [
+            {
+                "language": "de",
+                "text": "deutsch"
+            },
+            {
+                "language": "en",
+                "text": "english"
+            }
+        ]
+    },
+    "kind": "Instance",
+    "category": "CONSTANT"
+}

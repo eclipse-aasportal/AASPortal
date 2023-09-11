@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compileOnSave": false,
+    "compilerOptions": {
+        "outDir": "./build",
+        "module": "ES2022",
+        "target": "ES2022",
+        "moduleResolution": "nodenext",
+        "strict": true,
+        "noImplicitAny": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "sourceMap": true,
+        "alwaysStrict": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "useUnknownInCatchVariables": false,
+        "downlevelIteration": true,
+        "removeComments": true,
+        "useDefineForClassFields": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "lib": [
+            "es2022"
+        ],
+        "types": [
+            "node"
+        ],
+        "paths": {
+            "*": [
+                "./src/app/types/*"
+            ]
+        }
+    }
+}

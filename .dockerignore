@@ -1,0 +1,10 @@
+.git
+.VSCodeCounter
+.nyc_output
+.archive
+.vscode
+.angular
+node_modules
+reports
+build
+dist

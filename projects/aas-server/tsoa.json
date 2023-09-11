@@ -1,0 +1,37 @@
+{
+    "entryFile": "src/app/aas-server.ts",
+    "noImplicitAdditionalProperties": "silently-remove-extras",
+    "controllerPathGlobs": [
+        "src/app/controller/**/*controller.ts"
+    ],
+    "multerOpts": {
+        "dest": "/temp"
+    },
+    "spec": {
+        "outputDirectory": "./src/app",
+        "specVersion": 3,
+        "schemes": [
+            "http"
+        ],
+        "securityDefinitions": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            },
+            "api_key": {
+                "type": "apiKey",
+                "name": "access_token",
+                "in": "query"
+            }
+        },
+        "yaml": false
+    },
+    "routes": {
+        "routesDir": "./src/app/routes",
+        "iocModule": "src/app/controller/ioc-container",
+        "middleware": "express",
+        "authenticationModule": "./src/app/controller/authentication",
+        "esm": true
+    }
+}
