@@ -133,7 +133,7 @@ RS256 (RSA Signature with SHA-256) is an asymmetric algorithm, and it uses a pub
 
 `JWT_PUBLIC_KEY=`*`<path to public key file>`*
 
-# HTTPS
+## HTTPS
 To enable HTTPS 
 
 `HTTPS_CERT_FILE=`*`<path to certificate file>`*
