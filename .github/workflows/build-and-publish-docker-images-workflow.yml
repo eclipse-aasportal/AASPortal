@@ -25,3 +25,19 @@ jobs:
           context: .
           push: true
           tags: fraunhoferiosb/aasportal_aio:latest
+
+      - name: Build and push AASPortal (frontend) image
+        uses: docker/build-push-action@v5
+        with:
+          file: ./Dockerfile.aas-portal
+          context: .
+          push: true
+          tags: fraunhoferiosb/aasportal_aasportal:latest
+
+      - name: Build and push AASServer (backend) image
+        uses: docker/build-push-action@v5
+        with:
+          file: ./Dockerfile.aas-server
+          context: .
+          push: true
+          tags: fraunhoferiosb/aasportal_aasserver:latest
