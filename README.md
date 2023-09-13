@@ -6,7 +6,7 @@
 
 Check out the [Getting Started](./docs/source/gettingstarted.md) section to learn how to setup Visual Studio Code and start using and developing the *AASPortal*. Learn more about the [Architecture](./docs/source/architecture.md) of *AASPortal*, and check out the [Usage](./docs/source/usage.md) section to learn about available search filters for AAS and which Endpoints can be connected to the *AASPortal*.
 
-For more details about the AASPortal see the full documentation :blue_book: [here](https://fpethig-rtd-tutorial.readthedocs.io/en/latest/?badge=latest).
+For more details about the AASPortal see the full documentation :blue_book: [here](https://aasportal.readthedocs.io/en/latest/?badge=latest).
 
 **AASPortal is under active development and we are looking forward to your active contributions!**
 
@@ -17,7 +17,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 - Docker Desktop 4.x
 
 ## Getting Started
-You can find a detailed documentation :blue_book: [here](https://fpethig-rtd-tutorial.readthedocs.io/)
+You can find a detailed documentation :blue_book: [here](https://aasportal.readthedocs.io/)
 
 ## Usage
 
