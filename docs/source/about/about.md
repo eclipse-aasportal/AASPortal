@@ -10,6 +10,6 @@ aasportal@iosb-ina.fraunhofer.de
 
 Distributed under the Apache 2.0 License. See `LICENSE` for more information.
 
-Copyright (C) 2022 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131 Karlsruhe, Germany.
+Copyright (C) 2023, Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V., Germany.
 
 You should have received a copy of the Apache 2.0 License along with this program. If not, see [https://www.apache.org/licenses/LICENSE-2.0.html](https://www.apache.org/licenses/LICENSE-2.0.html).
