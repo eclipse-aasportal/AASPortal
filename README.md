@@ -1,4 +1,4 @@
-# AASPortal [![Documentation Status](https://readthedocs.org/projects/fpethig-rtd-tutorial/badge/?version=latest "Documentation Status")](https://fpethig-rtd-tutorial.readthedocs.io/en/latest/?badge=latest)
+# AASPortal [![Documentation Status](https://readthedocs.org/projects/aasportal/badge/?version=latest "Documentation Status")](https://aasportal.readthedocs.io/en/latest/?badge=latest)
 
 ![AASPortal Logo <](./docs/source/images/AASPortal_mid.png "AASPortal Logo")
 
