@@ -4,7 +4,7 @@ AASPortal is a Node.js based web portal for the visualization and management of 
 
 ## Contact
 
-aasportal@iosb-ina.fraunhofer.de
+[aasportal@iosb-ina.fraunhofer.de](mailto:aasportal@iosb-ina.fraunhofer.de)
 
 ## License
 
