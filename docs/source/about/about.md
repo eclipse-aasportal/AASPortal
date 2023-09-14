@@ -1,10 +1,10 @@
 # About the Project
 
-AASPortal is a Node.js based web portal for the visualization and management of Asset Administration Shells (AAS). The implementation uses the concepts of the document “Details of the Asset Administration Shell” published on https://www.plattform-i40.de and licensed under Creative Commons CC BY 4.0.
+AASPortal is a Node.js based web portal for the visualization and management of Asset Administration Shells (AAS). The implementation uses the concepts of the document “Details of the Asset Administration Shell” published on [https://www.plattform-i40.de](https://www.plattform-i40.de) and licensed under Creative Commons CC BY 4.0.
 
 ## Contact
 
-aasportal@iosb-ina.fraunhofer.de
+[aasportal@iosb-ina.fraunhofer.de](mailto:aasportal@iosb-ina.fraunhofer.de)
 
 ## License
 
