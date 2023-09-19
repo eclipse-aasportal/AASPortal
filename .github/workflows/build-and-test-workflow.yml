@@ -7,7 +7,7 @@ on:
 #
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: node:lts-alpine3.16
 
     # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
     strategy:
