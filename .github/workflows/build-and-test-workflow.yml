@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: apt update && apt install chromium-browser && export CHROME_BIN='/usr/bin/chromium-browser'
+      - run: apt install chromium-browser && export CHROME_BIN='/usr/bin/chromium-browser'
       - run: npm ci
       - run: npm run build -ws
       - run: npm run test
