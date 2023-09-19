@@ -21,10 +21,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: sudo apt update && sudo apt install chromium-browser && export CHROME_BIN='/usr/bin/chromium-browser'
-      - run: npm config set unsafe-perm=true
-      - run: npm ci --allow-root
+      - run: npm ci --unsafe-perm=true --allow-root
       - run: npm run build -ws
-      - run: npm run test --allow-root
+      - run: sudo npm run test
       - run: npm run coverage
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
