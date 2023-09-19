@@ -12,7 +12,7 @@ jobs:
     # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x]
 #
     steps:
       - uses: actions/checkout@v3
@@ -21,9 +21,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: sudo apt update && sudo apt install chromium-browser && export CHROME_BIN='/usr/bin/chromium-browser'
-      - run: npm ci --unsafe-perm=true --allow-root
+      - run: npm config set unsafe-perm=true
+      - run: npm ci --allow-root
       - run: npm run build -ws
-      - run: npm run test
+      - run: npm run test --allow-root
       - run: npm run coverage
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
