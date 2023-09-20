@@ -24,7 +24,7 @@ export class LocalFileStorage extends FileStorage {
     }
 
     public exists(path: string): Promise<boolean> {
-        return new Promise<boolean>(res  => res(fs.existsSync(resolve(this.root, path))));
+        return Promise.resolve(fs.existsSync(resolve(this.root, path)));
     }
 
     public async isDirectory(path: string): Promise<boolean> {
@@ -39,7 +39,7 @@ export class LocalFileStorage extends FileStorage {
         return fs.promises.writeFile(resolve(this.root, path), data);
     }
 
-    public readdir(path: string): Promise<string[]> {
+    public readDir(path: string): Promise<string[]> {
         return fs.promises.readdir(resolve(this.root, path));
     }
 
