@@ -6,20 +6,30 @@
  *
  *****************************************************************************/
 
+import path from 'path';
 import { DependencyContainer } from 'tsyringe';
 import { TemplateStorage } from './template-storage.js';
 import { Variable } from '../variable.js';
-import { LocalTemplateStorage } from './locale-template-storage.js';
+import { OwnCloudStorage } from '../file-storage/own-cloud-storage.js';
+import { FileStorage } from '../file-storage/file-storage.js';
+import { LocalFileStorage } from '../file-storage/local-file-storage.js';
+import { Logger } from '../logging/logger.js';
 
 export class TemplateStorageFactory {
-    constructor(private readonly container: DependencyContainer) { }
+    constructor(
+        private readonly container: DependencyContainer
+    ) { }
 
     public create(): TemplateStorage {
-        const url = this.container.resolve(Variable).TEMPLATE_STORAGE;
+        let fileStorage: FileStorage;
+        const variable = this.container.resolve(Variable);
+        const url = variable.TEMPLATE_STORAGE;
         if (url) {
-            throw new Error('Not implemented.');
+            fileStorage = new OwnCloudStorage(url);
+        } else {
+            fileStorage = new LocalFileStorage(path.resolve(variable.ASSETS, 'templates'));
         }
 
-        return this.container.resolve(LocalTemplateStorage);
+        return new TemplateStorage(this.container.resolve<Logger>('Logger'), fileStorage);
     }
 }

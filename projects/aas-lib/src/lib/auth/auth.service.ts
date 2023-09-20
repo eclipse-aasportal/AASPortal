@@ -54,6 +54,8 @@ export class AuthService {
             } else {
                 token = null;
             }
+        } else {
+            token = null;
         }
 
         if (!token) {

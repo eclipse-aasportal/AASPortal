@@ -14,7 +14,7 @@ export abstract class FileStorage {
     public abstract isDirectory(path: string): Promise<boolean>;
     public abstract mkdir(path: string, recursive?: boolean): Promise<string | undefined>;
     public abstract writeFile(path: string, data: string | Buffer): Promise<void>;
-    public abstract readdir(path: string): Promise<string[]>;
+    public abstract readDir(path: string): Promise<string[]>;
     public abstract readFile(path: string): Promise<Buffer>;
     public abstract unlink(path: string): Promise<void>;
     public abstract rename(oldPath: string, newPath: string): Promise<void>;

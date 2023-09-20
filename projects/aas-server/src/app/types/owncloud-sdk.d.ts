@@ -9,7 +9,8 @@
 declare module 'owncloud-sdk' {
 
     export interface OwnCloudAuthentication {
-        basic?: { username: string; password: string; }
+        basic?: { username: string; password: string; };
+        bearer?: string;
     }
 
     export interface OwnCloudOptions {
@@ -17,9 +18,41 @@ declare module 'owncloud-sdk' {
         auth?: OwnCloudAuthentication;
     }
 
+    export class FileInfo {
+        public name: string;
+        public type: string;
+        public processing: boolean;
+        public fileInfo: { [key: string]: string };
+
+        public getName(): string;
+        public getPath(): string;
+        public getSize(): number;
+        public getFileId(): number;
+        public getContentType(): string;
+        public getLastModified(): string;
+        public getProperty(property: string): string;
+        public isDir(): boolean;
+    }
+
+    export class Files {
+        public list(path: string, depth = '1', properties: { [key: string]: string } = {}): Promise<FileInfo[]>;
+        public getFileContents(path: string, options?: { [key: string]: string }): Promise<string>;
+        public getFileUrl(path: string): string;
+        public getPathForFileId(fileId: number): Promise<string>;
+        public putFileContents(path: string, content: string, options: { [key: string]: string } = {}): Promise<boolean>;
+        public createFolder(path: string): Promise<boolean>;
+        public delete(path: string): Promise<boolean>;
+        public fileInfo(path: string, properties: { [key: string]: string }): Promise<FileInfo>;
+        public move (source: string, target: string, overwrite = false): Promise<boolean>;
+        public copy (source: string, target: string, overwrite = false): Promise<boolean>;
+    }
+
     export default class ownCloud {
         constructor(options?: OwnCloudOptions);
 
-        public login(): Promise<any>;
+        public files: Files;
+
+        public login(): Promise<string>;
+        public logout(): void;
     }
 }
