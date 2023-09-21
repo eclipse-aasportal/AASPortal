@@ -61,11 +61,11 @@ All AAS that contain at least one property with the name *Producer* and the valu
 
 All AAS where *RotationSpeed* is greater or equal then *5000*:
 
-`#Prop=RotationSpeed >= 5000`
+`#Prop:RotationSpeed >= 5000`
 
 All AAS where *ProductionDate* is between *12/24/2022* and *12/31/2022*:
 
-`#Prop=ProductionDate = 12/24/2022...12/31/2022`
+`#Prop:ProductionDate = 12/24/2022...12/31/2022`
 
 ## Supported Endpoints
 
