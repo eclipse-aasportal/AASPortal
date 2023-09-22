@@ -34,7 +34,8 @@ import { WindowService } from '../window.service';
     providedIn: 'root'
 })
 export class AuthService {
-    private readonly $payload = new BehaviorSubject<JWTPayload>({ role: 'guest' });
+    private readonly payload$ = new BehaviorSubject<JWTPayload>({ role: 'guest' });
+    private readonly ready$ = new BehaviorSubject<boolean>(false);
     private readonly cookies = new Map<string, string>();
 
     constructor(
@@ -44,43 +45,44 @@ export class AuthService {
         private notify: NotifyService,
         private window: WindowService
     ) {
-        this.payload = this.$payload.asObservable();
+        this.payload = this.payload$.asObservable();
+        this.ready = this.ready$.asObservable();
 
         const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
-        let token = this.window.getLocalStorageItem('.Token');
-        if (stayLoggedIn && token) {
-            if (this.isValid(token)) {
-                this.nextPayload(token);
-            } else {
-                token = null;
-            }
-        } else {
-            token = null;
+        const token = this.window.getLocalStorageItem('.Token');
+        if (stayLoggedIn && token && this.isValid(token)) {
+            this.nextPayload(token);
+            this.ready$.next(true);
+            return;
         }
 
-        if (!token) {
-            this.loginAsGuestAsync().catch(error => notify.error(error));
-        }
+        this.loginAsGuest().subscribe({
+            error: (error) => notify.error(error),
+            complete: () => this.ready$.next(true)
+        });
     }
+
+    /** Signals that an authentication was performed. */
+    public readonly ready: Observable<boolean>;
 
     /** The e-mail of the current user. */
     public get userId(): string | undefined {
-        return this.$payload.getValue()?.sub;
+        return this.payload$.getValue()?.sub;
     }
 
     /** The name or alias of the current user. */
     public get name(): string | undefined {
-        return this.$payload.getValue()?.name ?? this.translate.instant('GUEST_USER');
+        return this.payload$.getValue()?.name ?? this.translate.instant('GUEST_USER');
     }
 
     /** The current user role. */
     public get role(): UserRole {
-        return this.$payload.getValue()?.role ?? 'guest';
+        return this.payload$.getValue()?.role ?? 'guest';
     }
 
     /** Indicates whether the current user is authenticated. */
     public get authenticated(): boolean {
-        const payload = this.$payload.getValue();
+        const payload = this.payload$.getValue();
         return payload.sub != null && (payload.role === 'editor' || payload.role === 'admin');
     }
 
@@ -174,7 +176,7 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public async updateUserProfileAsync(profile?: UserProfile): Promise<void> {
-        const payload = this.$payload.getValue();
+        const payload = this.payload$.getValue();
         if (!payload || !payload.sub || !payload.name) {
             throw new Error('Invalid operation.');
         }
@@ -210,7 +212,7 @@ export class AuthService {
      * Deletes the account of the current authenticated user.
      */
     public async deleteUserAsync(): Promise<void> {
-        const payload = this.$payload.getValue();
+        const payload = this.payload$.getValue();
         if (!payload || !payload.sub || !payload.name) {
             throw new Error('Invalid operation');
         }
@@ -247,7 +249,7 @@ export class AuthService {
      */
     public getCookie(name: string): string | null {
         let data: string | null;
-        const payload = this.$payload.getValue();
+        const payload = this.payload$.getValue();
         if (payload) {
             data = this.cookies.get(name) ?? null;
         } else {
@@ -263,7 +265,7 @@ export class AuthService {
      * @param data The cookie value.
      */
     public setCookie(name: string, data: string): void {
-        const payload = this.$payload.getValue();
+        const payload = this.payload$.getValue();
         if (payload && payload.sub) {
             const id = payload.sub;
             this.api.setCookie(id, { name, data }).pipe(
@@ -283,7 +285,7 @@ export class AuthService {
      * @param name The cookie name.
      */
     public deleteCookie(name: string): Observable<void> {
-        const payload = this.$payload.getValue();
+        const payload = this.payload$.getValue();
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.deleteCookie(id, name).pipe(
@@ -308,6 +310,12 @@ export class AuthService {
         this.nextPayload(result.token);
     }
 
+    private loginAsGuest(): Observable<void> {
+        this.window.removeLocalStorageItem('.Token');
+        this.window.removeLocalStorageItem('.StayLoggedIn');
+        return this.api.guest().pipe(map(result => this.nextPayload(result.token)));
+    }
+
     private isValid(token: string): boolean {
         try {
             const value = jwtDecode(token) as JWTPayload;
@@ -320,7 +328,7 @@ export class AuthService {
     private nextPayload(token: string): void {
         this.window.setLocalStorageItem('.Token', token);
         const payload = jwtDecode(token) as JWTPayload;
-        this.$payload.next(payload);
+        this.payload$.next(payload);
         this.cookies.clear();
         if (payload.sub) {
             this.api.getCookies(payload.sub).subscribe({

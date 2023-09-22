@@ -20,6 +20,7 @@
         "format": "eslint src/app/**/*.ts --fix"
     },
     "dependencies": {
+        "@babel/polyfill": "^7.4.4",
         "@xmldom/xmldom": "^0.8.10",
         "bcryptjs": "^2.4.3",
         "common": "3.0.0",
