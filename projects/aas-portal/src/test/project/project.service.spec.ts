@@ -92,7 +92,7 @@ describe('ProjectService', () => {
 
         api.getContent.and.returnValue(of(content));
 
-        auth = jasmine.createSpyObj<AuthService>('AuthService', ['checkCookie', 'getCookie', 'setCookie']);
+        auth = jasmine.createSpyObj<AuthService>('AuthService', ['checkCookie', 'getCookie', 'setCookie'], { ready: of(true) });
         auth.checkCookie.and.returnValue(false);
 
         TestBed.configureTestingModule({
