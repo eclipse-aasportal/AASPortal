@@ -1,6 +1,6 @@
 {
     "name": "aas-portal-project",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
@@ -35,7 +35,6 @@
         "./projects/aas-portal"
     ],
     "devDependencies": {
-        "@babel/polyfill": "^7.4.4",
         "@semantic-release/git": "^10.0.1",
         "@semantic-release/gitlab": "^12.0.5"
     }

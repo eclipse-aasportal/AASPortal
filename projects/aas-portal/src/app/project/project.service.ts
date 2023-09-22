@@ -8,10 +8,10 @@
 
 import { Injectable } from '@angular/core';
 import { AASDocument, AASContainer, WebSocketData, AASServerMessage, AASWorkspace } from 'common';
-import { Observable, of, mergeMap, catchError, noop } from 'rxjs';
+import { Observable, of, mergeMap, catchError, noop, skipWhile, first } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
-import { LogType, NotifyService, WebSocketFactoryService } from 'aas-lib';
+import { AuthService, LogType, NotifyService, WebSocketFactoryService } from 'aas-lib';
 
 import { ProjectAPIService } from './project-api.service';
 import { State } from './project.state';
@@ -30,7 +30,8 @@ export class ProjectService {
         store: Store,
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly api: ProjectAPIService,
-        private readonly notify: NotifyService
+        private readonly notify: NotifyService,
+        private readonly auth: AuthService
     ) {
         this.store = store as Store<State>;
 
@@ -39,8 +40,11 @@ export class ProjectService {
         this.documents = this.store.select(ProjectSelectors.selectDocuments);
         this.containers = this.store.select(ProjectSelectors.selectContainers);
         this.store.select(ProjectSelectors.selectError).pipe().subscribe(error => this.notify.error(error));
-        this.store.dispatch(ProjectActions.initialize());
+
         this.subscribeWorkspaceChanged();
+
+        this.auth.ready.pipe(skipWhile(ready => ready === false), first())
+            .subscribe(() => this.store.dispatch(ProjectActions.initialize()));
     }
 
     /** All available AAS container. */

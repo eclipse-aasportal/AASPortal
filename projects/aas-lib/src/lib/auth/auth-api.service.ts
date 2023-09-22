@@ -34,6 +34,7 @@ export class AuthApiService {
         });
     }
 
+    /** @deprecated */
     public guestAsync(): Promise<AuthResult> {
         return new Promise<AuthResult>((result, reject) => {
             let data: AuthResult;
@@ -47,6 +48,11 @@ export class AuthApiService {
         });
     }
 
+    public guest(): Observable<AuthResult> {
+        return this.http.post<AuthResult>('/api/v1/guest', undefined);
+    }
+
+    /** @deprecated */
     public loginAsync(credentials: Credentials): Promise<AuthResult> {
         return new Promise<AuthResult>((result, reject) => {
             let data: AuthResult;
@@ -59,6 +65,10 @@ export class AuthApiService {
                         error: (error) => reject(error)
                     });
         });
+    }
+
+    public login(credentials: Credentials): Observable<AuthResult> {
+        return this.http.post<AuthResult>('/api/v1/login', credentials);
     }
 
     public updateProfileAsync(id: string, profile: UserProfile): Promise<AuthResult> {

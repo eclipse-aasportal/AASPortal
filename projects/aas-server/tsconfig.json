@@ -3,9 +3,9 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./build",
-        "module": "ES2022",
+        "module": "NodeNext",
         "target": "ES2022",
-        "moduleResolution": "nodenext",
+        "moduleResolution": "NodeNext",
         "strict": true,
         "noImplicitAny": true,
         "esModuleInterop": true,
