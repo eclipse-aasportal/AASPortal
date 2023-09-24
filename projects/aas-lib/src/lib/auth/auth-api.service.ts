@@ -20,95 +20,28 @@ export class AuthApiService {
         private readonly http: HttpClient
     ) { }
 
-    public registerUserAsync(profile: UserProfile): Promise<AuthResult> {
-        return new Promise<AuthResult>((result, reject) => {
-            let data: AuthResult;
-            this.http.post<AuthResult>(
-                '/api/v1/register',
-                profile).subscribe(
-                    {
-                        next: (value) => data = value,
-                        complete: () => result(data),
-                        error: (error) => reject(error)
-                    });
-        });
-    }
-
-    /** @deprecated */
-    public guestAsync(): Promise<AuthResult> {
-        return new Promise<AuthResult>((result, reject) => {
-            let data: AuthResult;
-            this.http.post<AuthResult>(
-                '/api/v1/guest', undefined).subscribe(
-                    {
-                        next: value => data = value,
-                        complete: () => result(data),
-                        error: (error) => reject(error)
-                    });
-        });
+    public register(profile: UserProfile): Observable<AuthResult> {
+        return this.http.post<AuthResult>('/api/v1/register', profile);
     }
 
     public guest(): Observable<AuthResult> {
         return this.http.post<AuthResult>('/api/v1/guest', undefined);
     }
 
-    /** @deprecated */
-    public loginAsync(credentials: Credentials): Promise<AuthResult> {
-        return new Promise<AuthResult>((result, reject) => {
-            let data: AuthResult;
-            this.http.post<AuthResult>(
-                '/api/v1/login',
-                credentials).subscribe(
-                    {
-                        next: value => data = value,
-                        complete: () => result(data),
-                        error: (error) => reject(error)
-                    });
-        });
-    }
-
     public login(credentials: Credentials): Observable<AuthResult> {
         return this.http.post<AuthResult>('/api/v1/login', credentials);
-    }
-
-    public updateProfileAsync(id: string, profile: UserProfile): Promise<AuthResult> {
-        return new Promise<AuthResult>((result, reject) => {
-            let data: AuthResult;
-            this.http.put<AuthResult>(
-                `/api/v1/users/${encodeBase64Url(id)}`,
-                profile).subscribe(
-                    {
-                        next: (value) => data = value,
-                        complete: () => result(data),
-                        error: (error) => reject(error)
-                    });
-        });
     }
 
     public updateProfile(id: string, profile: UserProfile): Observable<AuthResult> {
         return this.http.put<AuthResult>(`/api/v1/users/${encodeBase64Url(id)}`, profile);
     }
 
-    public deleteUserAsync(id: string): Promise<void> {
-        return new Promise<void>((result, reject) => {
-            this.http.delete<void>(
-                `/api/v1/users/${encodeBase64Url(id)}`)
-                .subscribe({
-                    complete: () => result(),
-                    error: (error) => reject(error)
-                });
-        });
+    public delete(id: string): Observable<void> {
+        return this.http.delete<void>(`/api/v1/users/${encodeBase64Url(id)}`);
     }
 
-    public resetPasswordAsync(id: string): Promise<void> {
-        return new Promise<void>((result, reject) => {
-            this.http.delete<void>(
-                `/api/v1/users/${encodeBase64Url(id)}/reset`)
-                .subscribe({
-                    complete: () => result(),
-                    error: (error) => reject(error)
-                });
-        });
+    public resetPassword(id: string): Observable<void> {
+        return this.http.delete<void>(`/api/v1/users/${encodeBase64Url(id)}/reset`);
     }
 
     public getCookies(id: string): Observable<Cookie[]> {

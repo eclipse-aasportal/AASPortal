@@ -226,9 +226,12 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.document != null && !this.document.readonly && this.document.modified ? this.document.modified : false;
     }
 
-    public async synchronize(): Promise<void> {
+    public synchronize(): void {
         try {
-            await this.auth.ensureAuthorizedAsync('editor');
+            this.auth.ensureAuthorized('editor').pipe(map(() => {
+                
+            })).subscribe();
+
             if (this.canSynchronize() && this.document) {
                 const messages = await this.api.putDocumentAsync(this.document);
                 if (messages && messages.length > 0) {
