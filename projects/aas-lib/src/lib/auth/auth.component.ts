@@ -28,35 +28,19 @@ export class AuthComponent {
         return this.auth.name;
     }
 
-    public async registerUser(): Promise<void> {
-        try {
-            await this.auth.registerAsync();
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public register(): void {
+        this.auth.register().subscribe({ error: error => this.notify.error(error) });
     }
 
-    public async loginUser(): Promise<void> {
-        try {
-            await this.auth.loginAsync();
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public login(): void {
+        this.auth.login().subscribe({ error: error => this.notify.error(error) });
     }
 
-    public async logoutUser(): Promise<void> {
-        try {
-            await this.auth.logoutAsync();
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public logout(): void {
+        this.auth.logout().subscribe({ error: error => this.notify.error(error) });
     }
 
-    public async updateUserProfile(): Promise<void> {
-        try {
-            await this.auth.updateUserProfileAsync();
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public updateUserProfile(): void {
+        this.auth.updateUserProfile().subscribe({ error: error => this.notify.error(error) });
     }
 }

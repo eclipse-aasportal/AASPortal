@@ -14,11 +14,11 @@
         </div>
     </a>
     <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="loginUser()" translate>CMD_LOGIN</a>
-        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="registerUser()"
+        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="login()" translate>CMD_LOGIN</a>
+        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="register()"
             translate>CMD_REGISTER_USER</a>
         <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="updateUserProfile()"
             translate>CMD_UPDATE_PROFILE</a>
-        <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="logoutUser()" translate>CMD_LOGOUT</a>
+        <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="logout()" translate>CMD_LOGOUT</a>
     </div>
 </div>

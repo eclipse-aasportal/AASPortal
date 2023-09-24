@@ -9,13 +9,12 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, of, skip, skipWhile } from 'rxjs';
+import { EMPTY, first, mergeMap, of, skipWhile } from 'rxjs';
 
 import { WindowService } from '../../lib/window.service';
 import { NotifyService } from '../../lib/notify/notify.service';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
-import { AuthResult } from 'common';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { LoginFormResult, ProfileFormResult, RegisterFormResult } from 'src/public-api';
 import { getGuestToken, getToken } from '../assets/json-web-token';
@@ -32,9 +31,9 @@ describe('AuthService', () => {
         beforeEach(function () {
             token = getGuestToken();
             api = jasmine.createSpyObj<AuthApiService>(
-                ['loginAsync', 'guestAsync', 'registerUserAsync', 'getCookies', 'updateProfileAsync']);
+                ['login', 'guest', 'register', 'getCookies', 'updateProfile']);
 
-            api.guestAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token })));
+            api.guest.and.returnValue(of({ token }));
             api.getCookies.and.returnValue(EMPTY);
 
             window = jasmine.createSpyObj<WindowService>(
@@ -76,7 +75,7 @@ describe('AuthService', () => {
         it('should be created', (done: DoneFn) => {
             expect(service).toBeTruthy();
 
-            service.payload.pipe(skip(1), first()).subscribe((value) => {
+            service.payload.pipe(first()).subscribe((value) => {
                 expect(value).toBeTruthy();
                 expect(service.userId).toBeUndefined();
                 expect(service.authenticated).toBeFalse();
@@ -84,10 +83,6 @@ describe('AuthService', () => {
                 expect(service.role).toEqual('guest');
                 done();
             });
-        });
-
-        it('provides a valid guest token', () => {
-            expect(service).toBeTruthy();
         });
 
         describe('isAuthorized', function () {
@@ -104,7 +99,7 @@ describe('AuthService', () => {
             });
         });
 
-        describe('loginAsync', function () {
+        describe('login', function () {
             let newToken: string;
 
             beforeEach(function () {
@@ -112,29 +107,26 @@ describe('AuthService', () => {
             });
 
             it('can login as arguments', function (done: DoneFn) {
-                api.loginAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: newToken })));
-                service.loginAsync({ id: 'john.doe@email.com', password: 'password' });
-
-                service.payload.pipe(skipWhile(value => value.sub == null), first()).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toEqual('john.doe@email.com');
-                    expect(service.authenticated).toBeTrue();
-                    expect(service.name).toEqual('John');
-                    expect(service.role).toEqual('editor');
-                    done();
-                });
+                api.login.and.returnValue(of({ token: newToken }));
+                service.login({ id: 'john.doe@email.com', password: 'password' }).pipe(
+                    mergeMap(() => service.payload)).subscribe((value) => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toEqual('john.doe@email.com');
+                        expect(service.authenticated).toBeTrue();
+                        expect(service.name).toEqual('John');
+                        expect(service.role).toEqual('editor');
+                        done();
+                    });
             });
 
             it('can login via form', function (done: DoneFn) {
-                api.loginAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: newToken })));
-                service.loginAsync({ id: 'john.doe@email.com', password: 'password' });
+                api.login.and.returnValue(of({ token: newToken }));
 
                 spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
                     result: new Promise<LoginFormResult>(resolve => resolve({ stayLoggedIn: true, token: newToken }))
                 }));
 
-                service.loginAsync();
-                service.payload.pipe(skipWhile(value => value.sub == null), first()).subscribe((value) => {
+                service.login().pipe(mergeMap(() => service.payload)).subscribe((value) => {
                     expect(value).toBeTruthy();
                     expect(service.userId).toEqual('john.doe@email.com');
                     expect(service.authenticated).toBeTrue();
@@ -145,7 +137,7 @@ describe('AuthService', () => {
             });
         });
 
-        describe('registerAsync', function () {
+        describe('register', function () {
             let newToken: string;
 
             beforeEach(function () {
@@ -153,15 +145,13 @@ describe('AuthService', () => {
             });
 
             it('allows registering a new user via arguments', function (done: DoneFn) {
-                api.registerUserAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: newToken })));
+                api.register.and.returnValue(of({ token: newToken }));
 
-                service.registerAsync({
+                service.register({
                     id: 'john.doe@email.com',
                     name: 'John',
                     password: '1234.xyz'
-                });
-
-                service.payload.pipe(skipWhile(value => value.sub == null), first()).subscribe((value) => {
+                }).pipe(mergeMap(() => service.payload)).subscribe((value) => {
                     expect(value).toBeTruthy();
                     expect(service.userId).toEqual('john.doe@email.com');
                     expect(service.authenticated).toBeTrue();
@@ -172,15 +162,13 @@ describe('AuthService', () => {
             });
 
             it('allows registering a new user via form', function (done: DoneFn) {
-                api.registerUserAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: newToken })));
+                api.register.and.returnValue(of({ token: newToken }));
 
                 spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
                     result: new Promise<RegisterFormResult>(resolve => resolve({ stayLoggedIn: true, token: newToken }))
                 }));
 
-                service.registerAsync();
-
-                service.payload.pipe(skipWhile(value => value.sub == null), first()).subscribe((value) => {
+                service.register().pipe(mergeMap(() => service.payload)).subscribe((value) => {
                     expect(value).toBeTruthy();
                     expect(service.userId).toEqual('john.doe@email.com');
                     expect(service.authenticated).toBeTrue();
@@ -190,15 +178,15 @@ describe('AuthService', () => {
                 });
             });
 
-            describe('logoutUserAsync', function () {
-                it('throws an error when try to logout', async function () {
-                    await expectAsync(service.logoutAsync()).toBeRejected();
+            describe('logout', function () {
+                it('throws an error when try to logout', function () {
+                    service.logout().subscribe({ error: error => expect(error).toBeTruthy() });
                 });
             });
 
-            describe('updateUserProfileAsync', function () {
+            describe('updateProfile', function () {
                 it('throw an error for a guest login', async function () {
-                    await expectAsync(service.updateUserProfileAsync()).toBeRejected();
+                    service.updateUserProfile().subscribe({ error: error => expect(error).toBeTruthy() });
                 });
             });
 
@@ -211,7 +199,7 @@ describe('AuthService', () => {
         beforeEach(function () {
             token = getToken('John');
             api = jasmine.createSpyObj<AuthApiService>(
-                ['loginAsync', 'guestAsync', 'registerUserAsync', 'getCookies', 'updateProfileAsync', 'setCookie', 'deleteCookie', 'deleteUserAsync']);
+                ['login', 'guest', 'register', 'getCookies', 'updateProfile', 'setCookie', 'deleteCookie', 'delete']);
 
             api.getCookies.and.returnValue(of([{ name: 'Cookie1', data: 'The quick brown fox jumps over the lazy dog.' }]));
             window = jasmine.createSpyObj<WindowService>(
@@ -283,7 +271,7 @@ describe('AuthService', () => {
             });
         });
 
-        describe('logoutUserAsync', function () {
+        describe('logout', function () {
             let guestToken: string;
 
             beforeEach(function () {
@@ -291,18 +279,19 @@ describe('AuthService', () => {
             });
 
             it('logs out the current user', function (done: DoneFn) {
-                api.guestAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: guestToken })));
+                api.guest.and.returnValue(of({ token: guestToken }));
 
-                service.logoutAsync();
-
-                service.payload.pipe(skipWhile(value => value.sub != null), first()).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toBeUndefined();
-                    expect(service.authenticated).toBeFalse();
-                    expect(service.name).toEqual('GUEST_USER');
-                    expect(service.role).toEqual('guest');
-                    done();
-                });
+                service.logout().pipe(
+                    mergeMap(() => service.payload),
+                    skipWhile(value => value.sub != null),
+                    first()).subscribe((value) => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toBeUndefined();
+                        expect(service.authenticated).toBeFalse();
+                        expect(service.name).toEqual('GUEST_USER');
+                        expect(service.role).toEqual('guest');
+                        done();
+                    });
             });
         });
 
@@ -316,31 +305,28 @@ describe('AuthService', () => {
             });
 
             it('updates the user profile via argument', function (done: DoneFn) {
-                api.updateProfileAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: newToken })))
+                api.updateProfile.and.returnValue(of({ token: newToken }));
 
-                service.updateUserProfileAsync({ id: 'john.doe@email.com', name: 'John Doe' });
-
-                service.payload.pipe(skipWhile(value => value.name !== 'John Doe'), first()).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toEqual('john.doe@email.com');
-                    expect(service.authenticated).toBeTrue();
-                    expect(service.name).toEqual('John Doe');
-                    expect(service.role).toEqual('editor');
-                    done();
-                });
+                service.updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' }).pipe(
+                    mergeMap(() => service.payload)).subscribe((value) => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toEqual('john.doe@email.com');
+                        expect(service.authenticated).toBeTrue();
+                        expect(service.name).toEqual('John Doe');
+                        expect(service.role).toEqual('editor');
+                        done();
+                    });
             });
 
             it('updates the user profile via form', function (done: DoneFn) {
-                api.updateProfileAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: newToken })))
+                api.updateProfile.and.returnValue(of({ token: newToken }));
 
                 spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
                     result: new Promise<ProfileFormResult>(resolve => resolve({ token: newToken })),
                     componentInstance: { initialize: jasmine.createSpy() }
                 }));
 
-                service.updateUserProfileAsync();
-
-                service.payload.pipe(skipWhile(value => value.name !== 'John Doe'), first()).subscribe((value) => {
+                service.updateUserProfile().pipe(mergeMap(() => service.payload)).subscribe((value) => {
                     expect(value).toBeTruthy();
                     expect(service.userId).toEqual('john.doe@email.com');
                     expect(service.authenticated).toBeTrue();
@@ -351,17 +337,15 @@ describe('AuthService', () => {
             });
 
             it('deletes a user via form', function (done: DoneFn) {
-                api.deleteUserAsync.and.returnValue(new Promise<void>(resolve => resolve()))
-                api.guestAsync.and.returnValue(new Promise<AuthResult>(resolve => resolve({ token: guestToken })));
+                api.delete.and.returnValue(of(void 0));
+                api.guest.and.returnValue(of({ token: guestToken }));
                 window.confirm.and.returnValue(true);
                 spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
                     result: new Promise<ProfileFormResult>(resolve => resolve({ action: 'deleteUser' })),
                     componentInstance: { initialize: jasmine.createSpy() }
                 }));
 
-                service.updateUserProfileAsync();
-
-                service.payload.pipe(skipWhile(value => value.sub != null), first()).subscribe((value) => {
+                service.updateUserProfile().pipe(mergeMap(() => service.payload)).subscribe((value) => {
                     expect(value).toBeTruthy();
                     expect(service.userId).toBeUndefined();
                     expect(service.authenticated).toBeFalse();

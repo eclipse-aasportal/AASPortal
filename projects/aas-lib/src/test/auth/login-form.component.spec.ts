@@ -17,7 +17,7 @@ import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { ERRORS } from '../../lib/types/errors';
 import { INFO } from '../../lib/types/info';
 import { LoginFormComponent, LoginFormResult } from '../../lib/auth/login-form/login-form.component';
-import { AuthResult } from 'common';
+import { of, throwError } from 'rxjs';
 
 describe('LoginFormComponent', () => {
     let component: LoginFormComponent;
@@ -60,7 +60,7 @@ describe('LoginFormComponent', () => {
     it('submits a valid user', fakeAsync(async () => {
         const result: LoginFormResult = { token: 'a_token', stayLoggedIn: true };
         spyOn(modal, 'close').and.callFake((...args) => expect(args[0]).toEqual(result));
-        spyOn(api, 'loginAsync').and.returnValue(new Promise<AuthResult>((result) => result({ token: 'a_token' })));
+        spyOn(api, 'login').and.returnValue(of({ token: 'a_token' }));
 
         component.userId = 'john.doe@email.com';
         component.password = '1234.Abcd';
@@ -104,8 +104,7 @@ describe('LoginFormComponent', () => {
 
     it('does not login an unknown user', fakeAsync(async () => {
         spyOn(modal, 'close').and.returnValue();
-        spyOn(api, 'loginAsync').and
-            .returnValue(new Promise<AuthResult>((_, reject) => reject(new Error('Unknown user'))));
+        spyOn(api, 'login').and.returnValue(throwError(() => new Error('Unknown user')));
 
         component.userId = 'unknown.user@email.com';
         component.password = '1234.abcd';
@@ -115,7 +114,7 @@ describe('LoginFormComponent', () => {
     }));
 
     it('supports the reset of a forgotten password', async function () {
-        spyOn(api, 'resetPasswordAsync').and.returnValue(new Promise<void>((result) => result()));
+        spyOn(api, 'resetPassword').and.returnValue(of(void 0));
         component.userId = 'john.doe@email.com';
         await component.resetPassword();
         expect(component.messages.length).toEqual(1);

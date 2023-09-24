@@ -22,7 +22,7 @@ describe('AuthComponent', () => {
     let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['loginAsync']);
+        auth = jasmine.createSpyObj<AuthService>(['login']);
 
         TestBed.configureTestingModule({
             declarations: [AuthComponent],

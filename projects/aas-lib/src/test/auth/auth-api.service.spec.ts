@@ -38,47 +38,53 @@ describe('AuthApiService', function () {
         expect(service).toBeTruthy();
     });
 
-    describe('guestAsync', function () {
-        it('login guest', async function () {
+    describe('guest', function () {
+        it('login guest', function () {
             const result: AuthResult = { token: getGuestToken() };
-            const promise = service.guestAsync();
+            service.guest().subscribe((res) => {
+                expect(res).toEqual(result);
+            });
+
             const req = httpTestingController.expectOne('/api/v1/guest');
-            req.flush(result);
-            await expectAsync(promise).toBeResolvedTo(result);
             expect(req.request.method).toEqual('POST');
+            req.flush(result);
         });
     });
 
-    describe('loginAsync', function () {
-        it('login John', async function () {
+    describe('login', function () {
+        it('login John', function () {
             const result: AuthResult = { token: getToken('John') };
-            const promise = service.loginAsync({ id: 'john.doe@email.com', password: '1234.xyz' });
+            service.login({ id: 'john.doe@email.com', password: '1234.xyz' }).subscribe((res) => {
+                expect(res).toEqual(result);
+            });
+
             const req = httpTestingController.expectOne('/api/v1/login');
-            req.flush(result);
-            await expectAsync(promise).toBeResolvedTo(result);
             expect(req.request.method).toEqual('POST');
+            req.flush(result);
         });
     });
 
-    describe('registerUserAsync', function () {
-        it('registers John as new user', async function () {
+    describe('register', function () {
+        it('registers John as new user', function () {
             const result: AuthResult = { token: getToken('John') };
-            const promise = service.registerUserAsync({ id: 'john.doe@email.com', name: 'John', password: '1234.xyz' });
+            service.register({ id: 'john.doe@email.com', name: 'John', password: '1234.xyz' })
+                .subscribe((res) => {
+                    expect(res).toEqual(result);
+                });
+
             const req = httpTestingController.expectOne('/api/v1/register');
-            req.flush(result);
-            await expectAsync(promise).toBeResolvedTo(result);
             expect(req.request.method).toEqual('POST');
+            req.flush(result);
         });
     });
 
-    // describe('deleteUserAsync', function () {
-    //     it('deletes a registered user', async function () {
-    //         const promise = service.deleteUserAsync('john.doe@email.com', getToken('John'));
-    //         const req = httpTestingController.expectOne('/api/v1/users/am9obi5kb2VAZW1haWwuY29t');
-    //         await expectAsync(promise).toBeResolved();
-    //         expect(req.request.method).toEqual('DELETE');
-    //     });
-    // });
+    describe('delete', function () {
+        it('deletes a registered user', function () {
+            service.delete('john.doe@email.com').subscribe();
+            const req = httpTestingController.expectOne('/api/v1/users/am9obi5kb2VAZW1haWwuY29t');
+            expect(req.request.method).toEqual('DELETE');
+        });
+    });
 
     it('getCookies', function () {
         const cookies: Cookie[] = [

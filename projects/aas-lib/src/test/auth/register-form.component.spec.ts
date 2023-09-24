@@ -12,12 +12,12 @@ import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AuthResult } from 'common';
 
 import { RegisterFormComponent, RegisterFormResult } from '../../lib/auth/register-form/register-form.component';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { ERRORS } from '../../lib/types/errors';
 import { getToken } from '../assets/json-web-token';
+import { of } from 'rxjs';
 
 describe('RegisterFormComponent', () => {
     let component: RegisterFormComponent;
@@ -62,7 +62,7 @@ describe('RegisterFormComponent', () => {
     it('registers a new user', fakeAsync(async () => {
         const result: RegisterFormResult = { stayLoggedIn: true, token: token };
         spyOn(modal, 'close').and.callFake((...args) => expect(args[0]).toEqual(result));
-        spyOn(api, 'registerUserAsync').and.returnValue(new Promise<AuthResult>((result) => result({ token })));
+        spyOn(api, 'register').and.returnValue(of({ token }));
 
         component.userId = 'john.doe@email.com';
         component.name = 'John Doe';

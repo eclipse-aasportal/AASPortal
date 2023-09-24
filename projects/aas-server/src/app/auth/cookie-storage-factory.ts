@@ -10,7 +10,6 @@ import { DependencyContainer } from 'tsyringe';
 import { CookieStorage } from './cookie-storage.js';
 import { LocaleCookieStorage } from './locale-cookie-storage.js';
 import { Variable } from '../variable.js';
-import { parseUrl } from '../convert.js';
 import { MongoDBCookieStorage } from './mongo-db-cookie-storage.js';
 import { Logger } from '../logging/logger.js';
 
@@ -24,9 +23,10 @@ export class CookieStorageFactory {
         const logger = this.container.resolve<Logger>('Logger');
         if (url) {
             try {
-                const protocol = parseUrl(url).protocol;
-                if (protocol === 'mongodb:') {
-                    return new MongoDBCookieStorage();
+                if (new URL(url).protocol === 'mongodb:') {
+                    const storage = this.container.resolve(MongoDBCookieStorage);
+                    logger.info(`Using user database at: ${url}`);
+                    return storage;
                 } else {
                     throw new Error(`${url} is not supported cookie storage.`);
                 }
@@ -35,6 +35,8 @@ export class CookieStorageFactory {
             }
         }
 
-        return this.container.resolve(LocaleCookieStorage);
+        const storage = this.container.resolve(LocaleCookieStorage);
+        logger.info(`Using locale user database.`);
+        return storage;
     }
 }

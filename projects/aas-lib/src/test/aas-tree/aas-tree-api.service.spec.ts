@@ -18,7 +18,7 @@ describe('AASTreeApiService', function () {
     let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(function () {
-        auth = jasmine.createSpyObj<AuthService>(['loginAsync']);
+        auth = jasmine.createSpyObj<AuthService>(['login']);
         TestBed.configureTestingModule({
             declarations: [],
             providers: [
