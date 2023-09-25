@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { HttpErrorResponse } from "@angular/common/http";
-import { TranslateService } from "@ngx-translate/core";
-import { ApplicationError, ErrorData, stringFormat } from "common";
-import { noop, toString } from "lodash-es";
+import { HttpErrorResponse } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
+import { ApplicationError, ErrorData, stringFormat } from 'common';
+import { noop, toString } from 'lodash-es';
 
 const mimeTypes = new Map<string, string>(
     [
@@ -102,7 +102,7 @@ export function messageToString(message: any, translate: TranslateService): stri
         text = format(message.message, message.name, message.args);
     } else if (message instanceof Error) {
         text = message.message;
-    } else if (typeof message === "string") {
+    } else if (typeof message === 'string') {
         text = message;
     } else if (message instanceof HttpErrorResponse) {
         if (isErrorData(message.error)) {
