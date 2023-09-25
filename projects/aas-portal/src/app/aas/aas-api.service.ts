@@ -34,19 +34,11 @@ export class AASApiService {
      * Applies a changed AAS document.
      * @param document The document to apply.
      */
-    public async putDocumentAsync(document: AASDocument): Promise<string[]> {
+    public putDocument(document: AASDocument): Observable<string[]> {
         const formData = new FormData();
         formData.append('content', JSON.stringify(document.content))
-        return new Promise<string[]>((resolve, reject) => {
-            let messages: string[];
-            this.http.put<string[]>(
+        return this.http.put<string[]>(
                 `/api/v1/containers/${encodeBase64Url(document.container)}/documents/${encodeBase64Url(document.id)}`,
-                formData)
-                .subscribe({
-                    next: (value) => messages = value,
-                    error: (error) => reject(error),
-                    complete: () => resolve(messages)
-                });
-        });
+                formData);
     }
 }

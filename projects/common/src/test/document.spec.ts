@@ -22,7 +22,7 @@ describe('Document', function () {
         beforeEach(function () {
             a = {
                 id: 'http://customer.com/aas/a',
-                container: 'C:/Git/aasportal/common/test/assets/?type=AasxDirectory',
+                container: 'C:/Git/AASPortal/common/test/assets/?type=AasxDirectory',
                 endpoint: { type: 'file', address: 'a.json' },
                 idShort: 'A',
                 readonly: true,
@@ -31,7 +31,7 @@ describe('Document', function () {
 
             b = {
                 id: 'http://customer.com/aas/b',
-                container: 'C:/Git/aasportal/common/test/assets/?type=AasxDirectory',
+                container: 'C:/Git/AASPortal/common/test/assets/?type=AasxDirectory',
                 endpoint: { type: 'file', address: 'b.json' },
                 idShort: 'B',
                 readonly: true,

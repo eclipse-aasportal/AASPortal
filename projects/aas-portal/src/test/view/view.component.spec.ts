@@ -39,7 +39,7 @@ describe('ViewComponent', () => {
             template: 'Nameplate',
             submodels: [{
                 id: 'http://customer.com/aas/9175_7013_7091_9168',
-                url: 'C:\\Git\\aasportal\\data\\endpoints\\samples',
+                url: 'C:\\Git\\AASPortal\\data\\endpoints\\samples',
                 idShort: 'Identification'
             }]
         }

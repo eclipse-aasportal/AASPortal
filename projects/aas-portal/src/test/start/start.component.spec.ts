@@ -69,7 +69,7 @@ describe('StartComponent', () => {
     let ws2: AASWorkspace;
 
     beforeEach(() => {
-        window = jasmine.createSpyObj<WindowService>(['confirm', 'getLocalStorageItem', 'setLocalStorageItem']);
+        window = jasmine.createSpyObj<WindowService>(['confirm', 'getLocalStorageItem', 'setLocalStorageItem', 'removeLocalStorageItem']);
         document1 = ws.createDocument('document1');
         document2 = ws.createDocument('document2');
         document3 = ws.createDocument('document3');
