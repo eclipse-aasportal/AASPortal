@@ -21,7 +21,7 @@ container.registerInstance('USERS_DIR', './users');
 container.registerType('Logger', FileLogger);
 container.register('CookieStorage', { useFactory: c => new CookieStorageFactory(c).create() });
 container.register('UserStorage', { useFactory: c => new UserStorageFactory(c).create() });
-container.register('winston.Logger', { useFactory: c => new LoggerFactory(c).create() });
+container.register('winston.Logger', { useFactory: () => new LoggerFactory().create() });
 container.register('TemplateStorage', { useFactory: c => new TemplateStorageFactory(c).create() });
 
 container.afterResolution(AASProvider, (_, instance) => {
