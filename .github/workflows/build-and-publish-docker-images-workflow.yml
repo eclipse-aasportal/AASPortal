@@ -41,7 +41,7 @@ jobs:
           file: ./Dockerfile.aas-portal
           context: .
           push: true
-          tags: fraunhoferiosb/aasportal_aasportal:{{env.IMAGE_TAG}}
+          tags: fraunhoferiosb/aasportal_aasportal:${{env.IMAGE_TAG}}
 
       - name: Build and push AASServer (backend) image
         uses: docker/build-push-action@v5
@@ -49,4 +49,4 @@ jobs:
           file: ./Dockerfile.aas-server
           context: .
           push: true
-          tags: fraunhoferiosb/aasportal_aasserver:{{env.IMAGE_TAG}}
+          tags: fraunhoferiosb/aasportal_aasserver:${{env.IMAGE_TAG}}
