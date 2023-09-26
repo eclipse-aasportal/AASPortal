@@ -50,7 +50,7 @@ export class NotifyService {
      * Displays an information to the user.
      * @param message The message.
      */
-    public info(message: string, ...args: any[]): void {
+    public info(message: string, ...args: unknown[]): void {
         if (message && !isElement(message)) {
             message = stringFormat(this.translate.instant(message), args);
             this.messages.push(
@@ -84,7 +84,7 @@ export class NotifyService {
      * @param type The message type.
      * @param message The message.
      */
-    public log(type: LogType, message: any): void {
+    public log(type: LogType, message: unknown): void {
         if (message) {
             switch (type) {
                 case LogType.Error:
