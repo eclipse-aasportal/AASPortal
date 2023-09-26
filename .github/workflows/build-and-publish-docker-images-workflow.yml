@@ -2,6 +2,10 @@ name: Build-and-publish-docker-images-workflow
 
 on:
   push:
+    branches:
+      - main
+      - staging
+      - development
 
   release:
     types: [published]
@@ -18,13 +22,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set environment for branch
+        run: |
+          if [[ "${{github.base_ref}}" == "master" || "${{github.ref}}" == "refs/heads/master" ]]; then
+              echo "IMAGE_TAG=latest" >> "$GITHUB_ENV"
+          else
+              echo "IMAGE_TAG=unstable" >> "$GITHUB_ENV"
+          fi
+
       - name: Build and push All in One image
         uses: docker/build-push-action@v5
         with:
           file: ./Dockerfile
           context: .
           push: true
-          tags: fraunhoferiosb/aasportal_aio:latest
+          tags: fraunhoferiosb/aasportal_aio:${{env.IMAGE_TAG}}
 
       - name: Build and push AASPortal (frontend) image
         uses: docker/build-push-action@v5
@@ -32,7 +44,7 @@ jobs:
           file: ./Dockerfile.aas-portal
           context: .
           push: true
-          tags: fraunhoferiosb/aasportal_aasportal:latest
+          tags: fraunhoferiosb/aasportal_aasportal:{{env.IMAGE_TAG}}
 
       - name: Build and push AASServer (backend) image
         uses: docker/build-push-action@v5
@@ -40,4 +52,4 @@ jobs:
           file: ./Dockerfile.aas-server
           context: .
           push: true
-          tags: fraunhoferiosb/aasportal_aasserver:latest
+          tags: fraunhoferiosb/aasportal_aasserver:{{env.IMAGE_TAG}}
