@@ -111,16 +111,16 @@ export class AasxServerV3 extends AasxServer {
 
     public async commitAsync(
         source: aas.Environment,
-        destination: aas.Environment,
+        target: aas.Environment,
         diffs: DifferenceItem[]): Promise<string[]> {
         const messages: string[] = [];
-        const aasId = encodeBase64Url(destination.assetAdministrationShells[0].id);
+        const aasId = encodeBase64Url(target.assetAdministrationShells[0].id);
         for (const diff of diffs) {
             if (diff.type === 'inserted') {
                 if (isSubmodel(diff.sourceElement)) {
                     messages.push(await this.postSubmodelAsync(aasId, diff.sourceElement));
                 } else if (isSubmodelElement(diff.sourceElement)) {
-                    const submodel = this.getSubmodel(destination, diff.destinationParent);
+                    const submodel = this.getSubmodel(target, diff.destinationParent);
                     messages.push(await this.postSubmodelElementAsync(submodel, diff.sourceElement));
                 } else {
                     throw new Error(`Inserting "${diff?.sourceElement?.modelType}" is not implemented.`);
@@ -129,7 +129,7 @@ export class AasxServerV3 extends AasxServer {
                 if (isSubmodel(diff.sourceElement)) {
                     messages.push(await this.putSubmodelAsync(aasId, diff.sourceElement));
                 } else if (isSubmodelElement(diff.sourceElement)) {
-                    const submodel = this.getSubmodel(destination, diff.destinationElement);
+                    const submodel = this.getSubmodel(target, diff.destinationElement);
                     messages.push(await this.putSubmodelElementAsync(submodel, diff.sourceElement as aas.SubmodelElement));
                 } else if (isAssetAdministrationShell(diff.sourceElement)) {
                     messages.push(await this.putShellAsync(diff.sourceElement));
@@ -140,7 +140,7 @@ export class AasxServerV3 extends AasxServer {
                 if (isSubmodel(diff.destinationElement)) {
                     messages.push(await this.deleteSubmodelAsync(diff.destinationElement.id));
                 } else if (isSubmodelElement(diff.destinationElement)) {
-                    const submodel = this.getSubmodel(destination, diff.destinationParent);
+                    const submodel = this.getSubmodel(target, diff.destinationParent);
                     messages.push(await this.deleteSubmodelElementAsync(submodel, diff.destinationElement));
                 } else {
                     throw new Error(`Deleting "${diff?.destinationElement?.modelType}" is not implemented.`);

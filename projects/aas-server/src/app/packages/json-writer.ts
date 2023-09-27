@@ -6,7 +6,8 @@
  *
  *****************************************************************************/
 
-import { aas } from 'common';
+import path from 'path';
+import { aas, extensionToMimeType } from 'common';
 import { AASWriter } from './aas-writer.js';
 
 /** */
@@ -349,13 +350,17 @@ export class JsonWriter extends AASWriter {
     }
 
     private writeFile(source: aas.File): aas.File {
-        if (!source.contentType) {
-            throw new Error('Blob.contentType');
+        let contentType: string | undefined = source.contentType;
+        if (source.value && !contentType) {
+            contentType = extensionToMimeType(path.extname(source.value.trim()));
+            if (!contentType) {
+                throw new Error('File.contentType');
+            }
         }
 
         const file: aas.File = {
             ...this.writeSubmodelElementType(source),
-            contentType: source.contentType
+            contentType
         };
 
         if (source.value) {
@@ -366,7 +371,7 @@ export class JsonWriter extends AASWriter {
     }
 
     private writeBlob(source: aas.Blob): aas.Blob {
-        if (!source.contentType) {
+        if (source.value && !source.contentType) {
             throw new Error('Blob.contentType');
         }
 

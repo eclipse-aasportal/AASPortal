@@ -201,7 +201,8 @@ export class ContainersController extends ControllerBase {
     ): Promise<string[]> {
         try {
             this.logger.start('updateDocument');
-            const env: aas.Environment = JSON.parse((await fs.promises.readFile(content.path)).toString());
+            const buffer = await fs.promises.readFile(content.path);
+            const env: aas.Environment = JSON.parse(buffer.toString());
             return await this.aasProvider.updateDocumentAsync(decodeBase64Url(url), decodeBase64Url(id), env);
         } finally {
             this.logger.stop();

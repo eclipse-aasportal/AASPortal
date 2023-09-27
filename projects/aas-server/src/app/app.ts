@@ -96,13 +96,13 @@ export class App {
             }
 
             return res.status(500).json({
-                message: "Internal Server Error",
+                message: err.message
             });
         }
 
         if (err instanceof Error) {
             return res.status(500).json({
-                message: "Internal Server Error",
+                message: err.message
             });
         }
 
@@ -111,7 +111,7 @@ export class App {
 
     private notFoundHandler = (_req: Request, res: Response) => {
         res.status(404).send({
-            message: "Not Found",
+            message: "Not Found"
         });
     };
 
