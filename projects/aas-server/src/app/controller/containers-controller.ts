@@ -7,7 +7,8 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Body, Delete, Get, OperationId, Path, Post, Put, Queries, Route, Security, Tags, UploadedFiles } from 'tsoa';
+import fs from 'fs';
+import { Body, Delete, Get, OperationId, Path, Post, Put, Queries, Route, Security, Tags, UploadedFile, UploadedFiles } from 'tsoa';
 import { AASDocument, aas } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
@@ -196,11 +197,12 @@ export class ContainersController extends ControllerBase {
     public async updateDocument(
         @Path() url: string,
         @Path() id: string,
-        @Body() content: aas.Environment
+        @UploadedFile() content: Express.Multer.File
     ): Promise<string[]> {
         try {
             this.logger.start('updateDocument');
-            return await this.aasProvider.updateDocumentAsync(decodeBase64Url(url), decodeBase64Url(id), content);
+            const env: aas.Environment = JSON.parse((await fs.promises.readFile(content.path)).toString());
+            return await this.aasProvider.updateDocumentAsync(decodeBase64Url(url), decodeBase64Url(id), env);
         } finally {
             this.logger.stop();
         }

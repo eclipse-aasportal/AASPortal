@@ -51,3 +51,4 @@ projects/aas-server/src/app/routes
 .DS_Store
 Thumbs.db
 .VSCodeCounter
+aas-server-config.json
