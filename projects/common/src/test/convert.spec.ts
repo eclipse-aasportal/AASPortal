@@ -20,7 +20,9 @@ import {
     toLocale,
     toInvariant,
     parseNumber,
-    toBoolean
+    toBoolean,
+    mimeTypeToExtension,
+    extensionToMimeType
 } from '../lib/convert.js';
 
 describe('Convert', function () {
@@ -391,6 +393,26 @@ describe('Convert', function () {
 
         it('converts "false" to false', function () {
             expect(toBoolean('false')).toBeFalsy();
+        });
+    });
+    
+    describe('mimeTypeToExtension', function () {
+        it('return ".png" for "image/png"', function () {
+            expect(mimeTypeToExtension('image/png')).toEqual('.png');
+        });
+
+        it('return undefined for an unknown MIME type', function () {
+            expect(mimeTypeToExtension('unknown')).toBeUndefined();
+        });
+    });
+
+    describe('extensionToMimeType', function () {
+        it('return "image/png" for ".png"', function () {
+            expect(extensionToMimeType('.png')).toEqual('image/png');
+        });
+
+        it('return undefined for an unknown MIME type', function () {
+            expect(extensionToMimeType('unknown')).toBeUndefined();
         });
     });
 });

@@ -36,7 +36,7 @@ export class ServerMessage {
 
                 response.on('end', () => {
                     try {
-                        ServerMessage.checkStatusCode(response);
+                        ServerMessage.checkStatusCode(response, data);
                         result(JSON.parse(data));
                     } catch (error) {
                         reject(error);
@@ -101,7 +101,7 @@ export class ServerMessage {
 
                 response.on('end', function () {
                     try {
-                        ServerMessage.checkStatusCode(response);
+                        ServerMessage.checkStatusCode(response, responseData);
                         result(JSON.parse(responseData));
                     } catch (error) {
                         reject(error);
@@ -151,7 +151,7 @@ export class ServerMessage {
 
                 response.on('end', function () {
                     try {
-                        ServerMessage.checkStatusCode(response);
+                        ServerMessage.checkStatusCode(response, responseData);
                         result(JSON.parse(responseData));
                     } catch (error) {
                         reject(error);
@@ -218,7 +218,7 @@ export class ServerMessage {
 
                 response.on('end', function () {
                     try {
-                        ServerMessage.checkStatusCode(response);
+                        ServerMessage.checkStatusCode(response, responseData);
                         result(JSON.parse(responseData));
                     } catch (error) {
                         reject(error);
@@ -253,7 +253,7 @@ export class ServerMessage {
 
                 response.on('end', function () {
                     try {
-                        ServerMessage.checkStatusCode(response);
+                        ServerMessage.checkStatusCode(response, responseData);
                         result(JSON.parse(responseData));
                     } catch (error) {
                         reject(error);
@@ -269,13 +269,13 @@ export class ServerMessage {
         });
     }
 
-    private static checkStatusCode(response: http.IncomingMessage): void {
+    private static checkStatusCode(response: http.IncomingMessage, data?: string): void {
         if (!response.statusCode) {
-            throw new Error('Unknown status code.');
+            throw new Error(data ? `Unknown status code: ${data}` : 'Unknown status code.');
         }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
-            throw new Error(`(${response.statusCode}) ${response.statusMessage}`);
+            throw new Error(data ? `(${response.statusCode}) ${response.statusMessage}: ${data}` : `(${response.statusCode}) ${response.statusMessage}.`);
         }
     }
 }

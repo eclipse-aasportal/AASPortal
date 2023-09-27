@@ -24,6 +24,7 @@ import {
     EndpointType,
     selectSubmodel,
     getIdShortPath,
+    mimeTypeToExtension,
 } from 'common';
 
 import { AASTreeRow, AASTreeFeatureState } from './aas-tree.state';
@@ -33,7 +34,7 @@ import { ShowVideoFormComponent } from './show-video-form/show-video-form.compon
 import { OperationCallFormComponent } from './operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { AASTree } from '../types/aas-tree';
-import { basename, encodeBase64Url, mimeTypeToExtension } from '../convert';
+import { basename, encodeBase64Url } from '../convert';
 import { AASQuery } from '../types/aas-query-params';
 import { ViewQuery } from '../types/view-query-params';
 import { WindowService } from '../window.service';

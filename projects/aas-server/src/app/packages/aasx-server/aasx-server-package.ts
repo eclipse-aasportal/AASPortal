@@ -58,12 +58,12 @@ export class AasxServerPackage extends AASPackage {
         return document;
     }
 
-    public async commitDocumentAsync(source: AASDocument, content: aas.Environment): Promise<string[]> {
+    public async commitDocumentAsync(target: AASDocument, content: aas.Environment): Promise<string[]> {
         let messages: string[] | undefined;
-        if (source.content && content) {
-            const diffs = await diffAsync(source.content, content);
+        if (target.content && content) {
+            const diffs = await diffAsync(content, target.content);
             if (diffs.length > 0) {
-                messages = await this.source.commitAsync(source.content, content, diffs);
+                messages = await this.source.commitAsync(content, target.content, diffs);
             }
         }
 
