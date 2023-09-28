@@ -8,16 +8,17 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AppRoutingModule } from 'src/app/app-routing.module';
-import { MainComponent } from '../../app/main/main.component';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AASDocument } from 'common';
-import { Subject } from 'rxjs';
-import { CommonModule } from '@angular/common';
-import { AASLibModule } from 'aas-lib';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
-import { ProjectService } from 'src/app/project/project.service';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { Subject } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { AASDocument } from 'common';
+
+import { AppRoutingModule } from '../../app/app-routing.module';
+import { MainComponent } from '../../app/main/main.component';
+import { AASLibModule } from 'projects/aas-lib/src/public-api';
+import { ProjectService } from '../../app/project/project.service';
 
 describe('MainComponent', () => {
     let component: MainComponent;

@@ -16,8 +16,10 @@ import { NotifyService } from '../../lib/notify/notify.service';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { LoginFormResult, ProfileFormResult, RegisterFormResult } from 'src/public-api';
 import { getGuestToken, getToken } from '../assets/json-web-token';
+import { LoginFormResult } from '../../lib/auth/login-form/login-form.component';
+import { RegisterFormResult } from '../../lib/auth/register-form/register-form.component';
+import { ProfileFormResult } from '../../lib/auth/profile-form/profile-form.component';
 
 describe('AuthService', () => {
     let service: AuthService;

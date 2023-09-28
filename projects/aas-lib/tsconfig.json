@@ -1,27 +1,15 @@
 {
+    "extends": "../../tsconfig.json",
     "compileOnSave": false,
     "compilerOptions": {
-        "baseUrl": "./",
-        "outDir": "./build",
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "noImplicitOverride": true,
-        "noPropertyAccessFromIndexSignature": true,
+        "outDir": "./dist/out-tsc",
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "sourceMap": true,
         "declaration": false,
-        "downlevelIteration": true,
-        "experimentalDecorators": true,
         "moduleResolution": "node",
         "importHelpers": true,
-        "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "target": "es2022",
-        "module": "es2022",
         "lib": [
-            "es2022",
+            "ES2022",
             "dom"
         ],
         "types": [

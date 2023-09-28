@@ -9,8 +9,8 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AASDocument, aas } from 'common';
-import { AASTreeApiService } from 'src/lib/aas-tree/aas-tree-api.service';
-import { AuthService } from 'src/lib/auth/auth.service';
+import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
+import { AuthService } from '../../lib/auth/auth.service';
 
 describe('AASTreeApiService', function () {
     let service: AASTreeApiService;

@@ -14,10 +14,10 @@ import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Message } from 'common';
 import { first } from 'rxjs';
-import { messageTableReducer } from 'src/lib/message-table/massage-table.reducer';
-import { MessageTableComponent } from 'src/lib/message-table/message-table.component';
-import { MessageTableFeatureState } from 'src/lib/message-table/message-table.state';
-import { SortableHeaderDirective } from 'src/public-api';
+import { messageTableReducer } from '../../lib/message-table/massage-table.reducer';
+import { MessageTableComponent } from '../../lib/message-table/message-table.component';
+import { MessageTableFeatureState } from '../../lib/message-table/message-table.state';
+import { SortableHeaderDirective } from '../../public-api';
 
 describe('MessageTableComponent', () => {
     let component: MessageTableComponent;

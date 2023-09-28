@@ -8,7 +8,7 @@
 
 import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ScoreComponent } from 'src/lib/score/score.component';
+import { ScoreComponent } from '../../lib/score/score.component';
 
 
 describe('ScoreComponent', () => {

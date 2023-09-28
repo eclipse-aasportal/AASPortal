@@ -11,7 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { ShowVideoFormComponent } from 'src/lib/aas-tree/show-video-form/show-video-form.component';
+import { ShowVideoFormComponent } from '../../lib/aas-tree/show-video-form/show-video-form.component';
 
 describe('ShowVideoFormComponent', () => {
     let component: ShowVideoFormComponent;

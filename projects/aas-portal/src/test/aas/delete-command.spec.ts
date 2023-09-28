@@ -10,11 +10,11 @@ import { TestBed } from "@angular/core/testing";
 import { Store, StoreModule } from "@ngrx/store";
 import { first } from 'rxjs';
 import { aas, AASDocument, selectElement } from "common";
-import { aasReducer } from "src/app/aas/aas.reducer";
-import { DeleteCommand } from "src/app/aas/commands/delete-command";
-import { sampleDocument } from "src/test/assets/sample-document";
+import { aasReducer } from "../../app/aas/aas.reducer";
+import { DeleteCommand } from "../../app/aas/commands/delete-command";
+import { sampleDocument } from "../../test/assets/sample-document";
 import { cloneDeep } from "lodash-es";
-import { State } from "src/app/aas/aas.state";
+import { State } from "../../app/aas/aas.state";
 
 describe('DeleteCommand', function () {
     let command: DeleteCommand;

@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { AASWorkspace } from 'common';
-import { AuthService } from 'aas-lib';
+import { AuthService } from 'projects/aas-lib/src/public-api';
 import { catchError, EMPTY, exhaustMap, from, map, merge, mergeMap, Observable, of, zip } from 'rxjs';
 
 import { ProjectAPIService } from './project-api.service';

@@ -8,10 +8,10 @@
 
 import { aas, AASDocument, getChildren, getParent, isAssetAdministrationShell, isSubmodel, normalize, selectSubmodel } from "common";
 import { cloneDeep, noop } from "lodash-es";
-import { Command } from "src/app/types/command";
 import { Store } from "@ngrx/store";
 import { State } from '../aas.state';
 import * as AASActions from '../aas.actions';
+import { Command } from "../../types/command";
 
 export class DeleteCommand extends Command {
     private readonly store: Store<State>;

@@ -9,7 +9,7 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { convertBlobToBase64Async, extension } from 'aas-lib';
+import { convertBlobToBase64Async, extension } from 'projects/aas-lib/src/public-api';
 import { aas, extensionToMimeType, toInvariant, toLocale } from 'common';
 
 export interface LangStringRow extends aas.LangString {

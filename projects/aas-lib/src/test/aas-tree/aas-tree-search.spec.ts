@@ -9,10 +9,10 @@
 import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASTreeSearch } from 'src/lib/aas-tree/aas-tree-search';
-import { AASTreeFeatureState } from 'src/lib/aas-tree/aas-tree.state';
-import { aasTreeReducer } from 'src/lib/aas-tree/aas-tree.reducer';
-import * as AASTreeActions from 'src/lib/aas-tree/aas-tree.actions';
+import { AASTreeSearch } from '../../lib/aas-tree/aas-tree-search';
+import { AASTreeFeatureState } from '../../lib/aas-tree/aas-tree.state';
+import { aasTreeReducer } from '../../lib/aas-tree/aas-tree.reducer';
+import * as AASTreeActions from '../../lib/aas-tree/aas-tree.actions';
 import { sampleDocument } from '../assets/sample-document';
 
 describe('AASTreeSearch', function () {

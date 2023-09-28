@@ -12,20 +12,20 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, aas } from 'common';
 import { Observable, noop, of } from 'rxjs';
-import { AASTree, DownloadService, NotifyService, OnlineState } from 'aas-lib';
+import { AASTree, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
 import { CommonModule } from '@angular/common';
 
 import { AASComponent } from '../../app/aas/aas.component';
-import { aasReducer } from 'src/app/aas/aas.reducer';
-import { rotationSpeed, sampleDocument, torque } from 'src/test/assets/sample-document';
+import { aasReducer } from '../../app/aas/aas.reducer';
+import { rotationSpeed, sampleDocument, torque } from '../../test/assets/sample-document';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
-import { DashboardChartType, DashboardPage } from 'src/app/dashboard/dashboard.state';
+import { DashboardService } from '../../app/dashboard/dashboard.service';
+import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.state';
 import { Router } from '@angular/router';
-import { AppRoutingModule } from 'src/app/app-routing.module';
-import { AASState } from 'src/app/aas/aas.state';
-import * as AASActions from 'src/app/aas/aas.actions';
-import { ProjectService } from 'src/app/project/project.service';
+import { AppRoutingModule } from '../../app/app-routing.module';
+import { AASState } from '../../app/aas/aas.state';
+import * as AASActions from '../../app/aas/aas.actions';
+import { ProjectService } from '../../app/project/project.service';
 import { Component, Input } from '@angular/core';
 
 class TestProjectService implements Partial<ProjectService> {

@@ -17,13 +17,14 @@ import { CommonModule } from '@angular/common';
 import { SimpleChange } from '@angular/core';
 
 import * as ws from '../assets/test-document'
-import { AASTableState } from 'src/lib/aas-table/aas-table.state';
-import { AASTableComponent } from 'src/lib/aas-table/aas-table.component';
-import { NotifyService } from 'src/lib/notify/notify.service';
-import { aasTableReducer } from 'src/lib/aas-table/aas-table.reducer';
-import { ViewMode } from 'src/lib/types/view-mode';
-import { MaxLengthPipe, SortableHeaderDirective } from 'src/public-api';
-import { selectState } from 'src/lib/aas-table/aas-table.selectors';
+import { AASTableComponent } from '../../lib/aas-table/aas-table.component';
+import { MaxLengthPipe } from '../../lib/max-length.pipe';
+import { SortableHeaderDirective } from '../../lib/sortable-header.directive';
+import { NotifyService } from '../../lib/notify/notify.service';
+import { aasTableReducer } from '../../lib/aas-table/aas-table.reducer';
+import { ViewMode } from '../../lib/types/view-mode';
+import { selectState } from '../../lib/aas-table/aas-table.selectors';
+import { AASTableState } from '../../lib/aas-table/aas-table.state';
 
 describe('AASTableComponent', () => {
     let store: Store<{ aasTable: AASTableState }>;

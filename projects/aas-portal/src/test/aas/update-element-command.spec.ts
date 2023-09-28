@@ -10,11 +10,11 @@ import { TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 import { first } from 'rxjs';
 import { aas, AASDocument, selectElement } from 'common';
-import { aasReducer } from 'src/app/aas/aas.reducer';
-import { UpdateElementCommand } from 'src/app/aas/commands/update-element-command';
-import { sampleDocument } from 'src/test/assets/sample-document';
 import { cloneDeep } from 'lodash-es';
-import { State } from 'src/app/aas/aas.state';
+import { aasReducer } from '../../app/aas/aas.reducer';
+import { UpdateElementCommand } from '../../app/aas/commands/update-element-command';
+import { sampleDocument } from '../../test/assets/sample-document';
+import { State } from '../../app/aas/aas.state';
 
 describe('SetValueCommand', function () {
     let command: UpdateElementCommand;

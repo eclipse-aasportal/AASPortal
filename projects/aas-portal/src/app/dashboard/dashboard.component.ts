@@ -11,7 +11,7 @@ import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, QueryList, 
 import { isNumber } from 'lodash-es';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'common';
-import * as lib from "aas-lib";
+import * as lib from 'projects/aas-lib/src/public-api';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { map, Subscription } from "rxjs";
 import { ActivatedRoute } from "@angular/router";
@@ -33,7 +33,7 @@ import { DeleteItemCommand } from "./commands/delete-item-command";
 import { SetChartTypeCommand } from "./commands/set-chart-type-command";
 import { selectEditMode, selectName, selectPage, selectPages, selectRows, selectSelectionMode } from "./dashboard.selectors";
 import { SetMinMaxCommand } from "./commands/set-min-max-command";
-import { DashboardQuery, DashboardQueryParams } from "src/app/types/dashboard-query-params";
+import { DashboardQuery, DashboardQueryParams } from "../types/dashboard-query-params";
 import * as DashboardActions from './dashboard.actions';
 import {
     DashboardItem,
