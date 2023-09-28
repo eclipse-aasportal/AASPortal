@@ -11,7 +11,6 @@ import { UserStorage } from './user-storage.js';
 import { LocaleUserStorage } from './locale-user-storage.js';
 import { Variable } from '../variable.js';
 import { MongoDBUserStorage } from './mongo-db-user-storage.js';
-import { parseUrl } from '../convert.js';
 import { Logger } from '../logging/logger.js';
 
 /* istanbul ignore next */
@@ -24,9 +23,10 @@ export class UserStorageFactory {
         const logger = this.container.resolve<Logger>('Logger');
         if (url) {
             try {
-                const protocol = parseUrl(url).protocol;
-                if (protocol === 'mongodb:') {
-                    return new MongoDBUserStorage();
+                if (new URL(url).protocol === 'mongodb:') {
+                    const storage = this.container.resolve(MongoDBUserStorage);
+                    logger.info(`Using user storage at: ${url}`);
+                    return storage;
                 } else {
                     throw new Error(`"${url}" is a not supported user storage.`);
                 }
@@ -35,6 +35,8 @@ export class UserStorageFactory {
             }
         }
 
-        return this.container.resolve(LocaleUserStorage);
+        const storage = this.container.resolve(LocaleUserStorage);
+        logger.info(`Using local user storage.`);
+        return storage;
     }
 }

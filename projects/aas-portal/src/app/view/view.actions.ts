@@ -8,7 +8,7 @@
 
 import { createAction, props } from "@ngrx/store";
 import { TypedAction } from '@ngrx/store/src/models';
-import { DocumentSubmodelPair, SubmodelViewDescriptor } from 'aas-lib'
+import { DocumentSubmodelPair, SubmodelViewDescriptor } from 'projects/aas-lib/src/public-api'
 
 export enum ViewActionType {
     SET_SUBMODELS = '[Submodel] set submodels',

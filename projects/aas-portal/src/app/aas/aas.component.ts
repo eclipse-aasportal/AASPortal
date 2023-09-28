@@ -9,13 +9,13 @@
 import { head } from 'lodash-es';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, first } from 'rxjs';
-import * as lib from 'aas-lib';
+import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
+import * as lib from 'projects/aas-lib/src/public-api';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { ProjectService } from '../project/project.service';
 
-import { CommandHandlerService } from 'src/app/aas/command-handler.service';
+import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
 import { UpdateElementCommand } from './commands/update-element-command';
 import { DeleteCommand } from './commands/delete-command';
@@ -27,8 +27,8 @@ import * as AASActions from './aas.actions';
 import * as AASSelectors from './aas.selectors';
 import { State } from './aas.state';
 import { DashboardChartType } from '../dashboard/dashboard.state';
-import { DashboardQuery } from 'src/app/types/dashboard-query-params';
-import { getEndpointType } from 'src/app/configuration';
+import { DashboardQuery } from '../types/dashboard-query-params';
+import { getEndpointType } from '../configuration';
 import {
     AASDocument,
     equalDocument,
@@ -226,20 +226,20 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.document != null && !this.document.readonly && this.document.modified ? this.document.modified : false;
     }
 
-    public async synchronize(): Promise<void> {
-        try {
-            await this.auth.ensureAuthorizedAsync('editor');
-            if (this.canSynchronize() && this.document) {
-                const messages = await this.api.putDocumentAsync(this.document);
+    public synchronize(): void {
+        if (!this.canSynchronize() || !this.document) return;
+
+        const document = this.document;
+        this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.putDocument(document)),
+            map((messages) => {
                 if (messages && messages.length > 0) {
                     this.notify.info(messages.join('\r\n'));
                 }
 
-                this.store.dispatch(AASActions.resetModified({ document: this.document }));
-            }
-        } catch (error) {
-            this.notify.error(error);
-        }
+                this.store.dispatch(AASActions.resetModified({ document }));
+            })).subscribe({ error: (error) => this.notify.error(error) });
+
     }
 
     public canUndo(): boolean {
@@ -266,48 +266,50 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.selectedElements.length === 1;
     }
 
-    public async newElement(): Promise<void> {
-        await this.auth.ensureAuthorizedAsync('editor');
-        if (this.document?.content && this.selectedElements.length === 1) {
-            const modalRef = this.modal.open(NewElementFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.initialize(this.document.content, this.selectedElements[0], this.templates);
-            const result: NewElementResult = await modalRef.result;
-            if (result.element) {
-                try {
-                    this.commandHandler.execute(new NewElementCommand(
-                        this.store,
-                        this.document,
-                        this.selectedElements[0],
-                        result.element));
-                } catch (error) {
-                    this.notify.error(error);
-                }
-            }
-        }
+    public newElement(): void {
+        if (!this.document?.content || this.selectedElements.length !== 1) return;
+
+        const document = this.document;
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.modal.open(NewElementFormComponent, { backdrop: 'static' })),
+            mergeMap((modalRef) => {
+                modalRef.componentInstance.initialize(document.content, this.selectedElements[0], this.templates);
+                return from<Promise<NewElementResult | undefined>>(modalRef.result)
+            }),
+            map((result) => {
+                if (!result) return;
+
+                this.commandHandler.execute(new NewElementCommand(
+                    this.store,
+                    document,
+                    this.selectedElements[0],
+                    result.element));
+            })).subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public canEditElement(): boolean {
         return this.selectedElements.length === 1;
     }
 
-    public async editElement(): Promise<void> {
-        await this.auth.ensureAuthorizedAsync('editor');
-        if (this.document && this.selectedElements.length === 1) {
-            const modalRef = this.modal.open(EditElementFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.initialize(this.selectedElements[0]);
-            const result: aas.SubmodelElement = await modalRef.result;
-            if (result) {
-                try {
-                    this.commandHandler.execute(new UpdateElementCommand(
-                        this.store,
-                        this.document,
-                        this.selectedElements[0],
-                        result));
-                } catch (error) {
-                    this.notify.error(error);
-                }
-            }
-        }
+    public editElement(): void {
+        if (!this.document?.content || this.selectedElements.length !== 1) return;
+
+        const document = this.document;
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.modal.open(EditElementFormComponent, { backdrop: 'static' })),
+            mergeMap((modalRef) => {
+                modalRef.componentInstance.initialize(this.selectedElements[0]);
+                return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
+            }),
+            map((result) => {
+                if (!result) return;
+
+                this.commandHandler.execute(new UpdateElementCommand(
+                    this.store,
+                    document,
+                    this.selectedElements[0],
+                    result));
+            })).subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public canDeleteElement(): boolean {
@@ -315,15 +317,14 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             this.selectedElements.every(item => item.modelType !== 'AssetAdministrationShell');
     }
 
-    public async deleteElement(): Promise<void> {
-        await this.auth.ensureAuthorizedAsync('editor');
-        if (this.document && this.selectedElements.length > 0) {
-            try {
-                this.commandHandler.execute(new DeleteCommand(this.store, this.document, this.selectedElements));
-            } catch (error) {
-                this.notify.error(error);
-            }
-        }
+    public deleteElement(): void {
+        if (!this.document || this.selectedElements.length <= 0) return;
+
+        const document = this.document;
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => {
+                this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
+            })).subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public canDownloadDocument(): boolean {

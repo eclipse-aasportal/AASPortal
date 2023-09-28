@@ -12,8 +12,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASContainer, AASDocument, AASWorkspace, stringFormat } from 'common';
-import * as lib from 'aas-lib';
-import { BehaviorSubject, first, from, map, mergeMap, noop, Observable, Subscription } from 'rxjs';
+import * as lib from 'projects/aas-lib/src/public-api';
+import { BehaviorSubject, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 import { ProjectService } from '../project/project.service';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
@@ -21,7 +21,7 @@ import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-f
 import * as StartActions from './start.actions';
 import { State } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { getEndpointType } from 'src/app/configuration';
+import { getEndpointType } from '../configuration';
 import { selectFilter, selectIsViewModeList, selectIsViewModeTree, selectShowAll, selectViewMode } from './start.selectors';
 
 @Component({
@@ -129,12 +129,15 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public async addEndpoint(): Promise<void> {
-        try {
-            await this.auth.ensureAuthorizedAsync('editor');
-            const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.workspaces = this.workspaces.map(item => item.name);
-            const result: string = await modalRef.result;
-            if (result) {
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.modal.open(AddEndpointFormComponent, { backdrop: 'static' })),
+            mergeMap((modalRef) => {
+                modalRef.componentInstance.workspaces = this.workspaces.map(item => item.name);
+                return from<Promise<string | undefined>>(modalRef.result)
+            }),
+            map((result) => {
+                if (!result) return;
+
                 const url = new URL(result);
                 this.project
                     .addEndpoint(url.searchParams.get('name')!, result)
@@ -142,17 +145,15 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                     .subscribe({
                         error: (error) => this.notify.error(error),
                     });
-            }
-        } catch (error) {
-            this.notify.error(error);
-        }
+            })).subscribe({ error: (error) => this.notify.error(error) });
     }
 
-    public async removeEndpoint(): Promise<void> {
-        if (this.workspaces.length > 0) {
-            try {
-                await this.auth.ensureAuthorizedAsync('editor');
-                const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
+    public removeEndpoint(): void {
+        if (this.workspaces.length <= 0) return;
+
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' })),
+            mergeMap((modalRef) => {
                 modalRef.componentInstance.endpoints = [...this.workspaces]
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(item => ({
@@ -160,32 +161,21 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                         url: item.containers.map((c, i) => i === 0 ? c.url.split('?')[0] : `${i + 1}`).join(', '),
                         selected: false
                     } as EndpointSelect));
-
-                const results: string[] = await modalRef.result;
-                if (results) {
-                    from(results).pipe(mergeMap(result => this.project.removeEndpoint(result))).subscribe({
-                        error: (error) => this.notify.error(error),
-                    });
-                }
-            } catch (error) {
-                if (error) {
-                    this.notify.error(error);
-                }
-            }
-        }
+                return from<Promise<string[] | undefined>>(modalRef.result);
+            }),
+            mergeMap((endpoints) => from((endpoints ?? []))),
+            mergeMap((endpoint) => this.project.removeEndpoint(endpoint)))
+            .subscribe({ error: (error) => this.notify.error(error) });
     }
 
-    public async reset(): Promise<void> {
-        try {
-            await this.auth.ensureAuthorizedAsync('editor');
-            if (this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))) {
-                this.project.reset().subscribe({
-                    error: (error) => this.notify.error(error),
-                });
-            }
-        } catch (error) {
-            noop();
-        }
+    public reset(): void {
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
+            mergeMap((result) => {
+                if (!result) return of(void 0);
+
+                return this.project.reset();
+            })).subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public setWorkspace(name: string): void {
@@ -196,20 +186,22 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.getUploadCapableEndpoints().length > 0;
     }
 
-    public async uploadDocument(): Promise<void> {
-        try {
-            await this.auth.ensureAuthorizedAsync('editor');
-            const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
-            const containers = this.getUploadCapableEndpoints();
-            modalRef.componentInstance.containers = containers;
-            modalRef.componentInstance.container = containers[0];
-            const name = await modalRef.result;
-            if (typeof name === 'string') {
-                this.notify.info('INFO_UPLOAD_AASX_FILE_SUCCESS', name);
-            }
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public uploadDocument(): void {
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.modal.open(UploadFormComponent, { backdrop: 'static' })),
+            mergeMap((modalRef) => {
+                const containers = this.getUploadCapableEndpoints();
+                modalRef.componentInstance.containers = containers;
+                modalRef.componentInstance.container = containers[0];
+                return from<Promise<string | undefined>>(modalRef.result);
+            })).subscribe({
+                next: (result) => {
+                    if (result) {
+                        this.notify.info('INFO_UPLOAD_AASX_FILE_SUCCESS', result);
+                    }
+                },
+                error: (error) => this.notify.error(error)
+            });
     }
 
     public canDownloadDocument(): boolean {
@@ -237,22 +229,16 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                 item => getEndpointType(item.container) === 'AasxDirectory');
     }
 
-    public async deleteDocument(): Promise<void> {
-        try {
-            await this.auth.ensureAuthorizedAsync('editor');
-            if (this.aasTable) {
-                if (this.window.confirm(stringFormat(
-                    this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                    this.selectedDocuments.map(item => item.idShort).join(', ')))) {
-                    from(this.selectedDocuments).pipe(mergeMap(document => this.project.deleteDocument(document)))
-                        .subscribe({
-                            error: (error) => this.notify.error(error)
-                        });
-                }
-            }
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public deleteDocument(): void {
+        if (!this.aasTable || this.selectedDocuments.length === 0) return;
+
+        this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.window.confirm(stringFormat(
+                this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
+                this.selectedDocuments.map(item => item.idShort).join(', ')))),
+            mergeMap((result) => from(result ? this.selectedDocuments : [])),
+            mergeMap((document) => this.project.deleteDocument(document)))
+            .subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public canViewUserFeedback(): boolean {

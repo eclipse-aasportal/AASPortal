@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { DashboardChart, DashboardChartType, DashboardItemType } from "src/app/dashboard/dashboard.state";
-import { maxRotationSpeed, rotationSpeed, torque } from "src/test/assets/sample-document";
+import { DashboardChart, DashboardChartType, DashboardItemType } from '../../app/dashboard/dashboard.state';
+import { maxRotationSpeed, rotationSpeed, torque } from '../../test/assets/sample-document';
 
 export const pages = [{
     name: 'Dashboard 1',

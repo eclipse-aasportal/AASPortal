@@ -10,7 +10,7 @@ import { AASDocument } from "common";
 
 const data: object = {
     "id": "AssetAdministrationShell---2CEBD072",
-    "container": "C:\\Git\\aasportal\\data\\endpoints\\samples",
+    "container": "C:\\Git\\AASPortal\\data\\endpoints\\samples",
     "endpoint": {
         "type": "file",
         "address": "IDTA 02006-2-0_Sample Digital Nameplate.aasx"

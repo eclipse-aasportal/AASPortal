@@ -11,7 +11,7 @@ import { Logger } from '../logging/logger.js';
 import { AASEndpointScan } from './aas-endpoint-scan.js';
 import { ServerMessage } from '../packages/server-message.js';
 import { createEndpoint } from '../configuration.js';
-import { AssetAdministrationShellDescriptor } from 'registry.js';
+import { AssetAdministrationShellDescriptor } from '../types/registry.js';
 
 export class AASRegistryScan extends AASEndpointScan {
     private readonly registry = new ServerMessage();

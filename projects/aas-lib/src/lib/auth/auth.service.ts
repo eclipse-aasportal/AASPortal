@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, EMPTY, last, map, mergeMap, Observable } from 'rxjs';
+import { BehaviorSubject, from, last, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import jwtDecode from 'jwt-decode';
 import {
     ApplicationError,
@@ -93,132 +93,129 @@ export class AuthService {
      * User login.
      * @param credentials The credentials.
      */
-    public async loginAsync(credentials?: Credentials): Promise<void> {
+    public login(credentials?: Credentials): Observable<void> {
         if (credentials) {
-            const result = await this.api.loginAsync(credentials);
-            this.nextPayload(result.token);
-        } else {
-            const modalRef = this.modal.open(LoginFormComponent, { backdrop: 'static', animation: true, keyboard: true });
-            const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
-            const token = this.window.getLocalStorageItem('.Token');
-            if (stayLoggedIn && token) {
-                modalRef.componentInstance.stayLoggedIn = stayLoggedIn;
-            }
+            return this.api.login(credentials).pipe(map(result => this.nextPayload(result.token)));
+        }
 
-            const result: LoginFormResult = await modalRef.result;
-            if (result != null) {
-                if (result.token) {
+        return of(this.modal.open(LoginFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
+            mergeMap(modalRef => {
+                const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
+                const token = this.window.getLocalStorageItem('.Token');
+                if (stayLoggedIn && token) {
+                    modalRef.componentInstance.stayLoggedIn = stayLoggedIn;
+                }
+
+                return from<Promise<LoginFormResult | undefined>>(modalRef.result);
+            }),
+            mergeMap(result => {
+                if (result?.token) {
                     this.nextPayload(result.token);
                     if (result.stayLoggedIn) {
                         this.window.setLocalStorageItem('.StayLoggedIn', 'true');
-                    } else if (stayLoggedIn) {
+                    } else if (toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'))) {
                         this.window.removeLocalStorageItem('.StayLoggedIn');
                     }
-                } else if (result.action === 'register') {
-                    await this.registerAsync();
+                } else if (result?.action === 'register') {
+                    return this.register();
                 }
-            }
-        }
+
+                return of(void 0);
+            }));
     }
 
     /**
      * Ensures that the current user has the expected rights.
      * @param role The expected user role.
      */
-    public async ensureAuthorizedAsync(role: UserRole): Promise<void> {
-        if (!this.isAuthorized(role)) {
-            await this.loginAsync();
+    public ensureAuthorized(role: UserRole): Observable<void> {
+        if (this.isAuthorized(role)) {
+            return of(void 0);
+        }
+
+        return this.login().pipe(map(() => {
             if (!this.isAuthorized(role)) {
                 throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
             }
-        }
+        }));
     }
 
     /** Logs out the current user. */
-    public async logoutAsync(): Promise<void> {
+    public logout(): Observable<void> {
         if (!this.userId) {
-            throw new Error('Invalid operation.');
+            return throwError(() => new Error('Invalid operation.'));
         }
 
-        await this.loginAsGuestAsync();
+        return this.loginAsGuest();
     }
 
     /**
      * Registers a new user.
      * @param profile The profile of the new user.
      */
-    public async registerAsync(profile?: UserProfile): Promise<void> {
+    public register(profile?: UserProfile): Observable<void> {
         if (profile) {
-            const result = await this.api.registerUserAsync(profile);
-            this.nextPayload(result.token);
-        } else {
-            const modalRef = this.modal.open(
-                RegisterFormComponent, {
-                backdrop: 'static',
-                animation: true,
-                keyboard: true
-            });
-
-            const result: RegisterFormResult = await modalRef.result;
-            if (result) {
-                this.nextPayload(result.token);
-                if (result.stayLoggedIn) {
-                    this.window.setLocalStorageItem('.StayLoggedIn', 'true');
-                } else {
-                    this.window.removeLocalStorageItem('.StayLoggedIn');
-                }
-            }
+            return this.api.register(profile).pipe(map(result => this.nextPayload(result.token)));
         }
+
+        return of(this.modal.open(RegisterFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
+            mergeMap(modalRef => from<Promise<RegisterFormResult | undefined>>(modalRef.result)),
+            map(result => {
+                if (result) {
+                    this.nextPayload(result.token);
+                    if (result.stayLoggedIn) {
+                        this.window.setLocalStorageItem('.StayLoggedIn', 'true');
+                    } else {
+                        this.window.removeLocalStorageItem('.StayLoggedIn');
+                    }
+                }
+            }));
     }
 
     /**
      * Updates the profile of the current user.
      * @param profile The updated user profile.
      */
-    public async updateUserProfileAsync(profile?: UserProfile): Promise<void> {
+    public updateUserProfile(profile?: UserProfile): Observable<void> {
         const payload = this.payload$.getValue();
         if (!payload || !payload.sub || !payload.name) {
-            throw new Error('Invalid operation.');
+            return throwError(() => new Error('Invalid operation.'));
         }
 
         if (profile) {
-            const result = await this.api.updateProfileAsync(payload.sub, profile);
-            this.nextPayload(result.token);
-        } else {
-            profile = { id: payload.sub, name: payload.name };
-            const form = this.modal.open(
-                ProfileFormComponent, {
-                backdrop: 'static',
-                animation: true,
-                keyboard: true
-            });
+            return this.api.updateProfile(payload.sub, profile).pipe(
+                map(result => this.nextPayload(result.token)));
+        }
 
-            form.componentInstance.initialize(profile);
-            const result: ProfileFormResult = await form.result;
-            if (result) {
-                if (result.token) {
+        return of(this.modal.open(ProfileFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
+            mergeMap(form => {
+                form.componentInstance.initialize({ id: payload.sub, name: payload.name });
+                return from<Promise<ProfileFormResult>>(form.result)
+            }),
+            mergeMap(result => {
+                if (result?.token) {
                     this.nextPayload(result.token);
-                } else if (result.action === 'deleteUser') {
+                } else if (result?.action === 'deleteUser') {
                     const message = stringFormat(this.translate.instant('CMD_DELETE_USER'), this.userId);
                     if (this.window.confirm(message)) {
-                        await this.deleteUserAsync();
+                        return this.deleteUser();
                     }
                 }
-            }
-        }
+
+                return of(void 0);
+            }));
     }
 
     /**
      * Deletes the account of the current authenticated user.
      */
-    public async deleteUserAsync(): Promise<void> {
+    public deleteUser(): Observable<void> {
         const payload = this.payload$.getValue();
         if (!payload || !payload.sub || !payload.name) {
             throw new Error('Invalid operation');
         }
 
-        await this.api.deleteUserAsync(payload.sub);
-        await this.loginAsGuestAsync();
+        return this.api.delete(payload.sub).pipe(mergeMap(() => this.loginAsGuest()));
     }
 
     /**
@@ -289,25 +286,15 @@ export class AuthService {
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.deleteCookie(id, name).pipe(
-                mergeMap(() => {
-                    const values = this.api.getCookies(id);
-                    return values;
-                }),
+                mergeMap(() => this.api.getCookies(id)),
                 map(cookies => {
                     this.cookies.clear();
                     cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data));
                 }));
         } else {
             this.window.removeLocalStorageItem(name);
-            return EMPTY;
+            return of(void 0);
         }
-    }
-
-    private async loginAsGuestAsync(): Promise<void> {
-        this.window.removeLocalStorageItem('.Token');
-        this.window.removeLocalStorageItem('.StayLoggedIn');
-        const result = await this.api.guestAsync();
-        this.nextPayload(result.token);
     }
 
     private loginAsGuest(): Observable<void> {

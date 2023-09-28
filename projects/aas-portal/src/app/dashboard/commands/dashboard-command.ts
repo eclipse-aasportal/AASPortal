@@ -8,7 +8,7 @@
 
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs';
-import { Command } from 'src/app/types/command';
+import { Command } from '../../types/command';
 import * as DashboardSelectors from '../dashboard.selectors';
 import * as DashboardActions from '../dashboard.actions';
 import { DashboardChart, DashboardItem, DashboardItemType, DashboardRow, DashboardState, State } from '../dashboard.state';

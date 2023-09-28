@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { WindowService, AASLibModule, ViewMode } from 'aas-lib';
+import { WindowService, AASLibModule, ViewMode } from 'projects/aas-lib/src/public-api';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -17,11 +17,11 @@ import { AASContainer, AASDocument, AASWorkspace } from 'common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { EffectsModule } from '@ngrx/effects';
 
-import * as ws from 'src/test/assets/test-document';
-import { startReducer } from 'src/app/start/start.reducer';
+import * as ws from '../../test/assets/test-document';
+import { startReducer } from '../../app/start/start.reducer';
 import { StartComponent } from '../../app/start/start.component';
-import { StartState } from 'src/app/start/start.state';
-import { ProjectService } from 'src/app/project/project.service';
+import { StartState } from '../../app/start/start.state';
+import { ProjectService } from '../../app/project/project.service';
 
 class TestProjectService implements Partial<ProjectService> {
     constructor(
@@ -69,7 +69,7 @@ describe('StartComponent', () => {
     let ws2: AASWorkspace;
 
     beforeEach(() => {
-        window = jasmine.createSpyObj<WindowService>(['confirm', 'getLocalStorageItem', 'setLocalStorageItem']);
+        window = jasmine.createSpyObj<WindowService>(['confirm', 'getLocalStorageItem', 'setLocalStorageItem', 'removeLocalStorageItem']);
         document1 = ws.createDocument('document1');
         document2 = ws.createDocument('document2');
         document3 = ws.createDocument('document3');

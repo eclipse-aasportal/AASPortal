@@ -176,11 +176,11 @@ describe('index', function () {
         });
 
         it('returns true for same file system path', function () {
-            expect(equalUrls('C:\\Git\\aasportal\\data\\samples', 'C:\\Git\\aasportal\\data\\samples')).toBeTruthy();
+            expect(equalUrls('C:\\Git\\AASPortal\\data\\samples', 'C:\\Git\\AASPortal\\data\\samples')).toBeTruthy();
         });
 
         it('returns true for different file system path', function () {
-            expect(equalUrls('C:\\Git\\aasportal\\data\\samples', 'C:\\Git\\aasportal\\data\\other')).toBeFalsy();
+            expect(equalUrls('C:\\Git\\AASPortal\\data\\samples', 'C:\\Git\\AASPortal\\data\\other')).toBeFalsy();
         });
     });
 

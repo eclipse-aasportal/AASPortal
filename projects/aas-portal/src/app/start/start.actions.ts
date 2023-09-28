@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
-import { ViewMode } from 'aas-lib';
+import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 export enum StartActionType {
     SET_VIEW_MODE = '[Start] Set View Mode',

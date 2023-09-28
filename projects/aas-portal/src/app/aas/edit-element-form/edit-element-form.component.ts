@@ -9,9 +9,8 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { convertBlobToBase64Async, extension, extensionToMimeType } from 'aas-lib';
-import { aas, toInvariant, toLocale } from 'common';
-import { noop } from 'lodash-es';
+import { convertBlobToBase64Async, extension } from 'projects/aas-lib/src/public-api';
+import { aas, extensionToMimeType, toInvariant, toLocale } from 'common';
 
 export interface LangStringRow extends aas.LangString {
     index: number;
@@ -169,7 +168,7 @@ export class EditElementFormComponent {
                 this.contentType = extensionToMimeType(ext);
                 convertBlobToBase64Async(files[0]).then(
                     value => this.value = value
-                ).catch(error => {
+                ).catch(() => {
                     this.value = temp;
                     this.pushMessage('Unable to read file.');
                 })

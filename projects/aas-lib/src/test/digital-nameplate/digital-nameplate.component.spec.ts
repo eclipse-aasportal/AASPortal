@@ -12,7 +12,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { selectElement } from 'common';
 import { nameplate } from './digital-nameplate-document';
-import { DigitalNameplateComponent } from 'src/lib/digital-nameplate/digital-nameplate.component';
+import { DigitalNameplateComponent } from '../../lib/digital-nameplate/digital-nameplate.component';
 
 describe('DigitalNameplateComponent', () => {
     let component: DigitalNameplateComponent;

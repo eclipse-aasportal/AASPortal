@@ -18,28 +18,28 @@ export abstract class Logger {
      * @param error 
      * @param args Additional arguments.
      */
-    public abstract error(error: Error | string, ...args: any[]): void;
+    public abstract error(error: Error | string, ...args: unknown[]): void;
 
     /**
      * Logs a warning.
      * @param message The message format.
      * @param args The format items.
      */
-    public abstract warning(message: string, ...args: any[]): void;
+    public abstract warning(message: string, ...args: unknown[]): void;
 
     /**
      * Logs an information.
      * @param message The message format.
      * @param args The format items.
      */
-    public abstract info(message: string, ...args: any[]): void;
+    public abstract info(message: string, ...args: unknown[]): void;
 
     /**
      * Logs a debug message.
      * @param message The message format.
      * @param args The format items.
      */
-    public abstract debug(message: Error | string, ...args: any[]): void;
+    public abstract debug(message: Error | string, ...args: unknown[]): void;
 
     /**
      * Logs the specified message.

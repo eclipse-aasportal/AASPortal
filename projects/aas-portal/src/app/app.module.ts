@@ -12,7 +12,7 @@ import { StoreModule } from '@ngrx/store';
 import { NgbModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap'
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { AASLibModule } from 'aas-lib';
+import { AASLibModule } from 'projects/aas-lib/src/public-api';
 import { EffectsModule } from '@ngrx/effects';
 import { FormsModule } from '@angular/forms';
 

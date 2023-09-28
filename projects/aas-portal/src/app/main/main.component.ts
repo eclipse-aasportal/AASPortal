@@ -9,7 +9,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, first } from 'rxjs';
-import { ClipboardService, WindowService, AASQuery } from 'aas-lib';
+import { ClipboardService, WindowService, AASQuery } from 'projects/aas-lib/src/public-api';
 import { ProjectService } from '../project/project.service';
 
 export enum LinkId {

@@ -12,16 +12,16 @@ import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { first, of } from 'rxjs';
-import { SubmodelViewDescriptor, ViewQuery } from 'aas-lib';
+import { SubmodelViewDescriptor, ViewQuery } from 'projects/aas-lib/src/public-api';
 import { EffectsModule } from '@ngrx/effects';
-import { AASLibModule, ClipboardService } from 'aas-lib';
+import { AASLibModule, ClipboardService } from 'projects/aas-lib/src/public-api';
 
-import { AppRoutingModule } from 'src/app/app-routing.module';
-import { viewReducer } from 'src/app/view/view.reducer';
-import { ViewState } from 'src/app/view/view.state';
-import { sampleDocument } from 'src/test/assets/sample-document';
+import { AppRoutingModule } from '../../app/app-routing.module';
+import { viewReducer } from '../../app/view/view.reducer';
+import { ViewState } from '../../app/view/view.state';
+import { sampleDocument } from '../../test/assets/sample-document';
 import { ViewComponent } from '../../app/view/view.component';
-import { ProjectService } from 'src/app/project/project.service';
+import { ProjectService } from '../../app/project/project.service';
 
 describe('ViewComponent', () => {
     let component: ViewComponent;
@@ -39,7 +39,7 @@ describe('ViewComponent', () => {
             template: 'Nameplate',
             submodels: [{
                 id: 'http://customer.com/aas/9175_7013_7091_9168',
-                url: 'C:\\Git\\aasportal\\data\\endpoints\\samples',
+                url: 'C:\\Git\\AASPortal\\data\\endpoints\\samples',
                 idShort: 'Identification'
             }]
         }

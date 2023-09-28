@@ -8,7 +8,7 @@
 
 import { TranslateService } from "@ngx-translate/core";
 import { ApplicationError } from "common";
-import { encodeBase64Url, basename, messageToString, normalize, decodeBase64Url, isBase64, mimeTypeToExtension, extensionToMimeType, extension, convertBlobToBase64Async } from "../lib/convert";
+import { encodeBase64Url, basename, messageToString, normalize, decodeBase64Url, isBase64, extension, convertBlobToBase64Async } from "../lib/convert";
 
 describe('convert', function () {
     describe('basename', function () {
@@ -76,28 +76,8 @@ describe('convert', function () {
         });
     });
 
-    describe('mimeTypeToExtension', function () {
-        it('return ".png" for "image/png"', function () {
-            expect(mimeTypeToExtension('image/png')).toEqual('.png');
-        });
-
-        it('return undefined for an unknown MIME type', function () {
-            expect(mimeTypeToExtension('unknown')).toBeUndefined();
-        });
-
-        describe('extensionToMimeType', function () {
-            it('return "image/png" for ".png"', function () {
-                expect(extensionToMimeType('.png')).toEqual('image/png');
-            });
-
-            it('return undefined for an unknown MIME type', function () {
-                expect(extensionToMimeType('unknown')).toBeUndefined();
-            });
-        });
-    });
-
-    describe('convertBlobToBase64Async', function() {
-        it('converts the Blob content to a base64 encoded string', async function() {
+    describe('convertBlobToBase64Async', function () {
+        it('converts the Blob content to a base64 encoded string', async function () {
             const blob = new Blob(['Hello World!']);
             await expectAsync(convertBlobToBase64Async(blob)).toBeResolvedTo('SGVsbG8gV29ybGQh');
         });

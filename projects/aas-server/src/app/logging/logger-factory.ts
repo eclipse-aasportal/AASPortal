@@ -12,42 +12,32 @@ import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { isMainThread } from 'worker_threads';
 import { noop } from 'lodash-es';
-import { DependencyContainer } from 'tsyringe';
 
 /* istanbul ignore next */
 export class LoggerFactory {
-    constructor(private readonly container: DependencyContainer) {
-    }
-
     public create(): winston.Logger {
         const filename = path.resolve('.', 'aas-server-%DATE%.log');
         if (isMainThread) {
             this.deleteLogFiles();
         }
 
-        const transport: DailyRotateFile = new DailyRotateFile({
-            filename: filename,
-            datePattern: 'YYYY-MM-DD',
-            zippedArchive: false,
-            maxSize: '20m',
-            maxFiles: '2d',
-            format: winston.format.combine(
-                winston.format.timestamp(),
-                winston.format.json())
-        });
-
-        const logger = winston.createLogger({
+        return winston.createLogger({
             level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-            transports: [transport],
+            transports: [
+                new DailyRotateFile({
+                    filename: filename,
+                    datePattern: 'YYYY-MM-DD',
+                    zippedArchive: false,
+                    maxSize: '20m',
+                    maxFiles: '2d',
+                    format: winston.format.combine(
+                        winston.format.timestamp(),
+                        winston.format.json())
+                }),
+                new winston.transports.Console({
+                    format: winston.format.simple(),
+                })]
         });
-
-        if (process.env.NODE_ENV !== 'production') {
-            logger.add(new winston.transports.Console({
-                format: winston.format.simple(),
-            }));
-        }
-
-        return logger;
     }
 
     private deleteLogFiles(): void {

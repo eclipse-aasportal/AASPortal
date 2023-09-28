@@ -11,7 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { NewElementFormComponent } from 'src/app/aas/new-element-form/new-element-form.component';
+import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
 
 describe('NewElementFormComponent', () => {
     let component: NewElementFormComponent;

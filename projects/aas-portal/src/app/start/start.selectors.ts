@@ -8,7 +8,7 @@
 
 import { createSelector } from '@ngrx/store';
 import { State } from './start.state'
-import { ViewMode } from 'aas-lib';
+import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 
 const getShowAll = (state: State) => state.start.showAll;

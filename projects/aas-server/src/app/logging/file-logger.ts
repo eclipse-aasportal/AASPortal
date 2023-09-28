@@ -39,7 +39,7 @@ export class FileLogger extends Logger {
         super();
     }
 
-    public override error(error: Error | string, ...args: any[]): void {
+    public override error(error: Error | string, ...args: unknown[]): void {
         if (this.logger.isErrorEnabled()) {
             let text: string | null = null;
             if (error) {
@@ -60,7 +60,7 @@ export class FileLogger extends Logger {
         }
     }
 
-    public override warning(message: string, ...args: any[]): void {
+    public override warning(message: string, ...args: unknown[]): void {
         if (this.logger.isWarnEnabled()) {
             let text: string | null = null;
             if (typeof message === 'string') {
@@ -77,7 +77,7 @@ export class FileLogger extends Logger {
         }
     }
 
-    public override info(message: string, ...args: any[]): void {
+    public override info(message: string, ...args: unknown[]): void {
         if (this.logger.isInfoEnabled()) {
             let text: string | null = null;
             if (typeof message === 'string') {
@@ -94,7 +94,7 @@ export class FileLogger extends Logger {
         }
     }
 
-    public override debug(message: Error | string, ...args: any[]): void {
+    public override debug(message: Error | string, ...args: unknown[]): void {
         if (this.logger.isDebugEnabled()) {
             let text: string | null = null;
             if (message) {

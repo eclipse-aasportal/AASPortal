@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { MaxLengthPipe } from "src/lib/max-length.pipe";
+import { MaxLengthPipe } from "../../lib/max-length.pipe";
 
 describe('MaxLengthPipe', () => {
     it('create an instance', () => {

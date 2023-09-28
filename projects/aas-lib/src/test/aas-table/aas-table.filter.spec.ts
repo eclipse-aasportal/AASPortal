@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { TranslateService } from '@ngx-translate/core';
-import { AASTableFilter } from 'src/lib/aas-table/aas-table.filter';
-import { AASTableRow } from 'src/lib/aas-table/aas-table.state';
+import { AASTableFilter } from '../../lib/aas-table/aas-table.filter';
+import { AASTableRow } from '../../lib/aas-table/aas-table.state';
 import { aasNoTechnicalData, sampleDocument } from '../assets/sample-document'
 
 describe('AASTableFilter', function () {

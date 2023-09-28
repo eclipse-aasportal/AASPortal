@@ -20,12 +20,13 @@ import {
     selectReferable,
     isBooleanType,
     toLocale,
-    toBoolean
+    toBoolean,
+    mimeTypeToExtension
 } from 'common';
 
 import { AASTreeRow, AASTreeState, DisplayType, SearchTerm } from './aas-tree.state';
 import * as AASTreeActions from './aas-tree.actions';
-import { basename, normalize, mimeTypeToExtension } from '../convert';
+import { basename, normalize } from '../convert';
 
 const initialState: AASTreeState = {
     rows: [],

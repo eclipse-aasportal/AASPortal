@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { SortableHeaderDirective } from "src/lib/sortable-header.directive";
+import { SortableHeaderDirective } from "../../lib/sortable-header.directive";
 
 describe('SortableHeaderDirective', () => {
     it('should create an instance', () => {

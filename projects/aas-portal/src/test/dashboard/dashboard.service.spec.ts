@@ -11,13 +11,13 @@ import { TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { first } from 'rxjs';
-import { dashboardReducer } from 'src/app/dashboard/dashboard.reducer';
-import { rotationSpeed, sampleDocument, torque } from 'src/test/assets/sample-document';
 
+import { dashboardReducer } from '../../app/dashboard/dashboard.reducer';
+import { rotationSpeed, sampleDocument, torque } from '../../test/assets/sample-document';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { pages } from './test-pages';
-import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from 'src/app/dashboard/dashboard.state';
-import { AuthService } from 'aas-lib';
+import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from '../../app/dashboard/dashboard.state';
+import { AuthService } from 'projects/aas-lib/src/public-api';
 
 describe('DashboardService', function () {
     let service: DashboardService;

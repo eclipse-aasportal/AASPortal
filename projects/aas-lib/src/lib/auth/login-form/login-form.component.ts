@@ -9,7 +9,7 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthResult, Credentials, isValidEMail, isValidPassword, stringFormat } from 'common';
+import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'common';
 import { isEmpty } from 'lodash-es';
 
 import { messageToString } from '../../convert';
@@ -70,30 +70,30 @@ export class LoginFormComponent {
         this.modal.close({ action: "register" } as LoginFormResult);
     }
 
-    public async submit(): Promise<void> {
-        try {
-            this.clearMessages();
-            if (isEmpty(this.userId)) {
-                this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-            } else if (!isValidEMail(this.userId)) {
-                this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-            } else if (isEmpty(this.password)) {
-                this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-            } else if (!isValidPassword(this.password)) {
-                this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-            } else {
-                const credentials: Credentials = { id: this.userId, password: this.password };
-                const loginResult: AuthResult = await this.api.loginAsync(credentials);
-                const result: LoginFormResult = {
-                    stayLoggedIn: this.stayLoggedIn,
-                    token: loginResult.token
-                };
+    public submit(): void {
+        this.clearMessages();
+        if (isEmpty(this.userId)) {
+            this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
+        } else if (!isValidEMail(this.userId)) {
+            this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
+        } else if (isEmpty(this.password)) {
+            this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
+        } else if (!isValidPassword(this.password)) {
+            this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
+        } else {
+            const credentials: Credentials = { id: this.userId, password: this.password };
+            this.api.login(credentials).subscribe(
+                {
+                    next: value => {
+                        const result: LoginFormResult = {
+                            stayLoggedIn: this.stayLoggedIn,
+                            token: value.token
+                        };
 
-                this.modal.close(result);
-            }
-        }
-        catch (error) {
-            this.pushMessage(messageToString(error, this.translate));
+                        this.modal.close(result);
+                    },
+                    error: error => this.pushMessage(messageToString(error, this.translate))
+                });
         }
     }
 

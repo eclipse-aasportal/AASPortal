@@ -52,7 +52,7 @@ export class WSServer extends EventEmitter {
 
     public run(): void {
         this.server.listen(this.variable.NODE_SERVER_PORT, () => {
-            console.log(`AAS-Server listening on ${this.variable.NODE_SERVER_PORT}`);
+            this.logger.info(`AAS-Server listening on ${this.variable.NODE_SERVER_PORT}`);
         })
     }
 
