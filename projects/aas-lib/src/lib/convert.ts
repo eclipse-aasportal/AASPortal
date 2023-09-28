@@ -8,7 +8,7 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import { ApplicationError, ErrorData, stringFormat } from 'common';
+import { ApplicationError, ErrorData, convertToString, stringFormat } from 'common';
 import { noop, toString } from 'lodash-es';
 
 /**
@@ -70,8 +70,8 @@ export async function resolveError(error: unknown, translate: TranslateService):
                     noop();
                 }
             }
-        } else if (typeof error.error === 'string') {
-            message = error.error;
+        } else {
+            message = convertToString(error.error);
         }
     }
 
