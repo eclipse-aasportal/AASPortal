@@ -10,7 +10,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { TestBed } from '@angular/core/testing';
 import { AuthResult, Cookie } from 'common';
 
-import { AuthApiService } from 'src/lib/auth/auth-api.service';
+import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { getGuestToken, getToken } from '../assets/json-web-token';
 
 describe('AuthApiService', function () {

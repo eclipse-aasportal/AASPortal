@@ -11,7 +11,7 @@ import { AASDocument, AASContainer, WebSocketData, AASServerMessage, AASWorkspac
 import { Observable, of, mergeMap, catchError, noop, skipWhile, first } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
-import { AuthService, LogType, NotifyService, WebSocketFactoryService } from 'aas-lib';
+import { AuthService, LogType, NotifyService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
 
 import { ProjectAPIService } from './project-api.service';
 import { State } from './project.state';

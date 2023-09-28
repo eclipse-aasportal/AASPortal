@@ -9,22 +9,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { JWTPayload, WebSocketData } from 'common';
 import { first, of, Subject } from 'rxjs';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
+import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
+import { EffectsModule } from '@ngrx/effects';
+import { Store, StoreModule } from '@ngrx/store';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { CommonModule } from '@angular/common';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
-import { TestWebSocketFactoryService } from 'src/test/assets/test-web-socket-factory.service';
-import { AppRoutingModule } from 'src/app/app-routing.module';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { Store, StoreModule } from '@ngrx/store';
-import { dashboardReducer } from 'src/app/dashboard/dashboard.reducer';
-import { CommonModule } from '@angular/common';
+import { TestWebSocketFactoryService } from '../../test/assets/test-web-socket-factory.service';
+import { AppRoutingModule } from '../../app/app-routing.module';
+import { dashboardReducer } from '../../app/dashboard/dashboard.reducer';
 import { pages } from './test-pages';
-import { DashboardService } from 'src/app/dashboard/dashboard.service';
-import { SelectionMode } from 'src/app/types/selection-mode';
+import { DashboardService } from '../../app/dashboard/dashboard.service';
+import { SelectionMode } from '../../app/types/selection-mode';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { EffectsModule } from '@ngrx/effects';
 import * as DashboardActions from '../../app/dashboard/dashboard.actions';
-import { DashboardChart, State } from 'src/app/dashboard/dashboard.state';
+import { DashboardChart, State } from '../../app/dashboard/dashboard.state';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;

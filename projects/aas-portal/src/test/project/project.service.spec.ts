@@ -13,7 +13,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { EMPTY, first, of, Subject, throwError } from 'rxjs';
 import { Store, StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
+import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import {
     aas,

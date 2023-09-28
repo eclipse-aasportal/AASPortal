@@ -10,12 +10,12 @@ import { head } from 'lodash-es';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
-import * as lib from 'aas-lib';
+import * as lib from 'projects/aas-lib/src/public-api';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { ProjectService } from '../project/project.service';
 
-import { CommandHandlerService } from 'src/app/aas/command-handler.service';
+import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
 import { UpdateElementCommand } from './commands/update-element-command';
 import { DeleteCommand } from './commands/delete-command';
@@ -27,8 +27,8 @@ import * as AASActions from './aas.actions';
 import * as AASSelectors from './aas.selectors';
 import { State } from './aas.state';
 import { DashboardChartType } from '../dashboard/dashboard.state';
-import { DashboardQuery } from 'src/app/types/dashboard-query-params';
-import { getEndpointType } from 'src/app/configuration';
+import { DashboardQuery } from '../types/dashboard-query-params';
+import { getEndpointType } from '../configuration';
 import {
     AASDocument,
     equalDocument,

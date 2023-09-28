@@ -12,7 +12,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASContainer, AASDocument, AASWorkspace, stringFormat } from 'common';
-import * as lib from 'aas-lib';
+import * as lib from 'projects/aas-lib/src/public-api';
 import { BehaviorSubject, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 import { ProjectService } from '../project/project.service';
 
@@ -21,7 +21,7 @@ import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-f
 import * as StartActions from './start.actions';
 import { State } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { getEndpointType } from 'src/app/configuration';
+import { getEndpointType } from '../configuration';
 import { selectFilter, selectIsViewModeList, selectIsViewModeTree, selectShowAll, selectViewMode } from './start.selectors';
 
 @Component({

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { cloneDeep, noop } from 'lodash-es';
-import { Command } from 'src/app/types/command';
+import { Command } from '../../types/command';
 import { Store } from '@ngrx/store';
 import {
     aas,

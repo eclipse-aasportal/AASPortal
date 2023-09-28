@@ -12,12 +12,12 @@ import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { of, throwError } from 'rxjs';
 
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { ERRORS } from '../../lib/types/errors';
 import { INFO } from '../../lib/types/info';
 import { LoginFormComponent, LoginFormResult } from '../../lib/auth/login-form/login-form.component';
-import { of, throwError } from 'rxjs';
 
 describe('LoginFormComponent', () => {
     let component: LoginFormComponent;

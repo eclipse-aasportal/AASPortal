@@ -11,10 +11,10 @@ import { Store, StoreModule } from '@ngrx/store';
 import { first } from 'rxjs';
 import { aas, AASDocument, selectElement } from 'common';
 import { cloneDeep } from 'lodash-es';
-import { aasReducer } from 'src/app/aas/aas.reducer';
-import { aasNoTechnicalData, submodelTechnicalData } from 'src/test/assets/sample-document';
-import { NewElementCommand } from 'src/app/aas/commands/new-element-command';
-import { AASState } from 'src/app/aas/aas.state';
+import { aasReducer } from '../../app/aas/aas.reducer';
+import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
+import { NewElementCommand } from '../../app/aas/commands/new-element-command';
+import { AASState } from '../../app/aas/aas.state';
 
 describe('NewElementCommand', function () {
     let command: NewElementCommand;

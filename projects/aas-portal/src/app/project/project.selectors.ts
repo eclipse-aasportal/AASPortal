@@ -10,7 +10,7 @@ import { createSelector } from "@ngrx/store";
 import { AASContainer, AASDocument, AASWorkspace, equalUrls, isUrlSafeBase64 } from "common";
 import { State } from "./project.state";
 import { noop } from "rxjs";
-import { decodeBase64Url } from "aas-lib";
+import { decodeBase64Url } from 'projects/aas-lib/src/public-api';
 
 const getWorkspaces = (state: State) => state.project.workspaces;
 const getDocuments = (state: State) => state.project.documents;

@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { AASEndpointType, stringFormat } from 'common';
-import { createEndpoint } from 'src/app/configuration';
+import { createEndpoint } from '../../configuration';
 
 export interface EndpointItem {
     name: string;

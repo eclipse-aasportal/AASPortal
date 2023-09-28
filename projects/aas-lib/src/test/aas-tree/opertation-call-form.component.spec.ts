@@ -14,10 +14,10 @@ import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas, AASDocument, convertToString } from 'common';
 import { cloneDeep } from 'lodash-es';
-import { AASTreeApiService } from 'src/lib/aas-tree/aas-tree-api.service';
-import { OperationCallFormComponent } from 'src/lib/aas-tree/operation-call-form/operation-call-form.component';
+import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
+import { OperationCallFormComponent } from '../../lib/aas-tree/operation-call-form/operation-call-form.component';
 import { sampleDocument } from '../assets/sample-document';
-import { ERRORS } from 'src/lib/types/errors';
+import { ERRORS } from '../../lib/types/errors';
 
 describe('OperationCallFormComponent', () => {
     let component: OperationCallFormComponent;

@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { exhaustMap, mergeMap, from, zip, of, EMPTY, toArray, map } from 'rxjs';
-import { DocumentSubmodelPair } from 'aas-lib';
+import { DocumentSubmodelPair } from 'projects/aas-lib/src/public-api';
 import * as ViewActions from './view.actions';
 import { ProjectService } from '../project/project.service';
 

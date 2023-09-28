@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createReducer, on } from "@ngrx/store";
-import { DocumentSubmodelPair } from 'aas-lib';
+import { DocumentSubmodelPair } from 'projects/aas-lib/src/public-api';
 import * as ViewActions from "./view.actions";
 import { ViewState } from "./view.state";
 

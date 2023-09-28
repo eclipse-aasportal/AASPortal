@@ -13,11 +13,11 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthResult } from 'common';
+import { of } from 'rxjs';
 
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { ERRORS } from '../../lib/types/errors';
 import { ProfileFormComponent } from '../../lib/auth/profile-form/profile-form.component';
-import { of } from 'rxjs';
 
 describe('ProfileFormComponent', () => {
     let component: ProfileFormComponent;

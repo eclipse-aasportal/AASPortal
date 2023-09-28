@@ -7,10 +7,10 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { Command } from 'src/app/types/command';
+import { Command } from '../../app/types/command';
 import { noop } from 'rxjs';
-import { NotifyService } from 'aas-lib';
-import { CommandHandlerService } from 'src/app/aas/command-handler.service';
+import { NotifyService } from 'projects/aas-lib/src/public-api';
+import { CommandHandlerService } from '../../app/aas/command-handler.service';
 
 class TestCommand extends Command {
     constructor(private spy?: jasmine.Spy, private undoSpy?: jasmine.Spy, private redoSpy?: jasmine.Spy) {
