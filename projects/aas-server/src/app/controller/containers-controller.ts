@@ -42,7 +42,7 @@ export class ContainersController extends ControllerBase {
     public async getDocuments(@Path() url: string): Promise<AASDocument[]> {
         try {
             this.logger.start('getDocuments');
-            return await Promise.resolve(this.aasProvider.getDocuments(decodeBase64Url(url)));
+            return await this.aasProvider.getDocumentsAsync(decodeBase64Url(url));
         } finally {
             this.logger.stop();
         }

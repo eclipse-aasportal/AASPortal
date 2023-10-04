@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, convertFromString, DifferenceItem, LiveRequest } from 'common';
+import { aas, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'common';
 import { ServerMessage } from '../server-message.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
@@ -47,6 +47,12 @@ export abstract class AasxServer extends AASResource {
         } 
     }
 
+    /**
+     * Reads the environment of the AAS with the specified identifier.
+     * @param id The AAS identifier.
+     * @returns
+     */
+    public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
 
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
@@ -57,7 +63,7 @@ export abstract class AasxServer extends AASResource {
     }
 
     public closeAsync(): Promise<void> {
-        return new Promise((resolve, _) => {
+        return new Promise(resolve => {
             if (this.reentry > 0) {
                 --this.reentry;
             }
@@ -84,13 +90,6 @@ export abstract class AasxServer extends AASResource {
     public abstract getShellsAsync(): Promise<string[]>;
 
     /**
-     * Reads the environment of the AAS with the specified identifier.
-     * @param id The AAS identifier.
-     * @returns
-     */
-    public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
-
-    /**
      * ToDo
      * @param source The source AAS.
      * @param destination The destination
@@ -115,7 +114,7 @@ export abstract class AasxServer extends AASResource {
      * @param valueType The 
      * @returns The current value.
      */
-    public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<any> {
+    public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
         const property = await this.message.get<PropertyValue>(new URL(url));
         return convertFromString(property.value, valueType);
     }

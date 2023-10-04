@@ -6,75 +6,73 @@
  *
  *****************************************************************************/
 
-import { AASDocument, isUrlSafeBase64 } from 'common';
-import { decodeBase64Url } from '../convert.js';
+import path from 'path';
+import fs from 'fs';
+import { AASDocument, ApplicationError } from 'common';
+
+import { encodeBase64Url } from '../convert.js';
 import { getEndpointName } from '../configuration.js';
+import { ERRORS } from '../errors.js';
 
 /** A container of Asset Administration Shells. */
 export class Container {
-    private readonly _documents = new Map<string, AASDocument>();
+    private readonly rootDir: string;
 
     constructor(
+        rootDir: string,
         url: string,
-        name: string,
+        public readonly name: string,
         configurationEndpoint: string) {
 
         this.url = new URL(url);
         this.name = name;
         this.configurationEndpoints = [configurationEndpoint];
+        this.base64Url = encodeBase64Url(url);
+        this.rootDir = path.join(rootDir, this.base64Url);
+
+        if (!fs.existsSync(this.rootDir)) {
+            fs.mkdirSync(this.rootDir);
+        }
     }
 
     public readonly url: URL;
 
-    public readonly name: string;
+    public readonly base64Url: string;
 
     public readonly configurationEndpoints: string[];
 
-    /** The AAS documents. */
-    public get documents(): IterableIterator<AASDocument> {
-        return this._documents.values();
+    public async *documents(): AsyncIterableIterator<AASDocument> {
+        const s = this.base64Url + '-';
+        return (await fs.promises.readdir(this.rootDir)).filter(file => file.startsWith(s));
     }
 
     public has(id: string): boolean {
-        return this._documents.has(id);
+        return fs.existsSync(path.join(this.rootDir, `${encodeBase64Url(id)}.json`));
     }
 
-    public find(id: string): AASDocument | undefined {
-        let document = this._documents.get(id);
-        if (!document) {
-            let decodedId: string | undefined;
-            try {
-                if (isUrlSafeBase64(id)) {
-                    decodedId = decodeBase64Url(id);
-                }
-            } catch (_) { }
+    public async getAsync(id: string): Promise<AASDocument> {
+        try {
+            const buffer = await fs.promises.readFile(
+                path.join(this.rootDir, `${encodeBase64Url(id)}.json`));
 
-            for (const item of this._documents.values()) {
-                if (item.idShort === id || item.id === decodedId) {
-                    document = item;
-                    break;
-                }
-            }
+            return JSON.parse(buffer.toString());
+        } catch (_) {
+            throw new ApplicationError(
+                `An AAS with the identification ${id} does not exist in the container '${this.url}'.`,
+                ERRORS.AASNotFound,
+                id,
+                this.url);
         }
-
-        return document;
     }
 
-    public get(id: string): AASDocument {
-        const document = this._documents.get(id);
-        if (!document) {
-            throw new Error(`An AAS with the identification '${id}' does not exist.`);
-        }
-
-        return document;
+    public async addAsync(aas: AASDocument): Promise<void> {
+        const file = path.join(this.rootDir, `${encodeBase64Url(aas.id)}.json`);
+        await fs.promises.writeFile(file, JSON.stringify(aas));
     }
 
-    public set(aas: AASDocument): void {
-        this._documents.set(aas.id, aas);
-    }
-
-    public remove(id: string): boolean {
-        return this._documents.delete(id);
+    public deleteAsync(id: string): Promise<void> {
+        const file = path.join(this.rootDir, `${encodeBase64Url(id)}.json`);
+        return fs.promises.unlink(file);
     }
 
     public toString(): string {
@@ -98,15 +96,5 @@ export class Container {
         }
 
         return this.configurationEndpoints.length === 0;
-    }
-    
-    private findByIdShort(idShort: string): AASDocument | undefined {
-        for (const item of this._documents.values()) {
-            if (item.idShort === idShort) {
-                return item;
-            }
-        }
-
-        return undefined;
     }
 }

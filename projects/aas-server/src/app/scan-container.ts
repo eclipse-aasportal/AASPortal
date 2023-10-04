@@ -19,6 +19,8 @@ import { ScanContainerResult, ScanResultType } from './aas-provider/scan-result.
 import { toUint8Array } from './convert.js';
 import { UpdateStatistic } from './update-statistic.js';
 import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
+import { Container } from './aas-provider/container.js';
+import { Variable } from './variable.js';
 
 @singleton()
 export class ScanContainer {
@@ -29,13 +31,15 @@ export class ScanContainer {
     constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(UpdateStatistic) private readonly statistic: UpdateStatistic,
-        @inject(AASResourceScanFactory) private readonly resourceScanFactory: AASResourceScanFactory
+        @inject(AASResourceScanFactory) private readonly resourceScanFactory: AASResourceScanFactory,
+        @inject(Variable) private readonly variable: Variable
     ) {
     }
 
     public async scanAsync(data: ScanContainerData): Promise<void> {
         this.data = data;
         this.reference = new Map<string, AASDocument>(data.container.documents!.map(item => [item.id, item]));
+        const container = new Container()
 
         let documents: AASDocument[];
         const scan = this.resourceScanFactory.create(data.container.url);

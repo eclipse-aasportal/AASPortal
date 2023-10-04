@@ -82,7 +82,7 @@ export class Parallel extends EventEmitter {
         @inject(Variable) private readonly variable: Variable
     ) {
         super();
-        this.script = path.resolve(this.variable.CONTENT_ROOT ?? './', 'aas-scan-worker.js');
+        this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan-worker.js');
         if (fs.existsSync(this.script)) {
             for (let i = 0; i < this.variable.MAX_WORKERS; i++) {
                 this.pool.set(new Worker(this.script, { env: SHARE_ENV }), true);

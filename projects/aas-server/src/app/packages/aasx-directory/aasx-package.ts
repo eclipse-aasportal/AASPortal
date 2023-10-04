@@ -53,13 +53,17 @@ export class AasxPackage extends AASPackage {
                 readonly: this.source.readOnly,
                 onlineReady: this.source.onlineReady,
                 modified: false,
-                content: environment
+                content: null
             };
         } else {
             throw new Error(`Asset format ${format} is not supported.`);
         }
 
         return document;
+    }
+
+    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+        return (await this.createReaderAsync()).readEnvironment();
     }
 
     public commitDocumentAsync(): Promise<string[]> {

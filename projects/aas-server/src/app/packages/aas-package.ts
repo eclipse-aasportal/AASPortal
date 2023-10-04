@@ -40,6 +40,9 @@ export abstract class AASPackage {
      */
     public abstract commitDocumentAsync(source: AASDocument, content: aas.Environment): Promise<string[]>;
 
+    /** Reads the AAS environment. */
+    public abstract readEnvironmentAsync(): Promise<aas.Environment>;
+
     protected normalize(path: string): string {
         path = path.replace(/\\/g, '/');
         if (path.charAt(0) === '/') {

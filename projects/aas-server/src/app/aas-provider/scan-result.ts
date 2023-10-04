@@ -12,7 +12,6 @@ export enum ScanResultType {
     Added,
     Removed,
     Changed,
-    Offline,
     ContainerAdded,
     ContainerRemoved,
     End

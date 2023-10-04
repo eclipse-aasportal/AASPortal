@@ -48,7 +48,6 @@ export class AASProvider {
     private readonly configuration: AASServerConfiguration;
     private readonly endpoints = new Map<string, URL>();
     private readonly timeout: number;
-    private readonly cache = new AASCache();
     private readonly file: string | undefined;
     private wsServer!: WSServer;
     private readonly tasks = new Map<number, {
@@ -63,7 +62,8 @@ export class AASProvider {
         @inject('CONFIGURATION') configuration: string | AASServerConfiguration,
         @inject('Logger') private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
-        @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory
+        @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
+        @inject('AASCache') private readonly cache: AASCache
     ) {
         let currentEndpoints = variable.ENDPOINTS;
         if (typeof configuration === 'string') {
@@ -135,9 +135,9 @@ export class AASProvider {
         return container;
     }
 
-    public getDocuments(url: string): AASDocument[] {
+    public async getDocumentsAsync(url: string): Promise<AASDocument[]> {
         const documents: AASDocument[] = [];
-        for (const document of this.cache.getContainer(url).documents) {
+        for await (const document of this.cache.getContainer(url).documents()) {
             documents.push({ ...document, content: document.content ? null : undefined })
         }
 
@@ -167,21 +167,22 @@ export class AASProvider {
     }
 
     public async getContentAsync(url: string, id: string): Promise<aas.Environment | undefined> {
-        const document: AASDocument = this.cache.get(url, id);
-        if (!document.content) {
-            throw new Error(`${id} has an unexpected empty content.`);
-        }
-
-        return document.content;
-    }
-
-    public async getThumbnailAsync(url: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
-        const document: AASDocument = this.cache.get(url, id);
+        const document: AASDocument = await this.cache.getAsync(url, id);
         const source = this.resourceFactory.create(document.container);
         try {
             await source.openAsync();
-            const pkg = source.createPackage(document.endpoint.address);
-            return await pkg.getThumbnailAsync();
+            return await source.createPackage(document.endpoint.address).readEnvironmentAsync();
+        } finally {
+            await source.closeAsync();
+        }
+    }
+
+    public async getThumbnailAsync(url: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
+        const document: AASDocument = await this.cache.getAsync(url, id);
+        const source = this.resourceFactory.create(document.container);
+        try {
+            await source.openAsync();
+            return await source.createPackage(document.endpoint.address).getThumbnailAsync();
         } finally {
             await source.closeAsync();
         }
@@ -194,7 +195,7 @@ export class AASProvider {
         path: string,
         options?: object
     ): Promise<NodeJS.ReadableStream> {
-        const document = this.cache.get(url, id);
+        const document = await this.cache.getAsync(url, id);
         if (!document.content) {
             throw new Error('Invalid operation.')
         }
@@ -367,7 +368,7 @@ export class AASProvider {
      * @returns A readable stream.
      */
     public async getDocumentAsync(id: string, url: string): Promise<NodeJS.ReadableStream> {
-        const document = this.cache.get(url, id);
+        const document = await this.cache.getAsync(url, id);
         const source = this.resourceFactory.create(document.container);
         try {
             await source.openAsync();
@@ -384,8 +385,10 @@ export class AASProvider {
      */
     public async addDocumentsAsync(url: string, files: Express.Multer.File[]): Promise<void> {
         if (!this.cache.hasContainer(url)) {
-            throw new Error(`The AAS container "${url}" does not exist.`);
-        }
+            throw new ApplicationError(
+                `An AAS container with the URL "${url}" does not exist.`, 
+                ERRORS.ContainerDoesNotExist, 
+                url);        }
 
         const source = this.resourceFactory.create(url);
         try {
@@ -394,7 +397,7 @@ export class AASProvider {
                 const aasPackage = await source.postPackageAsync(file);
                 if (aasPackage) {
                     const document = await aasPackage.createDocumentAsync();
-                    this.cache.add(document);
+                    await this.cache.addAsync(document);
                     this.notify({ type: 'Added', document: { ...document, content: null } });
                 }
             }
@@ -410,12 +413,12 @@ export class AASProvider {
      */
     public async deleteDocumentAsync(url: string, id: string): Promise<void> {
         const container = this.cache.getContainer(url);
-        const document = container.get(id);
+        const document = await container.getAsync(id);
         if (document) {
             const source = this.resourceFactory.create(url);
             try {
                 await source.deletePackageAsync(document.id, document.endpoint.address);
-                container.remove(id);
+                await container.deleteAsync(id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
                 await source.closeAsync();
@@ -435,7 +438,7 @@ export class AASProvider {
 
                 this.cache.addNewContainer(descriptor, endpoint.href);
                 const documents = await factory.create(endpoint.href).scanAsync();
-                documents.forEach(document => this.cache.add(document));
+                documents.forEach(async (document) => await this.cache.addAsync(document));
             }
         }
     }
@@ -448,7 +451,7 @@ export class AASProvider {
      * @returns ToDo.
      */
     public async invoke(url: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
-        const document = this.cache.get(url, id);
+        const document = await this.cache.getAsync(url, id);
         const resource = this.resourceFactory.create(document.container);
         try {
             await resource.openAsync();
@@ -563,8 +566,7 @@ export class AASProvider {
             statistic: statistic,
             container: {
                 url: container.url.href,
-                name: container.name,
-                documents: [...container.documents]
+                name: container.name
             }
         };
 
@@ -591,9 +593,6 @@ export class AASProvider {
                     break;
                 case ScanResultType.Removed:
                     this.onRemoved(result as ScanContainerResult);
-                    break;
-                case ScanResultType.Offline:
-                    this.onOffline(result as ScanContainerResult);
                     break;
                 case ScanResultType.ContainerAdded:
                     this.onContainerAdded(result as ScanEndpointResult);
@@ -632,12 +631,6 @@ export class AASProvider {
         this.cache.delete(result.container.url, result.document.id);
         this.logger.info(`Removed: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
         this.sendMessage({ type: 'Removed', document: { ...result.document, content: null } });
-    }
-
-    private onOffline(result: ScanContainerResult): void {
-        const reference = this.cache.get(result.container.url, result.document.id);
-        reference.content = undefined;
-        this.sendMessage({ type: 'Offline', document: { ...result.document, content: undefined } });
     }
 
     private onContainerAdded(result: ScanEndpointResult): void {

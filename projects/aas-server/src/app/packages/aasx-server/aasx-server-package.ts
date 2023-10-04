@@ -43,7 +43,7 @@ export class AasxServerPackage extends AASPackage {
 
     public async createDocumentAsync(): Promise<AASDocument> {
         const environment = await this.source.readEnvironmentAsync(this.idShort);
-        const document: AASDocument = {
+        return {
             id: environment.assetAdministrationShells[0].id,
             container: this.source.url.href,
             endpoint: { type: 'http', address: this.idShort },
@@ -52,10 +52,12 @@ export class AasxServerPackage extends AASPackage {
             readonly: this.source.readOnly,
             modified: false,
             onlineReady: true,
-            content: environment
+            content: null
         };
+    }
 
-        return document;
+    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+        return await this.source.readEnvironmentAsync(this.idShort);
     }
 
     public async commitDocumentAsync(target: AASDocument, content: aas.Environment): Promise<string[]> {

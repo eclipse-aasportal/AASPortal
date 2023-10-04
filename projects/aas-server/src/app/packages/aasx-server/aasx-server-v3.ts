@@ -15,6 +15,7 @@ import { Logger } from '../../logging/logger.js';
 import { AASPackage } from '../aas-package.js';
 import { JsonReader } from '../json-reader.js';
 import { JsonWriter } from '../json-writer.js';
+import { ERRORS } from '../../errors.js';
 import {
     aas,
     ApplicationError,
@@ -25,7 +26,6 @@ import {
     isSubmodelElement,
     selectSubmodel
 } from 'common';
-import { ERRORS } from '../../errors.js';
 
 interface PackageDescriptor {
     aasIds: string[];
