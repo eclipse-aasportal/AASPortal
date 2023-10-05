@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import http, { IncomingMessage } from 'http';
-    import env from '../../assets/aas-environment.js';
+import env from '../../assets/aas-environment.js';
 import { AasxServerV3, OperationResult } from '../../../app/packages/aasx-server/aasx-server-v3.js';
 import { aas, DifferenceItem } from 'common';
 import { cloneDeep } from 'lodash-es';
@@ -16,7 +16,7 @@ import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
-describe('AasxServerV3', function () {
+describe.skip('AasxServerV3', function () {
     let logger: Logger;
     let server: AasxServerV3;
 

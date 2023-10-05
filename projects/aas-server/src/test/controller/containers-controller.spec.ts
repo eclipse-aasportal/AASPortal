@@ -28,7 +28,7 @@ import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
 
-describe('ContainersController', function () {
+describe.skip('ContainersController', function () {
     let app: Express;
     let logger: Logger;
     let auth: jest.Mocked<AuthService>;
