@@ -1,6 +1,6 @@
 {
     "name": "aas-server",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "author": "Fraunhofer IOSB-INA",
     "license": "Apache 2.0",
     "description": "Web-based visualization and control of asset administration shells.",
