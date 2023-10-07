@@ -6,6 +6,10 @@ export default {
     ],
     coverageDirectory: '<rootDir>/../../reports/aas-server',
     coverageReporters: ['html', 'json-summary', 'cobertura'],
+    collectCoverageFrom: [
+        "<rootDir>/src/app/**/*.[tj]s",
+        "!<rootDir>/src/app/app.ts"
+    ],
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
         "^(\\.{1,2}/.*)\\.js$": "$1"
@@ -23,7 +27,10 @@ export default {
             {
                 useESM: true,
                 babelConfig: {
-                    plugins: ["babel-plugin-transform-import-meta"]
+                    plugins: [
+                        "babel-plugin-transform-import-meta",
+                        "@babel/plugin-syntax-import-attributes"
+                    ]
                 }
             }
         ]

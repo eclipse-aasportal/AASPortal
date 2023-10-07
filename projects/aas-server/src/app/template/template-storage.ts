@@ -34,7 +34,7 @@ export class TemplateStorage {
         for (const entry of await this.fileStorage.readDir(dir)) {
             const path = $path.join(dir, entry);
             if (await this.fileStorage.isDirectory(path)) {
-                await this.readDirAsync(path, descriptors)
+                await this.readDirAsync(path, descriptors);
             } else {
                 const format = $path.extname(path).toLowerCase();
                 switch (format) {
