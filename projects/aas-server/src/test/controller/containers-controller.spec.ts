@@ -212,12 +212,6 @@ describe.skip('ContainersController', function () {
     });
 
     it('updateDocument: /api/v1/containers/:url/documents/:id', async function () {
-        const content: aas.Environment = {
-            assetAdministrationShells: [],
-            submodels: [],
-            conceptDescriptions: []
-        };
-
         aasProvider.updateDocumentAsync.mockReturnValue(Promise.resolve([]));
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
@@ -227,7 +221,7 @@ describe.skip('ContainersController', function () {
         const response = await request(app)
             .put(`/api/v1/containers/${url}/documents/${id}`)
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .send(content);
+            .attach('content',  resolve('./src/test/assets/aas-example.json'));
 
         expect(response.statusCode).toBe(200);
         expect(aasProvider.updateDocumentAsync).toHaveBeenCalled();

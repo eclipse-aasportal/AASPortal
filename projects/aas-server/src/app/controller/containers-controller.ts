@@ -197,7 +197,7 @@ export class ContainersController extends ControllerBase {
     public async updateDocument(
         @Path() url: string,
         @Path() id: string,
-        @UploadedFile() content: Express.Multer.File
+    @UploadedFile() content: Express.Multer.File
     ): Promise<string[]> {
         try {
             this.logger.start('updateDocument');

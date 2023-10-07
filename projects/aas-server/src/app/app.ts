@@ -22,7 +22,6 @@ import { Variable } from './variable.js';
 import { Logger } from './logging/logger.js';
 import { parseUrl } from './convert.js';
 
-/* istanbul ignore next */
 @singleton()
 export class App {
     constructor(
