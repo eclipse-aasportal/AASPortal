@@ -11,7 +11,7 @@ import Jimp from 'jimp';
 import { ImageProcessing } from '../app/image-processing.js';
 import { describe, it, expect } from '@jest/globals';
 
-describe.skip('image processing', function () {
+describe('image processing', function () {
     it('resizes an image to 128 x 128 pixels', async function () {
         const source = fs.createReadStream('./src/test/assets/thumbnail.jpg');
         const stream = await ImageProcessing.resizeAsync(source, 128, 128);

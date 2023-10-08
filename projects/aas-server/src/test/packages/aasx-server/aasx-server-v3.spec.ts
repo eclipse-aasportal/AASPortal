@@ -16,7 +16,7 @@ import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
-describe.skip('AasxServerV3', function () {
+describe('AasxServerV3', function () {
     let logger: Logger;
     let server: AasxServerV3;
 
