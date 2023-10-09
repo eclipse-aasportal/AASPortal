@@ -21,8 +21,10 @@ jobs:
 
       - name: Set environment for branch
         run: |
-          if [[ "${{github.base_ref}}" == "master" || "${{github.ref}}" == "refs/heads/master" ]]; then
+          if [[ "${{github.base_ref}}" == "main" || "${{github.ref}}" == "refs/heads/main" ]]; then
               echo "IMAGE_TAG=latest" >> "$GITHUB_ENV"
+          elif [[ "${{github.base_ref}}" == "staging" || "${{github.ref}}" == "refs/heads/staging" ]]; then
+            echo "IMAGE_TAG=staging" >> "$GITHUB_ENV"
           else
               echo "IMAGE_TAG=unstable" >> "$GITHUB_ENV"
           fi
