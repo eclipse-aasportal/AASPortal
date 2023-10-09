@@ -3,6 +3,9 @@ name: Build-and-test-workflow
 # This example workflow assumes that the default branch for your repository is `main`. If the default branch has a different name, edit this example and add your repository's default branch.
 on:
   push:
+  pull_request:
+    types:
+      - opened
 
 #
 jobs:
