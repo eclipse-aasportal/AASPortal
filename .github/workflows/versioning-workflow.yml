@@ -1,4 +1,4 @@
-name: Versioning
+name: Versioning-workflow
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Release
+    name: Versioning
     runs-on: ubuntu-latest
     permissions:
       contents: write # to be able to publish a GitHub release
