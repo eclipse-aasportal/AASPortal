@@ -1,6 +1,6 @@
 {
     "name": "aas-portal-project",
-    "version": "3.0.4",
+    "version": "1.0.0",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
@@ -23,7 +23,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://gitlab.cc-asp.fraunhofer.de/iosb-ina-big-data-plattformen/aasportal.git"
+        "url": "https://github.com/AlexanderWollbrink/AASPortal_pipeline.git"
     },
     "author": "Fraunhofer IOSB-INA",
     "homepage": "https://www.iosb-ina.fraunhofer.de/",
