@@ -3,9 +3,10 @@ name: Build-and-publish-docker-images-workflow
 on:
   push:
     branches:
-      - master
-      - development
+      - main
       - staging
+      - development
+
   release:
     types: [published]
 
