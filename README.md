@@ -12,7 +12,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 testitest
 ## Prerequisites
 - Visual Studio Code meow
-- Node.js v18.10.0
+- Node.js v18.10.0 nya
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
