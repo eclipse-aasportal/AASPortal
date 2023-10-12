@@ -2,7 +2,7 @@ name: Versioning-workflow
 on:
   push:
     branches:
-      - master
+      - main
       - staging
       - development
     
