@@ -14,7 +14,7 @@ testitest
 - Visual Studio Code meow
 - Node.js v18.10.0 nya
 - GIT 2.36.0.windows.1
-- Docker Desktop 4.x
+- Docker Desktop 4.x kljsdfhdklf
 
 ## Getting Started
 You can find a detailed documentation :blue_book: [here](https://aasportal.readthedocs.io/)
