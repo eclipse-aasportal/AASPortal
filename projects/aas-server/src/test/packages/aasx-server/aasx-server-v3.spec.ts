@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import http, { IncomingMessage } from 'http';
-    import env from '../../assets/aas-environment.js';
+import env from '../../assets/aas-environment.js';
 import { AasxServerV3, OperationResult } from '../../../app/packages/aasx-server/aasx-server-v3.js';
 import { aas, DifferenceItem } from 'common';
 import { cloneDeep } from 'lodash-es';

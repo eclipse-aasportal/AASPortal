@@ -1,0 +1,38 @@
+name: Build-and-test-workflow
+
+# This example workflow assumes that the default branch for your repository is `main`. If the default branch has a different name, edit this example and add your repository's default branch.
+on:
+  push:
+  pull_request:
+    types:
+      - opened
+
+#
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
+    strategy:
+      matrix:
+        node-version: [18.x]
+#
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: sudo apt update && sudo apt install chromium-browser && export CHROME_BIN='/usr/bin/chromium-browser'
+      - run: npm ci --unsafe-perm=true --allow-root
+      - run: npm run build -ws
+      - run: sudo npm run test
+      - run: npm run coverage
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: |
+            reports/aas-portal.xml
+            reports/aas-server.xml
+            reports/common.xml
