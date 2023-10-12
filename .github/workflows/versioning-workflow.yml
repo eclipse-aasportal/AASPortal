@@ -2,7 +2,9 @@ name: Versioning-workflow
 on:
   push:
     branches:
-      - pipeline-dev
+      - master
+      - staging
+      - development
     
 
 permissions:
