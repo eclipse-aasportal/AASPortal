@@ -9,3 +9,5 @@
 <fhg-digital-nameplate *ngIf="template === 'Nameplate'" [submodels]="submodels"></fhg-digital-nameplate>
 <fhg-customer-feedback *ngIf="template === 'CustomerFeedback'" [submodels]="submodels"></fhg-customer-feedback>
 <div *ngIf="!template" class="alert alert-info" role="alert">No well known submodel selected.</div>
+
+<ng-template #viewToolbar></ng-template>

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { head } from 'lodash-es';
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
 import * as lib from 'projects/aas-lib/src/public-api';
@@ -29,6 +29,7 @@ import { State } from './aas.state';
 import { DashboardChartType } from '../dashboard/dashboard.state';
 import { DashboardQuery } from '../types/dashboard-query-params';
 import { getEndpointType } from '../configuration';
+import { ToolbarService } from '../toolbar.service';
 import {
     AASDocument,
     equalDocument,
@@ -48,8 +49,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly store: Store<State>;
     private readonly $state = new BehaviorSubject<lib.OnlineState>('offline');
     private readonly subscription = new Subscription();
+    private _dashboardPage = '';
     private templates: TemplateDescriptor[] = [];
-    private dashboardName = '';
     private selectedElements: aas.Referable[] = [];
 
     constructor(
@@ -63,17 +64,23 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly api: AASApiService,
         private readonly download: lib.DownloadService,
         private readonly commandHandler: CommandHandlerService,
-        private readonly toolbar: lib.ToolbarService,
+        private readonly toolbar: ToolbarService,
         private readonly auth: lib.AuthService,
         private readonly clipboard: lib.ClipboardService
     ) {
         this.store = store as Store<State>;
         this.state = this.$state.asObservable();
         this.search = this.store.select(AASSelectors.selectSearch);
+
+        this.dashboardPages = this.dashboard.pages.pipe((map(pages => pages.map(page => page.name))));
+        this.editable = this.store.select(AASSelectors.selectEditable);
     }
 
     @ViewChild('aasTree')
     public aasTree: lib.AASTree | null = null;
+
+    @ViewChild('aasToolbar', { read: TemplateRef })
+    public aasToolbar: TemplateRef<unknown> | null = null;
 
     public document: AASDocument | null = null;
 
@@ -119,6 +126,18 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.document?.readonly ?? true;
     }
 
+    public readonly dashboardPages: Observable<string[]>;
+
+    public get dashboardPage(): string {
+        return this._dashboardPage;
+    }
+
+    public set dashboardPage(value: string) {
+        this.dashboard.setPageName(value);
+    }
+
+    public readonly editable: Observable<boolean>;
+
     public ngOnInit(): void {
         const params = this.route.snapshot.queryParams as lib.AASQueryParams;
         let query: lib.AASQuery | undefined;
@@ -133,8 +152,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         if (query?.search) {
             this.store.dispatch(AASActions.setSearch({ search: query.search }));
         }
-
-        this.toolbar.setToolbar(this.createToolbar());
 
         if (query) {
             let document: Observable<AASDocument> | undefined;
@@ -176,7 +193,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             }));
 
         this.subscription.add(this.dashboard.name.subscribe(name => {
-            this.dashboardName = name;
+            this._dashboardPage = name;
         }));
     }
 
@@ -184,10 +201,14 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.aasTree) {
             this.subscription.add(this.aasTree.selectedElements.subscribe(values => this.selectedElements = values));
         }
+
+        if (this.aasToolbar) {
+            this.toolbar.set(this.aasToolbar);
+        }
     }
 
     public ngOnDestroy(): void {
-        this.toolbar.setToolbar();
+        this.toolbar.clear();
         this.subscription.unsubscribe();
     }
 
@@ -203,16 +224,21 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public canAddToDashboard(): boolean {
         const selectedElements = this.selectedElements;
-        return this.dashboardName != null && this.document != null &&
+        return this.dashboardPage != null && this.document != null &&
             selectedElements.length > 0 &&
             selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element));
     }
 
-    public async addToDashboard(chartType: DashboardChartType): Promise<boolean> {
+    public async addToDashboard(chartType: string): Promise<boolean> {
         if (this.document) {
             try {
-                this.dashboard.add(this.dashboardName, this.document, this.selectedElements, chartType);
-                this.clipboard.set('DashboardQuery', { page: this.dashboardName } as DashboardQuery);
+                this.dashboard.add(
+                    this.dashboardPage,
+                    this.document,
+                    this.selectedElements,
+                    chartType as DashboardChartType);
+
+                this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
                 return await this.router.navigateByUrl('/dashboard?format=DashboardQuery');
             } catch (error) {
                 this.notify.error(error);
@@ -336,15 +362,23 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return type === 'AasxDirectory' || type === 'AasxServer';
     }
 
-    public async downloadDocument(): Promise<void> {
-        try {
-            await this.download.downloadDocumentAsync(
-                this.document!.idShort + '.aasx',
-                this.document!.id,
-                this.document!.container);
-        } catch (error) {
-            this.notify.error(error);
-        }
+    public downloadDocument(): void {
+        this.download.downloadDocument(
+            this.document!.idShort + '.aasx',
+            this.document!.id,
+            this.document!.container).subscribe({ error: (error) => this.notify.error(error) });
+    }
+
+    public findNext(): void {
+        this.aasTree?.findNext()
+    }
+
+    public findPrevious(): void {
+        this.aasTree?.findPrevious()
+    }
+
+    public applySearch(text: string): void {
+        this.store.dispatch(AASActions.setSearch({ search: text }));
     }
 
     private versionToString(administration?: aas.AdministrativeInformation): string {
@@ -379,74 +413,5 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             element.value != null &&
             element.idShort === 'TimeSeriesHistory' &&
             element.contentType === 'application/json';
-    }
-
-    private createToolbar(): lib.Toolbar {
-        return {
-            groups: [
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createButton(
-                            'bi bi-play-fill',
-                            () => this.play(),
-                            () => this.$state.getValue() === 'offline'),
-                        this.toolbar.createButton(
-                            'bi bi-stop-fill',
-                            () => this.stop(),
-                            () => this.$state.getValue() === 'online')
-                    ],
-                    this.store.select(AASSelectors.selectOnlineReady)),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createSelect(
-                            this.dashboard.pages.pipe(map(pages => pages.map(page => this.toolbar.createOption(
-                                page.name,
-                                page.name)))),
-                            this.dashboard.name,
-                            (page) => this.dashboard.setPageName(page)),
-                        this.toolbar.createButton(
-                            'bi bi-graph-up',
-                            () => this.addToDashboard(DashboardChartType.Line),
-                            () => this.canAddToDashboard()),
-                        this.toolbar.createButton(
-                            'bi bi-bar-chart-line-fill',
-                            () => this.addToDashboard(DashboardChartType.BarVertical),
-                            () => this.canAddToDashboard())
-
-                    ]),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createButton('bi bi-arrow-repeat', () => this.synchronize(), () => this.canSynchronize()),
-                    ],
-                    this.store.select(AASSelectors.selectEditable)),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createButton('bi bi-download', () => this.downloadDocument(), () => this.canDownloadDocument())
-                    ]),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createButton('bi bi-arrow-90deg-left', () => this.undo(), () => this.canUndo()),
-                        this.toolbar.createButton('bi bi-arrow-90deg-right', () => this.redo(), () => this.canRedo()),
-                    ],
-                    this.store.select(AASSelectors.selectEditable)),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createButton('bi bi-plus-lg', () => this.newElement(), () => this.canNewElement()),
-                        this.toolbar.createButton('bi bi-pencil', () => this.editElement(), () => this.canEditElement()),
-                        this.toolbar.createButton('bi bi-trash', () => this.deleteElement(), () => this.canDeleteElement()),
-                    ],
-                    this.store.select(AASSelectors.selectEditable)),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createTextInput(
-                            'bi bi-search',
-                            this.search.pipe(first()),
-                            'PLACEHOLDER_SEARCH',
-                            (text: string) => this.store.dispatch(AASActions.setSearch({ search: text }))),
-                        this.toolbar.createButton('bi bi-chevron-down', () => this.aasTree?.findNext()),
-                        this.toolbar.createButton('bi bi-chevron-up', () => this.aasTree?.findPrevious()),
-                    ])
-            ]
-        }
     }
 }

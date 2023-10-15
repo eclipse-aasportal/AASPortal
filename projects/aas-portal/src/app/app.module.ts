@@ -8,8 +8,9 @@
 
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { NgbModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap'
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { AASLibModule } from 'projects/aas-lib/src/public-api';
@@ -55,9 +56,11 @@ import { httpInterceptorProviders } from './index';
     ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         AppRoutingModule,
         HttpClientModule,
         FormsModule,
+        NgbModule,
         StoreModule.forRoot(
             {
                 start: startReducer,
@@ -67,8 +70,6 @@ import { httpInterceptorProviders } from './index';
                 project: projectReducer
             }),
         EffectsModule.forRoot([ProjectEffects]),
-        NgbModule,
-        NgbTypeaheadModule,
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {

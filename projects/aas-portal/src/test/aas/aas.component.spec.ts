@@ -175,9 +175,10 @@ describe('AASComponent', () => {
         expect(router.navigateByUrl).toHaveBeenCalled();
     });
 
-    it('can download an AASX file', async function () {
-        spyOn(download, 'downloadDocumentAsync').and.returnValue(Promise.resolve());
+    it('can download an AASX file', function () {
+        spyOn(download, 'downloadDocument').and.returnValue(of(void 0));
         expect(component.canDownloadDocument()).toBeTrue();
-        await expectAsync(component.downloadDocument()).toBeResolved();
+        component.downloadDocument();
+        expect(download.downloadDocument).toHaveBeenCalled();
     });
 });

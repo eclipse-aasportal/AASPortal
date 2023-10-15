@@ -11,7 +11,7 @@ import { DashboardPage, DashboardRow, DashboardState } from "./dashboard.state";
 
 export enum DashboardActionType {
     UPDATE_ROWS = '[Dashboard] update rows',
-    TOGGLE_EDIT_MODE = '[Dashboard] toggle edit mode',
+    SET_EDIT_MODE = '[Dashboard] toggle edit mode',
     SET_PAGE_NAME = '[Dashboard] set page name',
     SET_PAGES = '[Dashboard] set pages',
     ADD_NEW_PAGE = '[Dashboard] add new page',
@@ -25,8 +25,9 @@ export const updateRows = createAction(
     DashboardActionType.UPDATE_ROWS,
     props<{ rows: DashboardRow[] }>());
 
-export const toggleEditMode = createAction(
-    DashboardActionType.TOGGLE_EDIT_MODE);
+export const setEditMode = createAction(
+    DashboardActionType.SET_EDIT_MODE,
+    props<{ editMode: boolean }>());
 
 export const setPageName = createAction(
     DashboardActionType.SET_PAGE_NAME,
