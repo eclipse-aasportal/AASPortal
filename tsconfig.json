@@ -4,7 +4,6 @@
     "compilerOptions": {
         "baseUrl": "./",
         "target": "ES2022",
-        "module": "ES2022",
         "useDefineForClassFields": false,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
@@ -15,9 +14,10 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
+        "moduleResolution": "NodeNext",
         "paths": {
             "io-planning-ui": [
-                "projects/io-planning-ui/dist"
+                "projects/aas-lib/src/public-api"
             ]
         },
     }

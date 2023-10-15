@@ -8,9 +8,10 @@
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
         "useUnknownInCatchVariables": false,
-        "moduleResolution": "nodenext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "lib": [
-            "es2022"
+            "ES2022"
         ],
         "types": [
             "node"

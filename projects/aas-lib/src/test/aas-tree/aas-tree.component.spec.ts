@@ -49,7 +49,7 @@ describe('AASTreeComponent', () => {
                 },
                 {
                     provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>(['downloadFileAsync', 'downloadDocumentAsync', 'uploadDocuments'])
+                    useValue: jasmine.createSpyObj<DownloadService>(['downloadFileAsync', 'downloadDocument', 'uploadDocuments'])
                 },
                 {
                     provide: WindowService,

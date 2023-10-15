@@ -30,8 +30,12 @@
         </div>
     </nav>
     <div class="container-fluid">
-        <fhg-toolbar></fhg-toolbar>
+        <div class="btn-toolbar" role="toolbar">
+            <ng-container *ngTemplateOutlet="toolbarTemplate | async"></ng-container>
+        </div>
         <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
     </div>
 </div>
 <router-outlet></router-outlet>
+
+<ng-template #emptyToolbar></ng-template>

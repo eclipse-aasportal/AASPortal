@@ -50,25 +50,20 @@ export class DownloadService {
      * @param id The AAS identifier.
      * @param name The file name.
      */
-    public downloadDocumentAsync(url: string, id: string, name: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            this.http.get(
-                `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`,
-                {
-                    responseType: 'blob'
-                }).pipe(map(blob => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.setAttribute('download', name);
-                    a.click();
-                    URL.revokeObjectURL(a.href);
-                })).subscribe({
-                    error: (error) => reject(error),
-                    complete: () => resolve()
-                });
-        });
+    public downloadDocument(url: string, id: string, name: string): Observable<void> {
+        return this.http.get(
+            `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`,
+            {
+                responseType: 'blob'
+            }).pipe(map(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.setAttribute('download', name);
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }));
     }
-
+    
     /**
      * Uploads the specified aasx file.
      * @param file A file.

@@ -15,8 +15,6 @@ import swaggerUi, { JsonObject } from 'swagger-ui-express';
 import { ApplicationError } from 'common';
 import { ValidateError } from 'tsoa';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import swaggerDoc from './swagger.json' assert {type: 'json'};
 import { RegisterRoutes } from './routes/routes.js';
 import { ERRORS } from './errors.js';
@@ -24,7 +22,6 @@ import { Variable } from './variable.js';
 import { Logger } from './logging/logger.js';
 import { parseUrl } from './convert.js';
 
-/* istanbul ignore next */
 @singleton()
 export class App {
     constructor(

@@ -14,7 +14,6 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { createEndpoint } from '../../app/configuration.js';
 import { AASResourceFactory } from '../../app/packages/aas-resource-factory.js';
 import { AASResource } from '../../app/packages/aas-resource.js';
-import { reject } from 'lodash-es';
 
 describe('AasxServerEndpointScan', function () {
     let logger: jest.Mocked<Logger>;
