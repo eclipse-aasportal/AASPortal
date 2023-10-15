@@ -58,7 +58,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     public aasTable: lib.AASTable | null = null;
 
     @ViewChild('startToolbar', { read: TemplateRef })
-    public startToolbar!: TemplateRef<unknown>;
+    public startToolbar: TemplateRef<unknown> | null = null;
 
     public viewMode: lib.ViewMode = lib.ViewMode.List;
 
@@ -120,7 +120,9 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.toolbar.set(this.startToolbar);
+        if (this.startToolbar) {
+            this.toolbar.set(this.startToolbar);
+        }
     }
 
     public ngOnDestroy(): void {

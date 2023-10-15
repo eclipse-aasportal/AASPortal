@@ -115,7 +115,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     public chartContainers: QueryList<ElementRef<HTMLCanvasElement>> | null = null;
 
     @ViewChild('dashboardToolbar', { read: TemplateRef })
-    public dashboardToolbar!: TemplateRef<undefined>;
+    public dashboardToolbar: TemplateRef<unknown> | null = null;
 
     public get page(): DashboardPage {
         return this._page;
@@ -193,7 +193,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     }
 
     public ngAfterViewInit(): void {
-        this.toolbar.set(this.dashboardToolbar);
+        if (this.dashboardToolbar) {
+            this.toolbar.set(this.dashboardToolbar);
+        }
     }
 
     public ngAfterViewChecked(): void {
@@ -837,46 +839,4 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     private isChart(value?: DashboardItem | null): value is DashboardChart {
         return value?.type === DashboardItemType.Chart;
     }
-
-    // private createToolbar(): lib.Toolbar {
-    //     const $editMode = this.store.select(selectEditMode);
-    //     return {
-    //         groups: [
-    //             this.toolbar.createGroup(
-    //                 [
-    //                     this.toolbar.createSelect<string>(
-    //                         this.store.select(selectPages)
-    //                             .pipe(map(pages => pages.map(page => this.toolbar.createOption(
-    //                                 page.name,
-    //                                 page.name)))),
-    //                         this.store.select(selectName),
-    //                         (name) => this.setPage(name)),
-    //                     this.toolbar.createButton('bi bi-plus', () => this.addNew(), () => this.editMode),
-    //                     this.toolbar.createButton('bi bi-pen', () => this.rename(), () => this.editMode),
-    //                     this.toolbar.createButton('bi bi-trash', () => this.delete(), () => this.editMode)
-    //                 ]),
-    //             this.toolbar.createGroup(
-    //                 [
-    //                     this.toolbar.createSwitch(
-    //                         'Edit mode',
-    //                         $editMode,
-    //                         () => this.toggleEditMode())
-    //                 ]),
-    //             this.toolbar.createGroup(
-    //                 [
-    //                     this.toolbar.createButton('bi bi-arrow-90deg-left', () => this.undo(), () => this.canUndo()),
-    //                     this.toolbar.createButton('bi bi-arrow-90deg-right', () => this.redo(), () => this.canRedo()),
-    //                 ],
-    //                 $editMode),
-    //             this.toolbar.createGroup(
-    //                 [
-    //                     this.toolbar.createButton('bi bi-box-arrow-left', () => this.moveLeft(), () => this.canMoveLeft()),
-    //                     this.toolbar.createButton('bi bi-box-arrow-up', () => this.moveUp(), () => this.canMoveUp()),
-    //                     this.toolbar.createButton('bi bi-box-arrow-down', () => this.moveDown(), () => this.canMoveDown()),
-    //                     this.toolbar.createButton('bi bi-box-arrow-right', () => this.moveRight(), () => this.canMoveRight())
-    //                 ],
-    //                 $editMode),
-    //         ]
-    //     };
-    // }
 }

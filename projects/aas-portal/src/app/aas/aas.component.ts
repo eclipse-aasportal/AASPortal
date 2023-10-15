@@ -80,7 +80,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     public aasTree: lib.AASTree | null = null;
 
     @ViewChild('aasToolbar', { read: TemplateRef })
-    public aasToolbar!: TemplateRef<undefined>;
+    public aasToolbar: TemplateRef<unknown> | null = null;
 
     public document: AASDocument | null = null;
 
@@ -202,7 +202,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             this.subscription.add(this.aasTree.selectedElements.subscribe(values => this.selectedElements = values));
         }
 
-        this.toolbar.set(this.aasToolbar);
+        if (this.aasToolbar) {
+            this.toolbar.set(this.aasToolbar);
+        }
     }
 
     public ngOnDestroy(): void {

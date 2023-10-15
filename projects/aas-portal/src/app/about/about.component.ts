@@ -20,7 +20,7 @@ import { ToolbarService } from '../toolbar.service';
 })
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     constructor(
-        private serverApi: ServerApiService, 
+        private serverApi: ServerApiService,
         private translate: TranslateService,
         private toolbar: ToolbarService) {
         this.author = pkg.author;
@@ -29,7 +29,7 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     @ViewChild('aasToolbar', { read: TemplateRef })
-    public aboutToolbar!: TemplateRef<undefined>;
+    public aboutToolbar: TemplateRef<unknown> | null = null;
 
     public version = '';
 
@@ -46,7 +46,7 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     public ngOnInit(): void {
 
         this.serverApi.getInfo().subscribe(info => {
-            this.serverVersion = info.version; 
+            this.serverVersion = info.version;
             this.libraries = info.libraries ?? [];
         });
 
@@ -54,7 +54,9 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.toolbar.set(this.aboutToolbar);
+        if (this.aboutToolbar) {
+            this.toolbar.set(this.aboutToolbar);
+        }
     }
 
     public ngOnDestroy(): void {

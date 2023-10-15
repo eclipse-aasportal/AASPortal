@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, of } from 'rxjs';
+import { EMPTY } from 'rxjs';
 
 import { DownloadService } from '../lib/download.service';
 
