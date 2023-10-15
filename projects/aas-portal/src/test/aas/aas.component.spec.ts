@@ -11,7 +11,7 @@ import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, aas } from 'common';
-import { Observable, noop, of } from 'rxjs';
+import { Observable, first, noop, of } from 'rxjs';
 import { AASTree, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
 import { CommonModule } from '@angular/common';
 
@@ -175,9 +175,10 @@ describe('AASComponent', () => {
         expect(router.navigateByUrl).toHaveBeenCalled();
     });
 
-    it('can download an AASX file', async function () {
-        spyOn(download, 'downloadDocumentAsync').and.returnValue(Promise.resolve());
+    it('can download an AASX file', function () {
+        spyOn(download, 'downloadDocument').and.returnValue(of(void 0));
         expect(component.canDownloadDocument()).toBeTrue();
-        await expectAsync(component.downloadDocument()).toBeResolved();
+        component.downloadDocument();
+        expect(download.downloadDocument).toHaveBeenCalled();
     });
 });

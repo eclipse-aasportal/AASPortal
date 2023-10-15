@@ -141,7 +141,7 @@ describe('DashboardComponent', () => {
 
     describe('edit mode', function () {
         beforeEach(function () {
-            component.toggleEditMode();
+            component.editMode = true;
         });
 
         it('has an edit mode', function () {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
@@ -22,7 +22,8 @@ import * as StartActions from './start.actions';
 import { State } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { getEndpointType } from '../configuration';
-import { selectFilter, selectIsViewModeList, selectIsViewModeTree, selectShowAll, selectViewMode } from './start.selectors';
+import { selectFilter, selectShowAll, selectViewMode } from './start.selectors';
+import { ToolbarService } from '../toolbar.service';
 
 @Component({
     selector: 'fhg-start',
@@ -43,7 +44,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly window: lib.WindowService,
         private readonly project: ProjectService,
         private readonly notify: lib.NotifyService,
-        private readonly toolbar: lib.ToolbarService,
+        private readonly toolbar: ToolbarService,
         private readonly auth: lib.AuthService,
         private readonly download: lib.DownloadService,
         private readonly clipboard: lib.ClipboardService
@@ -55,6 +56,9 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @ViewChild('aasTable')
     public aasTable: lib.AASTable | null = null;
+
+    @ViewChild('startToolbar', { read: TemplateRef })
+    public startToolbar!: TemplateRef<unknown>;
 
     public viewMode: lib.ViewMode = lib.ViewMode.List;
 
@@ -70,9 +74,11 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public allAvailable = true;
 
-    public ngOnInit(): void {
-        this.toolbar.setToolbar(this.createToolbar());
+    public readonly endpoint = this.project.workspace.pipe(map(item => item?.name ?? '-'));
 
+    public readonly endpoints = this.project.workspaces;
+
+    public ngOnInit(): void {
         this.subscription.add(
             this.store
                 .select(selectShowAll).pipe()
@@ -105,19 +111,21 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             this.project.documents.subscribe(
                 (documents) => (this.allAvailable = documents.every((item) => item.content)))
         );
-    }
 
-    public ngOnDestroy(): void {
-        this.toolbar.setToolbar();
-        this.subscription.unsubscribe();
-    }
-
-    public ngAfterViewInit(): void {
         this.subscription.add(this.aasTable?.selectedDocuments.subscribe(
             selectedDocuments => {
                 this.selectedDocuments = selectedDocuments;
                 this.someSelectedDocuments.next(selectedDocuments.length > 0);
             }));
+    }
+
+    public ngAfterViewInit(): void {
+        this.toolbar.set(this.startToolbar);
+    }
+
+    public ngOnDestroy(): void {
+        this.toolbar.clear();
+        this.subscription.unsubscribe();
     }
 
     public setViewMode(viewMode: string | lib.ViewMode): void {
@@ -128,7 +136,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.store.dispatch(StartActions.setShowAll({ showAll }));
     }
 
-    public async addEndpoint(): Promise<void> {
+    public addEndpoint(): void {
         this.auth.ensureAuthorized('editor').pipe(
             map(() => this.modal.open(AddEndpointFormComponent, { backdrop: 'static' })),
             mergeMap((modalRef) => {
@@ -208,18 +216,14 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.aasTable && this.selectedDocuments.length > 0 ? true : false;
     }
 
-    public async downloadDocument(): Promise<void> {
-        if (this.aasTable) {
-            for (const document of this.selectedDocuments) {
-                try {
-                    await this.download.downloadDocumentAsync(
-                        document.idShort + '.aasx',
-                        document.id,
-                        document.container);
-                } catch (error) {
-                    this.notify.error(error);
-                }
-            }
+    public downloadDocument(): void {
+        if (!this.aasTable) return;
+
+        for (const document of this.selectedDocuments) {
+            this.download.downloadDocument(
+                document.idShort + '.aasx',
+                document.id,
+                document.container).subscribe({ error: (error) => this.notify.error(error) });
         }
     }
 
@@ -295,6 +299,10 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    public applyFilter(filter: string): void {
+        this.store.dispatch(StartActions.setFilter({ filter }));
+    }
+
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {
         return document.content?.submodels.filter(submodel => lib.resolveSemanticId(submodel) === semanticId) ?? [];
     }
@@ -304,76 +312,5 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             const type = getEndpointType(item.url);
             return type === 'AasxDirectory' || type === 'AasxServer';
         }) ?? [];
-    }
-
-    private createToolbar(): lib.Toolbar {
-        return {
-            groups: [
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createDropDown(
-                            'bi bi-stack-overflow',
-                            this.createMenu(),
-                            this.project.workspace.pipe(map(item => item?.name ?? '-'))
-                        ),
-                        this.toolbar.createDropDown(
-                            'bi bi-gear',
-                            [
-                                this.toolbar.createMenuItem('CMD_ADD_ENDPOINT', () => this.addEndpoint()),
-                                this.toolbar.createMenuItem('CMD_REMOVE_ENDPOINT', () => this.removeEndpoint()),
-                                this.toolbar.createMenuItem('CMD_RESET_CONFIGURATION', () => this.reset()),
-                            ])
-                    ]),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createButton('bi bi-upload', () => this.uploadDocument(), () => this.canUploadDocument()),
-                        this.toolbar.createButton('bi bi-download', () => this.downloadDocument(), () => this.canDownloadDocument()),
-                        this.toolbar.createButton('bi bi-trash', () => this.deleteDocument(), () => this.canDeleteDocument())
-                    ]
-                ),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createRadio(
-                            'bi bi-list',
-                            'list',
-                            this.store.select(selectIsViewModeList),
-                            () => this.setViewMode('list')),
-                        this.toolbar.createRadio(
-                            'bi bi-diagram-3',
-                            'tree',
-                            this.store.select(selectIsViewModeTree),
-                            () => this.setViewMode('tree'))
-                    ]),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createDropDown(
-                            '',
-                            [
-                                this.toolbar.createMenuItem(
-                                    'CMD_VIEW_USER_FEEDBACK',
-                                    () => this.viewUserFeedback(),
-                                    () => this.canViewUserFeedback()),
-                                this.toolbar.createMenuItem(
-                                    'CMD_VIEW_NAMEPLATE',
-                                    () => this.viewNameplate(),
-                                    () => this.canViewNameplate())
-                            ],
-                            'LABEL_VIEWS',
-                            this.someSelectedDocuments.asObservable())
-                    ]),
-                this.toolbar.createGroup(
-                    [
-                        this.toolbar.createTextInput(
-                            'bi bi-filter',
-                            this.store.select(selectFilter).pipe(first()),
-                            'PLACEHOLDER_FILTER',
-                            (filter: string) => this.store.dispatch(StartActions.setFilter({ filter })))
-                    ])]
-        } as lib.Toolbar;
-    }
-
-    private createMenu(): Observable<lib.ToolbarItem[]> {
-        return this.project.workspaces.pipe(map(items => items.map(
-            item => this.toolbar.createMenuItem(item.name, () => this.setWorkspace(item.name)))));
     }
 }

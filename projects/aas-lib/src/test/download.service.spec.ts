@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY } from 'rxjs';
+import { EMPTY, first, of } from 'rxjs';
 
 import { DownloadService } from '../lib/download.service';
 
@@ -59,15 +59,14 @@ describe('DownloadService', () => {
         });
     });
 
-    describe('downloadDocumentAsync', function () {
-        it('downloads an AASX package file', async function () {
+    describe('downloadDocument', function () {
+        it('downloads an AASX package file', function () {
             const spy = spyOn(httpClient, 'get').and.returnValue(EMPTY);
-            await expectAsync(service.downloadDocumentAsync(
+            service.downloadDocument(
                 'http://localhost:1234',
                 'https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237',
                 'Test.aasx'
-            )).toBeResolved();
-
+            );
             expect(spy).toHaveBeenCalled();
         });
     });

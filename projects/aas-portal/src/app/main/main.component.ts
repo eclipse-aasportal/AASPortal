@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, first } from 'rxjs';
+import { Observable, Subscription, first, map } from 'rxjs';
 import { ClipboardService, WindowService, AASQuery } from 'projects/aas-lib/src/public-api';
 import { ProjectService } from '../project/project.service';
+import { ToolbarService } from '../toolbar.service';
 
 export enum LinkId {
     START = 0,
@@ -55,8 +56,17 @@ export class MainComponent implements OnInit, OnDestroy {
         private readonly router: Router,
         private readonly window: WindowService,
         private readonly project: ProjectService,
-        private readonly clipboard: ClipboardService) {
+        private readonly clipboard: ClipboardService,
+        private readonly viewContainer: ViewContainerRef,
+        private readonly toolbar: ToolbarService) {
+
+        this.toolbarTemplate = this.toolbar.toolbarTemplate.pipe(map(value => this.nextToolbar(value)))
     }
+
+    @ViewChild('emptyToolbar', { read: TemplateRef })
+    public emptyToolbar!: TemplateRef<unknown>;
+
+    public toolbarTemplate: Observable<TemplateRef<unknown> | null>;
 
     public activeId = LinkId.START;
 
@@ -74,7 +84,8 @@ export class MainComponent implements OnInit, OnDestroy {
                     this.router.navigateByUrl('/aas?format=AASQuery');
                 } else {
                     this.router.navigateByUrl('/start');
-                }});
+                }
+            });
         } else {
             this.router.navigateByUrl('/start');
         }
@@ -82,5 +93,9 @@ export class MainComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+    }
+
+    private nextToolbar(value: TemplateRef<unknown> | null): TemplateRef<unknown> {
+        return value ?? this.emptyToolbar;
     }
 }

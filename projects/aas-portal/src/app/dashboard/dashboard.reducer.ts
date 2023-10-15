@@ -57,8 +57,8 @@ export const dashboardReducer = createReducer(initialState,
         (_, { state }) => setState(state)
     ),
     on(
-        DashboardActions.toggleEditMode,
-        (state) => toggleEditMode(state)
+        DashboardActions.setEditMode,
+        (state, { editMode }) => setEditMode(state, editMode)
     ),
     on(
         DashboardActions.updatePage,
@@ -73,8 +73,8 @@ function updateRows(state: DashboardState, rows: DashboardRow[]): DashboardState
     return { ...state, rows };
 }
 
-function toggleEditMode(state: DashboardState): DashboardState {
-    return { ...state, editMode: !state.editMode };
+function setEditMode(state: DashboardState, editMode: boolean): DashboardState {
+    return { ...state, editMode: editMode };
 }
 
 function setPageName(state: DashboardState, name: string): DashboardState {
