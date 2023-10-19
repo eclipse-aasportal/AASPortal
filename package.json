@@ -1,6 +1,6 @@
 {
     "name": "aas-portal-project",
-    "version": "2.0.2",
+    "version": "1.1.0-staging.1",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
