@@ -1,5 +1,5 @@
 {
-  "branches": ["main", "development", "staging"],
+  "branches": ["main", {"name": "development", "prerelease": true}, {"name": "staging", "prerelease": true}],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
