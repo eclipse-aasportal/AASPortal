@@ -13,7 +13,7 @@ testitest
 ## Prerequisites
 - Visual Studio Code meow
 - Node.js v18.10.0 nya
-- GIT 2.36.0.windows.1
+- GIT 2.36.0.windows.1mwo
 - Docker Desktop 4.x kljsdfhdklf
 - testi
 
