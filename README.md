@@ -10,7 +10,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 
 **AASPortal is under active development and we are looking forward to your active contributions!**
 
-## Prerequisites
+## Prerequisitesbm,nm,n
 - Visual Studio Code
 - Node.js v18.10.0
 - GIT 2.36.0.windows.1
