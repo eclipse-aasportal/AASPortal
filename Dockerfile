@@ -2,6 +2,7 @@
 FROM node:lts-alpine3.16 as build
 WORKDIR /usr/src/app
 COPY . .
+RUN apk add g++ make py3-pip
 RUN npm install -w=aas-server -w=aas-portal
 RUN node create-app-info.js
 RUN npm run build
