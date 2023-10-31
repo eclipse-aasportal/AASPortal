@@ -270,7 +270,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (descriptor.submodels.length > 0) {
             this.clipboard.set('ViewQuery', { descriptor } as lib.ViewQuery)
-            this.router.navigateByUrl('/view?format=ViewQuery');
+            this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
         }
     }
 
@@ -297,7 +297,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (descriptor.submodels.length > 0) {
             this.clipboard.set('ViewQuery', { descriptor } as lib.ViewQuery)
-            this.router.navigateByUrl('/view?format=ViewQuery');
+            this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
         }
     }
 

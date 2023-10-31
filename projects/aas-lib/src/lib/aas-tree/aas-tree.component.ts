@@ -292,7 +292,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                 };
 
                 this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
-                this.router.navigateByUrl('/view?format=ViewQuery');
+                this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
             }
         }
     }
@@ -351,7 +351,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         const entity = element as aas.Entity;
         if (entity && entity.globalAssetId) {
             this.clipboard.set('AASQuery', { id: entity.globalAssetId } as AASQuery);
-            this.router.navigateByUrl('/aas?format=AASQuery');
+            this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
         }
     }
 
@@ -359,7 +359,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         const referenceElement = element as aas.ReferenceElement;
         if (referenceElement && referenceElement.value) {
             this.clipboard.set('AASQuery', { id: referenceElement.value.keys[0].value } as AASQuery);
-            this.router.navigateByUrl('/aas?format=AASQuery');
+            this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
         }
     }
 

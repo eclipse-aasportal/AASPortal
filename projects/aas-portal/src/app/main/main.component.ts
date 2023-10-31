@@ -81,13 +81,13 @@ export class MainComponent implements OnInit, OnDestroy {
             this.project.findDocument(id).pipe(first()).subscribe(document => {
                 if (document) {
                     this.clipboard.set('AASQuery', { id: document.id } as AASQuery);
-                    this.router.navigateByUrl('/aas?format=AASQuery');
+                    this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
                 } else {
-                    this.router.navigateByUrl('/start');
+                    this.router.navigateByUrl('/start', { skipLocationChange: true });
                 }
             });
         } else {
-            this.router.navigateByUrl('/start');
+            this.router.navigateByUrl('/start', { skipLocationChange: true });
         }
     }
 

@@ -239,7 +239,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                     chartType as DashboardChartType);
 
                 this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
-                return await this.router.navigateByUrl('/dashboard?format=DashboardQuery');
+                return await this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
             } catch (error) {
                 this.notify.error(error);
             }
