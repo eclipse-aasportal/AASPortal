@@ -50,9 +50,7 @@ describe('DocumentsController', function () {
             [
                 'updateDocumentAsync',
                 'getWorkspaces',
-                'getContainer',
                 'getContentAsync',
-                'getDocuments',
                 'getDocument',
                 'getDocumentAsync',
                 'addDocumentsAsync',

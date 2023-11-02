@@ -59,3 +59,5 @@ export * from './lib/customer-feedback/customer-feedback.state';
 export * from './lib/score/score.component';
 
 export * from './lib/secured-image/secured-image.component';
+
+export * from './lib/aas-provider/aas-provider.service';

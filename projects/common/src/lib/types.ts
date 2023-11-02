@@ -43,7 +43,7 @@ export type AASAbbreviation =
     'SM' |
     'SMC' |
     'SME' |
-    'SML' ;
+    'SML';
 
 /** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
 export interface AASContainer {
@@ -63,7 +63,7 @@ export interface AASDocument {
     idShort: string;
     /** The address of the resource containing the AAS. */
     endpoint: Endpoint;
-    /** The reference of the container from which the AAS comes. */
+    /** The URL of the container from which the AAS comes. */
     container: string;
     /** A time stamp that represents the current state of the AAS. */
     timeStamp: number;
@@ -76,6 +76,19 @@ export interface AASDocument {
     /** The root element of the AAS structure (content), `null` if the content is not loaded or 
      * `undefined` if the content is not available. */
     content?: aas.Environment | null;
+}
+
+export interface AASDocumentId {
+    url: string; 
+    id: string;
+}
+
+/** Represents a cursor in the collection of Asset Administration Shells. */
+export interface AASCursor {
+    previous?: AASDocumentId | null;
+    limit: number;
+    filter?: string;
+    next?: AASDocumentId | null;
 }
 
 /** Describes a template. */

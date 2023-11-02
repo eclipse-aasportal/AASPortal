@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, EndpointType } from "common";
-import { SortDirection } from "../sortable-header.directive";
+import { AASCursor, AASDocument, EndpointType } from "common";
 import { ViewMode } from '../types/view-mode';
 
 export class AASTableRow {
@@ -63,11 +62,9 @@ export class AASTableRow {
 }
 
 export interface AASTableState {
-    column: string;
-    direction: SortDirection;
+    initialized: boolean;
     viewMode: ViewMode;
-    showAll: boolean;
-    filter?: string;
+    cursor: AASCursor;
     rows: AASTableRow[];
 }
 

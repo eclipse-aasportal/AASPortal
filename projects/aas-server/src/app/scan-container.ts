@@ -11,22 +11,15 @@ import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
 import { AASDocument, aas, isDeepEqual } from 'common';
 import { ScanContainerData } from './aas-provider/worker-data.js';
-import { AasxDirectory } from './packages/aasx-directory/aasx-directory.js';
-import { AASResource } from './packages/aas-resource.js';
-import { AasxServer } from './packages/aasx-server/aasx-server.js';
-import { OpcuaServer } from './packages/opcua/opcua-server.js';
 import { ScanContainerResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { UpdateStatistic } from './update-statistic.js';
 import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
-import { Container } from './aas-provider/container.js';
 import { Variable } from './variable.js';
 
 @singleton()
 export class ScanContainer {
     private data!: ScanContainerData;
-    private reference!: Map<string, AASDocument>;
-    private source!: AASResource;
 
     constructor(
         @inject('Logger') private readonly logger: Logger,
@@ -38,9 +31,6 @@ export class ScanContainer {
 
     public async scanAsync(data: ScanContainerData): Promise<void> {
         this.data = data;
-        this.reference = new Map<string, AASDocument>(data.container.documents!.map(item => [item.id, item]));
-        const container = new Container()
-
         let documents: AASDocument[];
         const scan = this.resourceScanFactory.create(data.container.url);
         try {
@@ -54,19 +44,21 @@ export class ScanContainer {
         }
     }
 
-    private computeDeleted(documents: AASDocument[]) {
+    private computeDeleted(documents: AASDocument[]): void {
+        if (!this.data.container.documents) return;
+
         const current = new Map<string, AASDocument>(documents.map(item => [item.id, item]));
-        for (const referenceDocument of this.reference.values()) {
-            if (!current.has(referenceDocument.id)) {
-                this.postDeleted(referenceDocument);
+        for (const document of this.data.container.documents) {
+            if (!current.has(document.id)) {
+                this.postDeleted(document);
             }
         }
     }
 
     private onDocumentScanned = (document: AASDocument): void => {
-        const referenceDocument = this.reference.get(document.id);
-        if (referenceDocument) {
-            if (this.documentChanged(document, referenceDocument)) {
+        const reference = this.data.container.documents?.find(item => item.id === document.id);
+        if (reference) {
+            if (reference.content && this.documentChanged(document, reference)) {
                 this.postChanged(document);
             }
         } else {
@@ -74,33 +66,8 @@ export class ScanContainer {
         }
     }
 
-    private onError = (error: Error, source: AASResource, arg: string): void => {
+    private onError = (error: Error): void => {
         this.logger.error(error);
-        if (source instanceof AasxDirectory) {
-            const file = arg as string;
-            for (const referenceDocument of this.reference.values()) {
-                if (referenceDocument.container === source.url.href && referenceDocument.endpoint.address === file) {
-                    this.postOffline(referenceDocument);
-                    break;
-                }
-            }
-        } else if (source instanceof AasxServer) {
-            const idShort = arg;
-            for (const referenceDocument of this.reference.values()) {
-                if (referenceDocument.container === source.url.href && referenceDocument.idShort === idShort) {
-                    this.postOffline(referenceDocument);
-                    break;
-                }
-            }
-        } else if (source instanceof OpcuaServer) {
-            const nodeId = arg as string;
-            for (const referenceDocument of this.reference.values()) {
-                if (referenceDocument.container === source.url.href && referenceDocument.endpoint.address === nodeId) {
-                    this.postOffline(referenceDocument);
-                    break;
-                }
-            }
-        }
     }
 
     private postChanged(document: AASDocument): void {
@@ -136,19 +103,6 @@ export class ScanContainer {
             container: this.data.container,
             document: document,
             statistic: this.statistic.update(this.data.statistic, ScanResultType.Added)
-        };
-
-        const array = toUint8Array(value);
-        parentPort?.postMessage(array, [array.buffer]);
-    }
-
-    private postOffline(document: AASDocument): void {
-        const value: ScanContainerResult = {
-            taskId: this.data.taskId,
-            type: ScanResultType.Offline,
-            container: this.data.container,
-            document: { ...document, content: undefined },
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Offline)
         };
 
         const array = toUint8Array(value);

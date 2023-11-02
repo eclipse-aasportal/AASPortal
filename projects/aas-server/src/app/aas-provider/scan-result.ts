@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message } from "common";
+import { AASDocument, AASContainer, Message } from 'common';
 
 export enum ScanResultType {
     Added,
@@ -71,5 +71,5 @@ export function isScanEndpointResult(result: ScanResult): result is ScanEndpoint
 /** Indicates whether the specified result is of type `ScanContainerResult`. */
 export function isScanContainerResult(result: ScanResult): result is ScanContainerResult {
     return result.type === ScanResultType.Added || result.type === ScanResultType.Changed ||
-        result.type === ScanResultType.Removed || result.type === ScanResultType.Offline;
+        result.type === ScanResultType.Removed;
 }

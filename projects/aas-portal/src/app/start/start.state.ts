@@ -13,7 +13,6 @@ export interface StartState {
     reverse: boolean;
     column: string | null;
     filter: string;
-    showAll: boolean;
 }
 
 export interface State {

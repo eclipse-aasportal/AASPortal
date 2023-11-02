@@ -37,6 +37,7 @@ import { DigitalNameplateComponent } from './digital-nameplate/digital-nameplate
 import { messageTableReducer } from './message-table/massage-table.reducer';
 import { MessageTableComponent } from './message-table/message-table.component';
 import { SecuredImageComponent } from './secured-image/secured-image.component';
+import { AASProviderService } from './aas-provider/aas-provider.service';
 
 @NgModule({
     declarations: [
@@ -89,6 +90,8 @@ import { SecuredImageComponent } from './secured-image/secured-image.component';
         MessageTableComponent,
         SecuredImageComponent
     ],
-    providers: []
+    providers: [
+        AASProviderService
+    ]
 })
 export class AASLibModule { }

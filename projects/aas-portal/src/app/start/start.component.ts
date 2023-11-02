@@ -70,8 +70,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public workspaces: AASWorkspace[] = [];
 
-    public workspace: AASWorkspace | null = null;
-
     public allAvailable = true;
 
     public readonly endpoint = this.project.workspace.pipe(map(item => item?.name ?? '-'));
@@ -93,12 +91,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                 .subscribe((value) => {
                     this.viewMode = value;
                 })
-        );
-
-        this.subscription.add(
-            this.project.workspace.subscribe((value) => {
-                this.workspace = value;
-            })
         );
 
         this.subscription.add(
@@ -132,10 +124,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public setViewMode(viewMode: string | lib.ViewMode): void {
         this.store.dispatch(StartActions.setViewMode({ viewMode: viewMode as lib.ViewMode }));
-    }
-
-    public setShowAll(showAll: boolean): void {
-        this.store.dispatch(StartActions.setShowAll({ showAll }));
     }
 
     public addEndpoint(): void {
@@ -193,7 +181,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canUploadDocument(): boolean {
-        return this.getUploadCapableEndpoints().length > 0;
+        return true;
     }
 
     public uploadDocument(): void {
@@ -310,9 +298,10 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getUploadCapableEndpoints(): AASContainer[] {
-        return this.workspace?.containers.filter(item => {
-            const type = getEndpointType(item.url);
-            return type === 'AasxDirectory' || type === 'AasxServer';
-        }) ?? [];
+        throw new Error('Not implemented');
+        // return this.workspace?.containers.filter(item => {
+        //     const type = getEndpointType(item.url);
+        //     return type === 'AasxDirectory' || type === 'AasxServer';
+        // }) ?? [];
     }
 }

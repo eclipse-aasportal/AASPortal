@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Get, OperationId, Route, Security, Tags } from 'tsoa';
+import { Get, OperationId, Query, Route, Security, Tags } from 'tsoa';
 import { Logger } from '../logging/logger.js';
 import { ControllerBase } from './controller-base.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { AASDocument } from 'common';
+import { AASCursor, AASDocument } from 'common';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
 
@@ -29,6 +29,19 @@ export class DocumentsController extends ControllerBase {
         super(logger, auth, variable);
     }
 
+    @Get('')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getDocuments')
+    public async getDocuments(@Query() cursor: string): Promise<AASDocument[]> {
+        try {
+            this.logger.start('getDocuments');
+            const c: AASCursor = JSON.parse(decodeBase64Url(cursor));
+            return await this.aasProvider.getDocumentsAsync(c);
+        } finally {
+            this.logger.stop();
+        }
+    }
+
     /**
      * Gets the first occurrence of an AAS document with the specified identifier.
      * @param id The AAS identifier.
@@ -39,7 +52,7 @@ export class DocumentsController extends ControllerBase {
     @OperationId('getDocument')
     public async getDocument(id: string): Promise<AASDocument> {
         try {
-            this.logger.start('getWorkspaces');
+            this.logger.start('getDocument');
             return await Promise.resolve(this.aasProvider.getDocument(decodeBase64Url(id)));
         } finally {
             this.logger.stop();

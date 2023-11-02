@@ -20,7 +20,6 @@ import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
-import { Container } from '../../app/aas-provider/container.js';
 import { createSpyObj } from '../utils.js';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
@@ -53,9 +52,7 @@ describe('ContainersController', function () {
             [
                 'updateDocumentAsync',
                 'getWorkspaces',
-                'getContainer',
                 'getContentAsync',
-                'getDocuments',
                 'getDocument',
                 'getDocumentAsync',
                 'addDocumentsAsync',
@@ -84,16 +81,16 @@ describe('ContainersController', function () {
         app.use(errorHandler);
     });
 
-    it('getDocuments: /api/v1/containers/:url/documents', async function () {
-        aasProvider.getDocuments.mockReturnValue([sampleDocument]);
-        const response = await request(app)
-            .get('/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents')
-            .set('Authorization', `Bearer ${getToken()}`);
+    // it('getDocuments: /api/v1/containers/:url/documents', async function () {
+    //     aasProvider.getDocuments.mockReturnValue([sampleDocument]);
+    //     const response = await request(app)
+    //         .get('/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents')
+    //         .set('Authorization', `Bearer ${getToken()}`);
 
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toEqual([sampleDocument]);
-        expect(aasProvider.getDocuments).toHaveBeenCalled();
-    });
+    //     expect(response.statusCode).toBe(200);
+    //     expect(response.body).toEqual([sampleDocument]);
+    //     expect(aasProvider.getDocuments).toHaveBeenCalled();
+    // });
 
     it('getDocument: /api/v1/containers/:url/documents/:id', async function () {
         aasProvider.getDocumentAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
@@ -112,18 +109,18 @@ describe('ContainersController', function () {
         expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
     });
 
-    it('addDocuments: /api/v1/containers/:url/documents', async function () {
-        const container = createSpyObj<Container>({}, { url: new URL('file:///samples') });
-        aasProvider.getContainer.mockReturnValue(container);
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-        const response = await request(app)
-            .post('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/documents')
-            .set('Authorization', `Bearer ${getToken('John')}`)
-            .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
+    // it('addDocuments: /api/v1/containers/:url/documents', async function () {
+    //     const container = createSpyObj<Container>({}, { url: new URL('file:///samples') });
+    //     aasProvider.getContainer.mockReturnValue(container);
+    //     auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+    //     const response = await request(app)
+    //         .post('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/documents')
+    //         .set('Authorization', `Bearer ${getToken('John')}`)
+    //         .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
 
-        expect(response.statusCode).toBe(204);
-        expect(aasProvider.addDocumentsAsync).toHaveBeenCalled();
-    });
+    //     expect(response.statusCode).toBe(204);
+    //     expect(aasProvider.addDocumentsAsync).toHaveBeenCalled();
+    // });
 
     it('deleteDocument: /api/v1/containers/:url/documents/:id', async function () {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));

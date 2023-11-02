@@ -7,11 +7,10 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { aas, AASDocument, getChildren } from 'common';
+import { aas, AASCursor, AASDocument, AASDocumentPage, getChildren } from 'common';
 import { ViewMode } from '../types/view-mode';
 import * as AASTableActions from './aas-table.actions';
 import { AASTableRow, AASTableState } from './aas-table.state';
-import { SortDirection } from '../sortable-header.directive';
 
 interface Tuple {
     targets: AASDocument[];
@@ -20,11 +19,10 @@ interface Tuple {
 }
 
 const initialState: AASTableState = {
-    column: '',
-    direction: '',
-    rows: [],
+    initialized: false,
     viewMode: ViewMode.List,
-    showAll: false
+    cursor: { limit: 100 },
+    rows: [],
 };
 
 export const aasTableReducer = createReducer(
@@ -38,8 +36,8 @@ export const aasTableReducer = createReducer(
         (state, { row }) => expandRow(state, row)
     ),
     on(
-        AASTableActions.setSortParameter,
-        (state, { column, direction }) => setSortParameter(state, column, direction)
+        AASTableActions.setPage,
+        (state, { page }) => setPage(state, page)
     ),
     on(
         AASTableActions.toggleSelected,
@@ -58,21 +56,18 @@ export const aasTableReducer = createReducer(
         (state, { documents, viewMode }) => setViewMode(state, documents, viewMode)
     ),
     on(
-        AASTableActions.setShowAll,
-        (state, { documents, showAll }) => setShowAll(state, documents, showAll)
-    ),
-    on(
         AASTableActions.setFilter,
         (state, { filter }) => setFilter(state, filter)
     )
 );
 
+
 function updateRows(state: AASTableState, documents: AASDocument[]): AASTableState {
     let rows: AASTableRow[];
     if (state.viewMode === ViewMode.List) {
-        rows = initList(documents, state.showAll);
+        rows = initList(documents);
     } else {
-        rows = initTree(documents, state.showAll);
+        rows = initTree(documents);
     }
 
     return { ...state, rows };
@@ -81,33 +76,42 @@ function updateRows(state: AASTableState, documents: AASDocument[]): AASTableSta
 function setViewMode(state: AASTableState, documents: AASDocument[], viewMode: ViewMode): AASTableState {
     let rows: AASTableRow[];
     if (viewMode === ViewMode.List) {
-        rows = initList(documents, state.showAll);
+        rows = initList(documents);
     } else {
-        rows = initTree(documents, state.showAll);
+        rows = initTree(documents);
     }
 
     return { ...state, rows, viewMode };
 }
 
-function setShowAll(state: AASTableState, documents: AASDocument[], showAll: boolean): AASTableState {
-    let rows: AASTableRow[];
-    if (state.viewMode === ViewMode.List) {
-        rows = initList(documents, showAll);
-    } else {
-        rows = initTree(documents, showAll);
+function setFilter(state: AASTableState, filter?: string): AASTableState {
+    return { ...state, cursor: { ...state.cursor, filter } };
+}
+
+function setPage(state: AASTableState, page: AASDocumentPage): AASTableState {
+    const cursor: AASCursor = {
+        limit: state.cursor.limit
+    };
+
+    if (state.cursor.filter) {
+        cursor.filter = state.cursor.filter;
     }
 
-    return { ...state, rows, showAll };
+    if (page.previous || page.previous === null) {
+        cursor.previous = page.previous;
+    }
+
+    if (page.next || page.next === null) {
+        cursor.next = page.next;
+    }
+
+    return {...state, rows: initList(page.documents), cursor };
 }
 
-function setFilter(state: AASTableState, filter?: string): AASTableState {
-    return { ...state, filter };
-}
-
-function initList(documents: ReadonlyArray<AASDocument>, showAll: boolean): AASTableRow[] {
+function initList(documents: AASDocument[]): AASTableRow[] {
     const rows: AASTableRow[] = [];
     for (const document of documents) {
-        if (showAll || document.content !== undefined) {
+        if (document.content !== undefined) {
             const row = new AASTableRow(
                 document,
                 false,
@@ -127,11 +131,11 @@ function initList(documents: ReadonlyArray<AASDocument>, showAll: boolean): AAST
     return rows;
 }
 
-function initTree(documents: AASDocument[], showAll: boolean): AASTableRow[] {
+function initTree(documents: AASDocument[]): AASTableRow[] {
     const rows: AASTableRow[] = [];
     const map = new Map<string, Tuple>();
     for (const document of documents) {
-        if (showAll || document.content) {
+        if (document.content) {
             map.set(document.id, { targets: [], current: document, sources: [] });
         }
     }
@@ -236,10 +240,6 @@ function initTree(documents: AASDocument[], showAll: boolean): AASTableRow[] {
             previous = row;
         }
     }
-}
-
-function setSortParameter(state: AASTableState, column: string, direction: SortDirection): AASTableState {
-    return { ...state, column, direction };
 }
 
 function expandRow(state: AASTableState, row: AASTableRow): AASTableState {

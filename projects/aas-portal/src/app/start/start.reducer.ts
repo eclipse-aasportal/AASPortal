@@ -15,8 +15,7 @@ const initialState: StartState = {
     viewMode: ViewMode.List,
     reverse: false,
     column: null,
-    filter: '',
-    showAll: false
+    filter: ''
 };
 
 export const startReducer = createReducer(
@@ -26,10 +25,6 @@ export const startReducer = createReducer(
         (state, { filter }) => setFilter(state, filter)
     ),
     on(
-        StartActions.setShowAll,
-        (state, { showAll }) => setShowAll(state, showAll)
-    ),
-    on(
         StartActions.setViewMode,
         (state, { viewMode }) => setViewMode(state, viewMode)
     )
@@ -37,10 +32,6 @@ export const startReducer = createReducer(
 
 function setViewMode(state: StartState, viewMode: ViewMode): StartState {
     return { ...state, viewMode };
-}
-
-function setShowAll(state: StartState, showAll: boolean): StartState {
-    return { ...state, showAll };
 }
 
 function setFilter(state: StartState, filter: string): StartState {

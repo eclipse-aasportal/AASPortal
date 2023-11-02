@@ -13,13 +13,13 @@
                 <input id="aas-table-checkbox" type="checkbox" class="form-check-input" (change)="toggleSelections()"
                     [checked]="someSelections | async">
             </th>
-            <th scope="col" sortable="type" (sort)="onSort($event)" class="th-w-icon">
+            <th scope="col" class="th-w-icon">
                 <i class="bi bi-tag"></i>
             </th>
-            <th scope="col" sortable="name" (sort)="onSort($event)">
+            <th scope="col">
                 <div class="me-1" translate>COLUMN_NAME</div>
             </th>
-            <th scope="col" sortable="id" (sort)="onSort($event)">
+            <th scope="col">
                 <div class="me-1" translate>COLUMN_ID</div>
             </th>
         </tr>

@@ -85,8 +85,8 @@ export class AasxDirectory extends AASResource {
         return this.fileStorage.createReadStream(name);
     }
 
-    public override readEnvironmentAsync(id: string): Promise<aas.Environment> {
-        
+    public readEnvironmentAsync(id: string): Promise<aas.Environment> {
+        throw new Error('Not implemented.');
     }
 
     public async postPackageAsync(file: Express.Multer.File): Promise<AASPackage> {

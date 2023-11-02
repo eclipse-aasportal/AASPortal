@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AASDocument } from 'common';
-import { first, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ViewMode } from '../types/view-mode';
@@ -22,13 +22,15 @@ import { AASQuery } from '../types/aas-query-params';
 import { NotifyService } from '../notify/notify.service';
 import { ClipboardService } from '../clipboard.service';
 import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
+import { AASTableApiService } from './aas-table-api.service';
 
 @Component({
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.component.html',
-    styleUrls: ['./aas-table.component.scss']
+    styleUrls: ['./aas-table.component.scss'],
+    providers: [AASTableApiService]
 })
-export class AASTableComponent implements AASTable, OnChanges, OnDestroy {
+export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
     private readonly subscription: Subscription = new Subscription();
     private _filter = '';
@@ -37,13 +39,19 @@ export class AASTableComponent implements AASTable, OnChanges, OnDestroy {
         private readonly router: Router,
         translate: TranslateService,
         store: Store,
+        private readonly api: AASTableApiService,
         private readonly notify: NotifyService,
         private readonly clipboard: ClipboardService
     ) {
         this.store = store as Store<AASTableFeatureState>;
         this.selectedDocuments = this.store.select(AASTableSelectors.selectSelectedDocuments);
         this.someSelections = this.store.select(AASTableSelectors.selectSomeSelections);
-        this.rows = this.store.select(AASTableSelectors.selectRows(translate));
+        this.rows = this.store.select(AASTableSelectors.selectRows);
+
+        this.canSkipStart = this.store.select(AASTableSelectors.selectAtStart);
+        this.canSkipBackward = this.store.select(AASTableSelectors.selectAtStart);
+        this.canSkipForward = this.store.select(AASTableSelectors.selectAtEnd);
+        this.canSkipEnd = this.store.select(AASTableSelectors.selectAtEnd);
     }
 
     @ViewChildren(SortableHeaderDirective)
@@ -53,13 +61,15 @@ export class AASTableComponent implements AASTable, OnChanges, OnDestroy {
     public viewMode: ViewMode = ViewMode.List;
 
     @Input()
-    public showAll = false;
-
-    @Input()
     public filter: Observable<string> | null = null;
 
-    @Input()
-    public documents: Observable<AASDocument[]> | null = null;
+    public readonly canSkipStart: Observable<boolean>;
+
+    public readonly canSkipBackward: Observable<boolean>;
+
+    public readonly canSkipForward: Observable<boolean>;
+
+    public readonly canSkipEnd: Observable<boolean>;
 
     public rows: Observable<AASTableRow[]>;
 
@@ -67,38 +77,45 @@ export class AASTableComponent implements AASTable, OnChanges, OnDestroy {
 
     public readonly someSelections: Observable<boolean>;
 
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['documents']) {
-            this.documents?.subscribe(documents => this.documentsChanged(documents));
-        }
+    public ngOnInit(): void {
+        this.store.dispatch(AASTableActions.initialize());
+    }
 
+    public ngOnChanges(changes: SimpleChanges): void {
         if (changes['filter'] && this.filter) {
             this.subscription.add(this.filter.subscribe(filter => {
-                this.store.dispatch(AASTableActions.setFilter({ filter }));
+                this.store.dispatch(AASTableActions.getFirstPage({ filter }));
             }));
         }
 
-        const showAllChange = changes['showAll'];
-        if (showAllChange && this.showAll !== showAllChange.previousValue) {
-            this.documents?.pipe(first())
-                .subscribe(documents => this.store.dispatch(AASTableActions.setShowAll({
-                    documents,
-                    showAll: this.showAll
-                })));
-        }
-
-        const viewModeChange = changes['viewMode'];
-        if (viewModeChange && this.viewMode !== viewModeChange.previousValue) {
-            this.documents?.pipe(first())
-                .subscribe(documents => this.store.dispatch(AASTableActions.setViewMode({
-                    documents,
-                    viewMode: this.viewMode
-                })));
-        }
+        // const viewModeChange = changes['viewMode'];
+        // if (viewModeChange && this.viewMode !== viewModeChange.previousValue) {
+        //     this.documents?.pipe(first())
+        //         .subscribe(documents => this.store.dispatch(AASTableActions.setViewMode({
+        //             documents,
+        //             viewMode: this.viewMode
+        //         })));
+        // }
     }
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+    }
+
+    public skipStart(): void {
+        this.store.dispatch(AASTableActions.getFirstPage({}));
+    }
+
+    public skipBackward(): void {
+        this.store.dispatch(AASTableActions.getPreviousPage())
+    }
+
+    public skipForward(): void {
+        this.store.dispatch(AASTableActions.getNextPage())
+    }
+
+    public skipEnd(): void {
+        this.store.dispatch(AASTableActions.getLastPage())
     }
 
     public expand(row: AASTableRow): void {

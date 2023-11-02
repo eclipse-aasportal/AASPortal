@@ -7,15 +7,23 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
-import { AASDocument } from 'common';
+import { AASDocument, AASDocumentPage, aas } from 'common';
 import { SortDirection } from '../sortable-header.directive';
 import { AASTableRow } from './aas-table.state';
 import { ViewMode } from '../types/view-mode';
+import { TypedAction } from '@ngrx/store/src/models';
 
 export enum AASTableActionType {
+    INITIALIZE = '[AASTable] initialize',
+    GET_FIRST_PAGE = '[AASTable] get first page',
+    GET_NEXT_PAGE = '[AASTable] get next page',
+    GET_PREVIOUS_PAGE = '[AASTable] previous next page',
+    SET_PAGE = '[AASTable] set page',
+    GET_LAST_PAGE = '[AASTable] get last page',
+    SET_DOCUMENT_CONTENT = '[AASTable] set document content',
+
     UPDATE_ROWS = '[AASTable] Update Rows',
     SET_VIEW_MODE = '[AASTable] Set view mode',
-    SET_SHOW_ALL = '[AASTable] Set show all',
     SET_SORT_PARAMETER = '[AASTable] Set sort parameter',
     SET_FILTER = '[AASTable] Set filter',
     EXPAND = '[AASTable] Expand',
@@ -24,6 +32,35 @@ export enum AASTableActionType {
     TOGGLE_SELECTIONS = '[AASTable] Toggle selections'
 }
 
+export interface ApplyDocumentAction extends TypedAction<AASTableActionType.GET_FIRST_PAGE> {
+    filter?: string;
+}
+
+export const initialize = createAction(
+    AASTableActionType.INITIALIZE);
+
+export const getFirstPage = createAction(
+    AASTableActionType.GET_FIRST_PAGE,
+    props<{ filter?: string }>());
+
+export const getNextPage = createAction(
+    AASTableActionType.GET_NEXT_PAGE);
+
+export const getPreviousPage = createAction(
+    AASTableActionType.GET_PREVIOUS_PAGE);
+
+export const getLastPage = createAction(
+    AASTableActionType.GET_LAST_PAGE);
+
+
+export const setPage = createAction(
+    AASTableActionType.SET_PAGE,
+    props<{ page: AASDocumentPage }>());
+
+export const setDocumentContent = createAction(
+    AASTableActionType.SET_DOCUMENT_CONTENT,
+    props<{ document: AASDocument; content?: aas.Environment }>());
+
 export const updateRows = createAction(
     AASTableActionType.UPDATE_ROWS,
     props<{ documents: AASDocument[] }>());
@@ -31,10 +68,6 @@ export const updateRows = createAction(
 export const setViewMode = createAction(
     AASTableActionType.SET_VIEW_MODE,
     props<{ documents: AASDocument[]; viewMode: ViewMode }>());
-
-export const setShowAll = createAction(
-    AASTableActionType.SET_SHOW_ALL,
-    props<{ documents: AASDocument[]; showAll: boolean }>());
 
 export const setFilter = createAction(
     AASTableActionType.SET_FILTER,

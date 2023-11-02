@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { AASDocument, AASContainer, WebSocketData, AASServerMessage, AASWorkspace } from 'common';
-import { Observable, of, mergeMap, catchError, noop, skipWhile, first } from 'rxjs';
+import { Observable, of, mergeMap, catchError, skipWhile, first } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
 import { AuthService, LogType, NotifyService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
@@ -184,9 +184,6 @@ export class ProjectService {
                 case 'Changed':
                     this.documentUpdated(data.document!);
                     break;
-                case 'Offline':
-                    this.documentOffline(data.document!);
-                    break;
                 case 'ContainerAdded':
                     this.containerAdded(data.endpoint!, data.container!);
                     break;
@@ -226,10 +223,6 @@ export class ProjectService {
 
     private endpointRemoved(endpoint: string): void {
         this.store.dispatch(ProjectActions.endpointRemoved({ endpoint }));
-    }
-
-    private documentOffline(document: AASDocument): void {
-        noop();
     }
 
     private containerAdded(endpoint: string, container: AASContainer): void {

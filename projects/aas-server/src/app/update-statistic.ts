@@ -24,9 +24,6 @@ export class UpdateStatistic {
             case ScanResultType.Removed:
                 ++statistic.deleted;
                 break;
-            case ScanResultType.Offline:
-                ++statistic.offline;
-                break;
             case ScanResultType.End:
                 ++statistic.counter;
                 break;

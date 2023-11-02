@@ -11,9 +11,26 @@
         [documents]="documents"></fhg-aas-table>
 </div>
 
-<ng-content />
 <ng-template #startToolbar>
     <div class="btn-group me-2">
+        <button type="button" class="btn btn-primary" (click)="aasTable.skipStart()"
+            [disabled]="(aasTable.canSkipStart | async) === false">
+            <i class="bi bi-skip-start"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="aasTable.skipBackward()"
+            [disabled]="(aasTable.canSkipBackward | async) === false">
+            <i class="bi bi-skip-backward"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="aasTable.skipForward()"
+            [disabled]="(aasTable.canSkipForward | async) === false">
+            <i class="bi bi-skip-forward"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="aasTable.skipEnd()"
+            [disabled]="(aasTable.canSkipEnd | async) === false">
+            <i class="bi bi-skip-end"></i>
+        </button>
+    </div>
+    <!-- 
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints">
                 <i class="bi bi-stack-overflow"></i>
@@ -25,7 +42,8 @@
                     <button ngbDropdownItem (click)="setWorkspace(dropdownItem.name)">{{dropdownItem.name}}</button>
                 </ng-container>
             </div>
-        </div>
+        </div> -->
+    <div class="btn-group me-2">
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
                 <i class="bi bi-gear"></i>
