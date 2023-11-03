@@ -9,13 +9,14 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { AASCursor, AASWorkspace } from 'common';
-import { catchError, EMPTY, exhaustMap, from, map, merge, mergeMap, Observable, of, skipWhile, zip } from 'rxjs';
+import { AASDocument, AASDocumentId } from 'common';
+import { EMPTY, exhaustMap, map, mergeMap, first } from 'rxjs';
 
 import * as AASTableActions from './aas-table.actions';
 import * as AASTableSelectors from './aas-table.selectors';
 import { AASTableApiService } from './aas-table-api.service';
 import { AASTableFeatureState } from './aas-table.state';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class AASTableEffects {
@@ -24,7 +25,8 @@ export class AASTableEffects {
     constructor(
         private readonly actions: Actions,
         store: Store,
-        private readonly api: AASTableApiService
+        private readonly api: AASTableApiService,
+        private readonly auth: AuthService
     ) {
         this.store = store as Store<AASTableFeatureState>;
     }
@@ -32,17 +34,70 @@ export class AASTableEffects {
     public initialize = createEffect(() => {
         return this.actions.pipe(
             ofType(AASTableActions.AASTableActionType.INITIALIZE),
-            exhaustMap(() => this.store.select(AASTableSelectors.selectState)),
-            mergeMap(state => {
-                if (state.initialized) {
-                    return EMPTY;
-                }
+            exhaustMap(() => this.auth.ready.pipe(
+                first(ready => ready === true),
+                mergeMap(() => this.store.select(AASTableSelectors.selectState)),
+                mergeMap(state => {
+                    if (state.initialized) {
+                        return EMPTY;
+                    }
 
-                return this.api.getDocuments({ previous: null, limit: state.cursor.limit });
-            }),
-            mergeMap(page => from(page.documents)),
-            skipWhile(document => document.content != null),
-            mergeMap(document => zip(of(document), this.api.getContent(document.container, document.id))),
-            map(tuple => AASTableActions.setDocumentContent({ document: tuple[0], content: tuple[1] })));
+                    return this.api.getDocuments({ previous: null, limit: state.limit });
+                }),
+                map(page => AASTableActions.setPage({ page })))));
     });
+
+    public getFirstPage = createEffect(() => {
+        return this.actions.pipe(
+            ofType(AASTableActions.AASTableActionType.GET_FIRST_PAGE),
+            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
+                first(),
+                mergeMap(state => this.api.getDocuments({ previous: null, limit: state.limit })),
+                map(page => AASTableActions.setPage({ page })))));
+    });
+
+    public getLastPage = createEffect(() => {
+        return this.actions.pipe(
+            ofType(AASTableActions.AASTableActionType.GET_LAST_PAGE),
+            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
+                first(),
+                mergeMap(state => this.api.getDocuments({ next: null, limit: state.limit })),
+                map(page => AASTableActions.setPage({ page })))));
+    });
+
+    public getNextPage = createEffect(() => {
+        return this.actions.pipe(
+            ofType(AASTableActions.AASTableActionType.GET_NEXT_PAGE),
+            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
+                first(),
+                mergeMap(state => {
+                    if (state.rows.length === 0) return EMPTY;
+
+                    return this.api.getDocuments({
+                        next: this.getId(state.rows[state.rows.length - 1].document),
+                        limit: state.limit
+                    });
+                }),
+                map(page => AASTableActions.setPage({ page })))));
+    });
+
+    public getPreviousPage = createEffect(() => {
+        return this.actions.pipe(
+            ofType(AASTableActions.AASTableActionType.GET_PREVIOUS_PAGE),
+            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
+                first(),
+                mergeMap(state => {
+                    if (state.rows.length === 0) return EMPTY;
+
+                    return this.api.getDocuments({
+                        previous: this.getId(state.rows[0].document),
+                        limit: state.limit
+                    });
+                }),
+                map(page => AASTableActions.setPage({ page })))));
+    });
+
+    private getId(document: AASDocument): AASDocumentId {
+        return { id: document.id, url: document.container.split('?')[0] };
+    }
 }

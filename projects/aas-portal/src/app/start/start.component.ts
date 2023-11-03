@@ -22,7 +22,7 @@ import * as StartActions from './start.actions';
 import { State } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { getEndpointType } from '../configuration';
-import { selectFilter, selectShowAll, selectViewMode } from './start.selectors';
+import { selectFilter, selectViewMode } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
 
 @Component({
@@ -51,7 +51,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     ) {
         this.store = store as Store<State>;
         this.filter = this.store.select(selectFilter);
-        this.documents = this.project.documents;
     }
 
     @ViewChild('aasTable')
@@ -62,11 +61,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public viewMode: lib.ViewMode = lib.ViewMode.List;
 
-    public showAll = false;
-
     public readonly filter: Observable<string>;
-
-    public documents: Observable<AASDocument[]>;
 
     public workspaces: AASWorkspace[] = [];
 
@@ -77,14 +72,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     public readonly endpoints = this.project.workspaces;
 
     public ngOnInit(): void {
-        this.subscription.add(
-            this.store
-                .select(selectShowAll).pipe()
-                .subscribe((value) => {
-                    this.showAll = value;
-                })
-        );
-
         this.subscription.add(
             this.store
                 .select(selectViewMode).pipe()

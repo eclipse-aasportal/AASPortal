@@ -78,16 +78,23 @@ export interface AASDocument {
     content?: aas.Environment | null;
 }
 
+/** The unique identifier of an AAS. */
 export interface AASDocumentId {
     url: string; 
     id: string;
+}
+
+/** Represents a page of AAS documents from the total set. */
+export interface AASPage {
+    isFirst: boolean;
+    isLast: boolean;
+    documents: AASDocument[];
 }
 
 /** Represents a cursor in the collection of Asset Administration Shells. */
 export interface AASCursor {
     previous?: AASDocumentId | null;
     limit: number;
-    filter?: string;
     next?: AASDocumentId | null;
 }
 

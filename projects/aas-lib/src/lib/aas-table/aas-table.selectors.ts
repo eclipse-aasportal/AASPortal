@@ -13,7 +13,6 @@ import { ViewMode } from '../types/view-mode';
 
 const getRows = (state: AASTableFeatureState) => state.aasTable.rows;
 const getState = (state: AASTableFeatureState) => state.aasTable;
-const getCursor = (state: AASTableFeatureState) => state.aasTable.cursor;
 
 export const selectState = createSelector(getState, state => state);
 
@@ -42,14 +41,13 @@ export const selectRows = createSelector(getState, state => {
     }
 });
 
-export const selectAtStart = createSelector(
-    getCursor,
-    (cursor: AASCursor) => !!cursor.previous);
+export const selectIsFirstPage = createSelector(
+    getState,
+    state => state.isFirstPage);
 
-
-export const selectAtEnd = createSelector(
-    getCursor,
-    (cursor: AASCursor) => !!cursor.next);
+export const selectIsLastPage = createSelector(
+    getState,
+    state => state.isLastPage);
 
 export const selectInitialized = createSelector(
     getState,

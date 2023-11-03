@@ -74,8 +74,6 @@ describe('AASTableComponent', () => {
         fixture = TestBed.createComponent(AASTableComponent);
         component = fixture.componentInstance;
         component.filter = of('');
-        component.documents = of([document1, document2, document3]);
-        component.ngOnChanges({ 'documents': new SimpleChange(null, component.documents, true) });
         fixture.detectChanges();
     });
 
@@ -85,10 +83,6 @@ describe('AASTableComponent', () => {
 
     it('has an initial view mode "List"', function () {
         expect(component.viewMode).toEqual(ViewMode.List);
-    });
-
-    it('has an initial showAll "false"', function () {
-        expect(component.showAll).toBeFalse();
     });
 
     it('has initial an empty filter', function (done: DoneFn) {
@@ -121,15 +115,6 @@ describe('AASTableComponent', () => {
             done();
         });
     });
-
-    it('allows switching to showAll "true"', function (done: DoneFn) {
-        component.showAll = true;
-        component.ngOnChanges({ showAll: new SimpleChange(false, true, true) });
-        store.select(selectState).pipe(first()).subscribe(state => {
-            expect(state.showAll).toBeTrue();
-            done();
-        });
-});
 
     it('allows set a filter', function (done: DoneFn) {
         component.filter = of('document');

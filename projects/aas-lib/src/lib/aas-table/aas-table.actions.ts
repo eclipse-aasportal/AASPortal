@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
-import { AASDocument, AASDocumentPage, aas } from 'common';
+import { AASDocument, AASPage, aas } from 'common';
 import { SortDirection } from '../sortable-header.directive';
 import { AASTableRow } from './aas-table.state';
 import { ViewMode } from '../types/view-mode';
@@ -55,7 +55,7 @@ export const getLastPage = createAction(
 
 export const setPage = createAction(
     AASTableActionType.SET_PAGE,
-    props<{ page: AASDocumentPage }>());
+    props<{ page: AASPage }>());
 
 export const setDocumentContent = createAction(
     AASTableActionType.SET_DOCUMENT_CONTENT,

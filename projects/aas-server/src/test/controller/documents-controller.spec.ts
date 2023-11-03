@@ -12,6 +12,7 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
+import { AASCursor, AASPage } from 'common';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -23,6 +24,7 @@ import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
+import { encodeBase64Url } from '../../app/convert.js';
 
 describe('DocumentsController', function () {
     let app: Express;
@@ -53,6 +55,7 @@ describe('DocumentsController', function () {
                 'getContentAsync',
                 'getDocument',
                 'getDocumentAsync',
+                'getDocumentsAsync',
                 'addDocumentsAsync',
                 'deleteDocumentAsync',
                 'getDataElementValueAsync',
@@ -88,5 +91,19 @@ describe('DocumentsController', function () {
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
         expect(aasProvider.getDocument).toHaveBeenCalled();
+    });
+
+    it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
+        const page: AASPage = { isFirst: true, documents: [sampleDocument], isLast: true };
+        aasProvider.getDocumentsAsync.mockResolvedValue(page);
+        const cursor: AASCursor = { previous: null, limit: 10 };
+        const filter = '#prop:Name=Value';
+        const response = await request(app)
+            .get(`/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}&filter=${encodeBase64Url(filter)}`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(page);
+        expect(aasProvider.getDocumentsAsync).toHaveBeenCalled();
     });
 });

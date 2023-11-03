@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { aas, AASCursor, AASDocument, AASDocumentPage, getChildren } from 'common';
+import { aas, AASDocument, AASPage, getChildren } from 'common';
 import { ViewMode } from '../types/view-mode';
 import * as AASTableActions from './aas-table.actions';
 import { AASTableRow, AASTableState } from './aas-table.state';
@@ -21,7 +21,9 @@ interface Tuple {
 const initialState: AASTableState = {
     initialized: false,
     viewMode: ViewMode.List,
-    cursor: { limit: 100 },
+    limit: 5,
+    isFirstPage: false,
+    isLastPage: false,
     rows: [],
 };
 
@@ -61,7 +63,6 @@ export const aasTableReducer = createReducer(
     )
 );
 
-
 function updateRows(state: AASTableState, documents: AASDocument[]): AASTableState {
     let rows: AASTableRow[];
     if (state.viewMode === ViewMode.List) {
@@ -85,27 +86,17 @@ function setViewMode(state: AASTableState, documents: AASDocument[], viewMode: V
 }
 
 function setFilter(state: AASTableState, filter?: string): AASTableState {
-    return { ...state, cursor: { ...state.cursor, filter } };
+    return { ...state, filter };
 }
 
-function setPage(state: AASTableState, page: AASDocumentPage): AASTableState {
-    const cursor: AASCursor = {
-        limit: state.cursor.limit
+function setPage(state: AASTableState, page: AASPage): AASTableState {
+    return {
+        ...state,
+        initialized: true,
+        rows: initList(page.documents),
+        isFirstPage: page.isFirst,
+        isLastPage: page.isLast
     };
-
-    if (state.cursor.filter) {
-        cursor.filter = state.cursor.filter;
-    }
-
-    if (page.previous || page.previous === null) {
-        cursor.previous = page.previous;
-    }
-
-    if (page.next || page.next === null) {
-        cursor.next = page.next;
-    }
-
-    return {...state, rows: initList(page.documents), cursor };
 }
 
 function initList(documents: AASDocument[]): AASTableRow[] {

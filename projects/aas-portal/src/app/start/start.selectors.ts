@@ -10,12 +10,8 @@ import { createSelector } from '@ngrx/store';
 import { State } from './start.state'
 import { ViewMode } from 'projects/aas-lib/src/public-api';
 
-
-const getShowAll = (state: State) => state.start.showAll;
 const getFilter = (state: State) => state.start.filter;
 const getViewMode = (state: State) => state.start.viewMode;
-
-export const selectShowAll = createSelector(getShowAll, showAll => showAll);
 
 export const selectFilter = createSelector(getFilter, filter => filter);
 

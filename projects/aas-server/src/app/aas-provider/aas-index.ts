@@ -1,9 +1,17 @@
-import { AASCursor, AASDocument } from 'common';
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { AASCursor, AASDocument, AASPage } from 'common';
 
 export abstract class AASIndex {
-    public abstract getDocuments(url: string): Promise<AASDocument[]>;
+    public abstract getDocuments(cursor: AASCursor, filter?: string): Promise<AASPage>;
 
-    public abstract getPage(cursor: AASCursor): Promise<AASDocument[]>;
+    public abstract getContainerDocuments(url: string): Promise<AASDocument[]>;
 
     public abstract set(document: AASDocument): Promise<void>;
 

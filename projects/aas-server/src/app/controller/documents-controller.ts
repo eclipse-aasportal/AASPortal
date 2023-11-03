@@ -12,7 +12,7 @@ import { Logger } from '../logging/logger.js';
 import { ControllerBase } from './controller-base.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { AASCursor, AASDocument } from 'common';
+import { AASDocument, AASPage } from 'common';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
 
@@ -29,14 +29,23 @@ export class DocumentsController extends ControllerBase {
         super(logger, auth, variable);
     }
 
+    /**
+     * Returns a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
+     * @param cursor The current cursor.
+     * @param filter A filter expression.
+     * @returns A page of AAS documents.
+     */
     @Get('')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocuments')
-    public async getDocuments(@Query() cursor: string): Promise<AASDocument[]> {
+    public async getDocuments(@Query() cursor: string, @Query() filter?:string): Promise<AASPage> {
         try {
             this.logger.start('getDocuments');
-            const c: AASCursor = JSON.parse(decodeBase64Url(cursor));
-            return await this.aasProvider.getDocumentsAsync(c);
+            if (filter) {
+                filter = decodeBase64Url(filter);
+            }
+
+            return await this.aasProvider.getDocumentsAsync(JSON.parse(decodeBase64Url(cursor)), filter);
         } finally {
             this.logger.stop();
         }

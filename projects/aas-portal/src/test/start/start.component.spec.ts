@@ -124,16 +124,8 @@ describe('StartComponent', () => {
         expect(component.workspaces).toEqual([ws1, ws2]);
     });
 
-    it('provides an active workspace', function () {
-        expect(component.workspace).toEqual(ws1);
-    });
-
     it('initial view mode is "list"', function () {
         expect(component.viewMode).toEqual(ViewMode.List);
-    });
-
-    it('initial shows only AAS documents with content.', function () {
-        expect(component.showAll).toBeFalse();
     });
 
     it('indicates whether all AAS documents have content', function () {

@@ -27,8 +27,7 @@ import { AASTableApiService } from './aas-table-api.service';
 @Component({
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.component.html',
-    styleUrls: ['./aas-table.component.scss'],
-    providers: [AASTableApiService]
+    styleUrls: ['./aas-table.component.scss']
 })
 export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
@@ -48,10 +47,8 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
         this.someSelections = this.store.select(AASTableSelectors.selectSomeSelections);
         this.rows = this.store.select(AASTableSelectors.selectRows);
 
-        this.canSkipStart = this.store.select(AASTableSelectors.selectAtStart);
-        this.canSkipBackward = this.store.select(AASTableSelectors.selectAtStart);
-        this.canSkipForward = this.store.select(AASTableSelectors.selectAtEnd);
-        this.canSkipEnd = this.store.select(AASTableSelectors.selectAtEnd);
+        this.isFirstPage = this.store.select(AASTableSelectors.selectIsFirstPage);
+        this.isLastPage = this.store.select(AASTableSelectors.selectIsLastPage);
     }
 
     @ViewChildren(SortableHeaderDirective)
@@ -63,13 +60,9 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
     @Input()
     public filter: Observable<string> | null = null;
 
-    public readonly canSkipStart: Observable<boolean>;
+    public readonly isFirstPage: Observable<boolean>;
 
-    public readonly canSkipBackward: Observable<boolean>;
-
-    public readonly canSkipForward: Observable<boolean>;
-
-    public readonly canSkipEnd: Observable<boolean>;
+    public readonly isLastPage: Observable<boolean>;
 
     public rows: Observable<AASTableRow[]>;
 

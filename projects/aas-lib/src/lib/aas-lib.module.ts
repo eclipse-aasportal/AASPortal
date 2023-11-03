@@ -38,6 +38,8 @@ import { messageTableReducer } from './message-table/massage-table.reducer';
 import { MessageTableComponent } from './message-table/message-table.component';
 import { SecuredImageComponent } from './secured-image/secured-image.component';
 import { AASProviderService } from './aas-provider/aas-provider.service';
+import { EffectsModule } from '@ngrx/effects';
+import { AASTableEffects } from './aas-table/aas-table.effects';
 
 @NgModule({
     declarations: [
@@ -70,6 +72,7 @@ import { AASProviderService } from './aas-provider/aas-provider.service';
         StoreModule.forFeature('customerFeedback', customerFeedbackReducer),
         StoreModule.forFeature('aasTable', aasTableReducer),
         StoreModule.forFeature('tree', aasTreeReducer),
+        EffectsModule.forFeature(AASTableEffects),
         HttpClientModule
     ],
     exports: [

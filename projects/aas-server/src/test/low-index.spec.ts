@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { Low } from 'lowdb';
 import { Data, LowIndex } from '../app/aas-provider/low-index.js';
@@ -23,34 +31,46 @@ describe('LowIndex', () => {
         expect(index).toBeTruthy();
     });
 
-    describe('getDocuments', () => {
+    describe('getContainerDocuments', () => {
         it('returns all documents that belongs to a container', async () => {
-            const array = await index.getDocuments('file:///samples');
-            expect(array.length).toBeGreaterThan(0);
+            const array = await index.getContainerDocuments('file:///samples');
+            expect(array.length).toEqual(data.documents.length);
         });
     });
 
-    describe('getPage', () => {
+    describe('getDocuments', () => {
         it('provides all documents page by page (forward)', async () => {
             let cursor: AASCursor = { previous: null, limit: 5 };
-            let page = await index.getPage(cursor);
-            expect(page.length).toBeGreaterThan(0);
-            while (page.length > 0) {
-                page = await index.getPage(cursor);
-                expect(page.length).toBeGreaterThan(0);
-                cursor = { ...cursor, next: getId(page[page.length - 1]) };
+            let page = await index.getDocuments(cursor);
+            expect(page.isFirst).toBeTruthy();
+            expect(page.isLast).toBeFalsy();
+            let n = page.documents.length;
+            while (!page.isLast) {
+                cursor = { ...cursor, next: getId(page.documents[page.documents.length - 1]) };
+                page = await index.getDocuments(cursor);
+                n += page.documents.length;
             }
+
+            expect(page.isFirst).toBeFalsy();
+            expect(page.isLast).toBeTruthy();
+            expect(n).toEqual(data.documents.length);
         });
 
         it('provides all documents page by page (reverse)', async () => {
             let cursor: AASCursor = { next: null, limit: 5 };
-            let page = await index.getPage(cursor);
-            expect(page.length).toBeGreaterThan(0);
-            while (page.length > 0) {
-                page = await index.getPage(cursor);
-                expect(page.length).toBeGreaterThan(0);
-                cursor = { ...cursor, previous: getId(page[0]) };
+            let page = await index.getDocuments(cursor);
+            expect(page.isFirst).toBeFalsy();
+            expect(page.isLast).toBeTruthy();
+            let n = page.documents.length;
+            while (!page.isFirst) {
+                cursor = { ...cursor, previous: getId(page.documents[0]) };
+                page = await index.getDocuments(cursor);
+                n += page.documents.length;
             }
+
+            expect(page.isFirst).toBeTruthy();
+            expect(page.isLast).toBeFalsy();
+            expect(n).toEqual(data.documents.length);
         });
     });
 });

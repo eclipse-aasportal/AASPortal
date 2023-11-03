@@ -7,26 +7,25 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table #aasTable [viewMode]="viewMode" [showAll]="showAll" [filter]="filter"
-        [documents]="documents"></fhg-aas-table>
+    <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
     <div class="btn-group me-2">
         <button type="button" class="btn btn-primary" (click)="aasTable.skipStart()"
-            [disabled]="(aasTable.canSkipStart | async) === false">
+            [disabled]="aasTable.isFirstPage | async">
             <i class="bi bi-skip-start"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="aasTable.skipBackward()"
-            [disabled]="(aasTable.canSkipBackward | async) === false">
+            [disabled]="aasTable.isFirstPage | async">
             <i class="bi bi-skip-backward"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="aasTable.skipForward()"
-            [disabled]="(aasTable.canSkipForward | async) === false">
+            [disabled]="aasTable.isLastPage | async">
             <i class="bi bi-skip-forward"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="aasTable.skipEnd()"
-            [disabled]="(aasTable.canSkipEnd | async) === false">
+            [disabled]="aasTable.isLastPage | async">
             <i class="bi bi-skip-end"></i>
         </button>
     </div>

@@ -1,10 +1,20 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AASCursor, AASDocumentPage, aas } from 'common';
+import { AASCursor, AASPage, aas } from 'common';
 import { encodeBase64Url } from '../convert';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class AASTableApiService {
     constructor(private readonly http: HttpClient) {
     }
@@ -14,10 +24,12 @@ export class AASTableApiService {
      * @param cursor The current cursor.
      * @returns The document page.
      */
-    public getDocuments(cursor: AASCursor): Observable<AASDocumentPage> {
-        return this.http.get<AASDocumentPage>(`/api/v1/documents&cursor=${encodeBase64Url(JSON.stringify(cursor))}`);
+    public getDocuments(cursor: AASCursor, filter?: string): Observable<AASPage> {
+        return this.http.get<AASPage>(filter
+            ? `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}&filter=${encodeBase64Url(filter)}`
+            : `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`);
     }
-    
+
     /**
      * Loads the element structure of the specified document.
      * @param url The URL of the container.

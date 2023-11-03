@@ -41,10 +41,10 @@ export class ProjectService {
         this.containers = this.store.select(ProjectSelectors.selectContainers);
         this.store.select(ProjectSelectors.selectError).pipe().subscribe(error => this.notify.error(error));
 
-        this.subscribeWorkspaceChanged();
+        // this.subscribeWorkspaceChanged();
 
-        this.auth.ready.pipe(skipWhile(ready => ready === false), first())
-            .subscribe(() => this.store.dispatch(ProjectActions.initialize()));
+        // this.auth.ready.pipe(first(ready => ready === true))
+        //     .subscribe(() => this.store.dispatch(ProjectActions.initialize()));
     }
 
     /** All available AAS container. */
