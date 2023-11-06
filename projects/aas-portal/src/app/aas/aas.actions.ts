@@ -7,16 +7,26 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
+import { TypedAction } from '@ngrx/store/src/models';
 import { AASDocument, TemplateDescriptor } from 'common';
 
 export enum AASActionType {
     SET_TEMPLATE_STORAGE = '[AAS] Set template storage',
-    SET_DOCUMENT = '[AAS] Set document',
-    APPLY_DOCUMENT = '[AAS] Apply document',
-    RESET_MODIFIED = '[AAS] Reset modified',
-    SET_DASHBOARD = '[AAS] Set dashboard',
-    SET_SEARCH = '[AAS] Set search'
+    GET_DOCUMENT = '[AAS] get document',
+    SET_DOCUMENT = '[AAS] set document',
+    APPLY_DOCUMENT = '[AAS] apply document',
+    RESET_MODIFIED = '[AAS] reset modified',
+    SET_DASHBOARD = '[AAS] set dashboard',
+    SET_SEARCH = '[AAS] set search'
 }
+export interface GetDocumentAction extends TypedAction<AASActionType.GET_DOCUMENT> {
+    id: string;
+    url?: string;
+}
+
+export const getDocument = createAction(
+    AASActionType.GET_DOCUMENT, 
+    props<{ id: string, url?: string }>());
 
 export const setDocument = createAction(
     AASActionType.SET_DOCUMENT, 

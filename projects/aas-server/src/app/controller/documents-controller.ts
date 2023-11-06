@@ -38,14 +38,17 @@ export class DocumentsController extends ControllerBase {
     @Get('')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocuments')
-    public async getDocuments(@Query() cursor: string, @Query() filter?:string): Promise<AASPage> {
+    public async getDocuments(
+        @Query() cursor: string, 
+        @Query() filter?:string, 
+        @Query() language?: string): Promise<AASPage> {
         try {
             this.logger.start('getDocuments');
             if (filter) {
                 filter = decodeBase64Url(filter);
             }
 
-            return await this.aasProvider.getDocumentsAsync(JSON.parse(decodeBase64Url(cursor)), filter);
+            return await this.aasProvider.getDocumentsAsync(JSON.parse(decodeBase64Url(cursor)), filter, language);
         } finally {
             this.logger.stop();
         }
@@ -62,7 +65,7 @@ export class DocumentsController extends ControllerBase {
     public async getDocument(id: string): Promise<AASDocument> {
         try {
             this.logger.start('getDocument');
-            return await Promise.resolve(this.aasProvider.getDocument(decodeBase64Url(id)));
+            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }

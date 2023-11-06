@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter"></fhg-aas-table>
+    <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter" [limit]="limit"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
@@ -29,19 +29,6 @@
             <i class="bi bi-skip-end"></i>
         </button>
     </div>
-    <!-- 
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints">
-                <i class="bi bi-stack-overflow"></i>
-                <span>&nbsp;</span>
-                <span>{{endpoint | async}}</span>
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                <ng-container *ngFor="let dropdownItem of endpoints | async">
-                    <button ngbDropdownItem (click)="setWorkspace(dropdownItem.name)">{{dropdownItem.name}}</button>
-                </ng-container>
-            </div>
-        </div> -->
     <div class="btn-group me-2">
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
@@ -92,7 +79,7 @@
     <div class="input-group flex-grow-1 me-2" [hidden]="viewMode === 'tree'">
         <div class="input-group-text"><i class="bi bi-filter"></i></div>
         <input #textInput type="text" class="form-control" [value]="filter | async"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="applyFilter(textInput.value)"
-            [disabled]="viewMode === 'tree'">
+            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="applyFilter(textInput.value)"
+            (keydown.enter)="applyFilter(textInput.value)" [disabled]="viewMode === 'tree'">
     </div>
 </ng-template>

@@ -10,8 +10,9 @@ import { createAction, props } from '@ngrx/store';
 import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 export enum StartActionType {
-    SET_VIEW_MODE = '[Start] Set View Mode',
-    SET_FILTER = '[Start] Set filter'
+    SET_VIEW_MODE = '[Start] set View Mode',
+    APPLY_FILTER = '[Start] apply filter',
+    SET_FILTER = '[Start] set filter'
 }
 
 export const setViewMode = createAction(

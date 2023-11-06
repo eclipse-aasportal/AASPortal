@@ -53,9 +53,9 @@ describe('ContainersController', function () {
                 'updateDocumentAsync',
                 'getWorkspaces',
                 'getContentAsync',
-                'getDocument',
+                'getPackageAsync',
                 'getDocumentAsync',
-                'addDocumentsAsync',
+                'addPackagesAsync',
                 'deleteDocumentAsync',
                 'getDataElementValueAsync',
                 'invoke',
@@ -92,8 +92,8 @@ describe('ContainersController', function () {
     //     expect(aasProvider.getDocuments).toHaveBeenCalled();
     // });
 
-    it('getDocument: /api/v1/containers/:url/documents/:id', async function () {
-        aasProvider.getDocumentAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
+    it('getDocument: /api/v1/containers/:url/packages/:id', async function () {
+        aasProvider.getPackageAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
             const s = new Readable();
             s.push('Hello World!');
             s.push(null);
@@ -101,26 +101,24 @@ describe('ContainersController', function () {
         }));
 
         const response = await request(app)
-            .get(`/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
+            .get(`/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toBeTruthy();
-        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.getPackageAsync).toHaveBeenCalled();
     });
 
-    // it('addDocuments: /api/v1/containers/:url/documents', async function () {
-    //     const container = createSpyObj<Container>({}, { url: new URL('file:///samples') });
-    //     aasProvider.getContainer.mockReturnValue(container);
-    //     auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-    //     const response = await request(app)
-    //         .post('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/documents')
-    //         .set('Authorization', `Bearer ${getToken('John')}`)
-    //         .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
+    it('addDocuments: /api/v1/containers/:url/packages', async function () {
+        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        const response = await request(app)
+            .post('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/packages')
+            .set('Authorization', `Bearer ${getToken('John')}`)
+            .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
 
-    //     expect(response.statusCode).toBe(204);
-    //     expect(aasProvider.addDocumentsAsync).toHaveBeenCalled();
-    // });
+        expect(response.statusCode).toBe(204);
+        expect(aasProvider.addPackagesAsync).toHaveBeenCalled();
+    });
 
     it('deleteDocument: /api/v1/containers/:url/documents/:id', async function () {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));

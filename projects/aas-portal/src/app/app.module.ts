@@ -38,6 +38,7 @@ import { projectReducer } from './project/project.reducer';
 import { ProjectEffects } from './project/project.effects';
 import { HttpLoaderFactory } from './http-loader-factory';
 import { httpInterceptorProviders } from './index';
+import { AASEffects } from './aas/aas.effects';
 
 @NgModule({
     declarations: [
@@ -69,7 +70,7 @@ import { httpInterceptorProviders } from './index';
                 dashboard: dashboardReducer,
                 project: projectReducer
             }),
-        EffectsModule.forRoot([ProjectEffects]),
+        EffectsModule.forRoot([ProjectEffects, AASEffects]),
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {

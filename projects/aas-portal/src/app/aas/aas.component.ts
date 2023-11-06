@@ -9,11 +9,10 @@
 import { head } from 'lodash-es';
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
+import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, from } from 'rxjs';
 import * as lib from 'projects/aas-lib/src/public-api';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
-import { ProjectService } from '../project/project.service';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
@@ -58,7 +57,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly router: Router,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
-        private readonly project: ProjectService,
         private readonly notify: lib.NotifyService,
         private readonly dashboard: DashboardService,
         private readonly api: AASApiService,
@@ -71,9 +69,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.store = store as Store<State>;
         this.state = this.$state.asObservable();
         this.search = this.store.select(AASSelectors.selectSearch);
+        this.editable = this.store.select(AASSelectors.selectEditable);
 
         this.dashboardPages = this.dashboard.pages.pipe((map(pages => pages.map(page => page.name))));
-        this.editable = this.store.select(AASSelectors.selectEditable);
     }
 
     @ViewChild('aasTree')
@@ -154,14 +152,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         if (query) {
-            let document: Observable<AASDocument> | undefined;
-            if (query.url) {
-                document = this.project.getDocument(query.id, query.url);
-            } else {
-                document = this.project.getDocument(query.id);
-            }
-
-            document?.pipe(first()).subscribe(value => this.store.dispatch(AASActions.setDocument({ document: value })));
+            this.store.dispatch(AASActions.getDocument({ id: query.id, url: query.url }));
         }
 
         this.subscription.add(this.store.select(AASSelectors.selectDocument).pipe()

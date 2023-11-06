@@ -9,6 +9,7 @@
 import { Low } from 'lowdb';
 import { AASCursor, AASDocument, AASDocumentId, AASPage } from 'common';
 import { AASIndex } from './aas-index.js';
+import { AASFilter } from './aas-filter.js';
 
 export interface Data {
     documents: AASDocument[];
@@ -28,22 +29,22 @@ export class LowIndex extends AASIndex {
         return this.db.data.documents.filter(document => this.getKey(document.container) === url);
     }
 
-    public override async getDocuments(cursor: AASCursor, filter?: string): Promise<AASPage> {
+    public override async getDocuments(cursor: AASCursor, filter?: AASFilter): Promise<AASPage> {
         await this.promise;
 
         if (cursor.next) {
-            return this.getNextPage(cursor.next, cursor.limit);
+            return await this.getNextPage(cursor.next, cursor.limit, filter);
         }
 
         if (cursor.previous) {
-            return this.getPreviousPage(cursor.previous, cursor.limit);
+            return await this.getPreviousPage(cursor.previous, cursor.limit, filter);
         }
 
         if (cursor.previous === null) {
-            return this.getFirstPage(cursor.limit);
+            return await this.getFirstPage(cursor.limit, filter);
         }
 
-        return this.getLastPage(cursor.limit);
+        return await this.getLastPage(cursor.limit, filter);
     }
 
     public override async set(document: AASDocument): Promise<void> {
@@ -58,18 +59,20 @@ export class LowIndex extends AASIndex {
         }
     }
 
-    public override async has(url: string, id: string): Promise<boolean> {
+    public override async has(url: string | undefined, id: string): Promise<boolean> {
         await this.promise;
-        const document = this.db.data.documents.find(
-            item => this.getKey(item.container) === url && item.id === id);
+        const document = url
+            ? this.db.data.documents.find(item => this.getKey(item.container) === url && item.id === id)
+            : this.db.data.documents.find(item => item.id === id);
 
         return document != null;
     }
 
-    public async get(url: string, id: string): Promise<AASDocument> {
+    public async get(url: string | undefined, id: string): Promise<AASDocument> {
         await this.promise;
-        const document = this.db.data.documents.find(
-            item => this.getKey(item.container) === url && item.id === id);
+        const document = url
+            ? this.db.data.documents.find(item => this.getKey(item.container) === url && item.id === id)
+            : this.db.data.documents.find(item => item.id === id);
 
         if (!document) {
             throw new Error(`An AAS with the identifier ${id} does not exist in ${url}.`);
@@ -99,7 +102,7 @@ export class LowIndex extends AASIndex {
         throw new Error('Not implemented.');
     }
 
-    private getFirstPage(limit: number): AASPage {
+    private async getFirstPage(limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
@@ -108,36 +111,38 @@ export class LowIndex extends AASIndex {
         let min = this.getId(this.db.data.documents[0]);
         let max = min;
         for (const document of this.db.data.documents) {
-            const id = this.getId(document);
-            let isGreater: boolean;
-            if (this.compare(id, min) < 0) {
-                min = id;
-                isGreater = true;
-            } else {
-                isGreater = this.compare(min, id) <= 0;
-            }
-
-            if (isGreater) {
-                const index = documents.findIndex(item => this.compare(this.getId(item), id) > 0);
-                if (index >= 0) {
-                    documents.splice(index, 0, document);
-                    if (documents.length > limit) {
-                        documents.splice(limit);
-                    }
-                } else if (documents.length < limit) {
-                    documents.push(document);
+            if (!filter || await filter.do(document)) {
+                const id = this.getId(document);
+                let isGreater: boolean;
+                if (this.compare(id, min) < 0) {
+                    min = id;
+                    isGreater = true;
+                } else {
+                    isGreater = this.compare(min, id) <= 0;
                 }
-            }
 
-            if (this.compare(id, max) > 0) {
-                max = id;
+                if (isGreater) {
+                    const index = documents.findIndex(item => this.compare(this.getId(item), id) > 0);
+                    if (index >= 0) {
+                        documents.splice(index, 0, document);
+                        if (documents.length > limit) {
+                            documents.splice(limit);
+                        }
+                    } else if (documents.length < limit) {
+                        documents.push(document);
+                    }
+                }
+
+                if (this.compare(id, max) > 0) {
+                    max = id;
+                }
             }
         }
 
         return { isFirst: true, documents, isLast: this.isLastPage(documents, max) };
     }
 
-    private getNextPage(previous: AASDocumentId, limit: number): AASPage {
+    private async  getNextPage(previous: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
@@ -146,32 +151,34 @@ export class LowIndex extends AASIndex {
         let min = this.getId(this.db.data.documents[0]);
         let max = min;
         for (const document of this.db.data.documents) {
-            const id = this.getId(document);
-            if (this.compare(previous, id) < 0) {
-                const index = documents.findIndex(item => this.compare(this.getId(item), id) > 0);
-                if (index >= 0) {
-                    documents.splice(index, 0, document);
-                    if (documents.length > limit) {
-                        documents.splice(limit);
+            if (!filter || await filter.do(document)) {
+                const id = this.getId(document);
+                if (this.compare(previous, id) < 0) {
+                    const index = documents.findIndex(item => this.compare(this.getId(item), id) > 0);
+                    if (index >= 0) {
+                        documents.splice(index, 0, document);
+                        if (documents.length > limit) {
+                            documents.splice(limit);
+                        }
+                    } else if (documents.length < limit) {
+                        documents.push(document);
                     }
-                } else if (documents.length < limit) {
-                    documents.push(document);
                 }
-            }
 
-            if (this.compare(id, min) < 0) {
-                min = id;
-            }
+                if (this.compare(id, min) < 0) {
+                    min = id;
+                }
 
-            if (this.compare(id, max) > 0) {
-                max = id;
+                if (this.compare(id, max) > 0) {
+                    max = id;
+                }
             }
         }
 
         return { isFirst: this.isFirstPage(documents, min), documents, isLast: this.isLastPage(documents, max) };
     }
 
-    private getPreviousPage(next: AASDocumentId, limit: number): AASPage {
+    private async  getPreviousPage(next: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
         let documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
@@ -180,25 +187,27 @@ export class LowIndex extends AASIndex {
         let min = this.getId(this.db.data.documents[0]);
         let max = min;
         for (const document of this.db.data.documents) {
-            const id = this.getId(document);
-            if (this.compare(next, id) > 0) {
-                const index = documents.findIndex(item => this.compare(this.getId(item), id) < 0);
-                if (index >= 0) {
-                    documents.splice(index, 0, document);
-                    if (documents.length > limit) {
-                        documents.splice(limit);
+            if (!filter || await filter.do(document)) {
+                const id = this.getId(document);
+                if (this.compare(next, id) > 0) {
+                    const index = documents.findIndex(item => this.compare(this.getId(item), id) < 0);
+                    if (index >= 0) {
+                        documents.splice(index, 0, document);
+                        if (documents.length > limit) {
+                            documents.splice(limit);
+                        }
+                    } else if (documents.length < limit) {
+                        documents.push(document);
                     }
-                } else if (documents.length < limit) {
-                    documents.push(document);
                 }
-            }
 
-            if (this.compare(id, min) < 0) {
-                min = id;
-            }
+                if (this.compare(id, min) < 0) {
+                    min = id;
+                }
 
-            if (this.compare(id, max) > 0) {
-                max = id;
+                if (this.compare(id, max) > 0) {
+                    max = id;
+                }
             }
         }
 
@@ -207,7 +216,7 @@ export class LowIndex extends AASIndex {
         return { isFirst: this.isFirstPage(documents, min), documents, isLast: this.isLastPage(documents, next) };
     }
 
-    private getLastPage(limit: number): AASPage {
+    private async getLastPage(limit: number, filter?: AASFilter): Promise<AASPage> {
         let documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
@@ -216,29 +225,31 @@ export class LowIndex extends AASIndex {
         let max = this.getId(this.db.data.documents[0]);
         let min = max;
         for (const document of this.db.data.documents) {
-            const id = this.getId(document);
-            let isLower: boolean;
-            if (this.compare(id, max) > 0) {
-                max = id;
-                isLower = true;
-            } else {
-                isLower = this.compare(max, id) >= 0;
-            }
-
-            if (isLower) {
-                const index = documents.findIndex(item => this.compare(this.getId(item), id) < 0);
-                if (index >= 0) {
-                    documents.splice(index, 0, document);
-                    if (documents.length > limit) {
-                        documents.splice(limit);
-                    }
-                } else if (documents.length < limit) {
-                    documents.push(document);
+            if (!filter || await filter.do(document)) {
+                const id = this.getId(document);
+                let isLower: boolean;
+                if (this.compare(id, max) > 0) {
+                    max = id;
+                    isLower = true;
+                } else {
+                    isLower = this.compare(max, id) >= 0;
                 }
-            }
-            
-            if (this.compare(id, min) < 0) {
-                min = id;
+
+                if (isLower) {
+                    const index = documents.findIndex(item => this.compare(this.getId(item), id) < 0);
+                    if (index >= 0) {
+                        documents.splice(index, 0, document);
+                        if (documents.length > limit) {
+                            documents.splice(limit);
+                        }
+                    } else if (documents.length < limit) {
+                        documents.push(document);
+                    }
+                }
+
+                if (this.compare(id, min) < 0) {
+                    min = id;
+                }
             }
         }
 

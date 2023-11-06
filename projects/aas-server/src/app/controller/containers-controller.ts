@@ -32,53 +32,53 @@ export class ContainersController extends ControllerBase {
     }
 
     /**
-     * @summary Gets all AAS documents (no content) of the specified AAS container.
-     * @param url The AAS container URL (Base64Url encoded).
-     * @returns All AAS documents ot the specified AAS container.
-     */
-    @Get('{url}/documents')
-    @Security('bearerAuth', ['guest'])
-    @OperationId('getDocuments')
-    public async getDocuments(@Path() url: string): Promise<AASDocument[]> {
-        try {
-            this.logger.start('getDocuments');
-            return Promise.resolve([]);
-            //return await this.aasProvider.getDocumentsAsync(decodeBase64Url(url));
-        } finally {
-            this.logger.stop();
-        }
-    }
-
-    /**
      * @summary Downloads an AAS document from the specified AAS container.
      * @param url The AAS container URL (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
-     * @returns A readable stream.
+     * @returns The AAS document.
      */
     @Get('{url}/documents/{id}')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
-    public async getDocument(@Path() url: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
+    public async getDocument(@Path() url: string, @Path() id: string): Promise<AASDocument> {
         try {
             this.logger.start('getDocument');
-            return await this.aasProvider.getDocumentAsync(decodeBase64Url(url), decodeBase64Url(id));
+            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id), decodeBase64Url(url));
         } finally {
             this.logger.stop();
         }
     }
 
     /**
-     * @summary Uploads one or more AAS documents to the specified AAS container.
+     * @summary Downloads an AASX package from the specified AAS container.
+     * @param url The AAS container URL (Base64Url encoded).
+     * @param id The AAS identifier (Base64Url encoded).
+     * @returns A readable stream.
+     */
+    @Get('{url}/packages/{id}')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getPackage')
+    public async getPackage(@Path() url: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
+        try {
+            this.logger.start('getDocument');
+            return await this.aasProvider.getPackageAsync(decodeBase64Url(url), decodeBase64Url(id));
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Uploads one or more AASX packages to the specified AAS container.
      * @param url The AAS container URL (Base64Url encoded).
      * @param files The AAS Document.
      */
-    @Post('{url}/documents')
+    @Post('{url}/packages')
     @Security('bearerAuth', ['editor'])
-    @OperationId('addDocuments')
-    public async addDocuments(@Path() url: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
+    @OperationId('addPackages')
+    public async addPackages(@Path() url: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
         try {
-            this.logger.start('addDocuments');
-            await this.aasProvider.addDocumentsAsync(decodeBase64Url(url), files);
+            this.logger.start('addPackages');
+            await this.aasProvider.addPackagesAsync(decodeBase64Url(url), files);
         } finally {
             this.logger.stop();
         }

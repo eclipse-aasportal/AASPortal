@@ -10,8 +10,6 @@ import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 export interface StartState {
     viewMode: ViewMode;
-    reverse: boolean;
-    column: string | null;
     filter: string;
 }
 

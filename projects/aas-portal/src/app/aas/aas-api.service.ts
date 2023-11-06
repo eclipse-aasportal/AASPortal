@@ -23,6 +23,20 @@ export class AASApiService {
     }
 
     /**
+     * Gets the AAS document with the specified identifier.
+     * @param id The AAS identifier.
+     * @param url The AAS container URL.
+     * @returns The requested AAS document.
+     */
+    public getDocument(id: string, url?: string): Observable<AASDocument> {
+        if (url) {
+            return this.http.get<AASDocument>(`/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`);
+        }
+
+        return this.http.get<AASDocument>(`/api/v1/documents/${encodeBase64Url(id)}`);
+    }
+
+    /**
      * Gets the templates.
      * @returns An array of `TemplateDescriptor` items.
      */
@@ -38,7 +52,7 @@ export class AASApiService {
         const formData = new FormData();
         formData.append('content', new Blob([JSON.stringify(document.content)]));
         return this.http.put<string[]>(
-                `/api/v1/containers/${encodeBase64Url(document.container)}/documents/${encodeBase64Url(document.id)}`,
-                formData);
+            `/api/v1/containers/${encodeBase64Url(document.container)}/documents/${encodeBase64Url(document.id)}`,
+            formData);
     }
 }

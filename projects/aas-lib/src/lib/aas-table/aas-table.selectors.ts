@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { createSelector } from '@ngrx/store';
-import { AASCursor, AASDocument } from 'common';
+import { AASDocument } from 'common';
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
-import { ViewMode } from '../types/view-mode';
 
 const getRows = (state: AASTableFeatureState) => state.aasTable.rows;
 const getState = (state: AASTableFeatureState) => state.aasTable;
@@ -29,16 +28,7 @@ export const selectSomeSelections = createSelector(
     });
 
 export const selectRows = createSelector(getState, state => {
-    if (state.viewMode === ViewMode.List) {
         return state.rows;
-    } else {
-        const rows: AASTableRow[] = [];
-        for (const root of state.rows.filter(row => row.level === 0)) {
-            rows.push(...root.getExpanded(state.rows));
-        }
-
-        return rows;
-    }
 });
 
 export const selectIsFirstPage = createSelector(

@@ -22,12 +22,19 @@ export class AASTableApiService {
     /**
      * Returns a page of documents from the specified cursor.
      * @param cursor The current cursor.
+     * @param filter A filter expression.
+     * @param language The language to used for the filter.
      * @returns The document page.
      */
-    public getDocuments(cursor: AASCursor, filter?: string): Observable<AASPage> {
-        return this.http.get<AASPage>(filter
-            ? `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}&filter=${encodeBase64Url(filter)}`
-            : `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`);
+    public getDocuments(cursor: AASCursor, filter?: string, language?: string): Observable<AASPage> {
+        let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
+        if (filter) {
+            url += `&filter=${encodeBase64Url(filter)}`;
+            if (language) {
+                url += `&language=${language}`;
+            }
+        }
+        return this.http.get<AASPage>(url);
     }
 
     /**

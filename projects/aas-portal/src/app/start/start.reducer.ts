@@ -13,8 +13,6 @@ import { StartState } from './start.state';
 
 const initialState: StartState = {
     viewMode: ViewMode.List,
-    reverse: false,
-    column: null,
     filter: ''
 };
 

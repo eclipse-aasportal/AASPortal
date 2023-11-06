@@ -17,6 +17,7 @@ import * as AASTableSelectors from './aas-table.selectors';
 import { AASTableApiService } from './aas-table-api.service';
 import { AASTableFeatureState } from './aas-table.state';
 import { AuthService } from '../auth/auth.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable()
 export class AASTableEffects {
@@ -25,6 +26,7 @@ export class AASTableEffects {
     constructor(
         private readonly actions: Actions,
         store: Store,
+        private readonly translate: TranslateService,
         private readonly api: AASTableApiService,
         private readonly auth: AuthService
     ) {
@@ -42,57 +44,65 @@ export class AASTableEffects {
                         return EMPTY;
                     }
 
-                    return this.api.getDocuments({ previous: null, limit: state.limit });
+                    return this.api.getDocuments({ previous: null, limit: 10 });
                 }),
                 map(page => AASTableActions.setPage({ page })))));
     });
 
     public getFirstPage = createEffect(() => {
         return this.actions.pipe(
-            ofType(AASTableActions.AASTableActionType.GET_FIRST_PAGE),
-            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
-                first(),
-                mergeMap(state => this.api.getDocuments({ previous: null, limit: state.limit })),
-                map(page => AASTableActions.setPage({ page })))));
+            ofType<AASTableActions.GetPageAction>(AASTableActions.AASTableActionType.GET_FIRST_PAGE),
+            exhaustMap(action => this.api.getDocuments(
+                { previous: null, limit: action.limit },
+                action.filter,
+                this.translate.currentLang).pipe(
+                    map(page => AASTableActions.setPage({ page })))));
     });
 
     public getLastPage = createEffect(() => {
         return this.actions.pipe(
-            ofType(AASTableActions.AASTableActionType.GET_LAST_PAGE),
-            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
-                first(),
-                mergeMap(state => this.api.getDocuments({ next: null, limit: state.limit })),
-                map(page => AASTableActions.setPage({ page })))));
+            ofType<AASTableActions.GetPageAction>(AASTableActions.AASTableActionType.GET_LAST_PAGE),
+            exhaustMap(action => this.api.getDocuments(
+                { next: null, limit: action.limit },
+                action.filter,
+                this.translate.currentLang).pipe(
+                    map(page => AASTableActions.setPage({ page })))));
     });
 
     public getNextPage = createEffect(() => {
         return this.actions.pipe(
-            ofType(AASTableActions.AASTableActionType.GET_NEXT_PAGE),
-            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
+            ofType<AASTableActions.GetPageAction>(AASTableActions.AASTableActionType.GET_NEXT_PAGE),
+            exhaustMap(action => this.store.select(AASTableSelectors.selectState).pipe(
                 first(),
                 mergeMap(state => {
                     if (state.rows.length === 0) return EMPTY;
 
-                    return this.api.getDocuments({
-                        next: this.getId(state.rows[state.rows.length - 1].document),
-                        limit: state.limit
-                    });
+                    return this.api.getDocuments(
+                        {
+                            next: this.getId(state.rows[state.rows.length - 1].document),
+                            limit: action.limit
+                        },
+                        action.filter,
+                        this.translate.currentLang);
                 }),
                 map(page => AASTableActions.setPage({ page })))));
     });
 
     public getPreviousPage = createEffect(() => {
         return this.actions.pipe(
-            ofType(AASTableActions.AASTableActionType.GET_PREVIOUS_PAGE),
-            exhaustMap(() => this.store.select(AASTableSelectors.selectState).pipe(
+            ofType<AASTableActions.GetPageAction>(AASTableActions.AASTableActionType.GET_PREVIOUS_PAGE),
+            exhaustMap(action => this.store.select(AASTableSelectors.selectState).pipe(
                 first(),
                 mergeMap(state => {
                     if (state.rows.length === 0) return EMPTY;
 
-                    return this.api.getDocuments({
-                        previous: this.getId(state.rows[0].document),
-                        limit: state.limit
-                    });
+                    return this.api.getDocuments(
+                        {
+                            previous: this.getId(state.rows[0].document),
+                            limit: action.limit
+                        },
+                        action.filter,
+                        this.translate.currentLang);
                 }),
                 map(page => AASTableActions.setPage({ page })))));
     });

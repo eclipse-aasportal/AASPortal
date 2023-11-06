@@ -63,6 +63,8 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public readonly filter: Observable<string>;
 
+    public readonly limit = of(5);
+
     public workspaces: AASWorkspace[] = [];
 
     public allAvailable = true;

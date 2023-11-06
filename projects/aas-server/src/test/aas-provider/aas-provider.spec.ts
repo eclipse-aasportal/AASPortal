@@ -167,7 +167,7 @@ describe.skip('AASProvider', function () {
             }));
 
             resourceFactory.create.mockReturnValue(source);
-            await expect(aasProvider.getDocumentAsync(
+            await expect(aasProvider.getPackageAsync(
                 'http://customer.com/aas/9175_7013_7091_9168',
                 'file:///samples')).resolves.toBeDefined();
         });
@@ -198,7 +198,7 @@ describe.skip('AASProvider', function () {
             aasPackage.createDocumentAsync.mockReturnValue(new Promise<AASDocument>(resolve => resolve(sampleDocument)));
             source.postPackageAsync.mockReturnValue(new Promise<AASPackage>(resolve => resolve(aasPackage)));
             resourceFactory.create.mockReturnValue(source);
-            await expect(aasProvider.addDocumentsAsync(
+            await expect(aasProvider.addPackagesAsync(
                 'file:///samples',
                 [createSpyObj<Express.Multer.File>(['buffer'])])).resolves.toBeUndefined();
         });

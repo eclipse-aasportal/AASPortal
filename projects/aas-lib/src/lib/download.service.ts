@@ -52,7 +52,7 @@ export class DownloadService {
      */
     public downloadDocument(url: string, id: string, name: string): Observable<void> {
         return this.http.get(
-            `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`,
+            `/api/v1/containers/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`,
             {
                 responseType: 'blob'
             }).pipe(map(blob => {
@@ -78,7 +78,7 @@ export class DownloadService {
         }
 
         return this.http.post(
-            `/api/v1/containers/${encodeBase64Url(url)}/documents`,
+            `/api/v1/containers/${encodeBase64Url(url)}/packages`,
             data,
             {
                 reportProgress: true,

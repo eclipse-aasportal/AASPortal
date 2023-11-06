@@ -7,9 +7,7 @@
  *****************************************************************************/
 
 import { trim, noop } from 'lodash-es';
-import { AASTableRow } from './aas-table.state';
-import { TranslateService } from '@ngx-translate/core';
-import { normalize } from '../convert';
+import { normalize } from 'path';
 import {
     AASDocument,
     getModelTypeFromAbbreviation,
@@ -30,35 +28,36 @@ interface Query {
     value?: string | boolean;
 }
 
-export class AASTableFilter {
-    constructor(private readonly translate: TranslateService) {
+interface OrExpression {
+    andExpressions: string[];
+}
+
+interface Expression {
+    orExpressions: OrExpression[]
+}
+
+export class AASFilter {
+    private readonly expression: Expression;
+
+    constructor(searchText: string, private readonly language: string) {
+        this.expression = { orExpressions: this.splitOr(searchText) };
     }
 
-    public do(input: AASTableRow[], searchText: string): AASTableRow[] {
-        const output: AASTableRow[] = [];
-        let start = false;
+    public do(input: AASDocument): boolean {
+        let output = false;
         try {
-            const set = new Set<AASTableRow>();
-            if (typeof searchText === 'string') {
-                for (const or of this.splitOr(searchText)) {
-                    let rows = [...input];
-                    for (const and of this.splitAnd(or)) {
-                        if (and.length >= 3) {
-                            start = true;
-                            const expression = and.toLocaleLowerCase(this.translate.currentLang);
-                            if (expression.startsWith('#')) {
-                                rows = [...this.where(rows, this.parseExpression(expression))];
-                            } else {
-                                rows = [...this.filter(rows, expression)];
-                            }
+            for (const or of this.expression.orExpressions) {
+                for (const expression of or.andExpressions) {
+                    if (expression.length >= 3) {
+                        if (expression.startsWith('#')) {
+                            output = this.match(input, this.parseExpression(expression));
+                        } else {
+                            output = this.contains(input, expression);
                         }
                     }
 
-                    for (const row of rows) {
-                        if (!set.has(row)) {
-                            output.push(row);
-                            set.add(row);
-                        }
+                    if (!output) {
+                        break;
                     }
                 }
             }
@@ -66,25 +65,20 @@ export class AASTableFilter {
             noop();
         }
 
-        return start ? output : input;
+        return output;
     }
 
-    private splitOr(s: string): string[] {
-        return s.split('||').map(item => item.trim());
+    private splitOr(s: string): OrExpression[] {
+        return s.split('||').map(item => ({ andExpressions: this.splitAnd(item) }));
     }
 
     private splitAnd(s: string): string[] {
-        return s.split('&&').map(item => item.trim());
+        return s.split('&&').map(item => item.trim().toLocaleLowerCase(this.language));
     }
 
-    private *filter(rows: AASTableRow[], expression: string): Generator<AASTableRow> {
-        for (const row of rows) {
-            if (row.type.toLocaleLowerCase(this.translate.currentLang).indexOf(expression) >= 0 ||
-                row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(expression) >= 0 ||
-                row.id.toLocaleLowerCase(this.translate.currentLang).indexOf(expression) >= 0) {
-                yield row;
-            }
-        }
+    private contains(document: AASDocument, expression: string): boolean {
+        return document.idShort.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
+            document.id.toLocaleLowerCase(this.language).indexOf(expression) >= 0;
     }
 
     private parseExpression(expression: string): Query | undefined {
@@ -166,16 +160,8 @@ export class AASTableFilter {
         }
     }
 
-    private *where(rows: AASTableRow[], query: Query | undefined): Generator<AASTableRow> {
-        for (const row of rows) {
-            if (!query || this.match(row.document, query)) {
-                yield row;
-            }
-        }
-    }
-
-    private match(document: AASDocument, query: Query): boolean {
-        if (document.content) {
+    private match(document: AASDocument, query: Query | undefined): boolean {
+        if (query && document.content) {
             if (document.content.assetAdministrationShells.some(shell => this.any(shell, query))) {
                 return true;
             }
@@ -251,18 +237,18 @@ export class AASTableFilter {
                     let min: number;
                     let max: number;
                     if (isDate) {
-                        min = parseDate(b.substring(0, index).trim(), this.translate.currentLang)?.getTime() ?? 0;
-                        max = parseDate(b.substring(index + 3).trim(), this.translate.currentLang)?.getTime() ?? 0;
+                        min = parseDate(b.substring(0, index).trim(), this.language)?.getTime() ?? 0;
+                        max = parseDate(b.substring(index + 3).trim(), this.language)?.getTime() ?? 0;
                     } else {
-                        min = parseNumber(b.substring(0, index).trim(), this.translate.currentLang);
-                        max = parseNumber(b.substring(index + 3).trim(), this.translate.currentLang);
+                        min = parseNumber(b.substring(0, index).trim(), this.language);
+                        max = parseNumber(b.substring(index + 3).trim(), this.language);
                     }
 
                     return typeof min === 'number' && typeof max === 'number' && a >= min && a <= max;
                 } else {
                     const d = isDate
-                        ? parseDate(b, this.translate.currentLang)?.getTime() ?? 0
-                        : parseNumber(b, this.translate.currentLang);
+                        ? parseDate(b, this.language)?.getTime() ?? 0
+                        : parseNumber(b, this.language);
 
                     if (typeof d !== 'number') {
                         return false;
@@ -289,7 +275,7 @@ export class AASTableFilter {
         }
 
         return this.containsString(convertToString(a), b) ||
-            this.containsString(convertToString(a, this.translate.currentLang), b);
+            this.containsString(convertToString(a, this.language), b);
     }
 
     private containsString(a: string, b?: string): boolean {

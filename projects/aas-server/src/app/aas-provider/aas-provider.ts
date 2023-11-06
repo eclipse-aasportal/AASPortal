@@ -41,6 +41,7 @@ import { AASServerConfiguration, createEndpoint, getEndpointName, getEndpointTyp
 import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
+import { AASFilter } from './aas-filter.js';
 
 @singleton()
 export class AASProvider {
@@ -108,12 +109,25 @@ export class AASProvider {
         throw new Error('Not implemented.')
     }
 
-    public async getDocumentsAsync(cursor: AASCursor, filter?: string): Promise<AASPage> {
+    public async getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
+        if (filter) {
+            return this.index.getDocuments(cursor, new AASFilter(filter, language ?? 'en'));
+        }
+
         return this.index.getDocuments(cursor);
     }
 
-    public getDocument(id: string, url?: string): AASDocument {
-        throw new Error('Not implemented.')
+    public async getDocumentAsync(id: string, url?: string): Promise<AASDocument> {
+        const document = await this.index.get(url, id);
+        const source = this.resourceFactory.create(document.container);
+        try {
+            await source.openAsync();
+            document.content = await source.createPackage(document.endpoint.address).readEnvironmentAsync();
+        } finally {
+            await source.closeAsync();
+        }
+
+        return document;
     }
 
     public async getContentAsync(url: string, id: string): Promise<aas.Environment | undefined> {
@@ -286,7 +300,7 @@ export class AASProvider {
      * @param url The source URL.
      * @returns A readable stream.
      */
-    public async getDocumentAsync(id: string, url: string): Promise<NodeJS.ReadableStream> {
+    public async getPackageAsync(id: string, url: string): Promise<NodeJS.ReadableStream> {
         const document = await this.index.get(url, id);
         const source = this.resourceFactory.create(document.container);
         try {
@@ -302,7 +316,7 @@ export class AASProvider {
      * @param files The AASX package file.
      * @param url The destination URL.
      */
-    public async addDocumentsAsync(url: string, files: Express.Multer.File[]): Promise<void> {
+    public async addPackagesAsync(url: string, files: Express.Multer.File[]): Promise<void> {
         throw new Error('Not implemented.');
         // if (!this.chain.hasContainer(url)) {
         //     throw new ApplicationError(
