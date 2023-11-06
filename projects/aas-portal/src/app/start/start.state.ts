@@ -11,6 +11,7 @@ import { ViewMode } from 'projects/aas-lib/src/public-api';
 export interface StartState {
     viewMode: ViewMode;
     filter: string;
+    limit: number;
 }
 
 export interface State {

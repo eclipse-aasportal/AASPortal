@@ -12,7 +12,8 @@ import { ViewMode } from 'projects/aas-lib/src/public-api';
 export enum StartActionType {
     SET_VIEW_MODE = '[Start] set View Mode',
     APPLY_FILTER = '[Start] apply filter',
-    SET_FILTER = '[Start] set filter'
+    SET_FILTER = '[Start] set filter',
+    SET_LIMIT = '[Start] set limit',
 }
 
 export const setViewMode = createAction(
@@ -22,3 +23,7 @@ export const setViewMode = createAction(
 export const setFilter = createAction(
     StartActionType.SET_FILTER,
     props<{ filter: string }>());
+
+export const setLimit = createAction(
+    StartActionType.SET_FILTER,
+    props<{ limit: number }>());

@@ -79,7 +79,7 @@
     <div class="input-group flex-grow-1 me-2" [hidden]="viewMode === 'tree'">
         <div class="input-group-text"><i class="bi bi-filter"></i></div>
         <input #textInput type="text" class="form-control" [value]="filter | async"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="applyFilter(textInput.value)"
-            (keydown.enter)="applyFilter(textInput.value)" [disabled]="viewMode === 'tree'">
+            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
+            (keydown.enter)="setFilter(textInput.value)" [disabled]="viewMode === 'tree'">
     </div>
 </ng-template>

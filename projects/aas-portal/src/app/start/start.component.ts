@@ -22,7 +22,7 @@ import * as StartActions from './start.actions';
 import { State } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { getEndpointType } from '../configuration';
-import { selectFilter, selectViewMode } from './start.selectors';
+import { selectFilter, selectViewMode, selectLimit } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
 
 @Component({
@@ -51,6 +51,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     ) {
         this.store = store as Store<State>;
         this.filter = this.store.select(selectFilter);
+        this.limit = this.store.select(selectLimit);
     }
 
     @ViewChild('aasTable')
@@ -63,7 +64,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public readonly filter: Observable<string>;
 
-    public readonly limit = of(5);
+    public readonly limit: Observable<number>;
 
     public workspaces: AASWorkspace[] = [];
 
@@ -278,8 +279,12 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    public applyFilter(filter: string): void {
+    public setFilter(filter: string): void {
         this.store.dispatch(StartActions.setFilter({ filter }));
+    }
+
+    public setLimit(limit: number): void {
+        this.store.dispatch(StartActions.setLimit({ limit }));
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {

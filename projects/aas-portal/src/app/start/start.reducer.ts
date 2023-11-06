@@ -13,6 +13,7 @@ import { StartState } from './start.state';
 
 const initialState: StartState = {
     viewMode: ViewMode.List,
+    limit: 10,
     filter: ''
 };
 
@@ -21,6 +22,10 @@ export const startReducer = createReducer(
     on(
         StartActions.setFilter,
         (state, { filter }) => setFilter(state, filter)
+    ),
+    on(
+        StartActions.setLimit,
+        (state, { limit }) => setLimit(state, limit)
     ),
     on(
         StartActions.setViewMode,
@@ -34,4 +39,8 @@ function setViewMode(state: StartState, viewMode: ViewMode): StartState {
 
 function setFilter(state: StartState, filter: string): StartState {
     return { ...state, filter };
+}
+
+function setLimit(state: StartState, limit: number): StartState {
+    return { ...state, limit };
 }

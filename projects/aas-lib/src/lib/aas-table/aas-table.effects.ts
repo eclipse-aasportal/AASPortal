@@ -22,6 +22,7 @@ import { TranslateService } from '@ngx-translate/core';
 @Injectable()
 export class AASTableEffects {
     private readonly store: Store<AASTableFeatureState>;
+    private readonly defaultLimit = 10;
 
     constructor(
         private readonly actions: Actions,
@@ -44,7 +45,7 @@ export class AASTableEffects {
                         return EMPTY;
                     }
 
-                    return this.api.getDocuments({ previous: null, limit: 10 });
+                    return this.api.getDocuments({ previous: null, limit: this.defaultLimit });
                 }),
                 map(page => AASTableActions.setPage({ page })))));
     });
