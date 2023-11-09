@@ -12,7 +12,7 @@ and orientation.
 We pledge to act and interact in ways that contribute to an open, welcoming,
 diverse, inclusive, and healthy community.
 
-## Our Standards
+## Our Standardsbnm,
 
 Examples of behavior that contributes to a positive environment for our
 community include:

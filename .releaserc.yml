@@ -1,14 +1,12 @@
 {
-  "branches": ["main", "development"],
+  "branches": ["main", {"name": "development", "prerelease": true}, {"name": "staging", "prerelease": true}],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     ["@semantic-release/npm", {
       "npmPublish": false
     }],
-    ["@semantic-release/gitlab", {
-      "gitlabUrl": "https://gitlab.cc-asp.fraunhofer.de/"
-    }],
+    ["@semantic-release/github"],
     ["@semantic-release/git", {
       "assets": ["package.json"],
       "message": "chore(Release): ${nextRelease.version}\n\n${nextRelease.notes}"
