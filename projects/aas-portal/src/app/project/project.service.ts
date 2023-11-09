@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { AASDocument, AASContainer, WebSocketData, AASServerMessage, AASWorkspace } from 'common';
-import { Observable, of, mergeMap, catchError, skipWhile, first } from 'rxjs';
+import { AASDocument, AASContainer, WebSocketData, AASServerMessage, AASWorkspace, AASEndpoint } from 'common';
+import { Observable, of, mergeMap, catchError } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
 import { AuthService, LogType, NotifyService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
@@ -98,7 +98,7 @@ export class ProjectService {
                         return of(d);
                     }
 
-                    return this.api.getContent(d.id, d.container).pipe(
+                    return this.api.getContent(d.id, d.endpoint.url).pipe(
                         mergeMap(content => {
                             d.content = content;
                             return of(d);
@@ -112,8 +112,8 @@ export class ProjectService {
      * @param name Name of the endpoint.
      * @param url The endpoint URL
      */
-    public addEndpoint(name: string, url: string): Observable<void> {
-        return this.api.addEndpoint(name, url);
+    public addEndpoint(endpoint: AASEndpoint): Observable<void> {
+        return this.api.addEndpoint(endpoint);
     }
 
     /**
@@ -146,7 +146,7 @@ export class ProjectService {
      * @returns An observable.
      */
     public deleteDocument(document: AASDocument): Observable<void> {
-        return this.api.deleteDocument(document.id, document.container);
+        return this.api.deleteDocument(document.id, document.endpoint.url);
     }
 
     private subscribeWorkspaceChanged = (): void => {
@@ -185,16 +185,16 @@ export class ProjectService {
                     this.documentUpdated(data.document!);
                     break;
                 case 'ContainerAdded':
-                    this.containerAdded(data.endpoint!, data.container!);
+                    this.containerAdded(data.container!);
                     break;
                 case 'ContainerRemoved':
-                    this.containerRemoved(data.endpoint!, data.container!);
+                    this.containerRemoved(data.container!);
                     break;
                 case 'EndpointAdded':
                     this.endpointAdded(data.endpoint!);
                     break;
                 case 'EndpointRemoved':
-                    this.endpointRemoved(data.endpoint!);
+                    this.endpointRemoved(data.endpoint!.name);
                     break;
                 case 'Reset':
                     this.store.dispatch(ProjectActions.initialize());
@@ -217,27 +217,23 @@ export class ProjectService {
         this.store.dispatch(ProjectActions.documentUpdated({ document }));
     }
 
-    private endpointAdded(endpoint: string): void {
+    private endpointAdded(endpoint: AASEndpoint): void {
         this.store.dispatch(ProjectActions.endpointAdded({ endpoint }));
     }
 
-    private endpointRemoved(endpoint: string): void {
-        this.store.dispatch(ProjectActions.endpointRemoved({ endpoint }));
+    private endpointRemoved(name: string): void {
+        this.store.dispatch(ProjectActions.endpointRemoved({ endpoint: name }));
     }
 
-    private containerAdded(endpoint: string, container: AASContainer): void {
-        const url = new URL(endpoint);
-        const name = getEndpointName(url);
-        if (name) {
-            this.store.dispatch(ProjectActions.addContainer({ name, container }));
+    private containerAdded(container: AASContainer): void {
+        if (container.name) {
+            this.store.dispatch(ProjectActions.addContainer({ name: container.name, container }));
         }
     }
 
-    private containerRemoved(endpoint: string, container: AASContainer): void {
-        const url = new URL(endpoint);
-        const name = getEndpointName(url);
-        if (name) {
-            this.store.dispatch(ProjectActions.removeContainer({ name, container }));
+    private containerRemoved(container: AASContainer): void {
+        if (container.name) {
+            this.store.dispatch(ProjectActions.removeContainer({ name: container.name, container }));
         }
     }
 }

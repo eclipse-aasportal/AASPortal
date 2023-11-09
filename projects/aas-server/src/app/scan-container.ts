@@ -32,7 +32,7 @@ export class ScanContainer {
     public async scanAsync(data: ScanContainerData): Promise<void> {
         this.data = data;
         let documents: AASDocument[];
-        const scan = this.resourceScanFactory.create(data.container.url);
+        const scan = this.resourceScanFactory.create(data.container);
         try {
             scan.on('scanned', this.onDocumentScanned);
             scan.on('error', this.onError);

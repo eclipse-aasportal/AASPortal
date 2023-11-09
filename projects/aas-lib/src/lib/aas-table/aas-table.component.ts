@@ -129,7 +129,7 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
     public open(row: AASTableRow): void {
         const query: AASQuery = {
             id: row.document.id,
-            url: this.getUrl(row.document.container)
+            url: row.document.endpoint.url,
         };
 
         if (this._filter) {
@@ -140,19 +140,8 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
         this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
     }
 
-    public getFormatIcon(row: AASTableRow): string {
-        switch (row.type) {
-            case 'opc':
-                return '/assets/resources/opcua.32.png';
-            case 'http':
-                return '/assets/resources/aas.32.png';
-            default:
-                return '/assets/resources/aasx.32.png';
-        }
-    }
-
     public getToolTip(row: AASTableRow): string {
-        return `${row.document.container}, ${row.document.endpoint.address}`;
+        return `${row.document.endpoint.url}, ${row.document.address}`;
     }
 
     public toggleSelected(row: AASTableRow): void {
@@ -161,9 +150,5 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
 
     public toggleSelections(): void {
         this.store.dispatch(AASTableActions.toggleSelections());
-    }
-
-    private getUrl(url: string): string {
-        return url.split('?')[0];
     }
 }

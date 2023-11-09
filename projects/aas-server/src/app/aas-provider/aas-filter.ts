@@ -44,28 +44,32 @@ export class AASFilter {
     }
 
     public do(input: AASDocument): boolean {
-        let output = false;
+        let result = false;
         try {
             for (const or of this.expression.orExpressions) {
                 for (const expression of or.andExpressions) {
                     if (expression.length >= 3) {
                         if (expression.startsWith('#')) {
-                            output = this.match(input, this.parseExpression(expression));
+                            result = this.match(input, this.parseExpression(expression));
                         } else {
-                            output = this.contains(input, expression);
+                            result = this.contains(input, expression);
                         }
                     }
 
-                    if (!output) {
+                    if (!result) {
                         break;
                     }
+                }
+
+                if (result) {
+                    break;
                 }
             }
         } catch (error) {
             noop();
         }
 
-        return output;
+        return result;
     }
 
     private splitOr(s: string): OrExpression[] {

@@ -44,7 +44,7 @@ export class AASTreeApiService {
         return new Promise<aas.Operation>((result, reject) => {
             let data: aas.Operation;
             this.http.post<aas.Operation>(
-                `/api/v1/containers/${encodeBase64Url(document.container)}/documents/${encodeBase64Url(document.id)}`,
+                `/api/v1/containers/${encodeBase64Url(document.endpoint.url)}/documents/${encodeBase64Url(document.id)}`,
                 operation).subscribe({
                     next: (value) => data = value,
                     complete: () => result(data),

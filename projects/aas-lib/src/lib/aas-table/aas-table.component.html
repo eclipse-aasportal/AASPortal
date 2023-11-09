@@ -25,18 +25,19 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let row of rows | async">
+        <tr *ngFor="let row of rows | async" class="align-middle">
             <td>
                 <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)" [checked]="row.selected"
                     [name]="row.name" />
             </td>
             <td>
-                <img class="img-fluid" width="24" height="24" [src]="getFormatIcon(row)" alt="" />
+                <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
             </td>
             <td>
                 <a class="text-nowrap" href="javascript:void(0);" [name]="row.name" (click)="open(row)">{{row.name |
                     max:60}}</a>
             <td>
+                <div>{{row.endpoint}}</div>
                 <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
             </td>
         </tr>
@@ -70,7 +71,7 @@
                     </a>
                     <div *ngIf="row.isLeaf" class="text-muted wh-4"></div>
                     <div class="ms-2">
-                        <img class="img-fluid" width="24" height="24" [src]="getFormatIcon(row)" alt="" />
+                        <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
                     </div>
                     <div class="ms-2 flex-grow-1">
                         <a class="text-nowrap" href="javascript:void(0);" (click)="open(row)">{{row.name | max:60}}</a>

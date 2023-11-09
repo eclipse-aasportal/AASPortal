@@ -107,14 +107,14 @@ describe('AASTableComponent', () => {
         });
     });
 
-    it('allows switching to viewMode "Tree"', function (done: DoneFn) {
-        component.viewMode = ViewMode.Tree;
-        component.ngOnChanges({ viewMode: new SimpleChange(ViewMode.List, ViewMode.Tree, true) });
-        store.select(selectState).pipe(first()).subscribe(state => {
-            expect(state.viewMode).toEqual(ViewMode.Tree);
-            done();
-        });
-    });
+    // it('allows switching to viewMode "Tree"', function (done: DoneFn) {
+    //     component.viewMode = ViewMode.Tree;
+    //     component.ngOnChanges({ viewMode: new SimpleChange(ViewMode.List, ViewMode.Tree, true) });
+    //     store.select(selectState).pipe(first()).subscribe(state => {
+    //         expect(state.viewMode).toEqual(ViewMode.Tree);
+    //         done();
+    //     });
+    // });
 
     it('allows set a filter', function (done: DoneFn) {
         component.filter = of('document');

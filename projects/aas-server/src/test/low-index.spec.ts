@@ -18,7 +18,7 @@ describe('LowIndex', () => {
     let db: jest.Mocked<Low<Data>>;
 
     function getId(document: AASDocument): AASDocumentId {
-        return { id: document.id, url: document.container.split('?')[0] };
+        return { id: document.id, url: document.endpoint.url };
     }
 
     beforeEach(() => {

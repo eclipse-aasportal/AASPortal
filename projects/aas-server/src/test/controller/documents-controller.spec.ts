@@ -57,7 +57,7 @@ describe('DocumentsController', function () {
                 'getDocumentAsync',
                 'getDocumentsAsync',
                 'addPackagesAsync',
-                'deleteDocumentAsync',
+                'deletePackageAsync',
                 'getDataElementValueAsync',
                 'invoke',
                 'resetAsync'

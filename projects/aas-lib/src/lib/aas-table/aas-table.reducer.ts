@@ -65,9 +65,6 @@ function initList(documents: AASDocument[]): AASTableRow[] {
             const row = new AASTableRow(
                 document,
                 false,
-                document.idShort,
-                document.id,
-                document.endpoint.type,
                 false,
                 false,
                 0,
@@ -198,9 +195,6 @@ function expandRow(state: AASTableState, row: AASTableRow): AASTableState {
     rows[index] = new AASTableRow(
         row.document,
         false,
-        row.name,
-        row.id,
-        row.type,
         true,
         row.isLeaf,
         row.level,
@@ -216,9 +210,6 @@ function collapseRow(state: AASTableState, row: AASTableRow): AASTableState {
     rows[index] = new AASTableRow(
         row.document,
         false,
-        row.name,
-        row.id,
-        row.type,
         false,
         row.isLeaf,
         row.level,
@@ -234,9 +225,6 @@ function toggleSelected(state: AASTableState, row: AASTableRow) {
     rows[index] = new AASTableRow(
         row.document,
         !row.selected,
-        row.name,
-        row.id,
-        row.type,
         row.expanded,
         row.isLeaf,
         row.level,
@@ -255,9 +243,6 @@ function toggleSelections(state: AASTableState) {
             rows[index] = new AASTableRow(
                 row.document,
                 !row.selected,
-                row.name,
-                row.id,
-                row.type,
                 row.expanded,
                 row.isLeaf,
                 row.level,

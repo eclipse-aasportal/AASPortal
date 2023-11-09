@@ -22,7 +22,7 @@ describe('AasxServerV3', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AasxServerV3(logger, 'http://localhost:1234');
+        server = new AasxServerV3(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     describe('resolveNodeId', function () {

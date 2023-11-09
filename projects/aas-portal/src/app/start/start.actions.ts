@@ -25,5 +25,5 @@ export const setFilter = createAction(
     props<{ filter: string }>());
 
 export const setLimit = createAction(
-    StartActionType.SET_FILTER,
+    StartActionType.SET_LIMIT,
     props<{ limit: number }>());

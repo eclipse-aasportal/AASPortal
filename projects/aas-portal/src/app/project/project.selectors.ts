@@ -59,6 +59,6 @@ export const selectDocument = (id: string, url?: string) => createSelector(
         }
 
         return documents.find(item => (item.id === id || item.idShort === id || item.id === decodedId) &&
-            (url == null || equalUrls(item.container, url)));
+            (url == null || equalUrls(item.endpoint.url, url)));
     }
 );

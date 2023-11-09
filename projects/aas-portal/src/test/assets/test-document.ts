@@ -12,7 +12,8 @@ export function createContainer(url: string, documents: AASDocument[]): AASConta
     return {
         documents: documents,
         url: url,
-        name: url
+        name: url,
+        type: 'AasxServer'
     };
 }
 
@@ -27,9 +28,8 @@ export function createDocument(name: string, url= "http://localhost/container1")
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,
-        container: url,
-        endpoint: { address: "", type: "file" },
-        timeStamp: 0,
+        endpoint: { url, name, type: 'AasxServer', version: '3.0' },
+        address: '',
         modified: false,
         readonly: false,
         onlineReady: false,
@@ -43,9 +43,8 @@ export function createDocumentHeader(name: string, url: string): AASDocument {
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,
-        container: url,
-        endpoint: { address: "", type: "file" },
-        timeStamp: 0,
+        endpoint: { url, name, type: 'AasxServer', version: '3.0' },
+        address: '',
         modified: false,
         readonly: false,
         onlineReady: false,

@@ -6,20 +6,33 @@
  *
  *****************************************************************************/
 
-import { AASDocument, EndpointType } from "common";
+import { AASDocument } from 'common';
 
 export class AASTableRow {
     constructor(
         public readonly document: AASDocument,
         public readonly selected: boolean,
-        public readonly name: string,
-        public readonly id: string,
-        public readonly type: EndpointType,
         public readonly expanded: boolean,
         public readonly isLeaf: boolean,
         public readonly level: number,
         public firstChild: number,
         public nextSibling: number) {
+    }
+
+    public get id(): string {
+        return this.document.id;
+    }
+
+    public get name(): string {
+        return this.document.idShort;
+    }
+
+    public get thumbnail(): string {
+        return this.document.thumbnail ?? '/assets/resources/aas.32.png';
+    }
+
+    public get endpoint(): string | null {
+        return this.document.endpoint.name;
     }
 
     public get hasChildren(): boolean {

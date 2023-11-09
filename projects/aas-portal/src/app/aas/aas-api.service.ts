@@ -52,7 +52,7 @@ export class AASApiService {
         const formData = new FormData();
         formData.append('content', new Blob([JSON.stringify(document.content)]));
         return this.http.put<string[]>(
-            `/api/v1/containers/${encodeBase64Url(document.container)}/documents/${encodeBase64Url(document.id)}`,
+            `/api/v1/containers/${encodeBase64Url(document.endpoint.url)}/documents/${encodeBase64Url(document.id)}`,
             formData);
     }
 }

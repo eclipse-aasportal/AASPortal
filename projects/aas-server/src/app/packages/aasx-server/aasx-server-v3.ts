@@ -18,6 +18,7 @@ import { JsonWriter } from '../json-writer.js';
 import { ERRORS } from '../../errors.js';
 import {
     aas,
+    AASEndpoint,
     ApplicationError,
     DifferenceItem,
     getIdShortPath,
@@ -64,9 +65,11 @@ interface PagedResult<T extends aas.Identifiable> {
 }
 
 export class AasxServerV3 extends AasxServer {
-    constructor(logger: Logger, url: string | URL) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string) {
+        super(logger, url, name);
     }
+
+    public override readonly version = '3.0';
 
     public readonly readOnly = false;
 
@@ -107,6 +110,10 @@ export class AasxServerV3 extends AasxServer {
         };
 
         return new JsonReader(this.logger, sourceEnv).readEnvironment();
+    }
+
+    public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+        return this.message.getResponse(this.resolve(`/shells/${encodeBase64Url(id)}/asset-information/thumbnail`));
     }
 
     public async commitAsync(

@@ -1491,13 +1491,8 @@ const content: object = {
 export const sampleDocument: AASDocument = {
     "id": "http://customer.com/aas/9175_7013_7091_9168",
     "idShort": "ExampleMotor",
-    "container": "file:///samples?name=Samples&type=AasxDirectory",
-    "endpoint": {
-        "type": "file",
-        "address": "ExampleMotor.aasx"
-    },
-    "timeStamp": 1675961220599,
-    "modified": false,
+    "endpoint": { url: "file:///samples", name: 'Samples', type: 'AasxDirectory', version: '3.0' },
+    "address": "ExampleMotor.aasx",
     "readonly": false,
     "onlineReady": false,
     "content": content as aas.Environment

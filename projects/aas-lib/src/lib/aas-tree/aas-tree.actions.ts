@@ -9,7 +9,6 @@
 import { createAction, props } from '@ngrx/store';
 import { AASDocument } from 'common';
 import { AASTreeRow, SearchTerm } from './aas-tree.state';
-import { TypedAction } from '@ngrx/store/src/models';
 
 export enum AASTreeActionType {
     UPDATE_ROWS = '[AASTree] Update Rows',

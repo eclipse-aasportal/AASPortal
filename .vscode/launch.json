@@ -29,7 +29,7 @@
                 "WEB_ROOT": "projects/aas-portal/dist",
                 "ASSETS": "projects/aas-server/src/assets",
                 "USER_STORAGE": "mongodb://localhost:27017/aasportal-users",
-                "ENDPOINTS": "[\"file:///samples?name=Samples\"]"
+                "ENDPOINTS": "[\"file:///samples?name=Samples\",\"http://localhost:5001?name=AASXServer&type=AasxServer\"]"
             }
         },
         {

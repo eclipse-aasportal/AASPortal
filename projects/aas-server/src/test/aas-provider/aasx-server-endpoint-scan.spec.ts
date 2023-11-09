@@ -35,7 +35,7 @@ describe('AasxServerEndpointScan', function () {
             scan = new AASXServerEndpointScan(
                 logger,
                 resourceFactory,
-                createEndpoint('http://localhost:1234', 'aasx server').href,
+                createEndpoint('http://localhost:1234', 'aasx server'),
                 []);
 
             socket = createSpyObj<net.Socket>(['on', 'setTimeout', 'end']);
@@ -66,12 +66,12 @@ describe('AasxServerEndpointScan', function () {
         let socket: jest.Mocked<net.Socket>;
 
         beforeEach(function () {
-            const endpoint = createEndpoint('http://localhost:1234', 'aasx server').href;
+            const endpoint = createEndpoint('http://localhost:1234', 'aasx server');
             scan = new AASXServerEndpointScan(
                 logger,
                 resourceFactory,
                 endpoint,
-                [{ name: 'aasx server', url: endpoint }]);
+                [{ ...endpoint }]);
 
             socket = createSpyObj<net.Socket>(['on', 'setTimeout', 'destroy']);
             socket.on.mockImplementation((event, listener) => {

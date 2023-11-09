@@ -79,7 +79,7 @@ function addDocument(
 
 function removeDocument(state: ProjectState, document: AASDocument): ProjectState {
     try {
-        const documents = state.documents.filter(item => item.container !== document.container || item.id !== document.id);
+        const documents = state.documents.filter(item => item.endpoint.url !== document.endpoint.url || item.id !== document.id);
         return { ...state, documents };
     } catch (error) {
         return { ...state, error };
@@ -158,7 +158,7 @@ function removeContainer(state: ProjectState, name: string, container: AASContai
         workspaces[i] = workspace;
 
         if (state.workspace?.name === name) {
-            const documents = state.documents.filter(item => item.container != container.url);
+            const documents = state.documents.filter(item => item.endpoint.url != container.url);
             return { ...state, workspaces, workspace, documents };
         } else {
             return { ...state, workspaces };

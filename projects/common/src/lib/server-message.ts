@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASContainer, AASDocument } from './types.js';
+import { AASContainer, AASDocument, AASEndpoint } from './types.js';
 
 /** Defines the message types. */
 export type AASServerMessageType =
@@ -27,7 +27,7 @@ export interface AASServerMessage {
     /** The container if type `ContainerAdded` and `ContainerRemoved`. */
     container?: AASContainer;
      /** The endpoint if type `ContainerAdded`, `ContainerRemoved`, `EndpointAdded`, `EndpointRemoved`. */
-    endpoint?: string;
+    endpoint?: AASEndpoint;
     /** The document if type `Added`, `Removed` or `Changed` */
     document?: AASDocument;
 }

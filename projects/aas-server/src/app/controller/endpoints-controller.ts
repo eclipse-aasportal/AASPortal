@@ -8,6 +8,7 @@
 
 import { inject, injectable } from 'tsyringe';
 import { Body, Delete, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
+import { AASEndpoint } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
@@ -31,13 +32,13 @@ export class EndpointsController extends ControllerBase {
     /**
      * @summary Adds a new endpoint to the AASServer container configuration.
      * @param name The endpoint name.
-     * @param data The endpoint URL.
+     * @param endpoint The endpoint URL.
      */
     @Post('{name}')
     @Security('bearerAuth', ['editor'])
     @OperationId('addEndpoint')
-    public addEndpoint(@Path() name: string, @Body() data: { url: string }): Promise<void> {
-        return this.aasProvider.addEndpointAsync(name, new URL(data.url))
+    public addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
+        return this.aasProvider.addEndpointAsync(name, endpoint);
     }
 
     /**

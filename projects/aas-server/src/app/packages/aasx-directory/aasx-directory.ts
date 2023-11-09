@@ -20,13 +20,15 @@ import { SocketSubscription } from '../../live/socket-subscription.js';
 export class AasxDirectory extends AASResource {
     private reentry = 0;
 
-    constructor(logger: Logger, url: string | URL, private readonly fileStorage: FileStorage) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string, private readonly fileStorage: FileStorage) {
+        super(logger, url, name);
     }
 
     public get isOpen(): boolean {
         return this.reentry > 0;
     }
+
+    public override readonly version = '';
 
     public readonly readOnly = true;
 
@@ -49,7 +51,7 @@ export class AasxDirectory extends AASResource {
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
             if (!(await this.fileStorage.exists('.'))) {
-                throw new Error(`The directory '${this.baseUrl}' does not exist.`);
+                throw new Error(`The directory '${this.url}' does not exist.`);
             }
 
             ++this.reentry;

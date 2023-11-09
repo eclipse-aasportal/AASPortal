@@ -9,8 +9,7 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { AASEndpointType, stringFormat } from 'common';
-import { createEndpoint } from '../../configuration';
+import { AASEndpoint, AASEndpointType, stringFormat } from 'common';
 
 export interface EndpointItem {
     name: string;
@@ -59,6 +58,8 @@ export class AddEndpointFormComponent {
 
     public name = '';
 
+    public version = '3.0';
+
     public readonly items: EndpointItem[];
 
     public item: EndpointItem;
@@ -77,8 +78,8 @@ export class AddEndpointFormComponent {
         const name = this.validateName();
         const url = this.validateUrl(this.item.value.trim());
         if (name && url) {
-            const type = this.item.type;
-            this.modal.close(createEndpoint(url, { name, type }));
+            const endpoint: AASEndpoint = { url: url.href, name, type: this.item.type, version: this.version };
+            this.modal.close(endpoint);
         }
     }
 

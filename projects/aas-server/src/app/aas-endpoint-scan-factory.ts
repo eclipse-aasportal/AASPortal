@@ -9,7 +9,6 @@
 import { inject, singleton } from 'tsyringe';
 import { AASEndpointScan } from './aas-provider/aas-endpoint-scan.js';
 import { Logger } from './logging/logger.js';
-import { getEndpointType } from './configuration.js';
 import { DirectoryEndpointScan } from './aas-provider/directory-endpoint-scan.js';
 import { AASXServerEndpointScan } from './aas-provider/aasx-server-endpoint-scan.js';
 import { ScanEndpointData } from './aas-provider/worker-data.js';
@@ -28,12 +27,12 @@ export class AASEndpointScanFactory {
     ) { }
 
     public create(data: ScanEndpointData): AASEndpointScan {
-        switch (getEndpointType(data.endpoint)) {
+        switch (data.endpoint.type) {
             case 'AasxDirectory':
                 return new DirectoryEndpointScan(
                     this.logger,
                     data.endpoint,
-                    this.createFileStorage(data.endpoint),
+                    this.createFileStorage(data.endpoint.url),
                     data.containers);
             case 'AasxServer':
                 return new AASXServerEndpointScan(this.logger, this.resourceFactory, data.endpoint, data.containers);

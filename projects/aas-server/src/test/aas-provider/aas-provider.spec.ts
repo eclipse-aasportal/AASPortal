@@ -20,7 +20,7 @@ import { sampleDocument } from '../assets/sample-document.js';
 import { AASResourceFactory } from '../../app/packages/aas-resource-factory.js';
 import { AASResource } from '../../app/packages/aas-resource.js';
 import { createSpyObj } from '../utils.js';
-import { AASServerConfiguration, createEndpoint } from '../../app/configuration.js';
+import { AASServerConfiguration, createEndpoint, endpointUrl } from '../../app/configuration.js';
 import { AASResourceScanFactory } from '../../app/aas-provider/aas-resource-scan-factory.js';
 import { WSServer } from '../../app/ws-server.js';
 import { Variable } from '../../app/variable.js';
@@ -46,11 +46,11 @@ describe.skip('AASProvider', function () {
 
     describe('addEndpointAsync', function () {
         beforeEach(function () {
-            variable.ENDPOINTS.push(createEndpoint('file:///shop', 'Shop').href);
+            variable.ENDPOINTS.push(endpointUrl('file:///shop', 'Shop', 'AasxDirectory').href);
             aasProvider = new AASProvider(
                 variable, {
                 endpoints: [
-                    createEndpoint('file:///shop', 'Shop').href
+                    createEndpoint('file:///shop', 'Shop', 'AasxDirectory')
                 ]
             },
                 logger,
@@ -62,7 +62,7 @@ describe.skip('AASProvider', function () {
         });
 
         it('adds an existing endpoint to the configuration', async function () {
-            await aasProvider.addEndpointAsync('samples', createEndpoint('file:///samples', 'samples'));
+            await aasProvider.addEndpointAsync('samples', createEndpoint('file:///samples', 'samples', 'AasxDirectory'));
             const workspaces = aasProvider.getWorkspaces();
             expect(workspaces.length).toEqual(2);
         });
@@ -71,15 +71,15 @@ describe.skip('AASProvider', function () {
     describe('removeEndpointAsync', function () {
         beforeEach(function () {
             variable.ENDPOINTS.push(
-                createEndpoint('file:///shop', 'Shop').href,
-                createEndpoint('file:///samples', 'Samples').href);
+                endpointUrl('file:///shop', 'Shop', 'AasxDirectory').href,
+                endpointUrl('file:///samples', 'Samples', 'AasxDirectory').href);
 
             aasProvider = new AASProvider(
                 variable, {
                 endpoints:
                     [
-                        createEndpoint('file:///shop', 'Shop').href,
-                        createEndpoint('file:///samples', 'Samples').href
+                        createEndpoint('file:///shop', 'Shop', 'AasxDirectory'),
+                        createEndpoint('file:///samples', 'Samples', 'AasxDirectory')
                     ]
             },
                 logger,
@@ -105,12 +105,12 @@ describe.skip('AASProvider', function () {
     describe('resetAsync', function () {
         beforeEach(function () {
             variable.ENDPOINTS.push(
-                createEndpoint('file:///shop', 'Shop').href,
-                createEndpoint('file:///samples', 'Samples').href);
+                endpointUrl('file:///shop', 'Shop', 'AasxDirectory').href,
+                endpointUrl('file:///samples', 'Samples', 'AasxDirectory').href);
 
             const configuration: AASServerConfiguration = {
                 endpoints: [
-                    createEndpoint('file:///samples', 'Samples').href
+                    createEndpoint('file:///samples', 'Samples', 'AasxDirectory')
                 ]
             };
 
@@ -141,10 +141,10 @@ describe.skip('AASProvider', function () {
     describe('getPackageAsync', function () {
         beforeEach(async function () {
             const configuration: AASServerConfiguration = {
-                endpoints: [createEndpoint('file:///samples', 'Samples').href]
+                endpoints: [createEndpoint('file:///samples', 'Samples', 'AasxDirectory')]
             };
 
-            variable.ENDPOINTS.push(createEndpoint('file:///samples', 'Samples').href);
+            variable.ENDPOINTS.push(endpointUrl('file:///samples', 'Samples', 'AasxDirectory').href);
             aasProvider = new AASProvider(
                 variable,
                 configuration,
@@ -176,10 +176,10 @@ describe.skip('AASProvider', function () {
     describe('addDocumentAsync', function () {
         beforeEach(async function () {
             const configuration: AASServerConfiguration = {
-                endpoints: [createEndpoint('file:///samples', 'Samples').href]
+                endpoints: [createEndpoint('file:///samples', 'Samples', 'AasxDirectory')]
             };
 
-            variable.ENDPOINTS.push(createEndpoint('file:///samples', 'Samples').href);
+            variable.ENDPOINTS.push(endpointUrl('file:///samples', 'Samples', 'AasxDirectory').href);
             aasProvider = new AASProvider(
                 variable,
                 configuration,
@@ -207,10 +207,10 @@ describe.skip('AASProvider', function () {
     describe('deletePackageAsync', function () {
         beforeEach(async function () {
             const configuration: AASServerConfiguration = {
-                endpoints: [createEndpoint('file:///samples', 'Samples').href]
+                endpoints: [createEndpoint('file:///samples', 'Samples', 'AasxDirectory')]
             };
 
-            variable.ENDPOINTS.push(createEndpoint('file:///samples', 'Samples').href);
+            variable.ENDPOINTS.push(endpointUrl('file:///samples', 'Samples', 'AasxDirectory').href);
             aasProvider = new AASProvider(
                 variable,
                 configuration,
@@ -227,7 +227,7 @@ describe.skip('AASProvider', function () {
             const source = createSpyObj<AASResource>(['openAsync', 'closeAsync', 'deletePackageAsync']);
             source.deletePackageAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
             resourceFactory.create.mockReturnValue(source);
-            await expect(aasProvider.deleteDocumentAsync(
+            await expect(aasProvider.deletePackageAsync(
                 'file:///samples',
                 'http://customer.com/aas/9175_7013_7091_9168')).resolves.toBeUndefined();
 
@@ -238,10 +238,10 @@ describe.skip('AASProvider', function () {
     describe('invoke', function () {
         beforeEach(async function () {
             const configuration: AASServerConfiguration = {
-                endpoints: [createEndpoint('file:///samples', 'Samples').href]
+                endpoints: [createEndpoint('file:///samples', 'Samples', 'AasxDirectory')]
             };
 
-            variable.ENDPOINTS.push(createEndpoint('file:///samples', 'Samples').href);
+            variable.ENDPOINTS.push(endpointUrl('file:///samples', 'Samples', 'AasxDirectory').href);
             aasProvider = new AASProvider(
                 variable,
                 configuration,

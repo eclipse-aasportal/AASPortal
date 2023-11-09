@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { aas, AASContainer, AASDocument, AASWorkspace, stringFormat } from 'common';
+import { aas, AASContainer, AASDocument, AASEndpoint, AASWorkspace, stringFormat } from 'common';
 import * as lib from 'projects/aas-lib/src/public-api';
 import { BehaviorSubject, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 import { ProjectService } from '../project/project.service';
@@ -19,9 +19,8 @@ import { ProjectService } from '../project/project.service';
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
 import * as StartActions from './start.actions';
-import { State } from './start.state';
+import { StartFeatureState } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { getEndpointType } from '../configuration';
 import { selectFilter, selectViewMode, selectLimit } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
 
@@ -31,7 +30,7 @@ import { ToolbarService } from '../toolbar.service';
     styleUrls: ['./start.component.scss'],
 })
 export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
-    private readonly store: Store<State>
+    private readonly store: Store<StartFeatureState>
     private readonly subscription = new Subscription();
     private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
     private selectedDocuments: AASDocument[] = [];
@@ -49,7 +48,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly download: lib.DownloadService,
         private readonly clipboard: lib.ClipboardService
     ) {
-        this.store = store as Store<State>;
+        this.store = store as Store<StartFeatureState>;
         this.filter = this.store.select(selectFilter);
         this.limit = this.store.select(selectLimit);
     }
@@ -121,14 +120,13 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             map(() => this.modal.open(AddEndpointFormComponent, { backdrop: 'static' })),
             mergeMap((modalRef) => {
                 modalRef.componentInstance.workspaces = this.workspaces.map(item => item.name);
-                return from<Promise<string | undefined>>(modalRef.result)
+                return from<Promise<AASEndpoint | undefined>>(modalRef.result)
             }),
             map((result) => {
                 if (!result) return;
 
-                const url = new URL(result);
                 this.project
-                    .addEndpoint(url.searchParams.get('name')!, result)
+                    .addEndpoint(result)
                     .pipe(first())
                     .subscribe({
                         error: (error) => this.notify.error(error),
@@ -201,16 +199,16 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
         for (const document of this.selectedDocuments) {
             this.download.downloadDocument(
-                document.idShort + '.aasx',
+                document.endpoint.url,
                 document.id,
-                document.container).subscribe({ error: (error) => this.notify.error(error) });
+                document.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
         }
     }
 
     public canDeleteDocument(): boolean {
         return this.aasTable != null && this.selectedDocuments.length > 0 &&
             this.selectedDocuments.every(
-                item => getEndpointType(item.container) === 'AasxDirectory');
+                item => item.endpoint.type === 'AasxDirectory');
     }
 
     public deleteDocument(): void {
@@ -240,7 +238,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
-                    url: document.container,
+                    url: document.endpoint.url,
                     idShort: submodels[0].idShort
                 });
             }
@@ -267,7 +265,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
-                    url: document.container,
+                    url: document.endpoint.url,
                     idShort: submodels[0].idShort
                 });
             }

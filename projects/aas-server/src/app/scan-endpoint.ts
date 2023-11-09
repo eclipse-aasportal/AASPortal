@@ -13,7 +13,7 @@ import { ScanEndpointData } from './aas-provider/worker-data.js';
 import { ScanEndpointResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { AASEndpointScan } from './aas-provider/aas-endpoint-scan.js';
-import { AASContainer } from 'common';
+import { AASContainer, AASEndpoint } from 'common';
 import { noop } from 'lodash-es';
 import { UpdateStatistic } from './update-statistic.js';
 import { AASEndpointScanFactory } from './aas-endpoint-scan-factory.js';
@@ -42,7 +42,7 @@ export class ScanEndpoint {
         }
     }
 
-    private onContainerAdded = (endpoint: string, container: AASContainer): void => {
+    private onContainerAdded = (endpoint: AASEndpoint, container: AASContainer): void => {
         const value: ScanEndpointResult = {
             taskId: this.data.taskId,
             type: ScanResultType.ContainerAdded,
@@ -55,7 +55,7 @@ export class ScanEndpoint {
         parentPort?.postMessage(array, [array.buffer]);
     }
 
-    private onContainerRemoved = (endpoint: string, container: AASContainer) => {
+    private onContainerRemoved = (endpoint: AASEndpoint, container: AASContainer) => {
         const value: ScanEndpointResult = {
             taskId: this.data.taskId,
             type: ScanResultType.ContainerRemoved,

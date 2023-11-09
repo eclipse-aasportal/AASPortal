@@ -11,6 +11,7 @@ import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { Logger } from '../../logging/logger.js';
 import { AasxServer } from './aasx-server.js';
+import { ImageProcessing } from '../../image-processing.js';
 
 export class AasxServerPackage extends AASPackage {
     private readonly source: AasxServer;
@@ -29,8 +30,8 @@ export class AasxServerPackage extends AASPackage {
         this.idShort = idShort;
     }
 
-    public getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
-        return Promise.reject(new Error('Not implemented.'));
+    public getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+        return this.source.getThumbnailAsync(id);
     }
 
     public openReadStreamAsync(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
@@ -43,17 +44,23 @@ export class AasxServerPackage extends AASPackage {
 
     public async createDocumentAsync(): Promise<AASDocument> {
         const environment = await this.source.readEnvironmentAsync(this.idShort);
-        return {
+
+        const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
-            container: this.source.url.href,
-            endpoint: { type: 'http', address: this.idShort },
+            endpoint: { url: this.source.url, type: 'AasxServer', name: this.source.name, version: this.source.version },
+            address: this.idShort,
             idShort: environment.assetAdministrationShells[0].idShort,
-            timeStamp: Date.now(),
             readonly: this.source.readOnly,
-            modified: false,
             onlineReady: true,
             content: null
         };
+
+        const thumbnail = await this.createThumbnail(document.id);
+        if (thumbnail) {
+            document.thumbnail = thumbnail;
+        }
+
+        return document;
     }
 
     public override async readEnvironmentAsync(): Promise<aas.Environment> {
@@ -70,5 +77,11 @@ export class AasxServerPackage extends AASPackage {
         }
 
         return messages ?? [];
+    }
+
+    private async createThumbnail(id: string): Promise<string | undefined> {
+        const input = await this.source.getThumbnailAsync(id);
+        const output = await ImageProcessing.resizeAsync(input, 40, 40);
+        return await this.streamToBase64(output);
     }
 }

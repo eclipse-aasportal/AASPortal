@@ -27,7 +27,6 @@ import * as AASSelectors from './aas.selectors';
 import { State } from './aas.state';
 import { DashboardChartType } from '../dashboard/dashboard.state';
 import { DashboardQuery } from '../types/dashboard-query-params';
-import { getEndpointType } from '../configuration';
 import { ToolbarService } from '../toolbar.service';
 import {
     AASDocument,
@@ -86,8 +85,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public readonly search: Observable<string>;
 
-    public get endpoint(): string {
-        return this.document?.endpoint.address ?? '';
+    public get address(): string {
+        return this.document?.address ?? '';
     }
 
     public get idShort(): string {
@@ -104,8 +103,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public get thumbnail(): string {
         if (this.document) {
-            const url = lib.encodeBase64Url(this.document?.container);
-            const id = lib.encodeBase64Url(this.document?.id);
+            const url = lib.encodeBase64Url(this.document.endpoint.url);
+            const id = lib.encodeBase64Url(this.document.id);
             return `/api/v1/containers/${url}/documents/${id}/thumbnail`;
         }
 
@@ -347,7 +346,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     public canDownloadDocument(): boolean {
         let type: AASEndpointType | undefined;
         if (this.document) {
-            type = getEndpointType(this.document.container);
+            type = this.document.endpoint.type;
         }
 
         return type === 'AasxDirectory' || type === 'AasxServer';
@@ -355,9 +354,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public downloadDocument(): void {
         this.download.downloadDocument(
-            this.document!.idShort + '.aasx',
+            this.document!.endpoint.url,
             this.document!.id,
-            this.document!.container).subscribe({ error: (error) => this.notify.error(error) });
+            this.document!.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public findNext(): void {
@@ -397,7 +396,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
         return false;
     }
-
+    
     // Hack, Hack 
     private isTimeSeries(element: aas.Referable): boolean {
         return isBlob(element) &&

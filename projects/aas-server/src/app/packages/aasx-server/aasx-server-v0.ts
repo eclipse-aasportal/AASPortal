@@ -19,9 +19,11 @@ interface AASList {
 }
 
 export class AasxServerV0 extends AasxServer {
-    constructor(logger: Logger, url: string | URL) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string) {
+        super(logger, url, name);
     }
+
+    public override readonly version = '0.0';
 
     public readonly readOnly = false;
 
@@ -32,10 +34,14 @@ export class AasxServerV0 extends AasxServer {
         return value.aaslist.map(item => item.split(' : ')[1].trim())
     }
 
-    public async readEnvironmentAsync(id: string): Promise<aas.Environment> {
+    public override async readEnvironmentAsync(id: string): Promise<aas.Environment> {
         const url = this.resolve(`/aas/${id}/aasenv`);
         const sourceEnv = await this.message.get<aasV2.AssetAdministrationShellEnvironment>(url);
         return new JsonReaderV2(this.logger, sourceEnv).readEnvironment();
+    }
+
+    public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public async commitAsync(

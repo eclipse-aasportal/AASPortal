@@ -6,17 +6,16 @@
  *
  *****************************************************************************/
 
-import { AASContainer } from "common";
+import { AASContainer, AASEndpoint } from "common";
 import { Logger } from "../logging/logger.js";
 import { AASResourceFactory } from "../packages/aas-resource-factory.js";
 import { AASEndpointScan } from "./aas-endpoint-scan.js";
-import { getEndpointName } from '../configuration.js';
 
 export class AASXServerEndpointScan extends AASEndpointScan {
     constructor(
         private readonly logger: Logger,
         private readonly resourceFactory: AASResourceFactory,
-        private endpoint: string,
+        private endpoint: AASEndpoint,
         private containers: AASContainer[]
     ) {
         super();
@@ -26,13 +25,8 @@ export class AASXServerEndpointScan extends AASEndpointScan {
         const server = this.resourceFactory.create(this.endpoint);
         try {
             await server.openAsync();
-            const url = new URL(this.endpoint);
             if (this.containers.length === 0) {
-                const container: AASContainer = {
-                    url: url.href,
-                    name: getEndpointName(url)
-                };
-
+                const container: AASContainer = { ...this.endpoint };
                 this.emit('added', this.endpoint, container);
             }
         } catch (error) {

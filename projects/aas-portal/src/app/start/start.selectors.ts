@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { createSelector } from '@ngrx/store';
-import { State } from './start.state'
+import { StartFeatureState } from './start.state'
 import { ViewMode } from 'projects/aas-lib/src/public-api';
 
-const getFilter = (state: State) => state.start.filter;
-const getViewMode = (state: State) => state.start.viewMode;
-const getLimit = (state: State) => state.start.limit;
+const getFilter = (state: StartFeatureState) => state.start.filter;
+const getViewMode = (state: StartFeatureState) => state.start.viewMode;
+const getLimit = (state: StartFeatureState) => state.start.limit;
 
 export const selectFilter = createSelector(getFilter, filter => filter);
 

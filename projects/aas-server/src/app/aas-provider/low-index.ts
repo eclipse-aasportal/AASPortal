@@ -26,7 +26,7 @@ export class LowIndex extends AASIndex {
 
     public override async getContainerDocuments(url: string): Promise<AASDocument[]> {
         await this.promise;
-        return this.db.data.documents.filter(document => this.getKey(document.container) === url);
+        return this.db.data.documents.filter(document => document.endpoint.url === url);
     }
 
     public override async getDocuments(cursor: AASCursor, filter?: AASFilter): Promise<AASPage> {
@@ -49,9 +49,9 @@ export class LowIndex extends AASIndex {
 
     public override async set(document: AASDocument): Promise<void> {
         await this.promise;
-        const url = this.getKey(document.container);
+        const url = document.endpoint.url;
         const index = this.db.data.documents.findIndex(
-            item => this.getKey(item.container) === url && item.id === document.id);
+            item => item.endpoint.url === url && item.id === document.id);
 
         if (index >= 0) {
             this.db.data.documents[index] = document;
@@ -62,7 +62,7 @@ export class LowIndex extends AASIndex {
     public override async has(url: string | undefined, id: string): Promise<boolean> {
         await this.promise;
         const document = url
-            ? this.db.data.documents.find(item => this.getKey(item.container) === url && item.id === id)
+            ? this.db.data.documents.find(item => item.endpoint.url === url && item.id === id)
             : this.db.data.documents.find(item => item.id === id);
 
         return document != null;
@@ -71,7 +71,7 @@ export class LowIndex extends AASIndex {
     public async get(url: string | undefined, id: string): Promise<AASDocument> {
         await this.promise;
         const document = url
-            ? this.db.data.documents.find(item => this.getKey(item.container) === url && item.id === id)
+            ? this.db.data.documents.find(item => item.endpoint.url === url && item.id === id)
             : this.db.data.documents.find(item => item.id === id);
 
         if (!document) {
@@ -90,7 +90,7 @@ export class LowIndex extends AASIndex {
     public override async delete(url: string, id: string): Promise<void> {
         await this.promise;
         const index = this.db.data.documents.findIndex(
-            item => this.getKey(item.container) === url && item.id === id);
+            item => item.endpoint.url === url && item.id === id);
 
         if (index >= 0) {
             this.db.data.documents.splice(index, 1);
@@ -263,12 +263,8 @@ export class LowIndex extends AASIndex {
             this.compare(max, this.getId(documents[documents.length - 1])) === 0;
     }
 
-    private getKey(url: string): string {
-        return url.split('?')[0];
-    }
-
     private getId(document: AASDocument): AASDocumentId {
-        return { id: document.id, url: document.container.split('?')[0] };
+        return { id: document.id, url: document.endpoint.url };
     }
 
     private compare(a: AASDocumentId, b: AASDocumentId): number {

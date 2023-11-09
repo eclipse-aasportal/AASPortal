@@ -23,7 +23,8 @@ import {
     AASWorkspace,
     selectElement,
     AASCursor,
-    AASPage
+    AASPage,
+    AASEndpoint
 } from 'common';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -37,7 +38,7 @@ import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
 import { ERRORS } from '../errors.js';
 import { AASResourceFactory } from '../packages/aas-resource-factory.js';
-import { AASServerConfiguration, createEndpoint, getEndpointName, getEndpointType } from '../configuration.js';
+import { AASServerConfiguration, getEndpointName, urlToEndpoint } from '../configuration.js';
 import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
@@ -46,7 +47,7 @@ import { AASFilter } from './aas-filter.js';
 @singleton()
 export class AASProvider {
     private readonly configuration: AASServerConfiguration;
-    private readonly endpoints = new Map<string, URL>();
+    private readonly endpoints = new Map<string, AASEndpoint>();
     private readonly containers = new Map<string, AASContainer>();
     private readonly timeout: number;
     private readonly file: string | undefined;
@@ -66,10 +67,10 @@ export class AASProvider {
         @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
         @inject('AASIndex') private readonly index: AASIndex
     ) {
-        let currentEndpoints = variable.ENDPOINTS;
+        let currentEndpoints = variable.ENDPOINTS.map(item => urlToEndpoint(item));
         if (typeof configuration === 'string') {
             this.configuration = {
-                endpoints: variable.ENDPOINTS.map(endpoint => createEndpoint(endpoint).href)
+                endpoints: variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))
             };
 
             this.file = isAbsolute(configuration) ? configuration : resolve('.', configuration);
@@ -86,7 +87,7 @@ export class AASProvider {
         } else {
             currentEndpoints = configuration.endpoints;
             this.configuration = {
-                endpoints: variable.ENDPOINTS.map(endpoint => createEndpoint(endpoint).href)
+                endpoints: variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))
             };
         }
 
@@ -110,7 +111,8 @@ export class AASProvider {
     }
 
     public async getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
-        if (filter) {
+        const minFilterLength = 3;
+        if (filter && filter.length >= minFilterLength) {
             return this.index.getDocuments(cursor, new AASFilter(filter, language ?? 'en'));
         }
 
@@ -119,23 +121,25 @@ export class AASProvider {
 
     public async getDocumentAsync(id: string, url?: string): Promise<AASDocument> {
         const document = await this.index.get(url, id);
-        const source = this.resourceFactory.create(document.container);
+        const source = this.resourceFactory.create(document.endpoint);
         try {
             await source.openAsync();
-            document.content = await source.createPackage(document.endpoint.address).readEnvironmentAsync();
+            if (!document.content) {
+                document.content = await source.createPackage(document.address).readEnvironmentAsync();
+            }
+
+            return document;
         } finally {
             await source.closeAsync();
         }
-
-        return document;
     }
 
     public async getContentAsync(url: string, id: string): Promise<aas.Environment | undefined> {
         const document: AASDocument = await this.index.get(url, id);
-        const source = this.resourceFactory.create(document.container);
+        const source = this.resourceFactory.create(document.endpoint);
         try {
             await source.openAsync();
-            return await source.createPackage(document.endpoint.address).readEnvironmentAsync();
+            return await source.createPackage(document.address).readEnvironmentAsync();
         } finally {
             await source.closeAsync();
         }
@@ -143,10 +147,10 @@ export class AASProvider {
 
     public async getThumbnailAsync(url: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const document: AASDocument = await this.index.get(url, id);
-        const source = this.resourceFactory.create(document.container);
+        const source = this.resourceFactory.create(document.endpoint);
         try {
             await source.openAsync();
-            return await source.createPackage(document.endpoint.address).getThumbnailAsync();
+            return await source.createPackage(document.address).getThumbnailAsync(id);
         } finally {
             await source.closeAsync();
         }
@@ -165,10 +169,10 @@ export class AASProvider {
         }
 
         let stream: NodeJS.ReadableStream;
-        const source = this.resourceFactory.create(document.container);
+        const source = this.resourceFactory.create(document.endpoint);
         try {
             await source.openAsync();
-            const pkg = source.createPackage(document.endpoint.address);
+            const pkg = source.createPackage(document.address);
             const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, path);
             if (!dataElement) {
                 throw new Error('DataElement not found.');
@@ -209,7 +213,7 @@ export class AASProvider {
      * @param name The endpoint name.
      * @param url The endpoint URL.
      */
-    public async addEndpointAsync(name: string, url: URL): Promise<void> {
+    public async addEndpointAsync(name: string, endpoint: AASEndpoint): Promise<void> {
         if (this.endpoints.has(name)) {
             throw new ApplicationError(
                 `An endpoint with the name "${name}" already exists.`,
@@ -217,9 +221,9 @@ export class AASProvider {
                 name);
         }
 
-        await this.resourceFactory.testAsync(url);
+        await this.resourceFactory.testAsync(endpoint);
 
-        this.endpoints.set(name, url);
+        this.endpoints.set(name, endpoint);
 
         if (this.file) {
             await this.saveAsync(this.file);
@@ -229,11 +233,11 @@ export class AASProvider {
             type: 'AASServerMessage',
             data: {
                 type: 'EndpointAdded',
-                endpoint: url.href,
+                endpoint: endpoint,
             } as AASServerMessage,
         });
 
-        this.startEndpointScan(this.createTaskId(), url, this.createScanStatistic());
+        this.startEndpointScan(this.createTaskId(), endpoint, this.createScanStatistic());
     }
 
     /**
@@ -302,10 +306,10 @@ export class AASProvider {
      */
     public async getPackageAsync(id: string, url: string): Promise<NodeJS.ReadableStream> {
         const document = await this.index.get(url, id);
-        const source = this.resourceFactory.create(document.container);
+        const source = this.resourceFactory.create(document.endpoint);
         try {
             await source.openAsync();
-            return await source.getPackageAsync(id, document.endpoint.address);
+            return await source.getPackageAsync(id, document.address);
         } finally {
             await source.closeAsync();
         }
@@ -346,7 +350,7 @@ export class AASProvider {
      * @param url The container URL.
      * @param id The AAS identification.
      */
-    public async deleteDocumentAsync(url: string, id: string): Promise<void> {
+    public async deletePackageAsync(url: string, id: string): Promise<void> {
         throw new Error('Not implemented.');
         // const container = this.chain.getContainer(url);
         // const document = await container.get(id);
@@ -365,8 +369,8 @@ export class AASProvider {
     /** Only used for test. */
     public async scanAsync(factory: AASResourceScanFactory): Promise<void> {
         for (const endpoint of this.endpoints.values()) {
-            if (getEndpointType(endpoint) === 'AasxDirectory') {
-                const documents = await factory.create(endpoint.href).scanAsync();
+            if (endpoint.type === 'AasxDirectory') {
+                const documents = await factory.create(endpoint).scanAsync();
                 documents.forEach(async (document) => await this.index.add(document));
             }
         }
@@ -381,7 +385,7 @@ export class AASProvider {
      */
     public async invoke(url: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
         const document = await this.index.get(url, id);
-        const resource = this.resourceFactory.create(document.container);
+        const resource = this.resourceFactory.create(document.endpoint);
         try {
             await resource.openAsync();
             return await resource.invoke(document.content!, operation);
@@ -390,14 +394,12 @@ export class AASProvider {
         }
     }
 
-    private initEndpoints(endpoints: string[]): void {
+    private initEndpoints(endpoints: AASEndpoint[]): void {
         this.endpoints.clear();
         endpoints.forEach(item => {
             try {
-                const url = new URL(item);
-                const name = getEndpointName(url);
-                if (!this.endpoints.has(name)) {
-                    this.endpoints.set(name, url);
+                if (!this.endpoints.has(item.name)) {
+                    this.endpoints.set(item.name, item);
                 } else {
                     this.logger.error(`An endpoint with the name "${name}" already exists.`);
                 }
@@ -448,15 +450,14 @@ export class AASProvider {
         if (task) {
             this.tasks.delete(result.taskId);
             if (task.type === 'ScanContainer') {
-                const name = getEndpointName(task.id);
-                const url = this.endpoints.get(name);
-                if (url) {
-                    this.index.getContainerDocuments(url.href).then(documents => {
+                const endpoint = this.endpoints.get(task.id);
+                if (endpoint) {
+                    this.index.getContainerDocuments(endpoint.url).then(documents => {
                         setTimeout(
                             this.startContainerScan,
                             this.timeout,
                             result.taskId,
-                            { name, url, documents },
+                            { name: task.id, container: endpoint, documents },
                             result.statistic);
                     }).catch(error => this.logger.error(error));
                 }
@@ -475,16 +476,16 @@ export class AASProvider {
         }
     };
 
-    private startEndpointScan = (taskId: number, endpoint: URL, statistic: ScanStatistic) => {
+    private startEndpointScan = (taskId: number, endpoint: AASEndpoint, statistic: ScanStatistic) => {
         const data: ScanEndpointData = {
             type: 'ScanEndpointData',
             taskId: taskId,
             statistic: statistic,
-            endpoint: endpoint.href,
+            endpoint: endpoint,
             containers: [...this.containers.values()]
         };
 
-        this.tasks.set(taskId, { id: getEndpointName(endpoint), type: 'ScanEndpoint' });
+        this.tasks.set(taskId, { id: endpoint.name, type: 'ScanEndpoint' });
         this.parallel.execute(data);
     };
 
@@ -496,7 +497,7 @@ export class AASProvider {
             container
         };
 
-        this.tasks.set(taskId, { id: container.url, type: 'ScanContainer' });
+        this.tasks.set(taskId, { id: container.name, type: 'ScanContainer' });
         this.parallel.execute(data);
     };
 
@@ -551,11 +552,9 @@ export class AASProvider {
     }
 
     private onContainerAdded(result: ScanEndpointResult): void {
-        const url = new URL(result.endpoint);
-        const name = getEndpointName(url);
-        this.containers.set(name, { name, url: result.endpoint });
-        if (this.endpoints.has(name)) {
-            this.index.getContainerDocuments(url.href).then(documents => {
+        this.containers.set(result.endpoint.name, { ...result.endpoint });
+        if (this.endpoints.has(result.endpoint.name)) {
+            this.index.getContainerDocuments(result.endpoint.url).then(documents => {
                 setTimeout(
                     this.startContainerScan,
                     this.timeout,
@@ -593,6 +592,10 @@ export class AASProvider {
     //     return document;
     // }
 
+    private getUrl(url: string): string {
+        return url.split('?')[0];
+    }
+
     private createTaskId(): number {
         const taskId = this.nextTaskId;
         ++this.nextTaskId;
@@ -601,7 +604,7 @@ export class AASProvider {
 
     private async saveAsync(path: string): Promise<void> {
         const configuration: AASServerConfiguration = {
-            endpoints: [...this.endpoints.values()].map(item => item.href)
+            endpoints: [...this.endpoints.values()]
         };
 
         await writeFile(path, JSON.stringify(configuration));

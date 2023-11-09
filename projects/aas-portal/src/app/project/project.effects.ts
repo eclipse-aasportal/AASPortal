@@ -29,9 +29,9 @@ export class ProjectEffects {
         store: Store,
         private readonly auth: AuthService,
         private readonly api: ProjectAPIService
-        ) { 
-            this.store = store as Store<State>;
-        }
+    ) {
+        this.store = store as Store<State>;
+    }
 
     public initialize = createEffect(() => {
         return this.actions.pipe(
@@ -42,7 +42,7 @@ export class ProjectEffects {
                     const workspace = this.initializeWorkspace(workspaces);
                     if (workspace) {
                         return merge(
-                            of(ProjectActions.setState({ workspaces, workspace })), 
+                            of(ProjectActions.setState({ workspaces, workspace })),
                             this.loadDocuments(workspace));
                     }
 
@@ -75,9 +75,9 @@ export class ProjectEffects {
                 const workspace = tuple[1];
                 const document = tuple[0];
                 if (workspace) {
-                    if (workspace.containers.some(item => item.url === document.container)) {
+                    if (workspace.containers.some(item => item.url === document.endpoint.url)) {
                         if (document.content === null) {
-                            return this.api.getContent(document.id, document.container).pipe(
+                            return this.api.getContent(document.id, document.endpoint.url).pipe(
                                 map(content => ProjectActions.addDocument({ document, content })));
                         } else {
                             return of(ProjectActions.addDocument({ document }));
@@ -97,10 +97,10 @@ export class ProjectEffects {
                 const documents = tuple[1];
                 const document = tuple[0];
                 const index = documents.findIndex(item =>
-                    item.container === document.container && item.id === document.id);
+                    item.endpoint.url === document.endpoint.url && item.id === document.id);
 
                 if (index >= 0) {
-                    return this.api.getContent(document.id, document.container).pipe(
+                    return this.api.getContent(document.id, document.endpoint.url).pipe(
                         map(content => ProjectActions.setDocument({ index, document, content })));
                 }
 
@@ -111,72 +111,67 @@ export class ProjectEffects {
     public applyDocument = createEffect(() => {
         return this.actions.pipe(
             ofType<ProjectActions.ApplyDocumentAction>(ProjectActions.ProjectActionType.APPLY_DOCUMENT),
-            exhaustMap(action => zip(of(action.document), this.store.select(ProjectSelectors.selectDocuments))),
-            mergeMap(tuple => {
-                const document = tuple[0];
-                const index = tuple[1].findIndex(item => item.id == document.id &&
-                    item.container === document.container);
+            exhaustMap(action => this.store.select(ProjectSelectors.selectDocuments).pipe(
+                mergeMap(documents => {
+                    const index = documents.findIndex(item => item.id === action.document.id &&
+                        item.endpoint.url === action.document.endpoint.url);
 
-                if (index >= 0) {
-                    return of(ProjectActions.setDocument({ index, document }));
-                } else {
-                    return EMPTY;
-                }
-            }))
+                    if (index >= 0) {
+                        return of(ProjectActions.setDocument({ index, document: action.document }));
+                    } else {
+                        return EMPTY;
+                    }
+                }))));
     });
 
     public endpointAdded = createEffect(() => {
         return this.actions.pipe(
             ofType<ProjectActions.EndpointAddedAction>(ProjectActions.ProjectActionType.ENDPOINT_ADDED),
-            exhaustMap(action => zip(of(action.endpoint), this.store.select(ProjectSelectors.selectWorkspaces))),
-            mergeMap(tuple => {
-                const url = new URL(tuple[0]);
-                const workspace: AASWorkspace = {
-                    name: getEndpointName(url),
-                    containers: []
-                };
+            exhaustMap(action => this.store.select(ProjectSelectors.selectWorkspaces).pipe(
+                mergeMap(workspaces => {
+                    const workspace: AASWorkspace = {
+                        name: action.endpoint.name,
+                        containers: []
+                    };
 
-                if (tuple[1].length === 0) {
-                    return of(
-                        ProjectActions.addWorkspace({ workspace }),
-                        ProjectActions.setActiveWorkspace({ name: workspace.name }));
-                } else {
-                    return of(ProjectActions.addWorkspace({ workspace }));
-                }
-            }))
+                    if (workspaces.length === 0) {
+                        return of(
+                            ProjectActions.addWorkspace({ workspace }),
+                            ProjectActions.setActiveWorkspace({ name: workspace.name }));
+                    } else {
+                        return of(ProjectActions.addWorkspace({ workspace }));
+                    }
+                }))));
     });
 
     public endpointRemoved = createEffect(() => {
         return this.actions.pipe(
             ofType<ProjectActions.EndpointRemovedAction>(ProjectActions.ProjectActionType.ENDPOINT_REMOVED),
-            exhaustMap(action => zip(
-                of(getEndpointName(action.endpoint)), 
-                this.store.select(ProjectSelectors.selectProject))),
-            mergeMap(tuple => {
-                const workspaces = tuple[1].workspaces;
-                const workspace = tuple[1].workspace;
-                const name = tuple[0];
-                if (workspace) {
-                    let index = workspaces.findIndex(item => item.name === name);
-                    if (index >= 0) {
-                        if (workspaces.length >= 2) {
-                            ++index;
-                            if (index >= workspaces.length) {
-                                index = length - 2;
+            exhaustMap(action => this.store.select(ProjectSelectors.selectProject).pipe(
+                mergeMap(project => {
+                    const workspaces = project.workspaces;
+                    const workspace = project.workspace;
+                    if (workspace) {
+                        let index = workspaces.findIndex(item => item.name === action.endpoint);
+                        if (index >= 0) {
+                            if (workspaces.length >= 2) {
+                                ++index;
+                                if (index >= workspaces.length) {
+                                    index = length - 2;
+                                }
+
+                                const next = workspaces[index];
+                                return of(
+                                    ProjectActions.removeWorkspace({ workspace }),
+                                    ProjectActions.setActiveWorkspace({ name: next.name }));
                             }
 
-                            const next = workspaces[index];
-                            return of(
-                                ProjectActions.removeWorkspace({ workspace }),
-                                ProjectActions.setActiveWorkspace({ name: next.name }));
+                            return of(ProjectActions.removeWorkspace({ workspace }));
                         }
-
-                        return of(ProjectActions.removeWorkspace({ workspace }));
                     }
-                }
 
-                return EMPTY;
-            }))
+                    return EMPTY;
+                }))));
     });
 
     private initializeWorkspaces(workspaces: AASWorkspace[]): AASWorkspace[] {
@@ -210,7 +205,7 @@ export class ProjectEffects {
             mergeMap(documents => from(documents)),
             mergeMap(document => {
                 if (document.content === null) {
-                    return this.api.getContent(document.id, document.container).pipe(
+                    return this.api.getContent(document.id, document.endpoint.url).pipe(
                         map(content => ProjectActions.addDocument({ document, content })));
                 }
 

@@ -95,7 +95,7 @@ export class ContainersController extends ControllerBase {
     public async deleteDocument(@Path() url: string, @Path() id: string): Promise<void> {
         try {
             this.logger.start('deletePackage');
-            await this.aasProvider.deleteDocumentAsync(decodeBase64Url(url), decodeBase64Url(id));
+            await this.aasProvider.deletePackageAsync(decodeBase64Url(url), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }

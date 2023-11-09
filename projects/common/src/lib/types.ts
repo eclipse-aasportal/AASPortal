@@ -45,13 +45,19 @@ export type AASAbbreviation =
     'SME' |
     'SML';
 
-/** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
-export interface AASContainer {
-    /** The URL of the container endpoint. */
-    url: string;
-    /** An alias for the container. */
+/** The kind of AAS container or server. */
+export type AASEndpointType = 'AasxDirectory' | 'AasxServer' | 'OpcuaServer' | 'AASRegistry';
+
+/** The endpoint to an AAS container */
+export type AASEndpoint = {
     name: string;
-    /** The AAS documents that this container provides. */
+    url: string;
+    type: AASEndpointType;
+    version?: string;
+};
+
+/** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
+export interface AASContainer extends AASEndpoint {
     documents?: AASDocument[];
 }
 
@@ -61,12 +67,12 @@ export interface AASDocument {
     id: string;
     /** The name of the AAS. */
     idShort: string;
-    /** The address of the resource containing the AAS. */
-    endpoint: Endpoint;
-    /** The URL of the container from which the AAS comes. */
-    container: string;
+    /** The URL of the container that provides this AAS. */
+    endpoint: AASEndpoint;
+    /** The address of the AAS in the container. */
+    address: string;
     /** A time stamp that represents the current state of the AAS. */
-    timeStamp: number;
+    thumbnail?: string;
     /** Indicates whether the document can be edited. */
     readonly: boolean;
     /** Indicates whether the document is modified. */
@@ -80,7 +86,7 @@ export interface AASDocument {
 
 /** The unique identifier of an AAS. */
 export interface AASDocumentId {
-    url: string; 
+    url: string;
     id: string;
 }
 
@@ -133,9 +139,6 @@ export interface LiveRequest {
     id: string;
     nodes: LiveNode[]
 }
-
-/** The kind of AAS container or server. */
-export type AASEndpointType = 'AasxDirectory' | 'AasxServer' | 'OpcuaServer' | 'AASRegistry';
 
 export interface PackageInfo {
     name: string;

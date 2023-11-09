@@ -8,7 +8,7 @@
 
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AASDocument, aas } from 'common';
+import { AASDocument, AASEndpoint, aas } from 'common';
 import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
 
@@ -47,7 +47,7 @@ describe('AASTreeApiService', function () {
     describe('invoke', function () {
         it('invokes an operation', async function () {
             const document = jasmine.createSpyObj<AASDocument>({}, {
-                container: 'http://localhost/container',
+                endpoint: { url: 'http://localhost/container', name: 'Test', version: '3.0' } as AASEndpoint,
                 id: 'http://localhost/aas'
             });
 

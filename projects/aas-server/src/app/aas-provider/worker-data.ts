@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASContainer } from "common";
+import { AASContainer, AASEndpoint } from "common";
 import { ScanStatistic } from "./scan-result.js";
 
 export interface WorkerData {
@@ -22,7 +22,7 @@ export interface ScanContainerData extends WorkerData {
 
 export interface ScanEndpointData extends WorkerData {
     type: 'ScanEndpointData';
-    endpoint: string;
+    endpoint: AASEndpoint;
     containers: AASContainer[];
 }
 

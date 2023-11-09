@@ -22,8 +22,11 @@ export abstract class AASPackage {
     /** Gets the document that contains an Asset Administration Shell. */
     public abstract createDocumentAsync(): Promise<AASDocument>;
 
-    /** Gets the thumbnail of the current Asset Administration Shell */
-    public abstract getThumbnailAsync(): Promise<NodeJS.ReadableStream>;
+    /** 
+     * Gets the thumbnail of the current Asset Administration Shell.
+     * @param id The identifier of AAS.
+     */
+    public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
 
     /**
      * Returns a read-only stream of a file in a package with the specified path.
@@ -52,5 +55,14 @@ export abstract class AASPackage {
         }
 
         return path;
+    }
+    
+    protected async streamToBase64(stream: NodeJS.ReadableStream): Promise<string> {
+        const chunks = [];
+        for await (const chunk of stream) {
+            chunks.push(Buffer.from(chunk));
+        }
+    
+        return 'data:image/png;base64,' + Buffer.concat(chunks).toString('base64');
     }
 }

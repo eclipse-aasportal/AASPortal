@@ -22,20 +22,18 @@ describe('Document', function () {
         beforeEach(function () {
             a = {
                 id: 'http://customer.com/aas/a',
-                container: 'C:/Git/AASPortal/common/test/assets/?type=AasxDirectory',
-                endpoint: { type: 'file', address: 'a.json' },
+                endpoint: {url: 'C:/Git/AASPortal/common/test/assets', name: 'Test', type: 'AasxDirectory'},
+                address: 'a.json',
                 idShort: 'A',
                 readonly: true,
-                timeStamp: 42
             };
 
             b = {
                 id: 'http://customer.com/aas/b',
-                container: 'C:/Git/AASPortal/common/test/assets/?type=AasxDirectory',
-                endpoint: { type: 'file', address: 'b.json' },
+                endpoint: {url: 'C:/Git/AASPortal/common/test/assets', name: 'Test', type: 'AasxDirectory'},
+                address: 'b.json',
                 idShort: 'B',
                 readonly: true,
-                timeStamp: 42
             };
         });
 

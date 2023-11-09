@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
+import { AASEndpoint } from 'common';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';
 import { AASXServerScan } from './aasx-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
-import { parseUrl } from '../convert.js';
 import { OpcuaServer } from '../packages/opcua/opcua-server.js';
 import { AasxDirectory } from '../packages/aasx-directory/aasx-directory.js';
 import { AasxServer } from '../packages/aasx-server/aasx-server.js';
@@ -29,28 +29,31 @@ export class AASResourceScanFactory {
     ) {
     }
 
-    public create(url: string | URL): AASResourceScan {
-        const temp = typeof url === 'string' ? parseUrl(url) : url;
-        switch (temp.protocol) {
+    public create(endpoint: AASEndpoint): AASResourceScan {
+        switch (new URL(endpoint.url).protocol) {
             case 'http:':
             case 'https':
-                const version = temp.searchParams.get('version')?.toLowerCase() ?? '3.0';
+                const version = endpoint.version ?? '3.0';
                 let source: AasxServer;
                 if (version === '3.0') {
-                    source = new AasxServerV3(this.logger, temp);
+                    source = new AasxServerV3(this.logger, endpoint.url, endpoint.name);
                 } else if (version === '0.0') {
-                    source = new AasxServerV0(this.logger, temp);
+                    source = new AasxServerV0(this.logger, endpoint.url, endpoint.name);
                 } else {
                     throw new Error('Not implemented.');
                 }
 
                 return new AASXServerScan(this.logger, source);
             case 'opc.tcp:':
-                return new OpcuaServerScan(this.logger, new OpcuaServer(this.logger, temp));
+                return new OpcuaServerScan(this.logger, new OpcuaServer(this.logger, endpoint.url, endpoint.name));
             case 'file:':
                 return new DirectoryScan(
-                    this.logger, 
-                    new AasxDirectory(this.logger, temp, this.createLocalFileStorage(temp)));
+                    this.logger,
+                    new AasxDirectory(
+                        this.logger,
+                        endpoint.url,
+                        endpoint.name,
+                        this.createLocalFileStorage(new URL(endpoint.url))));
             default:
                 throw new Error('Not implemented.');
         }

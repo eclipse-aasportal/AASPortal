@@ -6,31 +6,25 @@
  *
  *****************************************************************************/
 
-import { AASContainer } from "common";
+import { AASContainer, AASEndpoint } from "common";
 import { Logger } from "../logging/logger.js";
 import { OpcuaServer } from "../packages/opcua/opcua-server.js";
 import { AASEndpointScan } from "./aas-endpoint-scan.js";
-import { getEndpointName } from '../configuration.js';
 
 export class OpcuaEndpointScan extends AASEndpointScan {
     constructor(
         private readonly logger: Logger,
-        private readonly endpoint: string,
+        private readonly endpoint: AASEndpoint,
         private readonly containers: AASContainer[]) {
         super();
     }
 
     public async scanAsync(): Promise<void> {
-        const source = new OpcuaServer(this.logger, this.endpoint);
+        const source = new OpcuaServer(this.logger, this.endpoint.url, this.endpoint.name);
         try {
             await source.openAsync();
             if (this.containers.length === 0) {
-                const url = new URL(this.endpoint);
-                const container: AASContainer = {
-                    url: url.href,
-                    name: getEndpointName(url)
-                };
-
+                const container: AASContainer = { ...this.endpoint };
                 this.emit('added', this.endpoint, container);
             }
         } catch (error) {

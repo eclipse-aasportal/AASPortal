@@ -45,13 +45,11 @@ export class OpcuaPackage extends AASPackage {
 
         const document: AASDocument = {
             id: this.getIdentifier(component),
-            container: this.server.url.href,
-            endpoint: { type: 'opc', address: this.nodeId },
+            endpoint: { url: this.server.url, type: 'AasxDirectory', name: this.server.name, version: this.server.version },
+            address: this.nodeId,
             idShort: component.browseName,
-            timeStamp: Date.now(),
             readonly: this.server.readOnly,
             onlineReady: this.server.onlineReady,
-            modified: false,
             content: null
         };
 

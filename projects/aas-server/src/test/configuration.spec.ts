@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { createEndpoint, getEndpointName, getEndpointType } from "../app/configuration.js";
+import { getEndpointName, getEndpointType } from "../app/configuration.js";
 import { describe, it, expect } from '@jest/globals'
 
 describe('configuration', function () {
@@ -49,33 +49,6 @@ describe('configuration', function () {
 
         it('gets "AasxServer" as default', function () {
             expect(getEndpointType('http://localhost:1234/')).toEqual('AasxServer');
-        });
-    });
-
-    describe('createEndpoint', function () {
-        it('creates an endpoint with options', function () {
-            expect(createEndpoint(
-                'http://localhost:1234',
-                {
-                    name: 'Test',
-                    params: [['version', '3.0']]
-                }).href)
-                .toEqual('http://localhost:1234/?name=Test&version=3.0');
-        });
-
-        it('creates an AASX server endpoint', function () {
-            expect(createEndpoint('http://localhost:1234/?type=AasxServer', 'Test').href)
-                .toEqual('http://localhost:1234/?name=Test');
-        });
-
-        it('creates an AAS registry endpoint', function () {
-            expect(createEndpoint('http://localhost:1234/v1/registry?type=AASRegistry', 'Test').href)
-                .toEqual('http://localhost:1234/v1/registry?name=Test&type=AASRegistry');
-        });
-
-        it('creates an AASX directory endpoint', function () {
-            expect(createEndpoint('file:///storage/samples', 'Test').href)
-                .toEqual('file:///storage/samples?name=Test');
         });
     });
 });

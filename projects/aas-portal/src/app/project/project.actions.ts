@@ -8,7 +8,7 @@
 
 import { createAction, props } from '@ngrx/store';
 import { TypedAction } from '@ngrx/store/src/models';
-import { aas, AASContainer, AASDocument, AASWorkspace } from 'common';
+import { aas, AASContainer, AASDocument, AASEndpoint, AASWorkspace } from 'common';
 
 export enum ProjectActionType {
     INITIALIZE = '[Project] initialize',
@@ -83,7 +83,7 @@ export const removeWorkspace = createAction(
 
 export const endpointAdded = createAction(
     ProjectActionType.ENDPOINT_ADDED,
-    props<{ endpoint: string }>());
+    props<{ endpoint: AASEndpoint }>());
 
 export const endpointRemoved = createAction(
     ProjectActionType.ENDPOINT_REMOVED,
@@ -105,10 +105,6 @@ export interface ApplyDocumentAction extends TypedAction<ProjectActionType.APPLY
     document: AASDocument;
 }
 
-export interface EndpointRemovedAction extends TypedAction<ProjectActionType.ENDPOINT_REMOVED> {
-    endpoint: string
-}
-
 export interface SetActiveWorkspaceAction extends TypedAction<ProjectActionType.SET_ACTIVE_WORKSPACE> {
     name: string;
 }
@@ -122,7 +118,7 @@ export interface DocumentUpdatedAction extends TypedAction<ProjectActionType.DOC
 }
 
 export interface EndpointAddedAction extends TypedAction<ProjectActionType.ENDPOINT_ADDED> {
-    endpoint: string;
+    endpoint: AASEndpoint;
 }
 
 export interface EndpointRemovedAction extends TypedAction<ProjectActionType.ENDPOINT_REMOVED> {

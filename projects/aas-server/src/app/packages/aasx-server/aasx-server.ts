@@ -27,8 +27,8 @@ export abstract class AasxServer extends AASResource {
     /**
      * @param url The URL of the AASX-Server.
      */
-    constructor(logger: Logger, url: string | URL) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string) {
+        super(logger, url, name);
     }
 
     protected readonly message = new ServerMessage();
@@ -54,9 +54,14 @@ export abstract class AasxServer extends AASResource {
      */
     public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
 
+    /** Gets the thumbnail of the AAS with the specified identifier.
+     * @param id The identifier of the current AAS.
+    */
+    public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
+
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
-            await this.message.checkUrlExist(this.url.href);
+            await this.message.checkUrlExist(this.url);
         }
 
         ++this.reentry;

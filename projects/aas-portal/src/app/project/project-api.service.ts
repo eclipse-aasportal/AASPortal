@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, } from '@angular/common/http';
-import { AASDocument, AASWorkspace, aas } from 'common';
+import { AASDocument, AASEndpoint, AASWorkspace, aas } from 'common';
 import { Observable } from 'rxjs';
 import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 
@@ -63,10 +63,10 @@ export class ProjectAPIService {
 
     /**
      * Adds a new endpoint to the AASServer configuration.
-     * @param endpoint The registry.
+     * @param endpoint The AAS container endpoint.
      */
-    public addEndpoint(name: string, url: string): Observable<void> {
-        return this.http.post<void>(`/api/v1/endpoints/${name}`, { url });
+    public addEndpoint(endpoint: AASEndpoint): Observable<void> {
+        return this.http.post<void>(`/api/v1/endpoints/${endpoint.name}`, endpoint);
     }
 
     /**

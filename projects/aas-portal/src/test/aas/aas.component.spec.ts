@@ -151,7 +151,7 @@ describe('AASComponent', () => {
         const aas = sampleDocument.content!.assetAdministrationShells[0];
         const assetId = aas.assetInformation.globalAssetId ?? '-';
 
-        expect(component.endpoint).toEqual(sampleDocument.endpoint!.address);
+        expect(component.address).toEqual(sampleDocument.address);
         expect(component.idShort).toEqual(sampleDocument.idShort);
         expect(component.id).toEqual(sampleDocument.id);
         expect(component.version).toEqual('-');

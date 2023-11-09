@@ -56,7 +56,7 @@ describe('ContainersController', function () {
                 'getPackageAsync',
                 'getDocumentAsync',
                 'addPackagesAsync',
-                'deleteDocumentAsync',
+                'deletePackageAsync',
                 'getDataElementValueAsync',
                 'invoke',
                 'resetAsync'
@@ -127,7 +127,7 @@ describe('ContainersController', function () {
             .set('Authorization', `Bearer ${getToken('John')}`);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.deleteDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.deletePackageAsync).toHaveBeenCalled();
     });
 
     it('getDocumentContent: /api/v1/containers/:url/documents/:id/content', async function () {

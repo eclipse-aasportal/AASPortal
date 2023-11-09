@@ -23,7 +23,7 @@ describe('OpcuaServer', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new OpcuaServer(logger, 'opc.tcp://localhost:1234/I4AASServer');
+        server = new OpcuaServer(logger, 'opc.tcp://localhost:1234/I4AASServer', 'OPCUA Server');
     });
 
     it('should be created', function () {

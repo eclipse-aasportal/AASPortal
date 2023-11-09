@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, isSubmodel } from "common";
+import { aas, isSubmodel } from 'common';
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 
 export class AASTreeRow {

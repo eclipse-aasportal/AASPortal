@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import http, { IncomingMessage } from 'http';
-import { AASContainer } from 'common';
+import { AASContainer, AASEndpoint } from 'common';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { AASRegistryScan } from '../../app/aas-provider/aas-registry-scan.js';
@@ -20,20 +20,18 @@ import { AssetAdministrationShellDescriptor } from '../../app/types/registry.js'
 describe('AASRegistryScan', function () {
     let registryScan: AASRegistryScan;
     let logger: jest.Mocked<Logger>;
-    let endpoint: URL;
+    let endpoint: AASEndpoint;
     let descriptors: AssetAdministrationShellDescriptor[];
 
     beforeEach(function () {
         descriptors = testRegistry as unknown as AssetAdministrationShellDescriptor[];
-        endpoint = new URL('http://localhost/registry/api/v1/registry/');
-        endpoint.searchParams.append('name', 'AAS Registry');
-        endpoint.searchParams.append('type', 'AASRegistry');
+        endpoint = { url: 'http://localhost/registry/api/v1/registry/', name: 'AAS Registry', type: 'AASRegistry' };
 
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
     });
 
     it('should create', function () {
-        expect(new AASRegistryScan(logger, endpoint.href, [])).toBeTruthy();
+        expect(new AASRegistryScan(logger, endpoint, [])).toBeTruthy();
     });
 
     it('adds new containers', async function () {
@@ -42,13 +40,13 @@ describe('AASRegistryScan', function () {
             stream.push(JSON.stringify(descriptors));
             stream.push(null);
             stream.statusCode = 201,
-            stream.statusMessage = 'Created',
-            (callback as (res: IncomingMessage) => void)(stream);
+                stream.statusMessage = 'Created',
+                (callback as (res: IncomingMessage) => void)(stream);
 
             return new http.ClientRequest('http://localhost:1234/registry/api/v1/registry/');
         });
 
-        registryScan = new AASRegistryScan(logger, endpoint.href, []);
+        registryScan = new AASRegistryScan(logger, endpoint, []);
         const spy = jest.fn();
         registryScan.on('added', spy);
         await expect(registryScan.scanAsync()).resolves.toBeUndefined();
@@ -62,8 +60,8 @@ describe('AASRegistryScan', function () {
             stream.push(JSON.stringify([]));
             stream.push(null);
             stream.statusCode = 200,
-            stream.statusMessage = 'OK',
-            (callback as (res: IncomingMessage) => void)(stream);
+                stream.statusMessage = 'OK',
+                (callback as (res: IncomingMessage) => void)(stream);
 
             return new http.ClientRequest('http://localhost:1234/registry/api/v1/registry/');
         });
@@ -71,19 +69,22 @@ describe('AASRegistryScan', function () {
         const containers: AASContainer[] = [
             {
                 name: 'http://172.16.160.171:51000',
-                url: 'http://172.16.160.171:51000/?type=AasxServer'
+                url: 'http://172.16.160.171:51000',
+                type: 'AasxServer'
             },
             {
                 name: 'http://172.16.160.188:50010',
-                url: 'http://172.16.160.188:50010/?type=AasxServer'
+                url: 'http://172.16.160.188:50010',
+                type: 'AasxServer'
             },
             {
                 name: 'http://172.16.160.171:54000',
-                url: 'http://172.16.160.171:54000/?type=AasxServer'
+                url: 'http://172.16.160.171:54000',
+                type: 'AasxServer'
             }
         ];
 
-        registryScan = new AASRegistryScan(logger, endpoint.href, containers);
+        registryScan = new AASRegistryScan(logger, endpoint, containers);
         const spy = jest.fn();
         registryScan.on('removed', spy);
         await expect(registryScan.scanAsync()).resolves.toBeUndefined();

@@ -30,7 +30,6 @@ import { ProjectAPIService } from '../../app/project/project-api.service';
 import { projectReducer } from '../../app/project/project.reducer';
 import { ProjectState } from '../../app/project/project.state';
 import { ProjectService } from '../../app/project/project.service';
-import { createEndpoint } from '../../app/configuration';
 
 class TestWebSocketFactoryService implements Partial<WebSocketFactoryService> {
     constructor(private readonly subject: Subject<WebSocketData>) { }
@@ -245,7 +244,7 @@ describe('ProjectService', () => {
             type: 'AASServerMessage',
             data: {
                 type: 'ContainerAdded',
-                endpoint: createEndpoint('http://localhost/registry', { name: 'WS1', type: 'AASRegistry' }),
+                endpoint: { url: 'http://localhost/registry', name: 'WS1', type: 'AASRegistry', version: '3.0' },
                 container: ws.createContainer('http://localhost/container3', [])
             } as AASServerMessage,
         };
@@ -265,7 +264,7 @@ describe('ProjectService', () => {
             type: 'AASServerMessage',
             data: {
                 type: 'ContainerRemoved',
-                endpoint: createEndpoint('http://localhost/registry', { name: 'WS1', type: 'AASRegistry' }),
+                endpoint: { url: 'http://localhost/registry', name: 'WS1', type: 'AASRegistry', version: '3.0' },
                 container: container2
             } as AASServerMessage,
         };
@@ -283,15 +282,12 @@ describe('ProjectService', () => {
 
     it('adds an AAS endpoint to the current server configuration', function (done: DoneFn) {
         api.addEndpoint.and.returnValue(EMPTY);
-        service.addEndpoint(
-            'samples',
-            createEndpoint('file:///samples', 'samples'))
-            .subscribe({
-                complete: () => {
-                    expect(api.addEndpoint).toHaveBeenCalled();
-                    done();
-                }
-            });
+        service.addEndpoint({ url: 'file:///samples', name: 'samples', type: 'AasxDirectory', version: '3.0' }).subscribe({
+            complete: () => {
+                expect(api.addEndpoint).toHaveBeenCalled();
+                done();
+            }
+        });
     });
 
     it('removes an AAS endpoint from the server configuration', function (done: DoneFn) {
@@ -329,7 +325,7 @@ describe('ProjectService', () => {
         service.applyDocument(modified);
         service.documents.pipe(first()).subscribe(items => {
             const document = items.find(item => item.id === modified.id &&
-                item.container === modified.container);
+                item.endpoint.url === modified.endpoint.url);
 
             expect(document).toBeDefined();
             expect(document?.modified).toBeTrue();

@@ -14,6 +14,6 @@ export interface StartState {
     limit: number;
 }
 
-export interface State {
+export interface StartFeatureState {
     start: StartState;
 }

@@ -20,11 +20,14 @@
                 <div class="flex-grow-1">{{ message }}</div>
             </div>
         </ngb-toast>
-        <label class="form-lable" for="input-endpoint-name" translate>LABEL_REGISTRY_NAME</label>
+        <label class="form-lable" for="input-endpoint-name" translate>LABEL_ENDPOINT_NAME</label>
         <input id="input-endpoint-name" type="text" class="form-control mb-3"
             placeholder="{{'PLACEHOLDER_ENDPOINT_NAME' | translate}}" [(ngModel)]="name" name="name"
             (input)="inputValue()">
-        <label class="form-lable" for="div-endpoint-url" translate>LABEL_REGISTRY_URL</label>
+        <label class="form-lable" for="input-endpoint-version" translate>LABEL_ENDPOINT_VERSION</label>
+        <input id="input-endpoint-version" type="text" class="form-control mb-3"
+            placeholder="{{'PLACEHOLDER_ENDPOINT_VERSION' | translate}}" [(ngModel)]="version" name="version">
+        <label class="form-lable" for="div-endpoint-url" translate>LABEL_ENDPOINT_URL</label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
             <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item.name}}</button>
             <div class="dropdown-menu" ngbDropdownMenu>

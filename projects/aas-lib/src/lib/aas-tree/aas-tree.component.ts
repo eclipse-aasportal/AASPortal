@@ -25,6 +25,7 @@ import {
     selectSubmodel,
     getIdShortPath,
     mimeTypeToExtension,
+    AASEndpointType,
 } from 'common';
 
 import { AASTreeRow, AASTreeFeatureState } from './aas-tree.state';
@@ -286,7 +287,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                     template,
                     submodels: [{
                         id: this.document.id,
-                        url: this.document.container,
+                        url: this.document.endpoint.url,
                         idShort: submodel.idShort
                     }]
                 };
@@ -327,11 +328,11 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                         await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
                     }
                 } else {
-                    const container = encodeBase64Url(this.document.container);
+                    const endpoint = encodeBase64Url(this.document.endpoint.url);
                     const id = encodeBase64Url(this.document.id);
                     const smId = encodeBase64Url(blob.parent.keys[0].value);
                     const path = getIdShortPath(blob);
-                    const url = `/api/v1/containers/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
+                    const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
                     if (blob.contentType.startsWith('image/')) {
                         await this.showImageAsync(name, url);
                     } else if (blob.contentType.startsWith('video/')) {
@@ -453,9 +454,20 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
             );
 
             this.webSocketSubject.next(this.createMessage(
-                this.document.endpoint.type,
-                this.document.container,
+                this.toEndpointType(this.document.endpoint.type),
+                this.document.endpoint.url,
                 this.document.id));
+        }
+    }
+
+    private toEndpointType(type: AASEndpointType): EndpointType {
+        switch (type) {
+            case 'OpcuaServer':
+                return 'opc';
+            case 'AasxDirectory':
+                return 'file';
+            default:
+                return 'http';
         }
     }
 
@@ -513,7 +525,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private onError = (error: any): void => {
+    private onError = (error: unknown): void => {
         this.notify.log(LogType.Error, error);
     }
 
@@ -525,7 +537,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                 const smId = encodeBase64Url(submodel.id);
                 const path = getIdShortPath(file);
                 value.name = basename(file.value);
-                const url = encodeBase64Url(this.document.container);
+                const url = encodeBase64Url(this.document.endpoint.url);
                 const id = encodeBase64Url(this.document.id);
                 value.url = `/api/v1/containers/${url}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }

@@ -109,7 +109,7 @@ describe('ProjectApiService', function () {
     it('POST: /api/v1/endpoints/:name', function () {
         const name = 'Test';
         const url = `file:///resources/samples/`;
-        service.addEndpoint(name, url).subscribe();
+        service.addEndpoint({ name, url, type: 'AasxDirectory', version: '3.0' }).subscribe();
         const req = httpTestingController.expectOne('/api/v1/endpoints/Test');
         expect(req.request.method).toEqual('POST');
         expect(req.request.body).toEqual({ url });

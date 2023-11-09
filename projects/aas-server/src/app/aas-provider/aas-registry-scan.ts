@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { AASContainer } from 'common';
+import { AASContainer, AASEndpoint } from 'common';
 import { Logger } from '../logging/logger.js';
 import { AASEndpointScan } from './aas-endpoint-scan.js';
 import { ServerMessage } from '../packages/server-message.js';
-import { createEndpoint } from '../configuration.js';
 import { AssetAdministrationShellDescriptor } from '../types/registry.js';
 
 export class AASRegistryScan extends AASEndpointScan {
@@ -19,11 +18,11 @@ export class AASRegistryScan extends AASEndpointScan {
 
     constructor(
         private readonly logger: Logger,
-        private readonly endpoint: string,
+        private readonly endpoint: AASEndpoint,
         private readonly containers: AASContainer[]) {
         super();
 
-        this.url = new URL(endpoint.split('?')[0]);
+        this.url = new URL(endpoint.url);
     }
 
     public async scanAsync(): Promise<void> {
@@ -54,7 +53,8 @@ export class AASRegistryScan extends AASEndpointScan {
             if (url) {
                 const container = reference.get(url);
                 if (!container) {
-                    reference.set(url, { url: url, name: '' });
+                    // ToDo
+                    reference.set(url, { url: url, name: '', type: 'AasxServer' });
                 }
             }
         }
@@ -74,7 +74,7 @@ export class AASRegistryScan extends AASEndpointScan {
 
     private containerUrl(value: string): string | undefined {
         try {
-            return createEndpoint(value).href;
+            return new URL(value).href;
         } catch (error) {
             this.logger.error(`'${value}' is an invalid URL.`);
             return undefined;

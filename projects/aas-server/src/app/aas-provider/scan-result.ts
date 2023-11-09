@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message } from 'common';
+import { AASDocument, AASContainer, Message, AASEndpoint } from 'common';
 
 export enum ScanResultType {
     Added,
@@ -50,7 +50,7 @@ export interface ScanResult {
 /** The result of an AASServer endpoint scan. */
 export interface ScanEndpointResult extends ScanResult {
     /** The AAS registry. */
-    endpoint: string;
+    endpoint: AASEndpoint;
     /** The result subject. */
     container: AASContainer;
 }
