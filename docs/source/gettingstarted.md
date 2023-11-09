@@ -63,7 +63,9 @@ or the name (idShort) of the AAS
     http://localhost/?id=Bosch_NexoPistolGripNutrunner
 
 ## AASServer 
-ToDo.
+AASServer is a Node.js server application based on the Express framework. The main feature of AASServer is the provision of Asset Administration Shells from different data sources (AASX server, OPC UA server, file system). AASServer can read Asset Administration Shells in JSON, XML and OPC UA format. An Asset Administration Shell is always provided to a web client (AASPortal) in JSON version 3 format.
+
+AASServer provides a user management. Authentication of a user is based on Json Web Token. 
 
 ## Environment Variables
 | Name             |                                                                       | default                                        |

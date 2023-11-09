@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EMPTY, from, mergeMap, of, Subscription, toArray, zip } from 'rxjs';
@@ -16,13 +16,14 @@ import { State } from './view.state';
 import * as ViewActions from './view.actions';
 import * as ViewSelectors from './view.selectors';
 import { ProjectService } from '../project/project.service';
+import { ToolbarService } from '../toolbar.service';
 
 @Component({
     selector: 'fhg-view',
     templateUrl: './view.component.html',
     styleUrls: ['./view.component.scss']
 })
-export class ViewComponent implements OnInit, OnDestroy {
+export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly store: Store<State>;
     private readonly subscription = new Subscription();
 
@@ -30,7 +31,8 @@ export class ViewComponent implements OnInit, OnDestroy {
         store: Store,
         private readonly route: ActivatedRoute,
         private readonly project: ProjectService,
-        private readonly clipboard: lib.ClipboardService
+        private readonly clipboard: lib.ClipboardService,
+        private readonly toolbar: ToolbarService
     ) {
         this.store = store as Store<State>;
         this.subscription.add(this.store.select(ViewSelectors.selectSubmodels)
@@ -43,6 +45,9 @@ export class ViewComponent implements OnInit, OnDestroy {
                 this.template = template;
             }));
     }
+
+    @ViewChild('viewToolbar', { read: TemplateRef })
+    public viewToolbar: TemplateRef<unknown> | null = null;
 
     public template?: string;
 
@@ -73,7 +78,14 @@ export class ViewComponent implements OnInit, OnDestroy {
         }
     }
 
+    public ngAfterViewInit(): void {
+        if (this.viewToolbar) {
+            this.toolbar.set(this.viewToolbar);
+        }
+    }
+
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+        this.toolbar.clear();
     }
 }

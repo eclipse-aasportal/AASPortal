@@ -13,7 +13,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { StoreModule } from '@ngrx/store';
 import { FormsModule } from '@angular/forms';
 
-import { ToolbarComponent } from './toolbar/toolbar.component';
 import { NotifyComponent } from './notify/notify.component';
 import { LocalizeComponent } from './localize/localize.component';
 import { LoginFormComponent } from './auth/login-form/login-form.component';
@@ -42,7 +41,6 @@ import { SecuredImageComponent } from './secured-image/secured-image.component';
 @NgModule({
     declarations: [
         NotifyComponent,
-        ToolbarComponent,
         LocalizeComponent,
         LoginFormComponent,
         RegisterFormComponent,
@@ -75,7 +73,6 @@ import { SecuredImageComponent } from './secured-image/secured-image.component';
     ],
     exports: [
         NotifyComponent,
-        ToolbarComponent,
         LocalizeComponent,
         LoginFormComponent,
         RegisterFormComponent,
