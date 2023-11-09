@@ -80,8 +80,12 @@ export class AasxServerPackage extends AASPackage {
     }
 
     private async createThumbnail(id: string): Promise<string | undefined> {
-        const input = await this.source.getThumbnailAsync(id);
-        const output = await ImageProcessing.resizeAsync(input, 40, 40);
-        return await this.streamToBase64(output);
+        try {
+            const input = await this.source.getThumbnailAsync(id);
+            const output = await ImageProcessing.resizeAsync(input, 40, 40);
+            return await this.streamToBase64(output);
+        } catch {
+            return undefined;
+        }
     }
 }

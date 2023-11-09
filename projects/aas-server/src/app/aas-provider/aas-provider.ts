@@ -457,7 +457,7 @@ export class AASProvider {
                             this.startContainerScan,
                             this.timeout,
                             result.taskId,
-                            { name: task.id, container: endpoint, documents },
+                            { ...endpoint, documents },
                             result.statistic);
                     }).catch(error => this.logger.error(error));
                 }
@@ -591,10 +591,6 @@ export class AASProvider {
 
     //     return document;
     // }
-
-    private getUrl(url: string): string {
-        return url.split('?')[0];
-    }
 
     private createTaskId(): number {
         const taskId = this.nextTaskId;

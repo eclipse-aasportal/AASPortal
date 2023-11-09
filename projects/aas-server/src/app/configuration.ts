@@ -59,10 +59,15 @@ export function createEndpoint(url: string, name: string, type: AASEndpointType 
     return { url, name, type, version };
 }
 
+/**
+ * Creates an AASEndpoint form an URL.
+ * @param url The current URL.
+ * @returns An equivalent AASEndpoint.
+ */
 export function urlToEndpoint(url: string): AASEndpoint {
     const value = new URL(url);
     const name = value.searchParams.get('name');
-    const type = value.searchParams.get('type') as AASEndpointType ?? 'AasxServer';
+    const type = value.searchParams.get('type') as AASEndpointType ?? getEndpointType(value);
     const version = value.searchParams.get('version') ?? '3.0';
 
     value.search = '';
@@ -71,6 +76,9 @@ export function urlToEndpoint(url: string): AASEndpoint {
     return { url: value.href, name: name ?? value.href, type, version };
 }
 
+/**
+ * Creates an URL that represents an AASEndpoint.
+ */
 export function endpointUrl(url: string, name: string, type: AASEndpointType, version?: string): URL {
     const value = new URL(url);
     value.searchParams.append('name', name);
