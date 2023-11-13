@@ -33,13 +33,13 @@ export class AASEndpointScanFactory {
                     this.logger,
                     data.endpoint,
                     this.createFileStorage(data.endpoint.url),
-                    data.containers);
+                    data.endpoints);
             case 'AasxServer':
-                return new AASXServerEndpointScan(this.logger, this.resourceFactory, data.endpoint, data.containers);
+                return new AASXServerEndpointScan(this.logger, this.resourceFactory, data.endpoint, data.endpoints);
             case 'AASRegistry':
-                return new AASRegistryScan(this.logger, data.endpoint, data.containers);
+                return new AASRegistryScan(this.logger, data.endpoint, data.endpoints);
             case 'OpcuaServer':
-                return new OpcuaEndpointScan(this.logger, data.endpoint, data.containers);
+                return new OpcuaEndpointScan(this.logger, data.endpoint, data.endpoints);
             default:
                 throw new Error();
         }

@@ -7,21 +7,58 @@
  *****************************************************************************/
 
 import { Low } from 'lowdb';
-import { AASCursor, AASDocument, AASDocumentId, AASPage } from 'common';
+import { AASCursor, AASDocument, AASDocumentId, AASEndpoint, AASPage, ApplicationError } from 'common';
 import { AASIndex } from './aas-index.js';
 import { AASFilter } from './aas-filter.js';
+import { Variable } from '../variable.js';
+import { urlToEndpoint } from '../configuration.js';
+import { ERRORS } from '../errors.js';
 
 export interface Data {
+    endpoints: AASEndpoint[];
     documents: AASDocument[];
 }
 
 export class LowIndex extends AASIndex {
     private readonly promise: Promise<void>;
 
-    constructor(private readonly db: Low<Data>) {
+    constructor(private readonly db: Low<Data>, private readonly variable: Variable) {
         super();
 
-        this.promise = db.read();
+        this.promise = this.initialize();
+    }
+
+    public override async getEndpoints(): Promise<AASEndpoint[]> {
+        await this.promise;
+        return this.db.data.endpoints;
+    }
+
+    public override async getEndpoint(name: string): Promise<AASEndpoint | undefined> {
+        await this.promise;
+        return this.db.data.endpoints.find(endpoint => endpoint.name === name);
+    }
+
+    public override async setEndpoint(endpoint: AASEndpoint): Promise<void> {
+        await this.promise;
+        if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
+            throw new ApplicationError(
+                `An endpoint with the name "${name}" already exists.`,
+                ERRORS.RegistryAlreadyExists,
+                endpoint.name);
+        }
+
+        this.db.data.endpoints.push(endpoint);
+        await this.db.write();
+    }
+
+    public override async removeEndpoint(name: string): Promise<boolean> {
+        await this.promise;
+        const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === name);
+        if (index < 0) return false;
+
+        this.db.data.endpoints.splice(index, 1);
+        await this.db.write();
+        return true;
     }
 
     public override async getContainerDocuments(url: string): Promise<AASDocument[]> {
@@ -83,23 +120,44 @@ export class LowIndex extends AASIndex {
 
     public override async add(document: AASDocument): Promise<void> {
         await this.promise;
-        this.db.data.documents.push(document);
+        const url = document.endpoint.url;
+        const id = document.id;
+        if (this.db.data.documents.some(item => item.endpoint.url === url && item.id === id)) {
+            throw new Error(`An AAS with the identifier ${id} already exist in ${url}`);
+        }
+
+        this.db.data.documents.push({ ...document, content: null });
         await this.db.write();
     }
 
-    public override async delete(url: string, id: string): Promise<void> {
+    public override async remove(url: string, id: string): Promise<boolean> {
         await this.promise;
         const index = this.db.data.documents.findIndex(
             item => item.endpoint.url === url && item.id === id);
 
-        if (index >= 0) {
-            this.db.data.documents.splice(index, 1);
-            await this.db.write();
-        }
+        if (index < 0) return false;
+
+        this.db.data.documents.splice(index, 1);
+        await this.db.write();
+        return true;
     }
 
-    public reset(): void {
-        throw new Error('Not implemented.');
+    public async reset(): Promise<void> {
+        this.db.data.documents = [];
+        this.db.data.endpoints =
+            this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
+
+        await this.db.write();
+    }
+
+    private async initialize(): Promise<void> {
+        await this.db.read();
+
+        if (this.db.data.endpoints.length === 0) {
+            const endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
+            this.db.data.endpoints.push(...endpoints);
+            await this.db.write();
+        }
     }
 
     private async getFirstPage(limit: number, filter?: AASFilter): Promise<AASPage> {

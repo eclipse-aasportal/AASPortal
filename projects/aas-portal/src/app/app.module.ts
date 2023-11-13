@@ -14,7 +14,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { AASLibModule } from 'projects/aas-lib/src/public-api';
-import { EffectsModule } from '@ngrx/effects';
 import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -34,11 +33,11 @@ import { UploadFormComponent } from './start/upload-form/upload-form.component';
 import { ViewComponent } from './view/view.component';
 import { viewReducer } from './view/view.reducer';
 import { AddEndpointFormComponent } from './start/add-endpoint-form/add-endpoint-form.component';
-import { projectReducer } from './project/project.reducer';
-import { ProjectEffects } from './project/project.effects';
 import { HttpLoaderFactory } from './http-loader-factory';
 import { httpInterceptorProviders } from './index';
+import { EffectsModule } from '@ngrx/effects';
 import { AASEffects } from './aas/aas.effects';
+import { ViewEffects } from './view/view.effects';
 
 @NgModule({
     declarations: [
@@ -68,9 +67,8 @@ import { AASEffects } from './aas/aas.effects';
                 aas: aasReducer,
                 view: viewReducer,
                 dashboard: dashboardReducer,
-                project: projectReducer
             }),
-        EffectsModule.forRoot([ProjectEffects, AASEffects]),
+        EffectsModule.forRoot([AASEffects, ViewEffects]),
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Body, Delete, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
+import { Body, Delete, Get, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
 import { AASEndpoint } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
@@ -27,6 +27,22 @@ export class EndpointsController extends ControllerBase {
         @inject(AASProvider) private readonly aasProvider: AASProvider
     ) {
         super(logger, auth, variable);
+    }
+
+    /**
+     * @summary Gets the endpoints.
+     * @returns All current available endpoints.
+     */
+    @Get('')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getEndpoints')
+    public async getEndpoints(): Promise<AASEndpoint[]> {
+        try {
+            this.logger.start('getWorkspaces');
+            return await this.aasProvider.getEndpoints();
+        } finally {
+            this.logger.stop();
+        }
     }
 
     /**
@@ -50,5 +66,20 @@ export class EndpointsController extends ControllerBase {
     @OperationId('deleteEndpoint')
     public deleteEndpoint(@Path() name: string): Promise<void> {
         return this.aasProvider.removeEndpointAsync(name);
+    }
+    
+    /**
+     * @summary Resets the AASServer container configuration.
+     */
+    @Delete('')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('reset')
+    public async reset(): Promise<void> {
+        try {
+            this.logger.start('reset');
+            await this.aasProvider.resetAsync();
+        } finally {
+            this.logger.stop();
+        }
     }
 }

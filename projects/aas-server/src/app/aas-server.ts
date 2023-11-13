@@ -17,7 +17,6 @@ import { WSServer } from './ws-server.js';
 import { AASProvider } from './aas-provider/aas-provider.js';
 import { AASIndexFactory } from './aas-provider/aas-index-factory.js';
 
-container.registerInstance('CONFIGURATION', './aas-server-config.json');
 container.registerInstance('USERS_DIR', './users');
 container.registerSingleton('Logger', FileLogger);
 container.register('AASIndex', { useFactory: c => new AASIndexFactory(c).create() });

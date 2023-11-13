@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, AASWorkspace, aas } from 'common';
+import { AASDocument, AASContainer, aas } from 'common';
 
 export function createContainer(url: string, documents: AASDocument[]): AASContainer {
     return {
@@ -14,13 +14,6 @@ export function createContainer(url: string, documents: AASDocument[]): AASConta
         url: url,
         name: url,
         type: 'AasxDirectory'
-    };
-}
-
-export function createWorkspace(name: string, containers: AASContainer[]): AASWorkspace {
-    return {
-        name: name,
-        containers: containers,
     };
 }
 

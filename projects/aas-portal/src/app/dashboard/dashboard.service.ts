@@ -347,8 +347,7 @@ export class DashboardService {
             } else {
                 nodes = [];
                 page.requests.push({
-                    type: this.toEndpointType(document.endpoint.type),
-                    url: document.endpoint.url,
+                    endpoint: document.endpoint,
                     id: document.id,
                     nodes: nodes
                 });
@@ -378,10 +377,9 @@ export class DashboardService {
 
     private indexOfRequest(page: DashboardPage, document: AASDocument): number {
         const url = document.endpoint.url;
-        const type = this.toEndpointType(document.endpoint.type);
         const id = document.id;
         return page.requests.findIndex(item => {
-            return item.url === url && (type === 'opc' || item.id === id);
+            return item.endpoint.url === url && (item.endpoint.type === 'OpcuaServer' || item.id === id);
         });
     }
 

@@ -69,16 +69,16 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Uploads one or more AASX packages to the specified AAS container.
-     * @param url The AAS container URL (Base64Url encoded).
-     * @param files The AAS Document.
+     * @param name The name of the destination endpoint (Base64Url encoded).
+     * @param files The AAS package file.
      */
-    @Post('{url}/packages')
+    @Post('{name}/packages')
     @Security('bearerAuth', ['editor'])
     @OperationId('addPackages')
-    public async addPackages(@Path() url: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
+    public async addPackages(@Path() name: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
         try {
             this.logger.start('addPackages');
-            await this.aasProvider.addPackagesAsync(decodeBase64Url(url), files);
+            await this.aasProvider.addPackagesAsync(decodeBase64Url(name), files);
         } finally {
             this.logger.stop();
         }
@@ -165,21 +165,6 @@ export class ContainersController extends ControllerBase {
                 decodeBase64Url(smId),
                 path,
                 queryParams);
-        } finally {
-            this.logger.stop();
-        }
-    }
-
-    /**
-     * @summary Resets the AASServer container configuration.
-     */
-    @Delete('reset')
-    @Security('bearerAuth', ['editor'])
-    @OperationId('reset')
-    public async reset(): Promise<void> {
-        try {
-            this.logger.start('reset');
-            await this.aasProvider.resetAsync();
         } finally {
             this.logger.stop();
         }

@@ -33,11 +33,6 @@ export class AddEndpointFormComponent {
                 value: 'http://'
             },
             {
-                name: this.translate.instant('AASEndpointType.AASRegistry'),
-                type: 'AASRegistry',
-                value: 'http://'
-            },
-            {
                 name: this.translate.instant('AASEndpointType.OpcuaServer'),
                 type: 'OpcuaServer',
                 value: 'opc.tcp://'
@@ -141,7 +136,7 @@ export class AddEndpointFormComponent {
         }
     }
 
-    private createMessage(id: string, ...args: any[]): string {
+    private createMessage(id: string, ...args: unknown[]): string {
         return stringFormat(this.translate.instant(id), args);
     }
 }

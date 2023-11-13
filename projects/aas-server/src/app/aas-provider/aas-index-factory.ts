@@ -22,7 +22,7 @@ export class AASIndexFactory {
     public create(): AASIndex {
         const variable = this.container.resolve(Variable);
         const dbFile = path.join(variable.CONTENT_ROOT, 'db.json');
-        const db = new Low<Data>(new JSONFile(dbFile), { documents: [] });
-        return new LowIndex(db);
+        const db = new Low<Data>(new JSONFile(dbFile), { documents: [], endpoints: [] });
+        return new LowIndex(db, variable);
     }
 }

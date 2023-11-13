@@ -21,8 +21,8 @@
         </div>
         <div class="mb-3">
             <label class="form-label" for="upload-container" translate>LABEL_UPLOAD_CONTAINER</label>
-            <select id="upload-container" class="form-select" [(ngModel)]="container" name="container">
-                <option *ngFor="let container of containers" [ngValue]="container">{{container.name}}</option>
+            <select id="upload-container" class="form-select" [(ngModel)]="endpoint" name="container">
+                <option *ngFor="let endpoint of endpoints" [ngValue]="endpoint">{{endpoint.name}}</option>
             </select>
         </div>
         <div class="progress form-group" *ngIf="progress > 0">

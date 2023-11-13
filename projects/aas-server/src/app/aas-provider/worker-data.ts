@@ -23,7 +23,7 @@ export interface ScanContainerData extends WorkerData {
 export interface ScanEndpointData extends WorkerData {
     type: 'ScanEndpointData';
     endpoint: AASEndpoint;
-    containers: AASContainer[];
+    endpoints: AASEndpoint[];
 }
 
 export function isScanContainerData(data: WorkerData): data is ScanContainerData {

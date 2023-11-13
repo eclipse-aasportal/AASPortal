@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, } from '@angular/common/http';
-import { AASDocument, AASEndpoint, AASWorkspace, aas } from 'common';
+import { AASEndpoint } from 'common';
 import { Observable } from 'rxjs';
 import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 
@@ -16,49 +16,17 @@ import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 @Injectable({
     providedIn: 'root'
 })
-export class ProjectAPIService {
+export class StartApiService {
     constructor(
         private readonly http: HttpClient,
     ) {}
 
     /**
-    * Returns the basic data of all available AAS containers.
+    * Returns all configured AAS endpoints.
     * @returns An array of `AASContainer`.
     */
-    public getWorkspaces(): Observable<AASWorkspace[]> {
-        return this.http.get<AASWorkspace[]>('/api/v1/workspaces');
-    }
-
-    /**
-     * Returns all documents contained in the container with the specified URL.
-     * @param url The container URL.
-     * @returns The documents of the specified container.
-     */
-    public getDocuments(url: string): Observable<AASDocument[]> {
-        return this.http.get<AASDocument[]>(`/api/v1/containers/${encodeBase64Url(url)}/documents`);
-    }
-
-    /**
-     * Gets the referenced AAS document.
-     * @param id The identification or name of the document.
-     * @param url The URL of the container.
-     * @returns The AAS document.
-     */
-    public getDocument(id: string, url?: string): Observable<AASDocument> {
-        return this.http.get<AASDocument>(
-            url ? `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`
-                : `/api/v1/documents/${encodeBase64Url(id)}`);
-    }
-
-    /**
-     * Loads the element structure of the specified document.
-     * @param id The identification of the AAS document.
-     * @param url The URL of the container.
-     * @returns The root of the element structure.
-     */
-    public getContent(id: string, url: string): Observable<aas.Environment> {
-        return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}/content`);
+    public getEndpoints(): Observable<AASEndpoint[]> {
+        return this.http.get<AASEndpoint[]>('/api/v1/endpoints');
     }
 
     /**
@@ -77,11 +45,9 @@ export class ProjectAPIService {
         return this.http.delete<void>(`/api/v1/endpoints/${name}`);
     }
 
-    /**
-     * Restores the default workspace/container configuration.
-     */
+    /** Restores the default AAS endpoint configuration. */
     public reset(): Observable<void> {
-        return this.http.delete<void>('/api/v1/containers/reset');
+        return this.http.delete<void>('/api/v1/endpoints');
     }
 
     /**

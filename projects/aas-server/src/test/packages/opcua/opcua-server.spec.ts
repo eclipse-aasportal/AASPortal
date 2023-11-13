@@ -106,9 +106,12 @@ describe('OpcuaServer', function () {
     describe('createSubscription', function () {
         it('creates a new OpcuaSubscription instance', function () {
             const request: LiveRequest = {
-                type: 'opc',
+                endpoint: {
+                    url: 'http://customer.com/aas/9175_7013_7091_9168',
+                    name: 'Test',
+                    type: 'OpcuaServer'
+                },
                 id: 'opc.tcp://localhost:1234/I4AASServer',
-                url: 'http://customer.com/aas/9175_7013_7091_9168',
                 nodes: [{
                     nodeId: 'ns=1;i=4711',
                     valueType: 'xs:integer'

@@ -18,6 +18,7 @@ import {
     parseNumber,
     convertFromString
 } from 'common';
+import { AASResourceFactory } from '../packages/aas-resource-factory.js';
 
 type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
@@ -39,17 +40,22 @@ interface Expression {
 export class AASFilter {
     private readonly expression: Expression;
 
-    constructor(searchText: string, private readonly language: string) {
+    constructor(private readonly resourceFactory: AASResourceFactory,
+        searchText: string, private readonly language: string) {
         this.expression = { orExpressions: this.splitOr(searchText) };
     }
 
-    public do(input: AASDocument): boolean {
+    public async do(input: AASDocument): Promise<boolean> {
         let result = false;
         try {
             for (const or of this.expression.orExpressions) {
                 for (const expression of or.andExpressions) {
                     if (expression.length >= 3) {
                         if (expression.startsWith('#')) {
+                            if (!input.content) {
+                                input.content = await this.getContentAsync(input)
+                            }
+                            
                             result = this.match(input, this.parseExpression(expression));
                         } else {
                             result = this.contains(input, expression);
@@ -78,6 +84,16 @@ export class AASFilter {
 
     private splitAnd(s: string): string[] {
         return s.split('&&').map(item => item.trim().toLocaleLowerCase(this.language));
+    }
+
+    private async getContentAsync(document: AASDocument): Promise<aas.Environment> {
+        const source = this.resourceFactory.create(document.endpoint);
+        try {
+            await source.openAsync();
+            return await source.createPackage(document.address).readEnvironmentAsync();
+        } finally {
+            await source.closeAsync();
+        }
     }
 
     private contains(document: AASDocument, expression: string): boolean {

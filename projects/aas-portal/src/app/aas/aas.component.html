@@ -31,17 +31,17 @@
         </div>
     </div>
     <div class="row">
-        <fhg-aas-tree #aasTree [state]="state | async" [search]="search" [document]="document">
+        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document">
         </fhg-aas-tree>
     </div>
 </div>
 
 <ng-template #aasToolbar>
     <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="(state | async) === 'offline'">
+        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="state === 'online'">
             <i class="bi bi-play-fill"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="(state | async) === 'online'">
+        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="state === 'offline'">
             <i class="bi bi-stop-fill"></i>
         </button>
     </div>

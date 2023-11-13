@@ -453,10 +453,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                 }
             );
 
-            this.webSocketSubject.next(this.createMessage(
-                this.toEndpointType(this.document.endpoint.type),
-                this.document.endpoint.url,
-                this.document.id));
+            this.webSocketSubject.next(this.createMessage(this.document));
         }
     }
 
@@ -499,15 +496,10 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private createMessage(type: EndpointType, url: string, id: string): WebSocketData {
+    private createMessage(document: AASDocument): WebSocketData {
         return {
             type: 'LiveRequest',
-            data: {
-                type: type,
-                url: url,
-                id: id,
-                nodes: this.liveNodes
-            } as LiveRequest
+            data: { endpoint: document.endpoint, id: document.id, nodes: this.liveNodes } as LiveRequest
         };
     }
 

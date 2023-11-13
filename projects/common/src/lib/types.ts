@@ -134,8 +134,7 @@ export interface LiveNode {
 }
 
 export interface LiveRequest {
-    type: EndpointType;
-    url: string;
+    endpoint: AASEndpoint;
     id: string;
     nodes: LiveNode[]
 }

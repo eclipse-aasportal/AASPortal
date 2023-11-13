@@ -11,10 +11,9 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { aas, AASContainer, AASDocument, AASEndpoint, AASWorkspace, stringFormat } from 'common';
+import { aas, AASContainer, AASDocument, AASEndpoint, stringFormat } from 'common';
 import * as lib from 'projects/aas-lib/src/public-api';
-import { BehaviorSubject, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
-import { ProjectService } from '../project/project.service';
+import { BehaviorSubject, EMPTY, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
@@ -23,6 +22,7 @@ import { StartFeatureState } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { selectFilter, selectViewMode, selectLimit } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
+import { StartApiService } from './start-api.service';
 
 @Component({
     selector: 'fhg-start',
@@ -41,7 +41,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
         private readonly window: lib.WindowService,
-        private readonly project: ProjectService,
+        private readonly api: StartApiService,
         private readonly notify: lib.NotifyService,
         private readonly toolbar: ToolbarService,
         private readonly auth: lib.AuthService,
@@ -65,13 +65,9 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public readonly limit: Observable<number>;
 
-    public workspaces: AASWorkspace[] = [];
-
     public allAvailable = true;
 
-    public readonly endpoint = this.project.workspace.pipe(map(item => item?.name ?? '-'));
-
-    public readonly endpoints = this.project.workspaces;
+    public readonly endpoints = this.api.getEndpoints();
 
     public ngOnInit(): void {
         this.subscription.add(
@@ -80,17 +76,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                 .subscribe((value) => {
                     this.viewMode = value;
                 })
-        );
-
-        this.subscription.add(
-            this.project.workspaces.subscribe((value) => {
-                this.workspaces = value;
-            })
-        );
-
-        this.subscription.add(
-            this.project.documents.subscribe(
-                (documents) => (this.allAvailable = documents.every((item) => item.content)))
         );
 
         this.subscription.add(this.aasTable?.selectedDocuments.subscribe(
@@ -117,40 +102,36 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public addEndpoint(): void {
         this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(AddEndpointFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.workspaces = this.workspaces.map(item => item.name);
-                return from<Promise<AASEndpoint | undefined>>(modalRef.result)
+            mergeMap(() => this.api.getEndpoints()),
+            map(endpoints => {
+                const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.workspaces = endpoints;
+                return modalRef;
             }),
-            map((result) => {
-                if (!result) return;
+            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
+            mergeMap((result) => {
+                if (!result) return EMPTY;
 
-                this.project
-                    .addEndpoint(result)
-                    .pipe(first())
-                    .subscribe({
-                        error: (error) => this.notify.error(error),
-                    });
+                return this.api.addEndpoint(result);
             })).subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public removeEndpoint(): void {
-        if (this.workspaces.length <= 0) return;
-
         this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.endpoints = [...this.workspaces]
+            mergeMap(() => this.api.getEndpoints()),
+            mergeMap(endpoints => {
+                const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.endpoints = endpoints
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(item => ({
                         name: item.name,
-                        url: item.containers.map((c, i) => i === 0 ? c.url.split('?')[0] : `${i + 1}`).join(', '),
+                        url: item.url,
                         selected: false
                     } as EndpointSelect));
                 return from<Promise<string[] | undefined>>(modalRef.result);
             }),
             mergeMap((endpoints) => from((endpoints ?? []))),
-            mergeMap((endpoint) => this.project.removeEndpoint(endpoint)))
+            mergeMap((endpoint) => this.api.removeEndpoint(endpoint)))
             .subscribe({ error: (error) => this.notify.error(error) });
     }
 
@@ -160,12 +141,8 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             mergeMap((result) => {
                 if (!result) return of(void 0);
 
-                return this.project.reset();
+                return this.api.reset();
             })).subscribe({ error: (error) => this.notify.error(error) });
-    }
-
-    public setWorkspace(name: string): void {
-        this.project.setWorkspace(name);
     }
 
     public canUploadDocument(): boolean {
@@ -174,11 +151,11 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public uploadDocument(): void {
         this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(UploadFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                const containers = this.getUploadCapableEndpoints();
-                modalRef.componentInstance.containers = containers;
-                modalRef.componentInstance.container = containers[0];
+            mergeMap(() => this.api.getEndpoints()),
+            mergeMap(endpoints => {
+                const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.endpoints = endpoints.sort((a, b) => a.name.localeCompare(b.name));
+                modalRef.componentInstance.endpoint = endpoints[0];
                 return from<Promise<string | undefined>>(modalRef.result);
             })).subscribe({
                 next: (result) => {
@@ -219,7 +196,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
                 this.selectedDocuments.map(item => item.idShort).join(', ')))),
             mergeMap((result) => from(result ? this.selectedDocuments : [])),
-            mergeMap((document) => this.project.deleteDocument(document)))
+            mergeMap((document) => this.api.deleteDocument(document.id, document.endpoint.url)))
             .subscribe({ error: (error) => this.notify.error(error) });
     }
 

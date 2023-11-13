@@ -10,8 +10,8 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef 
 import { Router } from '@angular/router';
 import { Observable, Subscription, first, map } from 'rxjs';
 import { ClipboardService, WindowService, AASQuery } from 'projects/aas-lib/src/public-api';
-import { ProjectService } from '../project/project.service';
 import { ToolbarService } from '../toolbar.service';
+import { MainApiService } from './main-api.service';
 
 export enum LinkId {
     START = 0,
@@ -55,7 +55,7 @@ export class MainComponent implements OnInit, OnDestroy {
     constructor(
         private readonly router: Router,
         private readonly window: WindowService,
-        private readonly project: ProjectService,
+        private readonly api: MainApiService,
         private readonly clipboard: ClipboardService,
         private readonly viewContainer: ViewContainerRef,
         private readonly toolbar: ToolbarService) {
@@ -78,7 +78,7 @@ export class MainComponent implements OnInit, OnDestroy {
         const params = this.window.getQueryParams();
         const id = params.get('id');
         if (id) {
-            this.project.findDocument(id).pipe(first()).subscribe(document => {
+            this.api.getDocument(id).pipe(first()).subscribe(document => {
                 if (document) {
                     this.clipboard.set('AASQuery', { id: document.id } as AASQuery);
                     this.router.navigateByUrl('/aas?format=AASQuery');

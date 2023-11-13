@@ -81,7 +81,7 @@ export abstract class AasxServer extends AASResource {
         return new AasxServerPackage(this.logger, this, address);
     }
 
-    public createSubscription(
+    public override createSubscription(
         client: SocketClient,
         message: LiveRequest,
         env: aas.Environment): SocketSubscription {

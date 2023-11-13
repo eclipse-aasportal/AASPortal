@@ -19,7 +19,6 @@ import { aas } from 'common';
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
-import { sampleDocument } from '../assets/sample-document.js';
 import { createSpyObj } from '../utils.js';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
@@ -51,7 +50,6 @@ describe('ContainersController', function () {
         aasProvider = createSpyObj<AASProvider>(
             [
                 'updateDocumentAsync',
-                'getWorkspaces',
                 'getContentAsync',
                 'getPackageAsync',
                 'getDocumentAsync',
@@ -141,17 +139,6 @@ describe('ContainersController', function () {
 
         expect(response.statusCode).toBe(200);
         expect(aasProvider.getContentAsync).toHaveBeenCalled();
-    });
-
-    it('reset: /api/v1/containers/reset', async function () {
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-        aasProvider.resetAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        const response = await request(app)
-            .delete('/api/v1/containers/reset')
-            .set('Authorization', `Bearer ${getToken('John')}`);
-
-        expect(response.statusCode).toBe(204);
-        expect(aasProvider.resetAsync).toHaveBeenCalled();
     });
 
     describe('getDataElementValue: /api/v1/containers/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', function () {

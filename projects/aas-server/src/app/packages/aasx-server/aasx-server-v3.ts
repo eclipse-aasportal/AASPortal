@@ -170,7 +170,7 @@ export class AasxServerV3 extends AasxServer {
         const aasId = encodeBase64Url(shell.id);
         const items = nodeId.split('.');
         const path = items[1].split('/').slice(1).join('.');
-        return this.resolve(`/shells/${aasId}/aas/submodels/${items[0]}/submodel/submodel-elements/${path}`).href;
+        return this.resolve(`/shells/${aasId}/submodels/${items[0]}/submodel/submodel-elements/${path}`).href;
     }
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {

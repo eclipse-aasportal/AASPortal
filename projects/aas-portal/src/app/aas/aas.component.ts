@@ -9,7 +9,7 @@
 import { head } from 'lodash-es';
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, from } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, Subscription, from } from 'rxjs';
 import * as lib from 'projects/aas-lib/src/public-api';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
@@ -45,8 +45,8 @@ import {
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly store: Store<State>;
-    private readonly $state = new BehaviorSubject<lib.OnlineState>('offline');
     private readonly subscription = new Subscription();
+    private _state: lib.OnlineState = 'offline';
     private _dashboardPage = '';
     private templates: TemplateDescriptor[] = [];
     private selectedElements: aas.Referable[] = [];
@@ -66,7 +66,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly clipboard: lib.ClipboardService
     ) {
         this.store = store as Store<State>;
-        this.state = this.$state.asObservable();
         this.search = this.store.select(AASSelectors.selectSearch);
         this.editable = this.store.select(AASSelectors.selectEditable);
 
@@ -81,7 +80,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public document: AASDocument | null = null;
 
-    public readonly state: Observable<lib.OnlineState>;
+    public get state(): lib.OnlineState {
+        return this._state;
+    }
 
     public readonly search: Observable<string>;
 
@@ -116,7 +117,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public get onlineReady(): boolean {
-        return this.document?.onlineReady ?? false;
+        return !!this.document?.onlineReady;
     }
 
     public get readonly(): boolean {
@@ -172,10 +173,10 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                 } else {
                     return EMPTY;
                 }
-            })
-        ).subscribe({
-            error: error => this.notify.error(error)
-        }));
+            }))
+            .subscribe({
+                error: error => this.notify.error(error)
+            }));
 
         this.subscription.add(this.store.select(AASSelectors.selectTemplates).pipe()
             .subscribe(templates => {
@@ -203,13 +204,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public play(): void {
-        if (this.onlineReady && this.$state.value === 'offline') {
-            this.$state.next('online');
+        if (this.onlineReady && this._state === 'offline') {
+            this._state = 'online';
         }
     }
 
     public stop(): void {
-        this.$state.next('offline');
+        this._state = 'offline';
     }
 
     public canAddToDashboard(): boolean {
@@ -396,7 +397,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
         return false;
     }
-    
+
     // Hack, Hack 
     private isTimeSeries(element: aas.Referable): boolean {
         return isBlob(element) &&
