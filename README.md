@@ -11,7 +11,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 - Visual Studio Code
 - Node.js v18.10.0
 - GIT 2.36.0.windows
-- Docker Desktop 4.x 
+- Docker Desktop 4.x  
 
 ## Getting Started
 You can find a detailed documentation :blue_book: [here](https://aasportal.readthedocs.io/)
