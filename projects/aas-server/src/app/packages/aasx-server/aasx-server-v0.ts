@@ -40,11 +40,11 @@ export class AasxServerV0 extends AasxServer {
         return new JsonReaderV2(this.logger, sourceEnv).readEnvironment();
     }
 
-    public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+    public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public async commitAsync(
+    public override async commitAsync(
         source: aas.Environment,
         destination: aas.Environment,
         diffs: DifferenceItem[]): Promise<string[]> {
@@ -101,23 +101,23 @@ export class AasxServerV0 extends AasxServer {
         return await this.message.getResponse(url);
     }
 
-    public getPackageAsync(aasId: string, name: string): Promise<NodeJS.ReadableStream> {
+    public override getPackageAsync(): Promise<NodeJS.ReadableStream> {
         throw new Error('Not implemented.');
     }
 
-    public postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined> {
+    public override postPackageAsync(): Promise<AASPackage | undefined> {
         throw new Error('Not implemented.');
     }
 
-    public deletePackageAsync(aasIdentifier: string): Promise<void> {
+    public override deletePackageAsync(): Promise<void> {
         throw new Error('Not implemented.');
     }
 
-    public invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public invoke(): Promise<aas.Operation> {
         throw new Error('Not implemented.');
     }
 
-    public getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public getBlobValueAsync(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 
@@ -140,7 +140,7 @@ export class AasxServerV0 extends AasxServer {
         const messages: string[] = [];
         const aas = destination.assetAdministrationShells[0].idShort;
         for (const submodel of submodels) {
-            messages.push(await this.putSubmodelAsync(aas, new JsonWriterV2().write(submodel)));
+            await this.putSubmodelAsync(aas, new JsonWriterV2().write(submodel));
         }
 
         return messages;
@@ -158,13 +158,13 @@ export class AasxServerV0 extends AasxServer {
         return messages;
     }
 
-    private async putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<string> {
+    private async putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<void> {
         return await this.message.put(
             this.resolve('/aas/' + aas + '/submodels/'),
             new JsonWriterV2().write(submodel));
     }
 
-    private async deleteSubmodelAsync(aas: string, submodelId: string): Promise<string> {
+    private async deleteSubmodelAsync(aas: string, submodelId: string): Promise<void> {
         return await this.message.delete(this.resolve('/aas/' + aas + '/submodels/' + submodelId));
     }
 }

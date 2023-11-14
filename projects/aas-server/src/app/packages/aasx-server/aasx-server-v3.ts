@@ -12,13 +12,11 @@ import { createReadStream } from 'fs';
 import { encodeBase64Url } from '../../convert.js';
 import { AasxServer } from './aasx-server.js';
 import { Logger } from '../../logging/logger.js';
-import { AASPackage } from '../aas-package.js';
 import { JsonReader } from '../json-reader.js';
 import { JsonWriter } from '../json-writer.js';
 import { ERRORS } from '../../errors.js';
 import {
     aas,
-    AASEndpoint,
     ApplicationError,
     DifferenceItem,
     getIdShortPath,
@@ -162,7 +160,7 @@ export class AasxServerV3 extends AasxServer {
         const aasId = encodeBase64Url(shell.id);
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);
-        const url = this.resolve(`/shells/${aasId}/submodels/${smId}/submodel/submodelElements/${path}/attachment`);
+        const url = this.resolve(`/shells/${aasId}/submodels/${smId}/submodel-elements/${path}/attachment`);
         return await this.message.getResponse(url);
     }
 
@@ -170,7 +168,7 @@ export class AasxServerV3 extends AasxServer {
         const aasId = encodeBase64Url(shell.id);
         const items = nodeId.split('.');
         const path = items[1].split('/').slice(1).join('.');
-        return this.resolve(`/shells/${aasId}/submodels/${items[0]}/submodel/submodel-elements/${path}`).href;
+        return this.resolve(`/shells/${aasId}/submodels/${items[0]}/submodel-elements/${path}`).href;
     }
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
@@ -180,16 +178,18 @@ export class AasxServerV3 extends AasxServer {
         return await this.message.getResponse(this.resolve(`/packages/${packageId}`));
     }
 
-    public async postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined> {
+    public postPackageAsync(file: Express.Multer.File): Promise<void> {
         const formData = new FormData();
         formData.append('file', createReadStream(file.path));
         formData.append('fileName', file.filename);
-        await this.message.post(this.resolve(`/packages`), formData);
-        return undefined;
+        return this.message.post(this.resolve(`/packages`), formData);
     }
 
-    public deletePackageAsync(aasIdentifier: string): Promise<void> {
-        throw new Error('Not implemented.');
+    public async deletePackageAsync(aasIdentifier: string): Promise<void> {
+        const aasId = encodeBase64Url(aasIdentifier);
+        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`/packages?aasId=${aasId}`));
+        const packageId = encodeBase64Url(descriptors[0].packageId);
+        return this.message.delete(this.resolve(`/packages/${packageId}`));
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {

@@ -39,7 +39,7 @@ describe('AasxServerV3', function () {
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
             const nodeId = smId + '.submodel1/property1';
             expect(server.resolveNodeId(shell, nodeId)).toEqual(
-                `http://localhost:1234/shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/property1`);
+                `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`);
         });
     });
 
