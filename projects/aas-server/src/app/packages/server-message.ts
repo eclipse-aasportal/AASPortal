@@ -18,7 +18,7 @@ export class ServerMessage {
      * @template T The type of the object.
      * @returns The requested object.
      */
-    public get<T>(url: URL): Promise<T> {
+    public get<T extends object>(url: URL): Promise<T> {
         return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 host: url.hostname,
@@ -28,7 +28,7 @@ export class ServerMessage {
                 timeout: 3000
             };
 
-            const request = http.request(options, (response) => {
+            const request = http.request(options, response => {
                 let data = '';
                 response.on('data', (chunk: string) => {
                     data += chunk;
@@ -69,7 +69,7 @@ export class ServerMessage {
 
             const request = http.request(options, response => result(response));
             request.on('timeout', () => request.destroy())
-                .on('error', (error) => reject(error))
+                .on('error', error => reject(error))
                 .end();
         });
     }
@@ -79,8 +79,8 @@ export class ServerMessage {
      * @param url The destination URL.
      * @param obj The object to send.
      */
-    public put<T>(url: URL, obj: object): Promise<T> {
-        return new Promise<T>((result, reject) => {
+    public put(url: URL, obj: object): Promise<string> {
+        return new Promise((result, reject) => {
             const data = JSON.stringify(obj);
             const options: http.RequestOptions = {
                 hostname: url.hostname,
@@ -95,22 +95,20 @@ export class ServerMessage {
 
             const request = http.request(options, (response) => {
                 let responseData = '';
-                response.on('data', function (chunk: string) {
+                response.on('data', (chunk: string) => {
                     responseData += chunk;
                 });
 
-                response.on('end', function () {
+                response.on('end', () => {
                     try {
                         ServerMessage.checkStatusCode(response, responseData);
-                        result(JSON.parse(responseData));
+                        result(responseData);
                     } catch (error) {
                         reject(error);
                     }
                 });
 
-                response.on('error', function (error: Error) {
-                    reject(error);
-                });
+                response.on('error', error => reject(error));
             }).on('error', error => reject(error));
 
             request.write(data);
@@ -123,7 +121,7 @@ export class ServerMessage {
      * @param url The destination URL.
      * @param obj The object to send.
      */
-    public post<T>(url: URL, obj: any): Promise<T> {
+    public post(url: URL, obj: FormData | object): Promise<string> {
         return obj instanceof FormData ? this.postFormData(url, obj) : this.postObject(url, obj);
     }
 
@@ -131,8 +129,8 @@ export class ServerMessage {
      * Deletes an object.
      * @param url The URL of the object to delete.
      */
-    public delete<T>(url: URL): Promise<T> {
-        return new Promise<T>((result, reject) => {
+    public delete(url: URL): Promise<string> {
+        return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 hostname: url.hostname,
                 port: url.port,
@@ -143,24 +141,22 @@ export class ServerMessage {
                 }
             };
 
-            http.request(options, (response) => {
+            http.request(options, response => {
                 let responseData = '';
-                response.on('data', function (chunk: string) {
+                response.on('data', (chunk: string) => {
                     responseData += chunk;
                 });
 
                 response.on('end', function () {
                     try {
                         ServerMessage.checkStatusCode(response, responseData);
-                        result(JSON.parse(responseData));
+                        result(responseData);
                     } catch (error) {
                         reject(error);
                     }
                 });
 
-                response.on('error', function (error: Error) {
-                    reject(error);
-                });
+                response.on('error', error => reject(error));
             }).on('error', error => reject(error))
                 .end();
         });
@@ -172,7 +168,7 @@ export class ServerMessage {
      */
     public async checkUrlExist(url: string): Promise<void> {
         const temp = parseUrl(url);
-        const exist = await new Promise<boolean>((resolve, _) => {
+        const exist = await new Promise<boolean>(resolve => {
             const socket = net.createConnection(Number(temp.port), temp.hostname);
             socket.setTimeout(3000);
             socket.on('connect', () => {
@@ -196,8 +192,8 @@ export class ServerMessage {
         }
     }
 
-    private postObject<T>(url: URL, obj: object): Promise<T> {
-        return new Promise<T>((result, reject) => {
+    private postObject(url: URL, obj: object): Promise<string> {
+        return new Promise((result, reject) => {
             const data = JSON.stringify(obj);
             const options: http.RequestOptions = {
                 hostname: url.hostname,
@@ -212,22 +208,20 @@ export class ServerMessage {
 
             const request = http.request(options, (response) => {
                 let responseData = '';
-                response.on('data', function (chunk: string) {
+                response.on('data', (chunk: string) => {
                     responseData += chunk;
                 });
 
-                response.on('end', function () {
+                response.on('end', () => {
                     try {
                         ServerMessage.checkStatusCode(response, responseData);
-                        result(JSON.parse(responseData));
+                        result(responseData);
                     } catch (error) {
                         reject(error);
                     }
                 });
 
-                response.on('error', function (error: Error) {
-                    reject(error);
-                });
+                response.on('error', error => reject(error));
             }).on('error', error => reject(error));
 
             request.write(data);
@@ -235,8 +229,8 @@ export class ServerMessage {
         });
     }
 
-    private postFormData<T>(url: URL, formData: FormData): Promise<T> {
-        return new Promise<T>((result, reject) => {
+    private postFormData(url: URL, formData: FormData): Promise<string> {
+        return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 hostname: url.hostname,
                 port: url.port,
@@ -247,22 +241,20 @@ export class ServerMessage {
 
             const request = http.request(options, (response) => {
                 let responseData = '';
-                response.on('data', function (chunk: string) {
+                response.on('data', (chunk: string) => {
                     responseData += chunk;
                 });
 
                 response.on('end', function () {
                     try {
                         ServerMessage.checkStatusCode(response, responseData);
-                        result(JSON.parse(responseData));
+                        result(responseData);
                     } catch (error) {
                         reject(error);
                     }
                 });
 
-                response.on('error', function (error: Error) {
-                    reject(error);
-                });
+                response.on('error', error => reject(error));
             }).on('error', error => reject(error));
 
             formData.pipe(request);
@@ -275,7 +267,9 @@ export class ServerMessage {
         }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
-            throw new Error(data ? `(${response.statusCode}) ${response.statusMessage}: ${data}` : `(${response.statusCode}) ${response.statusMessage}.`);
+            throw new Error(data 
+                ? `(${response.statusCode}) ${response.statusMessage}: ${data}` 
+                : `(${response.statusCode}) ${response.statusMessage}.`);
         }
     }
 }

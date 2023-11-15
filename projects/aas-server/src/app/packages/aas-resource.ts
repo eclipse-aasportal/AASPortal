@@ -66,14 +66,14 @@ export abstract class AASResource {
      * Uploads an AASX package.
      * @param file The AASX package file.
      */
-    public abstract postPackageAsync(file: Express.Multer.File): Promise<unknown>;
+    public abstract postPackageAsync(file: Express.Multer.File): Promise<string>;
 
     /**
      * Delete an aasx package from the current source.
      * @param aasIdentifier The AAS identifier.
      * @param name The name of the package in the source.
      */
-    public abstract deletePackageAsync(aasIdentifier: string, name: string): Promise<unknown>;
+    public abstract deletePackageAsync(aasIdentifier: string, name: string): Promise<string>;
 
     /**
      * Invokes the specified operation synchronously.

@@ -89,10 +89,10 @@ export class ContainersController extends ControllerBase {
      * @param url The AAS container URL (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
      */
-    @Delete('{url}/documents/{id}')
+    @Delete('{url}/packages/{id}')
     @Security('bearerAuth', ['editor'])
-    @OperationId('deleteDocument')
-    public async deleteDocument(@Path() url: string, @Path() id: string): Promise<void> {
+    @OperationId('deletePackage')
+    public async deletePackage(@Path() url: string, @Path() id: string): Promise<void> {
         try {
             this.logger.start('deletePackage');
             await this.aasProvider.deletePackageAsync(decodeBase64Url(url), decodeBase64Url(id));

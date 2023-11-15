@@ -35,8 +35,6 @@ export * from './lib/library-table/library-table.component';
 export * from './lib/submodel-template/submodel-template';
 
 export * from './lib/types/aas-query-params';
-export * from './lib/types/aas-table';
-export * from './lib/types/aas-tree';
 export * from './lib/types/message-entry';
 export * from './lib/types/online-state';
 export * from './lib/types/view-mode';

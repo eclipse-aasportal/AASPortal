@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { aas, AASContainer, AASDocument, AASEndpoint, stringFormat } from 'common';
+import { aas, AASDocument, AASEndpoint, stringFormat } from 'common';
 import * as lib from 'projects/aas-lib/src/public-api';
 import { BehaviorSubject, EMPTY, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 
@@ -53,9 +53,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.limit = this.store.select(selectLimit);
     }
 
-    @ViewChild('aasTable')
-    public aasTable: lib.AASTable | null = null;
-
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
@@ -77,12 +74,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.viewMode = value;
                 })
         );
-
-        this.subscription.add(this.aasTable?.selectedDocuments.subscribe(
-            selectedDocuments => {
-                this.selectedDocuments = selectedDocuments;
-                this.someSelectedDocuments.next(selectedDocuments.length > 0);
-            }));
     }
 
     public ngAfterViewInit(): void {
@@ -168,12 +159,10 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canDownloadDocument(): boolean {
-        return this.aasTable && this.selectedDocuments.length > 0 ? true : false;
+        return this.selectedDocuments.length > 0 ? true : false;
     }
 
     public downloadDocument(): void {
-        if (!this.aasTable) return;
-
         for (const document of this.selectedDocuments) {
             this.download.downloadDocument(
                 document.endpoint.url,
@@ -183,20 +172,20 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canDeleteDocument(): boolean {
-        return this.aasTable != null && this.selectedDocuments.length > 0 &&
+        return this.selectedDocuments.length > 0 &&
             this.selectedDocuments.every(
                 item => item.endpoint.type === 'AasxDirectory');
     }
 
     public deleteDocument(): void {
-        if (!this.aasTable || this.selectedDocuments.length === 0) return;
+        if (this.selectedDocuments.length === 0) return;
 
         this.auth.ensureAuthorized('editor').pipe(
             map(() => this.window.confirm(stringFormat(
                 this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
                 this.selectedDocuments.map(item => item.idShort).join(', ')))),
             mergeMap((result) => from(result ? this.selectedDocuments : [])),
-            mergeMap((document) => this.api.deleteDocument(document.id, document.endpoint.url)))
+            mergeMap((document) => this.api.delete(document.id, document.endpoint.url)))
             .subscribe({ error: (error) => this.notify.error(error) });
     }
 
@@ -262,15 +251,12 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.store.dispatch(StartActions.setLimit({ limit }));
     }
 
-    private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {
-        return document.content?.submodels.filter(submodel => lib.resolveSemanticId(submodel) === semanticId) ?? [];
+    public selectedDocumentsChange(documents: AASDocument[]): void {
+        this.selectedDocuments = documents;
+        this.someSelectedDocuments.next(documents.length > 0);
     }
 
-    private getUploadCapableEndpoints(): AASContainer[] {
-        throw new Error('Not implemented');
-        // return this.workspace?.containers.filter(item => {
-        //     const type = getEndpointType(item.url);
-        //     return type === 'AasxDirectory' || type === 'AasxServer';
-        // }) ?? [];
+    private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {
+        return document.content?.submodels.filter(submodel => lib.resolveSemanticId(submodel) === semanticId) ?? [];
     }
 }

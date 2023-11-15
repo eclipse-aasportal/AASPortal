@@ -105,11 +105,11 @@ export class AasxServerV0 extends AasxServer {
         throw new Error('Not implemented.');
     }
 
-    public override postPackageAsync(): Promise<AASPackage | undefined> {
+    public override postPackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
-    public override deletePackageAsync(): Promise<void> {
+    public override deletePackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
@@ -158,13 +158,11 @@ export class AasxServerV0 extends AasxServer {
         return messages;
     }
 
-    private async putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<void> {
-        return await this.message.put(
-            this.resolve('/aas/' + aas + '/submodels/'),
-            new JsonWriterV2().write(submodel));
+    private putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<string> {
+        return this.message.put(this.resolve('/aas/' + aas + '/submodels/'), new JsonWriterV2().write(submodel));
     }
 
-    private async deleteSubmodelAsync(aas: string, submodelId: string): Promise<void> {
-        return await this.message.delete(this.resolve('/aas/' + aas + '/submodels/' + submodelId));
+    private deleteSubmodelAsync(aas: string, submodelId: string): Promise<string> {
+        return this.message.delete(this.resolve('/aas/' + aas + '/submodels/' + submodelId));
     }
 }

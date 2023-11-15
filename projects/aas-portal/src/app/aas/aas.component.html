@@ -31,7 +31,8 @@
         </div>
     </div>
     <div class="row">
-        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document">
+        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document"
+            (selectedChange)="selectedElementsChange($event.elements)">
         </fhg-aas-tree>
     </div>
 </div>
@@ -91,10 +92,10 @@
         <div class="input-group-text"><i class="bi bi-search"></i></div>
         <input #textInput type="text" class="form-control" [value]="search | async"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="applySearch(textInput.value)">
-        <button type="button" class="btn btn-primary" (click)="findNext()">
+        <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
             <i class="bi bi-chevron-down"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="findPrevious()">
+        <button type="button" class="btn btn-primary" (click)="aasTree.findPrevious()">
             <i class="bi bi-chevron-up"></i>
         </button>
     </div>

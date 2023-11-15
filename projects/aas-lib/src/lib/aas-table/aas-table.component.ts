@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AASDocument } from 'common';
@@ -14,7 +14,6 @@ import { Observable, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ViewMode } from '../types/view-mode';
-import { AASTable } from '../types/aas-table';
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
 import * as AASTableSelectors from './aas-table.selectors';
 import * as AASTableActions from './aas-table.actions';
@@ -28,7 +27,7 @@ import { AASTableApiService } from './aas-table-api.service';
     templateUrl: './aas-table.component.html',
     styleUrls: ['./aas-table.component.scss']
 })
-export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy {
+export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
     private readonly subscription: Subscription = new Subscription();
     private _filter = '';
@@ -43,12 +42,13 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
         private readonly clipboard: ClipboardService
     ) {
         this.store = store as Store<AASTableFeatureState>;
-        this.selectedDocuments = this.store.select(AASTableSelectors.selectSelectedDocuments);
         this.someSelections = this.store.select(AASTableSelectors.selectSomeSelections);
         this.rows = this.store.select(AASTableSelectors.selectRows);
-
         this.isFirstPage = this.store.select(AASTableSelectors.selectIsFirstPage);
         this.isLastPage = this.store.select(AASTableSelectors.selectIsLastPage);
+
+        this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
+            .subscribe(documents => this.selectedChange.emit({ documents })));
     }
 
     @Input()
@@ -60,13 +60,14 @@ export class AASTableComponent implements AASTable, OnInit, OnChanges, OnDestroy
     @Input()
     public limit: Observable<number> | null = null;
 
+    @Output()
+    public selectedChange = new EventEmitter<{ documents: AASDocument[] }>();
+
     public readonly isFirstPage: Observable<boolean>;
 
     public readonly isLastPage: Observable<boolean>;
 
-    public rows: Observable<AASTableRow[]>;
-
-    public readonly selectedDocuments: Observable<AASDocument[]>;
+    public readonly rows: Observable<AASTableRow[]>;
 
     public readonly someSelections: Observable<boolean>;
 

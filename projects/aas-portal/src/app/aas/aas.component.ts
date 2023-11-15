@@ -72,9 +72,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dashboardPages = this.dashboard.pages.pipe((map(pages => pages.map(page => page.name))));
     }
 
-    @ViewChild('aasTree')
-    public aasTree: lib.AASTree | null = null;
-
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aasToolbar: TemplateRef<unknown> | null = null;
 
@@ -189,10 +186,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        if (this.aasTree) {
-            this.subscription.add(this.aasTree.selectedElements.subscribe(values => this.selectedElements = values));
-        }
-
         if (this.aasToolbar) {
             this.toolbar.set(this.aasToolbar);
         }
@@ -201,6 +194,10 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     public ngOnDestroy(): void {
         this.toolbar.clear();
         this.subscription.unsubscribe();
+    }
+
+    public selectedElementsChange(elements: aas.Referable[]): void {
+        this.selectedElements = elements;
     }
 
     public play(): void {
@@ -358,14 +355,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             this.document!.endpoint.url,
             this.document!.id,
             this.document!.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
-    }
-
-    public findNext(): void {
-        this.aasTree?.findNext()
-    }
-
-    public findPrevious(): void {
-        this.aasTree?.findPrevious()
     }
 
     public applySearch(text: string): void {

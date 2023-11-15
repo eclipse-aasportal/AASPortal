@@ -243,6 +243,10 @@ export class AASProvider {
         try {
             await source.openAsync();
             const pkg = source.createPackage(document.address);
+            if (!document.content) {
+                document.content = await pkg.readEnvironmentAsync();
+            }
+            
             return await pkg.commitDocumentAsync(document, content);
         }
         finally {
@@ -269,8 +273,8 @@ export class AASProvider {
 
     /**
      * Uploads an AASX package.
+     * @param name The name of the destination endpoint.
      * @param files The AASX package file.
-     * @param name The destination URL.
      */
     public async addPackagesAsync(name: string, files: Express.Multer.File[]): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
@@ -285,12 +289,7 @@ export class AASProvider {
         try {
             await source.openAsync();
             for (const file of files) {
-                const aasPackage = await source.postPackageAsync(file);
-                if (aasPackage) {
-                    const document = await aasPackage.createDocumentAsync();
-                    await this.index.add(document);
-                    this.notify({ type: 'Added', document: { ...document, content: null } });
-                }
+                await source.postPackageAsync(file);
             }
         } finally {
             await source.closeAsync();

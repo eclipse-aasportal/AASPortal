@@ -7,7 +7,8 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter" [limit]="limit"></fhg-aas-table>
+    <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter" [limit]="limit"
+        (selectedChange)="selectedDocumentsChange($event.documents)"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>

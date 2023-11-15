@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, } from '@angular/core';
 import { BehaviorSubject, Subscription, Observable, first } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
@@ -34,7 +34,6 @@ import { ShowImageFormComponent } from './show-image-form/show-image-form.compon
 import { ShowVideoFormComponent } from './show-video-form/show-video-form.component';
 import { OperationCallFormComponent } from './operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
-import { AASTree } from '../types/aas-tree';
 import { basename, encodeBase64Url } from '../convert';
 import { AASQuery } from '../types/aas-query-params';
 import { ViewQuery } from '../types/view-query-params';
@@ -60,7 +59,7 @@ interface PropertyValue {
     styleUrls: ['./aas-tree.component.scss'],
     providers: [AASTreeSearch]
 })
-export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
+export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTreeFeatureState>;
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
@@ -84,8 +83,10 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
     ) {
         this.store = store as Store<AASTreeFeatureState>;
         this.nodes = this.store.select(AASTreeSelectors.selectNodes);
-        this.selectedElements = this.store.select(AASTreeSelectors.selectSelectedElements);
         this.someSelected = this.store.select(AASTreeSelectors.selectSomeSelected);
+
+        this.subscription.add(this.store.select(AASTreeSelectors.selectSelectedElements).pipe()
+            .subscribe(elements => this.selectedChange.emit({ elements })));
     }
 
     @Input()
@@ -96,6 +97,9 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
 
     @Input()
     public search: Observable<string> | null = null;
+
+    @Output()
+    public selectedChange = new EventEmitter<{ elements: aas.Referable[] }>();
 
     public get onlineReady(): boolean {
         return this.document?.onlineReady ?? false;
@@ -110,8 +114,6 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
     }
 
     public someSelected: Observable<boolean>;
-
-    public selectedElements: Observable<aas.Referable[]>;
 
     public nodes: Observable<AASTreeRow[]>;
 

@@ -120,15 +120,15 @@ export class OpcuaServer extends AASResource {
         return new OpcuaSubscription(this.logger, client, this, message.nodes);
     }
 
-    public getPackageAsync(aasIdentifier: string, name: string): Promise<NodeJS.ReadableStream> {
+    public getPackageAsync(): Promise<NodeJS.ReadableStream> {
         throw new Error('Not implemented.');
     }
 
-    public postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined> {
+    public postPackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
-    public deletePackageAsync(aasId: string, name: string): Promise<void> {
+    public deletePackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
@@ -159,7 +159,7 @@ export class OpcuaServer extends AASResource {
         return operation;
     }
 
-    public getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public getBlobValueAsync(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 

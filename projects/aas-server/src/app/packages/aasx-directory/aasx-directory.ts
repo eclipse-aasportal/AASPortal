@@ -87,7 +87,7 @@ export class AasxDirectory extends AASResource {
         throw new Error('Not implemented.');
     }
 
-    public override async postPackageAsync(file: Express.Multer.File): Promise<void> {
+    public override async postPackageAsync(file: Express.Multer.File): Promise<string> {
         const exists = await this.fileStorage.exists(file.filename);
         if (exists) {
             throw new ApplicationError(
@@ -99,6 +99,7 @@ export class AasxDirectory extends AASResource {
         try {
             const buffer = await readFile(file.path);
             await this.fileStorage.writeFile(file.filename, buffer);
+            return `${file.filename} successfully written`;
         } catch (error) {
             if (await this.fileStorage.exists(file.filename)) {
                 await this.fileStorage.unlink(file.filename);
@@ -108,8 +109,9 @@ export class AasxDirectory extends AASResource {
         }
     }
 
-    public override deletePackageAsync(_: string, name: string): Promise<unknown> {
-        return this.fileStorage.unlink(name);
+    public override async deletePackageAsync(_: string, name: string): Promise<string> {
+        await this.fileStorage.unlink(name);
+        return `${name} successfully deleted`;
     }
 
     public override invoke(): Promise<aas.Operation> {

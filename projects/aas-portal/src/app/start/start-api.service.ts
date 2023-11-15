@@ -56,8 +56,8 @@ export class StartApiService {
      * @param url The URL of the AAS container.
      * @returns An observable.
      */
-    public deleteDocument(id: string, url: string): Observable<void> {
+    public delete(id: string, url: string): Observable<void> {
         return this.http.delete<void>(
-            `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`);
+            `/api/v1/containers/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
     }
 }

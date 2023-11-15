@@ -178,18 +178,18 @@ export class AasxServerV3 extends AasxServer {
         return await this.message.getResponse(this.resolve(`/packages/${packageId}`));
     }
 
-    public postPackageAsync(file: Express.Multer.File): Promise<void> {
+    public postPackageAsync(file: Express.Multer.File): Promise<string> {
         const formData = new FormData();
         formData.append('file', createReadStream(file.path));
         formData.append('fileName', file.filename);
         return this.message.post(this.resolve(`/packages`), formData);
     }
 
-    public async deletePackageAsync(aasIdentifier: string): Promise<void> {
+    public async deletePackageAsync(aasIdentifier: string): Promise<string> {
         const aasId = encodeBase64Url(aasIdentifier);
         const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`/packages?aasId=${aasId}`));
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        return this.message.delete(this.resolve(`/packages/${packageId}`));
+        return await this.message.delete(this.resolve(`/packages/${packageId}`));
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
@@ -205,9 +205,9 @@ export class AasxServerV3 extends AasxServer {
             inoutputVariables: cloneDeep(operation.inoutputVariables),
         };
 
-        const result: OperationResult = await this.message.post(
+        const result: OperationResult = JSON.parse(await this.message.post(
             this.resolve(`/shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
-            request);
+            request));
 
         if (!result.success) {
             throw new ApplicationError(
