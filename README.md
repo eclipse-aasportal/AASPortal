@@ -41,9 +41,7 @@ The following command creates and executes a Docker image:
 
 `npm run start`
 
-Go to:
-
-    http://localhost/
+Go to: http://localhost/
 
 ## Changelog
 
