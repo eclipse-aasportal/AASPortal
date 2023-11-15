@@ -16,7 +16,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 ## Getting Started
 You can find a detailed documentation :blue_book: [here](https://aasportal.readthedocs.io/)
 
-## Usage
+### Dockerhub
 
 The easiest way to run AASPortal locally, is using the latest "all in one" image from Dockerhub:
 
