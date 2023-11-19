@@ -64,7 +64,7 @@ export const collapseRow = createAction(
 
 export const toggleSelected = createAction(
     AASTableActionType.TOGGLE_SELECTED,
-    props<{ row: AASTableRow }>());
+    props<{ row: AASTableRow, altKey: boolean, shiftKey: boolean }>());
 
 export const toggleSelections = createAction(
     AASTableActionType.TOGGLE_SELECTIONS);

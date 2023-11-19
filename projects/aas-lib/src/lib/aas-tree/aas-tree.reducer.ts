@@ -59,11 +59,11 @@ export const aasTreeReducer = createReducer(
     ),
     on(
         AASTreeActions.toggleSelected,
-        (state, { row }) => toggleSelected(state, row)
+        (state, { row, altKey, shiftKey }) => toggleSelected(state, row, altKey, shiftKey)
     ),
     on(
         AASTreeActions.toggleSelections,
-        (state, { document }) => toggleSelections(state, document)
+        (state) => toggleSelections(state)
     ),
     on(
         AASTreeActions.updateRows,
@@ -263,11 +263,11 @@ function updateRows(state: AASTreeState, document: AASDocument | null, localeId:
 function expandRow(state: AASTreeState, arg: number | AASTreeRow): AASTreeState {
     const rows = [...state.rows];
     const ancestors: AASTreeRow[] = [];
-    let row = typeof arg === 'number' ?  state.rows[arg] : arg;
+    let row = typeof arg === 'number' ? state.rows[arg] : arg;
     if (!row.expanded) {
         expand(row);
     }
-    
+
     let parentRow = row.parent >= 0 ? state.rows[row.parent] : null;
     while (parentRow) {
         if (parentRow.expanded) {
@@ -287,7 +287,7 @@ function expandRow(state: AASTreeState, arg: number | AASTreeRow): AASTreeState 
 
         expand(row);
     }
-    
+
     return { ...state, rows, error: null };
 
     function expand(row: AASTreeRow) {
@@ -380,14 +380,66 @@ function collapse(state: AASTreeState): AASTreeState {
     return { ...state, rows, error: null };
 }
 
-function toggleSelected(state: AASTreeState, row: AASTreeRow): AASTreeState {
+function toggleSelected(state: AASTreeState, row: AASTreeRow, altKey: boolean, shiftKey: boolean): AASTreeState {
+    let rows: AASTreeRow[];
+    if (altKey) {
+        rows = state.rows.map(item =>
+            item === row ? clone(row, !row.selected) : (item.selected ? clone(item, false) : item),
+        );
+    } else if (shiftKey) {
+        const index = state.rows.indexOf(row);
+        let begin = index;
+        let end = index;
+        const selection = state.rows.map(row => row.selected);
+        const last = selection.lastIndexOf(true);
+        if (last >= 0) {
+            if (last > index) {
+                begin = index;
+                end = selection.indexOf(true);
+            } else if (last < index) {
+                begin = last;
+                end = index;
+            }
+        }
+
+        rows = [];
+        for (let i = 0, n = state.rows.length; i < n; i++) {
+            const row = state.rows[i];
+            if (i < begin || i > end) {
+                rows.push(row.selected ? clone(row, false) : row);
+            } else {
+                rows.push(row.selected ? row : clone(row, true));
+            }
+        }
+    } else {
+        const i = state.rows.indexOf(row);
+        rows = [...state.rows];
+        rows[i] = clone(row, !row.selected);
+    }
+
+    return { ...state, rows, error: null };
+}
+
+function toggleSelections(state: AASTreeState): AASTreeState {
+    const value = state.rows.length > 0 && state.rows.some(row => row.selected) &&
+        !state.rows.every(row => row.selected);
+
     const rows = [...state.rows];
-    const index = rows.indexOf(row);
-    rows[index] = new AASTreeRow(
+    for (let index = 0; index < rows.length; ++index) {
+        const row = rows[index];
+        if (row.selected !== value) {
+            rows[index] = clone(row, value);
+        }
+    }
+    return { ...state, rows, error: null };
+}
+
+function clone(row: AASTreeRow, selected: boolean): AASTreeRow {
+    return new AASTreeRow(
         row.id,
         row.element,
         row.expanded,
-        !row.selected,
+        selected,
         row.highlighted,
         row.level,
         row.abbreviation,
@@ -399,61 +451,6 @@ function toggleSelected(state: AASTreeState, row: AASTreeRow): AASTreeState {
         row.parent,
         row.firstChild,
         row.nextSibling);
-
-    return { ...state, rows, error: null };
-}
-
-function toggleSelections(state: AASTreeState, document: AASDocument | null): AASTreeState {
-    const value = !state.rows.some(row => row.selected);
-    const rows = state.rows.map(row => {
-        if (value) {
-            if (!row.selected && isSelectable(row, document)) {
-                return new AASTreeRow(
-                    row.id,
-                    row.element,
-                    row.expanded,
-                    true,
-                    row.highlighted,
-                    row.level,
-                    row.abbreviation,
-                    row.name,
-                    row.typeInfo,
-                    row.value,
-                    row.displayType,
-                    row.isLeaf,
-                    row.parent,
-                    row.firstChild,
-                    row.nextSibling);
-            }
-        } else if (row.selected) {
-            return new AASTreeRow(
-                row.id,
-                row.element,
-                row.expanded,
-                false,
-                row.highlighted,
-                row.level,
-                row.abbreviation,
-                row.name,
-                row.typeInfo,
-                row.value,
-                row.displayType,
-                row.isLeaf,
-                row.parent,
-                row.firstChild,
-                row.nextSibling);
-        }
-
-        return row;
-    });
-
-    return { ...state, rows, error: null };
-
-    function isSelectable(row: AASTreeRow, document: AASDocument | null): boolean {
-        return document != null &&
-            (!document.readonly ||
-                !document.modified && row.element.modelType === 'Property');
-    }
 }
 
 function getTypeInfo(referable: aas.Referable | null): string {
@@ -587,16 +584,6 @@ function getValue(referable: aas.Referable | null, localeId: string): boolean | 
         const first = relationship.first.keys.map(key => key.value).join('/');
         const second = relationship.second.keys.map(key => key.value).join('/');
         return `1. ${first}; 2. ${second}`;
-    }
-
-    function isDate(valueType: aas.DataTypeDefXsd): boolean {
-        switch (valueType) {
-            case 'xs:date':
-            case 'xs:dateTime':
-                return true;
-            default:
-                return false;
-        }
     }
 }
 

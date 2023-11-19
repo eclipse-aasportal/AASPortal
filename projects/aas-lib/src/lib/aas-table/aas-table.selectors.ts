@@ -21,14 +21,21 @@ export const selectSelectedDocuments = createSelector(
         return rows.filter(row => row.selected).map(row => row.document);
     });
 
-export const selectSomeSelections = createSelector(
+export const selectSomeSelected = createSelector(
     getRows,
     (rows: AASTableRow[]): boolean => {
-        return rows.some(row => row.selected);
+        return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
+    });
+
+
+export const selectEverySelected = createSelector(
+    getRows,
+    (rows: AASTableRow[]): boolean => {
+        return rows.length > 0 && rows.every(row => row.selected);
     });
 
 export const selectRows = createSelector(getState, state => {
-        return state.rows;
+    return state.rows;
 });
 
 export const selectIsFirstPage = createSelector(

@@ -11,7 +11,8 @@
         <tr>
             <th class="aas-tree-th-checkbox">
                 <input type="checkbox" class="form-check-input" (change)="toggleSelections()"
-                    [disabled]="state === 'online'" [checked]="someSelected | async">
+                    [disabled]="state === 'online'" [indeterminate]="someSelected | async"
+                    [checked]="everySelected | async">
             </th>
             <th>
                 <a class="link-secondary" href="javascript:void(0);" (click)="collapse()">
@@ -24,8 +25,8 @@
     <tbody>
         <tr *ngFor="let node of nodes | async" [ngClass]="visualState(node)" [id]="node.id">
             <td>
-                <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)" [checked]="node.selected"
-                    [disabled]="state === 'online'" />
+                <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)"
+                    [checked]="node.selected" [disabled]="state === 'online'" />
             </td>
             <td [colSpan]="node.isLeaf ? 1 : 2">
                 <div class="d-flex" style="overflow-x: hidden">

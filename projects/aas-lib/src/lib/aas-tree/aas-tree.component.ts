@@ -64,6 +64,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
+    private shiftKey = false;
+    private altKey = false;
 
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
@@ -79,14 +81,18 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly clipboard: ClipboardService
+        private readonly clipboard: ClipboardService,
     ) {
         this.store = store as Store<AASTreeFeatureState>;
         this.nodes = this.store.select(AASTreeSelectors.selectNodes);
         this.someSelected = this.store.select(AASTreeSelectors.selectSomeSelected);
+        this.everySelected = this.store.select(AASTreeSelectors.selectEverySelected);
 
         this.subscription.add(this.store.select(AASTreeSelectors.selectSelectedElements).pipe()
             .subscribe(elements => this.selectedChange.emit({ elements })));
+
+        this.window.addEventListener('keyup', this.keyup);
+        this.window.addEventListener('keydown', this.keydown);
     }
 
     @Input()
@@ -114,6 +120,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public someSelected: Observable<boolean>;
+
+    public everySelected: Observable<boolean>;
 
     public nodes: Observable<AASTreeRow[]>;
 
@@ -175,6 +183,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         this.subscription.unsubscribe();
         this.webSocketSubject?.unsubscribe();
         this.searching?.destroy();
+        this.window.removeEventListener('keyup', this.keyup);
+        this.window.removeEventListener('keydown', this.keydown);
     }
 
     public visualState(node: AASTreeRow): string {
@@ -225,11 +235,11 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public toggleSelections(): void {
-        this.store.dispatch(AASTreeActions.toggleSelections({ document: this.document }));
+        this.store.dispatch(AASTreeActions.toggleSelections());
     }
 
     public toggleSelection(node: AASTreeRow): void {
-        this.store.dispatch(AASTreeActions.toggleSelected({ row: node }));
+        this.store.dispatch(AASTreeActions.toggleSelected({ row: node, altKey: this.altKey, shiftKey: this.shiftKey }));
     }
 
     public open(node: AASTreeRow): void {
@@ -522,6 +532,16 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private onError = (error: unknown): void => {
         this.notify.log(LogType.Error, error);
     }
+
+    private keyup = () => {
+        this.shiftKey = false;
+        this.altKey = false;
+    };
+
+    private keydown = (event: KeyboardEvent) => {
+        this.shiftKey = event.shiftKey;
+        this.altKey = event.altKey;
+    };
 
     private resolveFile(file: aas.File): { url?: string, name?: string } {
         const value: { url?: string, name?: string } = {};

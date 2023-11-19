@@ -39,11 +39,10 @@ export const collapse = createAction(
 
 export const toggleSelected = createAction(
     AASTreeActionType.TOGGLE_SELECTED,
-    props<{ row: AASTreeRow }>());
+    props<{ row: AASTreeRow, altKey: boolean, shiftKey: boolean }>());
 
 export const toggleSelections = createAction(
-    AASTreeActionType.TOGGLE_SELECTIONS,
-    props<{ document: AASDocument | null }>());
+    AASTreeActionType.TOGGLE_SELECTIONS);
 
 export const setSearchText = createAction(
     AASTreeActionType.SET_SEARCH_TEXT,

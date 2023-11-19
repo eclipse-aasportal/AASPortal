@@ -10,8 +10,8 @@
     <thead>
         <tr>
             <th class="th-w-checkbox">
-                <input id="aas-table-checkbox" type="checkbox" class="form-check-input" (change)="toggleSelections()"
-                    [checked]="someSelections | async">
+                <input type="checkbox" class="form-check-input" [indeterminate]="someSelected | async"
+                    [checked]="everySelected | async" (change)="toggleSelections()">
             </th>
             <th scope="col" class="th-w-icon">
                 <i class="bi bi-tag"></i>

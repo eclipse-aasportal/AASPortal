@@ -11,16 +11,14 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AASDocument } from 'common';
 import { Observable, Subscription } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
 
 import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
 import * as AASTableSelectors from './aas-table.selectors';
 import * as AASTableActions from './aas-table.actions';
 import { AASQuery } from '../types/aas-query-params';
-import { NotifyService } from '../notify/notify.service';
 import { ClipboardService } from '../clipboard.service';
-import { AASTableApiService } from './aas-table-api.service';
+import { WindowService } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -32,23 +30,27 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly subscription: Subscription = new Subscription();
     private _filter = '';
     private _limit = 10;
+    private shiftKey = false;
+    private altKey = false;
 
     constructor(
         private readonly router: Router,
-        translate: TranslateService,
         store: Store,
-        private readonly api: AASTableApiService,
-        private readonly notify: NotifyService,
-        private readonly clipboard: ClipboardService
+        private readonly clipboard: ClipboardService,
+        private readonly window: WindowService
     ) {
         this.store = store as Store<AASTableFeatureState>;
-        this.someSelections = this.store.select(AASTableSelectors.selectSomeSelections);
         this.rows = this.store.select(AASTableSelectors.selectRows);
         this.isFirstPage = this.store.select(AASTableSelectors.selectIsFirstPage);
         this.isLastPage = this.store.select(AASTableSelectors.selectIsLastPage);
+        this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
+        this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
         this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
             .subscribe(documents => this.selectedChange.emit({ documents })));
+
+        this.window.addEventListener('keyup', this.keyup);
+        this.window.addEventListener('keydown', this.keydown);
     }
 
     @Input()
@@ -63,13 +65,15 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     @Output()
     public selectedChange = new EventEmitter<{ documents: AASDocument[] }>();
 
+    public someSelected: Observable<boolean>;
+
+    public everySelected: Observable<boolean>;
+
     public readonly isFirstPage: Observable<boolean>;
 
     public readonly isLastPage: Observable<boolean>;
 
     public readonly rows: Observable<AASTableRow[]>;
-
-    public readonly someSelections: Observable<boolean>;
 
     public ngOnInit(): void {
         this.store.dispatch(AASTableActions.initialize());
@@ -97,6 +101,8 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+        this.window.removeEventListener('keyup', this.keyup);
+        this.window.removeEventListener('keydown', this.keydown);
     }
 
     public skipStart(): void {
@@ -146,10 +152,20 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public toggleSelected(row: AASTableRow): void {
-        this.store.dispatch(AASTableActions.toggleSelected({ row }));
+        this.store.dispatch(AASTableActions.toggleSelected({ row, altKey: this.altKey, shiftKey: this.shiftKey }));
     }
 
     public toggleSelections(): void {
         this.store.dispatch(AASTableActions.toggleSelections());
     }
+
+    private keyup = () => {
+        this.shiftKey = false;
+        this.altKey = false;
+    };
+
+    private keydown = (event: KeyboardEvent) => {
+        this.shiftKey = event.shiftKey;
+        this.altKey = event.altKey;
+    };
 }

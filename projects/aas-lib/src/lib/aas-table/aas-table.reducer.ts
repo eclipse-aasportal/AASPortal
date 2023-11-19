@@ -40,7 +40,7 @@ export const aasTableReducer = createReducer(
     ),
     on(
         AASTableActions.toggleSelected,
-        (state, { row }) => toggleSelected(state, row)
+        (state, { row, altKey, shiftKey }) => toggleSelected(state, row, altKey, shiftKey)
     ),
     on(
         AASTableActions.toggleSelections,
@@ -219,37 +219,88 @@ function collapseRow(state: AASTableState, row: AASTableRow): AASTableState {
     return { ...state, rows };
 }
 
-function toggleSelected(state: AASTableState, row: AASTableRow) {
-    const rows = [...state.rows];
-    const index = rows.indexOf(row);
-    rows[index] = new AASTableRow(
-        row.document,
-        !row.selected,
-        row.expanded,
-        row.isLeaf,
-        row.level,
-        row.firstChild,
-        row.nextSibling);
+// function toggleSelected(state: AASTableState, row: AASTableRow) {
+//     const rows = [...state.rows];
+//     const index = rows.indexOf(row);
+//     rows[index] = new AASTableRow(
+//         row.document,
+//         !row.selected,
+//         row.expanded,
+//         row.isLeaf,
+//         row.level,
+//         row.firstChild,
+//         row.nextSibling);
 
-    return { ...state, rows }
+//     return { ...state, rows }
+// }
+
+function toggleSelected(
+    state: AASTableState,
+    row: AASTableRow,
+    altKey: boolean,
+    shiftKey: boolean,
+): AASTableState {
+    let rows: AASTableRow[];
+    if (altKey) {
+        rows = state.rows.map(item =>
+            item === row ? clone(row, !row.selected) : (item.selected ? clone(item, false) : item)
+        );
+    } else if (shiftKey) {
+        const index = state.rows.indexOf(row);
+        let begin = index;
+        let end = index;
+        const selection = state.rows.map(row => row.selected);
+        const last = selection.lastIndexOf(true);
+        if (last >= 0) {
+            if (last > index) {
+                begin = index;
+                end = selection.indexOf(true);
+            } else if (last < index) {
+                begin = last;
+                end = index;
+            }
+        }
+
+        rows = [];
+        for (let i = 0, n = state.rows.length; i < n; i++) {
+            const row = state.rows[i];
+            if (i < begin || i > end) {
+                rows.push(row.selected ? clone(row, false) : row);
+            } else {
+                rows.push(row.selected ? row : clone(row, true));
+            }
+        }
+    } else {
+        const i = state.rows.indexOf(row);
+        rows = [...state.rows];
+        rows[i] = clone(row, !row.selected);
+    }
+
+    return { ...state, rows };
 }
 
 function toggleSelections(state: AASTableState) {
-    const value = !state.rows.some(row => row.selected);
+    const value = state.rows.length > 0 && state.rows.some(row => row.selected) &&
+        !state.rows.every(row => row.selected);
+
     const rows = [...state.rows];
     for (let index = 0; index < rows.length; ++index) {
         const row = rows[index];
         if (row.selected !== value) {
-            rows[index] = new AASTableRow(
-                row.document,
-                !row.selected,
-                row.expanded,
-                row.isLeaf,
-                row.level,
-                row.firstChild,
-                row.nextSibling);
+            rows[index] = clone(row, value);
         }
     }
 
     return { ...state, rows }
+}
+
+function clone(row: AASTableRow, selected: boolean): AASTableRow {
+    return new AASTableRow(
+        row.document,
+        selected,
+        row.expanded,
+        row.isLeaf,
+        row.level,
+        row.firstChild,
+        row.nextSibling)
 }
