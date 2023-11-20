@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { aas, LiveRequest } from "common";
-import { Logger } from "../logging/logger.js";
-import { SocketClient } from "../live/socket-client.js";
-import { AASPackage } from "./aas-package.js";
-import { SocketSubscription } from "../live/socket-subscription.js";
+import { aas, LiveRequest } from 'common';
+import { Logger } from '../logging/logger.js';
+import { SocketClient } from '../live/socket-client.js';
+import { AASPackage } from './aas-package.js';
+import { SocketSubscription } from '../live/socket-subscription.js';
 
 /** Represents a resource of Asset Administration Shells. */
 export abstract class AASResource {

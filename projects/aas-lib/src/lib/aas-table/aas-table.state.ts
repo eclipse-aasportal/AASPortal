@@ -32,7 +32,7 @@ export class AASTableRow {
     }
 
     public get endpoint(): string | null {
-        return this.document.endpoint.name;
+        return this.document.endpoint;
     }
 
     public get hasChildren(): boolean {

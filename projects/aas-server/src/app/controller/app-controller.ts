@@ -10,7 +10,7 @@ import { inject, injectable } from 'tsyringe';
 import { Get, OperationId, Route, Security, Tags } from 'tsoa';
 import { ApplicationInfo } from '../application-info.js';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
 import { Message, PackageInfo } from 'common';
@@ -18,7 +18,7 @@ import { Message, PackageInfo } from 'common';
 @injectable()
 @Route('/api/v1/app')
 @Tags('App')
-export class AppController extends ControllerBase {
+export class AppController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,

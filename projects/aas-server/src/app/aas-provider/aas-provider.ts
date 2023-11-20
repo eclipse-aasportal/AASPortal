@@ -76,15 +76,20 @@ export class AASProvider {
     public async getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
-            return this.index.getDocuments(cursor, new AASFilter(this.resourceFactory, filter, language ?? 'en'));
+            return this.index.getDocuments(cursor, new AASFilter(
+                this.resourceFactory,
+                this.index,
+                filter,
+                language ?? 'en'));
         }
 
         return this.index.getDocuments(cursor);
     }
 
-    public async getDocumentAsync(id: string, url?: string): Promise<AASDocument> {
-        const document = await this.index.get(url, id);
-        const resource = this.resourceFactory.create(document.endpoint);
+    public async getDocumentAsync(id: string, name?: string): Promise<AASDocument> {
+        const document = await this.index.get(name, id);
+        const endpoint = await this.index.getEndpoint(document.endpoint);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             if (!document.content) {
@@ -97,9 +102,10 @@ export class AASProvider {
         }
     }
 
-    public async getContentAsync(url: string, id: string): Promise<aas.Environment | undefined> {
-        const document: AASDocument = await this.index.get(url, id);
-        const resource = this.resourceFactory.create(document.endpoint);
+    public async getContentAsync(name: string, id: string): Promise<aas.Environment | undefined> {
+        const endpoint = await this.index.getEndpoint(name);
+        const document: AASDocument = await this.index.get(name, id);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             return await resource.createPackage(document.address).readEnvironmentAsync();
@@ -108,9 +114,10 @@ export class AASProvider {
         }
     }
 
-    public async getThumbnailAsync(url: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
-        const document: AASDocument = await this.index.get(url, id);
-        const resource = this.resourceFactory.create(document.endpoint);
+    public async getThumbnailAsync(name: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
+        const endpoint = await this.index.getEndpoint(name);
+        const document: AASDocument = await this.index.get(name, id);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             return await resource.createPackage(document.address).getThumbnailAsync(id);
@@ -120,15 +127,16 @@ export class AASProvider {
     }
 
     public async getDataElementValueAsync(
-        url: string,
+        name: string,
         id: string,
         smId: string,
         path: string,
         options?: object
     ): Promise<NodeJS.ReadableStream> {
-        const document = await this.index.get(url, id);
+        const endpoint = await this.index.getEndpoint(name);
+        const document = await this.index.get(name, id);
         let stream: NodeJS.ReadableStream;
-        const resource = this.resourceFactory.create(document.endpoint);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address);
@@ -228,25 +236,26 @@ export class AASProvider {
 
     /**
      * Updates an Asset Administration Shell.
-     * @param url The AAS container URL.
+     * @param name The endpoint name.
      * @param id The AAS document ID.
      * @param content The new document content.
      * @returns 
      */
-    public async updateDocumentAsync(url: string, id: string, content: aas.Environment): Promise<string[]> {
-        const document = await this.index.get(url, id);
+    public async updateDocumentAsync(name: string, id: string, content: aas.Environment): Promise<string[]> {
+        const endpoint = await this.index.getEndpoint(name);
+        const document = await this.index.get(name, id);
         if (!document) {
             throw new Error(`The destination document ${id} is not available.`);
         }
 
-        const resource = this.resourceFactory.create(document.endpoint);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address);
             if (!document.content) {
                 document.content = await pkg.readEnvironmentAsync();
             }
-            
+
             return await pkg.commitDocumentAsync(document, content);
         }
         finally {
@@ -256,13 +265,14 @@ export class AASProvider {
 
     /**
      * Downloads an AASX package.
+     * @param name The endpoint name.
      * @param id The AAS identifier.
-     * @param url The source URL.
      * @returns A readable stream.
      */
-    public async getPackageAsync(url: string, id: string): Promise<NodeJS.ReadableStream> {
-        const document = await this.index.get(url, id);
-        const resource = this.resourceFactory.create(document.endpoint);
+    public async getPackageAsync(name: string, id: string): Promise<NodeJS.ReadableStream> {
+        const endpoint = await this.index.getEndpoint(name);
+        const document = await this.index.get(name, id);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             return await resource.getPackageAsync(id, document.address);
@@ -298,16 +308,17 @@ export class AASProvider {
 
     /**
      * Deletes an AASX package from an endpoint.
-     * @param url The endpoint URL.
+     * @param name The endpoint name.
      * @param id The AAS identification.
      */
-    public async deletePackageAsync(url: string, id: string): Promise<void> {
-        const document = await this.index.get(url, id);
+    public async deletePackageAsync(name: string, id: string): Promise<void> {
+        const endpoint = await this.index.getEndpoint(name);
+        const document = await this.index.get(name, id);
         if (document) {
-            const resource = this.resourceFactory.create(document.endpoint);
+            const resource = this.resourceFactory.create(endpoint);
             try {
                 await resource.deletePackageAsync(document.id, document.address);
-                await this.index.remove(url, id);
+                await this.index.remove(name, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
                 await resource.closeAsync();
@@ -327,14 +338,15 @@ export class AASProvider {
 
     /**
      * Invokes an operation synchronous.
-     * @param url The URL of the AAS container.
+     * @param name The endpoint name.
      * @param id The AAS identifier.
      * @param operation The Operation element.
      * @returns ToDo.
      */
-    public async invoke(url: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
-        const document = await this.index.get(url, id);
-        const resource = this.resourceFactory.create(document.endpoint);
+    public async invoke(name: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
+        const endpoint = await this.index.getEndpoint(name);
+        const document = await this.index.get(name, id);
+        const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             return await resource.invoke(document.content!, operation);
@@ -361,13 +373,11 @@ export class AASProvider {
     };
 
     private async createSubscription(message: LiveRequest, client: SocketClient): Promise<SocketSubscription> {
-        const resource = this.resourceFactory.create(message.endpoint);
-        const env = await this.getContentAsync(message.endpoint.url, message.id);
-        if (!env) {
-            throw new Error('Invalid operation.');
-        }
-
+        const endpoint = await this.index.getEndpoint(message.endpoint);
+        const document: AASDocument = await this.index.get(message.endpoint, message.id);
+        const resource = this.resourceFactory.create(endpoint);
         await resource.openAsync();
+        const env = await resource.createPackage(document.address).readEnvironmentAsync();
         return resource.createSubscription(client, message, env);
     }
 

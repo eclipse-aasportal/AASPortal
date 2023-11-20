@@ -47,7 +47,7 @@ export class AasxPackage extends AASPackage {
             const id = environment.assetAdministrationShells[0].id;
             document = {
                 id: id,
-                endpoint: { url: this.source.url, type: 'AasxDirectory', name: this.source.name, version: this.source.version },
+                endpoint: this.source.name,
                 address: this.file,
                 idShort: environment.assetAdministrationShells[0].idShort,
                 readonly: this.source.readOnly,

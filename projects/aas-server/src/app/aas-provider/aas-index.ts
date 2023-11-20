@@ -12,7 +12,7 @@ import { AASFilter } from './aas-filter.js';
 export abstract class AASIndex {
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
 
-    public abstract getEndpoint(name: string): Promise<AASEndpoint | undefined>;
+    public abstract getEndpoint(name: string): Promise<AASEndpoint>;
 
     public abstract setEndpoint(endpoint: AASEndpoint): Promise<void>;
 
@@ -26,11 +26,11 @@ export abstract class AASIndex {
 
     public abstract add(document: AASDocument): Promise<void>;
 
-    public abstract has(url: string | undefined, id: string): Promise<boolean>;
+    public abstract has(name: string | undefined, id: string): Promise<boolean>;
 
-    public abstract get(url: string | undefined, id: string): Promise<AASDocument>;
+    public abstract get(name: string | undefined, id: string): Promise<AASDocument>;
 
-    public abstract remove(url?: string, id?: string): Promise<boolean>;
+    public abstract remove(name?: string, id?: string): Promise<boolean>;
 
     public abstract reset(): Promise<void>;
 }

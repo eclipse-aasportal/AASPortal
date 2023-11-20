@@ -310,7 +310,7 @@ export class DashboardService {
         for (const blob of blobs) {
             if (blob.parent) {
                 const label = blob.idShort;
-                const url = encodeBase64Url(document.endpoint.url);
+                const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
                 const smId = encodeBase64Url(blob.parent.keys[0].value);
                 const path = getIdShortPath(blob);
@@ -325,7 +325,7 @@ export class DashboardService {
                         color: this.createRandomColor(),
                         element: blob,
                         node: null,
-                        url: `/api/v1/containers/${url}/documents/${id}/submodels/${smId}/blobs/${path}/value`
+                        url: `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`
                     }]
                 };
 
@@ -376,10 +376,10 @@ export class DashboardService {
     }
 
     private indexOfRequest(page: DashboardPage, document: AASDocument): number {
-        const url = document.endpoint.url;
+        const name = document.endpoint;
         const id = document.id;
         return page.requests.findIndex(item => {
-            return item.endpoint.url === url && (item.endpoint.type === 'OpcuaServer' || item.id === id);
+            return item.endpoint === name && item.id === id;
         });
     }
 

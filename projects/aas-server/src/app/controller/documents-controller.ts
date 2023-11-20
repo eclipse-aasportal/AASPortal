@@ -9,7 +9,7 @@
 import { inject, injectable } from 'tsyringe';
 import { Get, OperationId, Query, Route, Security, Tags } from 'tsoa';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
 import { AASDocument, AASPage } from 'common';
@@ -19,7 +19,7 @@ import { decodeBase64Url } from '../convert.js';
 @injectable()
 @Route('/api/v1/documents')
 @Tags('Documents')
-export class DocumentsController extends ControllerBase {
+export class DocumentsController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,

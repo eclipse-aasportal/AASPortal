@@ -19,6 +19,7 @@ import {
     convertFromString
 } from 'common';
 import { AASResourceFactory } from '../packages/aas-resource-factory.js';
+import { AASIndex } from './aas-index.js';
 
 type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
@@ -40,8 +41,12 @@ interface Expression {
 export class AASFilter {
     private readonly expression: Expression;
 
-    constructor(private readonly resourceFactory: AASResourceFactory,
-        searchText: string, private readonly language: string) {
+    constructor(
+        private readonly resourceFactory: AASResourceFactory,
+        private readonly index: AASIndex,
+        searchText: string,
+        private readonly language: string
+    ) {
         this.expression = { orExpressions: this.splitOr(searchText) };
     }
 
@@ -55,7 +60,7 @@ export class AASFilter {
                             if (!input.content) {
                                 input.content = await this.getContentAsync(input)
                             }
-                            
+
                             result = this.match(input, this.parseExpression(expression));
                         } else {
                             result = this.contains(input, expression);
@@ -87,7 +92,8 @@ export class AASFilter {
     }
 
     private async getContentAsync(document: AASDocument): Promise<aas.Environment> {
-        const source = this.resourceFactory.create(document.endpoint);
+        const endpoint = await this.index.getEndpoint(document.endpoint);
+        const source = this.resourceFactory.create(endpoint);
         try {
             await source.openAsync();
             return await source.createPackage(document.address).readEnvironmentAsync();

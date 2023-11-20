@@ -26,7 +26,7 @@ export interface GetDocumentAction extends TypedAction<AASActionType.GET_DOCUMEN
 
 export const getDocument = createAction(
     AASActionType.GET_DOCUMENT, 
-    props<{ id: string, url?: string }>());
+    props<{ id: string, name?: string }>());
 
 export const setDocument = createAction(
     AASActionType.SET_DOCUMENT, 

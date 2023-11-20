@@ -25,7 +25,7 @@ export class ViewEffects {
         return this.actions.pipe(
             ofType<ViewActions.SetSubmodelsAction>(ViewActions.ViewActionType.SET_SUBMODELS),
             exhaustMap(action => from(action.descriptor.submodels).pipe(
-                mergeMap(item => zip(this.api.getDocument(item.id, item.url), of(item.idShort))),
+                mergeMap(item => zip(this.api.getDocument(item.id, item.endpoint), of(item.idShort))),
                 mergeMap(tuple => {
                     const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
                     if (submodel?.modelType === 'Submodel') {

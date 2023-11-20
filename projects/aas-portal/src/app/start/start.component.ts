@@ -165,16 +165,14 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     public downloadDocument(): void {
         for (const document of this.selectedDocuments) {
             this.download.downloadDocument(
-                document.endpoint.url,
+                document.endpoint,
                 document.id,
                 document.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
         }
     }
 
     public canDeleteDocument(): boolean {
-        return this.selectedDocuments.length > 0 &&
-            this.selectedDocuments.every(
-                item => item.endpoint.type === 'AasxDirectory');
+        return this.selectedDocuments.length > 0;
     }
 
     public deleteDocument(): void {
@@ -185,7 +183,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
                 this.selectedDocuments.map(item => item.idShort).join(', ')))),
             mergeMap((result) => from(result ? this.selectedDocuments : [])),
-            mergeMap((document) => this.api.delete(document.id, document.endpoint.url)))
+            mergeMap((document) => this.api.delete(document.id, document.endpoint)))
             .subscribe({ error: (error) => this.notify.error(error) });
     }
 
@@ -204,7 +202,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
-                    url: document.endpoint.url,
+                    endpoint: document.endpoint,
                     idShort: submodels[0].idShort
                 });
             }
@@ -231,7 +229,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
-                    url: document.endpoint.url,
+                    endpoint: document.endpoint,
                     idShort: submodels[0].idShort
                 });
             }

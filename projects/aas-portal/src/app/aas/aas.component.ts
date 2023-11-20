@@ -35,7 +35,6 @@ import {
     aas, isProperty,
     isNumberType,
     isBlob,
-    AASEndpointType
 } from 'common';
 
 @Component({
@@ -101,9 +100,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public get thumbnail(): string {
         if (this.document) {
-            const url = lib.encodeBase64Url(this.document.endpoint.url);
+            const name = lib.encodeBase64Url(this.document.endpoint);
             const id = lib.encodeBase64Url(this.document.id);
-            return `/api/v1/containers/${url}/documents/${id}/thumbnail`;
+            return `/api/v1/containers/${name}/documents/${id}/thumbnail`;
         }
 
         return 'assets/resources/aas.svg'
@@ -149,7 +148,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         if (query) {
-            this.store.dispatch(AASActions.getDocument({ id: query.id, url: query.url }));
+            this.store.dispatch(AASActions.getDocument({ id: query.id, name: query.name }));
         }
 
         this.subscription.add(this.store.select(AASSelectors.selectDocument).pipe()
@@ -342,17 +341,12 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canDownloadDocument(): boolean {
-        let type: AASEndpointType | undefined;
-        if (this.document) {
-            type = this.document.endpoint.type;
-        }
-
-        return type === 'AasxDirectory' || type === 'AasxServer';
+        return true;
     }
 
     public downloadDocument(): void {
         this.download.downloadDocument(
-            this.document!.endpoint.url,
+            this.document!.endpoint,
             this.document!.id,
             this.document!.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
     }

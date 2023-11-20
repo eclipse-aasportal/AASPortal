@@ -109,6 +109,6 @@ export class AASTableEffects {
     });
 
     private getId(document: AASDocument): AASDocumentId {
-        return { id: document.id, url: document.endpoint.url };
+        return { id: document.id, endpoint: document.endpoint };
     }
 }

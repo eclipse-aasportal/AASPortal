@@ -14,24 +14,24 @@ import { AasxServer } from './aasx-server.js';
 import { ImageProcessing } from '../../image-processing.js';
 
 export class AasxServerPackage extends AASPackage {
-    private readonly source: AasxServer;
+    private readonly server: AasxServer;
     private readonly idShort: string;
 
     /**
      * Creates a new AAS-Registry package.
      * @param logger The logger service.
-     * @param source The handle.
+     * @param resource The handle.
      * @param idShort The name of the AAS.
      */
-    constructor(logger: Logger, source: AASResource, idShort: string) {
+    constructor(logger: Logger, resource: AASResource, idShort: string) {
         super(logger);
 
-        this.source = source as AasxServer;
+        this.server = resource as AasxServer;
         this.idShort = idShort;
     }
 
     public getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
-        return this.source.getThumbnailAsync(id);
+        return this.server.getThumbnailAsync(id);
     }
 
     public openReadStreamAsync(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
@@ -39,18 +39,18 @@ export class AasxServerPackage extends AASPackage {
             throw new Error('Invalid operation.');
         }
 
-        return this.source.openFileAsync(env.assetAdministrationShells[0], file);
+        return this.server.openFileAsync(env.assetAdministrationShells[0], file);
     }
 
     public async createDocumentAsync(): Promise<AASDocument> {
-        const environment = await this.source.readEnvironmentAsync(this.idShort);
+        const environment = await this.server.readEnvironmentAsync(this.idShort);
 
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
-            endpoint: { url: this.source.url, type: 'AasxServer', name: this.source.name, version: this.source.version },
+            endpoint: this.server.name,
             address: this.idShort,
             idShort: environment.assetAdministrationShells[0].idShort,
-            readonly: this.source.readOnly,
+            readonly: this.server.readOnly,
             onlineReady: true,
             content: null
         };
@@ -64,7 +64,7 @@ export class AasxServerPackage extends AASPackage {
     }
 
     public override async readEnvironmentAsync(): Promise<aas.Environment> {
-        return await this.source.readEnvironmentAsync(this.idShort);
+        return await this.server.readEnvironmentAsync(this.idShort);
     }
 
     public async commitDocumentAsync(target: AASDocument, content: aas.Environment): Promise<string[]> {
@@ -72,7 +72,7 @@ export class AasxServerPackage extends AASPackage {
         if (target.content && content) {
             const diffs = await diffAsync(content, target.content);
             if (diffs.length > 0) {
-                messages = await this.source.commitAsync(content, target.content, diffs);
+                messages = await this.server.commitAsync(content, target.content, diffs);
             }
         }
 
@@ -81,7 +81,7 @@ export class AasxServerPackage extends AASPackage {
 
     private async createThumbnail(id: string): Promise<string | undefined> {
         try {
-            const input = await this.source.getThumbnailAsync(id);
+            const input = await this.server.getThumbnailAsync(id);
             const output = await ImageProcessing.resizeAsync(input, 40, 40);
             return await this.streamToBase64(output);
         } catch {

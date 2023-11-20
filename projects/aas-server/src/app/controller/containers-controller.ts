@@ -15,13 +15,13 @@ import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
 import { decodeBase64Url } from '../convert.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { Variable } from '../variable.js';
 
 @injectable()
 @Route('/api/v1/containers')
 @Tags('Containers')
-export class ContainersController extends ControllerBase {
+export class ContainersController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
@@ -33,17 +33,17 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Downloads an AAS document from the specified AAS container.
-     * @param url The AAS container URL (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
      * @returns The AAS document.
      */
-    @Get('{url}/documents/{id}')
+    @Get('{endpoint}/documents/{id}')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
-    public async getDocument(@Path() url: string, @Path() id: string): Promise<AASDocument> {
+    public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
         try {
             this.logger.start('getDocument');
-            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id), decodeBase64Url(url));
+            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id), decodeBase64Url(endpoint));
         } finally {
             this.logger.stop();
         }
@@ -51,17 +51,17 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Downloads an AASX package from the specified AAS container.
-     * @param url The AAS container URL (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
      * @returns A readable stream.
      */
-    @Get('{url}/packages/{id}')
+    @Get('{endpoint}/packages/{id}')
     @Security('bearerAuth', ['guest'])
     @OperationId('getPackage')
-    public async getPackage(@Path() url: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
+    public async getPackage(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
         try {
             this.logger.start('getDocument');
-            return await this.aasProvider.getPackageAsync(decodeBase64Url(url), decodeBase64Url(id));
+            return await this.aasProvider.getPackageAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -86,16 +86,16 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Deletes an AAS document from its AAS container.
-     * @param url The AAS container URL (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
      */
-    @Delete('{url}/packages/{id}')
+    @Delete('{endpoint}/packages/{id}')
     @Security('bearerAuth', ['editor'])
     @OperationId('deletePackage')
-    public async deletePackage(@Path() url: string, @Path() id: string): Promise<void> {
+    public async deletePackage(@Path() endpoint: string, @Path() id: string): Promise<void> {
         try {
             this.logger.start('deletePackage');
-            await this.aasProvider.deletePackageAsync(decodeBase64Url(url), decodeBase64Url(id));
+            await this.aasProvider.deletePackageAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -103,17 +103,17 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Gets the content of the specified AAS document.
-     * @param url The AAS container URL (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
      * @returns The AAS environment or `undefined`.
      */
-    @Get('{url}/documents/{id}/content')
+    @Get('{endpoint}/documents/{id}/content')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentContent')
-    public async getDocumentContent(@Path() url: string, @Path() id: string): Promise<aas.Environment | undefined> {
+    public async getDocumentContent(@Path() endpoint: string, @Path() id: string): Promise<aas.Environment | undefined> {
         try {
             this.logger.start('getDocumentContent');
-            return await this.aasProvider.getContentAsync(decodeBase64Url(url), decodeBase64Url(id));
+            return await this.aasProvider.getContentAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -121,17 +121,17 @@ export class ContainersController extends ControllerBase {
     
     /**
      * @summary Gets the thumbnail of the specified AAS document.
-     * @param url The AAS container URL (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64Url encoded).
      * @param id The AAS identifier (Base64Url encoded).
      * @returns The thumbnail of the current AAS document.
      */
-    @Get('{url}/documents/{id}/thumbnail')
+    @Get('{endpoint}/documents/{id}/thumbnail')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentThumbnail')
-    public async getDocumentThumbnail(@Path() url: string, @Path() id: string): Promise<NodeJS.ReadableStream | undefined> {
+    public async getDocumentThumbnail(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream | undefined> {
         try {
             this.logger.start('getDocumentThumbnail');
-            return await this.aasProvider.getThumbnailAsync(decodeBase64Url(url), decodeBase64Url(id));
+            return await this.aasProvider.getThumbnailAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -139,19 +139,19 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Downloads the value of DataElement.
-     * @param url The URL of the AAS container (Base64Url encoded).
+     * @param endpoint The URL of the AAS container (Base64Url encoded).
      * @param id The document or AAS identifier (Base64Url encoded).
      * @param smId The Submodel identifier (Base64Url encoded).
      * @param path The idShort path to the DataElement.
      * @param width The image width.
      * @param height The image height.
      */
-    @Get('{url}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
+    @Get('{endpoint}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
     @Security('bearerAuth', ['guest'])
     @Security('api_key')
     @OperationId('getDataElementValue')
     public async getDataElementValue(
-        @Path() url: string,
+        @Path() endpoint: string,
         @Path() id: string,
         @Path() smId: string,
         @Path() path: string,
@@ -160,7 +160,7 @@ export class ContainersController extends ControllerBase {
         try {
             this.logger.start('getDataElementValue');
             return await this.aasProvider.getDataElementValueAsync(
-                decodeBase64Url(url),
+                decodeBase64Url(endpoint),
                 decodeBase64Url(id),
                 decodeBase64Url(smId),
                 path,
@@ -172,16 +172,16 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Updates the content of an AAS document.
-     * @param url The URL of the AAS container (Base64Url encoded).
+     * @param endpoint The URL of the AAS container (Base64Url encoded).
      * @param id The document or AAS identifier (Base64Url encoded).
      * @param content The new document content.
      * @returns The messages of the update process.
      */
-    @Put('{url}/documents/{id}')
+    @Put('{endpoint}/documents/{id}')
     @Security('bearerAuth', ['editor'])
     @OperationId('updateDocument')
     public async updateDocument(
-        @Path() url: string,
+        @Path() endpoint: string,
         @Path() id: string,
     @UploadedFile() content: Express.Multer.File
     ): Promise<string[]> {
@@ -189,7 +189,7 @@ export class ContainersController extends ControllerBase {
             this.logger.start('updateDocument');
             const buffer = await fs.promises.readFile(content.path);
             const env: aas.Environment = JSON.parse(buffer.toString());
-            return await this.aasProvider.updateDocumentAsync(decodeBase64Url(url), decodeBase64Url(id), env);
+            return await this.aasProvider.updateDocumentAsync(decodeBase64Url(endpoint), decodeBase64Url(id), env);
         } finally {
             this.logger.stop();
         }
@@ -197,22 +197,22 @@ export class ContainersController extends ControllerBase {
 
     /**
      * @summary Invokes an Operation synchronously.
-     * @param url The URL of the AAS container (Base64Url encoded).
+     * @param endpoint The URL of the AAS container (Base64Url encoded).
      * @param id The document or AAS identifier (Base64Url encoded).
      * @param operation The `Operation`.
      * @returns The executed `Operation`.
      */
-    @Post('{url}/documents/{id}/invoke')
+    @Post('{endpoint}/documents/{id}/invoke')
     @Security('bearerAuth', ['editor'])
     @OperationId('invokeOperation')
     public async invokeOperation(
-        @Path() url: string,
+        @Path() endpoint: string,
         @Path() id: string,
         @Body() operation: aas.Operation
     ): Promise<aas.Operation> {
         try {
             this.logger.start('invokeOperation');
-            return await this.aasProvider.invoke(decodeBase64Url(url), decodeBase64Url(id), operation);
+            return await this.aasProvider.invoke(decodeBase64Url(endpoint), decodeBase64Url(id), operation);
         } finally {
             this.logger.stop();
         }

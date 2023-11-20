@@ -20,7 +20,7 @@ export interface SubmodelViewDescriptor {
 
 export interface SubmodelReference {
     id: string;
-    url: string;
+    endpoint: string;
     idShort: string;
 }
 

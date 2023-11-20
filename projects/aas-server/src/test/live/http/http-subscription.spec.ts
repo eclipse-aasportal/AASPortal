@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { aas, LiveRequest } from 'common';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { aas, LiveRequest } from 'common';
 import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
 import env from '../../assets/aas-environment.js';
 import { createSpyObj, DoneFn } from '../../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 describe('HttpSubscription', function () {
     let aasxServer: jest.Mocked<AasxServer>;
@@ -40,12 +40,7 @@ describe('HttpSubscription', function () {
         };
 
         const request: LiveRequest = {
-            endpoint: {
-                url: 'file://doc',
-                name: 'Test',
-                type: 'AasxDirectory',
-
-            },
+            endpoint: 'AasxDirectory',
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             nodes: [{
                 nodeId: JSON.stringify(reference),

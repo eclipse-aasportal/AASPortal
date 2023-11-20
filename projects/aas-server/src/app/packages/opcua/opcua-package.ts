@@ -45,7 +45,7 @@ export class OpcuaPackage extends AASPackage {
 
         const document: AASDocument = {
             id: this.getIdentifier(component),
-            endpoint: { url: this.server.url, type: 'AasxDirectory', name: this.server.name, version: this.server.version },
+            endpoint: this.server.name,
             address: this.nodeId,
             idShort: component.browseName,
             readonly: this.server.readOnly,

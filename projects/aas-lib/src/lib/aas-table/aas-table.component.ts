@@ -136,7 +136,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     public open(row: AASTableRow): void {
         const query: AASQuery = {
             id: row.document.id,
-            url: row.document.endpoint.url,
+            name: row.document.endpoint,
         };
 
         if (this._filter) {
@@ -148,7 +148,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public getToolTip(row: AASTableRow): string {
-        return `${row.document.endpoint.url}, ${row.document.address}`;
+        return `${row.document.endpoint}, ${row.document.address}`;
     }
 
     public toggleSelected(row: AASTableRow): void {

@@ -13,13 +13,13 @@ import { AASEndpoint } from 'common';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { Variable } from '../variable.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
 @Tags('Endpoints')
-export class EndpointsController extends ControllerBase {
+export class EndpointsController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,

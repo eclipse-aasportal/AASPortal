@@ -299,7 +299,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                     template,
                     submodels: [{
                         id: this.document.id,
-                        url: this.document.endpoint.url,
+                        endpoint: this.document.endpoint,
                         idShort: submodel.idShort
                     }]
                 };
@@ -340,7 +340,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                         await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
                     }
                 } else {
-                    const endpoint = encodeBase64Url(this.document.endpoint.url);
+                    const endpoint = encodeBase64Url(this.document.endpoint);
                     const id = encodeBase64Url(this.document.id);
                     const smId = encodeBase64Url(blob.parent.keys[0].value);
                     const path = getIdShortPath(blob);
@@ -551,9 +551,9 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                 const smId = encodeBase64Url(submodel.id);
                 const path = getIdShortPath(file);
                 value.name = basename(file.value);
-                const url = encodeBase64Url(this.document.endpoint.url);
+                const name = encodeBase64Url(this.document.endpoint);
                 const id = encodeBase64Url(this.document.id);
-                value.url = `/api/v1/containers/${url}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+                value.url = `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }
         }
 

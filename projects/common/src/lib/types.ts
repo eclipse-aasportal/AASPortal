@@ -67,8 +67,8 @@ export interface AASDocument {
     id: string;
     /** The name of the AAS. */
     idShort: string;
-    /** The URL of the container that provides this AAS. */
-    endpoint: AASEndpoint;
+    /** The name of the endpoint. */
+    endpoint: string;
     /** The address of the AAS in the container. */
     address: string;
     /** A time stamp that represents the current state of the AAS. */
@@ -86,7 +86,7 @@ export interface AASDocument {
 
 /** The unique identifier of an AAS. */
 export interface AASDocumentId {
-    url: string;
+    endpoint: string;
     id: string;
 }
 
@@ -134,7 +134,7 @@ export interface LiveNode {
 }
 
 export interface LiveRequest {
-    endpoint: AASEndpoint;
+    endpoint: string;
     id: string;
     nodes: LiveNode[]
 }
@@ -164,7 +164,7 @@ export interface ErrorData {
     type: string;
     name: string;
     message: string;
-    args: any[];
+    args: unknown[];
 }
 
 /** Provides information about a 3rd-party package. */

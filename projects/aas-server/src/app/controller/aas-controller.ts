@@ -11,7 +11,7 @@ import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
 
-export abstract class ControllerBase extends Controller {
+export abstract class AASController extends Controller {
     protected constructor(
         protected readonly logger: Logger,
         protected readonly auth: AuthService,

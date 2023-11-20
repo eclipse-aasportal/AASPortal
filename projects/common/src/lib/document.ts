@@ -29,7 +29,7 @@ export interface DifferenceItem {
  * @returns `true` if the specified documents are equal.
  */
 export function equalDocument(a: AASDocument | null, b: AASDocument | null): boolean {
-    return a === b || a != null && b != null && a.id === b.id && equalUrls(a.endpoint.url, b.endpoint.url);
+    return a === b || a != null && b != null && a.id === b.id && a.endpoint === b.endpoint;
 }
 
 /**

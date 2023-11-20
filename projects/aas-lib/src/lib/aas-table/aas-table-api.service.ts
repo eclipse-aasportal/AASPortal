@@ -39,12 +39,12 @@ export class AASTableApiService {
 
     /**
      * Loads the element structure of the specified document.
-     * @param url The URL of the container.
+     * @param name The URL of the container.
      * @param id The identification of the AAS document.
      * @returns The root of the element structure.
      */
-    public getContent(url: string, id: string): Observable<aas.Environment> {
+    public getContent(name: string, id: string): Observable<aas.Environment> {
         return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}/content`);
+            `/api/v1/containers/${encodeBase64Url(name)}/documents/${encodeBase64Url(id)}/content`);
     }
 }
