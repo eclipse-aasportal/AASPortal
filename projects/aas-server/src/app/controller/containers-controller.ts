@@ -69,16 +69,16 @@ export class ContainersController extends AASController {
 
     /**
      * @summary Uploads one or more AASX packages to the specified AAS container.
-     * @param name The name of the destination endpoint (Base64Url encoded).
+     * @param endpoint The name of the destination endpoint (Base64Url encoded).
      * @param files The AAS package file.
      */
-    @Post('{name}/packages')
+    @Post('{endpoint}/packages')
     @Security('bearerAuth', ['editor'])
     @OperationId('addPackages')
-    public async addPackages(@Path() name: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
+    public async addPackages(@Path() endpoint: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
         try {
             this.logger.start('addPackages');
-            await this.aasProvider.addPackagesAsync(decodeBase64Url(name), files);
+            await this.aasProvider.addPackagesAsync(decodeBase64Url(endpoint), files);
         } finally {
             this.logger.stop();
         }

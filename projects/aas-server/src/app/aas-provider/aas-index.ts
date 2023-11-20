@@ -20,17 +20,17 @@ export abstract class AASIndex {
     
     public abstract getDocuments(cursor: AASCursor, filter?: AASFilter): Promise<AASPage>;
 
-    public abstract getContainerDocuments(url: string): Promise<AASDocument[]>;
+    public abstract getContainerDocuments(endpointName: string): Promise<AASDocument[]>;
 
     public abstract set(document: AASDocument): Promise<void>;
 
     public abstract add(document: AASDocument): Promise<void>;
 
-    public abstract has(name: string | undefined, id: string): Promise<boolean>;
+    public abstract has(endpointName: string | undefined, id: string): Promise<boolean>;
 
-    public abstract get(name: string | undefined, id: string): Promise<AASDocument>;
+    public abstract get(endpointName: string | undefined, id: string): Promise<AASDocument>;
 
-    public abstract remove(name?: string, id?: string): Promise<boolean>;
+    public abstract remove(endpointName?: string, id?: string): Promise<boolean>;
 
     public abstract reset(): Promise<void>;
 }

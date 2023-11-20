@@ -66,9 +66,9 @@ export class LowIndex extends AASIndex {
         return true;
     }
 
-    public override async getContainerDocuments(name: string): Promise<AASDocument[]> {
+    public override async getContainerDocuments(endpointName: string): Promise<AASDocument[]> {
         await this.promise;
-        return this.db.data.documents.filter(document => document.endpoint === name);
+        return this.db.data.documents.filter(document => document.endpoint === endpointName);
     }
 
     public override async getDocuments(cursor: AASCursor, filter?: AASFilter): Promise<AASPage> {
@@ -101,23 +101,23 @@ export class LowIndex extends AASIndex {
         }
     }
 
-    public override async has(name: string | undefined, id: string): Promise<boolean> {
+    public override async has(endpointName: string | undefined, id: string): Promise<boolean> {
         await this.promise;
-        const document = name
-            ? this.db.data.documents.find(item => item.endpoint === name && item.id === id)
+        const document = endpointName
+            ? this.db.data.documents.find(item => item.endpoint === endpointName && item.id === id)
             : this.db.data.documents.find(item => item.id === id);
 
         return document != null;
     }
 
-    public async get(name: string | undefined, id: string): Promise<AASDocument> {
+    public async get(endpointName: string | undefined, id: string): Promise<AASDocument> {
         await this.promise;
-        const document = name
-            ? this.db.data.documents.find(item => item.endpoint === name && item.id === id)
+        const document = endpointName
+            ? this.db.data.documents.find(item => item.endpoint === endpointName && item.id === id)
             : this.db.data.documents.find(item => item.id === id);
 
         if (!document) {
-            throw new Error(`An AAS with the identifier ${id} does not exist in ${name}.`);
+            throw new Error(`An AAS with the identifier ${id} does not exist in ${endpointName}.`);
         }
 
         return document;
@@ -125,20 +125,20 @@ export class LowIndex extends AASIndex {
 
     public override async add(document: AASDocument): Promise<void> {
         await this.promise;
-        const name = document.endpoint;
+        const endpoint = document.endpoint;
         const id = document.id;
-        if (this.db.data.documents.some(item => item.endpoint === name && item.id === id)) {
-            throw new Error(`An AAS with the identifier ${id} already exist in ${name}`);
+        if (this.db.data.documents.some(item => item.endpoint === endpoint && item.id === id)) {
+            throw new Error(`An AAS with the identifier ${id} already exist in ${endpoint}`);
         }
 
-        this.db.data.documents.push({ ...document, content: null });
+        this.db.data.documents.push(document);
         await this.db.write();
     }
 
-    public override async remove(name: string, id: string): Promise<boolean> {
+    public override async remove(endpointName: string, id: string): Promise<boolean> {
         await this.promise;
         const index = this.db.data.documents.findIndex(
-            item => item.endpoint === name && item.id === id);
+            item => item.endpoint === endpointName && item.id === id);
 
         if (index < 0) return false;
 

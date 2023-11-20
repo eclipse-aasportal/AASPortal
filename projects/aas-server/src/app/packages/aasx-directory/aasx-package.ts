@@ -52,7 +52,7 @@ export class AasxPackage extends AASPackage {
                 idShort: environment.assetAdministrationShells[0].idShort,
                 readonly: this.source.readOnly,
                 onlineReady: this.source.onlineReady,
-                content: null
+                content: environment
             };
         } else {
             throw new Error(`Asset format ${format} is not supported.`);

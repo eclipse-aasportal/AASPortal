@@ -52,7 +52,7 @@ export class AasxServerPackage extends AASPackage {
             idShort: environment.assetAdministrationShells[0].idShort,
             readonly: this.server.readOnly,
             onlineReady: true,
-            content: null
+            content: environment
         };
 
         const thumbnail = await this.createThumbnail(document.id);

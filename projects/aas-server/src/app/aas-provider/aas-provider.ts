@@ -488,7 +488,7 @@ export class AASProvider {
     private async onAdded(result: ScanContainerResult): Promise<void> {
         await this.index.add(result.document);
         this.logger.info(`Added: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
-        this.sendMessage({ type: 'Added', document: { ...result.document, content: result.document ? null : undefined } });
+        this.sendMessage({ type: 'Added', document: result.document });
     }
 
     private async onRemoved(result: ScanContainerResult): Promise<void> {

@@ -50,7 +50,7 @@ export class OpcuaPackage extends AASPackage {
             idShort: component.browseName,
             readonly: this.server.readOnly,
             onlineReady: this.server.onlineReady,
-            content: null
+            content: await new OpcuaReader(this.logger, component, this.dataTypes).readEnvironment()
         };
 
         return document;
@@ -61,7 +61,6 @@ export class OpcuaPackage extends AASPackage {
         const reader = new OpcuaReader(this.logger, component, this.dataTypes);
         return await reader.readEnvironment();
     }
-
 
     public getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
         return Promise.reject(new Error('Not implemented.'));
