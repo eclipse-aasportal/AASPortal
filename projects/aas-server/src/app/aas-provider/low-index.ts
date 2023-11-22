@@ -131,7 +131,8 @@ export class LowIndex extends AASIndex {
             throw new Error(`An AAS with the identifier ${id} already exist in ${endpoint}`);
         }
 
-        this.db.data.documents.push(document);
+        const index = this.getInsertPosition(document);
+        this.db.data.documents.splice(index, 0, document);
         await this.db.write();
     }
 
@@ -165,44 +166,40 @@ export class LowIndex extends AASIndex {
         }
     }
 
+    private getInsertPosition(document: AASDocumentId): number {
+        let index = 0;
+        for (const item of this.db.data.documents) {
+            if (this.compare(item, document) > 0) {
+                break;
+            }
+
+            ++index;
+        }
+
+        return index;
+    }
+
     private async getFirstPage(limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
         }
 
-        let min: AASDocumentId | undefined;
-        let max: AASDocumentId | undefined;
+        const n = limit + 1;
         for (const document of this.db.data.documents) {
             if (!filter || await filter.do(document)) {
-                const id = this.getId(document);
-                let isGreater: boolean;
-                if (!min || this.compare(id, min) < 0) {
-                    min = id;
-                    isGreater = true;
-                } else {
-                    isGreater = this.compare(min, id) <= 0;
-                }
-
-                if (isGreater) {
-                    const index = documents.findIndex(item => this.compare(this.getId(item), id) > 0);
-                    if (index >= 0) {
-                        documents.splice(index, 0, document);
-                        if (documents.length > limit) {
-                            documents.splice(limit);
-                        }
-                    } else if (documents.length < limit) {
-                        documents.push(document);
-                    }
-                }
-
-                if (!max || this.compare(id, max) > 0) {
-                    max = id;
+                documents.push(document);
+                if (documents.length >= n) {
+                    break;
                 }
             }
         }
 
-        return { isFirst: true, documents, isLast: this.isLastPage(documents, max) };
+        return {
+            isFirst: true,
+            documents: documents.slice(0, limit),
+            isLast: documents.length < n
+        };
     }
 
     private async getNextPage(previous: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
@@ -211,123 +208,94 @@ export class LowIndex extends AASIndex {
             return { isFirst: true, documents, isLast: true };
         }
 
-        let min: AASDocumentId | undefined;
-        let max: AASDocumentId | undefined;
-        for (const document of this.db.data.documents) {
-            if (!filter || await filter.do(document)) {
-                const id = this.getId(document);
-                if (this.compare(previous, id) < 0) {
-                    const index = documents.findIndex(item => this.compare(this.getId(item), id) > 0);
-                    if (index >= 0) {
-                        documents.splice(index, 0, document);
-                        if (documents.length > limit) {
-                            documents.splice(limit);
-                        }
-                    } else if (documents.length < limit) {
-                        documents.push(document);
-                    }
-                }
+        const n = limit + 1;
+        const items = this.db.data.documents;
+        let i = items.findIndex(item => this.compare(previous, item) < 0);
+        if ( i < 0) {
+            return this.getLastPage(limit, filter);
+        }
 
-                if (!min || this.compare(id, min) < 0) {
-                    min = id;
-                } else if (!max || this.compare(id, max) > 0) {
-                    max = id;
+        for (let m = items.length; i < m; i++) {
+            const document = items[i];
+            if (!filter || await filter.do(document)) {
+                documents.push(document);
+                if (documents.length >= n) {
+                    break;
                 }
             }
         }
 
-        return { isFirst: this.isFirstPage(documents, min), documents, isLast: this.isLastPage(documents, max) };
+        return {
+            isFirst: false,
+            documents: documents.slice(0, limit),
+            isLast: documents.length < n
+        };
     }
 
     private async getPreviousPage(next: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
-        let documents: AASDocument[] = [];
+        const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
         }
 
-        let min: AASDocumentId | undefined;
-        let max: AASDocumentId | undefined;
-        for (const document of this.db.data.documents) {
-            if (!filter || await filter.do(document)) {
-                const id = this.getId(document);
-                if (this.compare(next, id) > 0) {
-                    const index = documents.findIndex(item => this.compare(this.getId(item), id) < 0);
-                    if (index >= 0) {
-                        documents.splice(index, 0, document);
-                        if (documents.length > limit) {
-                            documents.splice(limit);
-                        }
-                    } else if (documents.length < limit) {
-                        documents.push(document);
-                    }
-                }
+        const n = limit + 1
+        const items = this.db.data.documents;
+        let i = this.findIndexReverse(next);
+        if (i < 0) {
+            return this.getFirstPage(limit, filter);
+        }
 
-                if (!min || this.compare(id, min) < 0) {
-                    min = id;
-                } else if (!max || this.compare(id, max) > 0) {
-                    max = id;
+        for (; i >= 0; --i) {
+            const document = items[i];
+            if (!filter || await filter.do(document)) {
+                documents.push(document);
+                if (documents.length >= n) {
+                    break;
                 }
             }
         }
 
-        documents = documents.reverse();
-
-        return { isFirst: this.isFirstPage(documents, min), documents, isLast: this.isLastPage(documents, next) };
+        return {
+            isFirst: documents.length < n,
+            documents: documents.slice(0, limit).reverse(),
+            isLast: false
+        };
     }
 
     private async getLastPage(limit: number, filter?: AASFilter): Promise<AASPage> {
-        let documents: AASDocument[] = [];
+        const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { isFirst: true, documents, isLast: true };
         }
 
-        let min: AASDocumentId | undefined;
-        let max: AASDocumentId | undefined;
-        for (const document of this.db.data.documents) {
+        const n = limit + 1
+        const items = this.db.data.documents;
+        for (let i = items.length - 1; i >= 0; --i) {
+            const document = items[i];
             if (!filter || await filter.do(document)) {
-                const id = this.getId(document);
-                let isLower: boolean;
-                if (!max || this.compare(id, max) > 0) {
-                    max = id;
-                    isLower = true;
-                } else {
-                    isLower = this.compare(max, id) >= 0;
-                }
-
-                if (isLower) {
-                    const index = documents.findIndex(item => this.compare(this.getId(item), id) < 0);
-                    if (index >= 0) {
-                        documents.splice(index, 0, document);
-                        if (documents.length > limit) {
-                            documents.splice(limit);
-                        }
-                    } else if (documents.length < limit) {
-                        documents.push(document);
-                    }
-                }
-
-                if (!min || this.compare(id, min) < 0) {
-                    min = id;
+                documents.push(document);
+                if (documents.length >= n) {
+                    break;
                 }
             }
         }
 
-        documents = documents.reverse();
-
-        return { isFirst: this.isFirstPage(documents, min), documents, isLast: true };
+        return {
+            isFirst: documents.length < n,
+            documents: documents.slice(0, limit).reverse(),
+            isLast: true
+        };
     }
 
-    private isFirstPage(documents: AASDocument[], min: AASDocumentId | undefined): boolean {
-        return documents.length === 0 || min == null || this.compare(min, this.getId(documents[0])) === 0;
-    }
+    private findIndexReverse(next: AASDocumentId): number {
+        const items = this.db.data.documents;
+        for (let i = items.length - 1; i >= 0; --i) {
+            if (this.compare(next, items[i]) > 0) {
+                return i;
+            }
+        }
 
-    private isLastPage(documents: AASDocument[], max: AASDocumentId | undefined): boolean {
-        return documents.length === 0 || max == null ||
-            this.compare(max, this.getId(documents[documents.length - 1])) === 0;
-    }
-
-    private getId(document: AASDocument): AASDocumentId {
-        return { id: document.id, endpoint: document.endpoint };
+        return -1;
     }
 
     private compare(a: AASDocumentId, b: AASDocumentId): number {
