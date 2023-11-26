@@ -61,14 +61,18 @@ export interface AASContainer extends AASEndpoint {
     documents?: AASDocument[];
 }
 
-/** Represents an Asset Administration Shell */
-export interface AASDocument {
-    /** The identification of the Asset Administration Shell. */
-    id: string;
-    /** The name of the AAS. */
-    idShort: string;
+/** The unique identifier of an AAS. */
+export interface AASDocumentId {
     /** The name of the endpoint. */
     endpoint: string;
+    /** The identification of the Asset Administration Shell. */
+    id: string;
+}
+
+/** Represents an Asset Administration Shell */
+export interface AASDocument extends AASDocumentId {
+    /** The name of the AAS. */
+    idShort: string;
     /** The address of the AAS in the container. */
     address: string;
     /** A time stamp that represents the current state of the AAS. */
@@ -84,17 +88,12 @@ export interface AASDocument {
     content?: aas.Environment | null;
 }
 
-/** The unique identifier of an AAS. */
-export interface AASDocumentId {
-    endpoint: string;
-    id: string;
-}
-
 /** Represents a page of AAS documents from the total set. */
 export interface AASPage {
-    isFirst: boolean;
-    isLast: boolean;
+    previous: AASDocumentId | null;
+    next: AASDocumentId | null;
     documents: AASDocument[];
+    totalCount: number;
 }
 
 /** Represents a cursor in the collection of Asset Administration Shells. */

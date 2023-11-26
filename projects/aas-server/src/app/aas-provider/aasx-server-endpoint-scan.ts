@@ -25,13 +25,12 @@ export class AASXServerEndpointScan extends AASEndpointScan {
         const server = this.resourceFactory.create(this.endpoint);
         try {
             await server.openAsync();
-            if (this.containers.length === 0) {
-                const container: AASContainer = { ...this.endpoint };
-                this.emit('added', this.endpoint, container);
+            if (this.containers.every(item => item.url !== this.endpoint.url)) {
+                this.emit('added', this.endpoint, { ...this.endpoint });
             }
         } catch (error) {
-            if (this.containers.length > 0) {
-                this.emit('removed', this.endpoint, this.containers[0]);
+            if (this.containers.some(item => item.url === this.endpoint.url)) {
+                this.emit('removed', this.endpoint, { ...this.endpoint });
             }
         } finally {
             await server.closeAsync();

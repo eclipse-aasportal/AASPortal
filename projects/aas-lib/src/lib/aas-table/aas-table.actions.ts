@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
-import { AASPage } from 'common';
+import { AASDocument, AASPage, aas } from 'common';
 import { AASTableRow } from './aas-table.state';
 import { TypedAction } from '@ngrx/store/src/models';
 
@@ -18,7 +18,7 @@ export enum AASTableActionType {
     GET_PREVIOUS_PAGE = '[AASTable] previous next page',
     SET_PAGE = '[AASTable] set page',
     GET_LAST_PAGE = '[AASTable] get last page',
-
+    SET_CONTENT = '[AASTable] set content',
     UPDATE_ROWS = '[AASTable] Update Rows',
     EXPAND = '[AASTable] Expand',
     COLLAPSE = '[AASTable] Collapse',
@@ -53,6 +53,10 @@ export const getLastPage = createAction(
 export const setPage = createAction(
     AASTableActionType.SET_PAGE,
     props<{ page: AASPage }>());
+
+export const setContent = createAction(
+    AASTableActionType.SET_CONTENT,
+    props<{ document: AASDocument, content: aas.Environment }>());
 
 export const expandRow = createAction(
     AASTableActionType.EXPAND,

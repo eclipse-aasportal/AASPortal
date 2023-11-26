@@ -23,13 +23,12 @@ export class OpcuaEndpointScan extends AASEndpointScan {
         const source = new OpcuaServer(this.logger, this.endpoint.url, this.endpoint.name);
         try {
             await source.openAsync();
-            if (this.containers.length === 0) {
-                const container: AASContainer = { ...this.endpoint };
-                this.emit('added', this.endpoint, container);
+            if (this.containers.every(item => item.url !== this.endpoint.url)) {
+                this.emit('added', this.endpoint, { ...this.endpoint });
             }
         } catch (error) {
-            if (this.containers.length > 0) {
-                this.emit('removed', this.endpoint, this.containers[0]);
+            if (this.containers.some(item => item.url === this.endpoint.url)) {
+                this.emit('removed', this.endpoint, { ...this.endpoint });
             }
         } finally {
             await source.closeAsync();

@@ -512,7 +512,7 @@ export class AASProvider {
     }
 
     private async onContainerRemoved(result: ScanEndpointResult): Promise<void> {
-        await this.index.removeEndpoint(result.container.name);
+        // await this.index.removeEndpoint(result.container.name);
         this.sendMessage({ type: 'ContainerRemoved', endpoint: result.endpoint, container: result.container });
     }
 

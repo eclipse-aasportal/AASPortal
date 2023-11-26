@@ -63,7 +63,7 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (query?.descriptor) {
             const descriptor: lib.SubmodelViewDescriptor = query.descriptor;
             zip(of(descriptor.template), from(descriptor.submodels).pipe(
-                mergeMap(item => zip(this.api.getDocument(item.id, item.endpoint), of(item.idShort))),
+                mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
                 mergeMap(tuple => {
                     const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
                     if (submodel?.modelType === 'Submodel') {

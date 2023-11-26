@@ -72,7 +72,7 @@
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
                 <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
                     translate>CMD_VIEW_USER_FEEDBACK</button>
-                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!this.canViewNameplate()"
+                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
                     translate>CMD_VIEW_NAMEPLATE</button>
             </div>
         </div>

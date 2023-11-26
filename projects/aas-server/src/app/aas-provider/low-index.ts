@@ -182,7 +182,7 @@ export class LowIndex extends AASIndex {
     private async getFirstPage(limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { isFirst: true, documents, isLast: true };
+            return { previous: null, documents, next: null, totalCount: 0 };
         }
 
         const n = limit + 1;
@@ -196,21 +196,22 @@ export class LowIndex extends AASIndex {
         }
 
         return {
-            isFirst: true,
+            previous: null,
             documents: documents.slice(0, limit),
-            isLast: documents.length < n
+            next: documents.length >= 0 ? documents[limit] : null,
+            totalCount: this.db.data.documents.length
         };
     }
 
-    private async getNextPage(previous: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
+    private async getNextPage(current: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { isFirst: true, documents, isLast: true };
+            return { previous: null, documents, next: null, totalCount: 0 };
         }
 
         const n = limit + 1;
         const items = this.db.data.documents;
-        let i = items.findIndex(item => this.compare(previous, item) < 0);
+        let i = items.findIndex(item => this.compare(current, item) < 0);
         if ( i < 0) {
             return this.getLastPage(limit, filter);
         }
@@ -226,21 +227,22 @@ export class LowIndex extends AASIndex {
         }
 
         return {
-            isFirst: false,
+            previous: current,
             documents: documents.slice(0, limit),
-            isLast: documents.length < n
+            next: documents.length >= n ? documents[limit] : null,
+            totalCount: items.length
         };
     }
 
-    private async getPreviousPage(next: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
+    private async getPreviousPage(current: AASDocumentId, limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { isFirst: true, documents, isLast: true };
+            return { previous: null, documents, next: null, totalCount: 0 };
         }
 
         const n = limit + 1
         const items = this.db.data.documents;
-        let i = this.findIndexReverse(next);
+        let i = this.findIndexReverse(current);
         if (i < 0) {
             return this.getFirstPage(limit, filter);
         }
@@ -256,16 +258,17 @@ export class LowIndex extends AASIndex {
         }
 
         return {
-            isFirst: documents.length < n,
+            previous: documents.length >= n ? documents[0] : null,
             documents: documents.slice(0, limit).reverse(),
-            isLast: false
+            next: current,
+            totalCount: items.length
         };
     }
 
     private async getLastPage(limit: number, filter?: AASFilter): Promise<AASPage> {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { isFirst: true, documents, isLast: true };
+            return { previous: null, documents, next: null, totalCount: 0 };
         }
 
         const n = limit + 1
@@ -281,9 +284,10 @@ export class LowIndex extends AASIndex {
         }
 
         return {
-            isFirst: documents.length < n,
+            previous:  documents.length >= n ? documents[0] : null,
             documents: documents.slice(0, limit).reverse(),
-            isLast: true
+            next: null,
+            totalCount: items.length
         };
     }
 

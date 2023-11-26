@@ -16,19 +16,19 @@ export class DirectoryEndpointScan extends AASEndpointScan {
         private readonly logger: Logger,
         private readonly endpoint: AASEndpoint,
         private readonly fileStorage: FileStorage,
-        private readonly containers: AASContainer[]) {
+        private readonly containers: AASContainer[]
+    ) {
         super();
     }
 
     public async scanAsync(): Promise<void> {
         if (await this.fileStorage.exists('.')) {
-            if (this.containers.length === 0) {
-                const container: AASContainer = { ...this.endpoint };
-                this.emit('added', this.endpoint, container);
+            if (this.containers.every(item => item.url !== this.endpoint.url)) {
+                this.emit('added', this.endpoint, { ...this.endpoint });
             }
         } else {
-            if (this.containers.length > 0) {
-                this.emit('removed', this.endpoint, this.containers[0]);
+            if (this.containers.some(item => item.url === this.endpoint.url)) {
+                this.emit('removed', this.endpoint, { ...this.endpoint });
             }
         }
     }

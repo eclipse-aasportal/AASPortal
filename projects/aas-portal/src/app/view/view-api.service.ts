@@ -23,12 +23,12 @@ export class ViewAPIService {
 
     /**
      * Gets the referenced AAS document.
-     * @param id The identification or name of the document.
-     * @param url The URL of the container.
+     * @param endpoint The endpoint name.
+     * @param id The AAS identification.
      * @returns The AAS document.
      */
-    public getDocument(id: string, url: string): Observable<AASDocument> {
+    public getDocument(endpoint: string, id: string): Observable<AASDocument> {
         return this.http.get<AASDocument>(
-            `/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`);
+            `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`);
     }
 }

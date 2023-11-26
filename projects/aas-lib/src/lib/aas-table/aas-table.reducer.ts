@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { AASDocument, AASPage } from 'common';
+import { AASDocument, AASPage, aas } from 'common';
 import * as AASTableActions from './aas-table.actions';
 import { AASTableRow, AASTableState } from './aas-table.state';
 
@@ -39,6 +39,10 @@ export const aasTableReducer = createReducer(
         (state, { page }) => setPage(state, page)
     ),
     on(
+        AASTableActions.setContent,
+        (state, { document, content }) => setContent(state, document, content)
+    ),
+    on(
         AASTableActions.toggleSelected,
         (state, { row, altKey, shiftKey }) => toggleSelected(state, row, altKey, shiftKey)
     ),
@@ -53,9 +57,31 @@ function setPage(state: AASTableState, page: AASPage): AASTableState {
         ...state,
         initialized: true,
         rows: initList(page.documents),
-        isFirstPage: page.isFirst,
-        isLastPage: page.isLast
+        isFirstPage: page.previous === null,
+        isLastPage: page.next === null
     };
+}
+
+function setContent(state: AASTableState, document: AASDocument, content: aas.Environment): AASTableState {
+    const rows = [...state.rows];
+    const index = rows.findIndex(row => row.endpoint === document.endpoint && row.id === document.id);
+    if (index >= 0) {
+        const row = rows[index];
+        rows[index] = clone(row, { ...document, content })
+    }
+
+    return { ...state, rows };
+
+    function clone(row: AASTableRow, document: AASDocument): AASTableRow {
+        return new AASTableRow(
+            document,
+            row.selected,
+            row.expanded,
+            row.isLeaf,
+            row.level,
+            row.firstChild,
+            row.nextSibling)
+    }
 }
 
 function initList(documents: AASDocument[]): AASTableRow[] {

@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { AASDocument, AASDocumentId } from 'common';
-import { EMPTY, exhaustMap, map, mergeMap, first } from 'rxjs';
+import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from } from 'rxjs';
 
 import * as AASTableActions from './aas-table.actions';
 import * as AASTableSelectors from './aas-table.selectors';
@@ -47,7 +47,12 @@ export class AASTableEffects {
 
                     return this.api.getDocuments({ previous: null, limit: this.defaultLimit });
                 }),
-                map(page => AASTableActions.setPage({ page })))));
+                mergeMap(page => concat(
+                    of(AASTableActions.setPage({ page })),
+                    from(page.documents).pipe(
+                        mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
+                            map(content => AASTableActions.setContent({ document, content }))
+                        ))))))));
     });
 
     public getFirstPage = createEffect(() => {
@@ -57,8 +62,13 @@ export class AASTableEffects {
                 { previous: null, limit: action.limit },
                 action.filter,
                 this.translate.currentLang).pipe(
-                    map(page => AASTableActions.setPage({ page })))));
-    });
+                    mergeMap(page => concat(
+                        of(AASTableActions.setPage({ page })),
+                        from(page.documents).pipe(
+                            mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
+                                map(content => AASTableActions.setContent({ document, content }))
+                            ))))))));
+        });
 
     public getLastPage = createEffect(() => {
         return this.actions.pipe(
@@ -67,8 +77,13 @@ export class AASTableEffects {
                 { next: null, limit: action.limit },
                 action.filter,
                 this.translate.currentLang).pipe(
-                    map(page => AASTableActions.setPage({ page })))));
-    });
+                    mergeMap(page => concat(
+                        of(AASTableActions.setPage({ page })),
+                        from(page.documents).pipe(
+                            mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
+                                map(content => AASTableActions.setContent({ document, content }))
+                            ))))))));
+        });
 
     public getNextPage = createEffect(() => {
         return this.actions.pipe(
@@ -86,7 +101,12 @@ export class AASTableEffects {
                         action.filter,
                         this.translate.currentLang);
                 }),
-                map(page => AASTableActions.setPage({ page })))));
+                mergeMap(page => concat(
+                    of(AASTableActions.setPage({ page })),
+                    from(page.documents).pipe(
+                        mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
+                            map(content => AASTableActions.setContent({ document, content }))
+                        ))))))));
     });
 
     public getPreviousPage = createEffect(() => {
@@ -105,7 +125,12 @@ export class AASTableEffects {
                         action.filter,
                         this.translate.currentLang);
                 }),
-                map(page => AASTableActions.setPage({ page })))));
+                mergeMap(page => concat(
+                    of(AASTableActions.setPage({ page })),
+                    from(page.documents).pipe(
+                        mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
+                            map(content => AASTableActions.setContent({ document, content }))
+                        ))))))));
     });
 
     private getId(document: AASDocument): AASDocumentId {
