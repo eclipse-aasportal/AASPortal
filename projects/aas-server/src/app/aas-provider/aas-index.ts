@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { AASCursor, AASDocument, AASEndpoint, AASPage } from 'common';
-import { AASFilter } from './aas-filter.js';
 
 export abstract class AASIndex {
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
@@ -18,7 +17,7 @@ export abstract class AASIndex {
 
     public abstract removeEndpoint(name: string): Promise<boolean>;
     
-    public abstract getDocuments(cursor: AASCursor, filter?: AASFilter): Promise<AASPage>;
+    public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage>;
 
     public abstract getContainerDocuments(endpointName: string): Promise<AASDocument[]>;
 

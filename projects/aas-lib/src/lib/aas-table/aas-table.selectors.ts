@@ -49,3 +49,7 @@ export const selectIsLastPage = createSelector(
 export const selectInitialized = createSelector(
     getState,
     state => state.initialized);
+
+export const selectTotalCount = createSelector(
+    getState,
+    state => state.totalCount);

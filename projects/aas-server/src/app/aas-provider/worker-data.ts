@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { AASContainer, AASEndpoint } from "common";
-import { ScanStatistic } from "./scan-result.js";
+import { AASContainer } from 'common';
+import { ScanStatistic } from './scan-result.js';
 
 export interface WorkerData {
     taskId: number;
-    type: 'ScanContainerData' | 'ScanEndpointData';
+    type: 'ScanContainerData';
     statistic: ScanStatistic;
 }
 
@@ -20,16 +20,6 @@ export interface ScanContainerData extends WorkerData {
     container: AASContainer;
 }
 
-export interface ScanEndpointData extends WorkerData {
-    type: 'ScanEndpointData';
-    endpoint: AASEndpoint;
-    endpoints: AASEndpoint[];
-}
-
 export function isScanContainerData(data: WorkerData): data is ScanContainerData {
     return data.type === 'ScanContainerData';
-}
-
-export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
-    return data.type === 'ScanEndpointData';
 }

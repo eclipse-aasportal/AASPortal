@@ -16,10 +16,11 @@ import {
     aas,
     parseDate,
     parseNumber,
-    convertFromString
+    convertFromString,
+    toBoolean
 } from 'common';
-import { AASResourceFactory } from '../packages/aas-resource-factory.js';
-import { AASIndex } from './aas-index.js';
+
+import { LowDbDocument, LowDbElement } from './lowdb-types.js';
 
 type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
@@ -27,7 +28,7 @@ interface Query {
     modelType: aas.ModelType;
     operator?: Operator;
     name?: string;
-    value?: string | boolean;
+    value?: string;
 }
 
 interface OrExpression {
@@ -38,32 +39,26 @@ interface Expression {
     orExpressions: OrExpression[]
 }
 
-export class AASFilter {
+export class LowDbQuery {
     private readonly expression: Expression;
 
     constructor(
-        private readonly resourceFactory: AASResourceFactory,
-        private readonly index: AASIndex,
         searchText: string,
         private readonly language: string
     ) {
         this.expression = { orExpressions: this.splitOr(searchText) };
     }
 
-    public async do(input: AASDocument): Promise<boolean> {
+    public do(document: LowDbDocument, elements: LowDbElement[]): boolean {
         let result = false;
         try {
             for (const or of this.expression.orExpressions) {
                 for (const expression of or.andExpressions) {
                     if (expression.length >= 3) {
                         if (expression.startsWith('#')) {
-                            if (!input.content) {
-                                input.content = await this.getContentAsync(input)
-                            }
-
-                            result = this.match(input, this.parseExpression(expression));
+                            result = this.match(elements, this.parseExpression(expression));
                         } else {
-                            result = this.contains(input, expression);
+                            result = this.contains(document, expression);
                         }
                     }
 
@@ -91,20 +86,10 @@ export class AASFilter {
         return s.split('&&').map(item => item.trim().toLocaleLowerCase(this.language));
     }
 
-    private async getContentAsync(document: AASDocument): Promise<aas.Environment> {
-        const endpoint = await this.index.getEndpoint(document.endpoint);
-        const source = this.resourceFactory.create(endpoint);
-        try {
-            await source.openAsync();
-            return await source.createPackage(document.address).readEnvironmentAsync();
-        } finally {
-            await source.closeAsync();
-        }
-    }
-
     private contains(document: AASDocument, expression: string): boolean {
         return document.idShort.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
-            document.id.toLocaleLowerCase(this.language).indexOf(expression) >= 0;
+            document.id.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
+            document.endpoint.toLocaleLowerCase(this.language).indexOf(expression) >= 0;
     }
 
     private parseExpression(expression: string): Query | undefined {
@@ -117,7 +102,7 @@ export class AASFilter {
                 query = { modelType: modelType };
                 if (tuple) {
                     query.name = expression.substring(index + 1, tuple.index).trim();
-                    query.value = this.fromString(expression.substring(tuple.index + tuple.operator.length));
+                    query.value = this.trim(expression.substring(tuple.index + tuple.operator.length));
                     query.operator = tuple.operator;
                 } else {
                     query.name = expression.substring(index + 1);
@@ -127,7 +112,7 @@ export class AASFilter {
             const modelType = getModelTypeFromAbbreviation(expression.substring(1, tuple.index) as AASAbbreviation);
             if (modelType) {
                 query = { modelType: modelType };
-                query.value = this.fromString(expression.substring(tuple.index + tuple.operator.length));
+                query.value = this.trim(expression.substring(tuple.index + tuple.operator.length));
                 query.operator = tuple.operator;
             }
         } else {
@@ -174,25 +159,13 @@ export class AASFilter {
         return undefined
     }
 
-    private fromString(s: string): string | boolean {
-        s = s.trim();
-        switch (s.toLowerCase()) {
-            case 'true':
-                return true;
-            case 'false':
-                return false;
-            default:
-                return trim(s, '\'"');
-        }
+    private trim(s: string): string {
+        return trim(s.trim(), '\'"');
     }
 
-    private match(document: AASDocument, query: Query | undefined): boolean {
-        if (query && document.content) {
-            if (document.content.assetAdministrationShells.some(shell => this.any(shell, query))) {
-                return true;
-            }
-
-            if (document.content.submodels.some(submodel => this.any(submodel, query))) {
+    private match(elements: LowDbElement[], query: Query | undefined): boolean {
+        if (query) {
+            if (elements.some(element => this.any(element, query))) {
                 return true;
             }
         }
@@ -200,65 +173,49 @@ export class AASFilter {
         return false;
     }
 
-    private any(parent: aas.Referable, query: Query): boolean {
-        if (parent.modelType === query.modelType) {
-            if (this.containsString(parent.idShort, query.name)) {
-                if (!parent || !query.value) {
+    private any(element: LowDbElement, query: Query): boolean {
+        if (element.modelType === query.modelType) {
+            if (this.containsString(element.idShort, query.name)) {
+                if (!element || !query.value) {
                     return true;
                 }
 
-                if (this.matchValue(parent, query.value, query.operator)) {
+                if (this.matchValue(element, query.value, query.operator)) {
                     return true;
                 }
-            }
-        }
-
-        for (const child of this.getChildren(parent)) {
-            if (this.any(child, query)) {
-                return true;
             }
         }
 
         return false;
     }
 
-    private matchValue(referable: aas.Referable, value: string | boolean, operator?: Operator): boolean {
-        switch (referable.modelType) {
+    private matchValue(element: LowDbElement, value: string, operator?: Operator): boolean {
+        switch (element.modelType) {
             case 'Property':
-                return this.matchProperty(referable as aas.Property, value, operator);
+                if (!element.value || !element.valueType) {
+                    return false;
+                }
+
+                return this.matchProperty(element.value, element.valueType, value, operator);
             case 'File': {
-                const fileName = normalize((referable as aas.File).value ?? '');
-                return fileName ? this.containsString(fileName, value as string) : false;
-            }
-            case 'Entity': {
-                const entity = referable as aas.Entity;
-                return entity.globalAssetId ? this.containsString(entity.globalAssetId, value as string) : false;
-            }
-            case 'ReferenceElement': {
-                const referenceElement = referable as aas.ReferenceElement;
-                return referenceElement.value.keys.some(key => this.containsString(key.value, value as string));
-            }
-            case 'MultiLanguageProperty': {
-                const langString = (referable as aas.MultiLanguageProperty).value;
-                return langString ? langString.some(item => item ? this.containsString(item.text, value as string) : false) : false;
+                const fileName = normalize(element.value ?? '');
+                return fileName ? this.containsString(fileName, value) : false;
             }
             default:
-                return false;
+                return element.value ? this.containsString(element.value, value): false;
         }
     }
 
-    private matchProperty(property: aas.Property, b: string | boolean, operator: Operator = '='): boolean {
-        const a = convertFromString(property.value, property.valueType);
-        if (typeof a === 'boolean') {
-            return (typeof b === 'boolean') && a === b;
-        } else if (typeof b === 'boolean') {
-            return false;
+    private matchProperty(value: string, valueType: aas.DataTypeDefXsd, b: string, operator: Operator = '='): boolean {
+        const a = convertFromString(value, valueType);
+        if (valueType === 'xs:boolean') {
+            return toBoolean(a) === toBoolean(b);
         }
 
         if (typeof a === 'number') {
             if (typeof b === 'string') {
                 const index = b.indexOf('...');
-                const isDate = this.isDate(property.valueType);
+                const isDate = this.isDate(valueType);
                 if (index >= 0) {
                     let min: number;
                     let max: number;
@@ -306,17 +263,6 @@ export class AASFilter {
 
     private containsString(a: string, b?: string): boolean {
         return b == null || a.toLowerCase().indexOf(b.toLowerCase()) >= 0;
-    }
-
-    private getChildren(parent: aas.Referable): aas.Referable[] {
-        switch (parent.modelType) {
-            case 'Submodel':
-                return (parent as aas.Submodel).submodelElements ?? [];
-            case 'SubmodelElementCollection':
-                return (parent as aas.SubmodelElementCollection).value ?? [];
-            default:
-                return [];
-        }
     }
 
     private isDate(valueType: aas.DataTypeDefXsd): boolean {

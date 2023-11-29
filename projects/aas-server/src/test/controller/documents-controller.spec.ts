@@ -51,7 +51,6 @@ describe('DocumentsController', function () {
         aasProvider = createSpyObj<AASProvider>(
             [
                 'updateDocumentAsync',
-                'getWorkspaces',
                 'getContentAsync',
                 'getPackageAsync',
                 'getDocumentAsync',

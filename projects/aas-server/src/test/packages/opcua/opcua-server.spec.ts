@@ -106,11 +106,7 @@ describe('OpcuaServer', function () {
     describe('createSubscription', function () {
         it('creates a new OpcuaSubscription instance', function () {
             const request: LiveRequest = {
-                endpoint: {
-                    url: 'http://customer.com/aas/9175_7013_7091_9168',
-                    name: 'Test',
-                    type: 'OpcuaServer'
-                },
+                endpoint: 'Test',
                 id: 'opc.tcp://localhost:1234/I4AASServer',
                 nodes: [{
                     nodeId: 'ns=1;i=4711',
@@ -124,19 +120,19 @@ describe('OpcuaServer', function () {
 
     describe('getPackageAsync', function () {
         it('is not implemented', function () {
-            expect(() => server.getPackageAsync('aasId', 'name')).toThrowError();
+            expect(() => server.getPackageAsync()).toThrowError();
         });
     });
 
     describe('postPackageAsync', function () {
         it('is not implemented', function () {
-            expect(() => server.postPackageAsync(createSpyObj<Express.Multer.File>({}))).toThrowError();
+            expect(() => server.postPackageAsync()).toThrowError();
         });
     });
 
     describe('deletePackageAsync', function () {
         it('is not implemented', function () {
-            expect(() => server.getPackageAsync('aasId', 'name')).toThrowError();
+            expect(() => server.getPackageAsync()).toThrowError();
         });
     });
 

@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import EventEmitter from "events";
-import { AASDocument } from "common";
+import EventEmitter from 'events';
+import { AASDocument } from 'common';
 
 /** Defines an automate to scan an AAS resource for Asset Administration Shells. */
 export abstract class AASResourceScan extends EventEmitter {

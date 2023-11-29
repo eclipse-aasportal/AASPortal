@@ -77,6 +77,7 @@ export interface AASTableState {
     initialized: boolean;
     isFirstPage: boolean;
     isLastPage: boolean;
+    totalCount: number;
     rows: AASTableRow[];
 }
 

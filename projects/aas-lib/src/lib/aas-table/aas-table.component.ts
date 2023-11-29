@@ -43,6 +43,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         this.rows = this.store.select(AASTableSelectors.selectRows);
         this.isFirstPage = this.store.select(AASTableSelectors.selectIsFirstPage);
         this.isLastPage = this.store.select(AASTableSelectors.selectIsLastPage);
+        this.totalCount = this.store.select(AASTableSelectors.selectTotalCount);
         this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
         this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
@@ -72,6 +73,8 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     public readonly isFirstPage: Observable<boolean>;
 
     public readonly isLastPage: Observable<boolean>;
+
+    public readonly totalCount: Observable<number>;
 
     public readonly rows: Observable<AASTableRow[]>;
 
@@ -105,19 +108,19 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         this.window.removeEventListener('keydown', this.keydown);
     }
 
-    public skipStart(): void {
+    public firstPage(): void {
         this.store.dispatch(AASTableActions.getFirstPage({ filter: this._filter, limit: this._limit }));
     }
 
-    public skipBackward(): void {
+    public previousPage(): void {
         this.store.dispatch(AASTableActions.getPreviousPage({ filter: this._filter, limit: this._limit }))
     }
 
-    public skipForward(): void {
+    public nextPage(): void {
         this.store.dispatch(AASTableActions.getNextPage({ filter: this._filter, limit: this._limit }))
     }
 
-    public skipEnd(): void {
+    public lastPage(): void {
         this.store.dispatch(AASTableActions.getLastPage({ filter: this._filter, limit: this._limit }))
     }
 

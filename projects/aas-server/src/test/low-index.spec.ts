@@ -8,23 +8,25 @@
 
 import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { Low } from 'lowdb';
-import { Data, LowIndex } from '../app/aas-provider/low-index.js';
+import { Data, LowDbIndex } from '../app/aas-provider/lowdb/lowdb-index.js';
 import { createSpyObj } from './utils.js';
 import { data } from './assets/test-db.js';
 import { AASCursor, AASDocument, AASDocumentId } from 'common';
+import { Variable } from '../app/variable.js';
 
 describe('LowIndex', () => {
-    let index: LowIndex;
+    let index: LowDbIndex;
     let db: jest.Mocked<Low<Data>>;
+    let variable: jest.Mocked<Variable>;
 
     function getId(document: AASDocument): AASDocumentId {
-        return { id: document.id, url: document.endpoint.url };
+        return { id: document.id, endpoint: document.endpoint };
     }
 
     beforeEach(() => {
         db = createSpyObj<Low<Data>>(['read', 'write'], { data: data });
         db.read.mockResolvedValue();
-        index = new LowIndex(db);
+        index = new LowDbIndex(db, variable);
     });
 
     it('should create', () => {
@@ -42,34 +44,34 @@ describe('LowIndex', () => {
         it('provides all documents page by page (forward)', async () => {
             let cursor: AASCursor = { previous: null, limit: 5 };
             let page = await index.getDocuments(cursor);
-            expect(page.isFirst).toBeTruthy();
-            expect(page.isLast).toBeFalsy();
+            expect(page.previous).toBeTruthy();
+            expect(page.next).toBeFalsy();
             let n = page.documents.length;
-            while (!page.isLast) {
+            while (!page.next) {
                 cursor = { ...cursor, next: getId(page.documents[page.documents.length - 1]) };
                 page = await index.getDocuments(cursor);
                 n += page.documents.length;
             }
 
-            expect(page.isFirst).toBeFalsy();
-            expect(page.isLast).toBeTruthy();
+            expect(page.previous).toBeFalsy();
+            expect(page.next).toBeTruthy();
             expect(n).toEqual(data.documents.length);
         });
 
         it('provides all documents page by page (reverse)', async () => {
             let cursor: AASCursor = { next: null, limit: 5 };
             let page = await index.getDocuments(cursor);
-            expect(page.isFirst).toBeFalsy();
-            expect(page.isLast).toBeTruthy();
+            expect(page.previous).toBeFalsy();
+            expect(page.next).toBeTruthy();
             let n = page.documents.length;
-            while (!page.isFirst) {
+            while (!page.next) {
                 cursor = { ...cursor, previous: getId(page.documents[0]) };
                 page = await index.getDocuments(cursor);
                 n += page.documents.length;
             }
 
-            expect(page.isFirst).toBeTruthy();
-            expect(page.isLast).toBeFalsy();
+            expect(page.previous).toBeTruthy();
+            expect(page.next).toBeFalsy();
             expect(n).toEqual(data.documents.length);
         });
     });

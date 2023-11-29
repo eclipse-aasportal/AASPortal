@@ -25,10 +25,10 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from './aas-index.js';
-import { ScanResultType, ScanResult, ScanStatistic, ScanContainerResult, ScanEndpointResult } from './scan-result.js';
+import { ScanResultType, ScanResult, ScanStatistic, ScanContainerResult } from './scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
-import { ScanContainerData, ScanEndpointData } from './worker-data.js';
+import { ScanContainerData } from './worker-data.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
@@ -36,7 +36,6 @@ import { AASResourceFactory } from '../packages/aas-resource-factory.js';
 import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
-import { AASFilter } from './aas-filter.js';
 import { ERRORS } from '../errors.js';
 
 @singleton()
@@ -76,11 +75,7 @@ export class AASProvider {
     public async getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
-            return this.index.getDocuments(cursor, new AASFilter(
-                this.resourceFactory,
-                this.index,
-                filter,
-                language ?? 'en'));
+            return this.index.getDocuments(cursor, filter, language ?? 'en');
         }
 
         return this.index.getDocuments(cursor);
@@ -195,7 +190,7 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        this.startEndpointScan(this.createTaskId(), endpoint, this.createScanStatistic());
+        this.startContainerScan(this.createTaskId(), endpoint, this.createScanStatistic());
     }
 
     /**
@@ -384,7 +379,6 @@ export class AASProvider {
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
-                await this.startEndpointScan(this.createTaskId(), endpoint, this.createScanStatistic());
                 await this.startContainerScan(this.createTaskId(), endpoint, this.createScanStatistic());
             }
         } catch (error) {
@@ -406,11 +400,6 @@ export class AASProvider {
                         endpoint,
                         result.statistic);
                 }
-            } else if (task.type === 'ScanEndpoint') {
-                const endpoint = await this.index.getEndpoint(task.id);
-                if (endpoint) {
-                    setTimeout(this.startEndpointScan, this.timeout, result.taskId, endpoint, result.statistic);
-                }
             }
         }
 
@@ -419,19 +408,6 @@ export class AASProvider {
             result.messages.forEach(message => this.logger.log(message));
             this.logger.stop();
         }
-    };
-
-    private startEndpointScan = async (taskId: number, endpoint: AASEndpoint, statistic: ScanStatistic) => {
-        const data: ScanEndpointData = {
-            type: 'ScanEndpointData',
-            taskId: taskId,
-            statistic: statistic,
-            endpoint: endpoint,
-            endpoints: await this.index.getEndpoints()
-        };
-
-        this.tasks.set(taskId, { id: endpoint.name, type: 'ScanEndpoint' });
-        this.parallel.execute(data);
     };
 
     private startContainerScan = async (taskId: number, endpoint: AASEndpoint, statistic: ScanStatistic) => {
@@ -467,12 +443,6 @@ export class AASProvider {
                 case ScanResultType.Removed:
                     await this.onRemoved(result as ScanContainerResult);
                     break;
-                case ScanResultType.ContainerAdded:
-                    await this.onContainerAdded(result as ScanEndpointResult);
-                    break;
-                case ScanResultType.ContainerRemoved:
-                    await this.onContainerRemoved(result as ScanEndpointResult);
-                    break;
             }
         } catch (error) {
             this.logger.error(error);
@@ -495,25 +465,6 @@ export class AASProvider {
         await this.index.remove(result.container.url, result.document.id);
         this.logger.info(`Removed: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
         this.sendMessage({ type: 'Removed', document: { ...result.document, content: null } });
-    }
-
-    private async onContainerAdded(result: ScanEndpointResult): Promise<void> {
-        if (await this.index.getEndpoint(result.container.name)) {
-            setTimeout(
-                this.startContainerScan,
-                this.timeout,
-                this.createTaskId(),
-                result.container,
-                this.createScanStatistic()
-            );
-
-            this.sendMessage({ type: 'ContainerAdded', endpoint: result.endpoint, container: result.container });
-        }
-    }
-
-    private async onContainerRemoved(result: ScanEndpointResult): Promise<void> {
-        // await this.index.removeEndpoint(result.container.name);
-        this.sendMessage({ type: 'ContainerRemoved', endpoint: result.endpoint, container: result.container });
     }
 
     private sendMessage(data: AASServerMessage) {

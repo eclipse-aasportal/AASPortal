@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Data } from '../../app/aas-provider/low-index.js';
+import { Data } from '../../app/aas-provider/lowdb/lowdb-index.js';
 
 export const data: Data = {
     "documents": []

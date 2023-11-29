@@ -21,6 +21,7 @@ const initialState: AASTableState = {
     initialized: false,
     isFirstPage: false,
     isLastPage: false,
+    totalCount: 0,
     rows: [],
 };
 
@@ -58,7 +59,8 @@ function setPage(state: AASTableState, page: AASPage): AASTableState {
         initialized: true,
         rows: initList(page.documents),
         isFirstPage: page.previous === null,
-        isLastPage: page.next === null
+        isLastPage: page.next === null,
+        totalCount: page.totalCount,
     };
 }
 
