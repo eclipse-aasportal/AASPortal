@@ -20,7 +20,7 @@ import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-f
 import * as StartActions from './start.actions';
 import { StartFeatureState } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { selectFilter, selectViewMode, selectLimit } from './start.selectors';
+import { selectFilter, selectViewMode, selectLimit, selectDocuments } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
 import { StartApiService } from './start-api.service';
 
@@ -33,7 +33,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly store: Store<StartFeatureState>
     private readonly subscription = new Subscription();
     private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
-    private selectedDocuments: AASDocument[] = [];
+    private _selected: AASDocument[] = [];
 
     constructor(
         store: Store,
@@ -51,6 +51,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.store = store as Store<StartFeatureState>;
         this.filter = this.store.select(selectFilter);
         this.limit = this.store.select(selectLimit);
+        this.documents = this.store.select(selectDocuments);
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
@@ -65,6 +66,17 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     public allAvailable = true;
 
     public readonly endpoints = this.api.getEndpoints();
+
+    public documents: Observable<AASDocument[]>;
+
+    public get selected(): AASDocument[]{
+        return this._selected;
+    }
+
+    public set selected(values: AASDocument[]) {
+        this._selected = values;
+        this.someSelectedDocuments.next(values.length > 0);
+    }
 
     public ngOnInit(): void {
         this.subscription.add(
@@ -159,11 +171,11 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canDownloadDocument(): boolean {
-        return this.selectedDocuments.length > 0 ? true : false;
+        return this._selected.length > 0 ? true : false;
     }
 
     public downloadDocument(): void {
-        for (const document of this.selectedDocuments) {
+        for (const document of this._selected) {
             this.download.downloadDocument(
                 document.endpoint,
                 document.id,
@@ -172,23 +184,23 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canDeleteDocument(): boolean {
-        return this.selectedDocuments.length > 0;
+        return this._selected.length > 0;
     }
 
     public deleteDocument(): void {
-        if (this.selectedDocuments.length === 0) return;
+        if (this._selected.length === 0) return;
 
         this.auth.ensureAuthorized('editor').pipe(
             map(() => this.window.confirm(stringFormat(
                 this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                this.selectedDocuments.map(item => item.idShort).join(', ')))),
-            mergeMap((result) => from(result ? this.selectedDocuments : [])),
+                this._selected.map(item => item.idShort).join(', ')))),
+            mergeMap((result) => from(result ? this._selected : [])),
             mergeMap((document) => this.api.delete(document.id, document.endpoint)))
             .subscribe({ error: (error) => this.notify.error(error) });
     }
 
     public canViewUserFeedback(): boolean {
-        return this.selectedDocuments.some(document => this.selectSubmodels(document, lib.CustomerFeedback).length === 1);
+        return this._selected.some(document => this.selectSubmodels(document, lib.CustomerFeedback).length === 1);
     }
 
     public viewUserFeedback(): void {
@@ -197,7 +209,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             submodels: []
         };
 
-        for (const document of this.selectedDocuments) {
+        for (const document of this._selected) {
             const submodels = this.selectSubmodels(document, lib.CustomerFeedback);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
@@ -215,7 +227,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canViewNameplate(): boolean {
-        return this.selectedDocuments.some(document => this.selectSubmodels(document, lib.ZVEINameplate).length === 1);
+        return this._selected.some(document => this.selectSubmodels(document, lib.ZVEINameplate).length === 1);
     }
 
     public viewNameplate(): void {
@@ -224,7 +236,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
             submodels: []
         };
 
-        for (const document of this.selectedDocuments) {
+        for (const document of this._selected) {
             const submodels = this.selectSubmodels(document, lib.ZVEINameplate);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
@@ -247,11 +259,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public setLimit(limit: number): void {
         this.store.dispatch(StartActions.setLimit({ limit }));
-    }
-
-    public selectedDocumentsChange(documents: AASDocument[]): void {
-        this.selectedDocuments = documents;
-        this.someSelectedDocuments.next(documents.length > 0);
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {

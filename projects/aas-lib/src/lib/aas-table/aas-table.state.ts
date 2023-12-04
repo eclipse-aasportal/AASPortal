@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { AASDocument } from 'common';
+import { ViewMode } from '../types/view-mode';
 
 export class AASTableRow {
     constructor(
@@ -74,10 +75,10 @@ export class AASTableRow {
 }
 
 export interface AASTableState {
-    initialized: boolean;
     isFirstPage: boolean;
     isLastPage: boolean;
     totalCount: number;
+    viewMode: ViewMode;
     rows: AASTableRow[];
 }
 

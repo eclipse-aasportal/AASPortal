@@ -9,8 +9,8 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AASDocument } from 'common';
-import { Observable, Subscription } from 'rxjs';
+import { AASDocument, equalArray } from 'common';
+import { Observable, Subscription, first, mergeMap } from 'rxjs';
 
 import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
@@ -19,6 +19,8 @@ import * as AASTableActions from './aas-table.actions';
 import { AASQuery } from '../types/aas-query-params';
 import { ClipboardService } from '../clipboard.service';
 import { WindowService } from '../window.service';
+import { AuthService } from '../auth/auth.service';
+import { NotifyService } from '../notify/notify.service';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -30,13 +32,17 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly subscription: Subscription = new Subscription();
     private _filter = '';
     private _limit = 10;
+    private _viewMode = ViewMode.List;
+    private _selected: AASDocument[] = [];
     private shiftKey = false;
     private altKey = false;
 
     constructor(
         private readonly router: Router,
         store: Store,
+        private readonly auth: AuthService,
         private readonly clipboard: ClipboardService,
+        private readonly notify: NotifyService,
         private readonly window: WindowService
     ) {
         this.store = store as Store<AASTableFeatureState>;
@@ -47,15 +53,25 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
         this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
-        this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
-            .subscribe(documents => this.selectedChange.emit({ documents })));
-
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
 
     @Input()
-    public viewMode: ViewMode = ViewMode.List;
+    public get viewMode(): ViewMode {
+        return this._viewMode;
+    }
+
+    public set viewMode(value: ViewMode) {
+        if (value !== this._viewMode) {
+            this._viewMode = value;
+            if (this._viewMode === ViewMode.List) {
+                this.store.dispatch(AASTableActions.getFirstPage({ limit: this._limit }));
+            } else {
+                this.store.dispatch(AASTableActions.initTreeView())
+            }
+        }
+    }
 
     @Input()
     public filter: Observable<string> | null = null;
@@ -64,7 +80,19 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     public limit: Observable<number> | null = null;
 
     @Output()
-    public selectedChange = new EventEmitter<{ documents: AASDocument[] }>();
+    public selectedChange = new EventEmitter<AASDocument[]>();
+
+    @Input()
+    public get selected(): AASDocument[] {
+        return this._selected;
+    }
+
+    public set selected(values: AASDocument[]) {
+        if (!equalArray(this._selected, values)) {
+            this._selected = values;
+            this.store.dispatch(AASTableActions.setSelections({ documents: values }));
+        }
+    }
 
     public someSelected: Observable<boolean>;
 
@@ -79,7 +107,21 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     public readonly rows: Observable<AASTableRow[]>;
 
     public ngOnInit(): void {
-        this.store.dispatch(AASTableActions.initialize());
+        this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
+            .subscribe(documents => {
+                this._selected = documents;
+                this.selectedChange.emit(documents);
+            }));
+
+        this.store.select(AASTableSelectors.selectViewMode).pipe(
+            first(viewMode => viewMode === ViewMode.Undefined),
+            mergeMap(() => this.auth.ready),
+            first(ready => ready),
+            first(),
+        ).subscribe({
+            next: () => this.store.dispatch(AASTableActions.getFirstPage({ limit: this._limit })),
+            error: error => this.notify.error(error),
+        });
     }
 
     public ngOnChanges(changes: SimpleChanges): void {

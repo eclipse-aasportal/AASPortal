@@ -14,7 +14,8 @@ import { StartState } from './start.state';
 const initialState: StartState = {
     viewMode: ViewMode.List,
     limit: 10,
-    filter: ''
+    filter: '',
+    documents: [],
 };
 
 export const startReducer = createReducer(

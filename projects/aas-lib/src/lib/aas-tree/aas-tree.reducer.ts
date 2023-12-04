@@ -421,16 +421,17 @@ function toggleSelected(state: AASTreeState, row: AASTreeRow, altKey: boolean, s
 }
 
 function toggleSelections(state: AASTreeState): AASTreeState {
-    const value = state.rows.length > 0 && state.rows.some(row => row.selected) &&
-        !state.rows.every(row => row.selected);
-
     const rows = [...state.rows];
-    for (let index = 0; index < rows.length; ++index) {
-        const row = rows[index];
-        if (row.selected !== value) {
-            rows[index] = clone(row, value);
+    if (rows.length > 0) {
+        const value = !state.rows.every(row => row.selected);
+        for (let index = 0, n = rows.length; index < n; ++index) {
+            const row = rows[index];
+            if (row.selected !== value) {
+                rows[index] = clone(row, value);
+            }
         }
     }
+
     return { ...state, rows, error: null };
 }
 

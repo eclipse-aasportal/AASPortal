@@ -20,7 +20,8 @@ import {
     AASCursor,
     AASPage,
     AASEndpoint,
-    ApplicationError
+    ApplicationError,
+    getChildren
 } from 'common';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -37,6 +38,7 @@ import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
+import { AASDocumentNode } from 'common/src/lib/types.js';
 
 @singleton()
 export class AASProvider {
@@ -62,12 +64,17 @@ export class AASProvider {
         this.parallel.on('end', this.parallelOnEnd);
     }
 
+    /**
+     * Starts the AAS provider.
+     * @param wsServer The web socket server instance.
+     */
     public start(wsServer: WSServer): void {
         this.wsServer = wsServer;
         this.wsServer.on('message', this.onClientMessage);
         setTimeout(this.startScan, 100);
     }
 
+    /** Gets all registered AAS container endpoints. */
     public getEndpoints(): Promise<AASEndpoint[]> {
         return this.index.getEndpoints();
     }
@@ -97,7 +104,7 @@ export class AASProvider {
         }
     }
 
-    public async getContentAsync(name: string, id: string): Promise<aas.Environment | undefined> {
+    public async getContentAsync(name: string, id: string): Promise<aas.Environment> {
         const endpoint = await this.index.getEndpoint(name);
         const document: AASDocument = await this.index.get(name, id);
         const resource = this.resourceFactory.create(endpoint);
@@ -350,6 +357,20 @@ export class AASProvider {
         }
     }
 
+    /**
+     * 
+     * @param endpoint The endpoint name.
+     * @param id The AAS identifier. 
+     * @returns 
+     */
+    public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocumentNode[]> {
+        const document: AASDocument = await this.index.get(endpoint, id);
+        const root: AASDocumentNode = { ...document, parent: null, content: null };
+        const nodes: AASDocumentNode[] = [root];
+        await this.collectDescendants(root, nodes);
+        return nodes;
+    }
+
     private onClientMessage = async (data: WebSocketData, client: SocketClient): Promise<void> => {
         try {
             switch (data.type) {
@@ -490,5 +511,56 @@ export class AASProvider {
             deleted: 0,
             offline: 0,
         };
+    }
+
+    private async collectDescendants(parent: AASDocumentNode, nodes: AASDocumentNode[]): Promise<void> {
+        const content = await this.getDocumentContentAsync(parent);
+        for (const reference of this.whereReferenceElement(content.submodels)) {
+            const childId = reference.value.keys[0].value;
+            let child: AASDocument | undefined;
+            if (await this.index.has(parent.endpoint, childId)) {
+                child = await this.index.get(parent.endpoint, childId);
+            } else if (await this.index.has(undefined, childId)) {
+                child = await this.index.get(undefined, childId);
+            }
+
+            if (child) {
+                const node: AASDocumentNode = { ...child, parent: { ...parent }, content: null };
+                nodes.push(node);
+                await this.collectDescendants(node, nodes);
+            }
+        }
+    }
+
+    private *whereReferenceElement(elements: aas.Referable[]): Generator<aas.ReferenceElement> {
+        const stack: aas.Referable[][] = [];
+        stack.push(elements);
+        while (stack.length > 0) {
+            const children = stack.pop() as aas.Referable[];
+            for (const child of children) {
+                if (child.modelType === 'ReferenceElement') {
+                    const value = child as aas.ReferenceElement;
+                    if (value && value.value.keys.some(item => item.type === 'AssetAdministrationShell')) {
+                        yield value;
+                    }
+                }
+
+                const children = getChildren(child);
+                if (children.length > 0) {
+                    stack.push(children);
+                }
+            }
+        }
+    }
+
+    public async getDocumentContentAsync(document: AASDocument): Promise<aas.Environment> {
+        const endpoint = await this.index.getEndpoint(document.endpoint);
+        const resource = this.resourceFactory.create(endpoint);
+        try {
+            await resource.openAsync();
+            return await resource.createPackage(document.address).readEnvironmentAsync();
+        } finally {
+            await resource.closeAsync();
+        }
     }
 }

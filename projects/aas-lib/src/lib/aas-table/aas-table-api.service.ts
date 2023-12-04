@@ -9,7 +9,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AASCursor, AASPage, aas } from 'common';
+import { AASCursor, AASDocumentNode, AASPage, aas } from 'common';
 import { encodeBase64Url } from '../convert';
 
 @Injectable({
@@ -39,12 +39,23 @@ export class AASTableApiService {
 
     /**
      * Loads the element structure of the specified document.
-     * @param name The URL of the container.
+     * @param endpointName The URL of the container.
      * @param id The identification of the AAS document.
      * @returns The root of the element structure.
      */
-    public getContent(name: string, id: string): Observable<aas.Environment> {
+    public getContent(endpointName: string, id: string): Observable<aas.Environment> {
         return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(name)}/documents/${encodeBase64Url(id)}/content`);
+            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/content`);
+    }
+
+    /**
+     * 
+     * @param endpointName 
+     * @param id 
+     * @returns 
+     */
+    public getHierarchy(endpointName: string, id: string): Observable<AASDocumentNode[]> {
+        return this.http.get<AASDocumentNode[]>(
+            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`);
     }
 }

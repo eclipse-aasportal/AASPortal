@@ -8,15 +8,16 @@
 
 import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { Low } from 'lowdb';
-import { Data, LowDbIndex } from '../app/aas-provider/lowdb/lowdb-index.js';
-import { createSpyObj } from './utils.js';
-import { data } from './assets/test-db.js';
+import { createSpyObj } from '../../utils.js';
 import { AASCursor, AASDocument, AASDocumentId } from 'common';
-import { Variable } from '../app/variable.js';
+import { Variable } from '../../../app/variable.js';
+import { LowDbIndex } from '../../../app/aas-provider/lowdb/lowdb-index.js';
+import { LowDbData } from '../../../app/aas-provider/lowdb/lowdb-types.js';
+import { dbData } from '../../assets/test-db.js';
 
-describe('LowIndex', () => {
+describe('LowDbIndex', () => {
     let index: LowDbIndex;
-    let db: jest.Mocked<Low<Data>>;
+    let db: jest.Mocked<Low<LowDbData>>;
     let variable: jest.Mocked<Variable>;
 
     function getId(document: AASDocument): AASDocumentId {
@@ -24,8 +25,9 @@ describe('LowIndex', () => {
     }
 
     beforeEach(() => {
-        db = createSpyObj<Low<Data>>(['read', 'write'], { data: data });
+        db = createSpyObj<Low<LowDbData>>(['read', 'write'], { data: dbData });
         db.read.mockResolvedValue();
+        variable = createSpyObj<Variable>([], { ENDPOINTS: [] });
         index = new LowDbIndex(db, variable);
     });
 
@@ -35,8 +37,8 @@ describe('LowIndex', () => {
 
     describe('getContainerDocuments', () => {
         it('returns all documents that belongs to a container', async () => {
-            const array = await index.getContainerDocuments('file:///samples');
-            expect(array.length).toEqual(data.documents.length);
+            const array = await index.getContainerDocuments('Samples');
+            expect(array).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));
         });
     });
 
@@ -44,35 +46,35 @@ describe('LowIndex', () => {
         it('provides all documents page by page (forward)', async () => {
             let cursor: AASCursor = { previous: null, limit: 5 };
             let page = await index.getDocuments(cursor);
-            expect(page.previous).toBeTruthy();
-            expect(page.next).toBeFalsy();
+            expect(page.previous).toBeNull();
+            expect(page.next).toBeDefined();
             let n = page.documents.length;
-            while (!page.next) {
+            while (page.next !== null) {
                 cursor = { ...cursor, next: getId(page.documents[page.documents.length - 1]) };
                 page = await index.getDocuments(cursor);
                 n += page.documents.length;
             }
 
-            expect(page.previous).toBeFalsy();
-            expect(page.next).toBeTruthy();
-            expect(n).toEqual(data.documents.length);
+            expect(page.previous).toBeDefined();
+            expect(page.next).toBeNull();
+            expect(n).toEqual(db.data.documents.length);
         });
 
         it('provides all documents page by page (reverse)', async () => {
             let cursor: AASCursor = { next: null, limit: 5 };
             let page = await index.getDocuments(cursor);
-            expect(page.previous).toBeFalsy();
-            expect(page.next).toBeTruthy();
+            expect(page.previous).toBeDefined();
+            expect(page.next).toBeNull();
             let n = page.documents.length;
-            while (!page.next) {
+            while (page.previous !== null) {
                 cursor = { ...cursor, previous: getId(page.documents[0]) };
                 page = await index.getDocuments(cursor);
                 n += page.documents.length;
             }
 
-            expect(page.previous).toBeTruthy();
-            expect(page.next).toBeFalsy();
-            expect(n).toEqual(data.documents.length);
+            expect(page.previous).toBeNull();
+            expect(page.next).toBeDefined();
+            expect(n).toEqual(db.data.documents.length);
         });
     });
 });

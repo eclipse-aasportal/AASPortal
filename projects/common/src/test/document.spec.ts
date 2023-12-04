@@ -22,7 +22,7 @@ describe('Document', function () {
         beforeEach(function () {
             a = {
                 id: 'http://customer.com/aas/a',
-                endpoint: {url: 'C:/Git/AASPortal/common/test/assets', name: 'Test', type: 'AasxDirectory'},
+                endpoint: 'Test',
                 address: 'a.json',
                 idShort: 'A',
                 readonly: true,
@@ -30,7 +30,7 @@ describe('Document', function () {
 
             b = {
                 id: 'http://customer.com/aas/b',
-                endpoint: {url: 'C:/Git/AASPortal/common/test/assets', name: 'Test', type: 'AasxDirectory'},
+                endpoint: 'Test',
                 address: 'b.json',
                 idShort: 'B',
                 readonly: true,

@@ -7,11 +7,13 @@
  *****************************************************************************/
 
 import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { AASDocument } from 'common';
 
 export interface StartState {
     viewMode: ViewMode;
     filter: string;
     limit: number;
+    documents: AASDocument[];
 }
 
 export interface StartFeatureState {

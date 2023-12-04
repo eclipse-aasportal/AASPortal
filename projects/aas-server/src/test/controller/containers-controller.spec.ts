@@ -16,6 +16,7 @@ import { Readable } from 'stream';
 import { resolve } from 'path';
 import { aas } from 'common';
 
+import { sampleDocument } from '../assets/sample-document.js';
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
@@ -79,18 +80,7 @@ describe('ContainersController', function () {
         app.use(errorHandler);
     });
 
-    // it('getDocuments: /api/v1/containers/:url/documents', async function () {
-    //     aasProvider.getDocuments.mockReturnValue([sampleDocument]);
-    //     const response = await request(app)
-    //         .get('/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents')
-    //         .set('Authorization', `Bearer ${getToken()}`);
-
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.body).toEqual([sampleDocument]);
-    //     expect(aasProvider.getDocuments).toHaveBeenCalled();
-    // });
-
-    it('getDocument: /api/v1/containers/:url/packages/:id', async function () {
+    it('getPackage: /api/v1/containers/:endpoint/packages/:id', async function () {
         aasProvider.getPackageAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
             const s = new Readable();
             s.push('Hello World!');
@@ -99,7 +89,7 @@ describe('ContainersController', function () {
         }));
 
         const response = await request(app)
-            .get(`/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
+            .get(`/api/v1/containers/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
@@ -107,10 +97,10 @@ describe('ContainersController', function () {
         expect(aasProvider.getPackageAsync).toHaveBeenCalled();
     });
 
-    it('addDocuments: /api/v1/containers/:url/packages', async function () {
+    it('addPackage: /api/v1/containers/:endpoint/packages', async function () {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
-            .post('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/packages')
+            .post('/api/v1/containers/U2FtcGxl/packages')
             .set('Authorization', `Bearer ${getToken('John')}`)
             .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
 
@@ -118,18 +108,29 @@ describe('ContainersController', function () {
         expect(aasProvider.addPackagesAsync).toHaveBeenCalled();
     });
 
-    it('deleteDocument: /api/v1/containers/:url/documents/:id', async function () {
+    it('deletePackage: /api/v1/containers/:endpoint/packages/:id', async function () {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
-            .delete('/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .delete('/api/v1/containers/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken('John')}`);
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.deletePackageAsync).toHaveBeenCalled();
     });
+    
+    it('getDocument: /api/v1/containers/:endpoint/documents/:id', async function () {
+        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
+        const response = await request(app)
+            .get('/api/v1/containers/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(sampleDocument);
+        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+    });
 
     it('getDocumentContent: /api/v1/containers/:url/documents/:id/content', async function () {
-        aasProvider.getContentAsync.mockReturnValue(new Promise<aas.Environment | undefined>(resolve => {
+        aasProvider.getContentAsync.mockReturnValue(new Promise<aas.Environment>(resolve => {
             resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
         }));
 

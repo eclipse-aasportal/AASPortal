@@ -46,9 +46,9 @@ export const selectIsLastPage = createSelector(
     getState,
     state => state.isLastPage);
 
-export const selectInitialized = createSelector(
+export const selectViewMode = createSelector(
     getState,
-    state => state.initialized);
+    state => state.viewMode);
 
 export const selectTotalCount = createSelector(
     getState,

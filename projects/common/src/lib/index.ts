@@ -103,12 +103,19 @@ export function equalUrls(url1: string, url2: string): boolean {
     }
 }
 
+/** Compares two arrays for equality. */
+export function equalArray<T>(a: T[], b: T[]): boolean {
+    if (a === b) return true;
+    if (a.length !== b.length) return false;
+    return a.every((_, i) => a[i] === b[i]);
+}
+
 /**
  * Determines whether the specified value represents a submodel element.
  * @param value The current value.
  * @returns `true` if the specified value represents a submodel element; otherwise, `false`.
  */
-export function isSubmodelElement(value: any): value is SubmodelElement {
+export function isSubmodelElement(value: unknown): value is SubmodelElement {
     if (value && (value as Referable).modelType) {
         switch ((value as Referable).modelType) {
             case 'ReferenceElement':

@@ -16,7 +16,8 @@
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/app/**/*.ts",
-        "format": "eslint src/app/**/*.ts --fix"
+        "format": "eslint src/app/**/*.ts --fix",
+        "watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch"
     },
     "dependencies": {
         "@babel/polyfill": "^7.4.4",

@@ -88,6 +88,11 @@ export interface AASDocument extends AASDocumentId {
     content?: aas.Environment | null;
 }
 
+/** Node in an AAS hierarchy. */
+export interface AASDocumentNode extends AASDocument {
+    parent: AASDocumentNode | null;
+}
+
 /** Represents a page of AAS documents from the total set. */
 export interface AASPage {
     previous: AASDocumentId | null;

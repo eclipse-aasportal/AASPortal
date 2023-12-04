@@ -74,7 +74,7 @@ describe('ServerMessage', function () {
 
         it('updates an object on a server', async function () {
             await expect(server.put(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }))
-                .resolves.toEqual('OK');
+                .resolves.toEqual(JSON.stringify('OK'));
         });
     });
 
@@ -93,7 +93,7 @@ describe('ServerMessage', function () {
 
         it('updates an object on a server', async function () {
             await expect(server.post(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }))
-                .resolves.toEqual('Created');
+                .resolves.toEqual(JSON.stringify('Created'));
         });
     });
 
@@ -112,7 +112,7 @@ describe('ServerMessage', function () {
 
         it('updates an object on a server', async function () {
             await expect(server.delete(new URL('http://localhost:1234/hello/world')))
-                .resolves.toEqual('Deleted');
+                .resolves.toEqual(JSON.stringify('Deleted'));
         });
     });
 

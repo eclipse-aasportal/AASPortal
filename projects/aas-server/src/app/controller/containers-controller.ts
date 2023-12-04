@@ -1,4 +1,4 @@
-/******************************************************************************
+    /******************************************************************************
  *
  * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
@@ -9,7 +9,7 @@
 import { inject, injectable } from 'tsyringe';
 import fs from 'fs';
 import { Body, Delete, Get, OperationId, Path, Post, Put, Queries, Route, Security, Tags, UploadedFile, UploadedFiles } from 'tsoa';
-import { AASDocument, aas } from 'common';
+import { AASDocument, AASDocumentNode, aas } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
@@ -29,24 +29,6 @@ export class ContainersController extends AASController {
         @inject(AASProvider) private readonly aasProvider: AASProvider
     ) {
         super(logger, auth, variable);
-    }
-
-    /**
-     * @summary Downloads an AAS document from the specified AAS container.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
-     * @returns The AAS document.
-     */
-    @Get('{endpoint}/documents/{id}')
-    @Security('bearerAuth', ['guest'])
-    @OperationId('getDocument')
-    public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
-        try {
-            this.logger.start('getDocument');
-            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id), decodeBase64Url(endpoint));
-        } finally {
-            this.logger.stop();
-        }
     }
 
     /**
@@ -96,6 +78,24 @@ export class ContainersController extends AASController {
         try {
             this.logger.start('deletePackage');
             await this.aasProvider.deletePackageAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Downloads an AAS document from the specified AAS container.
+     * @param endpoint The endpoint name (Base64Url encoded).
+     * @param id The AAS identifier (Base64Url encoded).
+     * @returns The AAS document.
+     */
+    @Get('{endpoint}/documents/{id}')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getDocument')
+    public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
+        try {
+            this.logger.start('getDocument');
+            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id), decodeBase64Url(endpoint));
         } finally {
             this.logger.stop();
         }
@@ -217,4 +217,23 @@ export class ContainersController extends AASController {
             this.logger.stop();
         }
     }
+
+    /**
+     * @summary Gets the content of the specified AAS document.
+     * @param endpoint The endpoint name (Base64Url encoded).
+     * @param id The AAS identifier (Base64Url encoded).
+     * @returns The AAS environment or `undefined`.
+     */
+    @Get('{endpoint}/documents/{id}/hierarchy')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getHierarchy')
+    public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocumentNode[]> {
+        try {
+            this.logger.start('getHierarchy');
+            return await this.aasProvider.getHierarchyAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+        } finally {
+            this.logger.stop();
+        }
+    }
+
 }

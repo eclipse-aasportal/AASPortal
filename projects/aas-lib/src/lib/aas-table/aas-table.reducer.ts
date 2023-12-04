@@ -7,21 +7,17 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { AASDocument, AASPage, aas } from 'common';
+import { findLastIndex } from 'lodash-es'
+import { AASDocument, AASDocumentNode, AASPage, aas } from 'common';
 import * as AASTableActions from './aas-table.actions';
 import { AASTableRow, AASTableState } from './aas-table.state';
-
-// interface Tuple {
-//     targets: AASDocument[];
-//     current: AASDocument;
-//     sources: AASDocument[];
-// }
+import { ViewMode } from '../types/view-mode';
 
 const initialState: AASTableState = {
-    initialized: false,
     isFirstPage: false,
     isLastPage: false,
     totalCount: 0,
+    viewMode: ViewMode.Undefined,
     rows: [],
 };
 
@@ -50,14 +46,38 @@ export const aasTableReducer = createReducer(
     on(
         AASTableActions.toggleSelections,
         (state) => toggleSelections(state)
-    )
+    ),
+    on(
+        AASTableActions.addRoot,
+        (state, { nodes }) => addRoot(state, nodes)
+    ),
+    on(
+        AASTableActions.setSelections,
+        (state, { documents }) => setSelections(state, documents)
+    ),
 );
 
 function setPage(state: AASTableState, page: AASPage): AASTableState {
+    const rows: AASTableRow[] = [];
+    for (const document of page.documents) {
+        if (document.content !== undefined) {
+            const row = new AASTableRow(
+                document,
+                false,
+                false,
+                false,
+                0,
+                -1,
+                -1);
+
+            rows.push(row);
+        }
+    }
+
     return {
         ...state,
-        initialized: true,
-        rows: initList(page.documents),
+        viewMode: ViewMode.List,
+        rows,
         isFirstPage: page.previous === null,
         isLastPage: page.next === null,
         totalCount: page.totalCount,
@@ -86,136 +106,86 @@ function setContent(state: AASTableState, document: AASDocument, content: aas.En
     }
 }
 
-function initList(documents: AASDocument[]): AASTableRow[] {
-    const rows: AASTableRow[] = [];
-    for (const document of documents) {
-        if (document.content !== undefined) {
-            const row = new AASTableRow(
-                document,
-                false,
-                false,
-                false,
-                0,
-                -1,
-                -1);
+function addRoot(state: AASTableState, nodes: AASDocumentNode[]): AASTableState {
+    const rows: AASTableRow[] = state.viewMode === ViewMode.Tree ? [...state.rows] : [];
+    const root = nodes.find(node => node.parent === null);
+    const index = findLastIndex(rows, row => row.level === 0);
+    if (root) {
+        const children = nodes.filter(node => isChild(root, node));
+        const rootRow = new AASTableRow(
+            root,
+            false,
+            false,
+            children.length === 0,
+            0,
+            state.rows.length + 1,
+            -1
+        );
 
-            rows.push(row);
+        rows.push(rootRow)
+
+        if (index >= 0) {
+            const previous = clone(rows[index]);
+            previous.nextSibling = rows.length - 1
+            rows[index] = previous;
+        }
+
+        traverse(root, nodes, rows, 1);
+    }
+
+    return { ...state, rows, viewMode: ViewMode.Tree };
+}
+
+function setSelections(state: AASTableState, documents: AASDocument[]): AASTableState {
+    const rows = { ...state.rows };
+    const set = new Set(documents);
+    for (let i = 0, n = rows.length; i < n; i++) {
+        const row = rows[i];
+        if (!row.selected && set.has(row.document)) {
+            rows[i] = clone(row, true);
+        } else if (row.selected) {
+            rows[i] = clone(row, false);
         }
     }
 
-    return rows;
+    return { ...state, rows };
 }
 
-// function initTree(documents: AASDocument[]): AASTableRow[] {
-//     const rows: AASTableRow[] = [];
-//     const map = new Map<string, Tuple>();
-//     for (const document of documents) {
-//         if (document.content) {
-//             map.set(document.id, { targets: [], current: document, sources: [] });
-//         }
-//     }
+function isChild(parent: AASDocumentNode, node: AASDocumentNode): boolean {
+    if (!node.parent) {
+        return false;
+    }
 
-//     for (const entry of map) {
-//         const env = entry[1].current.content;
-//         if (env) {
-//             for (const referable of where(env.submodels)) {
-//                 if (referable && referable.modelType === 'ReferenceElement') {
-//                     const tuple = map.get((referable as aas.ReferenceElement).value.keys[0].value);
-//                     if (tuple) {
-//                         entry[1].sources.push(tuple.current);
-//                         tuple.targets.push(entry[1].current);
-//                     }
-//                 }
-//             }
-//         }
-//     }
+    return node.parent.endpoint === parent.endpoint && node.parent.id === parent.id;
+}
 
-//     let previous: AASTableRow | null = null;
-//     for (const entry of map) {
-//         if (entry[1].targets.length === 0) {
-//             const root = entry[1].current;
-//             const row = new AASTableRow(
-//                 root,
-//                 false,
-//                 root.idShort,
-//                 root.id,
-//                 root.endpoint.type,
-//                 false,
-//                 entry[1].sources.length === 0,
-//                 0,
-//                 -1,
-//                 -1
-//             );
+function traverse(parent: AASDocumentNode, nodes: AASDocumentNode[], rows: AASTableRow[], level: number): void {
+    let previous: AASTableRow | null = null;
+    const children = nodes.filter(node => isChild(parent, node));
+    for (const child of children) {
+        const row = new AASTableRow(
+            child,
+            false,
+            false,
+            children.length === 0,
+            level,
+            -1,
+            -1
+        );
 
-//             if (previous) {
-//                 previous.nextSibling = rows.length - 1;
-//             }
+        rows.push(row);
+        if (previous) {
+            previous.nextSibling = rows.length - 1;
+        }
 
-//             rows.push(row);
+        if (children.length > 0) {
+            row.firstChild = rows.length;
+            traverse(child, nodes, rows, level + 1);
+        }
 
-//             if (!row.isLeaf && entry[1].sources.length > 0) {
-//                 row.firstChild = rows.length;
-//                 traverse(root, rows, 1);
-//             }
-
-//             previous = row;
-//         }
-//     }
-
-//     return rows;
-
-//     function* where(elements: aas.Referable[]): Generator<aas.Referable> {
-//         const stack: aas.Referable[][] = [];
-//         stack.push(elements);
-//         while (stack.length > 0) {
-//             const children = stack.pop() as aas.Referable[];
-//             for (const child of children) {
-//                 if (child.modelType === 'ReferenceElement') {
-//                     const value = child as aas.ReferenceElement;
-//                     if (value && value.value.keys.some(item => item.type === 'AssetAdministrationShell')) {
-//                         yield child;
-//                     }
-//                 }
-
-//                 const children = getChildren(child);
-//                 if (children.length > 0) {
-//                     stack.push(children);
-//                 }
-//             }
-//         }
-//     }
-
-//     function traverse(parent: AASDocument, rows: AASTableRow[], level: number): void {
-//         let previous: AASTableRow | null = null;
-//         for (const child of map.get(parent.id)!.sources) {
-//             const tuple = map.get(child.id)!;
-//             const row = new AASTableRow(
-//                 child,
-//                 false,
-//                 child.idShort,
-//                 child.id,
-//                 child.endpoint.type,
-//                 false,
-//                 tuple.sources.length === 0,
-//                 level,
-//                 -1,
-//                 -1
-//             );
-
-//             rows.push(row);
-//             if (previous) {
-//                 previous.nextSibling = rows.length - 1;
-//             }
-
-//             if (tuple.sources.length > 0) {
-//                 row.firstChild = rows.length;
-//                 traverse(child, rows, level + 1);
-//             }
-
-//             previous = row;
-//         }
-//     }
-// }
+        previous = row;
+    }
+}
 
 function expandRow(state: AASTableState, row: AASTableRow): AASTableState {
     const rows = [...state.rows];
@@ -246,21 +216,6 @@ function collapseRow(state: AASTableState, row: AASTableRow): AASTableState {
 
     return { ...state, rows };
 }
-
-// function toggleSelected(state: AASTableState, row: AASTableRow) {
-//     const rows = [...state.rows];
-//     const index = rows.indexOf(row);
-//     rows[index] = new AASTableRow(
-//         row.document,
-//         !row.selected,
-//         row.expanded,
-//         row.isLeaf,
-//         row.level,
-//         row.firstChild,
-//         row.nextSibling);
-
-//     return { ...state, rows }
-// }
 
 function toggleSelected(
     state: AASTableState,
@@ -307,22 +262,26 @@ function toggleSelected(
     return { ...state, rows };
 }
 
-function toggleSelections(state: AASTableState) {
-    const value = state.rows.length > 0 && state.rows.some(row => row.selected) &&
-        !state.rows.every(row => row.selected);
-
+function toggleSelections(state: AASTableState): AASTableState {
     const rows = [...state.rows];
-    for (let index = 0; index < rows.length; ++index) {
-        const row = rows[index];
-        if (row.selected !== value) {
-            rows[index] = clone(row, value);
+    if (rows.length > 0) {
+        const value = !rows.every(row => row.selected);
+        for (let index = 0, n = rows.length; index < n; ++index) {
+            const row = rows[index];
+            if (row.selected !== value) {
+                rows[index] = clone(row, value);
+            }
         }
     }
 
     return { ...state, rows }
 }
 
-function clone(row: AASTableRow, selected: boolean): AASTableRow {
+function clone(row: AASTableRow, selected?: boolean): AASTableRow {
+    if (selected === undefined) {
+        selected = row.selected;
+    }
+
     return new AASTableRow(
         row.document,
         selected,

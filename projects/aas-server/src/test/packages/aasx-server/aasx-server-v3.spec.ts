@@ -55,7 +55,7 @@ describe('AasxServerV3', function () {
         it('inserts a submodel', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Submodel inserted.'));
+                stream.push('Submodel inserted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 201;
@@ -74,7 +74,7 @@ describe('AasxServerV3', function () {
         it('inserts a submodel-element', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('SubmodelElement inserted.'));
+                stream.push('SubmodelElement inserted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 201;
@@ -95,7 +95,7 @@ describe('AasxServerV3', function () {
         it('updates a submodel', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Submodel updated.'));
+                stream.push('Submodel updated.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 200;
@@ -115,7 +115,7 @@ describe('AasxServerV3', function () {
         it('updates a submodel-element', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('SubmodelElement updated.'));
+                stream.push('SubmodelElement updated.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 200;
@@ -137,7 +137,7 @@ describe('AasxServerV3', function () {
         it('deletes a submodel', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Submodel deleted.'));
+                stream.push('Submodel deleted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 204;
@@ -156,7 +156,7 @@ describe('AasxServerV3', function () {
         it('deletes a submodel-element', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('SubmodelElement deleted.'));
+                stream.push('SubmodelElement deleted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 204;

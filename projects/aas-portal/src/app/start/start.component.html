@@ -8,11 +8,11 @@
 
 <div id="start-container" class="container-fluid">
     <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter" [limit]="limit"
-        (selectedChange)="selectedDocumentsChange($event.documents)"></fhg-aas-table>
+        [(selected)]="selected"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
-    <div class="btn-group me-2">
+    <div *ngIf="viewMode === 'list'" class="btn-group me-2">
         <button type="button" class="btn btn-primary" (click)="aasTable.firstPage()"
             [disabled]="aasTable.isFirstPage | async">
             <i class="bi bi-chevron-bar-left"></i>
@@ -20,9 +20,6 @@
         <button type="button" class="btn btn-primary" (click)="aasTable.previousPage()"
             [disabled]="aasTable.isFirstPage | async">
             <i class="bi bi-chevron-left"></i>
-        </button>
-        <button type="button" class="btn btn-outline-primary" [disabled]="true" [hidden]="(filter | async) !== ''">
-            {{aasTable.totalCount | async}}
         </button>
         <button type="button" class="btn btn-primary" (click)="aasTable.nextPage()"
             [disabled]="aasTable.isLastPage | async">
@@ -63,7 +60,7 @@
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="viewMode === 'tree'">
+            (change)="setViewMode('tree')" [checked]="viewMode === 'tree'" [disabled]="selected.length === 0">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>

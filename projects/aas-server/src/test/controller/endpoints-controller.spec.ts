@@ -90,13 +90,12 @@ describe('EndpointsController', function () {
     });
 
     it('POST: /api/v1/endpoints/:name', async function () {
-        const url = new URL('file:///assets/samples');
-        url.searchParams.append('type', 'AasxDirectory');
-        aasProvider.addEndpointAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'AasxDirectory' };
+        aasProvider.addEndpointAsync.mockResolvedValue();
+        auth.hasUserAsync.mockResolvedValue(true);
         const response = await request(app).post('/api/v1/endpoints/samples')
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .send({ url: url.href });
+            .send(endpoint);
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.addEndpointAsync).toHaveBeenCalled();
