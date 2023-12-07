@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<table *ngIf="viewMode === 'list'; else treeView" class="table table-sm table-hover table-striped">
+<table *ngIf="(viewMode | async) === 'list'; else treeView" class="table table-sm table-hover table-striped">
     <thead>
         <tr>
             <th class="th-w-checkbox">
@@ -53,7 +53,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let row of rows | async">
+            <tr *ngFor="let row of rows | async" class="align-middle">
                 <td>
                     <div class="d-flex" style="overflow-x: hidden">
                         <div [ngStyle]="{'width': (row.level * 16) + 'px'}"></div>
@@ -82,6 +82,7 @@
                     </div>
                 </td>
                 <td>
+                    <div>{{row.endpoint}}</div>
                     <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
                 </td>
             </tr>

@@ -38,7 +38,6 @@ import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
-import { AASDocumentNode } from 'common/src/lib/types.js';
 
 @singleton()
 export class AASProvider {
@@ -363,10 +362,10 @@ export class AASProvider {
      * @param id The AAS identifier. 
      * @returns 
      */
-    public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocumentNode[]> {
+    public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocument[]> {
         const document: AASDocument = await this.index.get(endpoint, id);
-        const root: AASDocumentNode = { ...document, parent: null, content: null };
-        const nodes: AASDocumentNode[] = [root];
+        const root: AASDocument = { ...document, parent: null, content: null };
+        const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
         return nodes;
     }
@@ -513,7 +512,7 @@ export class AASProvider {
         };
     }
 
-    private async collectDescendants(parent: AASDocumentNode, nodes: AASDocumentNode[]): Promise<void> {
+    private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
         const content = await this.getDocumentContentAsync(parent);
         for (const reference of this.whereReferenceElement(content.submodels)) {
             const childId = reference.value.keys[0].value;
@@ -525,7 +524,7 @@ export class AASProvider {
             }
 
             if (child) {
-                const node: AASDocumentNode = { ...child, parent: { ...parent }, content: null };
+                const node: AASDocument = { ...child, parent: { ...parent }, content: null };
                 nodes.push(node);
                 await this.collectDescendants(node, nodes);
             }

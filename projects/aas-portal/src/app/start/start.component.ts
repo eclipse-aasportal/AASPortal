@@ -13,14 +13,14 @@ import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, stringFormat } from 'common';
 import * as lib from 'projects/aas-lib/src/public-api';
-import { BehaviorSubject, EMPTY, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
 import * as StartActions from './start.actions';
+import * as StartSelectors from './start.selectors';
 import { StartFeatureState } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { selectFilter, selectViewMode, selectLimit, selectDocuments } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
 import { StartApiService } from './start-api.service';
 
@@ -49,27 +49,33 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly clipboard: lib.ClipboardService
     ) {
         this.store = store as Store<StartFeatureState>;
-        this.filter = this.store.select(selectFilter);
-        this.limit = this.store.select(selectLimit);
-        this.documents = this.store.select(selectDocuments);
+        this.filter = this.store.select(StartSelectors.selectFilter);
+        this.limit = this.store.select(StartSelectors.selectLimit);
+        this.isFirstPage = this.store.select(StartSelectors.selectIsFirstPage);
+        this.isLastPage = this.store.select(StartSelectors.selectIsLastPage);
+        this.documents = this.store.select(StartSelectors.selectDocuments);
+        this.viewMode = this.store.select(StartSelectors.selectViewMode);
+        this.endpoints = this.api.getEndpoints();
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
-    public viewMode: lib.ViewMode = lib.ViewMode.List;
+    public readonly viewMode: Observable<lib.ViewMode>;
 
     public readonly filter: Observable<string>;
 
     public readonly limit: Observable<number>;
 
-    public allAvailable = true;
+    public readonly isFirstPage: Observable<boolean>;
 
-    public readonly endpoints = this.api.getEndpoints();
+    public readonly isLastPage: Observable<boolean>;
+
+    public readonly endpoints: Observable<AASEndpoint[]>;
 
     public documents: Observable<AASDocument[]>;
 
-    public get selected(): AASDocument[]{
+    public get selected(): AASDocument[] {
         return this._selected;
     }
 
@@ -79,13 +85,15 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public ngOnInit(): void {
-        this.subscription.add(
-            this.store
-                .select(selectViewMode).pipe()
-                .subscribe((value) => {
-                    this.viewMode = value;
-                })
-        );
+        this.store.select(StartSelectors.selectViewMode).pipe(
+            first(viewMode => viewMode === lib.ViewMode.Undefined),
+            mergeMap(() => this.auth.ready),
+            first(ready => ready),
+            first(),
+        ).subscribe({
+            next: () => this.store.dispatch(StartActions.getFirstPage({})),
+            error: error => this.notify.error(error),
+        });
     }
 
     public ngAfterViewInit(): void {
@@ -100,7 +108,11 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public setViewMode(viewMode: string | lib.ViewMode): void {
-        this.store.dispatch(StartActions.setViewMode({ viewMode: viewMode as lib.ViewMode }));
+        if (viewMode === lib.ViewMode.List) {
+            this.store.dispatch(StartActions.getFirstPage({}));
+        } else {
+            this.store.dispatch(StartActions.getHierarchy({ roots: this._selected }));
+        }
     }
 
     public addEndpoint(): void {
@@ -254,11 +266,27 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public setFilter(filter: string): void {
-        this.store.dispatch(StartActions.setFilter({ filter }));
+        this.store.dispatch(StartActions.getFirstPage({ filter }));
     }
 
     public setLimit(limit: number): void {
-        this.store.dispatch(StartActions.setLimit({ limit }));
+        this.store.dispatch(StartActions.getFirstPage({ limit }));
+    }
+
+    public firstPage(): void {
+        this.store.dispatch(StartActions.getFirstPage({}));
+    }
+
+    public previousPage(): void {
+        this.store.dispatch(StartActions.getPreviousPage())
+    }
+
+    public nextPage(): void {
+        this.store.dispatch(StartActions.getNextPage())
+    }
+
+    public lastPage(): void {
+        this.store.dispatch(StartActions.getLastPage())
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {

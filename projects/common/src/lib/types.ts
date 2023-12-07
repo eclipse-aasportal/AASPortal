@@ -86,11 +86,8 @@ export interface AASDocument extends AASDocumentId {
     /** The root element of the AAS structure (content), `null` if the content is not loaded or 
      * `undefined` if the content is not available. */
     content?: aas.Environment | null;
-}
-
-/** Node in an AAS hierarchy. */
-export interface AASDocumentNode extends AASDocument {
-    parent: AASDocumentNode | null;
+    /** The parent AAS in a hierarchy. */
+    parent?: AASDocument | null;
 }
 
 /** Represents a page of AAS documents from the total set. */

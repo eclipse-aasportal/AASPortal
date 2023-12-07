@@ -8,15 +8,14 @@
 
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { AASDocument, AASDocumentId, AASDocumentNode, AASPage } from 'common';
-import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { exhaustMap, map, first } from 'rxjs';
+import { findLastIndex } from 'lodash-es';
+import { AASDocument } from 'common';
 
 import * as AASTableActions from './aas-table.actions';
 import * as AASTableSelectors from './aas-table.selectors';
-import { AASTableApiService } from './aas-table-api.service';
-import { AASTableFeatureState } from './aas-table.state';
-import { TranslateService } from '@ngx-translate/core';
+import { AASTableFeatureState, AASTableRow } from './aas-table.state';
 
 @Injectable()
 export class AASTableEffects {
@@ -25,99 +24,136 @@ export class AASTableEffects {
     constructor(
         private readonly actions: Actions,
         store: Store,
-        private readonly translate: TranslateService,
-        private readonly api: AASTableApiService,
     ) {
         this.store = store as Store<AASTableFeatureState>;
     }
 
-    public getFirstPage = createEffect(() => {
+    public updateListView = createEffect(() => {
         return this.actions.pipe(
-            ofType<AASTableActions.GetFirstPageAction>(AASTableActions.AASTableActionType.GET_FIRST_PAGE),
-            exhaustMap(action => this.api.getDocuments(
-                { previous: null, limit: action.limit },
-                action.filter,
-                this.translate.currentLang).pipe(
-                    mergeMap(page =>  this.setPageAndLoadContents(page)))));
-    });
-
-    public getLastPage = createEffect(() => {
-        return this.actions.pipe(
-            ofType<AASTableActions.GetLastPageAction>(AASTableActions.AASTableActionType.GET_LAST_PAGE),
-            exhaustMap(action => this.api.getDocuments(
-                { next: null, limit: action.limit },
-                action.filter,
-                this.translate.currentLang).pipe(
-                    mergeMap(page => this.setPageAndLoadContents(page)))));
-    });
-
-    public getNextPage = createEffect(() => {
-        return this.actions.pipe(
-            ofType<AASTableActions.GetNextPageAction>(AASTableActions.AASTableActionType.GET_NEXT_PAGE),
-            exhaustMap(action => this.store.select(AASTableSelectors.selectState).pipe(
+            ofType<AASTableActions.UpdateListViewAction>(AASTableActions.AASTableActionType.UPDATE_LIST_VIEW),
+            exhaustMap(action => this.store.select(AASTableSelectors.selectRows).pipe(
                 first(),
-                mergeMap(state => {
-                    if (state.rows.length === 0) return EMPTY;
-
-                    return this.api.getDocuments(
-                        {
-                            next: this.getId(state.rows[state.rows.length - 1].document),
-                            limit: action.limit
-                        },
-                        action.filter,
-                        this.translate.currentLang);
-                }),
-                mergeMap(page => this.setPageAndLoadContents(page)))));
+                map(state => {
+                    const rows = this.bla(state, action.documents);
+                    return AASTableActions.setRows({ rows });
+                })
+            )));
     });
 
-    public getPreviousPage = createEffect(() => {
+    public updateTreeView = createEffect(() => {
         return this.actions.pipe(
-            ofType<AASTableActions.GetPreviousPageAction>(AASTableActions.AASTableActionType.GET_PREVIOUS_PAGE),
-            exhaustMap(action => this.store.select(AASTableSelectors.selectState).pipe(
+            ofType<AASTableActions.UpdateTreeViewAction>(AASTableActions.AASTableActionType.UPDATE_TREE_VIEW),
+            exhaustMap(action => this.store.select(AASTableSelectors.selectRows).pipe(
                 first(),
-                mergeMap(state => {
-                    if (state.rows.length === 0) return EMPTY;
-
-                    return this.api.getDocuments(
-                        {
-                            previous: this.getId(state.rows[0].document),
-                            limit: action.limit
-                        },
-                        action.filter,
-                        this.translate.currentLang);
-                }),
-                mergeMap(page => this.setPageAndLoadContents(page)))));
+                map(state => {
+                    const rows = this.wupp(state, action.documents);
+                    return AASTableActions.setRows({ rows });
+                })
+            )));
     });
 
-    public initTreeView = createEffect(() => {
-        return this.actions.pipe(
-            ofType(AASTableActions.AASTableActionType.INIT_TREE_VIEW),
-            exhaustMap(() => this.store.select(AASTableSelectors.selectSelectedDocuments).pipe(
-                first(),
-                mergeMap(documents => from(documents).pipe(
-                        mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
-                        mergeMap(nodes => this.addRootAndLoadContents(nodes)))))));
-    });
+    private bla(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
+        const map = new Map(state.map(row => [`${row.endpoint}:${row.id}`, row]));
+        const rows = documents.map(document => {
+            return map.get(`${document.endpoint}:${document.id}`) ?? new AASTableRow(document, false, false, false, -1, -1, -1);
+        });
 
-    private getId(document: AASDocument): AASDocumentId {
-        return { id: document.id, endpoint: document.endpoint };
+        return rows;
+    }
+    
+    private wupp(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
+        const map = new Map(state.map(item => [`${item.endpoint}:${item.id}`, item]));
+        const rows: AASTableRow[] = [];
+        const nodes: AASDocument[] = [];
+        documents.forEach(document => {
+            const row = map.get(`${document.endpoint}:${document.id}`);
+            if (row) {
+                rows.push(row);
+            } else {
+                nodes.push(document);
+            }
+        });
+
+        if (nodes.length > 0) {
+            this.addRoot(nodes, rows);
+        }
+
+        return rows;
     }
 
-    private setPageAndLoadContents(page: AASPage): Observable<Action> {
-        return concat(
-            of(AASTableActions.setPage({ page })),
-            from(page.documents).pipe(
-                mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
-                    map(content => AASTableActions.setContent({ document, content }))
-                ))));
+    private addRoot(nodes: AASDocument[], rows: AASTableRow[]): AASTableRow[] {
+        const root = nodes.find(node => node.parent === null);
+        const index = findLastIndex(rows, row => row.level === 0);
+        if (root) {
+            const children = nodes.filter(node => this.isChild(root, node));
+            const rootRow = new AASTableRow(
+                root,
+                false,
+                false,
+                children.length === 0,
+                0,
+                rows.length + 1,
+                -1
+            );
+
+            rows.push(rootRow)
+
+            if (index >= 0) {
+                const previous = this.clone(rows[index]);
+                previous.nextSibling = rows.length - 1;
+                rows[index] = previous;
+            }
+
+            this.traverse(root, nodes, rows, 1);
+        }
+
+        return rows;
     }
 
-    private addRootAndLoadContents(nodes: AASDocumentNode[]): Observable<Action> {
-        return concat(
-            of(AASTableActions.addRoot({ nodes })),
-            from(nodes).pipe(
-                mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
-                    map(content => AASTableActions.setContent({ document, content }))
-                ))));
+    private traverse(parent: AASDocument, nodes: AASDocument[], rows: AASTableRow[], level: number): void {
+        let previous: AASTableRow | null = null;
+        const children = nodes.filter(node => this.isChild(parent, node));
+        for (const child of children) {
+            const row = new AASTableRow(
+                child,
+                false,
+                false,
+                children.length === 0,
+                level,
+                -1,
+                -1
+            );
+
+            rows.push(row);
+            if (previous) {
+                previous.nextSibling = rows.length - 1;
+            }
+
+            if (children.length > 0) {
+                row.firstChild = rows.length;
+                this.traverse(child, nodes, rows, level + 1);
+            }
+
+            previous = row;
+        }
+    }
+
+    private isChild(parent: AASDocument, node: AASDocument): boolean {
+        if (!node.parent) {
+            return false;
+        }
+
+        return node.parent.endpoint === parent.endpoint && node.parent.id === parent.id;
+    }
+
+    private clone(row: AASTableRow): AASTableRow {
+        return new AASTableRow(
+            row.document,
+            row.selected,
+            row.expanded,
+            row.isLeaf,
+            row.level,
+            row.firstChild,
+            row.nextSibling)
     }
 }

@@ -13,6 +13,9 @@ export interface StartState {
     viewMode: ViewMode;
     filter: string;
     limit: number;
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    totalCount: number;
     documents: AASDocument[];
 }
 

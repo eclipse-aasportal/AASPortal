@@ -10,17 +10,15 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, S
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AASDocument, equalArray } from 'common';
-import { Observable, Subscription, first, mergeMap } from 'rxjs';
+import { Observable, Subscription, map, mergeMap } from 'rxjs';
 
-import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
 import * as AASTableSelectors from './aas-table.selectors';
 import * as AASTableActions from './aas-table.actions';
 import { AASQuery } from '../types/aas-query-params';
 import { ClipboardService } from '../clipboard.service';
 import { WindowService } from '../window.service';
-import { AuthService } from '../auth/auth.service';
-import { NotifyService } from '../notify/notify.service';
+import { ViewMode } from '../types/view-mode';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -30,9 +28,6 @@ import { NotifyService } from '../notify/notify.service';
 export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
     private readonly subscription: Subscription = new Subscription();
-    private _filter = '';
-    private _limit = 10;
-    private _viewMode = ViewMode.List;
     private _selected: AASDocument[] = [];
     private shiftKey = false;
     private altKey = false;
@@ -40,16 +35,11 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     constructor(
         private readonly router: Router,
         store: Store,
-        private readonly auth: AuthService,
         private readonly clipboard: ClipboardService,
-        private readonly notify: NotifyService,
         private readonly window: WindowService
     ) {
         this.store = store as Store<AASTableFeatureState>;
         this.rows = this.store.select(AASTableSelectors.selectRows);
-        this.isFirstPage = this.store.select(AASTableSelectors.selectIsFirstPage);
-        this.isLastPage = this.store.select(AASTableSelectors.selectIsLastPage);
-        this.totalCount = this.store.select(AASTableSelectors.selectTotalCount);
         this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
         this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
@@ -58,26 +48,10 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     @Input()
-    public get viewMode(): ViewMode {
-        return this._viewMode;
-    }
-
-    public set viewMode(value: ViewMode) {
-        if (value !== this._viewMode) {
-            this._viewMode = value;
-            if (this._viewMode === ViewMode.List) {
-                this.store.dispatch(AASTableActions.getFirstPage({ limit: this._limit }));
-            } else {
-                this.store.dispatch(AASTableActions.initTreeView())
-            }
-        }
-    }
+    public viewMode: Observable<ViewMode> | null = null;
 
     @Input()
-    public filter: Observable<string> | null = null;
-
-    @Input()
-    public limit: Observable<number> | null = null;
+    public documents: Observable<AASDocument[]> | null = null;
 
     @Output()
     public selectedChange = new EventEmitter<AASDocument[]>();
@@ -94,15 +68,9 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    public someSelected: Observable<boolean>;
+    public readonly someSelected: Observable<boolean>;
 
-    public everySelected: Observable<boolean>;
-
-    public readonly isFirstPage: Observable<boolean>;
-
-    public readonly isLastPage: Observable<boolean>;
-
-    public readonly totalCount: Observable<number>;
+    public readonly everySelected: Observable<boolean>;
 
     public readonly rows: Observable<AASTableRow[]>;
 
@@ -112,35 +80,11 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
                 this._selected = documents;
                 this.selectedChange.emit(documents);
             }));
-
-        this.store.select(AASTableSelectors.selectViewMode).pipe(
-            first(viewMode => viewMode === ViewMode.Undefined),
-            mergeMap(() => this.auth.ready),
-            first(ready => ready),
-            first(),
-        ).subscribe({
-            next: () => this.store.dispatch(AASTableActions.getFirstPage({ limit: this._limit })),
-            error: error => this.notify.error(error),
-        });
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['filter'] && this.filter) {
-            this.subscription.add(this.filter.subscribe(filter => {
-                if (filter !== this._filter) {
-                    this._filter = filter;
-                    this.store.dispatch(AASTableActions.getFirstPage({ filter, limit: this._limit }));
-                }
-            }));
-        }
-
-        if (changes['limit'] && this.limit) {
-            this.subscription.add(this.limit.subscribe(limit => {
-                if (limit !== this._limit) {
-                    this._limit = limit;
-                    this.store.dispatch(AASTableActions.getFirstPage({ filter: this._filter, limit }));
-                }
-            }));
+        if (changes['viewMode'] || changes['documents']) {
+            this.initialize();
         }
     }
 
@@ -150,32 +94,12 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         this.window.removeEventListener('keydown', this.keydown);
     }
 
-    public firstPage(): void {
-        this.store.dispatch(AASTableActions.getFirstPage({ filter: this._filter, limit: this._limit }));
-    }
-
-    public previousPage(): void {
-        this.store.dispatch(AASTableActions.getPreviousPage({ filter: this._filter, limit: this._limit }))
-    }
-
-    public nextPage(): void {
-        this.store.dispatch(AASTableActions.getNextPage({ filter: this._filter, limit: this._limit }))
-    }
-
-    public lastPage(): void {
-        this.store.dispatch(AASTableActions.getLastPage({ filter: this._filter, limit: this._limit }))
-    }
-
     public expand(row: AASTableRow): void {
-        if (this.viewMode === ViewMode.Tree) {
-            this.store.dispatch(AASTableActions.expandRow({ row }));
-        }
+        this.store.dispatch(AASTableActions.expandRow({ row }));
     }
 
     public collapse(row: AASTableRow): void {
-        if (this.viewMode === ViewMode.Tree) {
-            this.store.dispatch(AASTableActions.collapseRow({ row }));
-        }
+        this.store.dispatch(AASTableActions.collapseRow({ row }));
     }
 
     public open(row: AASTableRow): void {
@@ -183,10 +107,6 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
             id: row.document.id,
             name: row.document.endpoint,
         };
-
-        if (this._filter) {
-            query.search = this._filter.replace(/&&/, '||');
-        }
 
         this.clipboard.set('AASQuery', query);
         this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
@@ -202,6 +122,21 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     public toggleSelections(): void {
         this.store.dispatch(AASTableActions.toggleSelections());
+    }
+
+    private initialize(): void {
+        if (this.viewMode != null && this.documents != null) {
+            const viewMode = this.viewMode;
+            this.subscription.add(this.documents.pipe(
+                mergeMap(documents => viewMode.pipe(
+                    map(viewMode => ({ viewMode, documents }))))).subscribe(tuple => {
+                        if (tuple.viewMode === ViewMode.List) {
+                            this.store.dispatch(AASTableActions.updateListView({ documents: tuple.documents }));
+                        } else {
+                            this.store.dispatch(AASTableActions.updateTreeView({ documents: tuple.documents }));
+                        }
+                    }));
+        }
     }
 
     private keyup = () => {

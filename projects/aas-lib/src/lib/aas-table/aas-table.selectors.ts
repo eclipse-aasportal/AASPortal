@@ -38,18 +38,3 @@ export const selectRows = createSelector(getState, state => {
     return state.rows;
 });
 
-export const selectIsFirstPage = createSelector(
-    getState,
-    state => state.isFirstPage);
-
-export const selectIsLastPage = createSelector(
-    getState,
-    state => state.isLastPage);
-
-export const selectViewMode = createSelector(
-    getState,
-    state => state.viewMode);
-
-export const selectTotalCount = createSelector(
-    getState,
-    state => state.totalCount);

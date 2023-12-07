@@ -8,40 +8,67 @@
 
 import { createReducer, on } from '@ngrx/store';
 import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { AASDocument, AASPage, aas } from 'common';
 import * as StartActions from './start.actions';
 import { StartState } from './start.state';
 
 const initialState: StartState = {
-    viewMode: ViewMode.List,
+    viewMode: ViewMode.Undefined,
     limit: 10,
     filter: '',
     documents: [],
+    isFirstPage: false,
+    isLastPage: false,
+    totalCount: 0,
 };
 
 export const startReducer = createReducer(
     initialState,
     on(
-        StartActions.setFilter,
-        (state, { filter }) => setFilter(state, filter)
+        StartActions.setDocuments,
+        (state, { documents }) => setDocuments(state, documents)
     ),
     on(
-        StartActions.setLimit,
-        (state, { limit }) => setLimit(state, limit)
+        StartActions.appendDocuments,
+        (state, { documents }) => appendDocuments(state, documents)
     ),
     on(
-        StartActions.setViewMode,
-        (state, { viewMode }) => setViewMode(state, viewMode)
-    )
+        StartActions.setPage,
+        (state, { page, limit, filter }) => setPage(state, page, limit, filter)
+    ),
+    on(
+        StartActions.setContent,
+        (state, { document, content }) => setContent(state, document, content)
+    ),
 )
 
-function setViewMode(state: StartState, viewMode: ViewMode): StartState {
-    return { ...state, viewMode };
+function setDocuments(state: StartState, documents: AASDocument[]): StartState {
+    return { ...state, documents, viewMode: ViewMode.Tree };
 }
 
-function setFilter(state: StartState, filter: string): StartState {
-    return { ...state, filter };
+function appendDocuments(state: StartState, documents: AASDocument[]): StartState {
+    return { ...state, documents: [...state.documents, ...documents] };
 }
 
-function setLimit(state: StartState, limit: number): StartState {
-    return { ...state, limit };
+function setPage(state: StartState, page: AASPage, limit: number | undefined, filter: string | undefined): StartState {
+    return {
+        ...state,
+        viewMode: ViewMode.List,
+        limit: limit ?? state.limit,
+        filter: filter ?? state.filter,
+        documents: page.documents,
+        isFirstPage: page.previous === null,
+        isLastPage: page.next === null,
+        totalCount: page.totalCount,
+    };
+}
+
+function setContent(state: StartState, document: AASDocument, content: aas.Environment): StartState {
+    const documents = [...state.documents];
+    const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
+    if (index >= 0) {
+        documents[index] = { ...document, content }
+    }
+
+    return { ...state, documents };
 }

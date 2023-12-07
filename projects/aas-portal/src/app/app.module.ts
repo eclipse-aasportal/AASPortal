@@ -38,6 +38,7 @@ import { httpInterceptorProviders } from './index';
 import { EffectsModule } from '@ngrx/effects';
 import { AASEffects } from './aas/aas.effects';
 import { ViewEffects } from './view/view.effects';
+import { StartEffects } from './start/start.effects';
 
 @NgModule({
     declarations: [
@@ -68,7 +69,7 @@ import { ViewEffects } from './view/view.effects';
                 view: viewReducer,
                 dashboard: dashboardReducer,
             }),
-        EffectsModule.forRoot([AASEffects, ViewEffects]),
+        EffectsModule.forRoot([StartEffects, AASEffects, ViewEffects]),
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {

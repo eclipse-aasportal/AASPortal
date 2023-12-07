@@ -9,7 +9,7 @@
 import { inject, injectable } from 'tsyringe';
 import fs from 'fs';
 import { Body, Delete, Get, OperationId, Path, Post, Put, Queries, Route, Security, Tags, UploadedFile, UploadedFiles } from 'tsoa';
-import { AASDocument, AASDocumentNode, aas } from 'common';
+import { AASDocument, aas } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
@@ -227,7 +227,7 @@ export class ContainersController extends AASController {
     @Get('{endpoint}/documents/{id}/hierarchy')
     @Security('bearerAuth', ['guest'])
     @OperationId('getHierarchy')
-    public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocumentNode[]> {
+    public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
         try {
             this.logger.start('getHierarchy');
             return await this.aasProvider.getHierarchyAsync(decodeBase64Url(endpoint), decodeBase64Url(id));

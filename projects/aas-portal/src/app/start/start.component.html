@@ -7,26 +7,21 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table #aasTable [viewMode]="viewMode" [filter]="filter" [limit]="limit"
-        [(selected)]="selected"></fhg-aas-table>
+    <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
-    <div *ngIf="viewMode === 'list'" class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="aasTable.firstPage()"
-            [disabled]="aasTable.isFirstPage | async">
+    <div *ngIf="(viewMode | async) === 'list'" class="btn-group me-2">
+        <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-bar-left"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="aasTable.previousPage()"
-            [disabled]="aasTable.isFirstPage | async">
+        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="aasTable.nextPage()"
-            [disabled]="aasTable.isLastPage | async">
+        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage | async">
             <i class="bi bi-chevron-right"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="aasTable.lastPage()"
-            [disabled]="aasTable.isLastPage | async">
+        <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage | async">
             <i class="bi bi-chevron-bar-right"></i>
         </button>
     </div>
@@ -55,12 +50,12 @@
     </div>
     <div class="btn-group me-2" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="viewMode === 'list'">
+            (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="viewMode === 'tree'" [disabled]="selected.length === 0">
+            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'" [disabled]="selected.length === 0">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>
@@ -77,10 +72,10 @@
             </div>
         </div>
     </div>
-    <div class="input-group flex-grow-1 me-2" [hidden]="viewMode === 'tree'">
+    <div class="input-group flex-grow-1 me-2" [hidden]="(viewMode | async) === 'tree'">
         <div class="input-group-text"><i class="bi bi-filter"></i></div>
         <input #textInput type="text" class="form-control" [value]="filter | async"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
-            (keydown.enter)="setFilter(textInput.value)" [disabled]="viewMode === 'tree'">
+            (keydown.enter)="setFilter(textInput.value)" [disabled]="(viewMode | async) === 'tree'">
     </div>
 </ng-template>
