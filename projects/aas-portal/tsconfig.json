@@ -15,7 +15,8 @@
         ],
         "types": [
             "@angular/localize",
-            "jasmine"
+            "jasmine",
+            "node"
         ]
     },
     "angularCompilerOptions": {

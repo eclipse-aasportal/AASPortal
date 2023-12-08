@@ -203,3 +203,9 @@ export interface WebSocketData {
     /** The data. */
     data: any;
 }
+
+/** Represents a list of favorite AAS documents,. */
+export interface FavoriteList {
+    name: string;
+    documents: AASDocument[];
+}

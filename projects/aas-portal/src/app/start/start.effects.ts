@@ -11,10 +11,11 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { AASDocument, AASDocumentId, AASPage } from 'common';
 import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
+import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 import * as StartActions from './start.actions';
 import * as StartSelectors from './start.selectors';
-import { TranslateService } from '@ngx-translate/core';
 import { StartFeatureState } from './start.state';
 import { StartApiService } from './start-api.service';
 
@@ -30,6 +31,23 @@ export class StartEffects {
     ) {
         this.store = store as Store<StartFeatureState>;
     }
+
+    public setListView = createEffect(() => {
+        return this.actions.pipe(
+            ofType(StartActions.StartActionType.SET_LIST_VIEW),
+            exhaustMap(() => concat(of(StartActions.setViewMode({ viewMode: ViewMode.List })),
+                this.store.select(StartSelectors.selectState).pipe(
+                    first(),
+                    mergeMap(state => {
+                        return this.api.getPage({
+                            previous: null,
+                            limit: state.limit
+                        },
+                            state.filter,
+                            this.translate.currentLang);
+                    }),
+                    mergeMap(page => this.setPageAndLoadContents(page))))));
+    });
 
     public getFirstPage = createEffect(() => {
         return this.actions.pipe(
@@ -101,13 +119,13 @@ export class StartEffects {
                 mergeMap(page => this.setPageAndLoadContents(page)))));
     });
 
-    public getHierarchy = createEffect(() => {
+    public setTreeView = createEffect(() => {
         return this.actions.pipe(
-            ofType<StartActions.GetHierarchyAction>(StartActions.StartActionType.GET_HIERARCHY),
-            exhaustMap(action => concat(of(StartActions.setDocuments({ documents: [] })), of(action.roots).pipe(
+            ofType<StartActions.SetTreeViewAction>(StartActions.StartActionType.SET_TREE_VIEW),
+            exhaustMap(action => concat(of(StartActions.setViewMode({ viewMode: ViewMode.Tree })), of(action.roots).pipe(
                 mergeMap(documents => from(documents).pipe(
                     mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
-                    mergeMap(nodes => this.addHierarchyAndLoadContents(nodes))))))));
+                    mergeMap(nodes => this.addTreeAndLoadContents(nodes))))))));
     });
 
     private getId(document: AASDocument): AASDocumentId {
@@ -123,9 +141,9 @@ export class StartEffects {
                 ))));
     }
 
-    private addHierarchyAndLoadContents(documents: AASDocument[]): Observable<Action> {
+    private addTreeAndLoadContents(documents: AASDocument[]): Observable<Action> {
         return concat(
-            of(StartActions.appendDocuments({ documents })),
+            of(StartActions.addTree({ documents })),
             from(documents).pipe(
                 mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
                     map(content => StartActions.setContent({ document, content }))

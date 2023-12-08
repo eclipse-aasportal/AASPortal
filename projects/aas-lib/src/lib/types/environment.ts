@@ -6,6 +6,10 @@
  *
  *****************************************************************************/
 
-export const environment = {
-  production: true
-};
+/** Environment variables */
+export interface Environment {
+    production: boolean;
+    version: string;
+    homepage: string;
+    author: string;
+}

@@ -48,12 +48,24 @@
     <table class="table table-sm table-borderless table-hover table-striped">
         <thead>
             <tr>
-                <th class="aas-th-name"></th>
-                <th class="aas-th-value"></th>
+                <th class="th-w-checkbox">
+                    <input type="checkbox" class="form-check-input" [indeterminate]="someSelected | async"
+                        [checked]="everySelected | async" (change)="toggleSelections()">
+                </th>
+                <th scope="col">
+                    <div class="text-center" translate>COLUMN_NAME</div>
+                </th>
+                <th scope="col">
+                    <div class="text-center" translate>COLUMN_ID</div>
+                </th>
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let row of rows | async" class="align-middle">
+                <td>
+                    <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)"
+                        [checked]="row.selected" [name]="row.name" />
+                </td>
                 <td>
                     <div class="d-flex" style="overflow-x: hidden">
                         <div [ngStyle]="{'width': (row.level * 16) + 'px'}"></div>

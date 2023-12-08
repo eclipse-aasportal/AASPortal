@@ -10,7 +10,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, S
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AASDocument, equalArray } from 'common';
-import { Observable, Subscription, map, mergeMap } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
 import * as AASTableSelectors from './aas-table.selectors';
@@ -83,8 +83,16 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['viewMode'] || changes['documents']) {
-            this.initialize();
+        if (changes['viewMode'] && this.viewMode != null) {
+            this.subscription.add(this.viewMode.subscribe(value => {
+                this.store.dispatch(AASTableActions.setViewMode({ viewMode: value }));
+            }))
+        }
+
+        if (changes['documents'] && this.documents != null) {
+            this.subscription.add(this.documents.subscribe(values => {
+                this.store.dispatch(AASTableActions.updateView({documents: values}));
+            }))
         }
     }
 
@@ -104,8 +112,8 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     public open(row: AASTableRow): void {
         const query: AASQuery = {
-            id: row.document.id,
-            name: row.document.endpoint,
+            id: row.id,
+            name: row.endpoint,
         };
 
         this.clipboard.set('AASQuery', query);
@@ -113,7 +121,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public getToolTip(row: AASTableRow): string {
-        return `${row.document.endpoint}, ${row.document.address}`;
+        return `${row.endpoint}, ${row.document.address}`;
     }
 
     public toggleSelected(row: AASTableRow): void {
@@ -122,21 +130,6 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     public toggleSelections(): void {
         this.store.dispatch(AASTableActions.toggleSelections());
-    }
-
-    private initialize(): void {
-        if (this.viewMode != null && this.documents != null) {
-            const viewMode = this.viewMode;
-            this.subscription.add(this.documents.pipe(
-                mergeMap(documents => viewMode.pipe(
-                    map(viewMode => ({ viewMode, documents }))))).subscribe(tuple => {
-                        if (tuple.viewMode === ViewMode.List) {
-                            this.store.dispatch(AASTableActions.updateListView({ documents: tuple.documents }));
-                        } else {
-                            this.store.dispatch(AASTableActions.updateTreeView({ documents: tuple.documents }));
-                        }
-                    }));
-        }
     }
 
     private keyup = () => {

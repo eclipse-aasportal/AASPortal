@@ -11,6 +11,18 @@
 </div>
 
 <ng-template #startToolbar>
+    <div class="btn-group me-2" id="favoriteGroup">
+        <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="favoriteGroup" autocomplete="off"
+            (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
+        <label class="btn btn-primary" for="viewModeList">
+            <i class="bi bi-list"></i>
+        </label>
+        <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="favoriteGroup" autocomplete="off"
+            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'" [disabled]="selected.length === 0">
+        <label class="btn btn-primary" for="viewModeTree">
+            <i class="bi bi-star"></i>
+        </label>
+    </div>
     <div *ngIf="(viewMode | async) === 'list'" class="btn-group me-2">
         <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-bar-left"></i>

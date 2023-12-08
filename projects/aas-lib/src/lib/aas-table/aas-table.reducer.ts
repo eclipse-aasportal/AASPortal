@@ -10,13 +10,19 @@ import { createReducer, on } from '@ngrx/store';
 import { AASDocument } from 'common';
 import * as AASTableActions from './aas-table.actions';
 import { AASTableRow, AASTableState } from './aas-table.state';
+import { ViewMode } from '../types/view-mode';
 
 const initialState: AASTableState = {
+    viewMode: ViewMode.List,
     rows: [],
 };
 
 export const aasTableReducer = createReducer(
     initialState,
+    on(
+        AASTableActions.setViewMode,
+        (state, { viewMode }) => setViewMode(state, viewMode),
+    ),
     on(
         AASTableActions.collapseRow,
         (state, { row }) => collapseRow(state, row)
@@ -43,6 +49,9 @@ export const aasTableReducer = createReducer(
     ),
 );
 
+function setViewMode(state: AASTableState, viewMode: ViewMode): AASTableState {
+    return state.viewMode !== viewMode ? { ...state, rows: [], viewMode } : state;
+}
 function setRows(state: AASTableState, rows: AASTableRow[]): AASTableState {
     return { ...state, rows };
 }

@@ -9,9 +9,9 @@
 import { Environment } from 'projects/aas-lib/src/public-api';
 
 export const environment: Environment = {
-    production: true,
+    production: false,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    version: (require('../../../../package.json') as { version: string }).version,
+    version: (require('../../../../package.json') as { version: string }).version + '-dev',
     homepage: 'https://www.iosb-ina.fraunhofer.de/',
     author: 'Fraunhofer IOSB-INA',
 };

@@ -10,32 +10,29 @@ import { createAction, props } from '@ngrx/store';
 import { TypedAction } from '@ngrx/store/src/models';
 import { AASDocument } from 'common';
 import { AASTableRow } from './aas-table.state';
+import { ViewMode } from '../types/view-mode';
 
 export enum AASTableActionType {
+    SET_VIEW_MODE = '[AASTable] set view mode',
     SET_PAGE = '[AASTable] set page',
     EXPAND = '[AASTable] expand',
     COLLAPSE = '[AASTable] collapse',
     TOGGLE_SELECTED = '[AASTable] toggle selected',
     TOGGLE_SELECTIONS = '[AASTable] toggle selections',
     SET_SELECTIONS = '[AASTable] set selections',
-    UPDATE_LIST_VIEW = '[AASTable] update list view',
-    UPDATE_TREE_VIEW = '[AASTable] update tree view',
+    UPDATE_VIEW = '[AASTable] update view',
 }
 
-export interface UpdateListViewAction extends TypedAction<AASTableActionType.UPDATE_LIST_VIEW> {
+export interface UpdateViewAction extends TypedAction<AASTableActionType.UPDATE_VIEW> {
     documents: AASDocument[];
 }
 
-export interface UpdateTreeViewAction extends TypedAction<AASTableActionType.UPDATE_TREE_VIEW> {
-    documents: AASDocument[];
-}
+export const setViewMode = createAction(
+    AASTableActionType.SET_VIEW_MODE,
+    props<{ viewMode: ViewMode }>());
 
-export const updateListView = createAction(
-    AASTableActionType.UPDATE_LIST_VIEW,
-    props<{ documents: AASDocument[] }>());
-
-export const updateTreeView = createAction(
-    AASTableActionType.UPDATE_TREE_VIEW,
+export const updateView = createAction(
+    AASTableActionType.UPDATE_VIEW,
     props<{ documents: AASDocument[] }>());
 
 export const setRows = createAction(

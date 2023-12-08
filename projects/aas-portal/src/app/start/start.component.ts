@@ -109,9 +109,9 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public setViewMode(viewMode: string | lib.ViewMode): void {
         if (viewMode === lib.ViewMode.List) {
-            this.store.dispatch(StartActions.getFirstPage({}));
+            this.store.dispatch(StartActions.setListView());
         } else {
-            this.store.dispatch(StartActions.getHierarchy({ roots: this._selected }));
+            this.store.dispatch(StartActions.setTreeView({ roots: this._selected }));
         }
     }
 

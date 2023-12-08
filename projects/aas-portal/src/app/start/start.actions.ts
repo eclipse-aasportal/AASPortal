@@ -9,10 +9,13 @@
 import { createAction, props } from '@ngrx/store';
 import { AASDocument, AASPage, aas } from 'common';
 import { TypedAction } from '@ngrx/store/src/models';
+import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 export enum StartActionType {
-    SET_DOCUMENTS = '[Start] set documents',
-    APPEND_DOCUMENTS = '[Start] append documents',
+    SET_TREE_VIEW = '[Start] set tree view',
+    SET_LIST_VIEW = '[Start] set list view',
+    SET_VIEW_MODE = '[Start] set view mode',
+    ADD_TREE = '[Start] add tree',
     APPLY_FILTER = '[Start] apply filter',
     GET_FIRST_PAGE = '[Start] get first page',
     GET_NEXT_PAGE = '[Start] get next page',
@@ -20,7 +23,6 @@ export enum StartActionType {
     GET_LAST_PAGE = '[Start] get last page',
     SET_PAGE = '[Start] set page',
     SET_CONTENT = '[Start] set content',
-    GET_HIERARCHY = '[Start] get hierarchy'
 }
 
 export interface GetFirstPageAction extends TypedAction<StartActionType.GET_FIRST_PAGE> {
@@ -28,20 +30,23 @@ export interface GetFirstPageAction extends TypedAction<StartActionType.GET_FIRS
     filter: string | undefined;
 }
 
-export interface GetHierarchyAction extends TypedAction<StartActionType.GET_HIERARCHY> {
+export interface SetTreeViewAction extends TypedAction<StartActionType.SET_TREE_VIEW> {
     roots: AASDocument[];
 }
 
-export const getHierarchy = createAction(
-    StartActionType.GET_HIERARCHY,
+export const setListView = createAction(
+    StartActionType.SET_LIST_VIEW);
+
+export const setTreeView = createAction(
+    StartActionType.SET_TREE_VIEW,
     props<{ roots: AASDocument[] }>());
 
-export const setDocuments = createAction(
-    StartActionType.SET_DOCUMENTS,
-    props<{ documents: AASDocument[] }>());
+export const setViewMode = createAction(
+    StartActionType.SET_VIEW_MODE,
+    props<{ viewMode: ViewMode }>());
 
-export const appendDocuments = createAction(
-    StartActionType.APPEND_DOCUMENTS,
+export const addTree = createAction(
+    StartActionType.ADD_TREE,
     props<{ documents: AASDocument[] }>());
 
 export const getFirstPage = createAction(

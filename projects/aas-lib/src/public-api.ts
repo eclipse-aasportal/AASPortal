@@ -39,6 +39,7 @@ export * from './lib/types/message-entry';
 export * from './lib/types/online-state';
 export * from './lib/types/view-mode';
 export * from './lib/types/view-query-params';
+export * from './lib/types/environment';
 
 export * from './lib/aas-table/aas-table.component';
 export * from './lib/aas-table/aas-table.state';

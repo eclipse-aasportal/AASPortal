@@ -16,6 +16,7 @@ import { AASDocument } from 'common';
 import * as AASTableActions from './aas-table.actions';
 import * as AASTableSelectors from './aas-table.selectors';
 import { AASTableFeatureState, AASTableRow } from './aas-table.state';
+import { ViewMode } from '../types/view-mode';
 
 @Injectable()
 export class AASTableEffects {
@@ -28,47 +29,43 @@ export class AASTableEffects {
         this.store = store as Store<AASTableFeatureState>;
     }
 
-    public updateListView = createEffect(() => {
+    public updateView = createEffect(() => {
         return this.actions.pipe(
-            ofType<AASTableActions.UpdateListViewAction>(AASTableActions.AASTableActionType.UPDATE_LIST_VIEW),
-            exhaustMap(action => this.store.select(AASTableSelectors.selectRows).pipe(
+            ofType<AASTableActions.UpdateViewAction>(AASTableActions.AASTableActionType.UPDATE_VIEW),
+            exhaustMap(action => this.store.select(AASTableSelectors.selectState).pipe(
                 first(),
                 map(state => {
-                    const rows = this.bla(state, action.documents);
+                    const rows = state.viewMode === ViewMode.List
+                        ? this.createListViewRows(state.rows, action.documents)
+                        : this.createTreeViewRows(state.rows, action.documents);
+
                     return AASTableActions.setRows({ rows });
                 })
             )));
     });
 
-    public updateTreeView = createEffect(() => {
-        return this.actions.pipe(
-            ofType<AASTableActions.UpdateTreeViewAction>(AASTableActions.AASTableActionType.UPDATE_TREE_VIEW),
-            exhaustMap(action => this.store.select(AASTableSelectors.selectRows).pipe(
-                first(),
-                map(state => {
-                    const rows = this.wupp(state, action.documents);
-                    return AASTableActions.setRows({ rows });
-                })
-            )));
-    });
-
-    private bla(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
+    private createListViewRows(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
         const map = new Map(state.map(row => [`${row.endpoint}:${row.id}`, row]));
         const rows = documents.map(document => {
-            return map.get(`${document.endpoint}:${document.id}`) ?? new AASTableRow(document, false, false, false, -1, -1, -1);
+            const row =  map.get(`${document.endpoint}:${document.id}`);
+            if (row) {
+                return row.document === document ? row : this.cloneD(row, document)
+            }
+
+            return new AASTableRow(document, false, false, false, -1, -1, -1);
         });
 
         return rows;
     }
-    
-    private wupp(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
-        const map = new Map(state.map(item => [`${item.endpoint}:${item.id}`, item]));
+
+    private createTreeViewRows(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
+        const map = new Map(state.map(row => [`${row.endpoint}:${row.id}`, row]));
         const rows: AASTableRow[] = [];
         const nodes: AASDocument[] = [];
         documents.forEach(document => {
             const row = map.get(`${document.endpoint}:${document.id}`);
             if (row) {
-                rows.push(row);
+                rows.push(row.document === document ? row : this.cloneD(row, document));
             } else {
                 nodes.push(document);
             }
@@ -92,7 +89,7 @@ export class AASTableEffects {
                 false,
                 children.length === 0,
                 0,
-                rows.length + 1,
+                children.length > 0 ? rows.length + 1 : -1,
                 -1
             );
 
@@ -154,6 +151,19 @@ export class AASTableEffects {
             row.isLeaf,
             row.level,
             row.firstChild,
-            row.nextSibling)
+            row.nextSibling);
     }
+
+
+    private cloneD(row: AASTableRow, document: AASDocument): AASTableRow {
+        return new AASTableRow(
+            document,
+            row.selected,
+            row.expanded,
+            row.isLeaf,
+            row.level,
+            row.firstChild,
+            row.nextSibling);
+    }
+
 }

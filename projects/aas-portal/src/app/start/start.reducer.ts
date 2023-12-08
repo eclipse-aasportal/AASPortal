@@ -25,12 +25,12 @@ const initialState: StartState = {
 export const startReducer = createReducer(
     initialState,
     on(
-        StartActions.setDocuments,
-        (state, { documents }) => setDocuments(state, documents)
+        StartActions.setViewMode,
+        (state, { viewMode }) => setViewMode(state, viewMode)
     ),
     on(
-        StartActions.appendDocuments,
-        (state, { documents }) => appendDocuments(state, documents)
+        StartActions.addTree,
+        (state, { documents }) => addTree(state, documents)
     ),
     on(
         StartActions.setPage,
@@ -42,15 +42,18 @@ export const startReducer = createReducer(
     ),
 )
 
-function setDocuments(state: StartState, documents: AASDocument[]): StartState {
-    return { ...state, documents, viewMode: ViewMode.Tree };
+function setViewMode(state: StartState, viewMode: ViewMode): StartState {
+    console.debug(`setViewMode(${viewMode})`);
+    return { ...state, documents: [], viewMode };
 }
 
-function appendDocuments(state: StartState, documents: AASDocument[]): StartState {
-    return { ...state, documents: [...state.documents, ...documents] };
+function addTree(state: StartState, nodes: AASDocument[]): StartState {
+    console.debug(`addTree(...)`);
+    return { ...state, documents: [...state.documents, ...nodes] };
 }
 
 function setPage(state: StartState, page: AASPage, limit: number | undefined, filter: string | undefined): StartState {
+    console.debug(`setPage(...)`);
     return {
         ...state,
         viewMode: ViewMode.List,

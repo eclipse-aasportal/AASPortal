@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { AASDocument } from 'common';
+import { ViewMode } from '../types/view-mode';
 
 export class AASTableRow {
     constructor(
@@ -31,7 +32,7 @@ export class AASTableRow {
         return this.document.thumbnail ?? '/assets/resources/aas.32.png';
     }
 
-    public get endpoint(): string | null {
+    public get endpoint(): string {
         return this.document.endpoint;
     }
 
@@ -74,6 +75,7 @@ export class AASTableRow {
 }
 
 export interface AASTableState {
+    viewMode: ViewMode;
     rows: AASTableRow[];
 }
 
