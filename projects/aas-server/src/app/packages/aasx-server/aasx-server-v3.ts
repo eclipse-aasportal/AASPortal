@@ -213,7 +213,7 @@ export class AasxServerV3 extends AasxServer {
 
     public async getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
         const blob = await this.message.get<aas.Blob>(
-            this.resolve(`/submodels/${submodelId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`));
+            this.resolve(`/submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`));
 
         if (!blob) {
             throw new Error(`Blob element "${submodelId}.${idShortPath}" does not exist.`)
@@ -232,7 +232,7 @@ export class AasxServerV3 extends AasxServer {
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.message.put(
-            this.resolve(`/shells/${aasId}/aas/submodels/${smId}/submodel`),
+            this.resolve(`/shells/${aasId}/submodels/${smId}`),
             new JsonWriter().write(submodel));
     }
 
@@ -265,7 +265,7 @@ export class AasxServerV3 extends AasxServer {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.delete(
-            this.resolve(`/submodels/${smId}/submodel/submodel-elements/${path}`));
+            this.resolve(`/submodels/${smId}/submodel-elements/${path}`));
     }
 
     private getSubmodel(env: aas.Environment, referable?: aas.Referable): aas.Submodel {
