@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { cloneDeep } from 'lodash-es';
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals';
 import { AASDocument } from '../lib/types.js';
 import * as doc from '../lib/document.js';
 import * as aas from '../lib/aas.js';
@@ -26,6 +26,8 @@ describe('Document', function () {
                 address: 'a.json',
                 idShort: 'A',
                 readonly: true,
+                crc32: 0,
+                timestamp: 0,
             };
 
             b = {
@@ -34,6 +36,8 @@ describe('Document', function () {
                 address: 'b.json',
                 idShort: 'B',
                 readonly: true,
+                crc32: 0,
+                timestamp: 0,
             };
         });
 

@@ -43,6 +43,9 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
         this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
+        this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
+            .subscribe(values => this._selected = values));
+
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
@@ -63,7 +66,6 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     public set selected(values: AASDocument[]) {
         if (!equalArray(this._selected, values)) {
-            this._selected = values;
             this.store.dispatch(AASTableActions.setSelections({ documents: values }));
         }
     }
@@ -91,7 +93,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
         if (changes['documents'] && this.documents != null) {
             this.subscription.add(this.documents.subscribe(values => {
-                this.store.dispatch(AASTableActions.updateView({documents: values}));
+                this.store.dispatch(AASTableActions.updateView({ documents: values }));
             }))
         }
     }

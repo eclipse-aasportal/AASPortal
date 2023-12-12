@@ -63,31 +63,35 @@ export interface AASContainer extends AASEndpoint {
 
 /** The unique identifier of an AAS. */
 export interface AASDocumentId {
-    /** The name of the endpoint. */
-    endpoint: string;
     /** The identification of the Asset Administration Shell. */
     id: string;
+    /** The name of the endpoint. */
+    endpoint: string;
 }
 
 /** Represents an Asset Administration Shell */
 export interface AASDocument extends AASDocumentId {
-    /** The name of the AAS. */
-    idShort: string;
     /** The address of the AAS in the container. */
     address: string;
-    /** A time stamp that represents the current state of the AAS. */
-    thumbnail?: string;
-    /** Indicates whether the document can be edited. */
-    readonly: boolean;
+    /** The root element of the AAS structure (content), `null` if the content is not loaded or 
+     * `undefined` if the content is not available. */
+    content?: aas.Environment | null;
+    /** Checksum to detect changes. */
+    crc32: number;
+    /** The name of the AAS. */
+    idShort: string;
     /** Indicates whether the document is modified. */
     modified?: boolean;
     /** Indicates whether communication can be established with the system represented by the AAS. */
     onlineReady?: boolean;
-    /** The root element of the AAS structure (content), `null` if the content is not loaded or 
-     * `undefined` if the content is not available. */
-    content?: aas.Environment | null;
     /** The parent AAS in a hierarchy. */
     parent?: AASDocument | null;
+    /** Indicates whether the document can be edited. */
+    readonly: boolean;
+    /** A time stamp that represents the current state of the AAS. */
+    thumbnail?: string;
+    /** The time at which the document was created. */
+    timestamp: number;
 }
 
 /** Represents a page of AAS documents from the total set. */
@@ -202,10 +206,4 @@ export interface WebSocketData {
     type: string;
     /** The data. */
     data: any;
-}
-
-/** Represents a list of favorite AAS documents,. */
-export interface FavoriteList {
-    name: string;
-    documents: AASDocument[];
 }

@@ -17,6 +17,12 @@ export interface StartState {
     isLastPage: boolean;
     totalCount: number;
     documents: AASDocument[];
+    favorites: string;
+}
+
+export interface FavoritesList {
+    name: string;
+    documents: AASDocument[];
 }
 
 export interface StartFeatureState {

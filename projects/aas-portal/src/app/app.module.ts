@@ -39,6 +39,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { AASEffects } from './aas/aas.effects';
 import { ViewEffects } from './view/view.effects';
 import { StartEffects } from './start/start.effects';
+import { FavoritesFormComponent } from './start/favorites-form/favorites-form.component';
 
 @NgModule({
     declarations: [
@@ -53,7 +54,8 @@ import { StartEffects } from './start/start.effects';
         NewElementFormComponent,
         EditElementFormComponent,
         UploadFormComponent,
-        ViewComponent
+        ViewComponent,
+        FavoritesFormComponent
     ],
     imports: [
         BrowserModule,

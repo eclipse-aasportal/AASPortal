@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, aas } from "common";
+import { AASDocument, Crc32, aas, flat } from "common";
 import { Logger } from "../logging/logger.js";
 
 /**
@@ -56,13 +56,69 @@ export abstract class AASPackage {
 
         return path;
     }
-    
+
     protected async streamToBase64(stream: NodeJS.ReadableStream): Promise<string> {
         const chunks = [];
         for await (const chunk of stream) {
             chunks.push(Buffer.from(chunk));
         }
-    
+
         return 'data:image/png;base64,' + Buffer.concat(chunks).toString('base64');
+    }
+
+    protected computeCrc32(env: aas.Environment): number {
+        const crc = new Crc32();
+        crc.start();
+
+        for (const shell of env.assetAdministrationShells) {
+            crc.add(JSON.stringify(shell));
+        }
+
+        for (const conceptDescription of env.conceptDescriptions) {
+            crc.add(JSON.stringify(conceptDescription));
+        }
+
+        for (const submodel of env.submodels) {
+            for (const referable of flat(submodel)) {
+                switch (referable.modelType) {
+                    case 'Property':
+                        {
+                            const property: aas.Property = { ...referable as aas.Property };
+                            if (property.category !== 'CONSTANT' && property.category !== 'PARAMETER') {
+                                delete property.value;
+                            }
+
+                            crc.add(JSON.stringify(property));
+                        }
+                        break;
+                    case 'Submodel':
+                        {
+                            const sm: aas.Submodel = { ...referable as aas.Submodel };
+                            delete sm.submodelElements;
+                            crc.add(JSON.stringify(sm));
+                        }
+                        break;
+                    case 'SubmodelElementCollection':
+                        {
+                            const collection: aas.SubmodelElementCollection = { ...referable as aas.SubmodelElementCollection };
+                            delete collection.value;
+                            crc.add(JSON.stringify(collection));
+                        }
+                        break;
+                    case 'SubmodelElementList':
+                        {
+                            const list: aas.SubmodelElementList = { ...referable as aas.SubmodelElementList };
+                            delete list.value;
+                            crc.add(JSON.stringify(list));
+                        }
+                        break;
+                    default:
+                        crc.add(JSON.stringify(referable));
+                        break
+                }
+            }
+        }
+
+        return crc.end();
     }
 }

@@ -431,7 +431,7 @@ export class AASProvider {
     };
 
     private startContainerScan = async (taskId: number, endpoint: AASEndpoint, statistic: ScanStatistic) => {
-        const documents = await this.index.getContainerDocuments(endpoint.url);
+        const documents = await this.index.getContainerDocuments(endpoint.name);
         const data: ScanContainerData = {
             type: 'ScanContainerData',
             taskId,
@@ -482,7 +482,7 @@ export class AASProvider {
     }
 
     private async onRemoved(result: ScanContainerResult): Promise<void> {
-        await this.index.remove(result.container.url, result.document.id);
+        await this.index.remove(result.container.name, result.document.id);
         this.logger.info(`Removed: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
         this.sendMessage({ type: 'Removed', document: { ...result.document, content: null } });
     }

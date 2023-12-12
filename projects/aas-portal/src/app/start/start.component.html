@@ -11,19 +11,15 @@
 </div>
 
 <ng-template #startToolbar>
-    <div class="btn-group me-2" id="favoriteGroup">
-        <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="favoriteGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
-        <label class="btn btn-primary" for="viewModeList">
-            <i class="bi bi-list"></i>
-        </label>
-        <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="favoriteGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'" [disabled]="selected.length === 0">
-        <label class="btn btn-primary" for="viewModeTree">
+    <div class="input-group me-2">
+        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites()">
             <i class="bi bi-star"></i>
-        </label>
+        </button>
+        <select class="form-select" [(ngModel)]="favoritesList">
+            <option *ngFor="let option of favoritesLists">{{option}}</option>
+        </select>
     </div>
-    <div *ngIf="(viewMode | async) === 'list'" class="btn-group me-2">
+    <div *ngIf="favoritesList === '-'" class="btn-group me-2">
         <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-bar-left"></i>
         </button>
@@ -67,7 +63,7 @@
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'" [disabled]="selected.length === 0">
+            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>
@@ -84,10 +80,12 @@
             </div>
         </div>
     </div>
-    <div class="input-group flex-grow-1 me-2" [hidden]="(viewMode | async) === 'tree'">
-        <div class="input-group-text"><i class="bi bi-filter"></i></div>
+    <div *ngIf="favoritesList === '-'" class="input-group flex-grow-1 me-2">
+        <div class="input-group-text">
+            <i class="bi bi-filter"></i>
+        </div>
         <input #textInput type="text" class="form-control" [value]="filter | async"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
-            (keydown.enter)="setFilter(textInput.value)" [disabled]="(viewMode | async) === 'tree'">
+            (keydown.enter)="setFilter(textInput.value)">
     </div>
 </ng-template>

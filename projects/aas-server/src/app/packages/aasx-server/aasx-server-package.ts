@@ -44,7 +44,6 @@ export class AasxServerPackage extends AASPackage {
 
     public async createDocumentAsync(): Promise<AASDocument> {
         const environment = await this.server.readEnvironmentAsync(this.idShort);
-
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
             endpoint: this.server.name,
@@ -52,7 +51,9 @@ export class AasxServerPackage extends AASPackage {
             idShort: environment.assetAdministrationShells[0].idShort,
             readonly: this.server.readOnly,
             onlineReady: true,
-            content: environment
+            content: environment,
+            timestamp: Date.now(),
+            crc32: this.computeCrc32(environment),
         };
 
         const thumbnail = await this.createThumbnail(document.id);

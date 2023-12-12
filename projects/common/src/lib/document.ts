@@ -8,7 +8,6 @@
 
 import { isEqual } from 'lodash-es';
 import * as aas from './aas.js';
-import { equalUrls } from './index.js';
 import { AASDocument, AASAbbreviation } from './types.js';
 
 /** Represents a difference. */
@@ -133,6 +132,28 @@ export function* traverse(root: aas.Referable): Generator<[string, [aas.Referabl
             yield [path + child.idShort, [parent, child]];
 
             for (const item of traverseChildren(child, childPath)) {
+                yield item;
+            }
+        }
+    }
+}
+
+/**
+ * 
+ * @param root 
+ */
+export function* flat(root: aas.Referable): Generator<aas.Referable> {
+    yield root;
+
+    for (const item of flatChildren(root)) {
+        yield item;
+    }
+
+    function* flatChildren(parent: aas.Referable): Generator<aas.Referable> {
+        for (const child of getChildren(parent)) {
+            yield child;
+
+            for (const item of flatChildren(child)) {
                 yield item;
             }
         }

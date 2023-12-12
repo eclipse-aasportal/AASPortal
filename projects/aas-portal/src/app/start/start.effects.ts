@@ -52,80 +52,97 @@ export class StartEffects {
     public getFirstPage = createEffect(() => {
         return this.actions.pipe(
             ofType<StartActions.GetFirstPageAction>(StartActions.StartActionType.GET_FIRST_PAGE),
-            exhaustMap(action => this.store.select(StartSelectors.selectState).pipe(
-                first(),
-                mergeMap(state => {
-                    return this.api.getPage({
-                        previous: null,
-                        limit: action.limit ?? state.limit
-                    },
-                        action.filter ?? state.filter,
-                        this.translate.currentLang);
-                }),
-                mergeMap(page => this.setPageAndLoadContents(page, action.limit, action.filter)))));
+            exhaustMap(action => concat(of(StartActions.setViewMode({ viewMode: ViewMode.List })),
+                this.store.select(StartSelectors.selectState).pipe(
+                    first(),
+                    mergeMap(state => {
+                        return this.api.getPage({
+                            previous: null,
+                            limit: action.limit ?? state.limit
+                        },
+                            action.filter ?? state.filter,
+                            this.translate.currentLang);
+                    }),
+                    mergeMap(page => this.setPageAndLoadContents(page, action.limit, action.filter))))));
     });
 
     public getLastPage = createEffect(() => {
         return this.actions.pipe(
             ofType(StartActions.StartActionType.GET_LAST_PAGE),
-            exhaustMap(() => this.store.select(StartSelectors.selectState).pipe(
-                first(),
-                mergeMap(state => {
-                    return this.api.getPage({
-                        next: null,
-                        limit: state.limit
-                    },
-                        state.filter,
-                        this.translate.currentLang);
-                }),
-                mergeMap(page => this.setPageAndLoadContents(page)))));
+            exhaustMap(() => concat(of(StartActions.setViewMode({ viewMode: ViewMode.List })),
+                this.store.select(StartSelectors.selectState).pipe(
+                    first(),
+                    mergeMap(state => {
+                        return this.api.getPage({
+                            next: null,
+                            limit: state.limit
+                        },
+                            state.filter,
+                            this.translate.currentLang);
+                    }),
+                    mergeMap(page => this.setPageAndLoadContents(page))))));
     });
 
     public getNextPage = createEffect(() => {
         return this.actions.pipe(
             ofType(StartActions.StartActionType.GET_NEXT_PAGE),
-            exhaustMap(() => this.store.select(StartSelectors.selectState).pipe(
-                first(),
-                mergeMap(state => {
-                    if (state.documents.length === 0) return EMPTY;
+            exhaustMap(() => concat(of(StartActions.setViewMode({ viewMode: ViewMode.List })),
+                this.store.select(StartSelectors.selectState).pipe(
+                    first(),
+                    mergeMap(state => {
+                        if (state.documents.length === 0) return EMPTY;
 
-                    return this.api.getPage(
-                        {
-                            next: this.getId(state.documents[state.documents.length - 1]),
-                            limit: state.limit
-                        },
-                        state.filter,
-                        this.translate.currentLang);
-                }),
-                mergeMap(page => this.setPageAndLoadContents(page)))));
+                        return this.api.getPage(
+                            {
+                                next: this.getId(state.documents[state.documents.length - 1]),
+                                limit: state.limit
+                            },
+                            state.filter,
+                            this.translate.currentLang);
+                    }),
+                    mergeMap(page => this.setPageAndLoadContents(page))))));
     });
 
     public getPreviousPage = createEffect(() => {
         return this.actions.pipe(
             ofType(StartActions.StartActionType.GET_PREVIOUS_PAGE),
-            exhaustMap(() => this.store.select(StartSelectors.selectState).pipe(
-                first(),
-                mergeMap(state => {
-                    if (state.documents.length === 0) return EMPTY;
+            exhaustMap(() => concat(of(StartActions.setViewMode({ viewMode: ViewMode.List })),
+                this.store.select(StartSelectors.selectState).pipe(
+                    first(),
+                    mergeMap(state => {
+                        if (state.documents.length === 0) return EMPTY;
 
-                    return this.api.getPage(
-                        {
-                            previous: this.getId(state.documents[0]),
-                            limit: state.limit
-                        },
-                        state.filter,
-                        this.translate.currentLang);
-                }),
-                mergeMap(page => this.setPageAndLoadContents(page)))));
+                        return this.api.getPage(
+                            {
+                                previous: this.getId(state.documents[0]),
+                                limit: state.limit
+                            },
+                            state.filter,
+                            this.translate.currentLang);
+                    }),
+                    mergeMap(page => this.setPageAndLoadContents(page))))));
     });
 
     public setTreeView = createEffect(() => {
         return this.actions.pipe(
-            ofType<StartActions.SetTreeViewAction>(StartActions.StartActionType.SET_TREE_VIEW),
-            exhaustMap(action => concat(of(StartActions.setViewMode({ viewMode: ViewMode.Tree })), of(action.roots).pipe(
-                mergeMap(documents => from(documents).pipe(
-                    mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
-                    mergeMap(nodes => this.addTreeAndLoadContents(nodes))))))));
+            ofType(StartActions.StartActionType.SET_TREE_VIEW),
+            exhaustMap(() => concat(
+                of(StartActions.setViewMode({ viewMode: ViewMode.Tree })),
+                this.store.select(StartSelectors.selectDocuments).pipe(
+                    first(),
+                    mergeMap(documents => from(documents).pipe(
+                        mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
+                        mergeMap(nodes => this.addTreeAndLoadContents(nodes))))))));
+    });
+
+    public getFavorites = createEffect(() => {
+        return this.actions.pipe(
+            ofType<StartActions.GetFavoritesAction>(StartActions.StartActionType.GET_FAVORITES),
+            exhaustMap(action => concat(
+                of(StartActions.setFavorites({ name: action.name, documents: action.documents })),
+                from(action.documents).pipe(
+                    mergeMap(document => this.api.getContent(document.endpoint, document.id).pipe(
+                        map(content => StartActions.setContent({ document, content }))))))));
     });
 
     private getId(document: AASDocument): AASDocumentId {

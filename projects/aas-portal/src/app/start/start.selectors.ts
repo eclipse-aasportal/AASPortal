@@ -37,3 +37,5 @@ export const selectIsFirstPage = createSelector(
 export const selectIsLastPage = createSelector(
     getState,
     state => state.isLastPage);
+
+export const selectFavorites = createSelector(getState, state => state.favorites);

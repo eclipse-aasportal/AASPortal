@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
@@ -23,17 +23,20 @@ import { StartFeatureState } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { ToolbarService } from '../toolbar.service';
 import { StartApiService } from './start-api.service';
+import { FavoritesService } from './favorites.service';
+import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
 })
-export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
+export class StartComponent implements OnDestroy, AfterViewInit {
     private readonly store: Store<StartFeatureState>
     private readonly subscription = new Subscription();
     private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
     private _selected: AASDocument[] = [];
+    private _favoritesList = '-';
 
     constructor(
         store: Store,
@@ -46,7 +49,8 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly toolbar: ToolbarService,
         private readonly auth: lib.AuthService,
         private readonly download: lib.DownloadService,
-        private readonly clipboard: lib.ClipboardService
+        private readonly clipboard: lib.ClipboardService,
+        private readonly favorites: FavoritesService,
     ) {
         this.store = store as Store<StartFeatureState>;
         this.filter = this.store.select(StartSelectors.selectFilter);
@@ -56,10 +60,45 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.documents = this.store.select(StartSelectors.selectDocuments);
         this.viewMode = this.store.select(StartSelectors.selectViewMode);
         this.endpoints = this.api.getEndpoints();
+
+        this.store.select(StartSelectors.selectViewMode).pipe(
+            first(viewMode => viewMode === lib.ViewMode.Undefined),
+            mergeMap(() => this.auth.ready),
+            first(ready => ready),
+            first(),
+        ).subscribe({
+            next: () => this.store.dispatch(StartActions.getFirstPage({})),
+            error: error => this.notify.error(error),
+        });
+
+        this.subscription.add(this.store.select(StartSelectors.selectFavorites).pipe()
+            .subscribe(value => this._favoritesList = value))
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
+
+    public get favoritesList(): string {
+        return this._favoritesList;
+    }
+
+    public set favoritesList(value: string) {
+        if (value !== this._favoritesList) {
+            const favoritesList = this.favorites.get(value);
+            if (favoritesList) {
+                this.store.dispatch(StartActions.getFavorites({
+                    name: favoritesList.name,
+                    documents: favoritesList.documents,
+                }));
+            } else {
+                this.store.dispatch(StartActions.getFirstPage({}));
+            }
+        }
+    }
+
+    public get favoritesLists(): string[] {
+        return ['-', ...this.favorites.lists.map(list => list.name)];
+    }
 
     public readonly viewMode: Observable<lib.ViewMode>;
 
@@ -84,18 +123,6 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.someSelectedDocuments.next(values.length > 0);
     }
 
-    public ngOnInit(): void {
-        this.store.select(StartSelectors.selectViewMode).pipe(
-            first(viewMode => viewMode === lib.ViewMode.Undefined),
-            mergeMap(() => this.auth.ready),
-            first(ready => ready),
-            first(),
-        ).subscribe({
-            next: () => this.store.dispatch(StartActions.getFirstPage({})),
-            error: error => this.notify.error(error),
-        });
-    }
-
     public ngAfterViewInit(): void {
         if (this.startToolbar) {
             this.toolbar.set(this.startToolbar);
@@ -111,7 +138,7 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
         if (viewMode === lib.ViewMode.List) {
             this.store.dispatch(StartActions.setListView());
         } else {
-            this.store.dispatch(StartActions.setTreeView({ roots: this._selected }));
+            this.store.dispatch(StartActions.setTreeView());
         }
     }
 
@@ -202,13 +229,18 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     public deleteDocument(): void {
         if (this._selected.length === 0) return;
 
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.window.confirm(stringFormat(
-                this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                this._selected.map(item => item.idShort).join(', ')))),
-            mergeMap((result) => from(result ? this._selected : [])),
-            mergeMap((document) => this.api.delete(document.id, document.endpoint)))
-            .subscribe({ error: (error) => this.notify.error(error) });
+        if (this._favoritesList === '-') {
+            this.auth.ensureAuthorized('editor').pipe(
+                map(() => this.window.confirm(stringFormat(
+                    this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
+                    this._selected.map(item => item.idShort).join(', ')))),
+                mergeMap((result) => from(result ? this._selected : [])),
+                mergeMap((document) => this.api.delete(document.id, document.endpoint)))
+                .subscribe({ error: (error) => this.notify.error(error) });
+        } else {
+            this.favorites.remove(this._selected, this._favoritesList);
+            this.store.dispatch(StartActions.removeFavorites({ favorites: [...this._selected] }));
+        }
     }
 
     public canViewUserFeedback(): boolean {
@@ -278,15 +310,23 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public previousPage(): void {
-        this.store.dispatch(StartActions.getPreviousPage())
+        this.store.dispatch(StartActions.getPreviousPage());
     }
 
     public nextPage(): void {
-        this.store.dispatch(StartActions.getNextPage())
+        this.store.dispatch(StartActions.getNextPage());
     }
 
     public lastPage(): void {
-        this.store.dispatch(StartActions.getLastPage())
+        this.store.dispatch(StartActions.getLastPage());
+    }
+
+    public addToFavorites(): void {
+        const modalRef = this.modal.open(FavoritesFormComponent, { backdrop: 'static' });
+        modalRef.componentInstance.documents = [...this._selected];
+        from(modalRef.result).subscribe(() => {
+            this.selected = [];
+        });
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {

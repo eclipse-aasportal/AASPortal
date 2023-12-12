@@ -43,6 +43,7 @@ export class OpcuaPackage extends AASPackage {
             throw new Error(`${this.nodeId}: ${component.typeDefinition} is an unexpected type definition.`);
         }
 
+        const content = await new OpcuaReader(this.logger, component, this.dataTypes).readEnvironment();
         const document: AASDocument = {
             id: this.getIdentifier(component),
             endpoint: this.server.name,
@@ -50,7 +51,9 @@ export class OpcuaPackage extends AASPackage {
             idShort: component.browseName,
             readonly: this.server.readOnly,
             onlineReady: this.server.onlineReady,
-            content: await new OpcuaReader(this.logger, component, this.dataTypes).readEnvironment()
+            content,
+            timestamp: Date.now(),
+            crc32: this.computeCrc32(content),
         };
 
         return document;

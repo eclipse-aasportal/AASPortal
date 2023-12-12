@@ -20,6 +20,7 @@ const initialState: StartState = {
     isFirstPage: false,
     isLastPage: false,
     totalCount: 0,
+    favorites: '-',
 };
 
 export const startReducer = createReducer(
@@ -40,15 +41,21 @@ export const startReducer = createReducer(
         StartActions.setContent,
         (state, { document, content }) => setContent(state, document, content)
     ),
+    on(
+        StartActions.setFavorites,
+        (state, { name, documents }) => setFavorites(state, name, documents)
+    ),
+    on(
+        StartActions.removeFavorites,
+        (state, { favorites }) => removeFavorites(state, favorites)
+    ),
 )
 
 function setViewMode(state: StartState, viewMode: ViewMode): StartState {
-    console.debug(`setViewMode(${viewMode})`);
     return { ...state, documents: [], viewMode };
 }
 
 function addTree(state: StartState, nodes: AASDocument[]): StartState {
-    console.debug(`addTree(...)`);
     return { ...state, documents: [...state.documents, ...nodes] };
 }
 
@@ -57,6 +64,7 @@ function setPage(state: StartState, page: AASPage, limit: number | undefined, fi
     return {
         ...state,
         viewMode: ViewMode.List,
+        favorites: '-',
         limit: limit ?? state.limit,
         filter: filter ?? state.filter,
         documents: page.documents,
@@ -66,12 +74,28 @@ function setPage(state: StartState, page: AASPage, limit: number | undefined, fi
     };
 }
 
+function setFavorites(state: StartState, favorites: string, documents: AASDocument[]): StartState {
+    return { ...state, favorites, documents, viewMode: ViewMode.List };
+}
+
 function setContent(state: StartState, document: AASDocument, content: aas.Environment): StartState {
     const documents = [...state.documents];
     const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
     if (index >= 0) {
         documents[index] = { ...document, content }
     }
+
+    return { ...state, documents };
+}
+
+function removeFavorites(state: StartState, favorites: AASDocument[]): StartState {
+    if (state.favorites === '-') {
+        return state;
+    }
+
+    const documents = state.documents.filter(
+        document => favorites.every(favorite => document.endpoint !== favorite.endpoint || 
+            document.id !== favorite.id));
 
     return { ...state, documents };
 }

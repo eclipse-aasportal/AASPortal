@@ -57,7 +57,7 @@ function setRows(state: AASTableState, rows: AASTableRow[]): AASTableState {
 }
 
 function setSelections(state: AASTableState, documents: AASDocument[]): AASTableState {
-    const rows = { ...state.rows };
+    const rows = [ ...state.rows ];
     const set = new Set(documents);
     for (let i = 0, n = rows.length; i < n; i++) {
         const row = rows[i];

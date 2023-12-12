@@ -23,6 +23,9 @@ export enum StartActionType {
     GET_LAST_PAGE = '[Start] get last page',
     SET_PAGE = '[Start] set page',
     SET_CONTENT = '[Start] set content',
+    GET_FAVORITES = '[Start] get favorites',
+    SET_FAVORITES = '[Start] set favorites',
+    REMOVE_FAVORITES = '[Start] remove favorites',
 }
 
 export interface GetFirstPageAction extends TypedAction<StartActionType.GET_FIRST_PAGE> {
@@ -30,16 +33,16 @@ export interface GetFirstPageAction extends TypedAction<StartActionType.GET_FIRS
     filter: string | undefined;
 }
 
-export interface SetTreeViewAction extends TypedAction<StartActionType.SET_TREE_VIEW> {
-    roots: AASDocument[];
+export interface GetFavoritesAction extends TypedAction<StartActionType.GET_FIRST_PAGE> {
+    name: string;
+    documents: AASDocument[];
 }
 
 export const setListView = createAction(
     StartActionType.SET_LIST_VIEW);
 
 export const setTreeView = createAction(
-    StartActionType.SET_TREE_VIEW,
-    props<{ roots: AASDocument[] }>());
+    StartActionType.SET_TREE_VIEW);
 
 export const setViewMode = createAction(
     StartActionType.SET_VIEW_MODE,
@@ -69,3 +72,15 @@ export const setPage = createAction(
 export const setContent = createAction(
     StartActionType.SET_CONTENT,
     props<{ document: AASDocument, content: aas.Environment }>());
+
+export const getFavorites = createAction(
+    StartActionType.GET_FAVORITES,
+    props<{ name: string, documents: AASDocument[] }>());
+
+export const setFavorites = createAction(
+    StartActionType.SET_FAVORITES,
+    props<{ name: string, documents: AASDocument[] }>());
+
+export const removeFavorites = createAction(
+    StartActionType.REMOVE_FAVORITES,
+    props<{ favorites: AASDocument[] }>());
