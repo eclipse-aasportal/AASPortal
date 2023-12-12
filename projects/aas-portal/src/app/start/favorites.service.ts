@@ -31,18 +31,20 @@ export class FavoritesService {
     }
 
     public delete(name: string): void {
-        const index = this._lists.findIndex(list => list.name === name);
-        if (index >= 0) {
-            this._lists.splice(index, 1);
-            this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
-        }
+        this._lists = this._lists.filter(list => list.name !== name);
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
     }
 
     public add(documents: AASDocument[], name: string): void {
-        let list = this._lists.find(list => list.name === name);
-        if (!list) {
+        const i = this._lists.findIndex(list => list.name === name);
+        const lists = [...this._lists];
+        let list: FavoritesList;
+        if (i < 0) {
             list = { name, documents: [] };
-            this._lists.push(list);
+            lists.push(list);
+        } else {
+            list = { ...lists[i], documents: [...lists[i].documents] };
+            lists[i] = list;
         }
 
         for (const document of documents) {
@@ -51,6 +53,7 @@ export class FavoritesService {
             }
         }
 
+        this._lists = lists;
         this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
     }
 
@@ -60,14 +63,8 @@ export class FavoritesService {
 
         const lists = [...this.lists];
         const list = { ...lists[i] };
-        for (const document of documents) {
-            const j = list.documents.findIndex(favorite => favorite.endpoint === document.endpoint &&
-                favorite.id === document.id);
-
-            if (j >= 0) {
-                list.documents.splice(j, 1);
-            }
-        }
+        list.documents = list.documents.filter(favorite =>
+            documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id));
 
         this._lists = lists;
         this.auth.setCookie('.Favorites', JSON.stringify(this._lists));

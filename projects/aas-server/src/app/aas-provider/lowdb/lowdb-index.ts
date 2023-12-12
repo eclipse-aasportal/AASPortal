@@ -8,7 +8,7 @@
 
 import { Low } from 'lowdb';
 import { v4 } from 'uuid';
-import { AASCursor, AASDocument, AASDocumentId, AASEndpoint, AASPage, ApplicationError, aas } from 'common';
+import { AASCursor, AASDocument, AASDocumentId, AASEndpoint, AASPage, ApplicationError, aas, flat } from 'common';
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
 import { Variable } from '../../variable.js';
@@ -348,61 +348,42 @@ export class LowDbIndex extends AASIndex {
 
     private traverseEnvironment(documentId: string, env: aas.Environment): void {
         for (const submodel of env.submodels) {
-            this.traverse(documentId, submodel, '');
-        }
-    }
-
-    private traverse(documentId: string, parent: aas.Referable, path: string): void {
-        const element: LowDbElement = {
-            documentId,
-            path,
-            modelType: parent.modelType,
-            idShort: parent.idShort
-        };
-
-        switch (parent.modelType) {
-            case 'Property':
-                element.value = (parent as aas.Property).value;
-                element.valueType = (parent as aas.Property).valueType;
-                break;
-            case 'MultiLanguageProperty':
-                element.value = (parent as aas.MultiLanguageProperty).value?.map(item => item.text).join(' ');
-                break;
-            case 'File':
-                element.value = (parent as aas.File).value + ' ' + (parent as aas.File).contentType;
-                break;
-            case 'Blob':
-                element.value = (parent as aas.Blob).contentType;
-                break;
-            case 'Range':
-                element.value = (parent as aas.Range).min + ' ' + (parent as aas.Range).max;
-                element.valueType = (parent as aas.Range).valueType;
-                break;
-            case 'Entity':
-                element.value = (parent as aas.Entity).globalAssetId;
-                break;
-        }
-
-        this.db.data.elements.push(element);
-
-        const children = this.getChildren(parent);
-        if (children) {
-            for (const child of children) {
-                this.traverse(documentId, child, path ? path + '.' + parent.idShort : parent.idShort);
+            for (const referable of flat(submodel)) {
+                this.writeElement(documentId, referable);
             }
         }
     }
 
-    private getChildren(parent: aas.Referable): aas.Referable[] | undefined {
-        switch (parent.modelType) {
-            case 'Submodel':
-                return (parent as aas.Submodel).submodelElements;
-            case 'SubmodelElementCollection':
-                return (parent as aas.SubmodelElementCollection).value;
-            case 'SubmodelElementList':
-                return (parent as aas.SubmodelElementList).value;
-            default:
-                return undefined;
+    private writeElement(documentId: string, referable: aas.Referable): void {
+        const element: LowDbElement = {
+            documentId,
+            modelType: referable.modelType,
+            idShort: referable.idShort
+        };
+
+        switch (referable.modelType) {
+            case 'Property':
+                element.value = (referable as aas.Property).value;
+                element.valueType = (referable as aas.Property).valueType;
+                break;
+            case 'MultiLanguageProperty':
+                element.value = (referable as aas.MultiLanguageProperty).value?.map(item => item.text).join(' ');
+                break;
+            case 'File':
+                element.value = (referable as aas.File).value + ' ' + (referable as aas.File).contentType;
+                break;
+            case 'Blob':
+                element.value = (referable as aas.Blob).contentType;
+                break;
+            case 'Range':
+                element.value = (referable as aas.Range).min + ' ' + (referable as aas.Range).max;
+                element.valueType = (referable as aas.Range).valueType;
+                break;
+            case 'Entity':
+                element.value = (referable as aas.Entity).globalAssetId;
+                break;
         }
+
+        this.db.data.elements.push(element);
     }
 }

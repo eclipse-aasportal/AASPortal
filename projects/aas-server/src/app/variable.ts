@@ -14,7 +14,7 @@ export class Variable {
     constructor() {
         this.JWT_SECRET = process.env.JWT_SECRET ?? 'The quick brown fox jumps over the lazy dog.';
         this.JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
-        this.JWT_EXPIRES_IN = process.env.JWT_EXPIRED_IN ? Number(process.env.JWT_EXPIRED_IN) : 7 * 24 * 60 * 60;
+        this.JWT_EXPIRES_IN = process.env.JWT_EXPIRED_IN ? Number(process.env.JWT_EXPIRED_IN) : 604800;
         this.NODE_SERVER_PORT = Number(process.env.NODE_SERVER_PORT);
         this.MAX_WORKERS = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 8;
         this.USER_STORAGE = process.env.USER_STORAGE;
@@ -27,6 +27,7 @@ export class Variable {
         this.TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
+        this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
     }
 
     /** The secret for HS256 encryption or the private key file for RS256 encryption. */
@@ -76,4 +77,7 @@ export class Variable {
 
     /** The certificate file if AASServer supports HTTPS. */
     public readonly HTTPS_CERT_FILE?: string;
+
+    /** The validity period of an AAS in milliseconds. */
+    public readonly AAS_EXPIRES_IN: number;
 }

@@ -58,7 +58,7 @@ export class ScanContainer {
     private onDocumentScanned = (document: AASDocument): void => {
         const reference = this.data.container.documents?.find(item => item.id === document.id);
         if (reference) {
-            if (reference.content && this.documentChanged(document, reference)) {
+            if (this.documentChanged(document, reference)) {
                 this.postChanged(document);
             }
         } else {
@@ -110,16 +110,13 @@ export class ScanContainer {
     }
 
     private documentChanged(document: AASDocument, reference: AASDocument): boolean {
-        let changed: boolean;
-        if (document.content === reference.content) {
-            changed = false;
-        } else if (document.content && reference.content) {
-            changed = !this.equalContent(document.content, reference.content);
-        } else {
-            changed = true;
+        if (document.crc32 === reference.crc32 && 
+            (!reference.timestamp || (Date.now() - reference.timestamp <= this.variable.AAS_EXPIRES_IN))) {
+            return false;
         }
 
-        return changed;
+
+        return true;
     }
 
     private equalContent(

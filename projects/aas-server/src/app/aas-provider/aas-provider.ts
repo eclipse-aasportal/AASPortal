@@ -471,7 +471,6 @@ export class AASProvider {
 
     private async onChanged(result: ScanContainerResult): Promise<void> {
         await this.index.set(result.document);
-        this.logger.info(`Changed: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
         this.sendMessage({ type: 'Changed', document: { ...result.document, content: null } });
     }
 

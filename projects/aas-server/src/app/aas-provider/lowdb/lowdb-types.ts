@@ -14,7 +14,6 @@ import {
 
 export interface LowDbElement {
     documentId: string;
-    path: string;
     modelType: aas.ModelType;
     idShort: string;
     value?: string;
