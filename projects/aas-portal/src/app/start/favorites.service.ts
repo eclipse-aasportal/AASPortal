@@ -26,6 +26,10 @@ export class FavoritesService {
         return this._lists;
     }
 
+    public has(name: string): boolean {
+        return this._lists.some(list => list.name === name);
+    }
+
     public get(name: string): FavoritesList | undefined {
         return this._lists.find(list => list.name === name);
     }
@@ -35,7 +39,7 @@ export class FavoritesService {
         this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
     }
 
-    public add(documents: AASDocument[], name: string): void {
+    public add(documents: AASDocument[], name: string, newName?: string): void {
         const i = this._lists.findIndex(list => list.name === name);
         const lists = [...this._lists];
         let list: FavoritesList;
@@ -45,6 +49,10 @@ export class FavoritesService {
         } else {
             list = { ...lists[i], documents: [...lists[i].documents] };
             lists[i] = list;
+        }
+
+        if (newName) {
+            list.name = newName;
         }
 
         for (const document of documents) {

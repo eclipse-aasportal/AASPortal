@@ -30,8 +30,24 @@
                 <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)" [checked]="row.selected"
                     [name]="row.name" />
             </td>
-            <td>
-                <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+            <td [ngSwitch]="row.state">
+                <div *ngSwitchCase="'unloaded'" class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <div
+                        class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info">
+                        <i class="bi bi-cloud-arrow-down"></i>
+                    </div>
+                </div>
+                <div *ngSwitchCase="'unavailable'" class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <div
+                        class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger">
+                        <i class="bi bi-cone-striped"></i>
+                    </div>
+                </div>
+                <div *ngSwitchDefault>
+                    <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+                </div>
             </td>
             <td>
                 <a class="text-nowrap" href="javascript:void(0);" [name]="row.name" (click)="open(row)">{{row.name |

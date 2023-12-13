@@ -40,6 +40,18 @@ export class AASTableRow {
         return this.firstChild >= 0;
     }
 
+    public get state(): 'loaded' | 'unloaded' | 'unavailable' {
+        if (this.document.content === null) {
+            return 'unloaded';
+        }
+
+        if (this.document.content) {
+            return 'loaded';
+        }
+
+        return 'unavailable';
+    }
+
     public getChildren(rows: AASTableRow[]): AASTableRow[] {
         const children: AASTableRow[] = [];
         if (this.firstChild >= 0) {

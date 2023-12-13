@@ -21,15 +21,18 @@
             </div>
         </ngb-toast>
         <ul class="list-group">
-            <li *ngFor="let item of items" class="list-group-item" (mouseenter)="setActive(item, true)"
+            <li *ngFor="let item of items | async" class="list-group-item" (mouseenter)="setActive(item, true)"
                 (mouseleave)="setActive(item, false)">
-                <input #selected class="form-check-input me-1" type="radio"
-                    (change)="selectedChange(item, selected.checked)" name="name" [disabled]="!name.value">
-                <input #name class="form-control" type="text" placeholder="new favorite list" [value]="item.name"
-                    (input)="inputName(item, name.value)">
-                <button class="btn" type="button" [hidden]="!item.active">
-                    <i class="bi bi-trash"></i>
-                </button>
+                <div class="d-flex flex-row align-items-center">
+                    <input #selected class="form-check-input me-1" type="radio" autocomplete="false"
+                        (change)="selectedChange(item, selected.checked)" name="name" [disabled]="!name.value"
+                        [checked]="item.selected">
+                    <input #name class="form-control no-border" type="text" placeholder="new favorite list"
+                        [value]="item.name" (input)="inputName(item, name.value)">
+                    <button class="btn" type="button" [hidden]="!canDelete(item)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </li>
         </ul>
     </div>

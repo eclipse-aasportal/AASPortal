@@ -5,3 +5,8 @@
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
+
+ .no-border {
+    border: 0;
+    box-shadow: none;
+}

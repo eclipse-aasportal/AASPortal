@@ -1,43 +1,44 @@
 {
-    "name": "aas-portal-project",
-    "version": "3.0.4",
-    "description": "Web-based visualization and control of asset administration shells.",
-    "type": "module",
-    "scripts": {
-        "tsoa": "npm run tsoa -w aas-server",
-        "start": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
-        "header": "node copyright-header.js",
-        "coverage": "node coverage-summary.js",
-        "user-db": "docker run -p 27017:27017 -d --name aasportal-users -e MONGO_INITDB_DATABASE=aasportal-users mongo",
-        "lint": "ng lint",
-        "test": "npm run test -ws",
-        "tsc": "npm run tsc -ws",
-        "build": "npm run build -ws",
-        "build:debug": "npm run build:debug -ws",
-        "lib:build": "npm run build -w common -w aas-lib",
-        "lib:build:debug": "npm run build:debug -w common -w aas-lib",
-        "aas-portal:build": "npm run build -w common -w aas-lib -w aas-portal",
-        "aas-portal:build:debug": "npm run build:build -w common -w aas-lib -w aas-portal",
-        "aas-server:build": "npm run build -w common -w aas-server",
-        "aas-server:build:debug": "npm run build:debug -w common -w aas-server"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://gitlab.cc-asp.fraunhofer.de/iosb-ina-big-data-plattformen/aasportal.git"
-    },
-    "author": "Fraunhofer IOSB-INA",
-    "homepage": "https://www.iosb-ina.fraunhofer.de/",
-    "license": "Apache-2.0",
-    "workspaces": [
-        "./projects/common",
-        "./projects/aas-server",
-        "./projects/aas-lib",
-        "./projects/aas-portal"
-    ],
-    "devDependencies": {
-        "@babel/plugin-syntax-import-attributes": "^7.22.5"
-    },
-    "dependencies": {
-        "lowdb": "^6.1.1"
-    }
+  "name": "aas-portal-project",
+  "version": "3.0.4",
+  "description": "Web-based visualization and control of asset administration shells.",
+  "type": "module",
+  "scripts": {
+    "tsoa": "npm run tsoa -w aas-server",
+    "start": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
+    "header": "node copyright-header.js",
+    "coverage": "node coverage-summary.js",
+    "user-db": "docker run -p 27017:27017 -d --name aasportal-users -e MONGO_INITDB_DATABASE=aasportal-users mongo",
+    "lint": "ng lint",
+    "test": "npm run test -ws",
+    "tsc": "npm run tsc -ws",
+    "build": "npm run build -ws",
+    "build:debug": "npm run build:debug -ws",
+    "lib:build": "npm run build -w common -w aas-lib",
+    "lib:build:debug": "npm run build:debug -w common -w aas-lib",
+    "aas-portal:build": "npm run build -w common -w aas-lib -w aas-portal",
+    "aas-portal:build:debug": "npm run build:build -w common -w aas-lib -w aas-portal",
+    "aas-server:build": "npm run build -w common -w aas-server",
+    "aas-server:build:debug": "npm run build:debug -w common -w aas-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.cc-asp.fraunhofer.de/iosb-ina-big-data-plattformen/aasportal.git"
+  },
+  "author": "Fraunhofer IOSB-INA",
+  "homepage": "https://www.iosb-ina.fraunhofer.de/",
+  "license": "Apache-2.0",
+  "workspaces": [
+    "./projects/common",
+    "./projects/aas-server",
+    "./projects/aas-lib",
+    "./projects/aas-portal"
+  ],
+  "devDependencies": {
+    "@babel/plugin-syntax-import-attributes": "^7.22.5"
+  },
+  "dependencies": {
+    "@ngrx/component-store": "^16.3.0",
+    "lowdb": "^6.1.1"
+  }
 }

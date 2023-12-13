@@ -8,39 +8,47 @@
 
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from "@ngx-translate/core";
 import { AASDocument } from 'common';
 import { FavoritesService } from '../favorites.service';
-
-interface FavoritesItem {
-    selected: boolean;
-    active: boolean;
-    name: string;
-}
+import { FavoritesFormStore, FavoritesItem } from './favorites-form.store';
+import { Observable, first } from 'rxjs';
 
 @Component({
     selector: 'fhg-favorites-form',
     templateUrl: './favorites-form.component.html',
-    styleUrls: ['./favorites-form.component.css']
+    styleUrls: ['./favorites-form.component.css'],
+    providers: [FavoritesFormStore],
 })
 export class FavoritesFormComponent {
+    private _documents: AASDocument[] = [];
+
     public constructor(
-        private modal: NgbActiveModal,
-        private favorites: FavoritesService,
-        private translate: TranslateService,
+        private readonly modal: NgbActiveModal,
+        private readonly favorites: FavoritesService,
+        private readonly store: FavoritesFormStore
     ) {
-        this.items = favorites.lists.map(list => ({ name: list.name, selected: false, active: false }));
-        this.items.push({ name: '', selected: false, active: false });
+        this.items = this.store.select(state => state.items);
+
+        const items = favorites.lists.map(list => ({ name: list.name, id: list.name, selected: false, active: false }));
+        items.sort((a, b) => a.name.localeCompare(b.name));
+        items.push({ name: '', id: '', selected: false, active: false });
+        this.store.setState(state => ({ ...state, items }));
     }
 
     public messages: string[] = [];
 
-    public documents: AASDocument[] = [];
+    public get documents(): AASDocument[] {
+        return this._documents;
+    }
 
-    public readonly items: FavoritesItem[];
+    public set documents(values: AASDocument[]) {
+        this._documents = values;
+    }
 
-    public canSelect(item: FavoritesItem): boolean {
-        return true;
+    public readonly items: Observable<FavoritesItem[]>;
+
+    public canDelete(item: FavoritesItem): boolean {
+        return (item.active || item.selected) && this.favorites.has(item.id);
     }
 
     public inputName(item: FavoritesItem, value: string): void {
@@ -48,19 +56,35 @@ export class FavoritesFormComponent {
     }
 
     public selectedChange(item: FavoritesItem, value: boolean): void {
-        item.selected = value;
+        this.store.setState(state => {
+            const items = [...state.items];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i] === item) {
+                    items[i] = { ...items[i], selected: value };
+                } else if (items[i].selected) {
+                    items[i] = { ...items[i], selected: false };
+                }
+            }
+
+            return { ...state, items };
+        });
     }
 
     public submit(): void {
         this.clearMessages();
 
-        if (this.documents.length > 0) {
-            const selectedItem = this.items.find(item => item.selected);
+        this.items.pipe(first()).subscribe(items => {
+            const selectedItem = items.find(item => item.selected);
             if (selectedItem) {
-                this.favorites.add(this.documents, selectedItem.name);
+                if (selectedItem.id || selectedItem.id === selectedItem.name) {
+                    this.favorites.add(this.documents, selectedItem.name);
+                } else {
+                    this.favorites.add(this.documents, selectedItem.id, selectedItem.name);
+                }
+
                 this.modal.close();
             }
-        }
+        });
     }
 
     public cancel(): void {
