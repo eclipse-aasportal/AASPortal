@@ -54,12 +54,6 @@
                                     "maximumError": "4kb"
                                 }
                             ],
-                            "fileReplacements": [
-                                {
-                                    "replace": "projects/aas-portal/src/environments/environment.ts",
-                                    "with": "projects/aas-portal/src/environments/environment.prod.ts"
-                                }
-                            ],
                             "outputHashing": "all"
                         },
                         "development": {
