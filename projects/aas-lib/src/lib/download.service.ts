@@ -46,13 +46,13 @@ export class DownloadService {
 
     /**
      * Downloads an AASX package file.
-     * @param url The endpoint URL.
+     * @param endpoint The endpoint name.
      * @param id The AAS identifier.
      * @param name The file name.
      */
-    public downloadDocument(url: string, id: string, name: string): Observable<void> {
+    public downloadDocument(endpoint: string, id: string, name: string): Observable<void> {
         return this.http.get(
-            `/api/v1/containers/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`,
+            `/api/v1/containers/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`,
             {
                 responseType: 'blob'
             }).pipe(map(blob => {
@@ -67,9 +67,9 @@ export class DownloadService {
     /**
      * Uploads the specified aasx file.
      * @param file A file.
-     * @param nme The name of the destination endpoint.
+     * @param name The name of the destination endpoint.
      */
-    public uploadDocuments(nme: string, file: File | File[]): Observable<HttpEvent<object>> {
+    public uploadDocuments(name: string, file: File | File[]): Observable<HttpEvent<object>> {
         const data = new FormData();
         if (Array.isArray(file)) {
             file.forEach(item => data.append('file', item));
@@ -78,7 +78,7 @@ export class DownloadService {
         }
 
         return this.http.post(
-            `/api/v1/containers/${encodeBase64Url(nme)}/packages`,
+            `/api/v1/containers/${encodeBase64Url(name)}/packages`,
             data,
             {
                 reportProgress: true,

@@ -31,8 +31,7 @@
         </div>
     </div>
     <div class="row">
-        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document"
-            (selectedChange)="selectedElementsChange($event.elements)">
+        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document" [(selected)]="selectedElements">
         </fhg-aas-tree>
     </div>
 </div>

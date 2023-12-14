@@ -1491,11 +1491,14 @@ const content: object = {
 export const env = content as aas.Environment;
 
 export const sampleDocument: AASDocument = {
-    "id": "http://customer.com/aas/9175_7013_7091_9168",
-    "idShort": "ExampleMotor",
-    "endpoint": 'Samples',
-    "address": "ExampleMotor.aasx",
-    "readonly": false,
-    "onlineReady": false,
-    "content": env
+    id: "http://customer.com/aas/9175_7013_7091_9168",
+    idShort: "ExampleMotor",
+    endpoint: 'Samples',
+    address: "ExampleMotor.aasx",
+    modified: false,
+    readonly: false,
+    onlineReady: false,
+    content: env,
+    crc32: 0,
+    timestamp: 0,
 };

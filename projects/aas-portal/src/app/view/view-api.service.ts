@@ -16,7 +16,7 @@ import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 @Injectable({
     providedIn: 'root'
 })
-export class ViewAPIService {
+export class ViewApiService {
     constructor(
         private readonly http: HttpClient,
     ) {}

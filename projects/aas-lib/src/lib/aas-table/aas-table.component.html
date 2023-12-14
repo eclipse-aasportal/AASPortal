@@ -10,8 +10,9 @@
     <thead>
         <tr>
             <th class="th-w-checkbox">
-                <input type="checkbox" class="form-check-input" [indeterminate]="someSelected | async"
-                    [checked]="everySelected | async" (change)="toggleSelections()">
+                <input id="aas-table-checkbox" type="checkbox" class="form-check-input"
+                    [indeterminate]="someSelected | async" [checked]="everySelected | async"
+                    (change)="toggleSelections()">
             </th>
             <th scope="col" class="th-w-icon">
                 <i class="bi bi-tag"></i>
@@ -52,6 +53,7 @@
             <td>
                 <a class="text-nowrap" href="javascript:void(0);" [name]="row.name" (click)="open(row)">{{row.name |
                     max:60}}</a>
+            </td>
             <td>
                 <div>{{row.endpoint}}</div>
                 <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>

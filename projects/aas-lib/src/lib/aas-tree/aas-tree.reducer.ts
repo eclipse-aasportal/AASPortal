@@ -74,7 +74,11 @@ export const aasTreeReducer = createReducer(
                 return { ...state, error };
             }
         }
-    )
+    ),
+    on(
+        AASTreeActions.setSelectedElements,
+        (state, {elements}) => setSelectedElements(state, elements),
+    ),
 );
 
 function updateRows(state: AASTreeState, document: AASDocument | null, localeId: string): AASTreeState {
@@ -433,6 +437,21 @@ function toggleSelections(state: AASTreeState): AASTreeState {
     }
 
     return { ...state, rows, error: null };
+}
+
+function setSelectedElements(state: AASTreeState, elements: aas.Referable[]): AASTreeState {
+    const rows = [ ...state.rows ];
+    const set = new Set(elements);
+    for (let i = 0, n = rows.length; i < n; i++) {
+        const row = rows[i];
+        if (!row.selected && set.has(row.element)) {
+            rows[i] = clone(row, true);
+        } else if (row.selected) {
+            rows[i] = clone(row, false);
+        }
+    }
+
+    return { ...state, rows };
 }
 
 function clone(row: AASTreeRow, selected: boolean): AASTreeRow {

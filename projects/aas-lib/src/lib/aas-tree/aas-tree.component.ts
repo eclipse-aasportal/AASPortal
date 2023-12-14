@@ -64,6 +64,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
+    private _selected: aas.Referable[] = [];
     private shiftKey = false;
     private altKey = false;
 
@@ -89,7 +90,10 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         this.everySelected = this.store.select(AASTreeSelectors.selectEverySelected);
 
         this.subscription.add(this.store.select(AASTreeSelectors.selectSelectedElements).pipe()
-            .subscribe(elements => this.selectedChange.emit({ elements })));
+            .subscribe(elements => {
+                this._selected = elements;
+                this.selectedChange.emit(elements);
+            }));
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -104,8 +108,17 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     @Input()
     public search: Observable<string> | null = null;
 
+    @Input()
+    public get selected(): aas.Referable[] {
+        return this._selected;
+    }
+
+    public set selected(values: aas.Referable[]) {
+        this.store.dispatch(AASTreeActions.setSelectedElements({ elements: values }));
+    }
+
     @Output()
-    public selectedChange = new EventEmitter<{ elements: aas.Referable[] }>();
+    public selectedChange = new EventEmitter<aas.Referable[]>();
 
     public get onlineReady(): boolean {
         return this.document?.onlineReady ?? false;

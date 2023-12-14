@@ -11,14 +11,14 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { exhaustMap, mergeMap, from, zip, of, EMPTY, toArray, map } from 'rxjs';
 import { DocumentSubmodelPair } from 'projects/aas-lib/src/public-api';
 import * as ViewActions from './view.actions';
-import { ViewAPIService } from './view-api.service';
+import { ViewApiService } from './view-api.service';
 
 /** Currently not used. Does not work with ProjectService */
 @Injectable()
 export class ViewEffects {
     constructor(
         private readonly actions: Actions,
-        private readonly api: ViewAPIService
+        private readonly api: ViewApiService
     ) { }
 
     public setSubmodels = createEffect(() => {

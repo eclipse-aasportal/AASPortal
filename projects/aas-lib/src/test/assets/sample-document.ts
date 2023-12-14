@@ -2970,25 +2970,29 @@ const technicalData: object = {
 };
 
 export const sampleDocument: AASDocument = {
-    "id": "http://customer.com/aas/9175_7013_7091_9168",
-    "idShort": "ExampleMotor",
-    "endpoint": { url: "file:///samples", name: 'Samples', type: 'AasxDirectory', version: '3.0' },
-    "address": "ExampleMotor.aasx",
-    "modified": false,
-    "readonly": false,
-    "onlineReady": false,
-    "content": content as aas.Environment
+    id: "http://customer.com/aas/9175_7013_7091_9168",
+    idShort: "ExampleMotor",
+    endpoint: 'Samples',
+    address: "ExampleMotor.aasx",
+    modified: false,
+    readonly: false,
+    onlineReady: false,
+    content: content as aas.Environment,
+    crc32: 0,
+    timestamp: 0,
 };
 
 export const aasNoTechnicalData: AASDocument = {
-    "id": "http://customer.com/aas/9175_7013_7091_9168",
-    "idShort": "ExampleMotor",
-    "endpoint": { url: "file:///samples", name: 'Samples', type: 'AasxDirectory', version: '3.0' },
-    "address": "ExampleMotor.aasx",
-    "modified": false,
-    "readonly": false,
-    "onlineReady": false,
-    "content": sampleNoTechnicalData as aas.Environment
+    id: "http://customer.com/aas/9175_7013_7091_9168",
+    idShort: "ExampleMotor",
+    endpoint: 'Samples',
+    address: "ExampleMotor.aasx",
+    modified: false,
+    readonly: false,
+    onlineReady: false,
+    content: sampleNoTechnicalData as aas.Environment,
+    crc32: 0,
+    timestamp: 0,
 };
 
 export const submodelTechnicalData: aas.Submodel = technicalData as aas.Submodel;

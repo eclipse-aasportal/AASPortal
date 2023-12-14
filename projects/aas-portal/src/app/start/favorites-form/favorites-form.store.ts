@@ -17,4 +17,34 @@ export class FavoritesFormStore extends ComponentStore<FavoritesFormState> {
     public constructor() {
         super({ items: [] });
     }
+
+    public ensureItemSelected(): void {
+        this.setState(state => {
+            if (state.items.length === 0) {
+                return state;
+            }
+
+            const items = [...state.items];
+            if (state.items.every(item => item.selected === false)) {
+                items[0] = { ...items[0], selected: true };
+            }
+
+            return { ...state, items };
+        });
+    }
+
+    public setSelected(item: FavoritesItem, value: boolean): void {
+        this.setState(state => {
+            const items = [...state.items];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i] === item) {
+                    items[i] = { ...items[i], selected: value };
+                } else if (items[i].selected) {
+                    items[i] = { ...items[i], selected: false };
+                }
+            }
+
+            return { ...state, items };
+        });
+    }
 }

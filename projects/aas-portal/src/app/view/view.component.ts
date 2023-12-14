@@ -16,7 +16,7 @@ import { State } from './view.state';
 import * as ViewActions from './view.actions';
 import * as ViewSelectors from './view.selectors';
 import { ToolbarService } from '../toolbar.service';
-import { ViewAPIService } from './view-api.service';
+import { ViewApiService } from './view-api.service';
 
 @Component({
     selector: 'fhg-view',
@@ -30,7 +30,7 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
     constructor(
         store: Store,
         private readonly route: ActivatedRoute,
-        private readonly api: ViewAPIService,
+        private readonly api: ViewApiService,
         private readonly clipboard: lib.ClipboardService,
         private readonly toolbar: ToolbarService
     ) {

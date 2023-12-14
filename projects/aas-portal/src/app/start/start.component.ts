@@ -12,8 +12,21 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, stringFormat } from 'common';
-import * as lib from 'projects/aas-lib/src/public-api';
 import { BehaviorSubject, EMPTY, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
+import {
+    AuthService,
+    ClipboardService,
+    CustomerFeedback,
+    DownloadService,
+    NotifyService,
+    SubmodelViewDescriptor,
+    ViewMode,
+    ViewQuery,
+    WindowService,
+    ZVEINameplate,
+    resolveSemanticId,
+    supportedSubmodelTemplates
+} from 'projects/aas-lib/src/public-api';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
@@ -43,13 +56,13 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         private readonly router: Router,
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
-        private readonly window: lib.WindowService,
+        private readonly window: WindowService,
         private readonly api: StartApiService,
-        private readonly notify: lib.NotifyService,
+        private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
-        private readonly auth: lib.AuthService,
-        private readonly download: lib.DownloadService,
-        private readonly clipboard: lib.ClipboardService,
+        private readonly auth: AuthService,
+        private readonly download: DownloadService,
+        private readonly clipboard: ClipboardService,
         private readonly favorites: FavoritesService,
     ) {
         this.store = store as Store<StartFeatureState>;
@@ -62,7 +75,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.endpoints = this.api.getEndpoints();
 
         this.store.select(StartSelectors.selectViewMode).pipe(
-            first(viewMode => viewMode === lib.ViewMode.Undefined),
+            first(viewMode => viewMode === ViewMode.Undefined),
             mergeMap(() => this.auth.ready),
             first(ready => ready),
             first(),
@@ -100,7 +113,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         return ['-', ...this.favorites.lists.map(list => list.name)];
     }
 
-    public readonly viewMode: Observable<lib.ViewMode>;
+    public readonly viewMode: Observable<ViewMode>;
 
     public readonly filter: Observable<string>;
 
@@ -134,8 +147,8 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.subscription.unsubscribe();
     }
 
-    public setViewMode(viewMode: string | lib.ViewMode): void {
-        if (viewMode === lib.ViewMode.List) {
+    public setViewMode(viewMode: string | ViewMode): void {
+        if (viewMode === ViewMode.List) {
             this.store.dispatch(StartActions.setListView());
         } else {
             this.store.dispatch(StartActions.setTreeView());
@@ -244,17 +257,17 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public canViewUserFeedback(): boolean {
-        return this._selected.some(document => this.selectSubmodels(document, lib.CustomerFeedback).length === 1);
+        return this._selected.some(document => this.selectSubmodels(document, CustomerFeedback).length === 1);
     }
 
     public viewUserFeedback(): void {
-        const descriptor: lib.SubmodelViewDescriptor = {
-            template: lib.supportedSubmodelTemplates.get(lib.CustomerFeedback),
+        const descriptor: SubmodelViewDescriptor = {
+            template: supportedSubmodelTemplates.get(CustomerFeedback),
             submodels: []
         };
 
         for (const document of this._selected) {
-            const submodels = this.selectSubmodels(document, lib.CustomerFeedback);
+            const submodels = this.selectSubmodels(document, CustomerFeedback);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
@@ -265,23 +278,23 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         }
 
         if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as lib.ViewQuery)
+            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery)
             this.router.navigateByUrl('/view?format=ViewQuery');
         }
     }
 
     public canViewNameplate(): boolean {
-        return this._selected.some(document => this.selectSubmodels(document, lib.ZVEINameplate).length === 1);
+        return this._selected.some(document => this.selectSubmodels(document, ZVEINameplate).length === 1);
     }
 
     public viewNameplate(): void {
-        const descriptor: lib.SubmodelViewDescriptor = {
-            template: lib.supportedSubmodelTemplates.get(lib.ZVEINameplate),
+        const descriptor: SubmodelViewDescriptor = {
+            template: supportedSubmodelTemplates.get(ZVEINameplate),
             submodels: []
         };
 
         for (const document of this._selected) {
-            const submodels = this.selectSubmodels(document, lib.ZVEINameplate);
+            const submodels = this.selectSubmodels(document, ZVEINameplate);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
@@ -292,7 +305,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         }
 
         if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as lib.ViewQuery)
+            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery)
             this.router.navigateByUrl('/view?format=ViewQuery');
         }
     }
@@ -330,6 +343,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {
-        return document.content?.submodels.filter(submodel => lib.resolveSemanticId(submodel) === semanticId) ?? [];
+        return document.content?.submodels.filter(submodel => resolveSemanticId(submodel) === semanticId) ?? [];
     }
 }

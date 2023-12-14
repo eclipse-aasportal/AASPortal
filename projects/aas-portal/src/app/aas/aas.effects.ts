@@ -23,7 +23,7 @@ export class AASEffects {
     public getDocument = createEffect(() => {
         return this.actions.pipe(
             ofType<AASActions.GetDocumentAction>(AASActions.AASActionType.GET_DOCUMENT),
-            exhaustMap(action => this.api.getDocument(action.id, action.url).pipe(
+            exhaustMap(action => this.api.getDocument(action.id, action.name).pipe(
                 map(document => AASActions.setDocument({ document })))));
     });
 }

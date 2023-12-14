@@ -18,18 +18,18 @@ import { AASDocument } from 'common';
 import { AppRoutingModule } from '../../app/app-routing.module';
 import { MainComponent } from '../../app/main/main.component';
 import { AASLibModule } from 'projects/aas-lib/src/public-api';
-import { ProjectService } from '../../app/project/project.service';
+import { MainApiService } from '../../app/main/main-api.service';
 
 describe('MainComponent', () => {
     let component: MainComponent;
     let fixture: ComponentFixture<MainComponent>;
     let documentSubject: Subject<AASDocument | null>;
-    let project: jasmine.SpyObj<ProjectService>;
+    let api: jasmine.SpyObj<MainApiService>;
 
     beforeEach(() => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
-        project = jasmine.createSpyObj<ProjectService>('ProjectService', ['getDocument', 'findDocument']);
+        api = jasmine.createSpyObj<MainApiService>('ProjectService', ['getDocument']);
 
         TestBed.configureTestingModule({
             declarations: [
@@ -37,8 +37,8 @@ describe('MainComponent', () => {
             ],
             providers: [
                 {
-                    provide: ProjectService,
-                    useValue: project
+                    provide: MainApiService,
+                    useValue: api
                 }
             ],
             imports: [

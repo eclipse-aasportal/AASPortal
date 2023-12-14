@@ -21,7 +21,7 @@ export enum AASActionType {
 }
 export interface GetDocumentAction extends TypedAction<AASActionType.GET_DOCUMENT> {
     id: string;
-    url?: string;
+    name?: string;
 }
 
 export const getDocument = createAction(

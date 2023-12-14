@@ -43,6 +43,9 @@ export class FavoritesFormComponent {
 
     public set documents(values: AASDocument[]) {
         this._documents = values;
+        if (values.length > 0) {
+            this.store.ensureItemSelected();
+        }
     }
 
     public readonly items: Observable<FavoritesItem[]>;
@@ -56,18 +59,7 @@ export class FavoritesFormComponent {
     }
 
     public selectedChange(item: FavoritesItem, value: boolean): void {
-        this.store.setState(state => {
-            const items = [...state.items];
-            for (let i = 0; i < items.length; i++) {
-                if (items[i] === item) {
-                    items[i] = { ...items[i], selected: value };
-                } else if (items[i].selected) {
-                    items[i] = { ...items[i], selected: false };
-                }
-            }
-
-            return { ...state, items };
-        });
+        this.store.setSelected(item, value);
     }
 
     public submit(): void {

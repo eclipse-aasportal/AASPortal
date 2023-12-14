@@ -88,13 +88,13 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         if (changes['viewMode'] && this.viewMode != null) {
             this.subscription.add(this.viewMode.subscribe(value => {
                 this.store.dispatch(AASTableActions.setViewMode({ viewMode: value }));
-            }))
+            }));
         }
 
         if (changes['documents'] && this.documents != null) {
             this.subscription.add(this.documents.subscribe(values => {
                 this.store.dispatch(AASTableActions.updateView({ documents: values }));
-            }))
+            }));
         }
     }
 

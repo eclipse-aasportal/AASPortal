@@ -27,7 +27,7 @@
                     <input #selected class="form-check-input me-1" type="radio" autocomplete="false"
                         (change)="selectedChange(item, selected.checked)" name="name" [disabled]="!name.value"
                         [checked]="item.selected">
-                    <input #name class="form-control no-border" type="text" placeholder="new favorite list"
+                    <input #name class="form-control no-border" type="text" placeholder="{{'PLACEHOLDER_NEW_FAVORITES' | translate}}"
                         [value]="item.name" (input)="inputName(item, name.value)">
                     <button class="btn" type="button" [hidden]="!canDelete(item)">
                         <i class="bi bi-trash"></i>

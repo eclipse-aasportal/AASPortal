@@ -21,25 +21,25 @@ import { viewReducer } from '../../app/view/view.reducer';
 import { ViewState } from '../../app/view/view.state';
 import { sampleDocument } from '../../test/assets/sample-document';
 import { ViewComponent } from '../../app/view/view.component';
-import { ProjectService } from '../../app/project/project.service';
+import { ViewApiService } from '../../app/view/view-api.service';
 
 describe('ViewComponent', () => {
     let component: ViewComponent;
     let fixture: ComponentFixture<ViewComponent>;
     let store: Store<{ view: ViewState }>;
-    let project: jasmine.SpyObj<ProjectService>;
+    let api: jasmine.SpyObj<ViewApiService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
     let clipboard: ClipboardService;
 
     beforeEach(() => {
-        project = jasmine.createSpyObj('ProjectService', ['getDocument']);
-        project.getDocument.and.returnValue(of(sampleDocument));
+        api = jasmine.createSpyObj('ProjectService', ['getDocument']);
+        api.getDocument.and.returnValue(of(sampleDocument));
 
         const descriptor: SubmodelViewDescriptor = {
             template: 'Nameplate',
             submodels: [{
                 id: 'http://customer.com/aas/9175_7013_7091_9168',
-                url: 'C:\\Git\\AASPortal\\data\\endpoints\\samples',
+                endpoint: 'C:\\Git\\AASPortal\\data\\endpoints\\samples',
                 idShort: 'Identification'
             }]
         }
@@ -61,8 +61,8 @@ describe('ViewComponent', () => {
             ],
             providers: [
                 {
-                    provide: ProjectService,
-                    useValue: project
+                    provide: ViewApiService,
+                    useValue: api
                 },
                 {
                     provide: ActivatedRoute,

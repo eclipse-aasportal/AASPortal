@@ -25,12 +25,12 @@ export class AASApiService {
     /**
      * Gets the AAS document with the specified identifier.
      * @param id The AAS identifier.
-     * @param url The AAS container URL.
+     * @param name The AAS container URL.
      * @returns The requested AAS document.
      */
-    public getDocument(id: string, url?: string): Observable<AASDocument> {
-        if (url) {
-            return this.http.get<AASDocument>(`/api/v1/containers/${encodeBase64Url(url)}/documents/${encodeBase64Url(id)}`);
+    public getDocument(id: string, name?: string): Observable<AASDocument> {
+        if (name) {
+            return this.http.get<AASDocument>(`/api/v1/containers/${encodeBase64Url(name)}/documents/${encodeBase64Url(id)}`);
         }
 
         return this.http.get<AASDocument>(`/api/v1/documents/${encodeBase64Url(id)}`);

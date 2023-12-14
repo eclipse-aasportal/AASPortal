@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
-import { AASDocument } from 'common';
+import { AASDocument, aas } from 'common';
 import { AASTreeRow, SearchTerm } from './aas-tree.state';
 
 export enum AASTreeActionType {
@@ -19,7 +19,8 @@ export enum AASTreeActionType {
     TOGGLE_SELECTIONS = '[AASTree] Toggle selections',
     SET_SEARCH_TEXT = '[AASTree] set search test',
     SET_MATCH_INDEX = '[AASTree] set match index',
-    SET_ROW_VALUE = '[AASTree] set blob value'
+    SET_ROW_VALUE = '[AASTree] set blob value',
+    SET_SELECTED_ELEMENTS = '[AASTree] set selected elements',
 }
 
 export const updateRows = createAction(
@@ -51,4 +52,7 @@ export const setSearchText = createAction(
 export const setMatchIndex = createAction(
     AASTreeActionType.SET_MATCH_INDEX,
     props<{ index: number }>());
-    
+
+export const setSelectedElements = createAction(
+    AASTreeActionType.SET_SELECTED_ELEMENTS,
+    props<{ elements: aas.Referable[] }>());
