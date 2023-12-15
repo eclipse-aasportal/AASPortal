@@ -6,19 +6,26 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, it, expect, jest } from '@jest/globals';
+import { beforeAll, beforeEach, describe, it, expect, jest } from '@jest/globals';
+import path from 'path';
+import fs from 'fs';
 import { Low } from 'lowdb';
-import { createSpyObj } from '../../utils.js';
 import { AASCursor, AASDocument, AASDocumentId } from 'common';
+import { createSpyObj } from '../../utils.js';
 import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-provider/lowdb/lowdb-index.js';
 import { LowDbData } from '../../../app/aas-provider/lowdb/lowdb-types.js';
-import { dbData } from '../../assets/test-db.js';
 
 describe('LowDbIndex', () => {
     let index: LowDbIndex;
     let db: jest.Mocked<Low<LowDbData>>;
     let variable: jest.Mocked<Variable>;
+    let dbData: LowDbData;
+
+    beforeAll(async () => {
+        const file = path.resolve('./', 'src/test/assets/test-db.json');
+        dbData = JSON.parse((await fs.promises.readFile(file)).toString());
+    });
 
     function getId(document: AASDocument): AASDocumentId {
         return { id: document.id, endpoint: document.endpoint };

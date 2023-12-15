@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@ngrx/component-store": "^16.3.0",
-    "lowdb": "^6.1.1"
+    "lowdb": "^6.1.1",
+    "uninstall": "^0.0.0"
   }
 }
