@@ -93,7 +93,7 @@ describe('DocumentsController', function () {
     // });
 
     it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
-        const page: AASPage = { previous: null, documents: [sampleDocument], next: null, totalCount: 0 };
+        const page: AASPage = { previous: null, documents: [sampleDocument], next: null };
         aasProvider.getDocumentsAsync.mockResolvedValue(page);
         const cursor: AASCursor = { previous: null, limit: 10 };
         const filter = '#prop:Name=Value';

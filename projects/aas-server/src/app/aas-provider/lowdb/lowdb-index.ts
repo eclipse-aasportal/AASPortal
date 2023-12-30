@@ -15,6 +15,7 @@ import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { ERRORS } from '../../errors.js';
 import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
+import { BaseValueType } from '../aas-index-query.js';
 
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
@@ -40,7 +41,7 @@ export class LowDbIndex extends AASIndex {
         return endpoint;
     }
 
-    public override async setEndpoint(endpoint: AASEndpoint): Promise<void> {
+    public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.promise;
         if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
             throw new ApplicationError(
@@ -91,7 +92,7 @@ export class LowDbIndex extends AASIndex {
         return this.getLastPage(cursor.limit, filter);
     }
 
-    public override async set(document: AASDocument): Promise<void> {
+    public override async update(document: AASDocument): Promise<void> {
         await this.promise;
         const name = document.endpoint;
         const documents = this.db.data.documents;
@@ -99,8 +100,8 @@ export class LowDbIndex extends AASIndex {
 
         if (index >= 0) {
             const documentId = documents[index].uuid;
-            documents[index] = { ...document, uuid: documentId };
-            this.db.data.elements = this.db.data.elements.filter(element => element.documentId !== documentId);
+            documents[index] = { ...document, uuid: documentId, content: null };
+            this.db.data.elements = this.db.data.elements.filter(element => element.uuid !== documentId);
             if (document.content) {
                 this.traverseEnvironment(documentId, document.content);
             }
@@ -109,26 +110,17 @@ export class LowDbIndex extends AASIndex {
         }
     }
 
-    public override async has(endpointName: string | undefined, id: string): Promise<boolean> {
+    public async find(endpointName: string | undefined, id: string): Promise<AASDocument | undefined> {
         await this.promise;
         const document = endpointName
             ? this.db.data.documents.find(item => item.endpoint === endpointName && item.id === id)
             : this.db.data.documents.find(item => item.id === id);
 
-        return document != null;
-    }
-
-    public async get(endpointName: string | undefined, id: string): Promise<AASDocument> {
-        await this.promise;
-        const document = endpointName
-            ? this.db.data.documents.find(item => item.endpoint === endpointName && item.id === id)
-            : this.db.data.documents.find(item => item.id === id);
-
-        if (!document) {
-            throw new Error(`An AAS with the identifier ${id} does not exist in ${endpointName}.`);
+        if (document) {
+            return this.toDocument(document);
         }
 
-        return this.toDocument(document);
+        return undefined;
     }
 
     public override async add(document: AASDocument): Promise<void> {
@@ -158,7 +150,7 @@ export class LowDbIndex extends AASIndex {
         if (index < 0) return false;
 
         const documentId = documents[index].uuid;
-        this.db.data.elements = this.db.data.elements.filter(element => element.documentId !== documentId);
+        this.db.data.elements = this.db.data.elements.filter(element => element.uuid !== documentId);
 
         documents.splice(index, 1);
         await this.db.write();
@@ -205,14 +197,14 @@ export class LowDbIndex extends AASIndex {
     private getFirstPage(limit: number, filter?: LowDbQuery): AASPage {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { previous: null, documents, next: null, totalCount: 0 };
+            return { previous: null, documents, next: null };
         }
 
         const n = limit + 1;
         const elements = this.db.data.elements;
         for (const document of this.db.data.documents) {
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.documentId === uuid))) {
+            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -224,14 +216,13 @@ export class LowDbIndex extends AASIndex {
             previous: null,
             documents: documents.slice(0, limit),
             next: documents.length >= 0 ? documents[limit] : null,
-            totalCount: this.db.data.documents.length
         };
     }
 
     private getNextPage(current: AASDocumentId, limit: number, filter?: LowDbQuery): AASPage {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { previous: null, documents, next: null, totalCount: 0 };
+            return { previous: null, documents, next: null };
         }
 
         const n = limit + 1;
@@ -245,7 +236,7 @@ export class LowDbIndex extends AASIndex {
         for (let m = items.length; i < m; i++) {
             const document = items[i];
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.documentId === uuid))) {
+            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -257,14 +248,13 @@ export class LowDbIndex extends AASIndex {
             previous: current,
             documents: documents.slice(0, limit),
             next: documents.length >= n ? documents[limit] : null,
-            totalCount: items.length
         };
     }
 
     private getPreviousPage(current: AASDocumentId, limit: number, filter?: LowDbQuery): AASPage {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { previous: null, documents, next: null, totalCount: 0 };
+            return { previous: null, documents, next: null };
         }
 
         const n = limit + 1
@@ -278,7 +268,7 @@ export class LowDbIndex extends AASIndex {
         for (; i >= 0; --i) {
             const document = items[i];
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.documentId === uuid))) {
+            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -290,14 +280,13 @@ export class LowDbIndex extends AASIndex {
             previous: documents.length >= n ? documents[0] : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
-            totalCount: items.length
         };
     }
 
     private getLastPage(limit: number, filter?: LowDbQuery): AASPage {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
-            return { previous: null, documents, next: null, totalCount: 0 };
+            return { previous: null, documents, next: null };
         }
 
         const n = limit + 1
@@ -306,7 +295,7 @@ export class LowDbIndex extends AASIndex {
         for (let i = items.length - 1; i >= 0; --i) {
             const document = items[i];
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.documentId === uuid))) {
+            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -318,7 +307,6 @@ export class LowDbIndex extends AASIndex {
             previous: documents.length >= n ? documents[0] : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
-            totalCount: items.length
         };
     }
 
@@ -354,34 +342,51 @@ export class LowDbIndex extends AASIndex {
         }
     }
 
-    private writeElement(documentId: string, referable: aas.Referable): void {
+    private writeElement(uuid: string, referable: aas.Referable): void {
         const element: LowDbElement = {
-            documentId,
-            modelType: referable.modelType,
+            uuid: uuid,
+            modelType: this.toAbbreviation(referable),
             idShort: referable.idShort
         };
 
-        switch (referable.modelType) {
-            case 'Property':
-                element.value = (referable as aas.Property).value;
-                element.valueType = (referable as aas.Property).valueType;
-                break;
-            case 'MultiLanguageProperty':
-                element.value = (referable as aas.MultiLanguageProperty).value?.map(item => item.text).join(' ');
-                break;
-            case 'File':
-                element.value = (referable as aas.File).value + ' ' + (referable as aas.File).contentType;
-                break;
-            case 'Blob':
-                element.value = (referable as aas.Blob).contentType;
-                break;
-            case 'Range':
-                element.value = (referable as aas.Range).min + ' ' + (referable as aas.Range).max;
-                element.valueType = (referable as aas.Range).valueType;
-                break;
-            case 'Entity':
-                element.value = (referable as aas.Entity).globalAssetId;
-                break;
+        let value: BaseValueType | undefined = this.toStringValue(referable);
+        if (value) {
+            element.value = value;
+            element.valueType = 'string';
+            this.db.data.elements.push(element);
+            return
+        }
+
+        value = this.toNumberValue(referable);
+        if (value) {
+            element.value = value.toString();
+            element.valueType = 'number';
+            this.db.data.elements.push(element);
+            return
+        }
+
+        value = this.toBooleanValue(referable);
+        if (value) {
+            element.value = value.toString();
+            element.valueType = 'boolean';
+            this.db.data.elements.push(element);
+            return
+        }
+
+        value = this.toBigintValue(referable);
+        if (value) {
+            element.value = value.toString();
+            element.valueType = 'bigint';
+            this.db.data.elements.push(element);
+            return
+        }
+
+        value = this.toDateValue(referable);
+        if (value) {
+            element.value = value.toISOString();
+            element.valueType = 'Date';
+            this.db.data.elements.push(element);
+            return
         }
 
         this.db.data.elements.push(element);

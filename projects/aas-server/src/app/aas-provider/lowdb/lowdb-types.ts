@@ -6,18 +6,16 @@
  *
  *****************************************************************************/
 
-import {
-    AASDocument,
-    aas,
-    AASEndpoint
-} from 'common';
+import { AASDocument, AASEndpoint } from 'common';
+
+export type LowDbElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
 
 export interface LowDbElement {
-    documentId: string;
-    modelType: aas.ModelType;
+    uuid: string;
+    modelType: string;
     idShort: string;
     value?: string;
-    valueType?: aas.DataTypeDefXsd;
+    valueType?: LowDbElementValueType;
 }
 
 export interface LowDbDocument extends AASDocument {

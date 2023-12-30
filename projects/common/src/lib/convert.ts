@@ -101,6 +101,78 @@ const mimeTypes = new Map<string, string>(
 
 export type DefaultType = string | number | boolean | bigint;
 
+export type StandardType = string | number | boolean | object
+
+/**
+ * Assigns a XSD data type to a corresponding JS data type.
+ * @param type The current XSD data type.
+ * @returns The corresponding JS data type.
+ */
+export function baseType(type: DataTypeDefXsd): 'string' | 'number' | 'boolean' | 'bigint' | 'Date' {
+    switch (type) {
+        case 'xs:anyURI':
+            return 'string';
+        case 'xs:base64Binary':
+            return 'string';
+        case 'xs:boolean':
+            return 'boolean'
+        case 'xs:byte':
+            return 'number';
+        case 'xs:date':
+            return 'Date';
+        case 'xs:dateTime':
+            return 'Date';
+        case 'xs:decimal':
+            return 'number';
+        case 'xs:double':
+            return 'number';
+        case 'xs:duration':
+            return 'Date';
+        case 'xs:float':
+            return 'number';
+        case 'xs:gDay':
+            return 'Date';
+        case 'xs:gMonth':
+            return 'Date';
+        case 'xs:gMonthDay':
+            return 'Date';
+        case 'xs:gYear':
+            return 'Date';
+        case 'xs:gYearMonth':
+            return 'Date';
+        case 'xs:hexBinary':
+            return 'string';
+        case 'xs:int':
+            return 'number';
+        case 'xs:integer':
+            return 'number';
+        case 'xs:long':
+            return 'bigint';
+        case 'xs:negativeInteger':
+            return 'number';
+        case 'xs:nonNegativeInteger':
+            return 'number';
+        case 'xs:nonPositiveInteger':
+            return 'number';
+        case 'xs:positiveInteger':
+            return 'number';
+        case 'xs:short':
+            return 'number';
+        case 'xs:string':
+            return 'string';
+        case 'xs:time':
+            return 'Date'
+        case 'xs:unsignedByte':
+            return 'number';
+        case 'xs:unsignedInt':
+            return 'number';
+        case 'xs:unsignedLong':
+            return 'bigint';
+        case 'xs:unsignedShort':
+            return 'number';
+    }
+}
+
 /**
  * Converts a value into an other data type.
  * @param value The current value.
@@ -108,7 +180,7 @@ export type DefaultType = string | number | boolean | bigint;
  * @param localId The locale identifier.
  * @returns The converted value.
  */
-export function changeType(value: any, type: DataTypeDefXsd, localId?: string): DefaultType | undefined {
+export function changeType(value: unknown, type: DataTypeDefXsd, localId?: string): DefaultType | undefined {
     switch (type) {
         case 'xs:boolean':
             return toBoolean(value);
@@ -125,6 +197,10 @@ export function changeType(value: any, type: DataTypeDefXsd, localId?: string): 
         case 'xs:unsignedByte':
         case 'xs:unsignedInt':
         case 'xs:unsignedShort':
+        case 'xs:negativeInteger':
+        case 'xs:nonNegativeInteger':
+        case 'xs:nonPositiveInteger':
+        case 'xs:positiveInteger':
             return toInteger(value);
         case 'xs:long':
         case 'xs:unsignedLong':
@@ -132,11 +208,11 @@ export function changeType(value: any, type: DataTypeDefXsd, localId?: string): 
         case 'xs:date':
         case 'xs:dateTime':
         case 'xs:time':
-            return toTime(value, localId);
+            return toDate(value, localId);
         case 'xs:string':
             return convertToString(value, localId);
         default:
-            return value;
+            return undefined;
     }
 }
 
@@ -177,7 +253,7 @@ export function convertToString(value: unknown, localeId?: string): string {
         return items;
     }
 
-    function getItems(array: any[]): string[] {
+    function getItems(array: unknown[]): string[] {
         return array.map(item => convertToString(item, localeId));
     }
 }
@@ -226,7 +302,7 @@ export function convertFromString(
         case 'xs:string':
             return s;
         default:
-            return undefined;
+            throw new Error('Not implemented.');
     }
 }
 
@@ -406,20 +482,20 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
  * @param value The value or a string expression.
  * @returns The data type.
  */
-export function determineType(value: any): DataTypeDefXsd | undefined {
+export function determineType(value: unknown): DataTypeDefXsd | undefined {
     if (typeof value === 'string') {
-        value = value.trim();
-        if (value.length > 0) {
-            const d = Number(value);
+        const s = value.trim();
+        if (s) {
+            const d = Number(s);
             if (!Number.isNaN(d)) {
                 return Number.isInteger(d) ? 'xs:int' : 'xs:double';
             }
 
-            if (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false') {
+            if (s.toLocaleLowerCase() === 'true' || s.toLocaleLowerCase() === 'false') {
                 return 'xs:boolean';
             }
 
-            if (!Number.isNaN(Date.parse(value))) {
+            if (!Number.isNaN(Date.parse(s))) {
                 return 'xs:dateTime';
             }
 
@@ -445,7 +521,7 @@ export function determineType(value: any): DataTypeDefXsd | undefined {
  * @param type The data type.
  * @returns A default value.
  */
-export function getDefaultValue(type: DataTypeDefXsd): any {
+export function getDefaultValue(type: DataTypeDefXsd): DefaultType {
     switch (type) {
         case 'xs:boolean':
             return false;
@@ -611,14 +687,18 @@ export function isNumberType(valueType: DataTypeDefXsd): boolean {
  * @param value The current value.
  * @returns A boolean value.
  */
-export function toBoolean(value: any): boolean {
+export function toBoolean(value: unknown): boolean {
     if (typeof value === 'boolean') {
         return value;
     }
 
+    if (!value) {
+        return false;
+    }
+
     if (typeof value === 'string') {
         value = value.toLocaleLowerCase();
-        if (value === 'false' || value.length === 0) {
+        if (value === 'false') {
             return false;
         }
 
@@ -674,7 +754,7 @@ function stringToByte(value: string): number | undefined {
     return b;
 }
 
-function toDouble(value: any, localeId?: string): number | undefined {
+function toDouble(value: unknown, localeId?: string): number | undefined {
     if (typeof value === 'number') {
         return value;
     }
@@ -704,7 +784,7 @@ function toDouble(value: any, localeId?: string): number | undefined {
     return undefined;
 }
 
-function toInteger(value: any): number | undefined {
+function toInteger(value: unknown): number | undefined {
     if (typeof value === 'number') {
         return value;
     }
@@ -727,7 +807,7 @@ function toInteger(value: any): number | undefined {
     return undefined;
 }
 
-function toTime(value: any, localeId?: string): number | undefined {
+function toDate(value: unknown, localeId?: string): number | undefined {
     if (value instanceof Date) {
         return value.getTime();
     }
@@ -743,7 +823,7 @@ function toTime(value: any, localeId?: string): number | undefined {
     return undefined;
 }
 
-function toBigInt(value: any): bigint | undefined {
+function toBigInt(value: unknown): bigint | undefined {
     if (typeof value === 'bigint') {
         return value;
     }

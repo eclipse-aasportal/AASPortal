@@ -6,52 +6,21 @@
  *
  *****************************************************************************/
 
-import { trim, noop } from 'lodash-es';
 import { normalize } from 'path';
-import {
-    AASDocument,
-    getModelTypeFromAbbreviation,
-    AASAbbreviation,
-    convertToString,
-    aas,
-    parseDate,
-    parseNumber,
-    convertFromString,
-    toBoolean
-} from 'common';
+import { AASDocument } from 'common';
 
-import { LowDbDocument, LowDbElement } from './lowdb-types.js';
+import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-types.js';
+import { QueryOperator, Query, BaseValueType, AASIndexQuery, QueryValueType } from '../aas-index-query.js';
 
-type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
+export class LowDbQuery extends AASIndexQuery {
 
-interface Query {
-    modelType: aas.ModelType;
-    operator?: Operator;
-    name?: string;
-    value?: string;
-}
-
-interface OrExpression {
-    andExpressions: string[];
-}
-
-interface Expression {
-    orExpressions: OrExpression[]
-}
-
-export class LowDbQuery {
-    private readonly expression: Expression;
-
-    constructor(
-        searchText: string,
-        private readonly language: string
-    ) {
-        this.expression = { orExpressions: this.splitOr(searchText) };
+    constructor(query: string, language: string) {
+        super(query, language);
     }
 
     public do(document: LowDbDocument, elements: LowDbElement[]): boolean {
-        let result = false;
         try {
+            let result = false;
             for (const or of this.expression.orExpressions) {
                 for (const expression of or.andExpressions) {
                     if (expression.length >= 3) {
@@ -71,96 +40,17 @@ export class LowDbQuery {
                     break;
                 }
             }
+
+            return result;
         } catch (error) {
-            noop();
+            return false;
         }
-
-        return result;
-    }
-
-    private splitOr(s: string): OrExpression[] {
-        return s.split('||').map(item => ({ andExpressions: this.splitAnd(item) }));
-    }
-
-    private splitAnd(s: string): string[] {
-        return s.split('&&').map(item => item.trim().toLocaleLowerCase(this.language));
     }
 
     private contains(document: AASDocument, expression: string): boolean {
         return document.idShort.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
             document.id.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
             document.endpoint.toLocaleLowerCase(this.language).indexOf(expression) >= 0;
-    }
-
-    private parseExpression(expression: string): Query | undefined {
-        let query: Query | undefined;
-        const index = expression.indexOf(':');
-        const tuple = this.parseOperator(expression);
-        if (index >= 0) {
-            const modelType = getModelTypeFromAbbreviation(expression.substring(1, index) as AASAbbreviation);
-            if (modelType) {
-                query = { modelType: modelType };
-                if (tuple) {
-                    query.name = expression.substring(index + 1, tuple.index).trim();
-                    query.value = this.trim(expression.substring(tuple.index + tuple.operator.length));
-                    query.operator = tuple.operator;
-                } else {
-                    query.name = expression.substring(index + 1);
-                }
-            }
-        } else if (tuple) {
-            const modelType = getModelTypeFromAbbreviation(expression.substring(1, tuple.index) as AASAbbreviation);
-            if (modelType) {
-                query = { modelType: modelType };
-                query.value = this.trim(expression.substring(tuple.index + tuple.operator.length));
-                query.operator = tuple.operator;
-            }
-        } else {
-            const modelType = getModelTypeFromAbbreviation(expression.substring(1) as AASAbbreviation);
-            if (modelType) {
-                query = { modelType: modelType };
-            }
-        }
-
-        return query;
-    }
-
-    private parseOperator(expression: string): { index: number, operator: Operator } | undefined {
-        let index = expression.indexOf('<=');
-        if (index > 0) {
-            return { index: index, operator: '<=' };
-        }
-
-        index = expression.indexOf('>=');
-        if (index > 0) {
-            return { index: index, operator: '>=' };
-        }
-
-        index = expression.indexOf('!=');
-        if (index > 0) {
-            return { index: index, operator: '!=' };
-        }
-
-        index = expression.indexOf('=');
-        if (index > 0) {
-            return { index, operator: '=' };
-        }
-
-        index = expression.indexOf('>');
-        if (index > 0) {
-            return { index, operator: '>' };
-        }
-
-        index = expression.indexOf('<');
-        if (index > 0) {
-            return { index, operator: '<' };
-        }
-
-        return undefined
-    }
-
-    private trim(s: string): string {
-        return trim(s.trim(), '\'"');
     }
 
     private match(elements: LowDbElement[], query: Query | undefined): boolean {
@@ -180,7 +70,7 @@ export class LowDbQuery {
                     return true;
                 }
 
-                if (this.matchValue(element, query.value, query.operator)) {
+                if (this.matchElement(element, query.value, query.operator)) {
                     return true;
                 }
             }
@@ -189,89 +79,139 @@ export class LowDbQuery {
         return false;
     }
 
-    private matchValue(element: LowDbElement, value: string, operator?: Operator): boolean {
+    private matchElement(element: LowDbElement, value: QueryValueType, operator?: QueryOperator): boolean {
         switch (element.modelType) {
-            case 'Property':
-                if (!element.value || !element.valueType) {
-                    return false;
-                }
-
-                return this.matchProperty(element.value, element.valueType, value, operator);
-            case 'File': {
+            case 'prop':
+                return this.matchProperty(element, value, operator);
+            case 'file': {
                 const fileName = normalize(element.value ?? '');
-                return fileName ? this.containsString(fileName, value) : false;
+                return typeof value === 'string' && fileName ? this.containsString(fileName, value) : false;
             }
             default:
-                return element.value ? this.containsString(element.value, value): false;
+                return typeof value === 'string' && element.value ? this.containsString(element.value, value) : false;
         }
     }
 
-    private matchProperty(value: string, valueType: aas.DataTypeDefXsd, b: string, operator: Operator = '='): boolean {
-        const a = convertFromString(value, valueType);
-        if (valueType === 'xs:boolean') {
-            return toBoolean(a) === toBoolean(b);
-        }
-
-        if (typeof a === 'number') {
-            if (typeof b === 'string') {
-                const index = b.indexOf('...');
-                const isDate = this.isDate(valueType);
-                if (index >= 0) {
-                    let min: number;
-                    let max: number;
-                    if (isDate) {
-                        min = parseDate(b.substring(0, index).trim(), this.language)?.getTime() ?? 0;
-                        max = parseDate(b.substring(index + 3).trim(), this.language)?.getTime() ?? 0;
-                    } else {
-                        min = parseNumber(b.substring(0, index).trim(), this.language);
-                        max = parseNumber(b.substring(index + 3).trim(), this.language);
-                    }
-
-                    return typeof min === 'number' && typeof max === 'number' && a >= min && a <= max;
-                } else {
-                    const d = isDate
-                        ? parseDate(b, this.language)?.getTime() ?? 0
-                        : parseNumber(b, this.language);
-
-                    if (typeof d !== 'number') {
-                        return false;
-                    }
-
-                    switch (operator) {
-                        case '<':
-                            return a < d;
-                        case '>':
-                            return a > d;
-                        case '>=':
-                            return a >= d;
-                        case '<=':
-                            return a <= d;
-                        case '!=':
-                            return Math.abs(a - d) > 0.000001;
-                        default:
-                            return Math.abs(a - d) <= 0.000001;
-                    }
-                }
-            }
-
+    private matchProperty(element: LowDbElement, b: QueryValueType, operator: QueryOperator = '='): boolean {
+        if (!element.value || !element.valueType) {
             return false;
         }
 
-        return this.containsString(convertToString(a), b) ||
-            this.containsString(convertToString(a, this.language), b);
+        const a = this.parse(element.value, element.valueType);
+        if (typeof a === 'boolean') {
+            return typeof b === 'boolean' ? a === b : false;
+        }
+
+        if (typeof a === 'string') {
+            return typeof b === 'string' ? this.containsString(a, b) : false;
+        }
+
+        if (typeof a === 'number') {
+            return this.matchNumber(a, b, operator);
+        }
+
+        if (typeof a === 'bigint') {
+            return this.matchBigInt(a, b, operator);
+        }
+
+        if (a instanceof Date) {
+            return this.matchDate(a, b, operator);
+        }
+
+        return false;
     }
 
     private containsString(a: string, b?: string): boolean {
         return b == null || a.toLowerCase().indexOf(b.toLowerCase()) >= 0;
     }
 
-    private isDate(valueType: aas.DataTypeDefXsd): boolean {
+    private matchNumber(a: number, b: QueryValueType, operator: QueryOperator): boolean {
+        if (typeof b === 'number') {
+            switch (operator) {
+                case '<':
+                    return a < b;
+                case '>':
+                    return a > b;
+                case '>=':
+                    return a >= b;
+                case '<=':
+                    return a <= b;
+                case '!=':
+                    return Math.abs(a - b) > 0.000001;
+                default:
+                    return Math.abs(a - b) <= 0.000001;
+            }
+        } else if (Array.isArray(b)) {
+            return (b.length === 2 && typeof b[0] === 'number' && typeof b[1] === 'number')
+                ? a >= b[0] && a <= b[1]
+                : false;
+        }
+
+        return false;
+    }
+
+    private matchBigInt(a: bigint, b: QueryValueType, operator: QueryOperator): boolean {
+        if (typeof b === 'bigint') {
+            switch (operator) {
+                case '<':
+                    return a < b;
+                case '>':
+                    return a > b;
+                case '>=':
+                    return a >= b;
+                case '<=':
+                    return a <= b;
+                case '!=':
+                    return a !== b;
+                default:
+                    return a === b;
+            }
+        } else if (Array.isArray(b)) {
+            return (b.length === 2 && typeof b[0] === 'bigint' && typeof b[1] === 'bigint')
+                ? a >= b[0] && a <= b[1]
+                : false;
+        }
+
+        return false;
+    }
+
+    private matchDate(a: Date, b: QueryValueType, operator: QueryOperator): boolean {
+        if (b instanceof Date) {
+            switch (operator) {
+                case '<':
+                    return a.getTime() < b.getTime();
+                case '>':
+                    return a.getTime() > b.getTime();
+                case '>=':
+                    return a.getTime() >= b.getTime();
+                case '<=':
+                    return a.getTime() <= b.getTime();
+                case '!=':
+                    return a.getTime() !== b.getTime();
+                default:
+                    return a.getTime() === b.getTime();
+            }
+        } else if (Array.isArray(b)) {
+            return (b.length === 2 && b[0] instanceof Date && b[1] instanceof Date)
+                ? a.getTime() >= b[0].getTime() && a.getTime() <= b[1].getTime()
+                : false;
+        }
+
+        return false;
+    }
+
+    private parse(s: string, valueType: LowDbElementValueType): BaseValueType {
         switch (valueType) {
-            case 'xs:date':
-            case 'xs:dateTime':
-                return true;
-            default:
-                return false;
+            case 'string':
+                return s;
+            case 'number':
+                return Number(s);
+            case 'boolean':
+                return Boolean(s);
+            case 'bigint':
+                return BigInt(s);
+            case 'Date':
+                return Date.parse(s);
         }
     }
 }

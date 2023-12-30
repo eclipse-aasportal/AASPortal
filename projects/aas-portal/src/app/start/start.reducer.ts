@@ -60,7 +60,6 @@ function addTree(state: StartState, nodes: AASDocument[]): StartState {
 }
 
 function setPage(state: StartState, page: AASPage, limit: number | undefined, filter: string | undefined): StartState {
-    console.debug(`setPage(...)`);
     return {
         ...state,
         viewMode: ViewMode.List,
@@ -70,7 +69,6 @@ function setPage(state: StartState, page: AASPage, limit: number | undefined, fi
         documents: page.documents,
         isFirstPage: page.previous === null,
         isLastPage: page.next === null,
-        totalCount: page.totalCount,
     };
 }
 

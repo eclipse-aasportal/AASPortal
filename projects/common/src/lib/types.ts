@@ -88,7 +88,7 @@ export interface AASDocument extends AASDocumentId {
     parent?: AASDocument | null;
     /** Indicates whether the document can be edited. */
     readonly: boolean;
-    /** A time stamp that represents the current state of the AAS. */
+    /** A thumbnail. */
     thumbnail?: string;
     /** The time at which the document was created. */
     timestamp: number;
@@ -99,7 +99,6 @@ export interface AASPage {
     previous: AASDocumentId | null;
     next: AASDocumentId | null;
     documents: AASDocument[];
-    totalCount: number;
 }
 
 /** Represents a cursor in the collection of Asset Administration Shells. */

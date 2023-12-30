@@ -105,7 +105,7 @@ export class AASProvider {
 
     public async getContentAsync(name: string, id: string): Promise<aas.Environment> {
         const endpoint = await this.index.getEndpoint(name);
-        const document: AASDocument = await this.index.get(name, id);
+        const document = await this.index.get(name, id);
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
@@ -117,7 +117,7 @@ export class AASProvider {
 
     public async getThumbnailAsync(name: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(name);
-        const document: AASDocument = await this.index.get(name, id);
+        const document = await this.index.get(name, id);
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
@@ -187,7 +187,7 @@ export class AASProvider {
      */
     public async addEndpointAsync(name: string, endpoint: AASEndpoint): Promise<void> {
         await this.resourceFactory.testAsync(endpoint);
-        await this.index.setEndpoint(endpoint);
+        await this.index.addEndpoint(endpoint);
         this.wsServer.notify('WorkspaceChanged', {
             type: 'AASServerMessage',
             data: {
@@ -363,7 +363,7 @@ export class AASProvider {
      * @returns 
      */
     public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocument[]> {
-        const document: AASDocument = await this.index.get(endpoint, id);
+        const document = await this.index.get(endpoint, id);
         const root: AASDocument = { ...document, parent: null, content: null };
         const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
@@ -389,7 +389,7 @@ export class AASProvider {
 
     private async createSubscription(message: LiveRequest, client: SocketClient): Promise<SocketSubscription> {
         const endpoint = await this.index.getEndpoint(message.endpoint);
-        const document: AASDocument = await this.index.get(message.endpoint, message.id);
+        const document = await this.index.get(message.endpoint, message.id);
         const resource = this.resourceFactory.create(endpoint);
         await resource.openAsync();
         const env = await resource.createPackage(document.address).readEnvironmentAsync();
@@ -470,7 +470,7 @@ export class AASProvider {
     };
 
     private async onChanged(result: ScanContainerResult): Promise<void> {
-        await this.index.set(result.document);
+        await this.index.update(result.document);
         this.sendMessage({ type: 'Changed', document: { ...result.document, content: null } });
     }
 
@@ -515,13 +515,7 @@ export class AASProvider {
         const content = await this.getDocumentContentAsync(parent);
         for (const reference of this.whereReferenceElement(content.submodels)) {
             const childId = reference.value.keys[0].value;
-            let child: AASDocument | undefined;
-            if (await this.index.has(parent.endpoint, childId)) {
-                child = await this.index.get(parent.endpoint, childId);
-            } else if (await this.index.has(undefined, childId)) {
-                child = await this.index.get(undefined, childId);
-            }
-
+            const child = await this.index.find(parent.endpoint, childId) ?? await this.index.find(undefined, childId);
             if (child) {
                 const node: AASDocument = { ...child, parent: { ...parent }, content: null };
                 nodes.push(node);

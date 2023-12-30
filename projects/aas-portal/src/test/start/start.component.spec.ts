@@ -75,7 +75,6 @@ describe('StartComponent', () => {
             previous: null,
             next: null,
             documents: [],
-            totalCount: 0,
         }));
 
         api.getContent.and.returnValue(of({

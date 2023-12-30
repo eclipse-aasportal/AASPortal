@@ -28,6 +28,7 @@ export class Variable {
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
         this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
+        this.AAS_INDEX = process.env.AAS_INDEX;
     }
 
     /** The secret for HS256 encryption or the private key file for RS256 encryption. */
@@ -80,4 +81,7 @@ export class Variable {
 
     /** The validity period of an AAS in milliseconds. */
     public readonly AAS_EXPIRES_IN: number;
+
+    /** The AASIndex realization. */
+    public readonly AAS_INDEX?: string;
 }

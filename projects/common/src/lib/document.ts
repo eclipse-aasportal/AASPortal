@@ -746,24 +746,30 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
     switch (abbreviation.toLowerCase()) {
         case 'aas':
             return 'AssetAdministrationShell';
+        case 'blob':
+            return 'Blob';
+        case 'ent':
+            return 'Entity';
+        case 'file':
+            return 'File';
+        case 'mlp':
+            return 'MultiLanguageProperty';
+        case 'opr':
+            return 'Operation';
+        case 'prop':
+            return 'Property';
+        case 'range':
+            return 'Range';
+        case 'ref':
+            return 'ReferenceElement';
+        case 'rel':
+            return 'RelationshipElement';
         case 'sm':
             return 'Submodel';
         case 'smc':
             return 'SubmodelElementCollection';
         case 'sml':
             return 'SubmodelElementList';
-        case 'prop':
-            return 'Property';
-        case 'mlp':
-            return 'MultiLanguageProperty';
-        case 'ref':
-            return 'ReferenceElement';
-        case 'ent':
-            return 'Entity';
-        case 'file':
-            return 'File';
-        case 'opr':
-            return 'Operation';
         default:
             return undefined;
     }
