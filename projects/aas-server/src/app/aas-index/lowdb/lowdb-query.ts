@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { normalize } from 'path';
-import { AASDocument, BaseValueType, Query, QueryOperator, QueryValueType } from 'common';
+import { AASDocument, BaseValueType, AASQuery, AASQueryOperator, AASQueryValueType } from 'common';
 
 import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-types.js';
 import { AASIndexQuery } from '../aas-index-query.js';
@@ -51,7 +51,7 @@ export class LowDbQuery extends AASIndexQuery {
             document.endpoint.toLocaleLowerCase(this.language).indexOf(expression) >= 0;
     }
 
-    private match(elements: LowDbElement[], query: Query | undefined): boolean {
+    private match(elements: LowDbElement[], query: AASQuery | undefined): boolean {
         if (query) {
             if (elements.some(element => this.any(element, query))) {
                 return true;
@@ -61,7 +61,7 @@ export class LowDbQuery extends AASIndexQuery {
         return false;
     }
 
-    private any(element: LowDbElement, query: Query): boolean {
+    private any(element: LowDbElement, query: AASQuery): boolean {
         if (element.modelType === query.modelType) {
             if (this.containsString(element.idShort, query.name)) {
                 if (!element || !query.value) {
@@ -77,7 +77,7 @@ export class LowDbQuery extends AASIndexQuery {
         return false;
     }
 
-    private matchElement(element: LowDbElement, value: QueryValueType, operator?: QueryOperator): boolean {
+    private matchElement(element: LowDbElement, value: AASQueryValueType, operator?: AASQueryOperator): boolean {
         switch (element.modelType) {
             case 'prop':
                 return this.matchProperty(element, value, operator);
@@ -90,7 +90,7 @@ export class LowDbQuery extends AASIndexQuery {
         }
     }
 
-    private matchProperty(element: LowDbElement, b: QueryValueType, operator: QueryOperator = '='): boolean {
+    private matchProperty(element: LowDbElement, b: AASQueryValueType, operator: AASQueryOperator = '='): boolean {
         if (!element.value || !element.valueType) {
             return false;
         }
@@ -123,7 +123,7 @@ export class LowDbQuery extends AASIndexQuery {
         return b == null || a.toLowerCase().indexOf(b.toLowerCase()) >= 0;
     }
 
-    private matchNumber(a: number, b: QueryValueType, operator: QueryOperator): boolean {
+    private matchNumber(a: number, b: AASQueryValueType, operator: AASQueryOperator): boolean {
         if (typeof b === 'number') {
             switch (operator) {
                 case '<':
@@ -148,7 +148,7 @@ export class LowDbQuery extends AASIndexQuery {
         return false;
     }
 
-    private matchBigInt(a: bigint, b: QueryValueType, operator: QueryOperator): boolean {
+    private matchBigInt(a: bigint, b: AASQueryValueType, operator: AASQueryOperator): boolean {
         if (typeof b === 'bigint') {
             switch (operator) {
                 case '<':
@@ -173,7 +173,7 @@ export class LowDbQuery extends AASIndexQuery {
         return false;
     }
 
-    private matchDate(a: Date, b: QueryValueType, operator: QueryOperator): boolean {
+    private matchDate(a: Date, b: AASQueryValueType, operator: AASQueryOperator): boolean {
         if (b instanceof Date) {
             switch (operator) {
                 case '<':

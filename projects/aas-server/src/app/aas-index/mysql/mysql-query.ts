@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Query, QueryOperator } from 'common';
+import { AASQuery, AASQueryOperator } from 'common';
 import { AASIndexQuery } from '../aas-index-query.js';
 
 export class MySqlQuery extends AASIndexQuery {
@@ -49,7 +49,7 @@ export class MySqlQuery extends AASIndexQuery {
         }
     }
 
-    private createSqlTerm(query: Query, values: unknown[]): string {
+    private createSqlTerm(query: AASQuery, values: unknown[]): string {
         let s = `elements.modelType = "${query.modelType.toLowerCase()}"`;
         if (query.name) {
             s += ` AND elements.idShort LIKE '%${query.name}%'`
@@ -84,7 +84,7 @@ export class MySqlQuery extends AASIndexQuery {
         return typeof value === 'bigint' || Array.isArray(value) && typeof value[0] === 'bigint';
     }
 
-    private createDateSqlTerm(operator: QueryOperator, value: Date | [Date, Date], values: unknown[]): string {
+    private createDateSqlTerm(operator: AASQueryOperator, value: Date | [Date, Date], values: unknown[]): string {
         if (Array.isArray(value)) {
             values.push(value[0]);
             values.push(value[1])
@@ -95,7 +95,7 @@ export class MySqlQuery extends AASIndexQuery {
         return ` AND elements.dateValue ${this.toMySqlOperator(operator)} ?`;
     }
 
-    private createNumberSqlTerm(operator: QueryOperator, value: number | [number, number], values: unknown[]): string {
+    private createNumberSqlTerm(operator: AASQueryOperator, value: number | [number, number], values: unknown[]): string {
         if (Array.isArray(value)) {
             values.push(value[0]);
             values.push(value[1])
@@ -106,7 +106,7 @@ export class MySqlQuery extends AASIndexQuery {
         return ` AND elements.numberValue ${this.toMySqlOperator(operator)} ?`;
     }
 
-    private createBigintSqlTerm(operator: QueryOperator, value: bigint | [bigint, bigint], values: unknown[]): string {
+    private createBigintSqlTerm(operator: AASQueryOperator, value: bigint | [bigint, bigint], values: unknown[]): string {
         if (Array.isArray(value)) {
             values.push(value[0]);
             values.push(value[1])
@@ -117,7 +117,7 @@ export class MySqlQuery extends AASIndexQuery {
         return ` AND elements.bigintValue ${this.toMySqlOperator(operator)} ?`;
     }
 
-    private createBooleanSqlTerm(operator: QueryOperator, value: boolean, values: unknown[]): string {
+    private createBooleanSqlTerm(operator: AASQueryOperator, value: boolean, values: unknown[]): string {
         if (operator === '=') {
             return ` AND elements.booleanValue ?`;
         }
@@ -131,7 +131,7 @@ export class MySqlQuery extends AASIndexQuery {
         throw new Error('Invalid operator.');
     }
 
-    private createStringSqlTerm(operator: QueryOperator, value: string): string {
+    private createStringSqlTerm(operator: AASQueryOperator, value: string): string {
         if (operator === '=') {
             return ` AND elements.stringValue LIKE '%${value}%'`;
         }
@@ -143,7 +143,7 @@ export class MySqlQuery extends AASIndexQuery {
         throw new Error('Invalid operator.');
     }
 
-    private toMySqlOperator(operator: QueryOperator): string {
+    private toMySqlOperator(operator: AASQueryOperator): string {
         return operator === '!=' ? '<>' : operator;
     }
 }

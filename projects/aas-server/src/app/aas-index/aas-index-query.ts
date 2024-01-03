@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Query, QueryParser } from 'common';
+import { AASQuery, QueryParser } from 'common';
 
 export abstract class AASIndexQuery {
     protected constructor(query: string, protected readonly language: string) {
@@ -19,7 +19,7 @@ export abstract class AASIndexQuery {
         return typeof value === 'string';
     }
 
-    protected isQuery(value: unknown): value is Query {
+    protected isQuery(value: unknown): value is AASQuery {
         return typeof value === 'object' && !Array.isArray(value);
     }
 }
