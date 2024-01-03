@@ -16,10 +16,9 @@ import { Parallel } from '../../app/aas-provider/parallel.js';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
 import { AASResourceFactory } from '../../app/packages/aas-resource-factory.js';
 import { createSpyObj } from '../utils.js';
-import { WSServer } from '../../app/ws-server.js';
 import { Variable } from '../../app/variable.js';
 import { FileStorageFactory } from '../../app/file-storage/file-storage-factory.js';
-import { AASIndex } from '../../app/aas-provider/aas-index.js';
+import { AASIndex } from '../../app/aas-index/aas-index.js';
 
 describe('AASProvider', function () {
     let aasProvider: AASProvider;

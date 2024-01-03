@@ -178,5 +178,17 @@
         "Acustics": "Akustik",
         "Assembly_Installation": "Montage & Installation",
         "Material": "Material"
+    },
+    "QueryParser": {
+        "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
+        "INVALID_ABBREVIATION": "'{0}' ist eine ungültige Modelltyp-Abkürzung an Position {1}.",
+        "INVALID_DATE_EXPRESSION": "'{0}' ist ein ungültiger Datumsausdruck an Position {1}.",
+        "INVALID_OPERATOR": "'{0}' ist ein ungültiger Operator an Position {1}.",
+        "INVALID_RANGE_EXPRESSION": "'{0}' ist ein ungültiger Bereichsausdruck an Position {1}.",
+        "LINK_EXPECTED": "'||' or '&&' erwartet an Position {0}",
+        "MIN_LENGTH": "Ein Abfrageausdruck muss mindestens {0} Zeichen enthalten.",
+        "MODEL_TYPE_EXPECTED": "Modelltypabkürzung an Position {0} erwartet.",
+        "TERM_EXPECTED": "Term erwartet an Position {0}.",
+        "END_OF_TEXT_NOT_FOUND": "Das Ende des Textes, beginnend an Position {0}, wurde nicht gefunden."
     }
 }

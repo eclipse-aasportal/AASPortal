@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { aas, AASDocument, AASEndpoint, stringFormat } from 'common';
+import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'common';
 import { BehaviorSubject, EMPTY, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 import {
     AuthService,
@@ -311,7 +311,16 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public setFilter(filter: string): void {
-        this.store.dispatch(StartActions.getFirstPage({ filter }));
+        filter = filter.trim();
+        if (filter.length >= 3) {
+            const parser = new QueryParser(filter);
+            try {
+                parser.check();
+                this.store.dispatch(StartActions.getFirstPage({ filter }));
+            } catch (error) {
+                this.notify.error(error);
+            }
+        }
     }
 
     public setLimit(limit: number): void {

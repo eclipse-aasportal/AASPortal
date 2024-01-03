@@ -25,7 +25,7 @@ import {
 } from 'common';
 
 import { ImageProcessing } from '../image-processing.js';
-import { AASIndex } from './aas-index.js';
+import { AASIndex } from '../aas-index/aas-index.js';
 import { ScanResultType, ScanResult, ScanStatistic, ScanContainerResult } from './scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';

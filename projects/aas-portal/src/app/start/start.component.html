@@ -86,6 +86,6 @@
         </div>
         <input #textInput type="text" class="form-control" [value]="filter | async"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
-            (keydown.enter)="setFilter(textInput.value)">
+            (keydown.enter)="textInput.blur()">
     </div>
 </ng-template>

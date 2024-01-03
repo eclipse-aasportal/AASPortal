@@ -29,6 +29,7 @@ export * from './application-error.js';
 export * from './multi-key-map.js';
 export * from './keyed-list.js';
 export * from './crc32.js';
+export * from './query-parser.js';
 
 /**
  * Determines whether the specified value represents a valid e-mail.

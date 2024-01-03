@@ -7,10 +7,10 @@
  *****************************************************************************/
 
 import { normalize } from 'path';
-import { AASDocument } from 'common';
+import { AASDocument, BaseValueType, Query, QueryOperator, QueryValueType } from 'common';
 
 import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-types.js';
-import { QueryOperator, Query, BaseValueType, AASIndexQuery, QueryValueType } from '../aas-index-query.js';
+import { AASIndexQuery } from '../aas-index-query.js';
 
 export class LowDbQuery extends AASIndexQuery {
 
@@ -21,14 +21,12 @@ export class LowDbQuery extends AASIndexQuery {
     public do(document: LowDbDocument, elements: LowDbElement[]): boolean {
         try {
             let result = false;
-            for (const or of this.expression.orExpressions) {
+            for (const or of this.queryParser.ast) {
                 for (const expression of or.andExpressions) {
-                    if (expression.length >= 3) {
-                        if (expression.startsWith('#')) {
-                            result = this.match(elements, this.parseExpression(expression));
-                        } else {
-                            result = this.contains(document, expression);
-                        }
+                    if (this.isText(expression)) {
+                        result = this.contains(document, expression);
+                    } else {
+                        result = this.match(elements, expression);
                     }
 
                     if (!result) {

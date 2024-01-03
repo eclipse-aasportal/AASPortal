@@ -325,7 +325,16 @@ export function parseNumber(s: string, localeId?: string): number {
     }
 
     const items = s.split(decimalSeparator);
-    s = items[0].split(groupSeparator).join('');
+    if (items.length > 2) {
+        return NaN;
+    }
+
+    const groups = items[0].split(groupSeparator);
+    if (groups.length > 1 && groups.some((group, i) => i === 0 && group.length > 3 || i > 0 && group.length !== 3)) {
+        return NaN;
+    }
+
+    s = groups.join('');
     if (items.length > 1) {
         s += invariantDecimalSeparator + items[1];
     }
@@ -346,11 +355,12 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
 
     let date: Date | undefined;
     if (s) {
-        s = s.trim().toLowerCase();
+        s = s.trim();
         if (localeId) {
             let dateItems: string[] | undefined;
             let timeTuple: { items: string[], timePeriod?: string } | undefined;
-            if (s.indexOf(',') < 0) {
+            const dateTime = splitDateTime(s);
+            if (dateTime.length === 1) {
                 if (s.indexOf(tuple.dateDelimiter) >= 0) {
                     dateItems = s.split(tuple.dateDelimiter);
                     const day = getDay(dateItems);
@@ -366,10 +376,8 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
                         getHours(timeTuple?.items, timeTuple?.timePeriod),
                         getMinutes(timeTuple?.items),
                         getSeconds(timeTuple?.items));
-
                 }
-            } else {
-                const dateTime = s.split(',');
+            } else if (dateTime.length === 2) {
                 dateItems = dateTime[0].split(tuple.dateDelimiter);
                 timeTuple = splitTime(dateTime[1]);
                 date = new Date(
@@ -379,8 +387,9 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
                     getHours(timeTuple?.items, timeTuple?.timePeriod),
                     getMinutes(timeTuple?.items),
                     getSeconds(timeTuple?.items));
+            } else {
+                date = new Date(NaN);
             }
-
         } else {
             date = new Date(s);
             if (date.toString() === 'Invalid Date') {
@@ -390,6 +399,19 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
     }
 
     return date;
+
+    function splitDateTime(s: string): string[] {
+        let index = s.indexOf(',');
+        if (index < 0) {
+            index = s.indexOf(' ');
+        }
+
+        if (index < 0) {
+            return [s];
+        }
+
+        return [s.substring(0, index).trimEnd(), s.substring(index + 1).trimStart()];
+    }
 
     function getFormatInfo(parts: Intl.DateTimeFormatPart[]): {
         dateDelimiter: string,
@@ -413,11 +435,11 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
     }
 
     function splitTime(exp: string): { items: string[], timePeriod?: string } {
-        if (exp.endsWith('am')) {
+        if (exp.toLowerCase().endsWith('am')) {
             return { items: exp.substring(0, exp.length - 2).split(tuple.timeDelimiter), timePeriod: 'am' };
         }
 
-        if (exp.endsWith('pm')) {
+        if (exp.toLowerCase().endsWith('pm')) {
             return { items: exp.substring(0, exp.length - 2).split(tuple.timeDelimiter), timePeriod: 'pm' };
         }
 

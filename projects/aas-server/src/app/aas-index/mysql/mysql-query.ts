@@ -6,7 +6,8 @@
  *
  *****************************************************************************/
 
-import { QueryOperator, Query, AASIndexQuery } from '../aas-index-query.js';
+import { Query, QueryOperator } from 'common';
+import { AASIndexQuery } from '../aas-index-query.js';
 
 export class MySqlQuery extends AASIndexQuery {
 
@@ -15,9 +16,9 @@ export class MySqlQuery extends AASIndexQuery {
     }
 
     public get joinElements(): boolean {
-        for (const or of this.expression.orExpressions) {
+        for (const or of this.queryParser.ast) {
             for (const and of or.andExpressions) {
-                if (and.startsWith('#')) {
+                if (this.isQuery(and)) {
                     return true;
                 }
             }
@@ -28,26 +29,21 @@ export class MySqlQuery extends AASIndexQuery {
 
     public createSql(values: unknown[]): string {
         try {
-            const orQueries: string[] = [];
-            for (const or of this.expression.orExpressions) {
-                const andQueries: string[] = [];
-                for (const expression of or.andExpressions) {
-                    if (expression.length >= 3) {
-                        if (expression.startsWith('#')) {
-                            const query = this.parseExpression(expression);
-                            if (query) {
-                                andQueries.push(this.createSqlTerm(query, values));
-                            }
-                        } else {
-                            andQueries.push(`documents.endpoint LIKE '%${expression}%' OR documents.id LIKE '%${expression}%' OR documents.idShort LIKE '%${expression}%'`);
-                        }
+            const orSqlTerms: string[] = [];
+            for (const or of this.queryParser.ast) {
+                const andSqlTerms: string[] = [];
+                for (const and of or.andExpressions) {
+                    if (this.isQuery(and)) {
+                        andSqlTerms.push(this.createSqlTerm(and, values));
+                    } else {
+                        andSqlTerms.push(`documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%'`);
                     }
                 }
 
-                orQueries.push(andQueries.join(' AND '));
+                orSqlTerms.push(andSqlTerms.join(' AND '));
             }
 
-            return orQueries.join(' OR ');
+            return orSqlTerms.join(' OR ');
         } catch (error) {
             return '';
         }
@@ -108,7 +104,6 @@ export class MySqlQuery extends AASIndexQuery {
 
         values.push(value);
         return ` AND elements.numberValue ${this.toMySqlOperator(operator)} ?`;
-
     }
 
     private createBigintSqlTerm(operator: QueryOperator, value: bigint | [bigint, bigint], values: unknown[]): string {
@@ -120,7 +115,6 @@ export class MySqlQuery extends AASIndexQuery {
 
         values.push(value);
         return ` AND elements.bigintValue ${this.toMySqlOperator(operator)} ?`;
-
     }
 
     private createBooleanSqlTerm(operator: QueryOperator, value: boolean, values: unknown[]): string {

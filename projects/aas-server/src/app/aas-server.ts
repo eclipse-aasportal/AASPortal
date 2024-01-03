@@ -15,7 +15,7 @@ import { FileLogger } from './logging/file-logger.js';
 import { TemplateStorageFactory } from './template/template-storage-factory.js';
 import { WSServer } from './ws-server.js';
 import { AASProvider } from './aas-provider/aas-provider.js';
-import { AASIndexFactory } from './aas-provider/aas-index-factory.js';
+import { AASIndexFactory } from './aas-index/aas-index-factory.js';
 
 container.registerInstance('USERS_DIR', './users');
 container.registerSingleton('Logger', FileLogger);

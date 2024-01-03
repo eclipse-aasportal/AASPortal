@@ -8,14 +8,13 @@
 
 import { Low } from 'lowdb';
 import { v4 } from 'uuid';
-import { AASCursor, AASDocument, AASDocumentId, AASEndpoint, AASPage, ApplicationError, aas, flat } from 'common';
+import { AASCursor, AASDocument, AASDocumentId, AASEndpoint, AASPage, ApplicationError, BaseValueType, aas, flat } from 'common';
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
 import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { ERRORS } from '../../errors.js';
 import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
-import { BaseValueType } from '../aas-index-query.js';
 
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
@@ -354,7 +353,7 @@ export class LowDbIndex extends AASIndex {
             element.value = value;
             element.valueType = 'string';
             this.db.data.elements.push(element);
-            return
+            return;
         }
 
         value = this.toNumberValue(referable);
@@ -362,7 +361,7 @@ export class LowDbIndex extends AASIndex {
             element.value = value.toString();
             element.valueType = 'number';
             this.db.data.elements.push(element);
-            return
+            return;
         }
 
         value = this.toBooleanValue(referable);
@@ -370,7 +369,7 @@ export class LowDbIndex extends AASIndex {
             element.value = value.toString();
             element.valueType = 'boolean';
             this.db.data.elements.push(element);
-            return
+            return;
         }
 
         value = this.toBigintValue(referable);
@@ -378,7 +377,7 @@ export class LowDbIndex extends AASIndex {
             element.value = value.toString();
             element.valueType = 'bigint';
             this.db.data.elements.push(element);
-            return
+            return;
         }
 
         value = this.toDateValue(referable);
@@ -386,7 +385,7 @@ export class LowDbIndex extends AASIndex {
             element.value = value.toISOString();
             element.valueType = 'Date';
             this.db.data.elements.push(element);
-            return
+            return;
         }
 
         this.db.data.elements.push(element);
