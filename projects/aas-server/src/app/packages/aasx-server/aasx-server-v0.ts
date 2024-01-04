@@ -8,7 +8,6 @@
 
 import { aas, DifferenceItem, selectSubmodel } from 'common';
 import { Logger } from '../../logging/logger.js';
-import { AASPackage } from '../aas-package.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { AasxServer } from './aasx-server.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';

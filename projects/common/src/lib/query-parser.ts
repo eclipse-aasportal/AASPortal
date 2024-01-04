@@ -22,7 +22,7 @@ export interface AASQuery {
     value?: AASQueryValueType;
 }
 
-export type AndExpression = string | AASQuery;
+export type AndExpression = string | AASQuery | OrExpression[];
 
 export interface OrExpression {
     andExpressions: AndExpression[];

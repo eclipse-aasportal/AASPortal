@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { normalize } from 'path';
-import { AASDocument, BaseValueType, AASQuery, AASQueryOperator, AASQueryValueType } from 'common';
+import { AASDocument, BaseValueType, AASQuery, AASQueryOperator, AASQueryValueType, OrExpression } from 'common';
 
 import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-types.js';
 import { AASIndexQuery } from '../aas-index-query.js';
@@ -20,35 +20,42 @@ export class LowDbQuery extends AASIndexQuery {
 
     public do(document: LowDbDocument, elements: LowDbElement[]): boolean {
         try {
-            let result = false;
-            for (const or of this.queryParser.ast) {
-                for (const expression of or.andExpressions) {
-                    if (this.isText(expression)) {
-                        result = this.contains(document, expression);
-                    } else {
-                        result = this.match(elements, expression);
-                    }
-
-                    if (!result) {
-                        break;
-                    }
-                }
-
-                if (result) {
-                    break;
-                }
-            }
-
-            return result;
+            return this.evaluate(this.queryParser.ast, document, elements);
         } catch (error) {
             return false;
         }
     }
 
-    private contains(document: AASDocument, expression: string): boolean {
-        return document.idShort.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
-            document.id.toLocaleLowerCase(this.language).indexOf(expression) >= 0 ||
-            document.endpoint.toLocaleLowerCase(this.language).indexOf(expression) >= 0;
+    private evaluate(expression: OrExpression[], document: LowDbDocument, elements: LowDbElement[]): boolean {
+        let result = false;
+        for (const or of expression) {
+            for (const and of or.andExpressions) {
+                if (this.isText(and)) {
+                    result = this.contains(document, and);
+                } else if (this.isExpression(and)) {
+                    throw new Error('Not implemented.');
+                } else {
+                    result = this.match(elements, and);
+                }
+
+                if (!result) {
+                    break;
+                }
+            }
+
+            if (result) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private contains(document: AASDocument, value: string): boolean {
+        value = value.toLocaleLowerCase(this.language);
+        return document.idShort.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
+            document.id.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
+            document.endpoint.toLocaleLowerCase(this.language).indexOf(value) >= 0;
     }
 
     private match(elements: LowDbElement[], query: AASQuery | undefined): boolean {

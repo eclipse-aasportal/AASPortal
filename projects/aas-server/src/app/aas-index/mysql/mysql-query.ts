@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASQuery, AASQueryOperator } from 'common';
+import { AASDocument, AASQuery, AASQueryOperator, OrExpression } from 'common';
 import { AASIndexQuery } from '../aas-index-query.js';
 
 export class MySqlQuery extends AASIndexQuery {
@@ -29,24 +29,30 @@ export class MySqlQuery extends AASIndexQuery {
 
     public createSql(values: unknown[]): string {
         try {
-            const orSqlTerms: string[] = [];
-            for (const or of this.queryParser.ast) {
-                const andSqlTerms: string[] = [];
-                for (const and of or.andExpressions) {
-                    if (this.isQuery(and)) {
-                        andSqlTerms.push(this.createSqlTerm(and, values));
-                    } else {
-                        andSqlTerms.push(`documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%'`);
-                    }
-                }
-
-                orSqlTerms.push(andSqlTerms.join(' AND '));
-            }
-
-            return orSqlTerms.join(' OR ');
+            return this.evaluate(this.queryParser.ast, values);
         } catch (error) {
             return '';
         }
+    }
+
+    private evaluate(expression: OrExpression[], values: unknown[]): string {
+        const orSqlTerms: string[] = [];
+        for (const or of expression) {
+            const andSqlTerms: string[] = [];
+            for (const and of or.andExpressions) {
+                if (this.isQuery(and)) {
+                    andSqlTerms.push(this.createSqlTerm(and, values));
+                } else if (this.isExpression(and)) {
+                    throw new Error('Not implemented.');
+                } else {
+                    andSqlTerms.push(`documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%'`);
+                }
+            }
+
+            orSqlTerms.push(andSqlTerms.join(' AND '));
+        }
+
+        return orSqlTerms.join(' OR ');
     }
 
     private createSqlTerm(query: AASQuery, values: unknown[]): string {

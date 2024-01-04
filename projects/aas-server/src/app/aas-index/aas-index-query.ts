@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASQuery, QueryParser } from 'common';
+import { AASQuery, OrExpression, QueryParser } from 'common';
 
 export abstract class AASIndexQuery {
     protected constructor(query: string, protected readonly language: string) {
@@ -21,5 +21,9 @@ export abstract class AASIndexQuery {
 
     protected isQuery(value: unknown): value is AASQuery {
         return typeof value === 'object' && !Array.isArray(value);
+    }
+
+    protected isExpression(value: unknown): value is OrExpression[] {
+        return Array.isArray(value);
     }
 }

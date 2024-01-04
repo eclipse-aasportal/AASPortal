@@ -28,7 +28,7 @@ describe('JsonReaderV2', function () {
     });
 
     it('reads the AAS environment from a JSON source', function () {
-        let env = reader.readEnvironment();
+        const env = reader.readEnvironment();
         expect(env).toBeDefined();
     });
 });
