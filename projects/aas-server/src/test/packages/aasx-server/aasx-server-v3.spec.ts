@@ -206,6 +206,7 @@ describe('AasxServerV3', function () {
         it('throws an error if the server returns with status code 500', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
+                stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 500;
                 stream.statusMessage = 'Internal server error.';
