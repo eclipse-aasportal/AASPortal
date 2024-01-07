@@ -26,6 +26,13 @@ aasportal
 
 ```
 
+## Docker(hub)
+The easiest way to run AASPortal locally, is using the latest "all in one" image from Dockerhub:
+
+`docker run -p 80:80 fraunhoferiosb/aasportal_aio`
+
+Then go to http://localhost/ in your browser and enjoy.
+
 ## Setup Visual Studio Code
 The preferred development environment is Visual Studio Code. Clone *AASPortal*'s GIT repository. Open aasportal in Visual Studio Code. In a terminal window execute the the following commands:
 
@@ -63,7 +70,9 @@ or the name (idShort) of the AAS
     http://localhost/?id=Bosch_NexoPistolGripNutrunner
 
 ## AASServer 
-ToDo.
+AASServer is a Node.js server application based on the Express framework. The main feature of AASServer is the provision of Asset Administration Shells from different data sources (AASX server, OPC UA server, file system). AASServer can read Asset Administration Shells in JSON, XML and OPC UA format. An Asset Administration Shell is always provided to a web client (AASPortal) in JSON version 3 format.
+
+AASServer provides a user management. Authentication of a user is based on Json Web Token. 
 
 ## Environment Variables
 | Name             |                                                                       | default                                        |

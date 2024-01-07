@@ -47,14 +47,16 @@
                         </div>
                     </div>
                     <div class="row mb-2">
-                        <label [for]="'inputMin' + column.id" class="col-sm-2 col-form-label" translate>LABEL_MIN</label>
+                        <label [for]="'inputMin' + column.id" class="col-sm-2 col-form-label"
+                            translate>LABEL_MIN</label>
                         <div class="col-sm-10">
                             <input #inputMin type="text" class="form-control" [id]="'inputMin' + column.id"
                                 [value]="getMin(column)" (change)="changeMin(column, inputMin.value)">
                         </div>
                     </div>
                     <div class="row mb-2">
-                        <label [for]="'inputMax' + column.id" class="col-sm-2 col-form-label"translate>LABEL_MAX</label>
+                        <label [for]="'inputMax' + column.id" class="col-sm-2 col-form-label"
+                            translate>LABEL_MAX</label>
                         <div class="col-sm-10">
                             <input #inputMax type="text" class="form-control" [id]="'inputMax' + column.id"
                                 [value]="getMax(column)" (change)="changeMax(column, inputMax.value)">
@@ -65,3 +67,48 @@
         </div>
     </div>
 </div>
+
+<ng-template #dashboardToolbar>
+    <div class="input-group me-2">
+        <select #select class="form-select" [(ngModel)]="page">
+            <option *ngFor="let option of (pages | async)" [ngValue]="option">{{option.name}}</option>
+        </select>
+        <button type="button" class="btn btn-primary" (click)="addNew()" [disabled]="!editMode">
+            <i class="bi bi-plus"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="rename()" [disabled]="!editMode">
+            <i class="bi bi-pen"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="delete()" [disabled]="!editMode">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+    <div class="input-group me-2">
+        <div class="form-check form-switch pt-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="toggleEditMode" [(ngModel)]="editMode">
+            <label class="form-check-label" for="toggleEditMode" translate>Edit Mode</label>
+        </div>
+    </div>
+    <div class="btn-group me-2" [hidden]="!editMode">
+        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="!canUndo()">
+            <i class="bi bi-arrow-90deg-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="!canRedo()">
+            <i class="bi bi-arrow-90deg-right"></i>
+        </button>
+    </div>
+    <div class="btn-group me-2" [hidden]="!editMode">
+        <button type="button" class="btn btn-primary" (click)="moveLeft()" [disabled]="!canMoveLeft()">
+            <i class="bi bi-box-arrow-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="moveUp()" [disabled]="!canMoveUp()">
+            <i class="bi bi-box-arrow-up"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="moveDown()" [disabled]="!canMoveDown()">
+            <i class="bi bi-box-arrow-down"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="moveRight()" [disabled]="!canMoveRight()">
+            <i class="bi bi-box-arrow-right"></i>
+        </button>
+    </div>
+</ng-template>

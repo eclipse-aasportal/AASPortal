@@ -5,7 +5,7 @@
 
 Check out the [Getting Started](gettingstarted.md) section to learn how to setup Visual Studio Code and start using and developing the *AASPortal*. Learn more about the [Architecture](architecture.md) of *AASPortal*, and check out the [Usage](usage.md) section to learn about available search filters for AAS and which Endpoints can be connected to the *AASPortal*.
 
-*This project is under active development and we are looking forward to your active contributions!*
+*This project is under active development and we are looking forward to your active contributions!!*
 
 ```{toctree} 
 :hidden:

@@ -10,7 +10,7 @@
     <div class="row mt-1">
         <div class="d-flex flex-row">
             <div class="border border-secondary rounded p-1">
-                <fhg-img [height]="88" [width]="88" [src]="thumbnail" alt="assets/resources/aas.svg"/>
+                <fhg-img [height]="88" [width]="88" [src]="thumbnail" alt="assets/resources/aas.svg" />
             </div>
             <div class="d-flex flex-row ps-1">
                 <div class="d-flex flex-column">
@@ -35,3 +35,67 @@
         </fhg-aas-tree>
     </div>
 </div>
+
+<ng-template #aasToolbar>
+    <div class="btn-group me-2">
+        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="(state | async) === 'offline'">
+            <i class="bi bi-play-fill"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="(state | async) === 'online'">
+            <i class="bi bi-stop-fill"></i>
+        </button>
+    </div>
+    <div class="input-group me-2">
+        <select #select class="form-select" [(ngModel)]="dashboardPage">
+            <option *ngFor="let option of (dashboardPages | async)" [ngValue]="option">{{option}}</option>
+        </select>
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')"
+            [disabled]="!canAddToDashboard()">
+            <i class="bi bi-graph-up"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('BarVertical')"
+            [disabled]="!canAddToDashboard()">
+            <i class="bi bi-bar-chart-line-fill"></i>
+        </button>
+    </div>
+    <div class="btn-group me-2" [hidden]="(editable | async) === false">
+        <button type="button" class="btn btn-primary" (click)="synchronize()" [disabled]="!canSynchronize()">
+            <i class="bi bi-arrow-repeat"></i>
+        </button>
+    </div>
+    <div class="btn-group me-2">
+        <button type="button" class="btn btn-primary" (click)="downloadDocument()" [disabled]="!canDownloadDocument()">
+            <i class="bi bi-download"></i>
+        </button>
+    </div>
+    <div class="btn-group me-2" [hidden]="(editable | async) === false">
+        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="!canUndo()">
+            <i class="bi bi-arrow-90deg-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="!canRedo()">
+            <i class="bi bi-arrow-90deg-right"></i>
+        </button>
+    </div>
+    <div class="btn-group me-2" [hidden]="(editable | async) === false">
+        <button type="button" class="btn btn-primary" (click)="newElement()" [disabled]="!canNewElement()">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="editElement()" [disabled]="!canEditElement()">
+            <i class="bi bi-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="deleteElement()" [disabled]="!canDeleteElement()">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+    <div class="input-group flex-grow-1 me-2">
+        <div class="input-group-text"><i class="bi bi-search"></i></div>
+        <input #textInput type="text" class="form-control" [value]="search | async"
+            [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="applySearch(textInput.value)">
+        <button type="button" class="btn btn-primary" (click)="findNext()">
+            <i class="bi bi-chevron-down"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="findPrevious()">
+            <i class="bi bi-chevron-up"></i>
+        </button>
+    </div>
+</ng-template>

@@ -99,14 +99,4 @@ export class Container {
 
         return this.configurationEndpoints.length === 0;
     }
-    
-    private findByIdShort(idShort: string): AASDocument | undefined {
-        for (const item of this._documents.values()) {
-            if (item.idShort === idShort) {
-                return item;
-            }
-        }
-
-        return undefined;
-    }
 }

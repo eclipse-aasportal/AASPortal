@@ -20,10 +20,6 @@ export * from './lib/convert';
 export * from './lib/notify/notify.component';
 export * from './lib/notify/notify.service';
 
-export * from './lib/toolbar/toolbar.component';
-export * from './lib/toolbar/toolbar.service';
-export * from './lib/toolbar/toolbar';
-
 export * from './lib/localize/localize.component';
 export * from './lib/localize/culture-info';
 

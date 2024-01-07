@@ -128,7 +128,7 @@ export class AASTableComponent implements AASTable, OnChanges, OnDestroy {
         }
 
         this.clipboard.set('AASQuery', query);
-        this.router.navigateByUrl('/aas?format=AASQuery');
+        this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
     }
 
     public onSort({ column, direction }: SortEvent) {

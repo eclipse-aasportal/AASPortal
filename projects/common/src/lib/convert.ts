@@ -90,6 +90,7 @@ const mimeTypes = new Map<string, string>(
         ['application/xml', '.xml'],
         ['text/xml', '.xml'],
         ['application/vnd.mozilla.xul+xml', '.xul'],
+        ['application/x-pem-file', '.pem'],
         ['application/zip', '.zip'],
         ['video/3gpp', '.3gp'],
         ['audio/3gpp', '.3gp'],
