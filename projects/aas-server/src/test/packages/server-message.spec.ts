@@ -28,18 +28,18 @@ describe('ServerMessage', function () {
         beforeEach(function () {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Hello World!'));
+                stream.push(JSON.stringify({ text: 'Hello World!' }));
                 stream.push(null);
-                stream.statusCode = 200,
-                    stream.statusMessage = 'OK',
-                    (callback as (res: IncomingMessage) => void)(stream);
+                stream.statusCode = 200;
+                stream.statusMessage = 'OK';
+                (callback as (res: IncomingMessage) => void)(stream);
                 return new http.ClientRequest('http://localhost:1234/hello/world');
             });
         });
 
         it('gets an object from a server', async function () {
-            await expect(server.get<string>(new URL('http://localhost:1234/hello/world')))
-                .resolves.toBe('Hello World!');
+            await expect(server.get<{ text: string }>(new URL('http://localhost:1234/hello/world')))
+                .resolves.toEqual({ text: 'Hello World!' });
         });
     });
 
@@ -47,7 +47,7 @@ describe('ServerMessage', function () {
         beforeEach(function () {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Hello World!'));
+                stream.push(JSON.stringify({ text: 'Hello World!' }));
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 return new http.ClientRequest('http://localhost:1234/hello/world');
@@ -74,7 +74,7 @@ describe('ServerMessage', function () {
 
         it('updates an object on a server', async function () {
             await expect(server.put(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }))
-                .resolves.toEqual('OK');
+                .resolves.toEqual(JSON.stringify('OK'));
         });
     });
 
@@ -92,8 +92,8 @@ describe('ServerMessage', function () {
         });
 
         it('updates an object on a server', async function () {
-            await expect(server.post(new URL('http://localhost:1234/hello/world'), 'Hello World!'))
-                .resolves.toEqual('Created');
+            await expect(server.post(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }))
+                .resolves.toEqual(JSON.stringify('Created'));
         });
     });
 
@@ -112,7 +112,7 @@ describe('ServerMessage', function () {
 
         it('updates an object on a server', async function () {
             await expect(server.delete(new URL('http://localhost:1234/hello/world')))
-                .resolves.toEqual('Deleted');
+                .resolves.toEqual(JSON.stringify('Deleted'));
         });
     });
 

@@ -13,6 +13,6 @@ export interface AASQueryParams {
 
 export interface AASQuery {
     id: string;
-    url?: string;
+    name?: string;
     search?: string;
 }

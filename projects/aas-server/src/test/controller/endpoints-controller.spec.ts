@@ -12,6 +12,7 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
+import { AASEndpoint } from 'common';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -46,8 +47,10 @@ describe('EndpointsController', function () {
 
         aasProvider = createSpyObj<AASProvider>(
             [
+                'getEndpoints',
                 'addEndpointAsync',
                 'removeEndpointAsync',
+                'resetAsync',
             ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
@@ -69,14 +72,30 @@ describe('EndpointsController', function () {
         app.use(errorHandler);
     });
 
+    it('getEndpoints: /api/v1/endpoints', async function () {
+        const endpoints: AASEndpoint = {
+            name: 'Test',
+            url: 'http://localhost:1234',
+            type: 'AasxServer'
+        };
+
+        aasProvider.getEndpoints.mockResolvedValue([endpoints]);
+        const response = await request(app)
+            .get('/api/v1/endpoints')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual([endpoints]);
+        expect(aasProvider.getEndpoints).toHaveBeenCalled();
+    });
+
     it('POST: /api/v1/endpoints/:name', async function () {
-        const url = new URL('file:///assets/samples');
-        url.searchParams.append('type', 'AasxDirectory');
-        aasProvider.addEndpointAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'AasxDirectory' };
+        aasProvider.addEndpointAsync.mockResolvedValue();
+        auth.hasUserAsync.mockResolvedValue(true);
         const response = await request(app).post('/api/v1/endpoints/samples')
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .send({ url: url.href });
+            .send(endpoint);
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.addEndpointAsync).toHaveBeenCalled();
@@ -91,5 +110,16 @@ describe('EndpointsController', function () {
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.removeEndpointAsync).toHaveBeenCalled();
+    });
+
+    it('reset: /api/v1/endpoints', async function () {
+        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        aasProvider.resetAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
+        const response = await request(app)
+            .delete('/api/v1/endpoints')
+            .set('Authorization', `Bearer ${getToken('John')}`);
+
+        expect(response.statusCode).toBe(204);
+        expect(aasProvider.resetAsync).toHaveBeenCalled();
     });
 });

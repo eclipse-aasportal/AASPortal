@@ -6,83 +6,116 @@
  !
  !---------------------------------------------------------------------------->
 
-<table *ngIf="viewMode === 'list'" class="table table-sm table-hover table-striped">
+<table *ngIf="(viewMode | async) === 'list'; else treeView" class="table table-sm table-hover table-striped">
     <thead>
         <tr>
             <th class="th-w-checkbox">
-                <input id="aas-table-checkbox" type="checkbox" class="form-check-input" (change)="toggleSelections()"
-                    [checked]="someSelections | async">
+                <input id="aas-table-checkbox" type="checkbox" class="form-check-input"
+                    [indeterminate]="someSelected | async" [checked]="everySelected | async"
+                    (change)="toggleSelections()">
             </th>
-            <th scope="col" sortable="type" (sort)="onSort($event)" class="th-w-icon">
+            <th scope="col" class="th-w-icon">
                 <i class="bi bi-tag"></i>
             </th>
-            <th scope="col" sortable="name" (sort)="onSort($event)">
+            <th scope="col">
                 <div class="me-1" translate>COLUMN_NAME</div>
             </th>
-            <th scope="col" sortable="id" (sort)="onSort($event)">
+            <th scope="col">
                 <div class="me-1" translate>COLUMN_ID</div>
             </th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let row of rows | async">
+        <tr *ngFor="let row of rows | async" class="align-middle">
             <td>
                 <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)" [checked]="row.selected"
                     [name]="row.name" />
             </td>
-            <td>
-                <img class="img-fluid" width="24" height="24" [src]="getFormatIcon(row)" alt="" />
-            </td>
-            <td>
-                <a *ngIf="canOpen(row)" class="text-nowrap" href="javascript:void(0);" [name]="row.name"
-                    (click)="open(row)">{{row.name | max:60}}</a>
-                <div *ngIf="!canOpen(row)" class="text-nowrap text-secondary">{{row.name | max:60}}</div>
-            <td>
-                <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<table *ngIf="viewMode === 'tree'" class="table table-sm table-borderless table-hover table-striped">
-    <thead>
-        <tr>
-            <th class="aas-th-name"></th>
-            <th class="aas-th-value"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let row of rows | async">
-            <td>
-                <div class="d-flex" style="overflow-x: hidden">
-                    <div [ngStyle]="{'width': (row.level * 16) + 'px'}"></div>
-                    <a *ngIf="!row.isLeaf && !row.expanded && row.hasChildren" href="javascript:void(0);"
-                        (click)="expand(row)">
-                        <div class="text-dark">
-                            <i class="bi bi-plus-square"></i>
-                        </div>
-                    </a>
-                    <div *ngIf="!row.isLeaf && !row.expanded && !row.hasChildren" class="text-muted">
-                        <i class="bi bi-square"></i>
+            <td [ngSwitch]="row.state">
+                <div *ngSwitchCase="'unloaded'" class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <div
+                        class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info">
+                        <i class="bi bi-cloud-arrow-down"></i>
                     </div>
-                    <a *ngIf="!row.isLeaf && row.expanded" href="javascript:void(0);" (click)="collapse(row)">
-                        <div class="text-dark">
-                            <i class="bi bi-dash-square"></i>
-                        </div>
-                    </a>
-                    <div *ngIf="row.isLeaf" class="text-muted wh-4"></div>
-                    <div class="ms-2">
-                        <img class="img-fluid" width="24" height="24" [src]="getFormatIcon(row)" alt="" />
+                </div>
+                <div *ngSwitchCase="'unavailable'" class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <div
+                        class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger">
+                        <i class="bi bi-cone-striped"></i>
                     </div>
-                    <div class="ms-2 flex-grow-1">
-                        <a *ngIf="canOpen(row)" class="text-nowrap" href="javascript:void(0);"
-                            (click)="open(row)">{{row.name | max:60}}</a>
-                        <div *ngIf="!canOpen(row)" class="text-nowrap text-secondary">{{row.name | max:60}}</div>
-                    </div>
+                </div>
+                <div *ngSwitchDefault>
+                    <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
                 </div>
             </td>
             <td>
+                <a class="text-nowrap" href="javascript:void(0);" [name]="row.name" (click)="open(row)">{{row.name |
+                    max:60}}</a>
+            </td>
+            <td>
+                <div>{{row.endpoint}}</div>
                 <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
             </td>
         </tr>
     </tbody>
 </table>
+
+<ng-template #treeView>
+    <table class="table table-sm table-borderless table-hover table-striped">
+        <thead>
+            <tr>
+                <th class="th-w-checkbox">
+                    <input type="checkbox" class="form-check-input" [indeterminate]="someSelected | async"
+                        [checked]="everySelected | async" (change)="toggleSelections()">
+                </th>
+                <th scope="col">
+                    <div class="text-center" translate>COLUMN_NAME</div>
+                </th>
+                <th scope="col">
+                    <div class="text-center" translate>COLUMN_ID</div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of rows | async" class="align-middle">
+                <td>
+                    <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)"
+                        [checked]="row.selected" [name]="row.name" />
+                </td>
+                <td>
+                    <div class="d-flex" style="overflow-x: hidden">
+                        <div [ngStyle]="{'width': (row.level * 16) + 'px'}"></div>
+                        <a *ngIf="!row.isLeaf && !row.expanded && row.hasChildren" href="javascript:void(0);"
+                            (click)="expand(row)">
+                            <div class="text-dark">
+                                <i class="bi bi-plus-square"></i>
+                            </div>
+                        </a>
+                        <div *ngIf="!row.isLeaf && !row.expanded && !row.hasChildren" class="text-muted">
+                            <i class="bi bi-square"></i>
+                        </div>
+                        <a *ngIf="!row.isLeaf && row.expanded" href="javascript:void(0);" (click)="collapse(row)">
+                            <div class="text-dark">
+                                <i class="bi bi-dash-square"></i>
+                            </div>
+                        </a>
+                        <div *ngIf="row.isLeaf" class="text-muted wh-4"></div>
+                        <div class="ms-2">
+                            <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+                        </div>
+                        <div class="ms-2 flex-grow-1">
+                            <a class="text-nowrap" href="javascript:void(0);" (click)="open(row)">{{row.name |
+                                max:60}}</a>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div>{{row.endpoint}}</div>
+                    <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</ng-template>

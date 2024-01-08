@@ -10,7 +10,7 @@ import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { DownloadService } from 'projects/aas-lib/src/public-api';
-import { AASContainer } from 'common';
+import { AASEndpoint } from 'common';
 
 @Component({
     selector: 'fhg-upload-form',
@@ -29,25 +29,25 @@ export class UploadFormComponent {
 
     public files: string | string[] | null = null;
 
-    public container: AASContainer | null = null;
+    public endpoint: AASEndpoint | null = null;
 
-    public containers: AASContainer[] = [];
+    public endpoints: AASEndpoint[] = [];
 
     public progress = 0;
 
     public canSubmit(): boolean {
         return this.fileInput?.nativeElement?.files != null &&
             this.fileInput.nativeElement.files.length > 0 &&
-            this.container != null;
+            this.endpoint != null;
     }
 
     public submit(): void {
-        if (!this.uploading && this.container?.url) {
+        if (!this.uploading && this.endpoint?.url) {
             this.uploading = true;
             const file = this.fileInput!.nativeElement!.files![0];
-            this.download.uploadDocuments(this.container.url, [file])
+            this.download.uploadDocuments(this.endpoint.name, [file])
                 .subscribe({
-                    next: (event: HttpEvent<any>) => {
+                    next: (event: HttpEvent<unknown>) => {
                         switch (event.type) {
                             case HttpEventType.Sent:
                                 break;

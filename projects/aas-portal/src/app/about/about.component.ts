@@ -9,9 +9,9 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Library, Message } from 'common';
 import { ServerApiService } from './server-api.service';
-import pkg from '../../../../../package.json';
 import { TranslateService } from '@ngx-translate/core';
 import { ToolbarService } from '../toolbar.service';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'fhg-about',
@@ -23,9 +23,9 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
         private serverApi: ServerApiService,
         private translate: TranslateService,
         private toolbar: ToolbarService) {
-        this.author = pkg.author;
-        this.version = pkg.version;
-        this.homepage = pkg.homepage;
+        this.author = environment.author;
+        this.version = environment.version;
+        this.homepage = environment.homepage;
     }
 
     @ViewChild('aasToolbar', { read: TemplateRef })

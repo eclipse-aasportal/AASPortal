@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { aas, DefaultType, LiveRequest } from 'common';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { aas, LiveRequest } from 'common';
 import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
 import env from '../../assets/aas-environment.js';
 import { createSpyObj, DoneFn } from '../../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 describe('HttpSubscription', function () {
     let aasxServer: jest.Mocked<AasxServer>;
@@ -40,8 +40,7 @@ describe('HttpSubscription', function () {
         };
 
         const request: LiveRequest = {
-            type: 'file',
-            url: 'file://doc',
+            endpoint: 'AasxDirectory',
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             nodes: [{
                 nodeId: JSON.stringify(reference),
@@ -58,10 +57,10 @@ describe('HttpSubscription', function () {
 
     it('open/close subscription', function (done: DoneFn) {
         jest.useFakeTimers();
-        aasxServer.readValueAsync.mockReturnValue(new Promise<any>(result => {
+        aasxServer.readValueAsync.mockReturnValue(new Promise<DefaultType>(result => {
             expect(true).toBeTruthy();
             result(42);
-            subscription.close();            
+            subscription.close();
             done();
         }));
 

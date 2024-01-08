@@ -31,7 +31,7 @@ export class WindowService {
     public confirm(message: string): boolean | undefined {
         return window.confirm(message);
     }
-    
+
     public getQueryParams(): URLSearchParams {
         return new URLSearchParams(window.location.search);
     }
@@ -50,5 +50,21 @@ export class WindowService {
 
     public clearLocalStorage(): void {
         window.localStorage.clear();
+    }
+
+    public addEventListener<K extends keyof WindowEventMap>(
+        type: K,
+        listener: (this: Window, ev: WindowEventMap[K]) => unknown,
+        options?: boolean | AddEventListenerOptions
+    ): void {
+        window.addEventListener(type, listener, options)
+    }
+
+    public removeEventListener<K extends keyof WindowEventMap>(
+        type: K,
+        listener: (this: Window, ev: WindowEventMap[K]) => unknown,
+        options?: boolean | EventListenerOptions
+    ): void {
+        window.removeEventListener(type, listener, options)
     }
 }

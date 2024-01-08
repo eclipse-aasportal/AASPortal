@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas } from "common/dist/types/index.js";
+import { aas } from 'common';
 
 export default {
     "assetAdministrationShells": [

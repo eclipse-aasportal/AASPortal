@@ -9,7 +9,7 @@
 import { inject, injectable } from 'tsyringe';
 import { Get, OperationId, Route, Security, Tags } from 'tsoa';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
 import { TemplateDescriptor } from 'common';
@@ -21,7 +21,7 @@ import { TemplateStorage } from '../template/template-storage.js';
 @injectable()
 @Route('/api/v1/templates')
 @Tags('Templates')
-export class TemplatesController extends ControllerBase {
+export class TemplatesController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,

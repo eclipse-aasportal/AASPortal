@@ -28,6 +28,8 @@ export * as aas from './aas.js';
 export * from './application-error.js';
 export * from './multi-key-map.js';
 export * from './keyed-list.js';
+export * from './crc32.js';
+export * from './query-parser.js';
 
 /**
  * Determines whether the specified value represents a valid e-mail.
@@ -59,11 +61,11 @@ export function isValidPassword(value: string | undefined): boolean {
  * @param args An object array that contains zero or more objects to format.
  * @returns A copy of format in which the format items have been replaced by the string representation of the corresponding objects in args.
  */
-export function stringFormat(format: string, ...args: any[]) {
+export function stringFormat(format: string, ...args: unknown[]) {
     try {
         return format.replace(/{(\d+)}/g, (match, index) => {
             index = Number(index);
-            const arg: any = index >= 0 && index < args.length ? args[index] : undefined;
+            const arg: unknown = index >= 0 && index < args.length ? args[index] : undefined;
             if (typeof arg === 'undefined') {
                 return '<undefined>';
             } else if (arg === null) {
@@ -74,7 +76,7 @@ export function stringFormat(format: string, ...args: any[]) {
                 return arg.toString();
             } else if (typeof arg === 'boolean') {
                 return arg ? 'true' : 'false';
-            } else if ('toString' in arg) {
+            } else if ((arg as { toString: () => string }).toString) {
                 return arg.toString();
             } else {
                 return match;
@@ -103,12 +105,19 @@ export function equalUrls(url1: string, url2: string): boolean {
     }
 }
 
+/** Compares two arrays for equality. */
+export function equalArray<T>(a: T[], b: T[]): boolean {
+    if (a === b) return true;
+    if (a.length !== b.length) return false;
+    return a.every((_, i) => a[i] === b[i]);
+}
+
 /**
  * Determines whether the specified value represents a submodel element.
  * @param value The current value.
  * @returns `true` if the specified value represents a submodel element; otherwise, `false`.
  */
-export function isSubmodelElement(value: any): value is SubmodelElement {
+export function isSubmodelElement(value: unknown): value is SubmodelElement {
     if (value && (value as Referable).modelType) {
         switch ((value as Referable).modelType) {
             case 'ReferenceElement':

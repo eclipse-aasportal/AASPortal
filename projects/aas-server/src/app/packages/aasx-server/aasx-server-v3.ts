@@ -12,9 +12,9 @@ import { createReadStream } from 'fs';
 import { encodeBase64Url } from '../../convert.js';
 import { AasxServer } from './aasx-server.js';
 import { Logger } from '../../logging/logger.js';
-import { AASPackage } from '../aas-package.js';
 import { JsonReader } from '../json-reader.js';
 import { JsonWriter } from '../json-writer.js';
+import { ERRORS } from '../../errors.js';
 import {
     aas,
     ApplicationError,
@@ -25,7 +25,6 @@ import {
     isSubmodelElement,
     selectSubmodel
 } from 'common';
-import { ERRORS } from '../../errors.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -64,9 +63,11 @@ interface PagedResult<T extends aas.Identifiable> {
 }
 
 export class AasxServerV3 extends AasxServer {
-    constructor(logger: Logger, url: string | URL) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string) {
+        super(logger, url, name);
     }
+
+    public override readonly version = '3.0';
 
     public readonly readOnly = false;
 
@@ -107,6 +108,10 @@ export class AasxServerV3 extends AasxServer {
         };
 
         return new JsonReader(this.logger, sourceEnv).readEnvironment();
+    }
+
+    public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+        return this.message.getResponse(this.resolve(`/shells/${encodeBase64Url(id)}/asset-information/thumbnail`));
     }
 
     public async commitAsync(
@@ -172,16 +177,18 @@ export class AasxServerV3 extends AasxServer {
         return await this.message.getResponse(this.resolve(`/packages/${packageId}`));
     }
 
-    public async postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined> {
+    public postPackageAsync(file: Express.Multer.File): Promise<string> {
         const formData = new FormData();
         formData.append('file', createReadStream(file.path));
         formData.append('fileName', file.filename);
-        await this.message.post(this.resolve(`/packages`), formData);
-        return undefined;
+        return this.message.post(this.resolve(`/packages`), formData);
     }
 
-    public deletePackageAsync(aasIdentifier: string): Promise<void> {
-        throw new Error('Not implemented.');
+    public async deletePackageAsync(aasIdentifier: string): Promise<string> {
+        const aasId = encodeBase64Url(aasIdentifier);
+        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`/packages?aasId=${aasId}`));
+        const packageId = encodeBase64Url(descriptors[0].packageId);
+        return await this.message.delete(this.resolve(`/packages/${packageId}`));
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
@@ -197,9 +204,9 @@ export class AasxServerV3 extends AasxServer {
             inoutputVariables: cloneDeep(operation.inoutputVariables),
         };
 
-        const result: OperationResult = await this.message.post(
+        const result: OperationResult = JSON.parse(await this.message.post(
             this.resolve(`/shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
-            request);
+            request));
 
         if (!result.success) {
             throw new ApplicationError(

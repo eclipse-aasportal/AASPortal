@@ -15,8 +15,8 @@ import * as lib from 'projects/aas-lib/src/public-api';
 import { State } from './view.state';
 import * as ViewActions from './view.actions';
 import * as ViewSelectors from './view.selectors';
-import { ProjectService } from '../project/project.service';
 import { ToolbarService } from '../toolbar.service';
+import { ViewApiService } from './view-api.service';
 
 @Component({
     selector: 'fhg-view',
@@ -30,7 +30,7 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
     constructor(
         store: Store,
         private readonly route: ActivatedRoute,
-        private readonly project: ProjectService,
+        private readonly api: ViewApiService,
         private readonly clipboard: lib.ClipboardService,
         private readonly toolbar: ToolbarService
     ) {
@@ -63,7 +63,7 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (query?.descriptor) {
             const descriptor: lib.SubmodelViewDescriptor = query.descriptor;
             zip(of(descriptor.template), from(descriptor.submodels).pipe(
-                mergeMap(item => zip(this.project.getDocument(item.id, item.url), of(item.idShort))),
+                mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
                 mergeMap(tuple => {
                     const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
                     if (submodel?.modelType === 'Submodel') {

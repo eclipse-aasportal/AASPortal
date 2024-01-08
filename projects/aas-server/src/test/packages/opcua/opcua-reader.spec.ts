@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { Logger } from "../../../app/logging/logger.js";
 import { OpcuaReader } from '../../../app/packages/opcua/opcua-reader.js';
 import { OPCUAComponent } from "../../../app/packages/opcua/opcua.js";
 import { OpcuaDataTypeDictionary } from "../../../app/packages/opcua/opcua-data-type-dictionary.js";
 import { createSpyObj } from '../../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
-describe('OPCUAReader', function () {
+describe('OpcuaReader', function () {
     let reader: OpcuaReader;
     let logger: jest.Mocked<Logger>;
     let origin: jest.Mocked<OPCUAComponent>;

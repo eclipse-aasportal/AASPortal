@@ -35,8 +35,8 @@ export class OpcuaServer extends AASResource {
     private session: ClientSession | null = null;
     private reentry = 0;
 
-    constructor(logger: Logger, url: string | URL, options?: OPCUAClientOptions) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string, options?: OPCUAClientOptions) {
+        super(logger, url, name);
 
         if (options) {
             this.options = this.resolveOpcuaClientOptions(options);
@@ -54,6 +54,8 @@ export class OpcuaServer extends AASResource {
         }
     }
 
+    public override readonly version = '';
+
     public readonly readOnly = true;
 
     public readonly onlineReady = true;
@@ -67,7 +69,7 @@ export class OpcuaServer extends AASResource {
      **/
     public getSession(): ClientSession {
         if (this.reentry <= 0 || this.session == null) {
-            throw new Error(`No session to ${this.baseUrl} established.`);
+            throw new Error(`No session to ${this.url} established.`);
         }
 
         return this.session;
@@ -86,7 +88,7 @@ export class OpcuaServer extends AASResource {
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
             this.client = OPCUAClient.create(this.options as OPCUAClientOptions);
-            await this.client.connect(this.baseUrl.href);
+            await this.client.connect(this.url);
             this.session = await this.client.createSession();
         }
 
@@ -118,15 +120,15 @@ export class OpcuaServer extends AASResource {
         return new OpcuaSubscription(this.logger, client, this, message.nodes);
     }
 
-    public getPackageAsync(aasIdentifier: string, name: string): Promise<NodeJS.ReadableStream> {
+    public getPackageAsync(): Promise<NodeJS.ReadableStream> {
         throw new Error('Not implemented.');
     }
 
-    public postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined> {
+    public postPackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
-    public deletePackageAsync(aasId: string, name: string): Promise<void> {
+    public deletePackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
@@ -157,7 +159,7 @@ export class OpcuaServer extends AASResource {
         return operation;
     }
 
-    public getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public getBlobValueAsync(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 

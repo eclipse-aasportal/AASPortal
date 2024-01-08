@@ -7,18 +7,19 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Body, Delete, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
+import { Body, Delete, Get, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
+import { AASEndpoint } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { Variable } from '../variable.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
 @Tags('Endpoints')
-export class EndpointsController extends ControllerBase {
+export class EndpointsController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
@@ -29,15 +30,31 @@ export class EndpointsController extends ControllerBase {
     }
 
     /**
+     * @summary Gets the endpoints.
+     * @returns All current available endpoints.
+     */
+    @Get('')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getEndpoints')
+    public async getEndpoints(): Promise<AASEndpoint[]> {
+        try {
+            this.logger.start('getWorkspaces');
+            return await this.aasProvider.getEndpoints();
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
      * @summary Adds a new endpoint to the AASServer container configuration.
      * @param name The endpoint name.
-     * @param data The endpoint URL.
+     * @param endpoint The endpoint URL.
      */
     @Post('{name}')
     @Security('bearerAuth', ['editor'])
     @OperationId('addEndpoint')
-    public addEndpoint(@Path() name: string, @Body() data: { url: string }): Promise<void> {
-        return this.aasProvider.addEndpointAsync(name, new URL(data.url))
+    public addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
+        return this.aasProvider.addEndpointAsync(name, endpoint);
     }
 
     /**
@@ -49,5 +66,20 @@ export class EndpointsController extends ControllerBase {
     @OperationId('deleteEndpoint')
     public deleteEndpoint(@Path() name: string): Promise<void> {
         return this.aasProvider.removeEndpointAsync(name);
+    }
+    
+    /**
+     * @summary Resets the AASServer container configuration.
+     */
+    @Delete('')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('reset')
+    public async reset(): Promise<void> {
+        try {
+            this.logger.start('reset');
+            await this.aasProvider.resetAsync();
+        } finally {
+            this.logger.stop();
+        }
     }
 }

@@ -1,0 +1,43 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (ngSubmit)="submit()">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-star"></i>
+            <span class="ms-2" translate>CAPTION_FAVORITES</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="cancel()"></button>
+    </div>
+    <div class="modal-body">
+        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+            <div class="d-flex">
+                <div class="flex-grow-1">{{ message }}</div>
+            </div>
+        </ngb-toast>
+        <ul class="list-group">
+            <li *ngFor="let item of items | async" class="list-group-item" (mouseenter)="setActive(item, true)"
+                (mouseleave)="setActive(item, false)">
+                <div class="d-flex flex-row align-items-center">
+                    <input #selected class="form-check-input me-1" type="radio" autocomplete="false"
+                        (change)="selectedChange(item, selected.checked)" name="name" [disabled]="!name.value"
+                        [checked]="item.selected">
+                    <input #name class="form-control no-border" type="text" placeholder="{{'PLACEHOLDER_NEW_FAVORITES' | translate}}"
+                        [value]="item.name" (input)="inputName(item, name.value)">
+                    <button class="btn" type="button" [hidden]="!canDelete(item)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
+    </div>
+</form>

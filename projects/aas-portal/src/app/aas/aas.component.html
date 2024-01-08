@@ -21,7 +21,7 @@
                     <div class="fw-bold text-end small text-nowrap" translate>LABEL_ASSET_ID</div>
                 </div>
                 <div class="d-flex flex-column flex-grow-1 ps-1">
-                    <div class="small text-nowrap">{{endpoint}}</div>
+                    <div class="small text-nowrap">{{address}}</div>
                     <div class="small text-nowrap">{{idShort}}</div>
                     <div class="small text-nowrap">{{id}}</div>
                     <div class="small text-nowrap">{{version}}</div>
@@ -31,17 +31,17 @@
         </div>
     </div>
     <div class="row">
-        <fhg-aas-tree #aasTree [state]="state | async" [search]="search" [document]="document">
+        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document" [(selected)]="selectedElements">
         </fhg-aas-tree>
     </div>
 </div>
 
 <ng-template #aasToolbar>
     <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="(state | async) === 'offline'">
+        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="state === 'online'">
             <i class="bi bi-play-fill"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="(state | async) === 'online'">
+        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="state === 'offline'">
             <i class="bi bi-stop-fill"></i>
         </button>
     </div>
@@ -91,10 +91,10 @@
         <div class="input-group-text"><i class="bi bi-search"></i></div>
         <input #textInput type="text" class="form-control" [value]="search | async"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="applySearch(textInput.value)">
-        <button type="button" class="btn btn-primary" (click)="findNext()">
+        <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
             <i class="bi bi-chevron-down"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="findPrevious()">
+        <button type="button" class="btn btn-primary" (click)="aasTree.findPrevious()">
             <i class="bi bi-chevron-up"></i>
         </button>
     </div>

@@ -17,7 +17,7 @@ import { noop, toString } from 'lodash-es';
  * @param translate The translate service.
  * @returns The message as localized text.
  */
-export function messageToString(message: any, translate: TranslateService): string {
+export function messageToString(message: unknown, translate: TranslateService): string {
     let text: string;
     if (message instanceof ApplicationError) {
         text = format(message.message, message.name, message.args);
@@ -26,6 +26,7 @@ export function messageToString(message: any, translate: TranslateService): stri
     } else if (typeof message === 'string') {
         text = message;
     } else if (message instanceof HttpErrorResponse) {
+
         if (isErrorData(message.error)) {
             text = format(message.error.message, message.error.name, message.error.args);
         } else {
@@ -39,11 +40,12 @@ export function messageToString(message: any, translate: TranslateService): stri
 
     return text;
 
-    function isErrorData(value: object): value is ErrorData {
-        return typeof value === 'object' && 'message' in value && 'name' in value && 'type' in value;
+    function isErrorData(value: unknown): value is ErrorData {
+        const errorData = value as ErrorData;
+        return errorData.message != null && errorData.name != null && errorData.type != null;
     }
 
-    function format(message: string, name: string, args: any[]): string {
+    function format(message: string, name: string, args: unknown[]): string {
         if (name) {
             return stringFormat(translate.instant(name), args);
         }

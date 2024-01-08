@@ -43,7 +43,12 @@ export const selectSelectedElements = createSelector(
 
 export const selectSomeSelected = createSelector(
     getRows,
-    rows => rows.some(row => row.selected)
+    rows => rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected)
+);
+
+export const selectEverySelected = createSelector(
+    getRows,
+    rows => rows.length > 0 && rows.every(row => row.selected)
 );
 
 export const selectSelectedRows = createSelector(

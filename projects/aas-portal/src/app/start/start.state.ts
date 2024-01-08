@@ -7,15 +7,24 @@
  *****************************************************************************/
 
 import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { AASDocument } from 'common';
 
 export interface StartState {
     viewMode: ViewMode;
-    reverse: boolean;
-    column: string | null;
     filter: string;
-    showAll: boolean;
+    limit: number;
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    totalCount: number;
+    documents: AASDocument[];
+    favorites: string;
 }
 
-export interface State {
+export interface FavoritesList {
+    name: string;
+    documents: AASDocument[];
+}
+
+export interface StartFeatureState {
     start: StartState;
 }

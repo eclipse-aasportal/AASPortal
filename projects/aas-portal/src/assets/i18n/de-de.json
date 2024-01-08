@@ -21,6 +21,7 @@
     "CAPTION_INFO": "Info",
     "CAPTION_WARNING": "Warnung",
     "CAPTION_UPLOAD_FILE": "AASX-Datei hochladen",
+    "CAPTION_FAVORITES": "Favoriten",
     "CMD_OK": "OK",
     "CMD_OPEN_AAS": "VWS öffnen",
     "CMD_UPLOAD": "Hochladen",
@@ -83,8 +84,8 @@
     "LABEL_SELECT_WORKSPACE": "Gruppe",
     "LABEL_SELECT_REGISTRY": "AAS-Registry",
     "LABEL_SHOW_ALL": "Alle anzeigen",
-    "LABEL_REGISTRY_NAME": "Name",
-    "LABEL_REGISTRY_URL": "URL",
+    "LABEL_ENDPOINT_NAME": "Name",
+    "LABEL_ENDPOINT_URL": "URL",
     "LABEL_VIEW_MODE": "Anzeige:",
     "LABEL_INFO": "Info",
     "LABEL_WARNING": "Warnungen",
@@ -117,6 +118,7 @@
     "PLACEHOLDER_FILTER": "Filter",
     "PLACEHOLDER_WORKSPACE": "Gruppenname",
     "PLACEHOLDER_SEARCH": "Suche",
+    "PLACEHOLDER_NEW_FAVORITES": "neue Favoriten",
     "GUEST_USER": "Gast",
     "ERROR_UNCAUGHT": "{0}",
     "ERROR_UNKNOWN_USER": "Der Benutzer {0} ist unbekannt.",
@@ -176,5 +178,19 @@
         "Acustics": "Akustik",
         "Assembly_Installation": "Montage & Installation",
         "Material": "Material"
+    },
+    "QueryParser": {
+        "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
+        "END_OF_TEXT_NOT_FOUND": "Das Ende des Textes, beginnend an Position {0}, wurde nicht gefunden.",
+        "INVALID_ABBREVIATION": "'{0}' ist eine ungültige Modelltyp-Abkürzung an Position {1}.",
+        "INVALID_DATE_EXPRESSION": "'{0}' ist ein ungültiger Datumsausdruck an Position {1}.",
+        "INVALID_NESTED_EXPRESSION": "Ungültiger geschachtelter Ausdruck.",
+        "INVALID_OPERATOR": "'{0}' ist ein ungültiger Operator an Position {1}.",
+        "INVALID_RANGE_EXPRESSION": "'{0}' ist ein ungültiger Bereichsausdruck an Position {1}.",
+        "LINK_EXPECTED": "'||' or '&&' erwartet an Position {0}",
+        "MIN_LENGTH": "Ein Abfrageausdruck muss mindestens {0} Zeichen enthalten.",
+        "MODEL_TYPE_EXPECTED": "Modelltypabkürzung an Position {0} erwartet.",
+        "TERM_EXPECTED": "Term erwartet an Position {0}.",
+        "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
     }
 }

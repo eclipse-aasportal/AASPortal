@@ -39,26 +39,30 @@ export class OpcuaPackage extends AASPackage {
 
     public async createDocumentAsync(): Promise<AASDocument> {
         const component = await this.crawlAsync();
-        const reader = new OpcuaReader(this.logger, component, this.dataTypes);
-        const environment = await reader.readEnvironment();
-
         if (component.typeDefinition !== 'AASAssetAdministrationShellType') {
             throw new Error(`${this.nodeId}: ${component.typeDefinition} is an unexpected type definition.`);
         }
 
+        const content = await new OpcuaReader(this.logger, component, this.dataTypes).readEnvironment();
         const document: AASDocument = {
             id: this.getIdentifier(component),
-            container: this.server.url.href,
-            endpoint: { type: 'opc', address: this.nodeId },
+            endpoint: this.server.name,
+            address: this.nodeId,
             idShort: component.browseName,
-            content: environment,
-            timeStamp: Date.now(),
             readonly: this.server.readOnly,
             onlineReady: this.server.onlineReady,
-            modified: false
+            content,
+            timestamp: Date.now(),
+            crc32: this.computeCrc32(content),
         };
 
         return document;
+    }
+
+    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+        const component = await this.crawlAsync();
+        const reader = new OpcuaReader(this.logger, component, this.dataTypes);
+        return await reader.readEnvironment();
     }
 
     public getThumbnailAsync(): Promise<NodeJS.ReadableStream> {

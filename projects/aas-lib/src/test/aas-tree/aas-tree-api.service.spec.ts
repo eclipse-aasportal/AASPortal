@@ -47,7 +47,7 @@ describe('AASTreeApiService', function () {
     describe('invoke', function () {
         it('invokes an operation', async function () {
             const document = jasmine.createSpyObj<AASDocument>({}, {
-                container: 'http://localhost/container',
+                endpoint: 'Samples',
                 id: 'http://localhost/aas'
             });
 
@@ -57,7 +57,7 @@ describe('AASTreeApiService', function () {
             };
 
             const promise = service.invoke(document, operation);
-            const url = `/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC9jb250YWluZXI/documents/aHR0cDovL2xvY2FsaG9zdC9hYXM`
+            const url = `/api/v1/containers/U2FtcGxlcw/documents/aHR0cDovL2xvY2FsaG9zdC9hYXM`
             const req = httpTestingController.expectOne(url);
             req.flush(operation);
             await expectAsync(promise).toBeResolvedTo(operation);

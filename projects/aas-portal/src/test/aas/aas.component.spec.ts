@@ -12,12 +12,12 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, aas } from 'common';
 import { Observable, noop, of } from 'rxjs';
-import { AASTree, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
+import { AuthService, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
 import { CommonModule } from '@angular/common';
 
 import { AASComponent } from '../../app/aas/aas.component';
 import { aasReducer } from '../../app/aas/aas.reducer';
-import { rotationSpeed, sampleDocument, torque } from '../../test/assets/sample-document';
+import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.state';
@@ -25,16 +25,9 @@ import { Router } from '@angular/router';
 import { AppRoutingModule } from '../../app/app-routing.module';
 import { AASState } from '../../app/aas/aas.state';
 import * as AASActions from '../../app/aas/aas.actions';
-import { ProjectService } from '../../app/project/project.service';
-import { Component, Input } from '@angular/core';
-
-class TestProjectService implements Partial<ProjectService> {
-    constructor(private document: AASDocument) { }
-
-    public getDocument(): Observable<AASDocument> {
-        return of(this.document);
-    }
-}
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AASApiService } from '../../app/aas/aas-api.service';
+import { ToolbarService } from '../../app/toolbar.service';
 
 class TestDashboardService implements Partial<DashboardService> {
     public pages: Observable<DashboardPage[]> = of([]);
@@ -49,15 +42,17 @@ class TestDashboardService implements Partial<DashboardService> {
     template: '<div></div>',
     styleUrls: []
 })
-class TestAASTreeComponent implements AASTree {
-    @Input()
-    public state: OnlineState = 'offline';
+class TestAASTreeComponent {
     @Input()
     public document: AASDocument | null = null;
     @Input()
+    public state: OnlineState | null = 'offline';
+    @Input()
     public search: Observable<string> | null = null;
-
-    public selectedElements: Observable<aas.Referable[]> = of([torque, rotationSpeed]);
+    @Input()
+    public selected: aas.Referable[] = [torque, rotationSpeed];
+    @Output()
+    public selectedChange = new EventEmitter<aas.Referable[]>();
 
     public findNext(): void {
         noop();
@@ -77,7 +72,7 @@ class TestSecureImageComponent {
     @Input()
     public src = '';
     @Input()
-    public alt?:string;
+    public alt?: string;
     @Input()
     public classname?: string;
     @Input()
@@ -92,9 +87,18 @@ describe('AASComponent', () => {
     let store: Store<{ aas: AASState }>;
     let dashboard: DashboardService;
     let router: Router;
-    let download: DownloadService;
+    let api: jasmine.SpyObj<AASApiService>;
+    let download: jasmine.SpyObj<DownloadService>;
 
     beforeEach(() => {
+        api = jasmine.createSpyObj<AASApiService>(['getDocument', 'getTemplates', 'putDocument']);
+        download = jasmine.createSpyObj<DownloadService>(
+            [
+                'downloadDocument',
+                'downloadFileAsync',
+                'uploadDocuments',
+            ]);
+
         TestBed.configureTestingModule({
             declarations: [
                 AASComponent,
@@ -103,8 +107,8 @@ describe('AASComponent', () => {
             ],
             providers: [
                 {
-                    provide: ProjectService,
-                    useValue: new TestProjectService(sampleDocument)
+                    provide: AASApiService,
+                    useValue: api
                 },
                 {
                     provide: NotifyService,
@@ -113,7 +117,19 @@ describe('AASComponent', () => {
                 {
                     provide: DashboardService,
                     useValue: new TestDashboardService()
-                }
+                },
+                {
+                    provide: DownloadService,
+                    useValue: download,
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                },
+                {
+                    provide: AuthService,
+                    useValue: jasmine.createSpyObj<AuthService>(['ensureAuthorized']),
+                },
             ],
             imports: [
                 CommonModule,
@@ -127,10 +143,10 @@ describe('AASComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(AASComponent);
@@ -138,7 +154,6 @@ describe('AASComponent', () => {
         store = TestBed.inject(Store);
         dashboard = TestBed.inject(DashboardService);
         router = TestBed.inject(Router);
-        download = TestBed.inject(DownloadService);
         store.dispatch(AASActions.setDocument({ document: sampleDocument }));
         fixture.detectChanges();
     });
@@ -151,7 +166,7 @@ describe('AASComponent', () => {
         const aas = sampleDocument.content!.assetAdministrationShells[0];
         const assetId = aas.assetInformation.globalAssetId ?? '-';
 
-        expect(component.endpoint).toEqual(sampleDocument.endpoint!.address);
+        expect(component.address).toEqual(sampleDocument.address);
         expect(component.idShort).toEqual(sampleDocument.idShort);
         expect(component.id).toEqual(sampleDocument.id);
         expect(component.version).toEqual('-');
@@ -166,19 +181,27 @@ describe('AASComponent', () => {
         expect(component.readonly).toBeFalse();
     });
 
-    it('can add the selected properties to the dashboard', async function () {
-        spyOn(dashboard, 'add');
-        spyOn(router, 'navigateByUrl').and.resolveTo(true);
-        expect(component.canAddToDashboard()).toBeTrue();
-        await expectAsync(component.addToDashboard(DashboardChartType.BarVertical)).toBeResolvedTo(true);
-        expect(dashboard.add).toHaveBeenCalled();
-        expect(router.navigateByUrl).toHaveBeenCalled();
+    describe('canAddToDashboard', () => {
+        beforeEach(() => {
+            component.selectedElements = [torque, rotationSpeed];
+        })
+
+        it('can add the selected properties to the dashboard', async function () {
+            spyOn(dashboard, 'add');
+            spyOn(router, 'navigateByUrl').and.resolveTo(true);
+            expect(component.canAddToDashboard()).toBeTrue();
+            await expectAsync(component.addToDashboard(DashboardChartType.BarVertical)).toBeResolvedTo(true);
+            expect(dashboard.add).toHaveBeenCalled();
+            expect(router.navigateByUrl).toHaveBeenCalled();
+        });
     });
 
-    it('can download an AASX file', function () {
-        spyOn(download, 'downloadDocument').and.returnValue(of(void 0));
-        expect(component.canDownloadDocument()).toBeTrue();
-        component.downloadDocument();
-        expect(download.downloadDocument).toHaveBeenCalled();
+    describe('downloadDocument', () => {
+        it('can download an AASX file', function () {
+            download.downloadDocument.and.returnValue(of(void 0));
+            expect(component.canDownloadDocument()).toBeTrue();
+            component.downloadDocument();
+            expect(download.downloadDocument).toHaveBeenCalled();
+        });
     });
 });

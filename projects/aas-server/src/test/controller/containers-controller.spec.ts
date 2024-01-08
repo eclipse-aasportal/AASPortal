@@ -16,11 +16,10 @@ import { Readable } from 'stream';
 import { resolve } from 'path';
 import { aas } from 'common';
 
+import { sampleDocument } from '../assets/sample-document.js';
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
-import { sampleDocument } from '../assets/sample-document.js';
-import { Container } from '../../app/aas-provider/container.js';
 import { createSpyObj } from '../utils.js';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
@@ -52,14 +51,11 @@ describe('ContainersController', function () {
         aasProvider = createSpyObj<AASProvider>(
             [
                 'updateDocumentAsync',
-                'getWorkspaces',
-                'getContainer',
                 'getContentAsync',
-                'getDocuments',
-                'getDocument',
+                'getPackageAsync',
                 'getDocumentAsync',
-                'addDocumentsAsync',
-                'deleteDocumentAsync',
+                'addPackagesAsync',
+                'deletePackageAsync',
                 'getDataElementValueAsync',
                 'invoke',
                 'resetAsync'
@@ -84,19 +80,8 @@ describe('ContainersController', function () {
         app.use(errorHandler);
     });
 
-    it('getDocuments: /api/v1/containers/:url/documents', async function () {
-        aasProvider.getDocuments.mockReturnValue([sampleDocument]);
-        const response = await request(app)
-            .get('/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents')
-            .set('Authorization', `Bearer ${getToken()}`);
-
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toEqual([sampleDocument]);
-        expect(aasProvider.getDocuments).toHaveBeenCalled();
-    });
-
-    it('getDocument: /api/v1/containers/:url/documents/:id', async function () {
-        aasProvider.getDocumentAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
+    it('getPackage: /api/v1/containers/:endpoint/packages/:id', async function () {
+        aasProvider.getPackageAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
             const s = new Readable();
             s.push('Hello World!');
             s.push(null);
@@ -104,39 +89,48 @@ describe('ContainersController', function () {
         }));
 
         const response = await request(app)
-            .get(`/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
+            .get(`/api/v1/containers/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toBeTruthy();
-        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.getPackageAsync).toHaveBeenCalled();
     });
 
-    it('addDocuments: /api/v1/containers/:url/documents', async function () {
-        const container = createSpyObj<Container>({}, { url: new URL('file:///samples') });
-        aasProvider.getContainer.mockReturnValue(container);
+    it('addPackage: /api/v1/containers/:endpoint/packages', async function () {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
-            .post('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/documents')
+            .post('/api/v1/containers/U2FtcGxl/packages')
             .set('Authorization', `Bearer ${getToken('John')}`)
             .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.addDocumentsAsync).toHaveBeenCalled();
+        expect(aasProvider.addPackagesAsync).toHaveBeenCalled();
     });
 
-    it('deleteDocument: /api/v1/containers/:url/documents/:id', async function () {
+    it('deletePackage: /api/v1/containers/:endpoint/packages/:id', async function () {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
-            .delete('/api/v1/containers/aHR0cDovL2xvY2FsaG9zdC90ZXN0L2NvbnRhaW5lcg/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .delete('/api/v1/containers/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken('John')}`);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.deleteDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.deletePackageAsync).toHaveBeenCalled();
+    });
+    
+    it('getDocument: /api/v1/containers/:endpoint/documents/:id', async function () {
+        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
+        const response = await request(app)
+            .get('/api/v1/containers/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(sampleDocument);
+        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
     });
 
     it('getDocumentContent: /api/v1/containers/:url/documents/:id/content', async function () {
-        aasProvider.getContentAsync.mockReturnValue(new Promise<aas.Environment | undefined>(resolve => {
+        aasProvider.getContentAsync.mockReturnValue(new Promise<aas.Environment>(resolve => {
             resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
         }));
 
@@ -146,17 +140,6 @@ describe('ContainersController', function () {
 
         expect(response.statusCode).toBe(200);
         expect(aasProvider.getContentAsync).toHaveBeenCalled();
-    });
-
-    it('reset: /api/v1/containers/reset', async function () {
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-        aasProvider.resetAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        const response = await request(app)
-            .delete('/api/v1/containers/reset')
-            .set('Authorization', `Bearer ${getToken('John')}`);
-
-        expect(response.statusCode).toBe(204);
-        expect(aasProvider.resetAsync).toHaveBeenCalled();
     });
 
     describe('getDataElementValue: /api/v1/containers/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', function () {

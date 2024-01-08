@@ -6,20 +6,13 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { Logger } from '../../../app/logging/logger.js';
-import { createSpyObj } from '../../utils.js';
-import { SocketClient } from '../../../app/live/socket-client.js';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { HttpSocketItem } from '../../../app/live/http/http-socket-item.js';
 
 describe('HttpSocketItem', function () {
     let item: HttpSocketItem;
-    let logger: jest.Mocked<Logger>;
-    let client: jest.Mocked<SocketClient>;
 
     beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        client = createSpyObj<SocketClient>([]);
         item = new HttpSocketItem({ nodeId: '', valueType: 'xs:integer' }, 'http://localhost:1234');
     });
 

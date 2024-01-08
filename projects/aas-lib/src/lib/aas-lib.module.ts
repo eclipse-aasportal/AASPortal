@@ -12,6 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { StoreModule } from '@ngrx/store';
 import { FormsModule } from '@angular/forms';
+import { EffectsModule } from '@ngrx/effects';
 
 import { NotifyComponent } from './notify/notify.component';
 import { LocalizeComponent } from './localize/localize.component';
@@ -37,6 +38,7 @@ import { DigitalNameplateComponent } from './digital-nameplate/digital-nameplate
 import { messageTableReducer } from './message-table/massage-table.reducer';
 import { MessageTableComponent } from './message-table/message-table.component';
 import { SecuredImageComponent } from './secured-image/secured-image.component';
+import { AASTableEffects } from './aas-table/aas-table.effects';
 
 @NgModule({
     declarations: [
@@ -69,6 +71,7 @@ import { SecuredImageComponent } from './secured-image/secured-image.component';
         StoreModule.forFeature('customerFeedback', customerFeedbackReducer),
         StoreModule.forFeature('aasTable', aasTableReducer),
         StoreModule.forFeature('tree', aasTreeReducer),
+        EffectsModule.forFeature(AASTableEffects),
         HttpClientModule
     ],
     exports: [

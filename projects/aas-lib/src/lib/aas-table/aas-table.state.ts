@@ -6,17 +6,13 @@
  *
  *****************************************************************************/
 
-import { AASDocument, EndpointType } from "common";
-import { SortDirection } from "../sortable-header.directive";
+import { AASDocument } from 'common';
 import { ViewMode } from '../types/view-mode';
 
 export class AASTableRow {
     constructor(
         public readonly document: AASDocument,
         public readonly selected: boolean,
-        public readonly name: string,
-        public readonly id: string,
-        public readonly type: EndpointType,
         public readonly expanded: boolean,
         public readonly isLeaf: boolean,
         public readonly level: number,
@@ -24,8 +20,36 @@ export class AASTableRow {
         public nextSibling: number) {
     }
 
+    public get id(): string {
+        return this.document.id;
+    }
+
+    public get name(): string {
+        return this.document.idShort;
+    }
+
+    public get thumbnail(): string {
+        return this.document.thumbnail ?? '/assets/resources/aas.32.png';
+    }
+
+    public get endpoint(): string {
+        return this.document.endpoint;
+    }
+
     public get hasChildren(): boolean {
         return this.firstChild >= 0;
+    }
+
+    public get state(): 'loaded' | 'unloaded' | 'unavailable' {
+        if (this.document.content === null) {
+            return 'unloaded';
+        }
+
+        if (this.document.content) {
+            return 'loaded';
+        }
+
+        return 'unavailable';
     }
 
     public getChildren(rows: AASTableRow[]): AASTableRow[] {
@@ -63,11 +87,7 @@ export class AASTableRow {
 }
 
 export interface AASTableState {
-    column: string;
-    direction: SortDirection;
     viewMode: ViewMode;
-    showAll: boolean;
-    filter?: string;
     rows: AASTableRow[];
 }
 

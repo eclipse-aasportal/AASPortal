@@ -11,7 +11,7 @@
         "serve": "ng serve --host=127.0.0.1",
         "build": "ng build",
         "build:debug": "ng build --configuration development",
-        "test": "ng test",
+        "test": "ng test aas-portal",
         "tsc": "rimraf build && tsc -p tsconfig.json"
     },
     "private": true,

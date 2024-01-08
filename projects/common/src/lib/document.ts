@@ -8,7 +8,6 @@
 
 import { isEqual } from 'lodash-es';
 import * as aas from './aas.js';
-import { equalUrls } from './index.js';
 import { AASDocument, AASAbbreviation } from './types.js';
 
 /** Represents a difference. */
@@ -29,7 +28,7 @@ export interface DifferenceItem {
  * @returns `true` if the specified documents are equal.
  */
 export function equalDocument(a: AASDocument | null, b: AASDocument | null): boolean {
-    return a === b || a != null && b != null && a.id === b.id && equalUrls(a.container, b.container);
+    return a === b || a != null && b != null && a.id === b.id && a.endpoint === b.endpoint;
 }
 
 /**
@@ -133,6 +132,28 @@ export function* traverse(root: aas.Referable): Generator<[string, [aas.Referabl
             yield [path + child.idShort, [parent, child]];
 
             for (const item of traverseChildren(child, childPath)) {
+                yield item;
+            }
+        }
+    }
+}
+
+/**
+ * 
+ * @param root 
+ */
+export function* flat(root: aas.Referable): Generator<aas.Referable> {
+    yield root;
+
+    for (const item of flatChildren(root)) {
+        yield item;
+    }
+
+    function* flatChildren(parent: aas.Referable): Generator<aas.Referable> {
+        for (const child of getChildren(parent)) {
+            yield child;
+
+            for (const item of flatChildren(child)) {
                 yield item;
             }
         }
@@ -725,24 +746,30 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
     switch (abbreviation.toLowerCase()) {
         case 'aas':
             return 'AssetAdministrationShell';
+        case 'blob':
+            return 'Blob';
+        case 'ent':
+            return 'Entity';
+        case 'file':
+            return 'File';
+        case 'mlp':
+            return 'MultiLanguageProperty';
+        case 'opr':
+            return 'Operation';
+        case 'prop':
+            return 'Property';
+        case 'range':
+            return 'Range';
+        case 'ref':
+            return 'ReferenceElement';
+        case 'rel':
+            return 'RelationshipElement';
         case 'sm':
             return 'Submodel';
         case 'smc':
             return 'SubmodelElementCollection';
         case 'sml':
             return 'SubmodelElementList';
-        case 'prop':
-            return 'Property';
-        case 'mlp':
-            return 'MultiLanguageProperty';
-        case 'ref':
-            return 'ReferenceElement';
-        case 'ent':
-            return 'Entity';
-        case 'file':
-            return 'File';
-        case 'opr':
-            return 'Operation';
         default:
             return undefined;
     }

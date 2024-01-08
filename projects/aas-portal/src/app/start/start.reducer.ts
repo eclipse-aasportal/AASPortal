@@ -8,41 +8,92 @@
 
 import { createReducer, on } from '@ngrx/store';
 import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { AASDocument, AASPage, aas } from 'common';
 import * as StartActions from './start.actions';
 import { StartState } from './start.state';
 
 const initialState: StartState = {
-    viewMode: ViewMode.List,
-    reverse: false,
-    column: null,
+    viewMode: ViewMode.Undefined,
+    limit: 10,
     filter: '',
-    showAll: false
+    documents: [],
+    isFirstPage: false,
+    isLastPage: false,
+    totalCount: 0,
+    favorites: '-',
 };
 
 export const startReducer = createReducer(
     initialState,
     on(
-        StartActions.setFilter,
-        (state, { filter }) => setFilter(state, filter)
-    ),
-    on(
-        StartActions.setShowAll,
-        (state, { showAll }) => setShowAll(state, showAll)
-    ),
-    on(
         StartActions.setViewMode,
         (state, { viewMode }) => setViewMode(state, viewMode)
-    )
+    ),
+    on(
+        StartActions.addTree,
+        (state, { documents }) => addTree(state, documents)
+    ),
+    on(
+        StartActions.setPage,
+        (state, { page, limit, filter }) => setPage(state, page, limit, filter)
+    ),
+    on(
+        StartActions.setContent,
+        (state, { document, content }) => setContent(state, document, content)
+    ),
+    on(
+        StartActions.setFavorites,
+        (state, { name, documents }) => setFavorites(state, name, documents)
+    ),
+    on(
+        StartActions.removeFavorites,
+        (state, { favorites }) => removeFavorites(state, favorites)
+    ),
 )
 
 function setViewMode(state: StartState, viewMode: ViewMode): StartState {
-    return { ...state, viewMode };
+    return { ...state, documents: [], viewMode };
 }
 
-function setShowAll(state: StartState, showAll: boolean): StartState {
-    return { ...state, showAll };
+function addTree(state: StartState, nodes: AASDocument[]): StartState {
+    return { ...state, documents: [...state.documents, ...nodes] };
 }
 
-function setFilter(state: StartState, filter: string): StartState {
-    return { ...state, filter };
+function setPage(state: StartState, page: AASPage, limit: number | undefined, filter: string | undefined): StartState {
+    return {
+        ...state,
+        viewMode: ViewMode.List,
+        favorites: '-',
+        limit: limit ?? state.limit,
+        filter: filter != null ? filter : state.filter,
+        documents: page.documents,
+        isFirstPage: page.previous === null,
+        isLastPage: page.next === null,
+    };
+}
+
+function setFavorites(state: StartState, favorites: string, documents: AASDocument[]): StartState {
+    return { ...state, favorites, documents, viewMode: ViewMode.List };
+}
+
+function setContent(state: StartState, document: AASDocument, content: aas.Environment): StartState {
+    const documents = [...state.documents];
+    const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
+    if (index >= 0) {
+        documents[index] = { ...document, content }
+    }
+
+    return { ...state, documents };
+}
+
+function removeFavorites(state: StartState, favorites: AASDocument[]): StartState {
+    if (state.favorites === '-') {
+        return state;
+    }
+
+    const documents = state.documents.filter(
+        document => favorites.every(favorite => document.endpoint !== favorite.endpoint || 
+            document.id !== favorite.id));
+
+    return { ...state, documents };
 }

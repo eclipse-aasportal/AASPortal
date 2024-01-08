@@ -12,14 +12,14 @@ import { Body, Delete, Get, Hidden, OperationId, Path, Post, Put, Route, Securit
 
 import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { decodeBase64Url } from '../convert.js';
 import { Variable } from '../variable.js';
 
 @injectable()
 @Route('/api/v1')
 @Tags('Authentication')
-export class AuthController extends ControllerBase {
+export class AuthController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, convertFromString, DifferenceItem, LiveRequest } from 'common';
+import { aas, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'common';
 import { ServerMessage } from '../server-message.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
@@ -27,8 +27,8 @@ export abstract class AasxServer extends AASResource {
     /**
      * @param url The URL of the AASX-Server.
      */
-    constructor(logger: Logger, url: string | URL) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string) {
+        super(logger, url, name);
     }
 
     protected readonly message = new ServerMessage();
@@ -47,17 +47,28 @@ export abstract class AasxServer extends AASResource {
         } 
     }
 
+    /**
+     * Reads the environment of the AAS with the specified identifier.
+     * @param id The AAS identifier.
+     * @returns
+     */
+    public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
+
+    /** Gets the thumbnail of the AAS with the specified identifier.
+     * @param id The identifier of the current AAS.
+    */
+    public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
 
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
-            await this.message.checkUrlExist(this.url.href);
+            await this.message.checkUrlExist(this.url);
         }
 
         ++this.reentry;
     }
 
     public closeAsync(): Promise<void> {
-        return new Promise((resolve, _) => {
+        return new Promise(resolve => {
             if (this.reentry > 0) {
                 --this.reentry;
             }
@@ -70,7 +81,7 @@ export abstract class AasxServer extends AASResource {
         return new AasxServerPackage(this.logger, this, address);
     }
 
-    public createSubscription(
+    public override createSubscription(
         client: SocketClient,
         message: LiveRequest,
         env: aas.Environment): SocketSubscription {
@@ -82,13 +93,6 @@ export abstract class AasxServer extends AASResource {
      * @returns The names of the AASs contained in the current AASX server.
      */
     public abstract getShellsAsync(): Promise<string[]>;
-
-    /**
-     * Reads the environment of the AAS with the specified identifier.
-     * @param id The AAS identifier.
-     * @returns
-     */
-    public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
 
     /**
      * ToDo
@@ -115,7 +119,7 @@ export abstract class AasxServer extends AASResource {
      * @param valueType The 
      * @returns The current value.
      */
-    public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<any> {
+    public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
         const property = await this.message.get<PropertyValue>(new URL(url));
         return convertFromString(property.value, valueType);
     }

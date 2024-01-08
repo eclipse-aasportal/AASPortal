@@ -7,42 +7,48 @@
  *****************************************************************************/
 
 import { createAction, props } from '@ngrx/store';
+import { TypedAction } from '@ngrx/store/src/models';
 import { AASDocument } from 'common';
-import { SortDirection } from '../sortable-header.directive';
 import { AASTableRow } from './aas-table.state';
 import { ViewMode } from '../types/view-mode';
 
 export enum AASTableActionType {
-    UPDATE_ROWS = '[AASTable] Update Rows',
-    SET_VIEW_MODE = '[AASTable] Set view mode',
-    SET_SHOW_ALL = '[AASTable] Set show all',
-    SET_SORT_PARAMETER = '[AASTable] Set sort parameter',
-    SET_FILTER = '[AASTable] Set filter',
-    EXPAND = '[AASTable] Expand',
-    COLLAPSE = '[AASTable] Collapse',
-    TOGGLE_SELECTED = '[AASTable] Toggle selected',
-    TOGGLE_SELECTIONS = '[AASTable] Toggle selections'
+    SET_VIEW_MODE = '[AASTable] set view mode',
+    SET_PAGE = '[AASTable] set page',
+    EXPAND = '[AASTable] expand',
+    COLLAPSE = '[AASTable] collapse',
+    TOGGLE_SELECTED = '[AASTable] toggle selected',
+    TOGGLE_SELECTIONS = '[AASTable] toggle selections',
+    SET_SELECTIONS = '[AASTable] set selections',
+    UPDATE_VIEW = '[AASTable] update view',
 }
 
-export const updateRows = createAction(
-    AASTableActionType.UPDATE_ROWS,
-    props<{ documents: AASDocument[] }>());
+export interface UpdateViewAction extends TypedAction<AASTableActionType.UPDATE_VIEW> {
+    documents: AASDocument[];
+}
 
 export const setViewMode = createAction(
     AASTableActionType.SET_VIEW_MODE,
-    props<{ documents: AASDocument[]; viewMode: ViewMode }>());
+    props<{ viewMode: ViewMode }>());
 
-export const setShowAll = createAction(
-    AASTableActionType.SET_SHOW_ALL,
-    props<{ documents: AASDocument[]; showAll: boolean }>());
+export const updateView = createAction(
+    AASTableActionType.UPDATE_VIEW,
+    props<{ documents: AASDocument[] }>());
 
-export const setFilter = createAction(
-    AASTableActionType.SET_FILTER,
-    props<{ filter?: string }>());
+export const setRows = createAction(
+    AASTableActionType.SET_PAGE,
+    props<{ rows: AASTableRow[] }>());
 
-export const setSortParameter = createAction(
-    AASTableActionType.SET_SORT_PARAMETER,
-    props<{ column: string; direction: SortDirection }>());
+export const toggleSelected = createAction(
+    AASTableActionType.TOGGLE_SELECTED,
+    props<{ row: AASTableRow, altKey: boolean, shiftKey: boolean }>());
+
+export const toggleSelections = createAction(
+    AASTableActionType.TOGGLE_SELECTIONS);
+
+export const setSelections = createAction(
+    AASTableActionType.SET_SELECTIONS,
+    props<{ documents: AASDocument[] }>());
 
 export const expandRow = createAction(
     AASTableActionType.EXPAND,
@@ -51,10 +57,3 @@ export const expandRow = createAction(
 export const collapseRow = createAction(
     AASTableActionType.COLLAPSE,
     props<{ row: AASTableRow }>());
-
-export const toggleSelected = createAction(
-    AASTableActionType.TOGGLE_SELECTED,
-    props<{ row: AASTableRow }>());
-
-export const toggleSelections = createAction(
-    AASTableActionType.TOGGLE_SELECTIONS);

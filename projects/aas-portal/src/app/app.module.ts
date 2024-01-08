@@ -14,7 +14,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { AASLibModule } from 'projects/aas-lib/src/public-api';
-import { EffectsModule } from '@ngrx/effects';
 import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -34,10 +33,13 @@ import { UploadFormComponent } from './start/upload-form/upload-form.component';
 import { ViewComponent } from './view/view.component';
 import { viewReducer } from './view/view.reducer';
 import { AddEndpointFormComponent } from './start/add-endpoint-form/add-endpoint-form.component';
-import { projectReducer } from './project/project.reducer';
-import { ProjectEffects } from './project/project.effects';
 import { HttpLoaderFactory } from './http-loader-factory';
 import { httpInterceptorProviders } from './index';
+import { EffectsModule } from '@ngrx/effects';
+import { AASEffects } from './aas/aas.effects';
+import { ViewEffects } from './view/view.effects';
+import { StartEffects } from './start/start.effects';
+import { FavoritesFormComponent } from './start/favorites-form/favorites-form.component';
 
 @NgModule({
     declarations: [
@@ -52,7 +54,8 @@ import { httpInterceptorProviders } from './index';
         NewElementFormComponent,
         EditElementFormComponent,
         UploadFormComponent,
-        ViewComponent
+        ViewComponent,
+        FavoritesFormComponent
     ],
     imports: [
         BrowserModule,
@@ -67,9 +70,8 @@ import { httpInterceptorProviders } from './index';
                 aas: aasReducer,
                 view: viewReducer,
                 dashboard: dashboardReducer,
-                project: projectReducer
             }),
-        EffectsModule.forRoot([ProjectEffects]),
+        EffectsModule.forRoot([StartEffects, AASEffects, ViewEffects]),
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {

@@ -20,7 +20,7 @@ export interface SubmodelViewDescriptor {
 
 export interface SubmodelReference {
     id: string;
-    url: string;
+    endpoint: string;
     idShort: string;
 }
 
@@ -65,7 +65,7 @@ export function resolveSemanticId(value: aas.HasSemantic | aas.Reference | strin
 
     return semanticId;
 
-    function isReference(value: any): value is aas.Reference {
+    function isReference(value: unknown): value is aas.Reference {
         return Array.isArray((value as aas.Reference).keys);
     }
 }

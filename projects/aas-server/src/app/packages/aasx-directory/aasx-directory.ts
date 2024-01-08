@@ -6,12 +6,11 @@
  *
  *****************************************************************************/
 
-import { aas, ApplicationError, LiveRequest } from 'common';
+import { aas, ApplicationError } from 'common';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
 import { Logger } from '../../logging/logger.js';
-import { SocketClient } from '../../live/socket-client.js';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { AasxPackage } from './aasx-package.js';
@@ -20,13 +19,15 @@ import { SocketSubscription } from '../../live/socket-subscription.js';
 export class AasxDirectory extends AASResource {
     private reentry = 0;
 
-    constructor(logger: Logger, url: string | URL, private readonly fileStorage: FileStorage) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string, private readonly fileStorage: FileStorage) {
+        super(logger, url, name);
     }
 
     public get isOpen(): boolean {
         return this.reentry > 0;
     }
+
+    public override readonly version = '';
 
     public readonly readOnly = true;
 
@@ -49,7 +50,7 @@ export class AasxDirectory extends AASResource {
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
             if (!(await this.fileStorage.exists('.'))) {
-                throw new Error(`The directory '${this.baseUrl}' does not exist.`);
+                throw new Error(`The directory '${this.url}' does not exist.`);
             }
 
             ++this.reentry;
@@ -70,10 +71,7 @@ export class AasxDirectory extends AASResource {
         return new AasxPackage(this.logger, this, address);
     }
 
-    public createSubscription(
-        client: SocketClient,
-        message: LiveRequest,
-        env: aas.Environment): SocketSubscription {
+    public override createSubscription(): SocketSubscription {
         throw new Error('Not implemented.');
     }
 
@@ -85,7 +83,11 @@ export class AasxDirectory extends AASResource {
         return this.fileStorage.createReadStream(name);
     }
 
-    public async postPackageAsync(file: Express.Multer.File): Promise<AASPackage> {
+    public readEnvironmentAsync(): Promise<aas.Environment> {
+        throw new Error('Not implemented.');
+    }
+
+    public override async postPackageAsync(file: Express.Multer.File): Promise<string> {
         const exists = await this.fileStorage.exists(file.filename);
         if (exists) {
             throw new ApplicationError(
@@ -97,8 +99,7 @@ export class AasxDirectory extends AASResource {
         try {
             const buffer = await readFile(file.path);
             await this.fileStorage.writeFile(file.filename, buffer);
-            const aasPackage = new AasxPackage(this.logger, this, file.filename);
-            return aasPackage;
+            return `${file.filename} successfully written`;
         } catch (error) {
             if (await this.fileStorage.exists(file.filename)) {
                 await this.fileStorage.unlink(file.filename);
@@ -108,15 +109,16 @@ export class AasxDirectory extends AASResource {
         }
     }
 
-    public deletePackageAsync(_: string, name: string): Promise<void> {
-        return this.fileStorage.unlink(name);
+    public override async deletePackageAsync(_: string, name: string): Promise<string> {
+        await this.fileStorage.unlink(name);
+        return `${name} successfully deleted`;
     }
 
-    public invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public override invoke(): Promise<aas.Operation> {
         throw new Error('Not implemented.');
     }
 
-    public getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public override getBlobValueAsync(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 }

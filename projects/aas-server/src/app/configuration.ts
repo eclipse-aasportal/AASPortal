@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { AASEndpointType } from 'common';
+import { AASEndpoint, AASEndpointType } from 'common';
 
 /** The AAS Server configuration. */
 export interface AASServerConfiguration {
-    endpoints: string[]
+    endpoints: AASEndpoint[]
 }
 
 /**
@@ -51,71 +51,41 @@ export function getEndpointType(url: string | URL): AASEndpointType {
 
 /**
  * Creates an AAS container endpoint URL with required search parameters.
- * @param address The URL.
- * @param options The container endpoint options or names.
- * @returns The endpoint URL.
- */
-export function createEndpointURL(
-    address: string | URL,
-    options?: string | { name?: string, type?: AASEndpointType, params?: [string, string][] }): URL {
-    const endpoint = typeof address === 'string' ? new URL(address) : address;
-    let name: string | undefined;
-    let type: AASEndpointType | undefined;
-    const params = [...endpoint.searchParams];
-    params.forEach(param => endpoint.searchParams.delete(param[0]));
-    if (typeof options === 'string') {
-        name = options;
-    } else if (options) {
-        name = options.name;
-        type = options.type;
-        if (options.params) {
-            params.push(...options.params);
-        }
-    }
-
-    if (!name) {
-        const tuple = params.find(item => item[0] === 'name');
-        if (tuple) {
-            name = tuple[1];
-        }
-    }
-
-    if (!type) {
-        const tuple = params.find(item => item[0] === 'type');
-        if (tuple) {
-            type = tuple[1] as AASEndpointType;
-        }
-    }
-
-    if (type !== 'AASRegistry' || (endpoint.protocol !== 'http:' && endpoint.protocol !== 'https:')) {
-        type = undefined;
-    }
-
-    if (name) {
-        endpoint.searchParams.append('name', name);
-    }
-
-    if (type) {
-        endpoint.searchParams.append('type', type);
-    }
-
-    params?.forEach(item => {
-        if (item[0] !== 'type' && item[1] !== 'name') {
-            endpoint.searchParams.append(item[0], item[1]);
-        }
-    });
-
-    return endpoint;
-}
-
-/**
- * Creates an AAS container endpoint URL with required search parameters.
  * @param address The AAS container endpoint address (URL).
  * @param options The container endpoint options or name.
  * @returns The endpoint URL as string.
  */
-export function createEndpoint(
-    address: string | URL,
-    options?: string | { name?: string, type?: AASEndpointType, params?: [string, string][] }): URL {
-    return createEndpointURL(address, options);
+export function createEndpoint(url: string, name: string, type: AASEndpointType = 'AasxServer', version: string = '3.0'): AASEndpoint {
+    return { url, name, type, version };
+}
+
+/**
+ * Creates an AASEndpoint form an URL.
+ * @param url The current URL.
+ * @returns An equivalent AASEndpoint.
+ */
+export function urlToEndpoint(url: string): AASEndpoint {
+    const value = new URL(url);
+    const name = value.searchParams.get('name');
+    const type = value.searchParams.get('type') as AASEndpointType ?? getEndpointType(value);
+    const version = value.searchParams.get('version') ?? '3.0';
+
+    value.search = '';
+    value.hash = '';
+
+    return { url: value.href, name: name ?? value.href, type, version };
+}
+
+/**
+ * Creates an URL that represents an AASEndpoint.
+ */
+export function endpointUrl(url: string, name: string, type: AASEndpointType, version?: string): URL {
+    const value = new URL(url);
+    value.searchParams.append('name', name);
+    value.searchParams.append('type', type);
+    if (version) {
+        value.searchParams.append('version', version);
+    }
+
+    return value;
 }

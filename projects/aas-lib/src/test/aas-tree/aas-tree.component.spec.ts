@@ -15,7 +15,6 @@ import { AASTreeComponent } from '../../lib/aas-tree/aas-tree.component';
 import { sampleDocument } from '../assets/sample-document';
 import { NotifyService } from '../../lib/notify/notify.service';
 import { DownloadService } from '../../lib/download.service';
-import { TestWindowService } from '../assets/test-window.service';
 import { WindowService } from '../../lib/window.service';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../assets/test-web-socket-factory.service';
@@ -49,11 +48,17 @@ describe('AASTreeComponent', () => {
                 },
                 {
                     provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>(['downloadFileAsync', 'downloadDocument', 'uploadDocuments'])
+                    useValue: jasmine.createSpyObj<DownloadService>([
+                        'downloadFileAsync',
+                        'downloadDocument',
+                        'uploadDocuments'])
                 },
                 {
                     provide: WindowService,
-                    useValue: new TestWindowService()
+                    useValue: jasmine.createSpyObj<WindowService>([
+                        'addEventListener',
+                        'open',
+                        'removeEventListener']),
                 },
                 {
                     provide: WebSocketFactoryService,
@@ -140,20 +145,6 @@ describe('AASTreeComponent', () => {
 
 
     describe('toggleSelection', function () {
-        let nodes: AASTreeRow[];
-
-        beforeEach(function () {
-            component.nodes.pipe(first()).subscribe(values => nodes = values);
-        });
-
-        it('toggle selection of a row', function (done: DoneFn) {
-            component.toggleSelection(nodes[1]);
-            component.selectedElements.pipe(first()).subscribe(values => {
-                expect(values).toEqual([nodes[1].element]);
-                done();
-            });
-        });
-
         it('toggle selection of all rows', function (done: DoneFn) {
             component.toggleSelections();
             store.select(selectRows).pipe(first()).subscribe(values => {

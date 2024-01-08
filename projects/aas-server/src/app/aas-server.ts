@@ -15,10 +15,11 @@ import { FileLogger } from './logging/file-logger.js';
 import { TemplateStorageFactory } from './template/template-storage-factory.js';
 import { WSServer } from './ws-server.js';
 import { AASProvider } from './aas-provider/aas-provider.js';
+import { AASIndexFactory } from './aas-index/aas-index-factory.js';
 
-container.registerInstance('CONFIGURATION', './aas-server-config.json');
 container.registerInstance('USERS_DIR', './users');
-container.registerType('Logger', FileLogger);
+container.registerSingleton('Logger', FileLogger);
+container.register('AASIndex', { useFactory: c => new AASIndexFactory(c).create() });
 container.register('CookieStorage', { useFactory: c => new CookieStorageFactory(c).create() });
 container.register('UserStorage', { useFactory: c => new UserStorageFactory(c).create() });
 container.register('winston.Logger', { useFactory: () => new LoggerFactory().create() });

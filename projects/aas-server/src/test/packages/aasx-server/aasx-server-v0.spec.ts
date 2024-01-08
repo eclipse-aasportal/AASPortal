@@ -28,7 +28,7 @@ describe('AasxServerV0', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AasxServerV0(logger, 'http://localhost:1234');
+        server = new AasxServerV0(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     it('returns the AAS list', async function () {

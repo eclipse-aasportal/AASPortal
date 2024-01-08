@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { v4 as uuid } from 'uuid';
-import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode } from 'common';
+import { aas, AASDocument, AASEndpointType, ApplicationError, EndpointType, getIdShortPath, getUnit, LiveNode } from 'common';
 import { cloneDeep } from 'lodash-es';
 import { ERRORS } from '../types/errors';
 import { Observable } from 'rxjs';
@@ -310,7 +310,7 @@ export class DashboardService {
         for (const blob of blobs) {
             if (blob.parent) {
                 const label = blob.idShort;
-                const container = encodeBase64Url(document.container);
+                const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
                 const smId = encodeBase64Url(blob.parent.keys[0].value);
                 const path = getIdShortPath(blob);
@@ -325,7 +325,7 @@ export class DashboardService {
                         color: this.createRandomColor(),
                         element: blob,
                         node: null,
-                        url: `/api/v1/containers/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`
+                        url: `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`
                     }]
                 };
 
@@ -347,8 +347,7 @@ export class DashboardService {
             } else {
                 nodes = [];
                 page.requests.push({
-                    type: document.endpoint.type,
-                    url: document.container,
+                    endpoint: document.endpoint,
                     id: document.id,
                     nodes: nodes
                 });
@@ -356,6 +355,17 @@ export class DashboardService {
         }
 
         return nodes;
+    }
+
+    private toEndpointType(type: AASEndpointType): EndpointType {
+        switch (type) {
+            case 'OpcuaServer':
+                return 'opc';
+            case 'AasxDirectory':
+                return 'file';
+            default:
+                return 'http';
+        }
     }
 
     private getRow(page: DashboardPage, item: DashboardItem): DashboardItem[] {
@@ -366,11 +376,10 @@ export class DashboardService {
     }
 
     private indexOfRequest(page: DashboardPage, document: AASDocument): number {
-        const container = document.container;
-        const type = document.endpoint.type;
+        const name = document.endpoint;
         const id = document.id;
         return page.requests.findIndex(item => {
-            return item.url === container && (type === 'opc' || item.id === id);
+            return item.endpoint === name && item.id === id;
         });
     }
 

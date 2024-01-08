@@ -43,39 +43,69 @@ export type AASAbbreviation =
     'SM' |
     'SMC' |
     'SME' |
-    'SML' ;
+    'SML';
+
+/** The kind of AAS container or server. */
+export type AASEndpointType = 'AasxDirectory' | 'AasxServer' | 'OpcuaServer' | 'AASRegistry';
+
+/** The endpoint to an AAS container */
+export type AASEndpoint = {
+    name: string;
+    url: string;
+    type: AASEndpointType;
+    version?: string;
+};
 
 /** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
-export interface AASContainer {
-    /** The URL of the container endpoint. */
-    url: string;
-    /** An alias for the container. */
-    name: string;
-    /** The AAS documents that this container provides. */
+export interface AASContainer extends AASEndpoint {
     documents?: AASDocument[];
 }
 
-/** Represents an Asset Administration Shell */
-export interface AASDocument {
+/** The unique identifier of an AAS. */
+export interface AASDocumentId {
     /** The identification of the Asset Administration Shell. */
     id: string;
+    /** The name of the endpoint. */
+    endpoint: string;
+}
+
+/** Represents an Asset Administration Shell */
+export interface AASDocument extends AASDocumentId {
+    /** The address of the AAS in the container. */
+    address: string;
+    /** The root element of the AAS structure (content), `null` if the content is not loaded or 
+     * `undefined` if the content is not available. */
+    content?: aas.Environment | null;
+    /** Checksum to detect changes. */
+    crc32: number;
     /** The name of the AAS. */
     idShort: string;
-    /** The address of the resource containing the AAS. */
-    endpoint: Endpoint;
-    /** The reference of the container from which the AAS comes. */
-    container: string;
-    /** A time stamp that represents the current state of the AAS. */
-    timeStamp: number;
-    /** Indicates whether the document can be edited. */
-    readonly: boolean;
     /** Indicates whether the document is modified. */
     modified?: boolean;
     /** Indicates whether communication can be established with the system represented by the AAS. */
     onlineReady?: boolean;
-    /** The root element of the AAS structure (content), `null` if the content is not loaded or 
-     * `undefined` if the content is not available. */
-    content?: aas.Environment | null;
+    /** The parent AAS in a hierarchy. */
+    parent?: AASDocument | null;
+    /** Indicates whether the document can be edited. */
+    readonly: boolean;
+    /** A thumbnail. */
+    thumbnail?: string;
+    /** The time at which the document was created. */
+    timestamp: number;
+}
+
+/** Represents a page of AAS documents from the total set. */
+export interface AASPage {
+    previous: AASDocumentId | null;
+    next: AASDocumentId | null;
+    documents: AASDocument[];
+}
+
+/** Represents a cursor in the collection of Asset Administration Shells. */
+export interface AASCursor {
+    previous?: AASDocumentId | null;
+    limit: number;
+    next?: AASDocumentId | null;
 }
 
 /** Describes a template. */
@@ -108,14 +138,10 @@ export interface LiveNode {
 }
 
 export interface LiveRequest {
-    type: EndpointType;
-    url: string;
+    endpoint: string;
     id: string;
     nodes: LiveNode[]
 }
-
-/** The kind of AAS container or server. */
-export type AASEndpointType = 'AasxDirectory' | 'AasxServer' | 'OpcuaServer' | 'AASRegistry';
 
 export interface PackageInfo {
     name: string;
@@ -142,7 +168,7 @@ export interface ErrorData {
     type: string;
     name: string;
     message: string;
-    args: any[];
+    args: unknown[];
 }
 
 /** Provides information about a 3rd-party package. */

@@ -11,6 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { AASEndpoint } from 'common';
 import { AddEndpointFormComponent } from '../../app/start/add-endpoint-form/add-endpoint-form.component';
 
 describe('AddEndpointFormComponent', () => {
@@ -57,35 +58,39 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('submits endpoint Name: "My endpoint", URL: "file:///my-endpoint"', function () {
-        let endpoint: string | undefined;
+        let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake((result) => endpoint = result);
 
-        component.item = component.items[3];
+        component.item = component.items[2];
         component.name = 'My endpoint';
         component.item.value = 'file:///my-endpoint';
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
-        expect(endpoint).toEqual('file:///my-endpoint?name=My+endpoint');
+        expect(endpoint?.name).toEqual('My endpoint');
+        expect(endpoint?.url).toEqual('file:///my-endpoint');
+        expect(endpoint?.type).toEqual('AasxDirectory');
     });
 
     it('submits AAS endpoint Name: "My endpoint", URL: "file:///a\\b\\my-endpoint"', function () {
-        let endpoint: string | undefined;
+        let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake((result) => endpoint = result);
 
-        component.item = component.items[3];
+        component.item = component.items[2];
         component.name = 'My endpoint';
         component.item.value = 'file:///a\\b\\my-endpoint';
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
-        expect(endpoint).toEqual('file:///a/b/my-endpoint?name=My+endpoint');
+        expect(endpoint?.name).toEqual('My endpoint');
+        expect(endpoint?.url).toEqual('file:///a/b/my-endpoint');
+        expect(endpoint?.type).toEqual('AasxDirectory');
     });
 
     it('ignores AAS endpoint: Name: "", URL: "file:///my-endpoint"', function () {
         spyOn(modal, 'close');
 
-        component.item = component.items[3];
+        component.item = component.items[2];
         component.name = '';
         component.item.value = 'file:///my-endpoint';
 
@@ -97,7 +102,7 @@ describe('AddEndpointFormComponent', () => {
     it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', function () {
         spyOn(modal, 'close');
 
-        component.item = component.items[3];
+        component.item = component.items[2];
         component.name = 'My endpoint';
         component.item.value = 'file:///';
 
@@ -107,22 +112,24 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://172.16.160.178:30001/I4AASServer"', function () {
-        let endpoint: string | undefined;
+        let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake((result) => endpoint = result);
 
-        component.item = component.items[2];
+        component.item = component.items[1];
         component.name = 'I4AAS Server';
         component.item.value = 'opc.tcp://172.16.160.178:30001/I4AASServer';
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
-        expect(endpoint).toEqual('opc.tcp://172.16.160.178:30001/I4AASServer?name=I4AAS+Server');
+        expect(endpoint?.name).toEqual('I4AAS Server');
+        expect(endpoint?.url).toEqual('opc.tcp://172.16.160.178:30001/I4AASServer');
+        expect(endpoint?.type).toEqual('OpcuaServer');
     });
 
     it('ignores AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://"', function () {
         spyOn(modal, 'close');
 
-        component.item = component.items[2];
+        component.item = component.items[1];
         fixture.detectChanges();
 
         inputNameElement.value = 'I4AAS Server';
@@ -135,33 +142,8 @@ describe('AddEndpointFormComponent', () => {
         expect(component.messages.length > 0).toBeTrue();
     });
 
-    it('submits AAS registry Name: "AAS Registry", URL: "http://172.16.160.188:50000/registry/api/v1/registry/"', function () {
-        let endpoint: string | undefined;
-        spyOn(modal, 'close').and.callFake((result) => endpoint = result);
-
-        component.item = component.items[1];
-        component.name = 'AAS Registry';
-        component.item.value = 'http://172.16.160.188:50000/registry/api/v1/registry/';
-
-        form.dispatchEvent(new Event('submit'));
-        expect(modal.close).toHaveBeenCalled();
-        expect(endpoint).toEqual('http://172.16.160.188:50000/registry/api/v1/registry/?name=AAS+Registry&type=AASRegistry');
-    });
-
-    it('ignores endpoint Name: "AAS Registry", URL: "http://"', function () {
-        spyOn(modal, 'close');
-
-        component.item = component.items[1];
-        component.name = 'AAS Registry';
-        component.item.value = 'http://';
-
-        form.dispatchEvent(new Event('submit'));
-        expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages.length > 0).toBeTrue();
-    });
-
     it('submits AASX server Name: "AASX Server", URL: "http://172.16.160.188:50001/"', function () {
-        let endpoint: string | undefined;
+        let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake((result) => endpoint = result);
 
         component.item = component.items[0];
@@ -170,6 +152,8 @@ describe('AddEndpointFormComponent', () => {
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
-        expect(endpoint).toEqual('http://172.16.160.188:50001/?name=AASX+Server');
+        expect(endpoint?.name).toEqual('AASX Server');
+        expect(endpoint?.url).toEqual('http://172.16.160.188:50001/');
+        expect(endpoint?.type).toEqual('AasxServer');
     });
 });

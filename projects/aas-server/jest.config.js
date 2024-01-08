@@ -28,7 +28,6 @@ export default {
                 useESM: true,
                 babelConfig: {
                     plugins: [
-                        "babel-plugin-transform-import-meta",
                         "@babel/plugin-syntax-import-attributes"
                     ]
                 }

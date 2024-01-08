@@ -12,6 +12,7 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
+import { AASCursor, AASPage } from 'common';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -23,6 +24,7 @@ import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
+import { encodeBase64Url } from '../../app/convert.js';
 
 describe('DocumentsController', function () {
     let app: Express;
@@ -45,18 +47,15 @@ describe('DocumentsController', function () {
                 'deleteCookieAsync'
             ]);
 
-
         aasProvider = createSpyObj<AASProvider>(
             [
                 'updateDocumentAsync',
-                'getWorkspaces',
-                'getContainer',
                 'getContentAsync',
-                'getDocuments',
-                'getDocument',
+                'getPackageAsync',
                 'getDocumentAsync',
-                'addDocumentsAsync',
-                'deleteDocumentAsync',
+                'getDocumentsAsync',
+                'addPackagesAsync',
+                'deletePackageAsync',
                 'getDataElementValueAsync',
                 'invoke',
                 'resetAsync'
@@ -82,13 +81,27 @@ describe('DocumentsController', function () {
     });
 
     it('getDocument: /api/v1/documents/:id', async function () {
-        aasProvider.getDocument.mockReturnValue(sampleDocument);
+        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
-        expect(aasProvider.getDocument).toHaveBeenCalled();
+        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+    });
+
+    it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
+        const page: AASPage = { previous: null, documents: [sampleDocument], next: null };
+        aasProvider.getDocumentsAsync.mockResolvedValue(page);
+        const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
+        const filter = encodeBase64Url('#prop:Name=Value');
+        const response = await request(app)
+            .get(`/api/v1/documents?cursor=${cursor}&filter=${filter}`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(page);
+        expect(aasProvider.getDocumentsAsync).toHaveBeenCalled();
     });
 });

@@ -7,19 +7,19 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Get, OperationId, Route, Security, Tags } from 'tsoa';
+import { Get, OperationId, Query, Route, Security, Tags } from 'tsoa';
 import { Logger } from '../logging/logger.js';
-import { ControllerBase } from './controller-base.js';
+import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { AASDocument } from 'common';
+import { AASDocument, AASPage } from 'common';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
 
 @injectable()
 @Route('/api/v1/documents')
 @Tags('Documents')
-export class DocumentsController extends ControllerBase {
+export class DocumentsController extends AASController {
     constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
@@ -27,6 +27,31 @@ export class DocumentsController extends ControllerBase {
         @inject(AASProvider) private readonly aasProvider: AASProvider
     ) {
         super(logger, auth, variable);
+    }
+
+    /**
+     * Returns a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
+     * @param cursor The current cursor.
+     * @param filter A filter expression.
+     * @returns A page of AAS documents.
+     */
+    @Get('')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getDocuments')
+    public async getDocuments(
+        @Query() cursor: string, 
+        @Query() filter?:string, 
+        @Query() language?: string): Promise<AASPage> {
+        try {
+            this.logger.start('getDocuments');
+            if (filter) {
+                filter = decodeBase64Url(filter);
+            }
+
+            return await this.aasProvider.getDocumentsAsync(JSON.parse(decodeBase64Url(cursor)), filter, language);
+        } finally {
+            this.logger.stop();
+        }
     }
 
     /**
@@ -39,8 +64,8 @@ export class DocumentsController extends ControllerBase {
     @OperationId('getDocument')
     public async getDocument(id: string): Promise<AASDocument> {
         try {
-            this.logger.start('getWorkspaces');
-            return await Promise.resolve(this.aasProvider.getDocument(decodeBase64Url(id)));
+            this.logger.start('getDocument');
+            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }

@@ -22,7 +22,7 @@ describe('AasxServerV3', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AasxServerV3(logger, 'http://localhost:1234');
+        server = new AasxServerV3(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     describe('resolveNodeId', function () {
@@ -55,7 +55,7 @@ describe('AasxServerV3', function () {
         it('inserts a submodel', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Submodel inserted.'));
+                stream.push('Submodel inserted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 201;
@@ -74,7 +74,7 @@ describe('AasxServerV3', function () {
         it('inserts a submodel-element', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('SubmodelElement inserted.'));
+                stream.push('SubmodelElement inserted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 201;
@@ -95,7 +95,7 @@ describe('AasxServerV3', function () {
         it('updates a submodel', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Submodel updated.'));
+                stream.push('Submodel updated.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 200;
@@ -115,7 +115,7 @@ describe('AasxServerV3', function () {
         it('updates a submodel-element', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('SubmodelElement updated.'));
+                stream.push('SubmodelElement updated.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 200;
@@ -137,7 +137,7 @@ describe('AasxServerV3', function () {
         it('deletes a submodel', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Submodel deleted.'));
+                stream.push('Submodel deleted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 204;
@@ -156,7 +156,7 @@ describe('AasxServerV3', function () {
         it('deletes a submodel-element', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('SubmodelElement deleted.'));
+                stream.push('SubmodelElement deleted.');
                 stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 204;
@@ -206,6 +206,7 @@ describe('AasxServerV3', function () {
         it('throws an error if the server returns with status code 500', async function () {
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
                 const stream = new IncomingMessage(new Socket());
+                stream.push(null);
                 (callback as (res: IncomingMessage) => void)(stream);
                 stream.statusCode = 500;
                 stream.statusMessage = 'Internal server error.';

@@ -15,18 +15,18 @@ import { PackageInfo } from 'common';
 import { createSpyObj } from './utils.js';
 import { describe, beforeEach, it, expect } from '@jest/globals';
 
-describe('Application Info service', function () {
+describe('Application Info service', () => {
     let logger: Logger;
     let applicationInfo: ApplicationInfo;
     let file: string;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         file = resolve('.', 'src/test/assets/app-info.json');
         applicationInfo = new ApplicationInfo(logger);
     });
 
-    it('gets the AASServer package info', async function () {
+    it('gets the AASServer package info', async () => {
         const expected: PackageInfo = JSON.parse((await readFile(file)).toString());
         await expect(applicationInfo.getAsync(file)).resolves.toEqual(expected);
     });

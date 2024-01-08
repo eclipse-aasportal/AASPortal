@@ -7,25 +7,33 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table #aasTable [viewMode]="viewMode" [showAll]="showAll" [filter]="filter"
-        [documents]="documents"></fhg-aas-table>
+    <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"></fhg-aas-table>
 </div>
 
-<ng-content />
 <ng-template #startToolbar>
+    <div class="input-group me-2">
+        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites()">
+            <i class="bi bi-star"></i>
+        </button>
+        <select class="form-select" [(ngModel)]="favoritesList">
+            <option *ngFor="let option of favoritesLists">{{option}}</option>
+        </select>
+    </div>
+    <div *ngIf="favoritesList === '-'" class="btn-group me-2">
+        <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
+            <i class="bi bi-chevron-bar-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage | async">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage | async">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage | async">
+            <i class="bi bi-chevron-bar-right"></i>
+        </button>
+    </div>
     <div class="btn-group me-2">
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints">
-                <i class="bi bi-stack-overflow"></i>
-                <span>&nbsp;</span>
-                <span>{{endpoint | async}}</span>
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                <ng-container *ngFor="let dropdownItem of endpoints | async">
-                    <button ngbDropdownItem (click)="setWorkspace(dropdownItem.name)">{{dropdownItem.name}}</button>
-                </ng-container>
-            </div>
-        </div>
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
                 <i class="bi bi-gear"></i>
@@ -50,12 +58,12 @@
     </div>
     <div class="btn-group me-2" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="viewMode === 'list'">
+            (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="viewMode === 'tree'">
+            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>
@@ -67,15 +75,17 @@
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
                 <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
                     translate>CMD_VIEW_USER_FEEDBACK</button>
-                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!this.canViewNameplate()"
+                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
                     translate>CMD_VIEW_NAMEPLATE</button>
             </div>
         </div>
     </div>
-    <div class="input-group flex-grow-1 me-2" [hidden]="viewMode === 'tree'">
-        <div class="input-group-text"><i class="bi bi-filter"></i></div>
+    <div *ngIf="favoritesList === '-'" class="input-group flex-grow-1 me-2">
+        <div class="input-group-text">
+            <i class="bi bi-filter"></i>
+        </div>
         <input #textInput type="text" class="form-control" [value]="filter | async"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="applyFilter(textInput.value)"
-            [disabled]="viewMode === 'tree'">
+            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
+            (keydown.enter)="textInput.blur()">
     </div>
 </ng-template>

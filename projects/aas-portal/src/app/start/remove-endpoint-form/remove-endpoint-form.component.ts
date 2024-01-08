@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, OnInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { TranslateService } from "@ngx-translate/core";
 

@@ -7,15 +7,16 @@
  *****************************************************************************/
 
 import { createSelector } from '@ngrx/store';
-import { State } from './start.state'
+import { StartFeatureState } from './start.state'
 import { ViewMode } from 'projects/aas-lib/src/public-api';
 
+const getState = (state: StartFeatureState) => state.start;
+const getFilter = (state: StartFeatureState) => state.start.filter;
+const getViewMode = (state: StartFeatureState) => state.start.viewMode;
+const getLimit = (state: StartFeatureState) => state.start.limit;
+const getDocuments = (state: StartFeatureState) => state.start.documents;
 
-const getShowAll = (state: State) => state.start.showAll;
-const getFilter = (state: State) => state.start.filter;
-const getViewMode = (state: State) => state.start.viewMode;
-
-export const selectShowAll = createSelector(getShowAll, showAll => showAll);
+export const selectState = createSelector(getState, state => state);
 
 export const selectFilter = createSelector(getFilter, filter => filter);
 
@@ -24,3 +25,17 @@ export const selectViewMode = createSelector(getViewMode, viewMode => viewMode);
 export const selectIsViewModeList = createSelector(getViewMode, viewMode => viewMode === ViewMode.List);
 
 export const selectIsViewModeTree = createSelector(getViewMode, viewMode => viewMode === ViewMode.Tree);
+
+export const selectLimit = createSelector(getLimit, limit => limit); 
+
+export const selectDocuments = createSelector(getDocuments, documents => documents);
+
+export const selectIsFirstPage = createSelector(
+    getState,
+    state => state.isFirstPage);
+
+export const selectIsLastPage = createSelector(
+    getState,
+    state => state.isLastPage);
+
+export const selectFavorites = createSelector(getState, state => state.favorites);

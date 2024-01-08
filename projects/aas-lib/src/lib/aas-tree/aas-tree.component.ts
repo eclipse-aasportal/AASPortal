@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, } from '@angular/core';
 import { BehaviorSubject, Subscription, Observable, first } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
@@ -25,6 +25,7 @@ import {
     selectSubmodel,
     getIdShortPath,
     mimeTypeToExtension,
+    AASEndpointType,
 } from 'common';
 
 import { AASTreeRow, AASTreeFeatureState } from './aas-tree.state';
@@ -33,7 +34,6 @@ import { ShowImageFormComponent } from './show-image-form/show-image-form.compon
 import { ShowVideoFormComponent } from './show-video-form/show-video-form.component';
 import { OperationCallFormComponent } from './operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
-import { AASTree } from '../types/aas-tree';
 import { basename, encodeBase64Url } from '../convert';
 import { AASQuery } from '../types/aas-query-params';
 import { ViewQuery } from '../types/view-query-params';
@@ -59,11 +59,14 @@ interface PropertyValue {
     styleUrls: ['./aas-tree.component.scss'],
     providers: [AASTreeSearch]
 })
-export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
+export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTreeFeatureState>;
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
+    private _selected: aas.Referable[] = [];
+    private shiftKey = false;
+    private altKey = false;
 
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
@@ -79,12 +82,21 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly clipboard: ClipboardService
+        private readonly clipboard: ClipboardService,
     ) {
         this.store = store as Store<AASTreeFeatureState>;
         this.nodes = this.store.select(AASTreeSelectors.selectNodes);
-        this.selectedElements = this.store.select(AASTreeSelectors.selectSelectedElements);
         this.someSelected = this.store.select(AASTreeSelectors.selectSomeSelected);
+        this.everySelected = this.store.select(AASTreeSelectors.selectEverySelected);
+
+        this.subscription.add(this.store.select(AASTreeSelectors.selectSelectedElements).pipe()
+            .subscribe(elements => {
+                this._selected = elements;
+                this.selectedChange.emit(elements);
+            }));
+
+        this.window.addEventListener('keyup', this.keyup);
+        this.window.addEventListener('keydown', this.keydown);
     }
 
     @Input()
@@ -95,6 +107,18 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
 
     @Input()
     public search: Observable<string> | null = null;
+
+    @Input()
+    public get selected(): aas.Referable[] {
+        return this._selected;
+    }
+
+    public set selected(values: aas.Referable[]) {
+        this.store.dispatch(AASTreeActions.setSelectedElements({ elements: values }));
+    }
+
+    @Output()
+    public selectedChange = new EventEmitter<aas.Referable[]>();
 
     public get onlineReady(): boolean {
         return this.document?.onlineReady ?? false;
@@ -110,7 +134,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
 
     public someSelected: Observable<boolean>;
 
-    public selectedElements: Observable<aas.Referable[]>;
+    public everySelected: Observable<boolean>;
 
     public nodes: Observable<AASTreeRow[]>;
 
@@ -172,6 +196,8 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         this.subscription.unsubscribe();
         this.webSocketSubject?.unsubscribe();
         this.searching?.destroy();
+        this.window.removeEventListener('keyup', this.keyup);
+        this.window.removeEventListener('keydown', this.keydown);
     }
 
     public visualState(node: AASTreeRow): string {
@@ -222,11 +248,11 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
     }
 
     public toggleSelections(): void {
-        this.store.dispatch(AASTreeActions.toggleSelections({ document: this.document }));
+        this.store.dispatch(AASTreeActions.toggleSelections());
     }
 
     public toggleSelection(node: AASTreeRow): void {
-        this.store.dispatch(AASTreeActions.toggleSelected({ row: node }));
+        this.store.dispatch(AASTreeActions.toggleSelected({ row: node, altKey: this.altKey, shiftKey: this.shiftKey }));
     }
 
     public open(node: AASTreeRow): void {
@@ -286,7 +312,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                     template,
                     submodels: [{
                         id: this.document.id,
-                        url: this.document.container,
+                        endpoint: this.document.endpoint,
                         idShort: submodel.idShort
                     }]
                 };
@@ -327,11 +353,11 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                         await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
                     }
                 } else {
-                    const container = encodeBase64Url(this.document.container);
+                    const endpoint = encodeBase64Url(this.document.endpoint);
                     const id = encodeBase64Url(this.document.id);
                     const smId = encodeBase64Url(blob.parent.keys[0].value);
                     const path = getIdShortPath(blob);
-                    const url = `/api/v1/containers/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
+                    const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
                     if (blob.contentType.startsWith('image/')) {
                         await this.showImageAsync(name, url);
                     } else if (blob.contentType.startsWith('video/')) {
@@ -452,10 +478,18 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                 }
             );
 
-            this.webSocketSubject.next(this.createMessage(
-                this.document.endpoint.type,
-                this.document.container,
-                this.document.id));
+            this.webSocketSubject.next(this.createMessage(this.document));
+        }
+    }
+
+    private toEndpointType(type: AASEndpointType): EndpointType {
+        switch (type) {
+            case 'OpcuaServer':
+                return 'opc';
+            case 'AasxDirectory':
+                return 'file';
+            default:
+                return 'http';
         }
     }
 
@@ -487,15 +521,10 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private createMessage(type: EndpointType, url: string, id: string): WebSocketData {
+    private createMessage(document: AASDocument): WebSocketData {
         return {
             type: 'LiveRequest',
-            data: {
-                type: type,
-                url: url,
-                id: id,
-                nodes: this.liveNodes
-            } as LiveRequest
+            data: { endpoint: document.endpoint, id: document.id, nodes: this.liveNodes } as LiveRequest
         };
     }
 
@@ -513,9 +542,19 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private onError = (error: any): void => {
+    private onError = (error: unknown): void => {
         this.notify.log(LogType.Error, error);
     }
+
+    private keyup = () => {
+        this.shiftKey = false;
+        this.altKey = false;
+    };
+
+    private keydown = (event: KeyboardEvent) => {
+        this.shiftKey = event.shiftKey;
+        this.altKey = event.altKey;
+    };
 
     private resolveFile(file: aas.File): { url?: string, name?: string } {
         const value: { url?: string, name?: string } = {};
@@ -525,9 +564,9 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
                 const smId = encodeBase64Url(submodel.id);
                 const path = getIdShortPath(file);
                 value.name = basename(file.value);
-                const url = encodeBase64Url(this.document.container);
+                const name = encodeBase64Url(this.document.endpoint);
                 const id = encodeBase64Url(this.document.id);
-                value.url = `/api/v1/containers/${url}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+                value.url = `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }
         }
 

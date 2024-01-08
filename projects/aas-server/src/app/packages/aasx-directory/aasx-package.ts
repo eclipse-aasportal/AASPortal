@@ -22,6 +22,7 @@ import { AASReader } from '../aas-reader.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { JsonReader } from '../json-reader.js';
 import * as aasV2 from '../../types/aas-v2.js';
+import { ImageProcessing } from '../../image-processing.js';
 
 export class AasxPackage extends AASPackage {
     private readonly file: string;
@@ -29,10 +30,10 @@ export class AasxPackage extends AASPackage {
     private readonly zip: Lazy<jszip>;
     private originName: string | null = null;
 
-    constructor(logger: Logger, handle: AASResource, file: string) {
+    public constructor(logger: Logger, source: AASResource, file: string) {
         super(logger);
 
-        this.source = handle as AasxDirectory;
+        this.source = source as AasxDirectory;
         this.file = file;
         this.zip = new Lazy<jszip>(this.initializeZip.bind(this));
     }
@@ -46,20 +47,29 @@ export class AasxPackage extends AASPackage {
             const id = environment.assetAdministrationShells[0].id;
             document = {
                 id: id,
-                container: this.source.url.href,
-                endpoint: { type: 'file', address: this.file },
+                endpoint: this.source.name,
+                address: this.file,
                 idShort: environment.assetAdministrationShells[0].idShort,
-                timeStamp: Date.now(),
                 readonly: this.source.readOnly,
                 onlineReady: this.source.onlineReady,
-                modified: false,
-                content: environment
+                content: environment,
+                timestamp: Date.now(),
+                crc32: this.computeCrc32(environment),
             };
         } else {
             throw new Error(`Asset format ${format} is not supported.`);
         }
 
+        const thumbnail = await this.createThumbnail();
+        if (thumbnail) {
+            document.thumbnail = thumbnail;
+        }
+
         return document;
+    }
+
+    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+        return (await this.createReaderAsync()).readEnvironment();
     }
 
     public commitDocumentAsync(): Promise<string[]> {
@@ -70,7 +80,7 @@ export class AasxPackage extends AASPackage {
         if (!file.value) {
             throw new Error('Invalid operation.');
         }
-        
+
         const name = this.normalize(file.value);
         const stream = (await this.zip.getValueAsync()).file(name)?.nodeStream();
         if (!stream) {
@@ -201,5 +211,15 @@ export class AasxPackage extends AASPackage {
         }
 
         throw new Error('Not implemented.');
+    }
+
+    private async createThumbnail(): Promise<string | undefined> {
+        try {
+            const input = await this.getThumbnailAsync();
+            const output = await ImageProcessing.resizeAsync(input, 40, 40);
+            return await this.streamToBase64(output);
+        } catch {
+            return undefined;
+        }
     }
 }

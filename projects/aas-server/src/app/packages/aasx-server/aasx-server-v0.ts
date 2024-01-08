@@ -8,7 +8,6 @@
 
 import { aas, DifferenceItem, selectSubmodel } from 'common';
 import { Logger } from '../../logging/logger.js';
-import { AASPackage } from '../aas-package.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { AasxServer } from './aasx-server.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
@@ -19,9 +18,11 @@ interface AASList {
 }
 
 export class AasxServerV0 extends AasxServer {
-    constructor(logger: Logger, url: string | URL) {
-        super(logger, url);
+    constructor(logger: Logger, url: string, name: string) {
+        super(logger, url, name);
     }
+
+    public override readonly version = '0.0';
 
     public readonly readOnly = false;
 
@@ -32,13 +33,17 @@ export class AasxServerV0 extends AasxServer {
         return value.aaslist.map(item => item.split(' : ')[1].trim())
     }
 
-    public async readEnvironmentAsync(id: string): Promise<aas.Environment> {
+    public override async readEnvironmentAsync(id: string): Promise<aas.Environment> {
         const url = this.resolve(`/aas/${id}/aasenv`);
         const sourceEnv = await this.message.get<aasV2.AssetAdministrationShellEnvironment>(url);
         return new JsonReaderV2(this.logger, sourceEnv).readEnvironment();
     }
 
-    public async commitAsync(
+    public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+        return Promise.reject(new Error('Not implemented.'));
+    }
+
+    public override async commitAsync(
         source: aas.Environment,
         destination: aas.Environment,
         diffs: DifferenceItem[]): Promise<string[]> {
@@ -95,23 +100,23 @@ export class AasxServerV0 extends AasxServer {
         return await this.message.getResponse(url);
     }
 
-    public getPackageAsync(aasId: string, name: string): Promise<NodeJS.ReadableStream> {
+    public override getPackageAsync(): Promise<NodeJS.ReadableStream> {
         throw new Error('Not implemented.');
     }
 
-    public postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined> {
+    public override postPackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
-    public deletePackageAsync(aasIdentifier: string): Promise<void> {
+    public override deletePackageAsync(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
-    public invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public invoke(): Promise<aas.Operation> {
         throw new Error('Not implemented.');
     }
 
-    public getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public getBlobValueAsync(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 
@@ -134,7 +139,7 @@ export class AasxServerV0 extends AasxServer {
         const messages: string[] = [];
         const aas = destination.assetAdministrationShells[0].idShort;
         for (const submodel of submodels) {
-            messages.push(await this.putSubmodelAsync(aas, new JsonWriterV2().write(submodel)));
+            await this.putSubmodelAsync(aas, new JsonWriterV2().write(submodel));
         }
 
         return messages;
@@ -152,13 +157,11 @@ export class AasxServerV0 extends AasxServer {
         return messages;
     }
 
-    private async putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<string> {
-        return await this.message.put(
-            this.resolve('/aas/' + aas + '/submodels/'),
-            new JsonWriterV2().write(submodel));
+    private putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<string> {
+        return this.message.put(this.resolve('/aas/' + aas + '/submodels/'), new JsonWriterV2().write(submodel));
     }
 
-    private async deleteSubmodelAsync(aas: string, submodelId: string): Promise<string> {
-        return await this.message.delete(this.resolve('/aas/' + aas + '/submodels/' + submodelId));
+    private deleteSubmodelAsync(aas: string, submodelId: string): Promise<string> {
+        return this.message.delete(this.resolve('/aas/' + aas + '/submodels/' + submodelId));
     }
 }

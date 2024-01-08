@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { cloneDeep } from 'lodash-es';
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals';
 import { AASDocument } from '../lib/types.js';
 import * as doc from '../lib/document.js';
 import * as aas from '../lib/aas.js';
@@ -22,20 +22,22 @@ describe('Document', function () {
         beforeEach(function () {
             a = {
                 id: 'http://customer.com/aas/a',
-                container: 'C:/Git/AASPortal/common/test/assets/?type=AasxDirectory',
-                endpoint: { type: 'file', address: 'a.json' },
+                endpoint: 'Test',
+                address: 'a.json',
                 idShort: 'A',
                 readonly: true,
-                timeStamp: 42
+                crc32: 0,
+                timestamp: 0,
             };
 
             b = {
                 id: 'http://customer.com/aas/b',
-                container: 'C:/Git/AASPortal/common/test/assets/?type=AasxDirectory',
-                endpoint: { type: 'file', address: 'b.json' },
+                endpoint: 'Test',
+                address: 'b.json',
                 idShort: 'B',
                 readonly: true,
-                timeStamp: 42
+                crc32: 0,
+                timestamp: 0,
             };
         });
 
