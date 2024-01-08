@@ -18,7 +18,7 @@ describe('LowDbQuery', () => {
     let elements: LowDbElement[];
     let dbData: LowDbData;
 
-    describe('full text search', () => {
+    describe('text search', () => {
         beforeAll(async () => {
             const file = path.resolve('./', 'src/test/assets/test-db.json');
             dbData = JSON.parse((await fs.promises.readFile(file)).toString());
@@ -60,7 +60,7 @@ describe('LowDbQuery', () => {
         });
     });
 
-    describe('pattern search', () => {
+    describe('AAS element search', () => {
         beforeEach(() => {
             document = dbData.documents[0];
             elements = dbData.elements;

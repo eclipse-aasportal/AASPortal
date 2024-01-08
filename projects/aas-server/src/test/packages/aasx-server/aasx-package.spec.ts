@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { AasxPackage } from '../../../app/packages/aasx-directory/aasx-package.js'
 import { AasxDirectory } from '../../../app/packages/aasx-directory/aasx-directory.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { LocalFileStorage } from '../../../app/file-storage/local-file-storage.js';
 import { createSpyObj, fail } from '../../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { FileStorage } from '../../../app/file-storage/file-storage.js';
 
 describe('AasxPackage', function () {
@@ -26,27 +26,23 @@ describe('AasxPackage', function () {
     });
 
     describe('createDocumentAsync', function () {
-        it('creates a document from a xml origin', async function () {
+        it('creates a document from a xml origin', async () => {
             try {
                 await source.openAsync();
                 const aasxPackage = new AasxPackage(logger, source, 'xml-origin.aasx');
-                const document = aasxPackage.createDocumentAsync();
+                const document = await aasxPackage.createDocumentAsync();
                 expect(document).toBeDefined();
-            } catch (error) {
-                fail(error?.message)
             } finally {
                 await source.closeAsync();
             }
         });
 
-        it('creates a document from a json origin', async function () {
+        it('creates a document from a json origin', async () => {
             try {
                 await source.openAsync();
                 const aasxPackage = new AasxPackage(logger, source, 'json-origin.aasx');
-                const document = aasxPackage.createDocumentAsync();
+                const document = await aasxPackage.createDocumentAsync();
                 expect(document).toBeDefined();
-            } catch (error) {
-                fail(error?.message);
             } finally {
                 await source.closeAsync();
             }

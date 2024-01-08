@@ -23,7 +23,7 @@ describe('MultiKeyMap', function () {
     });
 
     it('allows adding a new key-value-pair', function () {
-        let size = map.size;
+        const size = map.size;
         map.set(1, 'A');
         expect(map.hasValue(1)).toBeTruthy();
         expect(map.hasKey('A')).toBeTruthy();
@@ -43,7 +43,7 @@ describe('MultiKeyMap', function () {
     });
 
     it('deletes a value by key', function () {
-        let size = map.size;
+        const size = map.size;
         expect(map.deleteValue(123)).toBeTruthy();
         expect(size - map.size).toEqual(1);
         expect(map.hasValue(123)).toBeFalsy();
@@ -51,7 +51,7 @@ describe('MultiKeyMap', function () {
     });
 
     it('deletes a value by key', function () {
-        let size = map.size;
+        const size = map.size;
         expect(map.deleteValue(123)).toBeTruthy();
         expect(size - map.size).toEqual(1);
         expect(map.hasValue(123)).toBeFalsy();

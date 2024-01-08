@@ -311,15 +311,17 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public setFilter(filter: string): void {
-        filter = filter.trim();
-        if (filter.length >= 3) {
-            const parser = new QueryParser(filter);
-            try {
-                parser.check();
-                this.store.dispatch(StartActions.getFirstPage({ filter }));
-            } catch (error) {
-                this.notify.error(error);
+        try {
+            filter = filter.trim();
+            if (filter.length >= 3) {
+                new QueryParser(filter).check();
+            } else {
+                filter = '';
             }
+
+            this.store.dispatch(StartActions.getFirstPage({ filter }));
+        } catch (error) {
+            this.notify.error(error);
         }
     }
 

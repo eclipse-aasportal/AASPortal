@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect } from '@jest/globals';
 import { JsonWriterV2 } from '../../app/packages/json-writer-v2.js';
 import env from '../assets/aas-environment.js';
-import { describe, beforeEach, it, expect } from '@jest/globals';
 
 describe('JsonWriterV2', function () {
     describe('writeEnvironment', function () {

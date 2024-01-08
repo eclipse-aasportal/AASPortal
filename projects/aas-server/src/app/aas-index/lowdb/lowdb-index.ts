@@ -19,7 +19,7 @@ import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
 
-    constructor(private readonly db: Low<LowDbData>, private readonly variable: Variable) {
+    public constructor(private readonly db: Low<LowDbData>, private readonly variable: Variable) {
         super();
 
         this.promise = this.initialize();

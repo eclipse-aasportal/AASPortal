@@ -14,8 +14,8 @@ import { AASIndexQuery } from '../aas-index-query.js';
 
 export class LowDbQuery extends AASIndexQuery {
 
-    constructor(query: string, language: string) {
-        super(query, language);
+    public constructor(expression: string, language: string) {
+        super(expression, language);
     }
 
     public do(document: LowDbDocument, elements: LowDbElement[]): boolean {
@@ -33,7 +33,7 @@ export class LowDbQuery extends AASIndexQuery {
                 if (this.isText(and)) {
                     result = this.contains(document, and);
                 } else if (this.isExpression(and)) {
-                    throw new Error('Not implemented.');
+                    result = this.evaluate(and, document, elements);
                 } else {
                     result = this.match(elements, and);
                 }

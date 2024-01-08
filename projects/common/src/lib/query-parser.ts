@@ -51,9 +51,9 @@ export class QueryParser {
         'sml'
     ]);
 
-    private orExpressions: OrExpression[] = [];
-    private currentOr?: OrExpression;
+    private readonly stack: { orExpressions: OrExpression[]; currentOr?: OrExpression }[] = [{ orExpressions: [] }];
     private currentPosition = -1;
+    private _hasAASQueries = false;
 
     public constructor(expression: string, private readonly language: string = 'en') {
         this.expression = expression.trim();
@@ -63,7 +63,12 @@ export class QueryParser {
 
     public get ast(): OrExpression[] {
         this.check();
-        return this.orExpressions;
+        return this.stack[0].orExpressions;
+    }
+
+    public get hasAASQueries(): boolean {
+        this.check();
+        return this._hasAASQueries;
     }
 
     public check(): void {
@@ -81,15 +86,36 @@ export class QueryParser {
 
         this.currentPosition = 0;
         this.nextTerm();
-        if (this.currentOr && this.currentOr.andExpressions.length > 0) {
-            this.orExpressions.push(this.currentOr);
-            this.currentOr = undefined;
+
+        if (this.stack.length !== 1) {
+            throw new ApplicationError(
+                'QueryParser.INVALID_NESTED_EXPRESSION',
+                `Invalid nested expression.`,
+                );
+        }
+
+        const current = this.stack[this.stack.length - 1];
+        if (current.currentOr && current.currentOr.andExpressions.length > 0) {
+            current.orExpressions.push(current.currentOr);
+            current.currentOr = undefined;
         }
     }
 
     private nextTerm(): void {
-        this.trimStart();
-        if (this.currentPosition >= this.expression.length) {
+        this.beginTerm();
+        let term: string | AASQuery;
+        if (this.expression[this.currentPosition] === '#') {
+            term = this.parseQuery();
+            this._hasAASQueries = true;
+        } else {
+            term = this.getText();
+        }
+
+        this.endTerm(term);
+    }
+
+    private beginTerm(): void {
+        if (!this.skipBlanks()) {
             throw new ApplicationError(
                 'QueryParser.TERM_EXPECTED',
                 `Term expected at position ${this.currentPosition}.`,
@@ -97,13 +123,12 @@ export class QueryParser {
             );
         }
 
-        let term: string | AASQuery;
-        if (this.expression[this.currentPosition] === '#') {
-            term = this.parseExpression();
-        } else {
-            term = this.getText();
+        if (this.ifChar('(')) {
+            this.levelDown();
         }
+    }
 
+    private endTerm(term: string | AASQuery | OrExpression[]): void {
         const link = this.nextLink();
         if (link === '&&') {
             this.addAndTerm(term);
@@ -111,9 +136,32 @@ export class QueryParser {
         } else if (link === '||') {
             this.addLastAndTerm(term);
             this.nextTerm();
+        } else if (link === ')') {
+            this.levelUp(term);
         } else {
             this.addAndTerm(term);
         }
+    }
+
+    private levelDown(): void {
+        this.stack.push({ orExpressions: [] });
+        this.beginTerm();
+    }
+
+    private levelUp(term: string | AASQuery | OrExpression[]): void {
+        const current = this.stack.pop();
+        if (!current) {
+            throw new Error('');
+        }
+
+        if (!current.currentOr) {
+            current.currentOr = { andExpressions: [term] };
+        } else {
+            current.currentOr.andExpressions.push(term);
+        }
+
+        current.orExpressions.push(current.currentOr)
+        this.endTerm(current.orExpressions);
     }
 
     private getText(leaveQuotationMarks: boolean = false): string {
@@ -136,7 +184,8 @@ export class QueryParser {
         }
 
         for (let i = this.currentPosition, n = this.expression.length; i < n; i++) {
-            if (QueryParser.operatorChars.has(this.expression[i])) {
+            const c = this.expression[i];
+            if (c === ')' || QueryParser.operatorChars.has(c)) {
                 const text = this.expression.substring(this.currentPosition, i);
                 this.currentPosition = i;
                 return text.trimEnd();
@@ -148,20 +197,29 @@ export class QueryParser {
         return text;
     }
 
-    private nextLink(): '||' | '&&' | undefined {
-        this.trimStart();
-        if (this.currentPosition >= this.expression.length) {
+    private nextLink(): '||' | '&&' | ')' | undefined {
+        if (!this.skipBlanks()) {
             return undefined;
         }
 
-        if (this.expression.startsWith('||', this.currentPosition)) {
-            this.currentPosition += 2;
+        if (this.ifChar('||')) {
             return '||';
         }
 
-        if (this.expression.startsWith('&&', this.currentPosition)) {
-            this.currentPosition += 2;
+        if (this.ifChar('&&')) {
             return '&&';
+        }
+
+        if (this.ifChar(')')) {
+            if (this.stack.length <= 1) {
+                throw new ApplicationError(
+                    'QueryParser.UNEXPECTED_CLOSING_BRACKET',
+                    `Unexpected closing bracket at position ${this.currentPosition}.`,
+                    this.currentPosition,
+                );
+            }
+
+            return ')';
         }
 
         throw new ApplicationError(
@@ -170,7 +228,7 @@ export class QueryParser {
             this.currentPosition);
     }
 
-    private trimStart(): void {
+    private skipBlanks(): boolean {
         while (this.currentPosition < this.expression.length) {
             if (this.expression[this.currentPosition] === ' ') {
                 ++this.currentPosition;
@@ -178,28 +236,32 @@ export class QueryParser {
                 break;
             }
         }
+
+        return this.currentPosition < this.expression.length;
     }
 
-    private addAndTerm(term: string | AASQuery): void {
-        if (!this.currentOr) {
-            this.currentOr = { andExpressions: [] };
+    private addAndTerm(term: string | AASQuery | OrExpression[]): void {
+        const current = this.stack[this.stack.length - 1];
+        if (!current.currentOr) {
+            current.currentOr = { andExpressions: [] };
         }
 
-        this.currentOr.andExpressions.push(term);
+        current.currentOr.andExpressions.push(term);
     }
 
-    private addLastAndTerm(term: string | AASQuery): void {
-        if (!this.currentOr) {
-            this.currentOr = { andExpressions: [term] };
+    private addLastAndTerm(term: string | AASQuery | OrExpression[]): void {
+        const current = this.stack[this.stack.length - 1];
+        if (!current.currentOr) {
+            current.currentOr = { andExpressions: [term] };
         } else {
-            this.currentOr.andExpressions.push(term);
+            current.currentOr.andExpressions.push(term);
         }
 
-        this.orExpressions.push(this.currentOr)
-        this.currentOr = undefined;
+        current.orExpressions.push(current.currentOr)
+        current.currentOr = undefined;
     }
 
-    private parseExpression(): AASQuery {
+    private parseQuery(): AASQuery {
         ++this.currentPosition;
         const query: AASQuery = { modelType: this.parseModelType() };
         const name = this.parseName();
@@ -217,7 +279,7 @@ export class QueryParser {
     }
 
     private parseModelType(): string {
-        this.trimStart();
+        this.skipBlanks();
         let i = this.currentPosition;
         for (let n = this.expression.length; i < n; i++) {
             const c = this.expression[i];
@@ -249,14 +311,12 @@ export class QueryParser {
     }
 
     private parseName(): string | undefined {
-        this.trimStart();
-        const c = this.expression[this.currentPosition];
-        if (c !== ':') {
+        this.skipBlanks();
+        if (!this.ifChar(':')) {
             return undefined;
         }
 
-        ++this.currentPosition;
-        this.trimStart();
+        this.skipBlanks();
         let i = this.currentPosition;
         for (let n = this.expression.length; i < n; i++) {
             const c = this.expression[i];
@@ -279,28 +339,35 @@ export class QueryParser {
     }
 
     private parseOperator(): AASQueryOperator | undefined {
-        this.trimStart();
-        const c = this.nextChar();
-        if (!c) {
+        if (!this.skipBlanks()) {
             return undefined;
         }
 
-        if (c === '=') {
+        if (this.ifChar('=')) {
             return '=';
         }
 
-        if (c === '<') {
-            return this.ifChar('=') ? '<=' : '<';
+        if (this.ifChar('<=')) {
+            return '<='
         }
 
-        if (c === '>') {
-            return this.ifChar('=') ? '>=' : '>';
+        if (this.ifChar('<')) {
+            return '<';
         }
 
-        if (c === '!' && this.ifChar('=')) {
+        if (this.ifChar('>=')) {
+            return '>='
+        }
+
+        if (this.ifChar('>')) {
+            return '>';
+        }
+
+        if (this.ifChar('!=')) {
             return '!=';
         }
 
+        const c = this.expression[this.currentPosition];
         if (QueryParser.operatorChars.has(c)) {
             throw new ApplicationError(
                 'QueryParser.INVALID_OPERATOR',
@@ -313,17 +380,9 @@ export class QueryParser {
         return undefined
     }
 
-    private nextChar(): string | undefined {
-        if (this.currentPosition < this.expression.length) {
-            return this.expression[this.currentPosition++];
-        }
-
-        return undefined;
-    }
-
     private ifChar(c: string): boolean {
-        if (this.expression[this.currentPosition] === c) {
-            ++this.currentPosition;
+        if (this.expression.startsWith(c, this.currentPosition)) {
+            this.currentPosition += c.length;
             return true;
         }
 
@@ -331,7 +390,7 @@ export class QueryParser {
     }
 
     private parseValue(): AASQueryValueType {
-        this.trimStart();
+        this.skipBlanks();
         const s = this.getText(true);
         if (s[0] === '"' || s[0] === '\'') {
             return s.substring(1, s.length - 1);

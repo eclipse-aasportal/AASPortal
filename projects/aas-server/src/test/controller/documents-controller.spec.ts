@@ -47,7 +47,6 @@ describe('DocumentsController', function () {
                 'deleteCookieAsync'
             ]);
 
-
         aasProvider = createSpyObj<AASProvider>(
             [
                 'updateDocumentAsync',
@@ -81,24 +80,24 @@ describe('DocumentsController', function () {
         app.use(errorHandler);
     });
 
-    // it('getPackageAsync: /api/v1/documents/:id', async function () {
-    //     aasProvider.getPackageAsync.mockReturnValue(sampleDocument);
-    //     const response = await request(app)
-    //         .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
-    //         .set('Authorization', `Bearer ${getToken()}`);
+    it('getDocument: /api/v1/documents/:id', async function () {
+        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
+        const response = await request(app)
+            .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .set('Authorization', `Bearer ${getToken()}`);
 
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.body).toEqual(sampleDocument);
-    //     expect(aasProvider.getPackageAsync).toHaveBeenCalled();
-    // });
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(sampleDocument);
+        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+    });
 
     it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
         const page: AASPage = { previous: null, documents: [sampleDocument], next: null };
         aasProvider.getDocumentsAsync.mockResolvedValue(page);
-        const cursor: AASCursor = { previous: null, limit: 10 };
-        const filter = '#prop:Name=Value';
+        const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
+        const filter = encodeBase64Url('#prop:Name=Value');
         const response = await request(app)
-            .get(`/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}&filter=${encodeBase64Url(filter)}`)
+            .get(`/api/v1/documents?cursor=${cursor}&filter=${filter}`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { aas, LiveRequest } from 'common';
+import { aas, DefaultType, LiveRequest } from 'common';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
@@ -57,7 +57,7 @@ describe('HttpSubscription', function () {
 
     it('open/close subscription', function (done: DoneFn) {
         jest.useFakeTimers();
-        aasxServer.readValueAsync.mockReturnValue(new Promise<any>(result => {
+        aasxServer.readValueAsync.mockReturnValue(new Promise<DefaultType>(result => {
             expect(true).toBeTruthy();
             result(42);
             subscription.close();

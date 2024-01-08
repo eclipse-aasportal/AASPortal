@@ -61,7 +61,7 @@ export class AasxPackage extends AASPackage {
         }
 
         const thumbnail = await this.createThumbnail();
-        if(thumbnail) {
+        if (thumbnail) {
             document.thumbnail = thumbnail;
         }
 
@@ -80,7 +80,7 @@ export class AasxPackage extends AASPackage {
         if (!file.value) {
             throw new Error('Invalid operation.');
         }
-        
+
         const name = this.normalize(file.value);
         const stream = (await this.zip.getValueAsync()).file(name)?.nodeStream();
         if (!stream) {
@@ -214,8 +214,12 @@ export class AasxPackage extends AASPackage {
     }
 
     private async createThumbnail(): Promise<string | undefined> {
-        const input = await this.getThumbnailAsync();
-        const output = await ImageProcessing.resizeAsync(input, 40, 40);
-        return await this.streamToBase64(output);
+        try {
+            const input = await this.getThumbnailAsync();
+            const output = await ImageProcessing.resizeAsync(input, 40, 40);
+            return await this.streamToBase64(output);
+        } catch {
+            return undefined;
+        }
     }
 }

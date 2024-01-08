@@ -65,7 +65,7 @@ function setPage(state: StartState, page: AASPage, limit: number | undefined, fi
         viewMode: ViewMode.List,
         favorites: '-',
         limit: limit ?? state.limit,
-        filter: filter ?? state.filter,
+        filter: filter != null ? filter : state.filter,
         documents: page.documents,
         isFirstPage: page.previous === null,
         isLastPage: page.next === null,

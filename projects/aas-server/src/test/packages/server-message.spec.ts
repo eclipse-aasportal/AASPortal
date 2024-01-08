@@ -30,9 +30,9 @@ describe('ServerMessage', function () {
                 const stream = new IncomingMessage(new Socket());
                 stream.push(JSON.stringify({ text: 'Hello World!' }));
                 stream.push(null);
-                stream.statusCode = 200,
-                    stream.statusMessage = 'OK',
-                    (callback as (res: IncomingMessage) => void)(stream);
+                stream.statusCode = 200;
+                stream.statusMessage = 'OK';
+                (callback as (res: IncomingMessage) => void)(stream);
                 return new http.ClientRequest('http://localhost:1234/hello/world');
             });
         });

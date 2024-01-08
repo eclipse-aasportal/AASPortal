@@ -6,25 +6,17 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASQuery, AASQueryOperator, OrExpression } from 'common';
+import { AASQuery, AASQueryOperator, OrExpression } from 'common';
 import { AASIndexQuery } from '../aas-index-query.js';
 
 export class MySqlQuery extends AASIndexQuery {
 
-    constructor(query: string, language: string) {
-        super(query, language);
+    public constructor(expression: string, language: string = 'en') {
+        super(expression, language);
     }
 
     public get joinElements(): boolean {
-        for (const or of this.queryParser.ast) {
-            for (const and of or.andExpressions) {
-                if (this.isQuery(and)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return this.queryParser.hasAASQueries;
     }
 
     public createSql(values: unknown[]): string {
@@ -43,9 +35,9 @@ export class MySqlQuery extends AASIndexQuery {
                 if (this.isQuery(and)) {
                     andSqlTerms.push(this.createSqlTerm(and, values));
                 } else if (this.isExpression(and)) {
-                    throw new Error('Not implemented.');
+                    andSqlTerms.push(`(${this.evaluate(and, values)})`);
                 } else {
-                    andSqlTerms.push(`documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%'`);
+                    andSqlTerms.push(`(documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%')`);
                 }
             }
 

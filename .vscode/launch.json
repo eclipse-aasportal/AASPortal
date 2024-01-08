@@ -30,7 +30,7 @@
                 "ASSETS": "projects/aas-server/src/assets",
                 "USER_STORAGE": "mongodb://localhost:27017/aasportal-users",
                 "ENDPOINTS": "[\"file:///samples?name=Samples\",\"http://localhost:5001?name=AASXServer&type=AasxServer\"]",
-                "AAS_INDEX": "mysql://aasportal:aas-server@localhost:3306"
+                // "AAS_INDEX": "mysql://aasportal:aas-server@localhost:3306"
             }
         },
         {
