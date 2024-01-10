@@ -19,15 +19,15 @@ interface Promisify {
     exec(): Promise<UserDataInstance | undefined>;
 }
 
-describe('MongoDBUserStorage', function () {
+describe('MongoDBUserStorage', () => {
     let userStorage: MongoDBUserStorage;
     let johnDoe: UserData;
 
-    beforeAll(function () {
+    beforeAll(() => {
         userStorage = new MongoDBUserStorage();
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
         johnDoe = {
             id: "john.doe@email.com",
             name: "John Doe",
@@ -38,19 +38,19 @@ describe('MongoDBUserStorage', function () {
         };
     });
 
-    it('indicates that john.doe@email.com exists', async function () {
+    it('indicates that john.doe@email.com exists', async () => {
         jest.spyOn(userStorage.UserDataModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
         await expect(userStorage.existAsync('john.doe@email.com')).resolves.toBe(true);
     });
 
-    it('indicates that unknown@email.com does not exist', async function () {
+    it('indicates that unknown@email.com does not exist', async () => {
         jest.spyOn(userStorage.UserDataModel, 'findOne').mockReturnValue(getPromisify());
         await expect(userStorage.existAsync('unknown@email.com')).resolves.toBe(false);
     });
 
-    it('reads the data of john.doe@email.com', async function () {
+    it('reads the data of john.doe@email.com', async () => {
         jest.spyOn(userStorage.UserDataModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
-        let user = (await userStorage.readAsync('john.doe@email.com'))!;
+        const user = (await userStorage.readAsync('john.doe@email.com'))!;
         expect(user).toBeDefined();
         expect(user.id).toEqual(johnDoe.id);
         expect(user.name).toEqual(johnDoe.name);
@@ -58,39 +58,39 @@ describe('MongoDBUserStorage', function () {
         expect(user.password).toEqual(johnDoe.password);
     });
 
-    it('reads "undefined" for an unknown user', async function () {
+    it('reads "undefined" for an unknown user', async () => {
         jest.spyOn(userStorage.UserDataModel, 'findOne').mockReturnValue(getPromisify());
         await expect(userStorage.readAsync('unknown@email.com')).resolves.toBe(undefined);
     });
 
-    it('updates the data of john.doe@email.com', async function () {
-        let save = jest.fn<() => Promise<void>>();
+    it('updates the data of john.doe@email.com', async () => {
+        const save = jest.fn<() => Promise<void>>();
         jest.spyOn(userStorage.UserDataModel, 'findOne').mockReturnValue(getPromisify(johnDoe, save));
         await userStorage.writeAsync('john.doe@email.com', { ...johnDoe });
         expect(save).toHaveBeenCalled
     });
 
-    it('deletes john.doe@email.com', async function () {
-        jest.spyOn(userStorage.UserDataModel, 'findOneAndRemove').mockReturnValue(getPromisify(johnDoe));
+    it('deletes john.doe@email.com', async () => {
+        jest.spyOn(userStorage.UserDataModel, 'findOneAndDelete').mockReturnValue(getPromisify(johnDoe));
         await expect(userStorage.deleteAsync('john.doe@email.com')).resolves.toBe(true);
     });
 
     function getPromisify(user?: UserData, save?: () => Promise<void>): any {
         if (user) {
             return {
-                exec: () => new Promise<UserDataInstance | undefined>((resolve, _) => resolve(getInstance(user, save)))
+                exec: () => new Promise<UserDataInstance | undefined>(resolve => resolve(getInstance(user, save)))
             } as Promisify;
         }
 
         return {
-            exec: () => new Promise<UserDataInstance | undefined>((resolve, _) => resolve(undefined))
+            exec: () => new Promise<UserDataInstance | undefined>(resolve => resolve(undefined))
         } as Promisify;
     }
 
     function getInstance(user: UserData, save?: () => Promise<void>): UserDataInstance {
         return {
             ...user,
-            save: save ?? (() => new Promise<void>((result, _) => result()))
+            save: save ?? (() => new Promise<void>(resolve => resolve()))
         }
     }
 });

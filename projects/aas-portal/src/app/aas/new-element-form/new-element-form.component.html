@@ -1,45 +1,51 @@
 <!-----------------------------------------------------------------------------
- !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
- ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- ! zur Foerderung der angewandten Forschung e.V.
- !
- !---------------------------------------------------------------------------->
+!
+! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+! zur Foerderung der angewandten Forschung e.V.
+!
+!---------------------------------------------------------------------------->
 
 <form (ngSubmit)="submit()">
-    <div class="modal-header">
-        <h4 class="modal-title text-info">
-            <i class="bi bi-plus-lg"></i>
-            <span class="ms-2" translate>CAPTION_NEW_ELEMENT</span>
-        </h4>
-        <button type="button" class="btn-close" (click)="cancel()"></button>
+  <div class="modal-header">
+    <h4 class="modal-title text-info">
+      <i class="bi bi-plus-lg"></i>
+      <span class="ms-2" translate>CAPTION_NEW_ELEMENT</span>
+    </h4>
+    <button type="button" class="btn-close" (click)="cancel()"></button>
+  </div>
+  <div class="modal-body">
+    @for (message of messages; track message) {
+      <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
+        <div class="d-flex">
+          <div class="flex-grow-1">{{ message }}</div>
+        </div>
+      </ngb-toast>
+    }
+    <div class="form-floating mb-3">
+      <select class="form-select" id="selectModelType" [(ngModel)]="modelType" name="modelType">
+        @for (item of modelTypes; track item) {
+          <option [ngValue]="item">{{item}}</option>
+        }
+      </select>
+      <label for="selectModelType" translate>LABEL_MODEL_TYPE</label>
     </div>
-    <div class="modal-body">
-        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
-            <div class="d-flex">
-                <div class="flex-grow-1">{{ message }}</div>
-            </div>
-        </ngb-toast>
-        <div class="form-floating mb-3">
-            <select class="form-select" id="selectModelType" [(ngModel)]="modelType" name="modelType">
-                <option *ngFor="let item of modelTypes" [ngValue]="item">{{item}}</option>
-            </select>
-            <label for="selectModelType" translate>LABEL_MODEL_TYPE</label>
-        </div>
-        <div class="form-floating mb-3">
-            <select class="form-select" id="selectTemplate" [(ngModel)]="template" name="template">
-                <option *ngFor="let item of templates" [ngValue]="item">{{item.name}}</option>
-            </select>
-            <label for="selectTemplate" translate>LABEL_MODEL_TYPE_TEMPLATE</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input id="inputElementName" type="text" class="form-control form-control-sm" [(ngModel)]="idShort"
-                name="idShort" placeholder="Name">
-            <label for="inputElementName" translate>LABEL_NAME</label>
-        </div>
+    <div class="form-floating mb-3">
+      <select class="form-select" id="selectTemplate" [(ngModel)]="template" name="template">
+        @for (item of templates; track item) {
+          <option [ngValue]="item">{{item.name}}</option>
+        }
+      </select>
+      <label for="selectTemplate" translate>LABEL_MODEL_TYPE_TEMPLATE</label>
+    </div>
+    <div class="form-floating mb-3">
+      <input id="inputElementName" type="text" class="form-control form-control-sm" [(ngModel)]="idShort"
+        name="idShort" placeholder="Name">
+        <label for="inputElementName" translate>LABEL_NAME</label>
+      </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
-        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
+      <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
     </div>
-</form>
+  </form>

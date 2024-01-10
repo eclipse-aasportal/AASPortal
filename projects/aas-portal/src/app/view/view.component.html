@@ -1,13 +1,19 @@
 <!-----------------------------------------------------------------------------
- !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
- ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- ! zur Foerderung der angewandten Forschung e.V.
- !
- !---------------------------------------------------------------------------->
+!
+! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+! zur Foerderung der angewandten Forschung e.V.
+!
+!---------------------------------------------------------------------------->
 
-<fhg-digital-nameplate *ngIf="template === 'Nameplate'" [submodels]="submodels"></fhg-digital-nameplate>
-<fhg-customer-feedback *ngIf="template === 'CustomerFeedback'" [submodels]="submodels"></fhg-customer-feedback>
-<div *ngIf="!template" class="alert alert-info" role="alert">No well known submodel selected.</div>
+@if (template === 'Nameplate') {
+  <fhg-digital-nameplate [submodels]="submodels"></fhg-digital-nameplate>
+}
+@if (template === 'CustomerFeedback') {
+  <fhg-customer-feedback [submodels]="submodels"></fhg-customer-feedback>
+}
+@if (!template) {
+  <div class="alert alert-info" role="alert">No well known submodel selected.</div>
+}
 
 <ng-template #viewToolbar></ng-template>

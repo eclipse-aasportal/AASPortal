@@ -1,91 +1,97 @@
 <!-----------------------------------------------------------------------------
- !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
- ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- ! zur Foerderung der angewandten Forschung e.V.
- !
- !---------------------------------------------------------------------------->
+!
+! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+! zur Foerderung der angewandten Forschung e.V.
+!
+!---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"></fhg-aas-table>
+  <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
-    <div class="input-group me-2">
-        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites()">
-            <i class="bi bi-star"></i>
-        </button>
-        <select class="form-select" [(ngModel)]="favoritesList">
-            <option *ngFor="let option of favoritesLists">{{option}}</option>
-        </select>
-    </div>
-    <div *ngIf="favoritesList === '-'" class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
-            <i class="bi bi-chevron-bar-left"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage | async">
-            <i class="bi bi-chevron-left"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage | async">
-            <i class="bi bi-chevron-right"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage | async">
-            <i class="bi bi-chevron-bar-right"></i>
-        </button>
-    </div>
+  <div class="input-group me-2">
+    <button class="btn btn-outline-primary" type="button" (click)="addToFavorites()">
+      <i class="bi bi-star"></i>
+    </button>
+    <select class="form-select" [(ngModel)]="favoritesList">
+      @for (option of favoritesLists; track option) {
+        <option>{{option}}</option>
+      }
+    </select>
+  </div>
+  @if (favoritesList === '-') {
     <div class="btn-group me-2">
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
-                <i class="bi bi-gear"></i>
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
-                <button ngbDropdownItem (click)="addEndpoint()" translate>CMD_ADD_ENDPOINT</button>
-                <button ngbDropdownItem (click)="removeEndpoint()" translate>CMD_REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="reset()" translate>CMD_RESET_CONFIGURATION</button>
-            </div>
-        </div>
+      <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
+        <i class="bi bi-chevron-bar-left"></i>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage | async">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage | async">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage | async">
+        <i class="bi bi-chevron-bar-right"></i>
+      </button>
     </div>
-    <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="uploadDocument()" [disabled]="!canUploadDocument()">
-            <i class="bi bi-upload"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="downloadDocument()" [disabled]="!canDownloadDocument()">
-            <i class="bi bi-download"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="deleteDocument()" [disabled]="!canDeleteDocument()">
-            <i class="bi bi-trash"></i>
-        </button>
+  }
+  <div class="btn-group me-2">
+    <div ngbDropdown class="btn-group" role="group">
+      <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
+        <i class="bi bi-gear"></i>
+      </button>
+      <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
+        <button ngbDropdownItem (click)="addEndpoint()" translate>CMD_ADD_ENDPOINT</button>
+        <button ngbDropdownItem (click)="removeEndpoint()" translate>CMD_REMOVE_ENDPOINT</button>
+        <button ngbDropdownItem (click)="reset()" translate>CMD_RESET_CONFIGURATION</button>
+      </div>
     </div>
-    <div class="btn-group me-2" id="viewModeGroup">
-        <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
-        <label class="btn btn-primary" for="viewModeList">
-            <i class="bi bi-list"></i>
-        </label>
-        <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'">
+  </div>
+  <div class="btn-group me-2">
+    <button type="button" class="btn btn-primary" (click)="uploadDocument()" [disabled]="!canUploadDocument()">
+      <i class="bi bi-upload"></i>
+    </button>
+    <button type="button" class="btn btn-primary" (click)="downloadDocument()" [disabled]="!canDownloadDocument()">
+      <i class="bi bi-download"></i>
+    </button>
+    <button type="button" class="btn btn-primary" (click)="deleteDocument()" [disabled]="!canDeleteDocument()">
+      <i class="bi bi-trash"></i>
+    </button>
+  </div>
+  <div class="btn-group me-2" id="viewModeGroup">
+    <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
+      (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
+      <label class="btn btn-primary" for="viewModeList">
+        <i class="bi bi-list"></i>
+      </label>
+      <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
+        (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'">
         <label class="btn btn-primary" for="viewModeTree">
-            <i class="bi bi-diagram-3"></i>
+          <i class="bi bi-diagram-3"></i>
         </label>
-    </div>
-    <div class="btn-group me-2">
+      </div>
+      <div class="btn-group me-2">
         <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints"
-                translate>LABEL_VIEWS</button>
-            <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
-                    translate>CMD_VIEW_USER_FEEDBACK</button>
-                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
-                    translate>CMD_VIEW_NAMEPLATE</button>
-            </div>
+          <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints"
+          translate>LABEL_VIEWS</button>
+          <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
+            <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
+            translate>CMD_VIEW_USER_FEEDBACK</button>
+            <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
+            translate>CMD_VIEW_NAMEPLATE</button>
+          </div>
         </div>
-    </div>
-    <div *ngIf="favoritesList === '-'" class="input-group flex-grow-1 me-2">
-        <div class="input-group-text">
+      </div>
+      @if (favoritesList === '-') {
+        <div class="input-group flex-grow-1 me-2">
+          <div class="input-group-text">
             <i class="bi bi-filter"></i>
-        </div>
-        <input #textInput type="text" class="form-control" [value]="filter | async"
+          </div>
+          <input #textInput type="text" class="form-control" [value]="filter | async"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
             (keydown.enter)="textInput.blur()">
-    </div>
-</ng-template>
+          </div>
+        }
+      </ng-template>

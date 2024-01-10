@@ -15,6 +15,7 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "moduleResolution": "NodeNext",
+        "module": "NodeNext",
         "paths": {
             "io-planning-ui": [
                 "projects/aas-lib/src/public-api"

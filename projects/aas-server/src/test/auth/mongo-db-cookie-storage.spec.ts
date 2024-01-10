@@ -19,15 +19,15 @@ interface Promisify {
     exec(): Promise<UserCookiesInstance | undefined>;
 }
 
-describe('MongoDBCookieStorage', function () {
+describe('MongoDBCookieStorage', () => {
     let cookieStorage: MongoDBCookieStorage;
     let userCookies: UserCookies;
 
-    beforeAll(function () {
+    beforeAll(() => {
         cookieStorage = new MongoDBCookieStorage();
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
         userCookies = {
             id: 'john.doe@email.com',
             cookies: [
@@ -43,39 +43,39 @@ describe('MongoDBCookieStorage', function () {
         };
     });
 
-    describe('checkAsync', function () {
-        it('indicates that "Cookie1" for john.doe@email.com exist', async function () {
+    describe('checkAsync', () => {
+        it('indicates that "Cookie1" for john.doe@email.com exist', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
             await expect(cookieStorage.checkAsync('john.doe@email.com', 'Cookie1')).resolves.toBe(true);
         });
 
-        it('indicates that "unknown" for john.doe@email.com not exist', async function () {
+        it('indicates that "unknown" for john.doe@email.com not exist', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
             await expect(cookieStorage.checkAsync('john.doe@email.com', 'unknown')).resolves.toBe(false);
         });
 
-        it('indicates that "Cookie1" for jane.doe@email.com not exist', async function () {
+        it('indicates that "Cookie1" for jane.doe@email.com not exist', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance());
             await expect(cookieStorage.checkAsync('jane.doe@email.com', 'Cookie1')).resolves.toBe(false);
         });
     });
 
-    describe('getAsync', function () {
-        it('returns the value of "Cookie1" for john.doe@email.com', async function () {
+    describe('getAsync', () => {
+        it('returns the value of "Cookie1" for john.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
             await expect(cookieStorage.getAsync('john.doe@email.com', 'Cookie1'))
                 .resolves.toEqual({ name: 'Cookie1', data: 'The quick brown fox jumps over the lazy dog.' });
         });
 
-        it('returns "undefined" for "unknown" for john.doe@email.com', async function () {
+        it('returns "undefined" for "unknown" for john.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
             await expect(cookieStorage.getAsync('john.doe@email.com', 'unknown'))
                 .resolves.toBeUndefined();
         });
 
-        it('returns "undefined" for "Cookie1" for jane.doe@email.com', async function () {
+        it('returns "undefined" for "Cookie1" for jane.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance());
 
             await expect(cookieStorage.getAsync('jane.doe@email.com', 'unknown'))
@@ -83,8 +83,8 @@ describe('MongoDBCookieStorage', function () {
         });
     });
 
-    describe('getAllAsync', function () {
-        it('returns all cookies for john.doe@email.com', async function () {
+    describe('getAllAsync', () => {
+        it('returns all cookies for john.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
             await expect(cookieStorage.getAllAsync('john.doe@email.com'))
@@ -101,17 +101,17 @@ describe('MongoDBCookieStorage', function () {
         });
     });
 
-    describe('setAsync', function () {
-        it('can set a new Cookie3 for john.doe@email.com', async function () {
-            let save = jest.fn<() => Promise<void>>();
+    describe('setAsync', () => {
+        it('can set a new Cookie3 for john.doe@email.com', async () => {
+            const save = jest.fn<() => Promise<void>>();
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
 
             await cookieStorage.setAsync('john.doe@email.com', 'Cookie3', 'Hello World!');
             expect(save).toHaveBeenCalled();
         });
 
-        it('can update the existing Cookie2 for john.doe@email.com', async function () {
-            let save = jest.fn<() => Promise<void>>();
+        it('can update the existing Cookie2 for john.doe@email.com', async () => {
+            const save = jest.fn<() => Promise<void>>();
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
 
             await cookieStorage.setAsync('john.doe@email.com', 'Cookie2', 'Hello World!');
@@ -119,10 +119,10 @@ describe('MongoDBCookieStorage', function () {
         });
     });
 
-    describe('deleteAsync', function () {
-        it('can delete a cookie', async function () {
-            let save = jest.fn<() => Promise<void>>();
-            let deleteOne = jest.fn<() => Promise<void>>();
+    describe('deleteAsync', () => {
+        it('can delete a cookie', async () => {
+            const save = jest.fn<() => Promise<void>>();
+            const deleteOne = jest.fn<() => Promise<void>>();
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies, save, deleteOne));
 
             await cookieStorage.deleteAsync('john.doe@email.com', 'Cookie1');
@@ -136,17 +136,17 @@ describe('MongoDBCookieStorage', function () {
     function getInstance(user?: UserCookies, save?: () => Promise<void>, deleteOne?: () => Promise<void>): any {
         if (user) {
             return {
-                exec: () => new Promise<UserCookiesInstance | undefined>((resolve, _) => resolve(
+                exec: () => new Promise<UserCookiesInstance | undefined>(resolve => resolve(
                     {
                         ...user,
-                        save: save ?? (() => new Promise<void>((result, _) => result())),
-                        deleteOne: deleteOne ?? (() => new Promise<void>((result, _) => result()))
+                        save: save ?? (() => new Promise<void>(result => result())),
+                        deleteOne: deleteOne ?? (() => new Promise<void>(result => result()))
                     }))
             } as Promisify;
         }
 
         return {
-            exec: () => new Promise<UserCookiesInstance | undefined>((resolve, _) => resolve(undefined))
+            exec: () => new Promise<UserCookiesInstance | undefined>(resolve => resolve(undefined))
         } as Promisify;
     }
 });

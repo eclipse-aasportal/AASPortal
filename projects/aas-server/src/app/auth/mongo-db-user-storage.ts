@@ -46,6 +46,6 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async deleteAsync(userId: string): Promise<boolean> {
-        return (await this.UserDataModel.findOneAndRemove({ id: userId }).exec()) != null
+        return (await this.UserDataModel.findOneAndDelete({ id: userId }).exec()) != null
     }
 }

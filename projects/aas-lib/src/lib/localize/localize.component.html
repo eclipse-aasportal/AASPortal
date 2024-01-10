@@ -1,19 +1,21 @@
 <!-----------------------------------------------------------------------------
- !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
- ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- ! zur Foerderung der angewandten Forschung e.V.
- !
- !---------------------------------------------------------------------------->
+!
+! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+! zur Foerderung der angewandten Forschung e.V.
+!
+!---------------------------------------------------------------------------->
 
 <div ngbDropdown class="d-inline-block">
-    <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
-        <div class="d-inline-flex">
-            <div class="px-2"><i class="bi bi-globe"></i></div>
-            <div>{{(culture | async)?.localeId}}</div>
-        </div>
-    </a>
-    <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        <a ngbDropdownItem (click)="setCulture(culture)" *ngFor="let culture of cultures | async">{{culture.name}}</a>
+  <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
+    <div class="d-inline-flex">
+      <div class="px-2"><i class="bi bi-globe"></i></div>
+      <div>{{(culture | async)?.localeId}}</div>
     </div>
+  </a>
+  <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
+    @for (culture of cultures | async; track culture) {
+      <a ngbDropdownItem (click)="setCulture(culture)">{{culture.name}}</a>
+    }
+  </div>
 </div>

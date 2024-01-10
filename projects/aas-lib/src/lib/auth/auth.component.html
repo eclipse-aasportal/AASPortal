@@ -1,24 +1,32 @@
 <!-----------------------------------------------------------------------------
- !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
- ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- ! zur Foerderung der angewandten Forschung e.V.
- !
- !---------------------------------------------------------------------------->
+!
+! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+! zur Foerderung der angewandten Forschung e.V.
+!
+!---------------------------------------------------------------------------->
 
 <div ngbDropdown class="d-inline-block">
-    <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
-        <div class="d-inline-flex">
-            <div class="px-2"><i class="bi bi-person-circle"></i></div>
-            <div>{{userName}}</div>
-        </div>
-    </a>
-    <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="login()" translate>CMD_LOGIN</a>
-        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="register()"
-            translate>CMD_REGISTER_USER</a>
-        <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="updateUserProfile()"
-            translate>CMD_UPDATE_PROFILE</a>
-        <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="logout()" translate>CMD_LOGOUT</a>
+  <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
+    <div class="d-inline-flex">
+      <div class="px-2"><i class="bi bi-person-circle"></i></div>
+      <div>{{userName}}</div>
     </div>
+  </a>
+  <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
+    @if (!userAuthenticated) {
+      <a type="button" class="dropdown-item" (click)="login()" translate>CMD_LOGIN</a>
+    }
+    @if (!userAuthenticated) {
+      <a type="button" class="dropdown-item" (click)="register()"
+      translate>CMD_REGISTER_USER</a>
+    }
+    @if (userAuthenticated) {
+      <a type="button" class="dropdown-item" (click)="updateUserProfile()"
+      translate>CMD_UPDATE_PROFILE</a>
+    }
+    @if (userAuthenticated) {
+      <a type="button" class="dropdown-item" (click)="logout()" translate>CMD_LOGOUT</a>
+    }
+  </div>
 </div>

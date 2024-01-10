@@ -1,40 +1,42 @@
 <!-----------------------------------------------------------------------------
- !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
- ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- ! zur Foerderung der angewandten Forschung e.V.
- !
- !---------------------------------------------------------------------------->
+!
+! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+! zur Foerderung der angewandten Forschung e.V.
+!
+!---------------------------------------------------------------------------->
 
 <div class="bg-white sticky-top pb-2">
-    <nav class="navbar navbar-expand-sm bg-white">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
-                <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbar">
-                <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="navbar-nav me-auto">
-                    <li [ngbNavItem]="link.id" *ngFor="let link of links">
-                        <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active" skipLocationChange="true">{{link.name | translate}}</a>
-                    </li>
-                </ul>
-                <fhg-localize class="text-primary" [languages]="['en-us', 'de-de']"></fhg-localize>
-                <fhg-auth class="text-primary me-2"></fhg-auth>
-                <div class="bg-light">
-                    <img class="img-thumbnail" src="/assets/i40-spec-logo.png" width="320" alt="">
-                </div>
-            </div>
-        </div>
-    </nav>
+  <nav class="navbar navbar-expand-sm bg-white">
     <div class="container-fluid">
-        <div class="btn-toolbar" role="toolbar">
-            <ng-container *ngTemplateOutlet="toolbarTemplate | async"></ng-container>
+      <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
+        <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="navbar-nav me-auto">
+          @for (link of links; track link) {
+            <li [ngbNavItem]="link.id">
+              <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active" skipLocationChange="true">{{link.name | translate}}</a>
+            </li>
+          }
+        </ul>
+        <fhg-localize class="text-primary" [languages]="['en-us', 'de-de']"></fhg-localize>
+        <fhg-auth class="text-primary me-2"></fhg-auth>
+        <div class="bg-light">
+          <img class="img-thumbnail" src="/assets/i40-spec-logo.png" width="320" alt="">
         </div>
-        <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
+      </div>
     </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="btn-toolbar" role="toolbar">
+      <ng-container *ngTemplateOutlet="toolbarTemplate | async"></ng-container>
+    </div>
+    <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
+  </div>
 </div>
 <router-outlet></router-outlet>
 
