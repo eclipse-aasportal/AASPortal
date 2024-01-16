@@ -13,34 +13,36 @@ import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
 import { AasxServerPackage } from '../../../app/packages/aasx-server/aasx-server-package.js';
 import { createSpyObj } from '../../utils.js';
 
-describe('AasxServerPackage', function () {
+describe('AasxServerPackage', () => {
     let aasPackage: AasxServerPackage;
     let logger: jest.Mocked<Logger>;
     let server: jest.Mocked<AasxServer>;
     let env: aas.Environment;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         server = createSpyObj<AasxServer>(['readEnvironmentAsync'], {
             url: 'http:/localhost:1234',
-            name: 'Test'
+            name: 'Test',
         });
 
         aasPackage = new AasxServerPackage(logger, server, 'CunaCup_Becher1');
         env = {
-            assetAdministrationShells: [{
-                id: 'Sample AAS',
-                idShort: 'http://www.fraunhofer.de/aas',
-                modelType: 'AssetAdministrationShell',
-                assetInformation: { assetKind: 'Instance' }
-            }], submodels: [], conceptDescriptions: []
+            assetAdministrationShells: [
+                {
+                    id: 'Sample AAS',
+                    idShort: 'http://www.fraunhofer.de/aas',
+                    modelType: 'AssetAdministrationShell',
+                    assetInformation: { assetKind: 'Instance' },
+                },
+            ],
+            submodels: [],
+            conceptDescriptions: [],
         };
     });
 
-    it('creates a document', async function () {
-        server.readEnvironmentAsync.mockReturnValue(
-            new Promise<aas.Environment>(resolve => resolve(env)));
-
+    it('creates a document', async () => {
+        server.readEnvironmentAsync.mockResolvedValue(env);
         await expect(aasPackage.createDocumentAsync()).resolves.toBeTruthy();
     });
 });

@@ -32,6 +32,6 @@ describe('SocketClient', function () {
         expect(client.has('test')).toBeTruthy();
 
         client.notify({ type: 'test', data: 42 });
-        expect(ws.send).toHaveBeenCalled(); 
+        expect(ws.send).toHaveBeenCalled();
     });
 });

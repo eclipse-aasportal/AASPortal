@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { LiveNode } from 'common';
-import { SocketItem } from '../socket-item.js';
 import { noop } from 'lodash-es';
+import { SocketItem } from '../socket-item.js';
 
 export class HttpSocketItem implements SocketItem {
     public constructor(

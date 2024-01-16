@@ -18,7 +18,15 @@ describe('WinstonLogger', function () {
         let winstonLogger: jest.Mocked<winston.Logger>;
 
         beforeEach(function () {
-            winstonLogger = createSpyObj<winston.Logger>(['error', 'warn', 'info', 'isErrorEnabled', 'isInfoEnabled', 'isWarnEnabled']);
+            winstonLogger = createSpyObj<winston.Logger>([
+                'error',
+                'warn',
+                'info',
+                'isErrorEnabled',
+                'isInfoEnabled',
+                'isWarnEnabled',
+            ]);
+
             winstonLogger.isErrorEnabled.mockReturnValue(true);
             winstonLogger.isWarnEnabled.mockReturnValue(true);
             winstonLogger.isInfoEnabled.mockReturnValue(true);
@@ -33,7 +41,7 @@ describe('WinstonLogger', function () {
             logger.stop();
             expect(logger.getMessages().length).toEqual(3);
         });
-        
+
         it('logs message objects', function () {
             logger.start('test');
             logger.log({ type: 'Info', text: 'This is an info.', timestamp: Date.now() });
@@ -42,7 +50,7 @@ describe('WinstonLogger', function () {
             logger.stop();
             expect(logger.getMessages().length).toEqual(3);
         });
-        
+
         it('logs only different errors', function () {
             logger.start('test');
             logger.error('This is a first error.');
@@ -76,7 +84,14 @@ describe('WinstonLogger', function () {
         let winstonLogger: jest.Mocked<winston.Logger>;
 
         beforeEach(function () {
-            winstonLogger = createSpyObj<winston.Logger>(['error', 'warn', 'info', 'isErrorEnabled', 'isInfoEnabled', 'isWarnEnabled']);
+            winstonLogger = createSpyObj<winston.Logger>([
+                'error',
+                'warn',
+                'info',
+                'isErrorEnabled',
+                'isInfoEnabled',
+                'isWarnEnabled',
+            ]);
             winstonLogger.isErrorEnabled.mockReturnValue(true);
             winstonLogger.isWarnEnabled.mockReturnValue(false);
             winstonLogger.isInfoEnabled.mockReturnValue(false);
@@ -98,7 +113,14 @@ describe('WinstonLogger', function () {
         let winstonLogger: jest.Mocked<winston.Logger>;
 
         beforeEach(function () {
-            winstonLogger = createSpyObj<winston.Logger>(['error', 'warn', 'info', 'isErrorEnabled', 'isInfoEnabled', 'isWarnEnabled']);
+            winstonLogger = createSpyObj<winston.Logger>([
+                'error',
+                'warn',
+                'info',
+                'isErrorEnabled',
+                'isInfoEnabled',
+                'isWarnEnabled',
+            ]);
             winstonLogger.isErrorEnabled.mockReturnValue(true);
             winstonLogger.isWarnEnabled.mockReturnValue(true);
             winstonLogger.isInfoEnabled.mockReturnValue(false);
@@ -120,7 +142,16 @@ describe('WinstonLogger', function () {
         let winstonLogger: jest.Mocked<winston.Logger>;
 
         beforeEach(function () {
-            winstonLogger = createSpyObj<winston.Logger>(['error', 'warn', 'info', 'debug', 'isErrorEnabled', 'isInfoEnabled', 'isWarnEnabled', 'isDebugEnabled']);
+            winstonLogger = createSpyObj<winston.Logger>([
+                'error',
+                'warn',
+                'info',
+                'debug',
+                'isErrorEnabled',
+                'isInfoEnabled',
+                'isWarnEnabled',
+                'isDebugEnabled',
+            ]);
             winstonLogger.isErrorEnabled.mockReturnValue(true);
             winstonLogger.isWarnEnabled.mockReturnValue(true);
             winstonLogger.isInfoEnabled.mockReturnValue(true);

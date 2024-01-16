@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { OpcuaServer } from '../../../app/packages/opcua/opcua-server.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
@@ -14,7 +14,6 @@ import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, St
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { LiveRequest, aas } from 'common';
 import env from '../../assets/aas-environment.js';
-import { afterEach } from 'node:test';
 
 type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodResult>;
 

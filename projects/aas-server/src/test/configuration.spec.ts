@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { getEndpointName, getEndpointType } from "../app/configuration.js";
-import { describe, it, expect } from '@jest/globals'
+import { getEndpointName, getEndpointType } from '../app/configuration.js';
+import { describe, it, expect } from '@jest/globals';
 
 describe('configuration', function () {
     describe('getEndpointName', function () {
@@ -24,13 +24,15 @@ describe('configuration', function () {
         });
 
         it('gets the default name of an AAS registry', function () {
-            expect(getEndpointName('http://localhost:1234/v1/registry?type=AASRegistry'))
-                .toEqual('http://localhost:1234/v1/registry');
+            expect(getEndpointName('http://localhost:1234/v1/registry?type=AASRegistry')).toEqual(
+                'http://localhost:1234/v1/registry',
+            );
         });
 
         it('gets the default name of an OPCUA server', function () {
-            expect(getEndpointName(new URL('opc.tcp://172.16.160.178:30001/I4AASServer')))
-                .toEqual('opc.tcp://172.16.160.178:30001/I4AASServer');
+            expect(getEndpointName(new URL('opc.tcp://172.16.160.178:30001/I4AASServer'))).toEqual(
+                'opc.tcp://172.16.160.178:30001/I4AASServer',
+            );
         });
 
         it('gets the default name of an AASX directory', function () {

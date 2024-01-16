@@ -56,7 +56,7 @@ describe('AasxServerV0', function () {
 
     it('gets the AAS with the specified idShort', async function () {
         jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-            let value: any;
+            let value: unknown;
             switch ((options as http.RequestOptions).path) {
                 case '/aas/CunaCup_Becher1/submodels':
                     value = submodels;
@@ -78,9 +78,9 @@ describe('AasxServerV0', function () {
             const stream = new IncomingMessage(new Socket());
             stream.push(JSON.stringify(value));
             stream.push(null);
-            (stream.statusCode = 200),
-                (stream.statusMessage = 'OK'),
-                (callback as (res: IncomingMessage) => void)(stream);
+            stream.statusCode = 200;
+            stream.statusMessage = 'OK';
+            (callback as (res: IncomingMessage) => void)(stream);
 
             return new http.ClientRequest('http://localhost:1234');
         });
@@ -97,9 +97,9 @@ describe('AasxServerV0', function () {
                 }),
             );
             stream.push(null);
-            (stream.statusCode = 200),
-                (stream.statusMessage = 'OK'),
-                (callback as (res: IncomingMessage) => void)(stream);
+            stream.statusCode = 200;
+            stream.statusMessage = 'OK';
+            (callback as (res: IncomingMessage) => void)(stream);
 
             return new http.ClientRequest('http://localhost:1234');
         });
@@ -117,9 +117,9 @@ describe('AasxServerV0', function () {
             const stream = new IncomingMessage(new Socket());
             stream.push(JSON.stringify({ value: 42 }));
             stream.push(null);
-            (stream.statusCode = 200),
-                (stream.statusMessage = 'OK'),
-                (callback as (res: IncomingMessage) => void)(stream);
+            stream.statusCode = 200;
+            stream.statusMessage = 'OK';
+            (callback as (res: IncomingMessage) => void)(stream);
 
             return new http.ClientRequest('http://localhost:1234');
         });

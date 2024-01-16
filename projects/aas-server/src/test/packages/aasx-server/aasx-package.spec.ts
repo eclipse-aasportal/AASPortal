@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { AasxPackage } from '../../../app/packages/aasx-directory/aasx-package.js'
+import { AasxPackage } from '../../../app/packages/aasx-directory/aasx-package.js';
 import { AasxDirectory } from '../../../app/packages/aasx-directory/aasx-directory.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { LocalFileStorage } from '../../../app/file-storage/local-file-storage.js';
-import { createSpyObj, fail } from '../../utils.js';
+import { createSpyObj } from '../../utils.js';
 import { FileStorage } from '../../../app/file-storage/file-storage.js';
 
 describe('AasxPackage', function () {

@@ -8,7 +8,7 @@
 
 import { Logger } from '../../app/logging/logger.js';
 import { readFile } from 'fs/promises';
-import { JsonReader } from '../../app/packages/json-reader.js'
+import { JsonReader } from '../../app/packages/json-reader.js';
 import { resolve } from 'path';
 import { createSpyObj } from '../utils.js';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
@@ -29,7 +29,7 @@ describe('JsonReader', function () {
     });
 
     it('reads the AAS environment from a JSON source', function () {
-        let env = reader.readEnvironment();
+        const env = reader.readEnvironment();
         expect(env).toBeDefined();
     });
 });

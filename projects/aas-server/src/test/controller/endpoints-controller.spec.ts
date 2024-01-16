@@ -35,23 +35,21 @@ describe('EndpointsController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
-        aasProvider = createSpyObj<AASProvider>(
-            [
-                'getEndpoints',
-                'addEndpointAsync',
-                'removeEndpointAsync',
-                'resetAsync',
-            ]);
+        aasProvider = createSpyObj<AASProvider>([
+            'getEndpoints',
+            'addEndpointAsync',
+            'removeEndpointAsync',
+            'resetAsync',
+        ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
@@ -76,13 +74,11 @@ describe('EndpointsController', function () {
         const endpoints: AASEndpoint = {
             name: 'Test',
             url: 'http://localhost:1234',
-            type: 'AasxServer'
+            type: 'AasxServer',
         };
 
         aasProvider.getEndpoints.mockResolvedValue([endpoints]);
-        const response = await request(app)
-            .get('/api/v1/endpoints')
-            .set('Authorization', `Bearer ${getToken()}`);
+        const response = await request(app).get('/api/v1/endpoints').set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual([endpoints]);
@@ -93,7 +89,8 @@ describe('EndpointsController', function () {
         const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'AasxDirectory' };
         aasProvider.addEndpointAsync.mockResolvedValue();
         auth.hasUserAsync.mockResolvedValue(true);
-        const response = await request(app).post('/api/v1/endpoints/samples')
+        const response = await request(app)
+            .post('/api/v1/endpoints/samples')
             .set('Authorization', `Bearer ${getToken('John')}`)
             .send(endpoint);
 

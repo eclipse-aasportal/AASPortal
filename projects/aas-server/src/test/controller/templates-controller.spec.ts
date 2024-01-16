@@ -35,18 +35,16 @@ describe('TemplateController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
         templateStorage = createSpyObj<TemplateStorage>(['readAsync']);
-
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
 
@@ -68,12 +66,10 @@ describe('TemplateController', function () {
 
     it('getTemplates: /api/v1/templates', async function () {
         const templates: TemplateDescriptor[] = [{ name: 'TestTemplate' }];
-        templateStorage.readAsync.mockReturnValue(new Promise<TemplateDescriptor[]>(resolve => resolve(templates)));
-        const response = await request(app)
-            .get('/api/v1/templates')
-            .set('Authorization', `Bearer ${getToken()}`);
+        templateStorage.readAsync.mockResolvedValue(templates);
+        const response = await request(app).get('/api/v1/templates').set('Authorization', `Bearer ${getToken()}`);
 
-        expect(response.statusCode).toBe(200)
+        expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(templates);
         expect(templateStorage.readAsync).toHaveBeenCalled();
     });

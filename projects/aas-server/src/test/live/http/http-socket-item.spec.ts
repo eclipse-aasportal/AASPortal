@@ -16,7 +16,7 @@ describe('HttpSocketItem', function () {
         item = new HttpSocketItem({ nodeId: '', valueType: 'xs:integer' }, 'http://localhost:1234');
     });
 
-    it('should be created', function() {
+    it('should be created', () => {
         expect(item).toBeTruthy();
         expect(item.url).toEqual('http://localhost:1234');
         expect(item.node).toEqual({ nodeId: '', valueType: 'xs:integer' });

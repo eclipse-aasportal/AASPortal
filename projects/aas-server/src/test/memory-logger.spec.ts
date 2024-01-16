@@ -7,19 +7,17 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { MemoryLogger, MemoryLoggerLevel } from '../app/logging/memory-logger.js';
 import { DebugConsole } from '../app/logging/logger.js';
 import { createSpyObj } from './utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 describe('MemoryLogger', function () {
     describe('log level Info', function () {
         let logger: MemoryLogger;
 
         beforeEach(function () {
-            logger = new MemoryLogger(
-                MemoryLoggerLevel.Info,
-                createSpyObj<DebugConsole>(['debug']));
+            logger = new MemoryLogger(MemoryLoggerLevel.Info, createSpyObj<DebugConsole>(['debug']));
         });
 
         it('should create', function () {

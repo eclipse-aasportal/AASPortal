@@ -8,7 +8,7 @@
 
 import { Logger } from '../../app/logging/logger.js';
 import { readFile } from 'fs/promises';
-import { JsonReaderV2 } from '../../app/packages/json-reader-v2.js'
+import { JsonReaderV2 } from '../../app/packages/json-reader-v2.js';
 import { createSpyObj } from '../utils.js';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
