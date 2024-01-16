@@ -25,7 +25,7 @@ import {
     WindowService,
     ZVEINameplate,
     resolveSemanticId,
-    supportedSubmodelTemplates
+    supportedSubmodelTemplates,
 } from 'projects/aas-lib/src/public-api';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
@@ -45,13 +45,13 @@ import { FavoritesFormComponent } from './favorites-form/favorites-form.componen
     styleUrls: ['./start.component.scss'],
 })
 export class StartComponent implements OnDestroy, AfterViewInit {
-    private readonly store: Store<StartFeatureState>
+    private readonly store: Store<StartFeatureState>;
     private readonly subscription = new Subscription();
     private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
     private _selected: AASDocument[] = [];
     private _favoritesList = '-';
 
-    constructor(
+    public constructor(
         store: Store,
         private readonly router: Router,
         private readonly modal: NgbModal,
@@ -74,18 +74,25 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.viewMode = this.store.select(StartSelectors.selectViewMode);
         this.endpoints = this.api.getEndpoints();
 
-        this.store.select(StartSelectors.selectViewMode).pipe(
-            first(viewMode => viewMode === ViewMode.Undefined),
-            mergeMap(() => this.auth.ready),
-            first(ready => ready),
-            first(),
-        ).subscribe({
-            next: () => this.store.dispatch(StartActions.getFirstPage({})),
-            error: error => this.notify.error(error),
-        });
+        this.store
+            .select(StartSelectors.selectViewMode)
+            .pipe(
+                first(viewMode => viewMode === ViewMode.Undefined),
+                mergeMap(() => this.auth.ready),
+                first(ready => ready),
+                first(),
+            )
+            .subscribe({
+                next: () => this.store.dispatch(StartActions.getFirstPage({})),
+                error: error => this.notify.error(error),
+            });
 
-        this.subscription.add(this.store.select(StartSelectors.selectFavorites).pipe()
-            .subscribe(value => this._favoritesList = value))
+        this.subscription.add(
+            this.store
+                .select(StartSelectors.selectFavorites)
+                .pipe()
+                .subscribe(value => (this._favoritesList = value)),
+        );
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
@@ -99,10 +106,12 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         if (value !== this._favoritesList) {
             const favoritesList = this.favorites.get(value);
             if (favoritesList) {
-                this.store.dispatch(StartActions.getFavorites({
-                    name: favoritesList.name,
-                    documents: favoritesList.documents,
-                }));
+                this.store.dispatch(
+                    StartActions.getFavorites({
+                        name: favoritesList.name,
+                        documents: favoritesList.documents,
+                    }),
+                );
             } else {
                 this.store.dispatch(StartActions.getFirstPage({}));
             }
@@ -156,48 +165,62 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public addEndpoint(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            map(endpoints => {
-                const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.workspaces = endpoints;
-                return modalRef;
-            }),
-            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
-            mergeMap((result) => {
-                if (!result) return EMPTY;
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                mergeMap(() => this.api.getEndpoints()),
+                map(endpoints => {
+                    const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
+                    modalRef.componentInstance.workspaces = endpoints;
+                    return modalRef;
+                }),
+                mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
+                mergeMap(result => {
+                    if (!result) return EMPTY;
 
-                return this.api.addEndpoint(result);
-            })).subscribe({ error: (error) => this.notify.error(error) });
+                    return this.api.addEndpoint(result);
+                }),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public removeEndpoint(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            mergeMap(endpoints => {
-                const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints = endpoints
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(item => ({
-                        name: item.name,
-                        url: item.url,
-                        selected: false
-                    } as EndpointSelect));
-                return from<Promise<string[] | undefined>>(modalRef.result);
-            }),
-            mergeMap((endpoints) => from((endpoints ?? []))),
-            mergeMap((endpoint) => this.api.removeEndpoint(endpoint)))
-            .subscribe({ error: (error) => this.notify.error(error) });
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                mergeMap(() => this.api.getEndpoints()),
+                mergeMap(endpoints => {
+                    const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
+                    modalRef.componentInstance.endpoints = endpoints
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map(
+                            item =>
+                                ({
+                                    name: item.name,
+                                    url: item.url,
+                                    selected: false,
+                                }) as EndpointSelect,
+                        );
+                    return from<Promise<string[] | undefined>>(modalRef.result);
+                }),
+                mergeMap(endpoints => from(endpoints ?? [])),
+                mergeMap(endpoint => this.api.removeEndpoint(endpoint)),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public reset(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
-            mergeMap((result) => {
-                if (!result) return of(void 0);
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
+                mergeMap(result => {
+                    if (!result) return of(void 0);
 
-                return this.api.reset();
-            })).subscribe({ error: (error) => this.notify.error(error) });
+                    return this.api.reset();
+                }),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public canUploadDocument(): boolean {
@@ -205,20 +228,24 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public uploadDocument(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            mergeMap(endpoints => {
-                const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints = endpoints.sort((a, b) => a.name.localeCompare(b.name));
-                modalRef.componentInstance.endpoint = endpoints[0];
-                return from<Promise<string | undefined>>(modalRef.result);
-            })).subscribe({
-                next: (result) => {
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                mergeMap(() => this.api.getEndpoints()),
+                mergeMap(endpoints => {
+                    const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
+                    modalRef.componentInstance.endpoints = endpoints.sort((a, b) => a.name.localeCompare(b.name));
+                    modalRef.componentInstance.endpoint = endpoints[0];
+                    return from<Promise<string | undefined>>(modalRef.result);
+                }),
+            )
+            .subscribe({
+                next: result => {
                     if (result) {
                         this.notify.info('INFO_UPLOAD_AASX_FILE_SUCCESS', result);
                     }
                 },
-                error: (error) => this.notify.error(error)
+                error: error => this.notify.error(error),
             });
     }
 
@@ -228,10 +255,9 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
     public downloadDocument(): void {
         for (const document of this._selected) {
-            this.download.downloadDocument(
-                document.endpoint,
-                document.id,
-                document.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
+            this.download
+                .downloadDocument(document.endpoint, document.id, document.idShort + '.aasx')
+                .subscribe({ error: error => this.notify.error(error) });
         }
     }
 
@@ -243,13 +269,21 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         if (this._selected.length === 0) return;
 
         if (this._favoritesList === '-') {
-            this.auth.ensureAuthorized('editor').pipe(
-                map(() => this.window.confirm(stringFormat(
-                    this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                    this._selected.map(item => item.idShort).join(', ')))),
-                mergeMap((result) => from(result ? this._selected : [])),
-                mergeMap((document) => this.api.delete(document.id, document.endpoint)))
-                .subscribe({ error: (error) => this.notify.error(error) });
+            this.auth
+                .ensureAuthorized('editor')
+                .pipe(
+                    map(() =>
+                        this.window.confirm(
+                            stringFormat(
+                                this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
+                                this._selected.map(item => item.idShort).join(', '),
+                            ),
+                        ),
+                    ),
+                    mergeMap(result => from(result ? this._selected : [])),
+                    mergeMap(document => this.api.delete(document.id, document.endpoint)),
+                )
+                .subscribe({ error: error => this.notify.error(error) });
         } else {
             this.favorites.remove(this._selected, this._favoritesList);
             this.store.dispatch(StartActions.removeFavorites({ favorites: [...this._selected] }));
@@ -263,7 +297,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     public viewUserFeedback(): void {
         const descriptor: SubmodelViewDescriptor = {
             template: supportedSubmodelTemplates.get(CustomerFeedback),
-            submodels: []
+            submodels: [],
         };
 
         for (const document of this._selected) {
@@ -272,13 +306,13 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 descriptor.submodels.push({
                     id: document.id,
                     endpoint: document.endpoint,
-                    idShort: submodels[0].idShort
+                    idShort: submodels[0].idShort,
                 });
             }
         }
 
         if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery)
+            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
             this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
         }
     }
@@ -290,7 +324,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     public viewNameplate(): void {
         const descriptor: SubmodelViewDescriptor = {
             template: supportedSubmodelTemplates.get(ZVEINameplate),
-            submodels: []
+            submodels: [],
         };
 
         for (const document of this._selected) {
@@ -299,13 +333,13 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 descriptor.submodels.push({
                     id: document.id,
                     endpoint: document.endpoint,
-                    idShort: submodels[0].idShort
+                    idShort: submodels[0].idShort,
                 });
             }
         }
 
         if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery)
+            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
             this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
         }
     }

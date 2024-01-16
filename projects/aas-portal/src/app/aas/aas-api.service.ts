@@ -14,13 +14,10 @@ import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 
 /** The client side AAS provider service. */
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class AASApiService {
-    constructor(
-        private readonly http: HttpClient
-    ) {
-    }
+    public constructor(private readonly http: HttpClient) {}
 
     /**
      * Gets the AAS document with the specified identifier.
@@ -30,7 +27,9 @@ export class AASApiService {
      */
     public getDocument(id: string, name?: string): Observable<AASDocument> {
         if (name) {
-            return this.http.get<AASDocument>(`/api/v1/containers/${encodeBase64Url(name)}/documents/${encodeBase64Url(id)}`);
+            return this.http.get<AASDocument>(
+                `/api/v1/containers/${encodeBase64Url(name)}/documents/${encodeBase64Url(id)}`,
+            );
         }
 
         return this.http.get<AASDocument>(`/api/v1/documents/${encodeBase64Url(id)}`);
@@ -53,6 +52,7 @@ export class AASApiService {
         formData.append('content', new Blob([JSON.stringify(document.content)]));
         return this.http.put<string[]>(
             `/api/v1/containers/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}`,
-            formData);
+            formData,
+        );
     }
 }

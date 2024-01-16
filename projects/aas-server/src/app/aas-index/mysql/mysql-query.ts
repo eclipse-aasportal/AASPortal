@@ -10,7 +10,6 @@ import { AASQuery, AASQueryOperator, OrExpression } from 'common';
 import { AASIndexQuery } from '../aas-index-query.js';
 
 export class MySqlQuery extends AASIndexQuery {
-
     public constructor(expression: string, language: string = 'en') {
         super(expression, language);
     }
@@ -37,7 +36,9 @@ export class MySqlQuery extends AASIndexQuery {
                 } else if (this.isExpression(and)) {
                     andSqlTerms.push(`(${this.evaluate(and, values)})`);
                 } else {
-                    andSqlTerms.push(`(documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%')`);
+                    andSqlTerms.push(
+                        `(documents.endpoint LIKE '%${and}%' OR documents.id LIKE '%${and}%' OR documents.idShort LIKE '%${and}%')`,
+                    );
                 }
             }
 
@@ -50,7 +51,7 @@ export class MySqlQuery extends AASIndexQuery {
     private createSqlTerm(query: AASQuery, values: unknown[]): string {
         let s = `elements.modelType = "${query.modelType.toLowerCase()}"`;
         if (query.name) {
-            s += ` AND elements.idShort LIKE '%${query.name}%'`
+            s += ` AND elements.idShort LIKE '%${query.name}%'`;
         }
 
         if (query.value && query.operator) {
@@ -71,21 +72,21 @@ export class MySqlQuery extends AASIndexQuery {
     }
 
     private isDate(value: unknown): value is Date | [Date, Date] {
-        return value instanceof Date || Array.isArray(value) && value[0] instanceof Date;
+        return value instanceof Date || (Array.isArray(value) && value[0] instanceof Date);
     }
 
     private isNumber(value: unknown): value is number | [number, number] {
-        return typeof value === 'number' || Array.isArray(value) && typeof value[0] === 'number';
+        return typeof value === 'number' || (Array.isArray(value) && typeof value[0] === 'number');
     }
 
     private isBigint(value: unknown): value is bigint | [bigint, bigint] {
-        return typeof value === 'bigint' || Array.isArray(value) && typeof value[0] === 'bigint';
+        return typeof value === 'bigint' || (Array.isArray(value) && typeof value[0] === 'bigint');
     }
 
     private createDateSqlTerm(operator: AASQueryOperator, value: Date | [Date, Date], values: unknown[]): string {
         if (Array.isArray(value)) {
             values.push(value[0]);
-            values.push(value[1])
+            values.push(value[1]);
             return ` AND elements.dateValue >= ? AND elements.dateValue <= ?`;
         }
 
@@ -93,10 +94,14 @@ export class MySqlQuery extends AASIndexQuery {
         return ` AND elements.dateValue ${this.toMySqlOperator(operator)} ?`;
     }
 
-    private createNumberSqlTerm(operator: AASQueryOperator, value: number | [number, number], values: unknown[]): string {
+    private createNumberSqlTerm(
+        operator: AASQueryOperator,
+        value: number | [number, number],
+        values: unknown[],
+    ): string {
         if (Array.isArray(value)) {
             values.push(value[0]);
-            values.push(value[1])
+            values.push(value[1]);
             return ` AND elements.numberValue >= ? AND elements.numberValue <= ?`;
         }
 
@@ -104,10 +109,14 @@ export class MySqlQuery extends AASIndexQuery {
         return ` AND elements.numberValue ${this.toMySqlOperator(operator)} ?`;
     }
 
-    private createBigintSqlTerm(operator: AASQueryOperator, value: bigint | [bigint, bigint], values: unknown[]): string {
+    private createBigintSqlTerm(
+        operator: AASQueryOperator,
+        value: bigint | [bigint, bigint],
+        values: unknown[],
+    ): string {
         if (Array.isArray(value)) {
             values.push(value[0]);
-            values.push(value[1])
+            values.push(value[1]);
             return ` AND elements.bigintValue >= ? AND elements.bigintValue <= ?`;
         }
 

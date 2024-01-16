@@ -23,16 +23,16 @@ export interface ProfileFormResult {
 @Component({
     selector: 'fhg-profile',
     templateUrl: './profile-form.component.html',
-    styleUrls: ['./profile-form.component.scss']
+    styleUrls: ['./profile-form.component.scss'],
 })
 export class ProfileFormComponent {
     private profile?: UserProfile;
 
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AuthApiService
-    ) { }
+        private api: AuthApiService,
+    ) {}
 
     public id = '';
 
@@ -82,17 +82,17 @@ export class ProfileFormComponent {
             const newProfile: UserProfile = {
                 id: this.id,
                 name: this.name ?? getUserNameFromEMail(this.id),
-                password: this.password1
+                password: this.password1,
             };
 
             this.api.updateProfile(this.profile.id, newProfile).subscribe({
-                next: (value) => {
+                next: value => {
                     const result: ProfileFormResult = { token: value.token };
                     this.modal.close(result);
                 },
-                error: (error) => {
+                error: error => {
                     this.pushMessage(messageToString(error, this.translate));
-                }
+                },
             });
         }
     }
@@ -102,7 +102,7 @@ export class ProfileFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message]
+        this.messages = [message];
     }
 
     private clearMessages(): void {

@@ -15,7 +15,7 @@ import swaggerUi, { JsonObject } from 'swagger-ui-express';
 import { ApplicationError } from 'common';
 import { ValidateError } from 'tsoa';
 
-import swaggerDoc from './swagger.json' assert {type: 'json'};
+import swaggerDoc from './swagger.json' assert { type: 'json' };
 import { RegisterRoutes } from './routes/routes.js';
 import { ERRORS } from './errors.js';
 import { Variable } from './variable.js';
@@ -24,9 +24,9 @@ import { parseUrl } from './convert.js';
 
 @singleton()
 export class App {
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         this.app = express();
         this.setup();
@@ -44,10 +44,12 @@ export class App {
             this.logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
         });
 
-        this.app.use(cors({
-            origin: this.variable.CORS_ORIGIN,
-            credentials: true
-        }));
+        this.app.use(
+            cors({
+                origin: this.variable.CORS_ORIGIN,
+                credentials: true,
+            }),
+        );
 
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
@@ -82,7 +84,7 @@ export class App {
     private errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction): Response | void => {
         if (err instanceof ValidateError) {
             return res.status(422).json({
-                message: "Validation Failed",
+                message: 'Validation Failed',
                 details: err?.fields,
             });
         }
@@ -90,18 +92,18 @@ export class App {
         if (err instanceof ApplicationError) {
             if (err.name === ERRORS.UnauthorizedAccess) {
                 return res.status(401).json({
-                    message: 'Unauthorized'
+                    message: 'Unauthorized',
                 });
             }
 
             return res.status(500).json({
-                message: err.message
+                message: err.message,
             });
         }
 
         if (err instanceof Error) {
             return res.status(500).json({
-                message: err.message
+                message: err.message,
             });
         }
 
@@ -110,7 +112,7 @@ export class App {
 
     private notFoundHandler = (_req: Request, res: Response) => {
         res.status(404).send({
-            message: "Not Found"
+            message: 'Not Found',
         });
     };
 
@@ -118,9 +120,9 @@ export class App {
         (swaggerDoc as { host?: string }).host = req.get('host');
         (req as Request & { swaggerDoc: JsonObject }).swaggerDoc = swaggerDoc;
         next();
-    }
+    };
 
     private getIndex = (req: Request, res: Response) => {
         res.sendFile(this.variable.WEB_ROOT + '/index.html');
-    }
+    };
 }

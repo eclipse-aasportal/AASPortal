@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 export interface AASQueryParams {
-    format?: string,
-    id?: string
+    format?: string;
+    id?: string;
 }
 
 export interface AASQuery {

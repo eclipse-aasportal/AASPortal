@@ -22,7 +22,7 @@ import { ViewMode } from '../types/view-mode';
 export class AASTableEffects {
     private readonly store: Store<AASTableFeatureState>;
 
-    constructor(
+    public constructor(
         private readonly actions: Actions,
         store: Store,
     ) {
@@ -32,24 +32,28 @@ export class AASTableEffects {
     public updateView = createEffect(() => {
         return this.actions.pipe(
             ofType<AASTableActions.UpdateViewAction>(AASTableActions.AASTableActionType.UPDATE_VIEW),
-            exhaustMap(action => this.store.select(AASTableSelectors.selectState).pipe(
-                first(),
-                map(state => {
-                    const rows = state.viewMode === ViewMode.List
-                        ? this.createListViewRows(state.rows, action.documents)
-                        : this.createTreeViewRows(state.rows, action.documents);
+            exhaustMap(action =>
+                this.store.select(AASTableSelectors.selectState).pipe(
+                    first(),
+                    map(state => {
+                        const rows =
+                            state.viewMode === ViewMode.List
+                                ? this.createListViewRows(state.rows, action.documents)
+                                : this.createTreeViewRows(state.rows, action.documents);
 
-                    return AASTableActions.setRows({ rows });
-                })
-            )));
+                        return AASTableActions.setRows({ rows });
+                    }),
+                ),
+            ),
+        );
     });
 
     private createListViewRows(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {
         const map = new Map(state.map(row => [`${row.endpoint}:${row.id}`, row]));
         const rows = documents.map(document => {
-            const row =  map.get(`${document.endpoint}:${document.id}`);
+            const row = map.get(`${document.endpoint}:${document.id}`);
             if (row) {
-                return row.document === document ? row : this.cloneD(row, document)
+                return row.document === document ? row : this.cloneD(row, document);
             }
 
             return new AASTableRow(document, false, false, false, -1, -1, -1);
@@ -90,10 +94,10 @@ export class AASTableEffects {
                 children.length === 0,
                 0,
                 children.length > 0 ? rows.length + 1 : -1,
-                -1
+                -1,
             );
 
-            rows.push(rootRow)
+            rows.push(rootRow);
 
             if (index >= 0) {
                 const previous = this.clone(rows[index]);
@@ -111,15 +115,7 @@ export class AASTableEffects {
         let previous: AASTableRow | null = null;
         const children = nodes.filter(node => this.isChild(parent, node));
         for (const child of children) {
-            const row = new AASTableRow(
-                child,
-                false,
-                false,
-                children.length === 0,
-                level,
-                -1,
-                -1
-            );
+            const row = new AASTableRow(child, false, false, children.length === 0, level, -1, -1);
 
             rows.push(row);
             if (previous) {
@@ -151,9 +147,9 @@ export class AASTableEffects {
             row.isLeaf,
             row.level,
             row.firstChild,
-            row.nextSibling);
+            row.nextSibling,
+        );
     }
-
 
     private cloneD(row: AASTableRow, document: AASDocument): AASTableRow {
         return new AASTableRow(
@@ -163,7 +159,7 @@ export class AASTableEffects {
             row.isLeaf,
             row.level,
             row.firstChild,
-            row.nextSibling);
+            row.nextSibling,
+        );
     }
-
 }

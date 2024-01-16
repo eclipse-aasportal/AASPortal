@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { UserData } from "./user-data.js";
+import { UserData } from './user-data.js';
 
 /** Defines user storage. */
 export abstract class UserStorage {

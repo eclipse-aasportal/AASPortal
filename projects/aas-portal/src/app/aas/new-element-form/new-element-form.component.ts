@@ -19,7 +19,7 @@ export interface NewElementResult {
 @Component({
     selector: 'fhg-new-element',
     templateUrl: './new-element-form.component.html',
-    styleUrls: ['./new-element-form.component.scss']
+    styleUrls: ['./new-element-form.component.scss'],
 })
 export class NewElementFormComponent {
     private env?: aas.Environment;
@@ -28,7 +28,7 @@ export class NewElementFormComponent {
     private _modelType?: aas.ModelType;
     private _template?: TemplateDescriptor;
 
-    constructor(private readonly modal: NgbActiveModal) { }
+    public constructor(private readonly modal: NgbActiveModal) {}
 
     public modelTypes: aas.ModelType[] = [];
 
@@ -75,15 +75,30 @@ export class NewElementFormComponent {
                 this.modelType = 'Submodel';
                 break;
             case 'Submodel':
-                this.modelTypes.push('MultiLanguageProperty', 'Property', 'SubmodelElementCollection', 'SubmodelElementList');
+                this.modelTypes.push(
+                    'MultiLanguageProperty',
+                    'Property',
+                    'SubmodelElementCollection',
+                    'SubmodelElementList',
+                );
                 this.modelType = 'Property';
                 break;
             case 'SubmodelElementCollection':
-                this.modelTypes.push('MultiLanguageProperty', 'Property', 'SubmodelElementCollection', 'SubmodelElementList');
+                this.modelTypes.push(
+                    'MultiLanguageProperty',
+                    'Property',
+                    'SubmodelElementCollection',
+                    'SubmodelElementList',
+                );
                 this.modelType = 'SubmodelElementCollection';
                 break;
             case 'SubmodelElementList':
-                this.modelTypes.push('MultiLanguageProperty', 'Property', 'SubmodelElementCollection', 'SubmodelElementList');
+                this.modelTypes.push(
+                    'MultiLanguageProperty',
+                    'Property',
+                    'SubmodelElementCollection',
+                    'SubmodelElementList',
+                );
                 this.modelType = 'SubmodelElementList';
         }
     }
@@ -92,7 +107,7 @@ export class NewElementFormComponent {
         this.clearMessages();
         if (this.validate()) {
             this.modal.close({
-                element: this.createElement()
+                element: this.createElement(),
             } as NewElementResult);
         }
     }

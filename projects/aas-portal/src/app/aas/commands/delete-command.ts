@@ -6,12 +6,22 @@
  *
  *****************************************************************************/
 
-import { aas, AASDocument, getChildren, getParent, isAssetAdministrationShell, isSubmodel, normalize, selectSubmodel } from "common";
-import { cloneDeep, noop } from "lodash-es";
-import { Store } from "@ngrx/store";
+import {
+    aas,
+    AASDocument,
+    getChildren,
+    getParent,
+    isAssetAdministrationShell,
+    isSubmodel,
+    normalize,
+    selectSubmodel,
+} from 'common';
+
+import { cloneDeep, noop } from 'lodash-es';
+import { Store } from '@ngrx/store';
 import { State } from '../aas.state';
 import * as AASActions from '../aas.actions';
-import { Command } from "../../types/command";
+import { Command } from '../../types/command';
 
 export class DeleteCommand extends Command {
     private readonly store: Store<State>;
@@ -19,27 +29,25 @@ export class DeleteCommand extends Command {
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    constructor(store: Store<State>, document: AASDocument, elements: aas.Referable | aas.Referable[]) {
-        super("Delete");
+    public constructor(store: Store, document: AASDocument, elements: aas.Referable | aas.Referable[]) {
+        super('Delete');
 
         if (!document.content) {
-            throw new Error("Document content is undefined.")
+            throw new Error('Document content is undefined.');
         }
 
-        this.store = store;
+        this.store = store as Store<State>;
         this.memento = document;
         this.document = {
             ...document,
             content: {
                 ...document.content!,
                 assetAdministrationShells: [...document.content!.assetAdministrationShells],
-                submodels: [...document.content!.submodels]
-            }
+                submodels: [...document.content!.submodels],
+            },
         };
 
-        this.elements = Array.isArray(elements)
-            ? normalize(document.content, elements, item => item)
-            : [elements];
+        this.elements = Array.isArray(elements) ? normalize(document.content, elements, item => item) : [elements];
     }
 
     protected onExecute(): void {

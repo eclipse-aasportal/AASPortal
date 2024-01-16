@@ -12,7 +12,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, map, mergeMap, Observable, Subscription, from } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
-import { AASQuery, AASQueryParams, AuthService, ClipboardService, DownloadService, NotifyService, OnlineState, encodeBase64Url } from 'projects/aas-lib/src/public-api';
+import {
+    AASQuery,
+    AASQueryParams,
+    AuthService,
+    ClipboardService,
+    DownloadService,
+    NotifyService,
+    OnlineState,
+    encodeBase64Url,
+} from 'projects/aas-lib/src/public-api';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
@@ -28,19 +37,12 @@ import { State } from './aas.state';
 import { DashboardChartType } from '../dashboard/dashboard.state';
 import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
-import {
-    AASDocument,
-    equalDocument,
-    TemplateDescriptor,
-    aas, isProperty,
-    isNumberType,
-    isBlob,
-} from 'common';
+import { AASDocument, equalDocument, TemplateDescriptor, aas, isProperty, isNumberType, isBlob } from 'common';
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
-    styleUrls: ['./aas.component.scss']
+    styleUrls: ['./aas.component.scss'],
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly store: Store<State>;
@@ -49,7 +51,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private _dashboardPage = '';
     private templates: TemplateDescriptor[] = [];
 
-    constructor(
+    public constructor(
         store: Store,
         private readonly router: Router,
         private readonly route: ActivatedRoute,
@@ -61,13 +63,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
-        private readonly clipboard: ClipboardService
+        private readonly clipboard: ClipboardService,
     ) {
         this.store = store as Store<State>;
         this.search = this.store.select(AASSelectors.selectSearch);
         this.editable = this.store.select(AASSelectors.selectEditable);
 
-        this.dashboardPages = this.dashboard.pages.pipe((map(pages => pages.map(page => page.name))));
+        this.dashboardPages = this.dashboard.pages.pipe(map(pages => pages.map(page => page.name)));
     }
 
     @ViewChild('aasToolbar', { read: TemplateRef })
@@ -90,7 +92,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public get id(): string {
-        return this.document?.id ?? '-'
+        return this.document?.id ?? '-';
     }
 
     public get assetId(): string {
@@ -104,7 +106,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             return `/api/v1/containers/${name}/documents/${id}/thumbnail`;
         }
 
-        return 'assets/resources/aas.svg'
+        return 'assets/resources/aas.svg';
     }
 
     public get version(): string {
@@ -140,7 +142,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             query = this.clipboard.get(params.format);
         } else if (params.id) {
             query = {
-                id: params.id
+                id: params.id,
             };
         }
 
@@ -152,37 +154,54 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             this.store.dispatch(AASActions.getDocument({ id: query.id, name: query.name }));
         }
 
-        this.subscription.add(this.store.select(AASSelectors.selectDocument).pipe()
-            .subscribe((value) => {
-                if (!equalDocument(this.document, value)) {
-                    this.commandHandler.clear();
-                }
+        this.subscription.add(
+            this.store
+                .select(AASSelectors.selectDocument)
+                .pipe()
+                .subscribe(value => {
+                    if (!equalDocument(this.document, value)) {
+                        this.commandHandler.clear();
+                    }
 
-                this.document = value;
-            }));
+                    this.document = value;
+                }),
+        );
 
-        this.subscription.add(this.store.select(AASSelectors.selectTemplateStorage).pipe(
-            mergeMap(templateStorage => {
-                if (templateStorage.timestamp === 0) {
-                    return this.api.getTemplates().pipe(
-                        map(templates => this.store.dispatch(AASActions.setTemplateStorage({ templates })))
-                    );
-                } else {
-                    return EMPTY;
-                }
-            }))
-            .subscribe({
-                error: error => this.notify.error(error)
-            }));
+        this.subscription.add(
+            this.store
+                .select(AASSelectors.selectTemplateStorage)
+                .pipe(
+                    mergeMap(templateStorage => {
+                        if (templateStorage.timestamp === 0) {
+                            return this.api
+                                .getTemplates()
+                                .pipe(
+                                    map(templates => this.store.dispatch(AASActions.setTemplateStorage({ templates }))),
+                                );
+                        } else {
+                            return EMPTY;
+                        }
+                    }),
+                )
+                .subscribe({
+                    error: error => this.notify.error(error),
+                }),
+        );
 
-        this.subscription.add(this.store.select(AASSelectors.selectTemplates).pipe()
-            .subscribe(templates => {
-                this.templates = templates;
-            }));
+        this.subscription.add(
+            this.store
+                .select(AASSelectors.selectTemplates)
+                .pipe()
+                .subscribe(templates => {
+                    this.templates = templates;
+                }),
+        );
 
-        this.subscription.add(this.dashboard.name.subscribe(name => {
-            this._dashboardPage = name;
-        }));
+        this.subscription.add(
+            this.dashboard.name.subscribe(name => {
+                this._dashboardPage = name;
+            }),
+        );
     }
 
     public ngAfterViewInit(): void {
@@ -208,9 +227,12 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public canAddToDashboard(): boolean {
         const selectedElements = this.selectedElements;
-        return this.dashboardPage != null && this.document != null &&
+        return (
+            this.dashboardPage != null &&
+            this.document != null &&
             selectedElements.length > 0 &&
-            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element));
+            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
+        );
     }
 
     public async addToDashboard(chartType: string): Promise<boolean> {
@@ -223,7 +245,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.dashboardPage,
                 this.document,
                 this.selectedElements,
-                chartType as DashboardChartType);
+                chartType as DashboardChartType,
+            );
 
             this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
             return await this.router.navigateByUrl('/dashboard?format=DashboardQuery');
@@ -234,23 +257,28 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public canSynchronize(): boolean {
-        return this.document != null && !this.document.readonly && this.document.modified ? this.document.modified : false;
+        return this.document != null && !this.document.readonly && this.document.modified
+            ? this.document.modified
+            : false;
     }
 
     public synchronize(): void {
         if (!this.canSynchronize() || !this.document) return;
 
         const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.putDocument(document)),
-            map((messages) => {
-                if (messages && messages.length > 0) {
-                    this.notify.info(messages.join('\r\n'));
-                }
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                mergeMap(() => this.api.putDocument(document)),
+                map(messages => {
+                    if (messages && messages.length > 0) {
+                        this.notify.info(messages.join('\r\n'));
+                    }
 
-                this.store.dispatch(AASActions.resetModified({ document }));
-            })).subscribe({ error: (error) => this.notify.error(error) });
-
+                    this.store.dispatch(AASActions.resetModified({ document }));
+                }),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public canUndo(): boolean {
@@ -281,21 +309,23 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!this.document?.content || this.selectedElements.length !== 1) return;
 
         const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(NewElementFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.initialize(document.content, this.selectedElements[0], this.templates);
-                return from<Promise<NewElementResult | undefined>>(modalRef.result)
-            }),
-            map((result) => {
-                if (!result) return;
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                map(() => this.modal.open(NewElementFormComponent, { backdrop: 'static' })),
+                mergeMap(modalRef => {
+                    modalRef.componentInstance.initialize(document.content, this.selectedElements[0], this.templates);
+                    return from<Promise<NewElementResult | undefined>>(modalRef.result);
+                }),
+                map(result => {
+                    if (!result) return;
 
-                this.commandHandler.execute(new NewElementCommand(
-                    this.store,
-                    document,
-                    this.selectedElements[0],
-                    result.element));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+                    this.commandHandler.execute(
+                        new NewElementCommand(this.store, document, this.selectedElements[0], result.element),
+                    );
+                }),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public canEditElement(): boolean {
@@ -306,36 +336,44 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!this.document?.content || this.selectedElements.length !== 1) return;
 
         const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(EditElementFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.initialize(this.selectedElements[0]);
-                return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
-            }),
-            map((result) => {
-                if (!result) return;
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                map(() => this.modal.open(EditElementFormComponent, { backdrop: 'static' })),
+                mergeMap(modalRef => {
+                    modalRef.componentInstance.initialize(this.selectedElements[0]);
+                    return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
+                }),
+                map(result => {
+                    if (!result) return;
 
-                this.commandHandler.execute(new UpdateElementCommand(
-                    this.store,
-                    document,
-                    this.selectedElements[0],
-                    result));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+                    this.commandHandler.execute(
+                        new UpdateElementCommand(this.store, document, this.selectedElements[0], result),
+                    );
+                }),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public canDeleteElement(): boolean {
-        return this.selectedElements.length > 0 &&
-            this.selectedElements.every(item => item.modelType !== 'AssetAdministrationShell');
+        return (
+            this.selectedElements.length > 0 &&
+            this.selectedElements.every(item => item.modelType !== 'AssetAdministrationShell')
+        );
     }
 
     public deleteElement(): void {
         if (!this.document || this.selectedElements.length <= 0) return;
 
         const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => {
-                this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+        this.auth
+            .ensureAuthorized('editor')
+            .pipe(
+                map(() => {
+                    this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
+                }),
+            )
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public canDownloadDocument(): boolean {
@@ -343,10 +381,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public downloadDocument(): void {
-        this.download.downloadDocument(
-            this.document!.endpoint,
-            this.document!.id,
-            this.document!.idShort + '.aasx').subscribe({ error: (error) => this.notify.error(error) });
+        this.download
+            .downloadDocument(this.document!.endpoint, this.document!.id, this.document!.idShort + '.aasx')
+            .subscribe({ error: error => this.notify.error(error) });
     }
 
     public applySearch(text: string): void {
@@ -379,11 +416,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
     }
 
-    // Hack, Hack 
+    // Hack, Hack
     private isTimeSeries(element: aas.Referable): boolean {
-        return isBlob(element) &&
+        return (
+            isBlob(element) &&
             element.value != null &&
             element.idShort === 'TimeSeriesHistory' &&
-            element.contentType === 'application/json';
+            element.contentType === 'application/json'
+        );
     }
 }

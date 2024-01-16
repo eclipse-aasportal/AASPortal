@@ -26,7 +26,7 @@ import {
     StatusCodes,
     VariantArrayType,
     VariantOptions,
-    coerceNodeId
+    coerceNodeId,
 } from 'node-opcua';
 
 export class OpcuaServer extends AASResource {
@@ -35,7 +35,7 @@ export class OpcuaServer extends AASResource {
     private session: ClientSession | null = null;
     private reentry = 0;
 
-    constructor(logger: Logger, url: string, name: string, options?: OPCUAClientOptions) {
+    public constructor(logger: Logger, url: string, name: string, options?: OPCUAClientOptions) {
         super(logger, url, name);
 
         if (options) {
@@ -45,7 +45,7 @@ export class OpcuaServer extends AASResource {
                 applicationName: 'aas-server',
                 connectionStrategy: {
                     initialDelay: 1000,
-                    maxRetry: 1
+                    maxRetry: 1,
                 },
                 securityMode: MessageSecurityMode.None,
                 securityPolicy: SecurityPolicy.None,
@@ -64,8 +64,8 @@ export class OpcuaServer extends AASResource {
         return this.reentry > 0;
     }
 
-    /** 
-     * Gets the current client session. 
+    /**
+     * Gets the current client session.
      **/
     public getSession(): ClientSession {
         if (this.reentry <= 0 || this.session == null) {
@@ -135,15 +135,15 @@ export class OpcuaServer extends AASResource {
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
         const inputArguments: Array<VariantOptions> = [];
         if (operation.inputVariables) {
-            for (let i = 0; i < operation.inputVariables.length; i++) {
-                inputArguments.push(await this.toVariantAsync(operation.inputVariables[i].value));
+            for (const inputVariable of operation.inputVariables) {
+                inputArguments.push(await this.toVariantAsync(inputVariable.value));
             }
         }
 
         const result = await this.session!.call({
             inputArguments: inputArguments,
             methodId: coerceNodeId(operation.methodId),
-            objectId: coerceNodeId(operation.objectId)
+            objectId: coerceNodeId(operation.objectId),
         });
 
         if (result.statusCode.value !== StatusCodes.Good.value) {
@@ -179,10 +179,9 @@ export class OpcuaServer extends AASResource {
 
     private resolveConnectionStrategy(value?: ConnectionStrategyOptions): ConnectionStrategyOptions | undefined {
         if (value) {
-            value =
-            {
+            value = {
                 initialDelay: value.initialDelay,
-                maxRetry: value.maxRetry
+                maxRetry: value.maxRetry,
             };
         }
 
@@ -191,9 +190,7 @@ export class OpcuaServer extends AASResource {
 
     private resolveMode(value?: string | MessageSecurityMode): MessageSecurityMode {
         if (value) {
-            return typeof value === 'string'
-                ? MessageSecurityMode[value as keyof typeof MessageSecurityMode]
-                : value;
+            return typeof value === 'string' ? MessageSecurityMode[value as keyof typeof MessageSecurityMode] : value;
         }
 
         return MessageSecurityMode.None;
@@ -201,9 +198,7 @@ export class OpcuaServer extends AASResource {
 
     private resolvePolicy(value?: string | SecurityPolicy): SecurityPolicy {
         if (value) {
-            return typeof value === 'string'
-                ? SecurityPolicy[value as keyof typeof SecurityPolicy]
-                : value;
+            return typeof value === 'string' ? SecurityPolicy[value as keyof typeof SecurityPolicy] : value;
         }
 
         return SecurityPolicy.None;
@@ -213,22 +208,22 @@ export class OpcuaServer extends AASResource {
         if (value.modelType === 'Property') {
             const property = value as aas.Property;
             switch (property.valueType) {
-                case 'xs:string':
+                case 'xs:string': {
                     let buffer: Buffer;
                     if (typeof property.value === 'string') {
                         buffer = await fs.promises.readFile(property.value);
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } else if (<any>property.value instanceof Buffer) {
-                        buffer = <any>property.value as Buffer;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        buffer = (<any>property.value) as Buffer;
                     } else {
                         throw new Error('Not supported File representation.');
                     }
 
                     return this.createVariantOptions(VariantArrayType.Scalar, DataType.ByteString, buffer);
+                }
                 default:
-                    return this.createVariantOptions(
-                        VariantArrayType.Scalar,
-                        property.valueType,
-                        property.value);
+                    return this.createVariantOptions(VariantArrayType.Scalar, property.valueType, property.value);
             }
         } else {
             throw new Error('Not implemented.');
@@ -238,12 +233,15 @@ export class OpcuaServer extends AASResource {
     private createVariantOptions(
         arrayType: VariantArrayType,
         dataType: DataType | aas.DataTypeDefXsd | undefined,
-        value: any): VariantOptions {
+        value: unknown,
+    ): VariantOptions {
         if (typeof dataType === 'string') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dataType = (<any>DataType)[dataType];
         }
 
         if (typeof arrayType === 'string') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             arrayType = (<any>VariantArrayType)[arrayType];
         }
 
@@ -251,7 +249,7 @@ export class OpcuaServer extends AASResource {
             arrayType: arrayType,
             dataType: dataType,
             value: value,
-            dimensions: Array.isArray(value) ? [1] : null
-        }
+            dimensions: Array.isArray(value) ? [1] : null,
+        };
     }
 }

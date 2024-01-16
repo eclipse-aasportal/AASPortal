@@ -16,7 +16,7 @@ export interface LibraryRow extends Library {
 @Component({
     selector: 'fhg-library-table',
     templateUrl: './library-table.component.html',
-    styleUrls: ['./library-table.component.scss']
+    styleUrls: ['./library-table.component.scss'],
 })
 export class LibraryTableComponent implements OnChanges {
     @Input()
@@ -41,10 +41,9 @@ export class LibraryTableComponent implements OnChanges {
 
     public refreshLibraries(): void {
         if (this.pageSize > 0 && this.size > this.pageSize) {
-            this.libraries = this.collection.map((library, i) => ({ id: i + 1, ...library })).slice(
-                (this.page - 1) * this.pageSize,
-                (this.page - 1) * this.pageSize + this.pageSize,
-            );
+            this.libraries = this.collection
+                .map((library, i) => ({ id: i + 1, ...library }))
+                .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
         } else {
             this.libraries = this.collection.map((library, i) => ({ id: i + 1, ...library }));
         }

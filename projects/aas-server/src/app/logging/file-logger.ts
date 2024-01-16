@@ -26,16 +26,14 @@ export class FileLogger extends Logger {
     private readonly defaultRecord: Record = {
         errors: new Map<string, number>(),
         warnings: new Map<string, number>(),
-        messages: new Map<string, number>()
+        messages: new Map<string, number>(),
     };
 
     private record = this.defaultRecord;
     private recording = 0;
     private context: string | null = null;
 
-    constructor(
-        @inject('winston.Logger') private readonly logger: winston.Logger
-    ) {
+    public constructor(@inject('winston.Logger') private readonly logger: winston.Logger) {
         super();
     }
 
@@ -106,7 +104,7 @@ export class FileLogger extends Logger {
             }
 
             if (text) {
-                this.logger.debug(text)
+                this.logger.debug(text);
             }
         }
     }
@@ -127,7 +125,7 @@ export class FileLogger extends Logger {
                 if (this.logger.isInfoEnabled()) {
                     this.record.messages.set(message.text, message.timestamp);
                 }
-                break
+                break;
         }
     }
 
@@ -139,7 +137,7 @@ export class FileLogger extends Logger {
                 record = {
                     errors: new Map<string, number>(),
                     warnings: new Map<string, number>(),
-                    messages: new Map<string, number>()
+                    messages: new Map<string, number>(),
                 };
 
                 this.records.set(context, record);

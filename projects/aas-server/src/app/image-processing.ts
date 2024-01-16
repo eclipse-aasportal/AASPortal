@@ -19,9 +19,10 @@ export class ImageProcessing {
      * @returns The resized image.
      */
     public static async resizeAsync(
-        source: NodeJS.ReadableStream, 
-        width: number | undefined, 
-        height: number | undefined): Promise<NodeJS.ReadableStream> {
+        source: NodeJS.ReadableStream,
+        width: number | undefined,
+        height: number | undefined,
+    ): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
             source.on('data', function (buffer: Uint8Array) {

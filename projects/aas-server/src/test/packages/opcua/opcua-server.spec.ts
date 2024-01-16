@@ -14,6 +14,7 @@ import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, St
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { LiveRequest, aas } from 'common';
 import env from '../../assets/aas-environment.js';
+import { afterEach } from 'node:test';
 
 type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodResult>;
 
@@ -24,6 +25,10 @@ describe('OpcuaServer', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         server = new OpcuaServer(logger, 'opc.tcp://localhost:1234/I4AASServer', 'OPCUA Server');
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     it('should be created', function () {
@@ -47,7 +52,10 @@ describe('OpcuaServer', function () {
         });
 
         it('throws an Error for an invalid URL', async function () {
-            client.connect.mockImplementation(() => new Promise<void>((_, reject) => reject(new Error('Connection failed.'))));
+            client.connect.mockImplementation(
+                () => new Promise<void>((_, reject) => reject(new Error('Connection failed.'))),
+            );
+
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
             jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
             await expect(server.testAsync()).rejects.toThrowError();
@@ -108,10 +116,12 @@ describe('OpcuaServer', function () {
             const request: LiveRequest = {
                 endpoint: 'Test',
                 id: 'opc.tcp://localhost:1234/I4AASServer',
-                nodes: [{
-                    nodeId: 'ns=1;i=4711',
-                    valueType: 'xs:integer'
-                }]
+                nodes: [
+                    {
+                        nodeId: 'ns=1;i=4711',
+                        valueType: 'xs:integer',
+                    },
+                ],
             };
 
             expect(server.createSubscription(createSpyObj<SocketClient>({}), request)).toBeTruthy();
@@ -151,9 +161,7 @@ describe('OpcuaServer', function () {
         it('invokes an operation', async function () {
             const result = createSpyObj<CallMethodResult>([], {
                 statusCode: StatusCodes.Good,
-                outputArguments: [
-                    { value: '3' } as Variant
-                ]
+                outputArguments: [{ value: '3' } as Variant],
             });
 
             const call: CallMethod = () => {
@@ -168,15 +176,22 @@ describe('OpcuaServer', function () {
                 objectId: 'ns=1;i=0815',
                 inputVariables: [
                     { value: { idShort: 'a', modelType: 'Property', valueType: 'xs:int', value: '1' } as aas.Property },
-                    { value: { idShort: 'b', modelType: 'Property', valueType: 'xs:int', value: '2' } as aas.Property }
+                    { value: { idShort: 'b', modelType: 'Property', valueType: 'xs:int', value: '2' } as aas.Property },
                 ],
                 outputVariables: [
-                    { value: { idShort: 'sum', modelType: 'Property', valueType: 'xs:int', value: '3' } as aas.Property },
+                    {
+                        value: {
+                            idShort: 'sum',
+                            modelType: 'Property',
+                            valueType: 'xs:int',
+                            value: '3',
+                        } as aas.Property,
+                    },
                 ],
                 parent: {
                     type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }]
-                }
+                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                },
             };
 
             await server.openAsync();
@@ -184,13 +199,10 @@ describe('OpcuaServer', function () {
             await server.closeAsync();
         });
 
-        
         it('throw an Error if the call result is not "Good"', async function () {
             const result = createSpyObj<CallMethodResult>([], {
                 statusCode: StatusCodes.Bad,
-                outputArguments: [
-                    { value: '3' } as Variant
-                ]
+                outputArguments: [{ value: '3' } as Variant],
             });
 
             const call: CallMethod = () => {
@@ -205,15 +217,22 @@ describe('OpcuaServer', function () {
                 objectId: 'ns=1;i=0815',
                 inputVariables: [
                     { value: { idShort: 'a', modelType: 'Property', valueType: 'xs:int', value: '1' } as aas.Property },
-                    { value: { idShort: 'b', modelType: 'Property', valueType: 'xs:int', value: '2' } as aas.Property }
+                    { value: { idShort: 'b', modelType: 'Property', valueType: 'xs:int', value: '2' } as aas.Property },
                 ],
                 outputVariables: [
-                    { value: { idShort: 'sum', modelType: 'Property', valueType: 'xs:int', value: '3' } as aas.Property },
+                    {
+                        value: {
+                            idShort: 'sum',
+                            modelType: 'Property',
+                            valueType: 'xs:int',
+                            value: '3',
+                        } as aas.Property,
+                    },
                 ],
                 parent: {
                     type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }]
-                }
+                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                },
             };
 
             await server.openAsync();
@@ -221,4 +240,4 @@ describe('OpcuaServer', function () {
             await server.closeAsync();
         });
     });
-}); 
+});

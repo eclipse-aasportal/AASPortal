@@ -6,36 +6,47 @@
  *
  *****************************************************************************/
 
-import "chart.js/auto";
-import { AfterViewInit, AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
+import 'chart.js/auto';
+import {
+    AfterViewInit,
+    AfterViewChecked,
+    Component,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    QueryList,
+    TemplateRef,
+    ViewChild,
+    ViewChildren,
+} from '@angular/core';
 import { isNumber } from 'lodash-es';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'common';
 import * as lib from 'projects/aas-lib/src/public-api';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { Observable, Subscription } from "rxjs";
-import { ActivatedRoute } from "@angular/router";
-import { Store } from "@ngrx/store";
+import { Observable, Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 
 import { DashboardService } from './dashboard.service';
 import { SelectionMode } from '../types/selection-mode';
-import { TranslateService } from "@ngx-translate/core";
-import { CommandHandlerService } from "../aas/command-handler.service";
-import { MoveLeftCommand } from "./commands/move-left-command";
-import { MoveRightCommand } from "./commands/move-right-command";
-import { MoveUpCommand } from "./commands/move-up-command";
-import { MoveDownCommand } from "./commands/move-down-command";
-import { SetColorCommand } from "./commands/set-color-command";
-import { DeletePageCommand } from "./commands/delete-page-command";
-import { RenamePageCommand } from "./commands/rename-page-command";
-import { AddNewPageCommand } from "./commands/add-new-page-command";
-import { DeleteItemCommand } from "./commands/delete-item-command";
-import { SetChartTypeCommand } from "./commands/set-chart-type-command";
-import { selectEditMode, selectPage, selectPages, selectRows, selectSelectionMode } from "./dashboard.selectors";
-import { SetMinMaxCommand } from "./commands/set-min-max-command";
-import { DashboardQuery, DashboardQueryParams } from "../types/dashboard-query-params";
+import { TranslateService } from '@ngx-translate/core';
+import { CommandHandlerService } from '../aas/command-handler.service';
+import { MoveLeftCommand } from './commands/move-left-command';
+import { MoveRightCommand } from './commands/move-right-command';
+import { MoveUpCommand } from './commands/move-up-command';
+import { MoveDownCommand } from './commands/move-down-command';
+import { SetColorCommand } from './commands/set-color-command';
+import { DeletePageCommand } from './commands/delete-page-command';
+import { RenamePageCommand } from './commands/rename-page-command';
+import { AddNewPageCommand } from './commands/add-new-page-command';
+import { DeleteItemCommand } from './commands/delete-item-command';
+import { SetChartTypeCommand } from './commands/set-chart-type-command';
+import { selectEditMode, selectPage, selectPages, selectRows, selectSelectionMode } from './dashboard.selectors';
+import { SetMinMaxCommand } from './commands/set-min-max-command';
+import { DashboardQuery, DashboardQueryParams } from '../types/dashboard-query-params';
 import * as DashboardActions from './dashboard.actions';
-import { DashboardApiService } from "./dashboard-api.service";
+import { DashboardApiService } from './dashboard-api.service';
 import { ToolbarService } from '../toolbar.service';
 import {
     DashboardItem,
@@ -45,7 +56,7 @@ import {
     DashboardChartType,
     DashboardRow,
     DashboardColumn,
-    State
+    State,
 } from './dashboard.state';
 
 interface UpdateTuple {
@@ -66,7 +77,7 @@ interface TimeSeries {
 @Component({
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss']
+    styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
     private readonly store: Store<State>;
@@ -80,7 +91,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     private _page: DashboardPage;
     private _editMode = false;
 
-    constructor(
+    public constructor(
         store: Store,
         private readonly api: DashboardApiService,
         private readonly activeRoute: ActivatedRoute,
@@ -92,23 +103,39 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         private readonly toolbar: ToolbarService,
         private readonly commandHandler: CommandHandlerService,
         private readonly window: lib.WindowService,
-        private readonly clipboard: lib.ClipboardService
+        private readonly clipboard: lib.ClipboardService,
     ) {
         this.store = store as Store<State>;
         this._page = this.dashboard.defaultPage ?? { name: '-', items: [], requests: [] };
         this.pages = this.store.select(selectPages);
 
-        this.subscription.add(this.store.select(selectPage).pipe()
-            .subscribe(value => this.updatePage(value)));
+        this.subscription.add(
+            this.store
+                .select(selectPage)
+                .pipe()
+                .subscribe(value => this.updatePage(value)),
+        );
 
-        this.subscription.add(this.store.select(selectEditMode).pipe()
-            .subscribe(editMode => this.updateEditMode(editMode)));
+        this.subscription.add(
+            this.store
+                .select(selectEditMode)
+                .pipe()
+                .subscribe(editMode => this.updateEditMode(editMode)),
+        );
 
-        this.subscription.add(this.store.select(selectSelectionMode).pipe()
-            .subscribe(selectionMode => this.selectionMode = selectionMode));
+        this.subscription.add(
+            this.store
+                .select(selectSelectionMode)
+                .pipe()
+                .subscribe(selectionMode => (this.selectionMode = selectionMode)),
+        );
 
-        this.subscription.add(this.store.select(selectRows).pipe()
-            .subscribe(rows => this.rows = rows));
+        this.subscription.add(
+            this.store
+                .select(selectRows)
+                .pipe()
+                .subscribe(rows => (this.rows = rows)),
+        );
     }
 
     @ViewChildren('chart')
@@ -135,7 +162,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         this.store.dispatch(DashboardActions.setEditMode({ editMode: value }));
     }
 
-    public rows: DashboardRow[] = []
+    public rows: DashboardRow[] = [];
 
     public get selectedItem(): DashboardItem | null {
         if (this.selections.size === 1) {
@@ -242,7 +269,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     public changeSource(column: DashboardColumn, label: string): void {
         const item = column.item;
         if (this.isChart(item)) {
-            this.selectedSources.set(item.id, item.sources.findIndex(source => source.label === label));
+            this.selectedSources.set(
+                item.id,
+                item.sources.findIndex(source => source.label === label),
+            );
         }
     }
 
@@ -278,7 +308,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         try {
             if (this.selectedItems.length > 0) {
                 this.commandHandler.execute(
-                    new DeleteItemCommand(this.store, this.dashboard, this._page, this.selectedItems));
+                    new DeleteItemCommand(this.store, this.dashboard, this._page, this.selectedItems),
+                );
 
                 this.selectedItems.forEach(item => {
                     this.selections.delete(item.id);
@@ -301,7 +332,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     public moveLeft(): void {
         try {
-            this.commandHandler.execute(new MoveLeftCommand(this.store, this.dashboard, this._page, this.selectedItem!));
+            this.commandHandler.execute(
+                new MoveLeftCommand(this.store, this.dashboard, this._page, this.selectedItem!),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -314,7 +347,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     public moveRight(): void {
         try {
-            this.commandHandler.execute(new MoveRightCommand(this.store, this.dashboard, this._page, this.selectedItem!));
+            this.commandHandler.execute(
+                new MoveRightCommand(this.store, this.dashboard, this._page, this.selectedItem!),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -340,7 +375,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     public moveDown(): void {
         try {
-            this.commandHandler.execute(new MoveDownCommand(this.store, this.dashboard, this._page, this.selectedItem!));
+            this.commandHandler.execute(
+                new MoveDownCommand(this.store, this.dashboard, this._page, this.selectedItem!),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -366,13 +403,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     public changeColor(column: DashboardColumn, color: string): void {
         try {
-            this.commandHandler.execute(new SetColorCommand(
-                this.store,
-                this.dashboard,
-                this._page,
-                column.item,
-                this.selectedSources.get(column.id) ?? 0,
-                color));
+            this.commandHandler.execute(
+                new SetColorCommand(
+                    this.store,
+                    this.dashboard,
+                    this._page,
+                    column.item,
+                    this.selectedSources.get(column.id) ?? 0,
+                    color,
+                ),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -380,12 +420,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     public changeChartType(column: DashboardColumn, value: string): void {
         try {
-            this.commandHandler.execute(new SetChartTypeCommand(
-                this.store,
-                this.dashboard,
-                this._page,
-                column.item,
-                value as DashboardChartType));
+            this.commandHandler.execute(
+                new SetChartTypeCommand(
+                    this.store,
+                    this.dashboard,
+                    this._page,
+                    column.item,
+                    value as DashboardChartType,
+                ),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -399,18 +442,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                 : '-';
         }
 
-        return '-'
+        return '-';
     }
 
     public changeMin(column: DashboardColumn, value: string): void {
         try {
-            this.commandHandler.execute(new SetMinMaxCommand(
-                this.store,
-                this.dashboard,
-                this._page,
-                column.item as DashboardChart,
-                Number(value),
-                undefined));
+            this.commandHandler.execute(
+                new SetMinMaxCommand(
+                    this.store,
+                    this.dashboard,
+                    this._page,
+                    column.item as DashboardChart,
+                    Number(value),
+                    undefined,
+                ),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -424,18 +470,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                 : '-';
         }
 
-        return '-'
+        return '-';
     }
 
     public changeMax(column: DashboardColumn, value: string): void {
         try {
-            this.commandHandler.execute(new SetMinMaxCommand(
-                this.store,
-                this.dashboard,
-                this._page,
-                column.item as DashboardChart,
-                undefined,
-                Number(value)));
+            this.commandHandler.execute(
+                new SetMinMaxCommand(
+                    this.store,
+                    this.dashboard,
+                    this._page,
+                    column.item as DashboardChart,
+                    undefined,
+                    Number(value),
+                ),
+            );
         } catch (error) {
             this.notify.error(error);
         }
@@ -500,7 +549,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             this.webSocketSubject = this.webServiceFactory.create();
             this.webSocketSubject.subscribe({
                 next: this.socketOnMessage,
-                error: this.socketOnError
+                error: this.socketOnError,
             });
         }
     }
@@ -559,16 +608,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             type: 'line',
             data: {
                 labels: [],
-                datasets: []
+                datasets: [],
             },
             options: {
                 scales: {
-                    'y': {
+                    y: {
                         min: item.min,
-                        max: item.max
-                    }
-                }
-            }
+                        max: item.max,
+                    },
+                },
+            },
         };
 
         let length = 0;
@@ -603,17 +652,17 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             type: 'bar',
             data: {
                 labels: [item.label],
-                datasets: []
+                datasets: [],
             },
             options: {
                 indexAxis: 'x',
                 scales: {
                     y: {
                         min: item.min,
-                        max: item.max
-                    }
-                }
-            }
+                        max: item.max,
+                    },
+                },
+            },
         };
 
         for (const source of item.sources) {
@@ -631,7 +680,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                 this.map.set(source.node.nodeId, { item, dataset });
             }
 
-            dataset.data[0] = this.getInitialBarChartData(source.element as aas.Property)
+            dataset.data[0] = this.getInitialBarChartData(source.element as aas.Property);
         }
 
         return { chart: new Chart(canvas, configuration), configuration };
@@ -642,17 +691,17 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             type: 'bar',
             data: {
                 labels: [item.label],
-                datasets: []
+                datasets: [],
             },
             options: {
                 indexAxis: 'y',
                 scales: {
                     x: {
                         min: item.min,
-                        max: item.max
-                    }
-                }
-            }
+                        max: item.max,
+                    },
+                },
+            },
         };
 
         for (const source of item.sources) {
@@ -670,7 +719,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                 this.map.set(source.node.nodeId, { item, dataset });
             }
 
-            dataset.data[0] = this.getInitialBarChartData(source.element as aas.Property)
+            dataset.data[0] = this.getInitialBarChartData(source.element as aas.Property);
         }
 
         return { chart: new Chart(canvas, configuration), configuration };
@@ -681,22 +730,22 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             type: 'line',
             data: {
                 labels: [],
-                datasets: []
+                datasets: [],
             },
             options: {
                 scales: {
                     y: {
                         min: item.min,
-                        max: item.max
-                    }
+                        max: item.max,
+                    },
                 },
                 plugins: {
                     decimation: {
                         enabled: true,
-                        algorithm: 'min-max'
+                        algorithm: 'min-max',
                     },
-                }
-            }
+                },
+            },
         };
 
         for (const source of item.sources) {
@@ -709,7 +758,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                     borderWidth: 1,
                     data: [],
                     animation: false,
-                    pointRadius: 0
+                    pointRadius: 0,
                 };
 
                 configuration.data.datasets.push(dataset);
@@ -734,7 +783,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     private getTimeSeriesData(url: string, data: number[], labels: string[]): void {
         this.api.getBlobValue(url).subscribe({
-            next: (value) => {
+            next: value => {
                 const timeSeries: TimeSeries = JSON.parse(window.atob(value));
                 if (timeSeries.timestamp && timeSeries.value) {
                     const n = Math.min(timeSeries.value.length, timeSeries.timestamp.length);
@@ -744,26 +793,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                     }
                 }
             },
-            error: (error) => this.notify.error(error)
+            error: error => this.notify.error(error),
         });
     }
 
     private createMessage(request: LiveRequest): WebSocketData {
         return {
             type: 'LiveRequest',
-            data: request
-        }
+            data: request,
+        };
     }
 
     private socketOnMessage = (data: WebSocketData): void => {
         if (data.type === 'LiveNode[]') {
-            this.updateCharts(data.data as LiveNode[])
+            this.updateCharts(data.data as LiveNode[]);
         }
-    }
+    };
 
     private socketOnError = (error: unknown): void => {
         this.notify.error(error);
-    }
+    };
 
     private updateCharts(nodes: LiveNode[]): void {
         for (const node of nodes) {
@@ -828,7 +877,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         }
     }
 
-    private isBigInt(y: unknown): boolean {
+    private isBigInt(y: unknown): y is number[] {
         return Array.isArray(y) && y.length === 2 && isNumber(y[0]) && isNumber(y[1]);
     }
 

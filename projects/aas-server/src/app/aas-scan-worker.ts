@@ -13,8 +13,9 @@ import { WorkerApp } from './worker-app.js';
 
 container.register('Logger', MemoryLogger);
 container.registerInstance(
-    'LOG_LEVEL', 
-    process.env.NODE_ENV === 'production' ? MemoryLoggerLevel.Error : MemoryLoggerLevel.All);
+    'LOG_LEVEL',
+    process.env.NODE_ENV === 'production' ? MemoryLoggerLevel.Error : MemoryLoggerLevel.All,
+);
 
 const app = container.resolve(WorkerApp);
 app.run();

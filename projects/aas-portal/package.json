@@ -12,7 +12,9 @@
         "build": "ng build",
         "build:debug": "ng build --configuration development",
         "test": "ng test aas-portal",
-        "tsc": "rimraf build && tsc -p tsconfig.json"
+        "tsc": "rimraf build && tsc -p tsconfig.json",
+        "lint": "ng lint aas-portal",
+        "format": "ng lint aas-portal --fix"
     },
     "private": true,
     "dependencies": {

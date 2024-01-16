@@ -10,7 +10,7 @@ import { Endpoint } from 'common';
 import * as aasv2 from './aas-v2.js';
 
 export interface AASRegistryModelType {
-    name: 'AssetAdministrationShellDescriptor' | 'Asset'
+    name: 'AssetAdministrationShellDescriptor' | 'Asset';
 }
 
 /** The self-describing information of a network resource. */

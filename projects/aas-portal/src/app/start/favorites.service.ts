@@ -12,7 +12,7 @@ import { AASDocument } from 'common';
 import { AuthService } from 'projects/aas-lib/src/public-api';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class FavoritesService {
     private _lists: FavoritesList[];
@@ -72,7 +72,8 @@ export class FavoritesService {
         const lists = [...this.lists];
         const list = { ...lists[i] };
         list.documents = list.documents.filter(favorite =>
-            documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id));
+            documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id),
+        );
 
         this._lists = lists;
         this.auth.setCookie('.Favorites', JSON.stringify(this._lists));

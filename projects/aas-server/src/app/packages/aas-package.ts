@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { AASDocument, Crc32, aas, flat } from "common";
-import { Logger } from "../logging/logger.js";
+import { AASDocument, Crc32, aas, flat } from 'common';
+import { Logger } from '../logging/logger.js';
 
 /**
  * Represents a package that contains an Asset Administration Shell.
@@ -15,14 +15,14 @@ import { Logger } from "../logging/logger.js";
 export abstract class AASPackage {
     protected readonly logger: Logger;
 
-    constructor(logger: Logger) {
+    protected constructor(logger: Logger) {
         this.logger = logger;
     }
 
     /** Gets the document that contains an Asset Administration Shell. */
     public abstract createDocumentAsync(): Promise<AASDocument>;
 
-    /** 
+    /**
      * Gets the thumbnail of the current Asset Administration Shell.
      * @param id The identifier of AAS.
      */
@@ -83,7 +83,7 @@ export abstract class AASPackage {
                 switch (referable.modelType) {
                     case 'Property':
                         {
-                            const property: aas.Property = { ...referable as aas.Property };
+                            const property: aas.Property = { ...(referable as aas.Property) };
                             if (property.category !== 'CONSTANT' && property.category !== 'PARAMETER') {
                                 delete property.value;
                             }
@@ -93,28 +93,30 @@ export abstract class AASPackage {
                         break;
                     case 'Submodel':
                         {
-                            const sm: aas.Submodel = { ...referable as aas.Submodel };
+                            const sm: aas.Submodel = { ...(referable as aas.Submodel) };
                             delete sm.submodelElements;
                             crc.add(JSON.stringify(sm));
                         }
                         break;
                     case 'SubmodelElementCollection':
                         {
-                            const collection: aas.SubmodelElementCollection = { ...referable as aas.SubmodelElementCollection };
+                            const collection: aas.SubmodelElementCollection = {
+                                ...(referable as aas.SubmodelElementCollection),
+                            };
                             delete collection.value;
                             crc.add(JSON.stringify(collection));
                         }
                         break;
                     case 'SubmodelElementList':
                         {
-                            const list: aas.SubmodelElementList = { ...referable as aas.SubmodelElementList };
+                            const list: aas.SubmodelElementList = { ...(referable as aas.SubmodelElementList) };
                             delete list.value;
                             crc.add(JSON.stringify(list));
                         }
                         break;
                     default:
                         crc.add(JSON.stringify(referable));
-                        break
+                        break;
                 }
             }
         }

@@ -9,13 +9,13 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DocumentService {
     public getElementById(elementId: string): HTMLElement | null {
         return document.getElementById(elementId);
     }
-    
+
     public createElement(tagName: string, options?: ElementCreationOptions): HTMLElement {
         return document.createElement(tagName, options);
     }

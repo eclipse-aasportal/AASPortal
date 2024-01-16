@@ -6,17 +6,17 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from "common";
-import { Logger } from "../logging/logger.js";
-import { AasxServer } from "../packages/aasx-server/aasx-server.js";
-import { AasxServerPackage } from "../packages/aasx-server/aasx-server-package.js";
-import { AASResourceScan } from "./aas-resource-scan.js";
+import { AASDocument } from 'common';
+import { Logger } from '../logging/logger.js';
+import { AasxServer } from '../packages/aasx-server/aasx-server.js';
+import { AasxServerPackage } from '../packages/aasx-server/aasx-server-package.js';
+import { AASResourceScan } from './aas-resource-scan.js';
 
 export class AASXServerScan extends AASResourceScan {
     private readonly logger: Logger;
     private readonly server: AasxServer;
 
-    constructor(logger: Logger, server: AasxServer) {
+    public constructor(logger: Logger, server: AasxServer) {
         super();
 
         this.logger = logger;

@@ -10,6 +10,6 @@ import { aas } from 'common';
 
 /**  */
 export abstract class AASWriter {
-    public abstract writeEnvironment(env: aas.Environment): any;
-    public abstract write(referable: aas.Referable): any;
+    public abstract writeEnvironment<T>(env: aas.Environment): T;
+    public abstract write<T>(referable: aas.Referable): T;
 }

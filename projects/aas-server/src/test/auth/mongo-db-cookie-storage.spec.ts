@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { MongoDBCookieStorage, UserCookies } from '../../app/auth/mongo-db-cookie-storage.js';
-import { describe, beforeAll, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, jest, afterEach, beforeAll } from '@jest/globals';
 
 interface UserCookiesInstance extends UserCookies {
     save(): Promise<void>;
@@ -33,14 +33,18 @@ describe('MongoDBCookieStorage', () => {
             cookies: [
                 {
                     name: 'Cookie1',
-                    data: 'The quick brown fox jumps over the lazy dog.'
+                    data: 'The quick brown fox jumps over the lazy dog.',
                 },
                 {
                     name: 'Cookie2',
-                    data: '42'
-                }
-            ]
+                    data: '42',
+                },
+            ],
         };
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     describe('checkAsync', () => {
@@ -64,22 +68,22 @@ describe('MongoDBCookieStorage', () => {
         it('returns the value of "Cookie1" for john.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
-            await expect(cookieStorage.getAsync('john.doe@email.com', 'Cookie1'))
-                .resolves.toEqual({ name: 'Cookie1', data: 'The quick brown fox jumps over the lazy dog.' });
+            await expect(cookieStorage.getAsync('john.doe@email.com', 'Cookie1')).resolves.toEqual({
+                name: 'Cookie1',
+                data: 'The quick brown fox jumps over the lazy dog.',
+            });
         });
 
         it('returns "undefined" for "unknown" for john.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
-            await expect(cookieStorage.getAsync('john.doe@email.com', 'unknown'))
-                .resolves.toBeUndefined();
+            await expect(cookieStorage.getAsync('john.doe@email.com', 'unknown')).resolves.toBeUndefined();
         });
 
         it('returns "undefined" for "Cookie1" for jane.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance());
 
-            await expect(cookieStorage.getAsync('jane.doe@email.com', 'unknown'))
-                .resolves.toBeUndefined();
+            await expect(cookieStorage.getAsync('jane.doe@email.com', 'unknown')).resolves.toBeUndefined();
         });
     });
 
@@ -87,17 +91,16 @@ describe('MongoDBCookieStorage', () => {
         it('returns all cookies for john.doe@email.com', async () => {
             jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
-            await expect(cookieStorage.getAllAsync('john.doe@email.com'))
-                .resolves.toEqual([
-                    {
-                        name: 'Cookie1',
-                        data: 'The quick brown fox jumps over the lazy dog.'
-                    },
-                    {
-                        name: 'Cookie2',
-                        data: '42'
-                    }
-                ]);
+            await expect(cookieStorage.getAllAsync('john.doe@email.com')).resolves.toEqual([
+                {
+                    name: 'Cookie1',
+                    data: 'The quick brown fox jumps over the lazy dog.',
+                },
+                {
+                    name: 'Cookie2',
+                    data: '42',
+                },
+            ]);
         });
     });
 
@@ -123,7 +126,9 @@ describe('MongoDBCookieStorage', () => {
         it('can delete a cookie', async () => {
             const save = jest.fn<() => Promise<void>>();
             const deleteOne = jest.fn<() => Promise<void>>();
-            jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(getInstance(userCookies, save, deleteOne));
+            jest.spyOn(cookieStorage.UserCookiesModel, 'findOne').mockReturnValue(
+                getInstance(userCookies, save, deleteOne),
+            );
 
             await cookieStorage.deleteAsync('john.doe@email.com', 'Cookie1');
             expect(save).toHaveBeenCalled();
@@ -136,17 +141,19 @@ describe('MongoDBCookieStorage', () => {
     function getInstance(user?: UserCookies, save?: () => Promise<void>, deleteOne?: () => Promise<void>): any {
         if (user) {
             return {
-                exec: () => new Promise<UserCookiesInstance | undefined>(resolve => resolve(
-                    {
-                        ...user,
-                        save: save ?? (() => new Promise<void>(result => result())),
-                        deleteOne: deleteOne ?? (() => new Promise<void>(result => result()))
-                    }))
+                exec: () =>
+                    new Promise<UserCookiesInstance | undefined>(resolve =>
+                        resolve({
+                            ...user,
+                            save: save ?? (() => new Promise<void>(result => result())),
+                            deleteOne: deleteOne ?? (() => new Promise<void>(result => result())),
+                        }),
+                    ),
             } as Promisify;
         }
 
         return {
-            exec: () => new Promise<UserCookiesInstance | undefined>(resolve => resolve(undefined))
+            exec: () => new Promise<UserCookiesInstance | undefined>(resolve => resolve(undefined)),
         } as Promisify;
     }
 });

@@ -25,7 +25,7 @@ export class FavoritesFormComponent {
     public constructor(
         private readonly modal: NgbActiveModal,
         private readonly favorites: FavoritesService,
-        private readonly store: FavoritesFormStore
+        private readonly store: FavoritesFormStore,
     ) {
         this.items = this.store.select(state => state.items);
 

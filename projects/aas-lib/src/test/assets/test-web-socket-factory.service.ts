@@ -12,7 +12,7 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 
 export class TestWebSocketFactoryService implements Partial<WebSocketFactoryService> {
-    constructor(private readonly subject: Subject<WebSocketData>) {}
+    public constructor(private readonly subject: Subject<WebSocketData>) {}
 
     public create(): WebSocketSubject<WebSocketData> {
         return this.subject as WebSocketSubject<WebSocketData>;

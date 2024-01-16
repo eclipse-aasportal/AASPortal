@@ -16,7 +16,7 @@ import {
     ReferenceElement,
     Submodel,
     SubmodelElement,
-    SubmodelElementCollection
+    SubmodelElementCollection,
 } from './aas.js';
 
 export * from './document.js';
@@ -37,9 +37,7 @@ export * from './query-parser.js';
  * @returns `true` if the specified value represents a valid e-mail; otherwise, `false`.
  */
 export function isValidEMail(value: string | undefined): boolean {
-    return typeof value === 'string' &&
-        value.length >= 5 &&
-        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
+    return typeof value === 'string' && value.length >= 5 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
 }
 
 /**
@@ -48,11 +46,13 @@ export function isValidEMail(value: string | undefined): boolean {
  * @returns `true` if the specified value represents a valid password; otherwise, `false`.
  */
 export function isValidPassword(value: string | undefined): boolean {
-    return typeof value === 'string' &&
+    return (
+        typeof value === 'string' &&
         /^[\S]+$/.test(value) &&
         value.length >= 8 &&
         value.length <= 20 &&
-        /^[a-zA-Z0-9-+_$%!§?#*~.,;:/]+$/.test(value);
+        /^[a-zA-Z0-9-+_$%!§?#*~.,;:/]+$/.test(value)
+    );
 }
 
 /**

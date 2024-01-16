@@ -19,11 +19,11 @@ import { Message, PackageInfo } from 'common';
 @Route('/api/v1/app')
 @Tags('App')
 export class AppController extends AASController {
-    constructor(
+    public constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
         @inject(Variable) variable: Variable,
-        @inject(ApplicationInfo) private readonly applicationInfo: ApplicationInfo
+        @inject(ApplicationInfo) private readonly applicationInfo: ApplicationInfo,
     ) {
         super(logger, auth, variable);
     }

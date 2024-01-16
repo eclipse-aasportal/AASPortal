@@ -15,16 +15,16 @@ import { WindowService } from '../window.service';
 @Component({
     selector: 'fhg-localize',
     templateUrl: './localize.component.html',
-    styleUrls: ['./localize.component.scss']
+    styleUrls: ['./localize.component.scss'],
 })
 export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly subscription = new Subscription();
     private readonly _cultures = new BehaviorSubject<CultureInfo[]>([]);
     private readonly _culture = new BehaviorSubject<CultureInfo | undefined>(undefined);
 
-    constructor(
+    public constructor(
         private readonly translate: TranslateService,
-        private readonly window: WindowService
+        private readonly window: WindowService,
     ) {
         this.cultures = this._cultures.asObservable();
         this.culture = this._culture.asObservable();
@@ -56,13 +56,16 @@ export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes['languages']) {
-            const items = this.languages.map(lang => (
-                {
-                    localeId: lang,
-                    name: new Intl.DisplayNames([lang], { type: 'language' }).of(lang)
-                } as CultureInfo));
+            const items = this.languages.map(
+                lang =>
+                    ({
+                        localeId: lang,
+                        name: new Intl.DisplayNames([lang], { type: 'language' }).of(lang),
+                    }) as CultureInfo,
+            );
 
-            const current = this.findCulture(items, this.translate.currentLang) ??
+            const current =
+                this.findCulture(items, this.translate.currentLang) ??
                 this.findCulture(items, this.translate.defaultLang) ??
                 items[0];
 
@@ -80,7 +83,7 @@ export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
         if (item) {
             this._culture.next(item);
         }
-    }
+    };
 
     private findCulture(cultures: CultureInfo[], localeId: string): CultureInfo | undefined {
         localeId = localeId?.toLocaleLowerCase();

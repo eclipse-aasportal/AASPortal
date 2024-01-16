@@ -16,15 +16,15 @@ import { JsonReaderV2 } from '../packages/json-reader-v2.js';
 import * as aasV2 from '../types/aas-v2.js';
 
 export class TemplateStorage {
-    constructor(
+    public constructor(
         private readonly logger: Logger,
-        private readonly fileStorage: FileStorage
-    ) { }
+        private readonly fileStorage: FileStorage,
+    ) {}
 
     public async readAsync(): Promise<TemplateDescriptor[]> {
         const descriptors: TemplateDescriptor[] = [];
         if (await this.fileStorage.exists(this.fileStorage.root)) {
-            await this.readDirAsync(this.fileStorage.root, descriptors)
+            await this.readDirAsync(this.fileStorage.root, descriptors);
         }
 
         return descriptors;
@@ -43,7 +43,7 @@ export class TemplateStorage {
                             name: $path.basename(path, $path.extname(format)),
                             endpoint: { type: 'file', address: path },
                             format: '.json',
-                            template: await this.readTemplateAsync(path)
+                            template: await this.readTemplateAsync(path),
                         });
                         break;
 

@@ -19,7 +19,12 @@ import { SocketSubscription } from '../../live/socket-subscription.js';
 export class AasxDirectory extends AASResource {
     private reentry = 0;
 
-    constructor(logger: Logger, url: string, name: string, private readonly fileStorage: FileStorage) {
+    public constructor(
+        logger: Logger,
+        url: string,
+        name: string,
+        private readonly fileStorage: FileStorage,
+    ) {
         super(logger, url, name);
     }
 
@@ -93,7 +98,8 @@ export class AasxDirectory extends AASResource {
             throw new ApplicationError(
                 `A file with the name '${file.filename}' already exists.`,
                 ERRORS.FileAlreadyExists,
-                file.filename);
+                file.filename,
+            );
         }
 
         try {

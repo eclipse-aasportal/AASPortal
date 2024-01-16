@@ -27,10 +27,11 @@ export interface RegisterFormResult {
     styleUrls: ['./register-form.component.scss'],
 })
 export class RegisterFormComponent {
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AuthApiService) { }
+        private api: AuthApiService,
+    ) {}
 
     public userId = '';
 
@@ -72,7 +73,7 @@ export class RegisterFormComponent {
             const profile: UserProfile = {
                 id: this.userId,
                 name: this.name ?? getUserNameFromEMail(this.userId),
-                password: this.password1
+                password: this.password1,
             };
 
             let result: RegisterFormResult | undefined;
@@ -81,13 +82,13 @@ export class RegisterFormComponent {
                     if (!this.passwordAsEMail) {
                         result = {
                             stayLoggedIn: this.stayLoggedIn,
-                            token: value.token
+                            token: value.token,
                         };
 
                         this.modal.close(result);
                     }
                 },
-                error: error => this.pushMessage(messageToString(error, this.translate))
+                error: error => this.pushMessage(messageToString(error, this.translate)),
             });
         }
     }
@@ -97,7 +98,7 @@ export class RegisterFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message]
+        this.messages = [message];
     }
 
     private clearMessages(): void {

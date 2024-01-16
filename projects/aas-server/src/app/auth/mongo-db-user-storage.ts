@@ -8,8 +8,8 @@
 
 import { injectable } from 'tsyringe';
 import { Schema, model } from 'mongoose';
-import { UserData } from "./user-data.js";
-import { UserStorage } from "./user-storage.js";
+import { UserData } from './user-data.js';
+import { UserStorage } from './user-storage.js';
 
 @injectable()
 export class MongoDBUserStorage extends UserStorage {
@@ -29,7 +29,7 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async readAsync(userId: string): Promise<UserData | undefined> {
-        return await this.UserDataModel.findOne({ id: userId }).exec() ?? undefined;
+        return (await this.UserDataModel.findOne({ id: userId }).exec()) ?? undefined;
     }
 
     public async writeAsync(userId: string, data: UserData): Promise<void> {
@@ -46,6 +46,6 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async deleteAsync(userId: string): Promise<boolean> {
-        return (await this.UserDataModel.findOneAndDelete({ id: userId }).exec()) != null
+        return (await this.UserDataModel.findOneAndDelete({ id: userId }).exec()) != null;
     }
 }

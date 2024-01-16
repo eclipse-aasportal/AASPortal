@@ -12,13 +12,10 @@ import { map, Observable } from 'rxjs';
 import { encodeBase64Url } from './convert';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DownloadService {
-    constructor(
-        private readonly http: HttpClient
-    ) {
-    }
+    public constructor(private readonly http: HttpClient) {}
 
     /**
      * Download a file from the specified URL.
@@ -27,19 +24,22 @@ export class DownloadService {
      */
     public async downloadFileAsync(url: string, filename: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            this.http.get(
-                url,
-                {
-                    responseType: 'blob'
-                }).pipe(map(blob => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.setAttribute('download', filename);
-                    a.click();
-                    URL.revokeObjectURL(a.href);
-                })).subscribe({
-                    error: (error) => reject(error),
-                    complete: () => resolve()
+            this.http
+                .get(url, {
+                    responseType: 'blob',
+                })
+                .pipe(
+                    map(blob => {
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.setAttribute('download', filename);
+                        a.click();
+                        URL.revokeObjectURL(a.href);
+                    }),
+                )
+                .subscribe({
+                    error: error => reject(error),
+                    complete: () => resolve(),
                 });
         });
     }
@@ -51,19 +51,21 @@ export class DownloadService {
      * @param name The file name.
      */
     public downloadDocument(endpoint: string, id: string, name: string): Observable<void> {
-        return this.http.get(
-            `/api/v1/containers/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`,
-            {
-                responseType: 'blob'
-            }).pipe(map(blob => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.setAttribute('download', name);
-                a.click();
-                URL.revokeObjectURL(a.href);
-            }));
+        return this.http
+            .get(`/api/v1/containers/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`, {
+                responseType: 'blob',
+            })
+            .pipe(
+                map(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.setAttribute('download', name);
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }),
+            );
     }
-    
+
     /**
      * Uploads the specified aasx file.
      * @param file A file.
@@ -77,12 +79,9 @@ export class DownloadService {
             data.append('file', file);
         }
 
-        return this.http.post(
-            `/api/v1/containers/${encodeBase64Url(name)}/packages`,
-            data,
-            {
-                reportProgress: true,
-                observe: 'events'
-            });
+        return this.http.post(`/api/v1/containers/${encodeBase64Url(name)}/packages`, data, {
+            reportProgress: true,
+            observe: 'events',
+        });
     }
 }

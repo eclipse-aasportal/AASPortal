@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ApplicationError } from 'common';
-import { ERRORS } from "./errors.js";
+import { ERRORS } from './errors.js';
 
 export function decodeBase64Url(data: string): string {
     return Buffer.from(data, 'base64url').toString('ascii');
@@ -25,7 +25,8 @@ export function parseUrl(url: string): URL {
             `"${url}" is an invalid URL: ${error?.message}`,
             ERRORS.InvalidURL,
             url,
-            error?.message);
+            error?.message,
+        );
     }
 }
 

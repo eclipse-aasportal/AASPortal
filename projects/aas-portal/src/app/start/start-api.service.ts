@@ -7,24 +7,22 @@
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AASCursor, AASDocument, AASEndpoint, AASPage, aas } from 'common';
 import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 
 /** The client side AAS provider service. */
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class StartApiService {
-    constructor(
-        private readonly http: HttpClient,
-    ) {}
+    public constructor(private readonly http: HttpClient) {}
 
     /**
-    * Returns all configured AAS endpoints.
-    * @returns An array of `AASContainer`.
-    */
+     * Returns all configured AAS endpoints.
+     * @returns An array of `AASContainer`.
+     */
     public getEndpoints(): Observable<AASEndpoint[]> {
         return this.http.get<AASEndpoint[]>('/api/v1/endpoints');
     }
@@ -57,10 +55,9 @@ export class StartApiService {
      * @returns An observable.
      */
     public delete(id: string, url: string): Observable<void> {
-        return this.http.delete<void>(
-            `/api/v1/containers/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
+        return this.http.delete<void>(`/api/v1/containers/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
     }
-    
+
     /**
      * Returns a page of documents from the specified cursor.
      * @param cursor The current cursor.
@@ -88,17 +85,19 @@ export class StartApiService {
      */
     public getContent(endpointName: string, id: string): Observable<aas.Environment> {
         return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/content`);
+            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/content`,
+        );
     }
 
     /**
-     * 
-     * @param endpointName 
-     * @param id 
-     * @returns 
+     *
+     * @param endpointName
+     * @param id
+     * @returns
      */
     public getHierarchy(endpointName: string, id: string): Observable<AASDocument[]> {
         return this.http.get<AASDocument[]>(
-            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`);
+            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`,
+        );
     }
 }

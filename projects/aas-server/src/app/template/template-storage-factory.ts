@@ -16,9 +16,7 @@ import { LocalFileStorage } from '../file-storage/local-file-storage.js';
 import { Logger } from '../logging/logger.js';
 
 export class TemplateStorageFactory {
-    constructor(
-        private readonly container: DependencyContainer
-    ) { }
+    public constructor(private readonly container: DependencyContainer) {}
 
     public create(): TemplateStorage {
         let fileStorage: FileStorage;

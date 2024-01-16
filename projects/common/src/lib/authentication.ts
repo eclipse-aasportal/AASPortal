@@ -6,17 +6,17 @@
  *
  *****************************************************************************/
 
-import { capitalize } from "lodash-es";
+import { capitalize } from 'lodash-es';
 
-export type UserRole = "guest" | "editor" | "admin";
+export type UserRole = 'guest' | 'editor' | 'admin';
 
 export const priority: UserRole[] = ['guest', 'editor', 'admin'];
 
 /** The user roles. */
 export const USER_ROLES: { [key: string]: string } = {
-    admin: "admin",
-    editor: "editor",
-    guest: "guest"
+    admin: 'admin',
+    editor: 'editor',
+    guest: 'guest',
 };
 
 /** The user profile. */
@@ -60,7 +60,12 @@ export function getUserNameFromEMail(email: string): string {
     let name: string;
     const index = email.indexOf('@');
     if (index > 0) {
-        name = email.substring(0, index).replace(/[.-]/, ' ').split(' ').map(item => capitalize(item)).join(' ');
+        name = email
+            .substring(0, index)
+            .replace(/[.-]/, ' ')
+            .split(' ')
+            .map(item => capitalize(item))
+            .join(' ');
     } else {
         name = email;
     }

@@ -15,35 +15,35 @@ import {
     NodeId,
     ClientSession,
     AttributeIds,
-    QualifiedName
+    QualifiedName,
 } from 'node-opcua';
 
 export type BaseTypeDefinition = 'Operation' | 'FolderType' | 'FileType';
 
 export type AASTypeDefinition =
-    'AASEnvironmentType' |
-    'AASAssetInformationType' |
-    'AASAssetAdministrationShellType' |
-    'AASAssetType' |
-    'AASEventType' |
-    'AASBlobType' |
-    'AASCapabilityType' |
-    'AASEntityType' |
-    'AASSubmodelType' |
-    'AASSubmodelElementCollectionType' |
-    'AASOrderedSubmodelElementCollectionType' |
-    'AASPropertyType' |
-    'AASFileType' |
-    'AASViewType' |
-    'AASContainedElementRefType' |
-    'AASQualifierList' |
-    'AASRangeType' |
-    'AASReferenceElementType' |
-    'AASReferenceType' |
-    'AASReferenceList' |
-    'AASRelationshipElementType' |
-    'AASMultiLanguagePropertyType' |
-    'AASOperationType';
+    | 'AASEnvironmentType'
+    | 'AASAssetInformationType'
+    | 'AASAssetAdministrationShellType'
+    | 'AASAssetType'
+    | 'AASEventType'
+    | 'AASBlobType'
+    | 'AASCapabilityType'
+    | 'AASEntityType'
+    | 'AASSubmodelType'
+    | 'AASSubmodelElementCollectionType'
+    | 'AASOrderedSubmodelElementCollectionType'
+    | 'AASPropertyType'
+    | 'AASFileType'
+    | 'AASViewType'
+    | 'AASContainedElementRefType'
+    | 'AASQualifierList'
+    | 'AASRangeType'
+    | 'AASReferenceElementType'
+    | 'AASReferenceType'
+    | 'AASReferenceList'
+    | 'AASRelationshipElementType'
+    | 'AASMultiLanguagePropertyType'
+    | 'AASOperationType';
 
 export interface AssetInformation {
     kind: aas.AssetKind;
@@ -109,7 +109,7 @@ export enum ValueType {
     DateTime = 12,
     ByteString = 13,
     LocalizedText = 14,
-    UtcTime = 15
+    UtcTime = 15,
 }
 
 export enum PropertyValueType {
@@ -163,7 +163,7 @@ export enum PropertyValueType {
     Time,
     ENTITIES,
     IDREFS,
-    NMTOKENS
+    NMTOKENS,
 }
 
 export enum DataTypeIEC61360Type {
@@ -181,12 +181,22 @@ export enum DataTypeIEC61360Type {
     RATIONAL,
     RATIONAL_MEASURE,
     TIME,
-    TIMESTAMP
+    TIMESTAMP,
 }
 
-export enum UAIdentifierType { IRDI = 0, IRI = 1, Custom = 2 }
+export enum UAIdentifierType {
+    IRDI = 0,
+    IRI = 1,
+    Custom = 2,
+}
 
-export enum UAKeyType { idShort = 0, FragmentId = 1, Custom = 2, IRDI = 3, IRI = 4 }
+export enum UAKeyType {
+    idShort = 0,
+    FragmentId = 1,
+    Custom = 2,
+    IRDI = 3,
+    IRI = 4,
+}
 
 export interface UAKey {
     idType: UAKeyType;
@@ -197,7 +207,7 @@ export interface UAKey {
 
 export enum UAEntityType {
     CoManagedEntity,
-    SelfManagedEntity
+    SelfManagedEntity,
 }
 
 export interface OPCUAComponent extends OPCUANode {
@@ -216,16 +226,17 @@ export interface OPCUAReadRequest {
 
 export interface AASKeyDataType {
     type: UAKeyElements;
-    value: any;
+    value: unknown;
     idType: UAKeyType;
 }
 
 export async function readDataTypeAsync(session: ClientSession, dataType: NodeIdLike): Promise<string> {
-    const qualifiedName: QualifiedName = (await session.read(
-        {
+    const qualifiedName: QualifiedName = (
+        await session.read({
             nodeId: dataType,
-            attributeId: AttributeIds.BrowseName
-        })).value.value;
+            attributeId: AttributeIds.BrowseName,
+        })
+    ).value.value;
 
     if (typeof qualifiedName.name === 'string') {
         return qualifiedName.name;

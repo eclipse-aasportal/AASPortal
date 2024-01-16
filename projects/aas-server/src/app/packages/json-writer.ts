@@ -12,11 +12,11 @@ import { AASWriter } from './aas-writer.js';
 
 /** */
 export class JsonWriter extends AASWriter {
-    public writeEnvironment(env: aas.Environment): any {
+    public override writeEnvironment<T>(env: aas.Environment): T {
         const conceptDescriptions = this.writeConceptDescriptions(env);
         const assetAdministrationShells = this.writeAssetAdministrationShells(env);
         const submodels = this.writeSubmodels(env);
-        return { assetAdministrationShells, submodels, conceptDescriptions };
+        return { assetAdministrationShells, submodels, conceptDescriptions } as T;
     }
 
     /**
@@ -24,14 +24,14 @@ export class JsonWriter extends AASWriter {
      * @param data The serialized Submodel or SubmodelElement.
      * @returns The deserialized Submodel or SubmodelElement.
      */
-    public write(source: aas.Referable): any {
+    public write<T>(source: aas.Referable): T {
         switch (source.modelType) {
             case 'AssetAdministrationShell':
                 throw new Error('Invalid operation.');
             case 'Submodel':
-                return this.writeSubmodel(source as aas.Submodel);
+                return this.writeSubmodel(source as aas.Submodel) as T;
             default:
-                return this.writeSubmodelElement(source as aas.SubmodelElement)!;
+                return this.writeSubmodelElement(source as aas.SubmodelElement) as T;
         }
     }
 
@@ -65,7 +65,7 @@ export class JsonWriter extends AASWriter {
         const shell: aas.AssetAdministrationShell = {
             ...this.writeIdentifiable(source),
             ...this.writeHasDataSpecification(source),
-            assetInformation: this.writeAssetInformation(source.assetInformation)
+            assetInformation: this.writeAssetInformation(source.assetInformation),
         };
 
         if (source.derivedFrom) {
@@ -117,7 +117,7 @@ export class JsonWriter extends AASWriter {
             ...this.writeHasSemantic,
             name: source.name,
             value: source.value,
-            externalSubjectId: this.writeReference(source.externalSubjectId)
+            externalSubjectId: this.writeReference(source.externalSubjectId),
         };
     }
 
@@ -137,7 +137,7 @@ export class JsonWriter extends AASWriter {
     private writeConceptDescription(source: aas.ConceptDescription): aas.ConceptDescription {
         const conceptDescription: aas.ConceptDescription = {
             ...this.writeIdentifiable(source),
-            ...this.writeHasDataSpecification(source)
+            ...this.writeHasDataSpecification(source),
         };
 
         if (source.isCaseOf) {
@@ -164,7 +164,7 @@ export class JsonWriter extends AASWriter {
             ...this.writeHasSemantic(source),
             ...this.writeQualifiable(source),
             ...this.writeHasKind(source),
-            ...this.writeHasDataSpecification(source)
+            ...this.writeHasDataSpecification(source),
         };
 
         if (source.submodelElements) {
@@ -221,19 +221,19 @@ export class JsonWriter extends AASWriter {
 
     private writeSubmodelElementType(source: aas.SubmodelElement): aas.SubmodelElement {
         return {
-            ...this.writeReferable(source, undefined),
+            ...this.writeReferable(source),
             ...this.writeHasSemantic(source),
             ...this.writeHasKind(source),
             ...this.writeHasDataSpecification(source),
-            ...this.writeQualifiable(source)
+            ...this.writeQualifiable(source),
         };
     }
 
     private writeAnnotatedRelationshipElement(
         source: aas.AnnotatedRelationshipElement,
-        ancestors?: aas.Referable[]): aas.AnnotatedRelationshipElement {
+    ): aas.AnnotatedRelationshipElement {
         if (!source.annotations) {
-            throw new Error('AnnotatedRelationshipElement.annotation')
+            throw new Error('AnnotatedRelationshipElement.annotation');
         }
 
         const relationship: aas.AnnotatedRelationshipElement = {
@@ -244,7 +244,7 @@ export class JsonWriter extends AASWriter {
         return relationship;
     }
 
-    private writeEventElement(source: aas.EventElement, ancestor?: aas.Referable[]): aas.EventElement {
+    private writeEventElement(source: aas.EventElement): aas.EventElement {
         return { ...this.writeSubmodelElementType(source) };
     }
 
@@ -265,7 +265,7 @@ export class JsonWriter extends AASWriter {
             ...this.writeEventElement(source),
             observed: source.observed,
             direction: source.direction,
-            state: source.state
+            state: source.state,
         };
 
         if (source.messageTopic) {
@@ -298,7 +298,7 @@ export class JsonWriter extends AASWriter {
 
         const property: aas.Property = {
             ...this.writeSubmodelElementType(source),
-            valueType: source.valueType
+            valueType: source.valueType,
         };
 
         if (source.value) {
@@ -323,7 +323,7 @@ export class JsonWriter extends AASWriter {
 
     private writeOperation(source: aas.Operation): aas.Operation {
         const operation: aas.Operation = {
-            ...this.writeSubmodelElementType(source)
+            ...this.writeSubmodelElementType(source),
         };
 
         if (source.inputVariables) {
@@ -360,7 +360,7 @@ export class JsonWriter extends AASWriter {
 
         const file: aas.File = {
             ...this.writeSubmodelElementType(source),
-            contentType
+            contentType,
         };
 
         if (source.value) {
@@ -377,7 +377,7 @@ export class JsonWriter extends AASWriter {
 
         const blob: aas.Blob = {
             ...this.writeSubmodelElementType(source),
-            contentType: source.contentType
+            contentType: source.contentType,
         };
 
         if (source.value) {
@@ -394,7 +394,7 @@ export class JsonWriter extends AASWriter {
 
         const entity: aas.Entity = {
             ...this.writeSubmodelElementType(source),
-            entityType: source.entityType
+            entityType: source.entityType,
         };
 
         if (source.statements) {
@@ -412,11 +412,9 @@ export class JsonWriter extends AASWriter {
         return entity;
     }
 
-    private writeSubmodelElementCollection(
-        source: aas.SubmodelElementCollection,
-        ancestors?: aas.Referable[]): aas.SubmodelElementCollection {
+    private writeSubmodelElementCollection(source: aas.SubmodelElementCollection): aas.SubmodelElementCollection {
         const collection: aas.SubmodelElementCollection = {
-            ...this.writeSubmodelElementType(source)
+            ...this.writeSubmodelElementType(source),
         };
 
         if (source.value) {
@@ -434,7 +432,7 @@ export class JsonWriter extends AASWriter {
         const list: aas.SubmodelElementList = {
             ...this.writeSubmodelElementType(source),
             typeValueListElement: source.typeValueListElement,
-            valueTypeListElement: source.valueTypeListElement
+            valueTypeListElement: source.valueTypeListElement,
         };
 
         if (source.orderRelevant) {
@@ -459,7 +457,7 @@ export class JsonWriter extends AASWriter {
 
         const reference: aas.ReferenceElement = {
             ...this.writeSubmodelElementType(source),
-            value: this.writeReference(source.value)
+            value: this.writeReference(source.value),
         };
 
         return reference;
@@ -467,17 +465,17 @@ export class JsonWriter extends AASWriter {
 
     private writeRelationshipElement(source: aas.RelationshipElement): aas.RelationshipElement {
         if (!source.first) {
-            throw new Error('RelationshipElement.first')
+            throw new Error('RelationshipElement.first');
         }
 
         if (!source.second) {
-            throw new Error('RelationshipElement.second')
+            throw new Error('RelationshipElement.second');
         }
 
         const relationship: aas.RelationshipElement = {
             ...this.writeSubmodelElementType(source),
             first: this.writeReference(source.first),
-            second: this.writeReference(source.second)
+            second: this.writeReference(source.second),
         };
 
         return relationship;
@@ -490,7 +488,7 @@ export class JsonWriter extends AASWriter {
 
         const range: aas.Range = {
             ...this.writeSubmodelElementType(source),
-            valueType: source.valueType
+            valueType: source.valueType,
         };
 
         if (source.min) {
@@ -538,7 +536,7 @@ export class JsonWriter extends AASWriter {
         const qualifier: aas.Qualifier = {
             ...this.writeHasSemantic(source),
             type: source.type,
-            valueType: source.valueType
+            valueType: source.valueType,
         };
 
         if (source.kind) {
@@ -556,7 +554,7 @@ export class JsonWriter extends AASWriter {
         return qualifier;
     }
 
-    private writeReferable(source: aas.Referable, id?: string): aas.Referable {
+    private writeReferable(source: aas.Referable): aas.Referable {
         if (!source.modelType) {
             throw Error(`Referable.modelType.`);
         }
@@ -580,8 +578,8 @@ export class JsonWriter extends AASWriter {
         }
 
         const identifiable: aas.Identifiable = {
-            ...this.writeReferable(source, source.id),
-            id: source.id
+            ...this.writeReferable(source),
+            id: source.id,
         };
 
         if (source.administration) {
@@ -594,7 +592,7 @@ export class JsonWriter extends AASWriter {
     private writeReference(source: aas.Reference): aas.Reference {
         return {
             type: source.type,
-            keys: source.keys.map((key, index) => {
+            keys: source.keys.map(key => {
                 if (!key.type) {
                     throw new Error(`Reference.type`);
                 }
@@ -607,15 +605,16 @@ export class JsonWriter extends AASWriter {
                     type: key.type,
                     value: key.value,
                 } as aas.Key;
-            })
+            }),
         };
     }
 
     private writeHasDataSpecification(source: aas.HasDataSpecification): aas.HasDataSpecification {
         const hasDataSpecification: aas.HasDataSpecification = {};
         if (source.embeddedDataSpecifications) {
-            hasDataSpecification.embeddedDataSpecifications = source.embeddedDataSpecifications
-                .map(item => this.writeEmbeddedDatSpecification(item));
+            hasDataSpecification.embeddedDataSpecifications = source.embeddedDataSpecifications.map(item =>
+                this.writeEmbeddedDatSpecification(item),
+            );
         }
 
         return hasDataSpecification;
@@ -633,14 +632,17 @@ export class JsonWriter extends AASWriter {
         let dataSpecificationContent: aas.DataSpecificationContent;
         if (source.dataSpecificationContent.modelType === 'DataSpecificationIEC61360') {
             dataSpecificationContent = this.writeDataSpecificationIEC61360(
-                source.dataSpecificationContent as aas.DataSpecificationIEC61360);
+                source.dataSpecificationContent as aas.DataSpecificationIEC61360,
+            );
         } else {
-            throw new Error(`${source.dataSpecificationContent.modelType} is a not supported DataSpecificationContent.`);
+            throw new Error(
+                `${source.dataSpecificationContent.modelType} is a not supported DataSpecificationContent.`,
+            );
         }
 
         const specification: aas.EmbeddedDataSpecification = {
             dataSpecification: this.writeReference(source.dataSpecification),
-            dataSpecificationContent
+            dataSpecificationContent,
         };
 
         return specification;
@@ -653,8 +655,8 @@ export class JsonWriter extends AASWriter {
 
         const iec61360: aas.DataSpecificationIEC61360 = {
             modelType: source.modelType,
-            preferredName: source.preferredName
-        }
+            preferredName: source.preferredName,
+        };
 
         if (source.dataType) {
             iec61360.dataType = source.dataType;
@@ -709,7 +711,7 @@ export class JsonWriter extends AASWriter {
         }
 
         const valueList: aas.ValueList = {
-            valueReferencePairs: source.valueReferencePairs.map(item => this.writeValueReferencePair(item))
+            valueReferencePairs: source.valueReferencePairs.map(item => this.writeValueReferencePair(item)),
         };
 
         return valueList;

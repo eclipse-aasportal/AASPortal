@@ -19,7 +19,7 @@ import {
     UserProfile,
     UserRole,
     JWTPayload,
-    toBoolean
+    toBoolean,
 } from 'common';
 
 import { NotifyService } from '../notify/notify.service';
@@ -31,19 +31,19 @@ import { AuthApiService } from './auth-api.service';
 import { WindowService } from '../window.service';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class AuthService {
     private readonly payload$ = new BehaviorSubject<JWTPayload>({ role: 'guest' });
     private readonly ready$ = new BehaviorSubject<boolean>(false);
     private readonly cookies = new Map<string, string>();
 
-    constructor(
+    public constructor(
         private modal: NgbModal,
         private translate: TranslateService,
         private api: AuthApiService,
         private notify: NotifyService,
-        private window: WindowService
+        private window: WindowService,
     ) {
         this.payload = this.payload$.asObservable();
         this.ready = this.ready$.asObservable();
@@ -57,8 +57,8 @@ export class AuthService {
         }
 
         this.loginAsGuest().subscribe({
-            error: (error) => notify.error(error),
-            complete: () => this.ready$.next(true)
+            error: error => notify.error(error),
+            complete: () => this.ready$.next(true),
         });
     }
 
@@ -121,7 +121,8 @@ export class AuthService {
                 }
 
                 return of(void 0);
-            }));
+            }),
+        );
     }
 
     /**
@@ -133,11 +134,13 @@ export class AuthService {
             return of(void 0);
         }
 
-        return this.login().pipe(map(() => {
-            if (!this.isAuthorized(role)) {
-                throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
-            }
-        }));
+        return this.login().pipe(
+            map(() => {
+                if (!this.isAuthorized(role)) {
+                    throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
+                }
+            }),
+        );
     }
 
     /** Logs out the current user. */
@@ -169,7 +172,8 @@ export class AuthService {
                         this.window.removeLocalStorageItem('.StayLoggedIn');
                     }
                 }
-            }));
+            }),
+        );
     }
 
     /**
@@ -183,14 +187,13 @@ export class AuthService {
         }
 
         if (profile) {
-            return this.api.updateProfile(payload.sub, profile).pipe(
-                map(result => this.nextPayload(result.token)));
+            return this.api.updateProfile(payload.sub, profile).pipe(map(result => this.nextPayload(result.token)));
         }
 
         return of(this.modal.open(ProfileFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
             mergeMap(form => {
                 form.componentInstance.initialize({ id: payload.sub, name: payload.name });
-                return from<Promise<ProfileFormResult>>(form.result)
+                return from<Promise<ProfileFormResult>>(form.result);
             }),
             mergeMap(result => {
                 if (result?.token) {
@@ -203,7 +206,8 @@ export class AuthService {
                 }
 
                 return of(void 0);
-            }));
+            }),
+        );
     }
 
     /**
@@ -265,13 +269,16 @@ export class AuthService {
         const payload = this.payload$.getValue();
         if (payload && payload.sub) {
             const id = payload.sub;
-            this.api.setCookie(id, { name, data }).pipe(
-                last(),
-                mergeMap(() => this.api.getCookies(id))).subscribe(
-                    {
-                        next: (cookies) => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
-                        error: (error) => this.notify.error(error)
-                    });
+            this.api
+                .setCookie(id, { name, data })
+                .pipe(
+                    last(),
+                    mergeMap(() => this.api.getCookies(id)),
+                )
+                .subscribe({
+                    next: cookies => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
+                    error: error => this.notify.error(error),
+                });
         } else {
             this.window.setLocalStorageItem(name, data);
         }
@@ -290,7 +297,8 @@ export class AuthService {
                 map(cookies => {
                     this.cookies.clear();
                     cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data));
-                }));
+                }),
+            );
         } else {
             this.window.removeLocalStorageItem(name);
             return of(void 0);
@@ -306,7 +314,7 @@ export class AuthService {
     private isValid(token: string): boolean {
         try {
             const value = jwtDecode(token) as JWTPayload;
-            return value.exp == null || (Date.now() / 1000 < value.exp);
+            return value.exp == null || Date.now() / 1000 < value.exp;
         } catch (error) {
             return false;
         }
@@ -319,8 +327,8 @@ export class AuthService {
         this.cookies.clear();
         if (payload.sub) {
             this.api.getCookies(payload.sub).subscribe({
-                next: (cookies) => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
-                error: (error) => this.notify.error(error)
+                next: cookies => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
+                error: error => this.notify.error(error),
             });
         }
     }

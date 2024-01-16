@@ -9,7 +9,7 @@
 import { BinaryStream, DataValueOptions } from 'node-opcua';
 import { OpaqueStructure } from 'node-opcua-extension-object';
 import { aas } from 'common';
-import { UAKeyElements, UAKeyType } from './opcua.js';
+import { UAKeyElements } from './opcua.js';
 
 export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string): DataValueOptions {
     if (dataType === 'AASKeyDataType') {
@@ -17,8 +17,8 @@ export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string):
             value: {
                 arrayType: 'Array',
                 dimensions: [1],
-                value: decodeToKeyArray(value.buffer)
-            }
+                value: decodeToKeyArray(value.buffer),
+            },
         };
     }
 
@@ -32,7 +32,7 @@ export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string):
             const id = stream.readString() as string;
             keys.push({
                 type: toKeyTypes(type),
-                value: id
+                value: id,
             });
         }
 

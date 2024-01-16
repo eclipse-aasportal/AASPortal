@@ -6,19 +6,20 @@
  *
  *****************************************************************************/
 
-import { Component } from "@angular/core";
-import { NotifyService } from "../notify/notify.service";
-import { AuthService } from "./auth.service";
+import { Component } from '@angular/core';
+import { NotifyService } from '../notify/notify.service';
+import { AuthService } from './auth.service';
 
 @Component({
-    selector: "fhg-auth",
-    templateUrl: "./auth.component.html",
-    styleUrls: ["./auth.component.scss"],
+    selector: 'fhg-auth',
+    templateUrl: './auth.component.html',
+    styleUrls: ['./auth.component.scss'],
 })
 export class AuthComponent {
-    constructor(
+    public constructor(
         private auth: AuthService,
-        private notify: NotifyService) { }
+        private notify: NotifyService,
+    ) {}
 
     public get userAuthenticated(): boolean {
         return this.auth.authenticated;

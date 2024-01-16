@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { createSelector } from "@ngrx/store";
-import { State } from "./aas.state";
+import { createSelector } from '@ngrx/store';
+import { State } from './aas.state';
 
 const getReadOnly = (state: State) => state.aas.document?.readonly ?? true;
 const getOnlineReady = (state: State) => state.aas.document?.onlineReady ?? false;

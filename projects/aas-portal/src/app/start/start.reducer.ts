@@ -25,31 +25,13 @@ const initialState: StartState = {
 
 export const startReducer = createReducer(
     initialState,
-    on(
-        StartActions.setViewMode,
-        (state, { viewMode }) => setViewMode(state, viewMode)
-    ),
-    on(
-        StartActions.addTree,
-        (state, { documents }) => addTree(state, documents)
-    ),
-    on(
-        StartActions.setPage,
-        (state, { page, limit, filter }) => setPage(state, page, limit, filter)
-    ),
-    on(
-        StartActions.setContent,
-        (state, { document, content }) => setContent(state, document, content)
-    ),
-    on(
-        StartActions.setFavorites,
-        (state, { name, documents }) => setFavorites(state, name, documents)
-    ),
-    on(
-        StartActions.removeFavorites,
-        (state, { favorites }) => removeFavorites(state, favorites)
-    ),
-)
+    on(StartActions.setViewMode, (state, { viewMode }) => setViewMode(state, viewMode)),
+    on(StartActions.addTree, (state, { documents }) => addTree(state, documents)),
+    on(StartActions.setPage, (state, { page, limit, filter }) => setPage(state, page, limit, filter)),
+    on(StartActions.setContent, (state, { document, content }) => setContent(state, document, content)),
+    on(StartActions.setFavorites, (state, { name, documents }) => setFavorites(state, name, documents)),
+    on(StartActions.removeFavorites, (state, { favorites }) => removeFavorites(state, favorites)),
+);
 
 function setViewMode(state: StartState, viewMode: ViewMode): StartState {
     return { ...state, documents: [], viewMode };
@@ -80,7 +62,7 @@ function setContent(state: StartState, document: AASDocument, content: aas.Envir
     const documents = [...state.documents];
     const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
     if (index >= 0) {
-        documents[index] = { ...document, content }
+        documents[index] = { ...document, content };
     }
 
     return { ...state, documents };
@@ -91,9 +73,9 @@ function removeFavorites(state: StartState, favorites: AASDocument[]): StartStat
         return state;
     }
 
-    const documents = state.documents.filter(
-        document => favorites.every(favorite => document.endpoint !== favorite.endpoint || 
-            document.id !== favorite.id));
+    const documents = state.documents.filter(document =>
+        favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
+    );
 
     return { ...state, documents };
 }

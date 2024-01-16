@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class WindowService {
     /**
@@ -55,16 +55,16 @@ export class WindowService {
     public addEventListener<K extends keyof WindowEventMap>(
         type: K,
         listener: (this: Window, ev: WindowEventMap[K]) => unknown,
-        options?: boolean | AddEventListenerOptions
+        options?: boolean | AddEventListenerOptions,
     ): void {
-        window.addEventListener(type, listener, options)
+        window.addEventListener(type, listener, options);
     }
 
     public removeEventListener<K extends keyof WindowEventMap>(
         type: K,
         listener: (this: Window, ev: WindowEventMap[K]) => unknown,
-        options?: boolean | EventListenerOptions
+        options?: boolean | EventListenerOptions,
     ): void {
-        window.removeEventListener(type, listener, options)
+        window.removeEventListener(type, listener, options);
     }
 }

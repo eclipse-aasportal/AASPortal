@@ -21,13 +21,12 @@ import { Variable } from './variable.js';
 export class ScanContainer {
     private data!: ScanContainerData;
 
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(UpdateStatistic) private readonly statistic: UpdateStatistic,
         @inject(AASResourceScanFactory) private readonly resourceScanFactory: AASResourceScanFactory,
-        @inject(Variable) private readonly variable: Variable
-    ) {
-    }
+        @inject(Variable) private readonly variable: Variable,
+    ) {}
 
     public async scanAsync(data: ScanContainerData): Promise<void> {
         this.data = data;
@@ -64,11 +63,11 @@ export class ScanContainer {
         } else {
             this.postAdded(document);
         }
-    }
+    };
 
     private onError = (error: Error): void => {
         this.logger.error(error);
-    }
+    };
 
     private postChanged(document: AASDocument): void {
         const value: ScanContainerResult = {
@@ -76,7 +75,7 @@ export class ScanContainer {
             type: ScanResultType.Changed,
             container: this.data.container,
             document: document,
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Changed)
+            statistic: this.statistic.update(this.data.statistic, ScanResultType.Changed),
         };
 
         const array = toUint8Array(value);
@@ -89,7 +88,7 @@ export class ScanContainer {
             type: ScanResultType.Removed,
             container: this.data.container,
             document: document,
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Removed)
+            statistic: this.statistic.update(this.data.statistic, ScanResultType.Removed),
         };
 
         const array = toUint8Array(value);
@@ -102,7 +101,7 @@ export class ScanContainer {
             type: ScanResultType.Added,
             container: this.data.container,
             document: document,
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Added)
+            statistic: this.statistic.update(this.data.statistic, ScanResultType.Added),
         };
 
         const array = toUint8Array(value);
@@ -110,18 +109,17 @@ export class ScanContainer {
     }
 
     private documentChanged(document: AASDocument, reference: AASDocument): boolean {
-        if (document.crc32 === reference.crc32 && 
-            (!reference.timestamp || (Date.now() - reference.timestamp <= this.variable.AAS_EXPIRES_IN))) {
+        if (
+            document.crc32 === reference.crc32 &&
+            (!reference.timestamp || Date.now() - reference.timestamp <= this.variable.AAS_EXPIRES_IN)
+        ) {
             return false;
         }
-
 
         return true;
     }
 
-    private equalContent(
-        a: aas.Environment | null,
-        b: aas.Environment | null): boolean {
+    private equalContent(a: aas.Environment | null, b: aas.Environment | null): boolean {
         let equals: boolean;
         if (a === b) {
             equals = true;

@@ -11,4 +11,4 @@ import { CustomerFeedbackFeatureState } from './customer-feedback.state';
 
 const getCustomerFeedback = (state: CustomerFeedbackFeatureState) => state.customerFeedback;
 
-export const selectCustomerFeedback = createSelector(getCustomerFeedback, (customerFeedback) => customerFeedback);
+export const selectCustomerFeedback = createSelector(getCustomerFeedback, customerFeedback => customerFeedback);

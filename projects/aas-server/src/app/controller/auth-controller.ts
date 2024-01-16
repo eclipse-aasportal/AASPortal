@@ -20,10 +20,10 @@ import { Variable } from '../variable.js';
 @Route('/api/v1')
 @Tags('Authentication')
 export class AuthController extends AASController {
-    constructor(
+    public constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
-        @inject(Variable) variable: Variable
+        @inject(Variable) variable: Variable,
     ) {
         super(logger, auth, variable);
     }
@@ -69,8 +69,7 @@ export class AuthController extends AASController {
     @Put('users/{id}')
     @Security('bearerAuth', ['editor'])
     @OperationId('updateProfile')
-    public updateProfile(@Path() id: string, @Body() profile: UserProfile
-    ): Promise<AuthResult> {
+    public updateProfile(@Path() id: string, @Body() profile: UserProfile): Promise<AuthResult> {
         return this.auth.updateProfileAsync(decodeBase64Url(id), profile);
     }
 
@@ -94,7 +93,7 @@ export class AuthController extends AASController {
     @Security('bearerAuth', ['editor'])
     @OperationId('deleteUser')
     public deleteUser(@Path() id: string): Promise<void> {
-        return this.auth.deleteUserAsync(decodeBase64Url(id))
+        return this.auth.deleteUserAsync(decodeBase64Url(id));
     }
 
     /**
@@ -107,7 +106,7 @@ export class AuthController extends AASController {
     @Security('bearerAuth', ['editor'])
     @OperationId('getCookie')
     public getCookie(@Path() id: string, @Path() name: string): Promise<Cookie | undefined> {
-        return this.auth.getCookieAsync(decodeBase64Url(id), name)
+        return this.auth.getCookieAsync(decodeBase64Url(id), name);
     }
 
     /**

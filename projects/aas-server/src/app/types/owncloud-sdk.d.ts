@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 declare module 'owncloud-sdk' {
-
     export interface OwnCloudAuthentication {
-        basic?: { username: string; password: string; };
+        basic?: { username: string; password: string };
         bearer?: string;
     }
 
@@ -39,16 +38,20 @@ declare module 'owncloud-sdk' {
         public getFileContents(path: string, options?: { [key: string]: string }): Promise<string>;
         public getFileUrl(path: string): string;
         public getPathForFileId(fileId: number): Promise<string>;
-        public putFileContents(path: string, content: string, options: { [key: string]: string } = {}): Promise<boolean>;
+        public putFileContents(
+            path: string,
+            content: string,
+            options: { [key: string]: string } = {},
+        ): Promise<boolean>;
         public createFolder(path: string): Promise<boolean>;
         public delete(path: string): Promise<boolean>;
         public fileInfo(path: string, properties: { [key: string]: string }): Promise<FileInfo>;
-        public move (source: string, target: string, overwrite = false): Promise<boolean>;
-        public copy (source: string, target: string, overwrite = false): Promise<boolean>;
+        public move(source: string, target: string, overwrite = false): Promise<boolean>;
+        public copy(source: string, target: string, overwrite = false): Promise<boolean>;
     }
 
     export default class ownCloud {
-        constructor(options?: OwnCloudOptions);
+        public constructor(options?: OwnCloudOptions);
 
         public files: Files;
 

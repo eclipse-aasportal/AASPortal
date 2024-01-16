@@ -16,7 +16,7 @@ export enum MemoryLoggerLevel {
     Info = 2,
     Warning = 3,
     Error = 4,
-    Non = 5
+    Non = 5,
 }
 
 @singleton()
@@ -26,14 +26,14 @@ export class MemoryLogger extends Logger {
     private readonly messages = new Map<string, number>();
     private recording = 0;
 
-    constructor(
+    public constructor(
         @inject('LOG_LEVEL') private readonly logLevel: MemoryLoggerLevel,
-        @inject(DebugConsole) private readonly console: DebugConsole
+        @inject(DebugConsole) private readonly console: DebugConsole,
     ) {
         super();
     }
 
-    public error(error: string | Error, ...args: any[]): void {
+    public error(error: string | Error, ...args: unknown[]): void {
         if (this.logLevel <= MemoryLoggerLevel.Error) {
             let text: string | undefined;
             if (error) {
@@ -50,7 +50,7 @@ export class MemoryLogger extends Logger {
         }
     }
 
-    public warning(message: string, ...args: any[]): void {
+    public warning(message: string, ...args: unknown[]): void {
         if (this.logLevel <= MemoryLoggerLevel.Warning) {
             if (typeof message === 'string') {
                 this.warnings.set(stringFormat(message, args), Date.now());
@@ -58,7 +58,7 @@ export class MemoryLogger extends Logger {
         }
     }
 
-    public info(message: string, ...args: any[]): void {
+    public info(message: string, ...args: unknown[]): void {
         if (this.logLevel <= MemoryLoggerLevel.Info) {
             if (typeof message === 'string') {
                 this.messages.set(stringFormat(message, args), Date.now());
@@ -66,7 +66,7 @@ export class MemoryLogger extends Logger {
         }
     }
 
-    public debug(message: string | Error, ...args: any[]): void {
+    public debug(message: string | Error, ...args: unknown[]): void {
         if (this.logLevel <= MemoryLoggerLevel.Debug) {
             {
                 let text: string | undefined;
@@ -101,10 +101,11 @@ export class MemoryLogger extends Logger {
                 if (this.logLevel <= MemoryLoggerLevel.Info) {
                     this.messages.set(message.text, message.timestamp);
                 }
-                break
+                break;
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public start(context: string): boolean {
         if (this.recording === 0) {
             this.errors.clear();
@@ -126,7 +127,7 @@ export class MemoryLogger extends Logger {
     }
 
     public getMessages(): Message[] {
-        const messages: Message[] = []
+        const messages: Message[] = [];
         for (const tuple of this.errors) {
             messages.push(createMessage('Error', tuple[0], tuple[1]));
         }

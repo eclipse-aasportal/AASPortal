@@ -13,7 +13,6 @@ import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-type
 import { AASIndexQuery } from '../aas-index-query.js';
 
 export class LowDbQuery extends AASIndexQuery {
-
     public constructor(expression: string, language: string) {
         super(expression, language);
     }
@@ -53,9 +52,11 @@ export class LowDbQuery extends AASIndexQuery {
 
     private contains(document: AASDocument, value: string): boolean {
         value = value.toLocaleLowerCase(this.language);
-        return document.idShort.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
+        return (
+            document.idShort.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
             document.id.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
-            document.endpoint.toLocaleLowerCase(this.language).indexOf(value) >= 0;
+            document.endpoint.toLocaleLowerCase(this.language).indexOf(value) >= 0
+        );
     }
 
     private match(elements: LowDbElement[], query: AASQuery | undefined): boolean {
@@ -147,7 +148,7 @@ export class LowDbQuery extends AASIndexQuery {
                     return Math.abs(a - b) <= 0.000001;
             }
         } else if (Array.isArray(b)) {
-            return (b.length === 2 && typeof b[0] === 'number' && typeof b[1] === 'number')
+            return b.length === 2 && typeof b[0] === 'number' && typeof b[1] === 'number'
                 ? a >= b[0] && a <= b[1]
                 : false;
         }
@@ -172,7 +173,7 @@ export class LowDbQuery extends AASIndexQuery {
                     return a === b;
             }
         } else if (Array.isArray(b)) {
-            return (b.length === 2 && typeof b[0] === 'bigint' && typeof b[1] === 'bigint')
+            return b.length === 2 && typeof b[0] === 'bigint' && typeof b[1] === 'bigint'
                 ? a >= b[0] && a <= b[1]
                 : false;
         }
@@ -197,7 +198,7 @@ export class LowDbQuery extends AASIndexQuery {
                     return a.getTime() === b.getTime();
             }
         } else if (Array.isArray(b)) {
-            return (b.length === 2 && b[0] instanceof Date && b[1] instanceof Date)
+            return b.length === 2 && b[0] instanceof Date && b[1] instanceof Date
                 ? a.getTime() >= b[0].getTime() && a.getTime() <= b[1].getTime()
                 : false;
         }

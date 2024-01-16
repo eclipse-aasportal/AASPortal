@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { UserRole } from "common";
+import { UserRole } from 'common';
 
 /** The user data. */
 export type UserData = {

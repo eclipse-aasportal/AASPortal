@@ -23,7 +23,7 @@ export class AasxServerPackage extends AASPackage {
      * @param resource The handle.
      * @param idShort The name of the AAS.
      */
-    constructor(logger: Logger, resource: AASResource, idShort: string) {
+    public constructor(logger: Logger, resource: AASResource, idShort: string) {
         super(logger);
 
         this.server = resource as AasxServer;

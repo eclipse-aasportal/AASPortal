@@ -7,19 +7,17 @@
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AASDocument } from 'common';
 import { Observable } from 'rxjs';
 import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
 
 /** The client side AAS provider service. */
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class MainApiService {
-    constructor(
-        private readonly http: HttpClient,
-    ) { }
+    public constructor(private readonly http: HttpClient) {}
 
     /**
      * Gets the first AAS with the specified identifier.

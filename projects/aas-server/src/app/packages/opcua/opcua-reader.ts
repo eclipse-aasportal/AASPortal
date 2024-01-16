@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { aas, convertToString, determineType } from "common";
-import { ArgumentOptions, LocalizedText, VariantArrayType, VariantOptions } from "node-opcua";
-import { Logger } from "../../logging/logger.js";
-import { AASReader } from "../aas-reader.js";
-import { OpcuaDataTypeDictionary } from "./opcua-data-type-dictionary.js";
+import { aas, convertToString, determineType } from 'common';
+import { ArgumentOptions, LocalizedText, VariantArrayType, VariantOptions } from 'node-opcua';
+import { Logger } from '../../logging/logger.js';
+import { AASReader } from '../aas-reader.js';
+import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import {
     OPCUAComponent,
     OPCUAProperty,
@@ -18,15 +18,16 @@ import {
     UAEntityType,
     UAKey,
     UAKeyElements,
-    ValueType
-} from "./opcua.js";
+    ValueType,
+} from './opcua.js';
 import { noop } from 'lodash-es';
 
 export class OpcuaReader extends AASReader {
-    constructor(
+    public constructor(
         private readonly logger: Logger,
         private readonly origin: OPCUAComponent,
-        private readonly dataTypes: OpcuaDataTypeDictionary) {
+        private readonly dataTypes: OpcuaDataTypeDictionary,
+    ) {
         super();
     }
 
@@ -34,10 +35,11 @@ export class OpcuaReader extends AASReader {
         const conceptDescriptions = this.readConceptDescriptions();
         const assetAdministrationShells = this.readAssetAdministrationShells();
         const submodels: aas.Submodel[] = this.readSubmodels(this.origin);
-        return { assetAdministrationShells, submodels, conceptDescriptions }
+        return { assetAdministrationShells, submodels, conceptDescriptions };
     }
 
-    public read(data: any): aas.Referable {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public read(data: unknown): aas.Referable {
         throw new Error('Not implemented.');
     }
 
@@ -55,8 +57,8 @@ export class OpcuaReader extends AASReader {
         const shell: aas.AssetAdministrationShell = {
             ...this.readIdentifiable(component),
             ...this.readHasDataSpecification(component),
-            assetInformation: this.readAssetInformation(component)
-        }
+            assetInformation: this.readAssetInformation(component),
+        };
 
         const submodels = this.readReferenceList(component, 'Submodel');
         if (submodels) {
@@ -71,12 +73,12 @@ export class OpcuaReader extends AASReader {
         let globalAssetId: string | undefined;
         const assetComponent = this.selectComponent(this.origin, 'Asset');
         if (assetComponent) {
-            assetKind = this.readPropertyValue(assetComponent, 'AssetKind') ?? 'Instance';
-            globalAssetId =  this.readIdentifier(assetComponent);
+            assetKind = this.readEnumProperty(assetComponent, 'AssetKind') ?? 'Instance';
+            globalAssetId = this.readIdentifier(assetComponent);
         } else {
             const infoComponent = this.selectComponent(component, undefined, 'AASAssetInformationType');
             if (infoComponent) {
-                assetKind = this.readPropertyValue(infoComponent, 'AssetKind') ?? 'Instance';
+                assetKind = this.readEnumProperty(infoComponent, 'AssetKind') ?? 'Instance';
                 globalAssetId = this.readReference(infoComponent, 'GlobalAssetId')?.keys[0].value;
             }
         }
@@ -111,18 +113,18 @@ export class OpcuaReader extends AASReader {
             ...this.readHasSemantic(component),
             ...this.readQualifiable(component),
             ...this.readHasKind(component),
-            ...this.readHasDataSpecification(component)
-        }
+            ...this.readHasDataSpecification(component),
+        };
 
-        const submodelElements = this.readSubmodelElements(
-            component,
-            {
-                type: 'ModelReference',
-                keys: [{
+        const submodelElements = this.readSubmodelElements(component, {
+            type: 'ModelReference',
+            keys: [
+                {
                     type: 'Submodel',
                     value: submodel.id,
-                }]
-            });
+                },
+            ],
+        });
         if (submodelElements.length > 0) {
             submodel.submodelElements = submodelElements;
         }
@@ -131,7 +133,8 @@ export class OpcuaReader extends AASReader {
     }
 
     private readSubmodelElements(component: OPCUAComponent, parent?: aas.Reference): aas.SubmodelElement[] {
-        const results = this.where(component.hasComponent,
+        const results = this.where(
+            component.hasComponent,
             'AASBlobType',
             'AASCapabilityType',
             'AASEventType',
@@ -144,7 +147,8 @@ export class OpcuaReader extends AASReader {
             'AASEntityType',
             'AASReferenceElementType',
             'AASRelationshipElementType',
-            'AASOperationType');
+            'AASOperationType',
+        );
 
         const submodelElements: aas.SubmodelElement[] = [];
         for (const component of results) {
@@ -217,11 +221,12 @@ export class OpcuaReader extends AASReader {
 
     private readSubmodelElementCollection(
         component: OPCUAComponent,
-        parent?: aas.Reference): aas.SubmodelElementCollection {
+        parent?: aas.Reference,
+    ): aas.SubmodelElementCollection {
         const base = this.readSubmodelElementType(component, parent);
         const collection: aas.SubmodelElementCollection = {
-            ...base
-        }
+            ...base,
+        };
 
         const value = this.readSubmodelElements(component, parent ? this.createReference(parent, base) : undefined);
         if (value.length > 0) {
@@ -245,7 +250,7 @@ export class OpcuaReader extends AASReader {
         const property: aas.Property = {
             ...this.readSubmodelElementType(component, parent),
             valueType: valueType,
-            nodeId: this.findProperty(component, 'Value')?.nodeId.toString()
+            nodeId: this.findProperty(component, 'Value')?.nodeId.toString(),
         };
 
         if (value) {
@@ -256,17 +261,17 @@ export class OpcuaReader extends AASReader {
     }
 
     private readFile(component: OPCUAComponent, parent?: aas.Reference): aas.File {
-        const contentType: string = this.readPropertyValue(component, 'MimeType');
+        const contentType = this.readStringProperty(component, 'MimeType');
         if (!contentType) {
             throw new Error('File.mimeType');
         }
 
         const file: aas.File = {
             ...this.readSubmodelElementType(component, parent),
-            contentType
+            contentType,
         };
 
-        const value: string = this.readPropertyValue(component, 'Value');
+        const value = this.readStringProperty(component, 'Value');
         if (value) {
             file.value = value;
         }
@@ -288,21 +293,23 @@ export class OpcuaReader extends AASReader {
         let langStrings: aas.LangString[] | undefined;
         const value: LocalizedText[] = this.readPropertyValue(component, propertyName);
         if (value) {
-            langStrings = value.map(item => ({ language: item.locale, text: item.text } as aas.LangString));
+            langStrings = value.map(item => ({ language: item.locale, text: item.text }) as aas.LangString);
         }
 
         return langStrings;
     }
 
     private readEntity(component: OPCUAComponent, parent?: aas.Reference): aas.Entity {
-        const entityType: aas.EntityType | undefined = this.toEntityType(this.readPropertyValue(component, 'EntityType'));
+        const entityType: aas.EntityType | undefined = this.toEntityType(
+            this.readPropertyValue(component, 'EntityType'),
+        );
         if (!entityType) {
             throw new Error('Entity.entityType');
         }
 
         const entity: aas.Entity = {
             ...this.readSubmodelElementType(component, parent),
-            entityType
+            entityType,
         };
 
         const asset = this.readReference(component, 'Asset');
@@ -323,7 +330,7 @@ export class OpcuaReader extends AASReader {
 
         return {
             ...this.readSubmodelElementType(component, parent),
-            value
+            value,
         };
     }
 
@@ -333,7 +340,8 @@ export class OpcuaReader extends AASReader {
         const inoutputVariables: aas.OperationVariable[] = [];
         let methodId: string | undefined;
         let objectId: string | undefined;
-        const opComponent = this.selectComponent(component, undefined, 'Operation') ?? this.findOperationNode(component);
+        const opComponent =
+            this.selectComponent(component, undefined, 'Operation') ?? this.findOperationNode(component);
         if (opComponent) {
             methodId = opComponent.nodeId?.toString();
             objectId = component.nodeId?.toString();
@@ -433,7 +441,7 @@ export class OpcuaReader extends AASReader {
             modelType: 'Property',
             idShort: argument.name!,
             kind: 'Instance',
-            valueType: this.dataTypes.get(argument.dataType)
+            valueType: this.dataTypes.get(argument.dataType),
         };
 
         return { value };
@@ -445,7 +453,7 @@ export class OpcuaReader extends AASReader {
             ...this.readHasSemantic(component),
             ...this.readHasKind(component),
             ...this.readHasDataSpecification(component),
-            ...this.readQualifiable(component)
+            ...this.readQualifiable(component),
         };
     }
 
@@ -472,12 +480,12 @@ export class OpcuaReader extends AASReader {
     private readAdministrativeInformation(component: OPCUAComponent): aas.AdministrativeInformation | undefined {
         const info: aas.AdministrativeInformation = {};
 
-        const version: string = this.readPropertyValue(component, 'Version');
+        const version = this.readStringProperty(component, 'Version');
         if (version) {
             info.version = version;
         }
 
-        const revision: string = this.readPropertyValue(component, 'Revision');
+        const revision = this.readStringProperty(component, 'Revision');
         if (revision) {
             info.revision = revision;
         }
@@ -488,14 +496,14 @@ export class OpcuaReader extends AASReader {
     private readReferable(component: OPCUAComponent, parent?: aas.Reference): aas.Referable {
         const referable: aas.Referable = {
             idShort: component.browseName,
-            modelType: this.readModelType(component)
+            modelType: this.readModelType(component),
         };
 
         if (parent) {
             referable.parent = parent;
         }
 
-        const category: aas.Category = this.readPropertyValue(component, 'Category');
+        const category = this.readEnumProperty<aas.Category>(component, 'Category');
         if (category) {
             referable.category = category;
         }
@@ -514,12 +522,12 @@ export class OpcuaReader extends AASReader {
     }
 
     private readHasKind(component: OPCUAComponent): aas.HasKind {
-        return { kind: this.readPropertyValue(component, 'ModellingKind') ?? 'Instance' };
+        return { kind: this.readEnumProperty(component, 'ModellingKind') ?? 'Instance' };
     }
 
     private readHasDataSpecification(component: OPCUAComponent): aas.HasDataSpecification {
         const dataSpecification: aas.HasDataSpecification = {};
-        const child = this.selectComponent(component, 'DataSpecification', 'AASReferenceList')
+        const child = this.selectComponent(component, 'DataSpecification', 'AASReferenceList');
         if (child?.hasComponent) {
             // ToDo:
         }
@@ -538,7 +546,7 @@ export class OpcuaReader extends AASReader {
     }
 
     private readIdentifier(component: OPCUAComponent): string {
-        const id: string = this.readPropertyValue(component, 'Id');
+        const id = this.readStringProperty(component, 'Id');
         if (!id) {
             throw new Error('Identifier.id');
         }
@@ -547,8 +555,9 @@ export class OpcuaReader extends AASReader {
     }
 
     private selectComponent(parent: OPCUAComponent, name?: string, type?: TypeDefinition): OPCUAComponent | undefined {
-        return parent.hasComponent?.find(component =>
-            (!name || component.browseName === name) && (!type || type === component.typeDefinition));
+        return parent.hasComponent?.find(
+            component => (!name || component.browseName === name) && (!type || type === component.typeDefinition),
+        );
     }
 
     private hasProperty(component: OPCUAComponent, browseName: string): boolean {
@@ -575,7 +584,27 @@ export class OpcuaReader extends AASReader {
         return undefined;
     }
 
-    private readPropertyValue(component: OPCUAComponent, propertyName: string): any {
+    private readStringProperty(component: OPCUAComponent, propertyName: string): string | undefined {
+        const property = this.findProperty(component, propertyName);
+        const value = property?.dataValue.value?.value;
+        if (value && typeof value !== 'string') {
+            throw new Error(`Unexpected value type: expected string, actual ${typeof value}`);
+        }
+
+        return value;
+    }
+
+    private readEnumProperty<T extends string>(component: OPCUAComponent, propertyName: string): T | undefined {
+        const property = this.findProperty(component, propertyName);
+        const value = property?.dataValue.value?.value;
+        if (value && typeof value !== 'string') {
+            throw new Error(`Unexpected value type: expected string, actual ${typeof value}`);
+        }
+
+        return value;
+    }
+
+    private readPropertyValue<T>(component: OPCUAComponent, propertyName: string): T {
         const property = this.findProperty(component, propertyName);
         return property?.dataValue.value?.value;
     }
@@ -592,7 +621,7 @@ export class OpcuaReader extends AASReader {
     private toReference(value: UAKey[]): aas.Reference {
         return {
             type: 'ModelReference',
-            keys: value.map(item => this.readKey(item))
+            keys: value.map(item => this.readKey(item)),
         };
     }
 
@@ -603,8 +632,7 @@ export class OpcuaReader extends AASReader {
             for (const component of components) {
                 if (set.has(component.typeDefinition)) {
                     items.push(component);
-                }
-                else if (component.typeDefinition === 'AASReferenceList') {
+                } else if (component.typeDefinition === 'AASReferenceList') {
                     if (component.browseName === 'Submodel' && component.hasComponent) {
                         for (const submodelReference of component.hasComponent) {
                             if (submodelReference.hasAddIn) {
@@ -616,8 +644,7 @@ export class OpcuaReader extends AASReader {
                             }
                         }
                     }
-                }
-                else if (component.typeDefinition === 'FolderType') {
+                } else if (component.typeDefinition === 'FolderType') {
                     if (component.hasComponent) {
                         for (const folderComponent of component.hasComponent) {
                             if (set.has(folderComponent.typeDefinition)) {
@@ -641,7 +668,7 @@ export class OpcuaReader extends AASReader {
             return value as aas.EntityType;
         }
 
-        return value ? UAEntityType[value] as aas.EntityType : undefined;
+        return value ? (UAEntityType[value] as aas.EntityType) : undefined;
     }
 
     private isArray(value: VariantOptions | undefined): boolean {
@@ -649,7 +676,7 @@ export class OpcuaReader extends AASReader {
     }
 
     private getArray<T>(value: VariantOptions | undefined): T[] {
-        return value !== undefined ? value.value as T[] : [];
+        return value !== undefined ? (value.value as T[]) : [];
     }
 
     private readDataTypeDefXsd(value?: ValueType | string): aas.DataTypeDefXsd | undefined {

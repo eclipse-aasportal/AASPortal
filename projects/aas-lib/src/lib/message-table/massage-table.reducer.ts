@@ -15,27 +15,17 @@ const initialState: MessageTableState = {
     showWarning: false,
     showError: true,
     column: '',
-    direction: ''
+    direction: '',
 };
 
 export const messageTableReducer = createReducer(
     initialState,
-    on(
-        MessageTableActions.setSortParameter,
-        (state, { column, direction }) => setSortParameter(state, column, direction)
+    on(MessageTableActions.setSortParameter, (state, { column, direction }) =>
+        setSortParameter(state, column, direction),
     ),
-    on(
-        MessageTableActions.toggleShowError,
-        (state) => toggleShowError(state)
-    ),
-    on(
-        MessageTableActions.toggleShowInfo,
-        (state) => toggleShowInfo(state)
-    ),
-    on(
-        MessageTableActions.toggleShowWarning,
-        (state) => toggleShowWarning(state)
-    )
+    on(MessageTableActions.toggleShowError, state => toggleShowError(state)),
+    on(MessageTableActions.toggleShowInfo, state => toggleShowInfo(state)),
+    on(MessageTableActions.toggleShowWarning, state => toggleShowWarning(state)),
 );
 
 function setSortParameter(state: MessageTableState, column: string, direction: string): MessageTableState {

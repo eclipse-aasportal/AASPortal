@@ -10,7 +10,7 @@ import { aas, isSubmodel } from 'common';
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 
 export class AASTreeRow {
-    constructor(
+    public constructor(
         public readonly id: string,
         public readonly element: aas.Referable,
         public expanded: boolean,
@@ -25,8 +25,8 @@ export class AASTreeRow {
         public readonly isLeaf: boolean,
         public readonly parent: number,
         public firstChild: number,
-        public nextSibling: number) {
-    }
+        public nextSibling: number,
+    ) {}
 
     public get hasChildren(): boolean {
         return this.firstChild >= 0;
@@ -80,12 +80,12 @@ export enum DisplayType {
     undefined = '',
     Text = 'text',
     Boolean = 'boolean',
-    Url = 'url'
+    Url = 'url',
 }
 
 export interface SearchTerm {
-    text?: string,
-    query?: SearchQuery
+    text?: string;
+    query?: SearchQuery;
 }
 
 export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';

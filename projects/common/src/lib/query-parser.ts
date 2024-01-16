@@ -29,7 +29,7 @@ export interface OrExpression {
 }
 
 export interface Expression {
-    orExpressions: OrExpression[]
+    orExpressions: OrExpression[];
 }
 
 export class QueryParser {
@@ -48,14 +48,17 @@ export class QueryParser {
         'rela',
         'sm',
         'smc',
-        'sml'
+        'sml',
     ]);
 
     private readonly stack: { orExpressions: OrExpression[]; currentOr?: OrExpression }[] = [{ orExpressions: [] }];
     private currentPosition = -1;
     private _hasAASQueries = false;
 
-    public constructor(expression: string, private readonly language: string = 'en') {
+    public constructor(
+        expression: string,
+        private readonly language: string = 'en',
+    ) {
         this.expression = expression.trim();
     }
 
@@ -88,10 +91,7 @@ export class QueryParser {
         this.nextTerm();
 
         if (this.stack.length !== 1) {
-            throw new ApplicationError(
-                'QueryParser.INVALID_NESTED_EXPRESSION',
-                `Invalid nested expression.`,
-                );
+            throw new ApplicationError('QueryParser.INVALID_NESTED_EXPRESSION', `Invalid nested expression.`);
         }
 
         const current = this.stack[this.stack.length - 1];
@@ -160,19 +160,20 @@ export class QueryParser {
             current.currentOr.andExpressions.push(term);
         }
 
-        current.orExpressions.push(current.currentOr)
+        current.orExpressions.push(current.currentOr);
         this.endTerm(current.orExpressions);
     }
 
     private getText(leaveQuotationMarks: boolean = false): string {
         const c = this.expression[this.currentPosition];
-        if (c === '"' || c === '\'') {
+        if (c === '"' || c === "'") {
             const i = this.expression.indexOf(c, this.currentPosition + 1);
             if (i < 0) {
                 throw new ApplicationError(
                     'QueryParser.END_OF_TEXT_NOT_FOUND',
                     `The end of the text, starting at position ${this.currentPosition}, was not found.`,
-                    this.currentPosition);
+                    this.currentPosition,
+                );
             }
 
             const text = leaveQuotationMarks
@@ -225,7 +226,8 @@ export class QueryParser {
         throw new ApplicationError(
             'QueryParser.LINK_EXPECTED',
             `'||' or '&&' expected at position ${this.currentPosition}`,
-            this.currentPosition);
+            this.currentPosition,
+        );
     }
 
     private skipBlanks(): boolean {
@@ -257,7 +259,7 @@ export class QueryParser {
             current.currentOr.andExpressions.push(term);
         }
 
-        current.orExpressions.push(current.currentOr)
+        current.orExpressions.push(current.currentOr);
         current.currentOr = undefined;
     }
 
@@ -348,7 +350,7 @@ export class QueryParser {
         }
 
         if (this.ifChar('<=')) {
-            return '<='
+            return '<=';
         }
 
         if (this.ifChar('<')) {
@@ -356,7 +358,7 @@ export class QueryParser {
         }
 
         if (this.ifChar('>=')) {
-            return '>='
+            return '>=';
         }
 
         if (this.ifChar('>')) {
@@ -377,7 +379,7 @@ export class QueryParser {
             );
         }
 
-        return undefined
+        return undefined;
     }
 
     private ifChar(c: string): boolean {
@@ -392,7 +394,7 @@ export class QueryParser {
     private parseValue(): AASQueryValueType {
         this.skipBlanks();
         const s = this.getText(true);
-        if (s[0] === '"' || s[0] === '\'') {
+        if (s[0] === '"' || s[0] === "'") {
             return s.substring(1, s.length - 1);
         }
 

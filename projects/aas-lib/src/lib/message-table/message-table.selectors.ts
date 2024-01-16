@@ -11,4 +11,4 @@ import { MessageTableFeatureState } from './message-table.state';
 
 const getState = (state: MessageTableFeatureState) => state.messageTable;
 
-export const selectState = createSelector(getState, (state) => state);
+export const selectState = createSelector(getState, state => state);

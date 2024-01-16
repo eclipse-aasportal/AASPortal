@@ -6,18 +6,19 @@
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { cloneDeep } from "lodash-es";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
-import { DashboardPage, DashboardItem } from "../dashboard.state";
+import { Store } from '@ngrx/store';
+import { cloneDeep } from 'lodash-es';
+import { DashboardService } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
+import { DashboardPage, DashboardItem } from '../dashboard.state';
 
 export class DeleteItemCommand extends DashboardCommand {
-    constructor(
+    public constructor(
         store: Store,
         private dashboard: DashboardService,
         private page: DashboardPage,
-        private items: DashboardItem[]) {
+        private items: DashboardItem[],
+    ) {
         super('Delete item', store);
     }
 

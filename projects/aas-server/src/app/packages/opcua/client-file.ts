@@ -15,11 +15,11 @@ import {
     NodeId,
     ResultMask,
     StatusCodes,
-    VariantArrayType
+    VariantArrayType,
 } from 'node-opcua';
 
 export enum OpenFileMode {
-    Read = 1
+    Read = 1,
 }
 
 export class ClientFile {
@@ -29,7 +29,10 @@ export class ClientFile {
     private closeMethodNodeId?: NodeId;
     private readMethodNodeId?: NodeId;
 
-    constructor(private session: ClientSession, fileNodeId: NodeId | string) {
+    public constructor(
+        private session: ClientSession,
+        fileNodeId: NodeId | string,
+    ) {
         this.fileNodeId = NodeId.resolveNodeId(fileNodeId);
     }
 
@@ -47,15 +50,15 @@ export class ClientFile {
         }
 
         const result = await this.session.call({
-            inputArguments: [
-                { dataType: DataType.Byte, value: mode as Byte }
-            ],
+            inputArguments: [{ dataType: DataType.Byte, value: mode as Byte }],
             methodId: this.openMethodNodeId,
-            objectId: this.fileNodeId
+            objectId: this.fileNodeId,
         });
 
         if (result.statusCode !== StatusCodes.Good) {
-            throw new Error('cannot open file statusCode = ' + result.statusCode.toString() + ' mode = ' + OpenFileMode[mode]);
+            throw new Error(
+                'cannot open file statusCode = ' + result.statusCode.toString() + ' mode = ' + OpenFileMode[mode],
+            );
         }
 
         this.fileHandle = result.outputArguments![0].value;
@@ -73,11 +76,9 @@ export class ClientFile {
         }
 
         const result = await this.session.call({
-            inputArguments: [
-                { dataType: DataType.UInt32, value: this.fileHandle }
-            ],
+            inputArguments: [{ dataType: DataType.UInt32, value: this.fileHandle }],
             methodId: this.closeMethodNodeId,
-            objectId: this.fileNodeId
+            objectId: this.fileNodeId,
         });
 
         if (result.statusCode !== StatusCodes.Good) {
@@ -102,11 +103,11 @@ export class ClientFile {
                 {
                     arrayType: VariantArrayType.Scalar,
                     dataType: DataType.Int32,
-                    value: bytesToRead
-                }
+                    value: bytesToRead,
+                },
             ],
             methodId: this.readMethodNodeId,
-            objectId: this.fileNodeId
+            objectId: this.fileNodeId,
         });
 
         if (result.statusCode !== StatusCodes.Good) {
@@ -124,7 +125,7 @@ export class ClientFile {
         const result = await this.session.browse({
             browseDirection: BrowseDirection.Forward,
             nodeId: this.fileNodeId,
-            resultMask: ResultMask.BrowseName | ResultMask.TypeDefinition
+            resultMask: ResultMask.BrowseName | ResultMask.TypeDefinition,
         });
 
         if (result.references) {

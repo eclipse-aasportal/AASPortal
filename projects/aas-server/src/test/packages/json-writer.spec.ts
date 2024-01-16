@@ -14,23 +14,23 @@ describe('JsonWriter', function () {
     describe('writeEnvironment', function () {
         let writer: JsonWriter;
 
-        beforeEach(function(){
+        beforeEach(() => {
             writer = new JsonWriter();
         });
 
-        it('writes an AAS environment', function() {
+        it('writes an AAS environment', () => {
             expect(writer.writeEnvironment(env)).toBeDefined();
-        })
+        });
     });
 
-    describe('write', function() {
+    describe('write', () => {
         let writer: JsonWriter;
 
-        beforeEach(function(){
+        beforeEach(() => {
             writer = new JsonWriter();
         });
 
-        it('does not support writing an AAS', function() {
+        it('does not support writing an AAS', () => {
             expect(() => writer.write(env.assetAdministrationShells[0])).toThrowError();
         });
     });

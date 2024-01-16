@@ -20,12 +20,15 @@ export interface LangStringRow extends aas.LangString {
 @Component({
     selector: 'fhg-edit-element',
     templateUrl: './edit-element-form.component.html',
-    styleUrls: ['./edit-element-form.component.scss']
+    styleUrls: ['./edit-element-form.component.scss'],
 })
 export class EditElementFormComponent {
     private element?: aas.Referable;
 
-    constructor(private modal: NgbActiveModal, private translate: TranslateService) { }
+    public constructor(
+        private modal: NgbActiveModal,
+        private translate: TranslateService,
+    ) {}
 
     public modelType!: aas.ModelType;
 
@@ -69,7 +72,7 @@ export class EditElementFormComponent {
         'xs:unsignedByte',
         'xs:unsignedInt',
         'xs:unsignedLong',
-        'xs:unsignedShort'
+        'xs:unsignedShort',
     ];
 
     public value?: string;
@@ -120,7 +123,7 @@ export class EditElementFormComponent {
     }
 
     public select(item: LangStringRow): void {
-        this.langStrings.forEach((langString) => {
+        this.langStrings.forEach(langString => {
             if (item === langString && langString.index >= 0) {
                 langString.selected = !langString.selected;
             } else {
@@ -133,7 +136,7 @@ export class EditElementFormComponent {
         this.clearMessages();
         const last = this.langStrings[this.langStrings.length - 1];
         last.index = this.langStrings.length - 1;
-        this.langStrings.forEach(item => item.selected = false);
+        this.langStrings.forEach(item => (item.selected = false));
         last.selected = true;
         this.langStrings.push({ language: '', text: '', selected: false, index: -1 });
     }
@@ -142,7 +145,7 @@ export class EditElementFormComponent {
         this.clearMessages();
         if (item.index >= 0) {
             this.langStrings = this.langStrings.filter(langString => langString !== item);
-            this.langStrings.forEach((langString, index) => langString.index = index);
+            this.langStrings.forEach((langString, index) => (langString.index = index));
             this.langStrings[this.langStrings.length - 1].index = -1;
         }
     }
@@ -166,12 +169,12 @@ export class EditElementFormComponent {
                 const temp = this.value;
                 this.value = undefined;
                 this.contentType = extensionToMimeType(ext);
-                convertBlobToBase64Async(files[0]).then(
-                    value => this.value = value
-                ).catch(() => {
-                    this.value = temp;
-                    this.pushMessage('Unable to read file.');
-                })
+                convertBlobToBase64Async(files[0])
+                    .then(value => (this.value = value))
+                    .catch(() => {
+                        this.value = temp;
+                        this.pushMessage('Unable to read file.');
+                    });
             }
         }
     }
@@ -185,7 +188,8 @@ export class EditElementFormComponent {
     private initMultiLanguageProperty(): void {
         const multiLangProperty = this.element as aas.MultiLanguageProperty;
         this.langStrings = multiLangProperty.value.map(
-            (item, index) => ({ ...item, selected: false, index } as LangStringRow));
+            (item, index) => ({ ...item, selected: false, index }) as LangStringRow,
+        );
 
         this.langStrings.push({ language: '', text: '', selected: false, index: -1 });
     }
@@ -248,7 +252,8 @@ export class EditElementFormComponent {
     private submitMultiLanguageProperty(): boolean {
         if (this.element) {
             const multiLangProperty = this.element as aas.MultiLanguageProperty;
-            multiLangProperty.value = this.langStrings.filter(item => item.language && item.text && item.index >= 0)
+            multiLangProperty.value = this.langStrings
+                .filter(item => item.language && item.text && item.index >= 0)
                 .map(item => ({ language: item.language, text: item.text }));
 
             return true;

@@ -11,24 +11,37 @@ import { first } from 'rxjs';
 import { Command } from '../../types/command';
 import * as DashboardSelectors from '../dashboard.selectors';
 import * as DashboardActions from '../dashboard.actions';
-import { DashboardChart, DashboardItem, DashboardItemType, DashboardRow, DashboardState, State } from '../dashboard.state';
+import {
+    DashboardChart,
+    DashboardItem,
+    DashboardItemType,
+    DashboardRow,
+    DashboardState,
+    State,
+} from '../dashboard.state';
 
 export abstract class DashboardCommand extends Command {
     private preState!: DashboardState;
     private postState!: DashboardState;
 
-    constructor(name: string, store: Store) {
+    protected constructor(name: string, store: Store) {
         super(name);
 
         this.store = store as Store<State>;
     }
 
-    protected store: Store<State>
+    protected store: Store<State>;
 
     protected onExecute(): void {
-        this.store.select(DashboardSelectors.selectState).pipe(first()).subscribe(state => this.preState = state);
+        this.store
+            .select(DashboardSelectors.selectState)
+            .pipe(first())
+            .subscribe(state => (this.preState = state));
         this.executing();
-        this.store.select(DashboardSelectors.selectState).pipe(first()).subscribe(state => this.postState = state);
+        this.store
+            .select(DashboardSelectors.selectState)
+            .pipe(first())
+            .subscribe(state => (this.postState = state));
     }
 
     protected abstract executing(): void;
@@ -54,15 +67,15 @@ export abstract class DashboardCommand extends Command {
             columns: row.map(item => ({
                 id: item.id,
                 item: item,
-                itemType: item.type
-            }))
+                itemType: item.type,
+            })),
         }));
     }
 
     protected validateItems(grid: DashboardItem[][]): DashboardItem[][] {
         grid.forEach((row, y) => {
-            row.forEach((item, x) => item.positions[0].x = x);
-            row.forEach(item => item.positions[0].y = y);
+            row.forEach((item, x) => (item.positions[0].x = x));
+            row.forEach(item => (item.positions[0].y = y));
         });
 
         return grid;

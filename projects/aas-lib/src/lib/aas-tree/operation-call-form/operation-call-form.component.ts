@@ -24,7 +24,7 @@ import {
     isProperty,
     toInvariant,
     convertToString,
-    toBoolean
+    toBoolean,
 } from 'common';
 
 export interface Bla {
@@ -39,16 +39,16 @@ export interface Bla {
 @Component({
     selector: 'fhg-operation-call',
     templateUrl: './operation-call-form.component.html',
-    styleUrls: ['./operation-call-form.component.scss']
+    styleUrls: ['./operation-call-form.component.scss'],
 })
 export class OperationCallFormComponent {
     private _operation!: aas.Operation;
 
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AASTreeApiService) {
-    }
+        private api: AASTreeApiService,
+    ) {}
 
     public name = '';
 
@@ -103,9 +103,10 @@ export class OperationCallFormComponent {
         for (const item of this.inputVariables) {
             const element = item.submodelElement;
             if (isProperty(element)) {
-                const value = typeof item.value === 'boolean'
-                    ? item.value.toString()
-                    : toInvariant(item.value, item.type, this.translate.currentLang);
+                const value =
+                    typeof item.value === 'boolean'
+                        ? item.value.toString()
+                        : toInvariant(item.value, item.type, this.translate.currentLang);
 
                 if (value == null) {
                     throw new ApplicationError(
@@ -113,12 +114,13 @@ export class OperationCallFormComponent {
                         ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION,
                         element.value,
                         element.idShort,
-                        element.valueType);
+                        element.valueType,
+                    );
                 }
 
                 element.value = value;
             } else {
-                // ToDo: 
+                // ToDo:
             }
         }
 
@@ -141,9 +143,11 @@ export class OperationCallFormComponent {
                     }
 
                     if (!valueType) {
-                        throw new ApplicationError(`The data type of the variable "${source.idShort}" is undefined.`,
+                        throw new ApplicationError(
+                            `The data type of the variable "${source.idShort}" is undefined.`,
                             ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE,
-                            source.idShort);
+                            source.idShort,
+                        );
                     }
 
                     let value = source.value;
@@ -157,7 +161,7 @@ export class OperationCallFormComponent {
                         description: getLocaleValue(source.descriptions),
                         type: valueType,
                         inputType: inputType,
-                        value: inputType === 'checkbox' ? toBoolean(value) : value
+                        value: inputType === 'checkbox' ? toBoolean(value) : value,
                     });
                 } else {
                     const source = sourceVariable.value;
@@ -167,7 +171,7 @@ export class OperationCallFormComponent {
                         description: getLocaleValue(source.descriptions),
                         type: 'xs:string',
                         inputType: 'text',
-                        value: 'not implemented'
+                        value: 'not implemented',
                     });
                 }
             }

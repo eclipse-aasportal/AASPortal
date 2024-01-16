@@ -17,13 +17,11 @@ export enum MessageTableActionType {
 
 export const setSortParameter = createAction(
     MessageTableActionType.SET_SORT_PARAMETER,
-    props<{ column: string; direction: string}>());
+    props<{ column: string; direction: string }>(),
+);
 
-export const toggleShowInfo = createAction(
-    MessageTableActionType.TOGGLE_SHOW_INFO);
+export const toggleShowInfo = createAction(MessageTableActionType.TOGGLE_SHOW_INFO);
 
-export const toggleShowWarning = createAction(
-    MessageTableActionType.TOGGLE_SHOW_WARNING);
+export const toggleShowWarning = createAction(MessageTableActionType.TOGGLE_SHOW_WARNING);
 
-export const toggleShowError = createAction(
-    MessageTableActionType.TOGGLE_SHOW_ERROR);
+export const toggleShowError = createAction(MessageTableActionType.TOGGLE_SHOW_ERROR);

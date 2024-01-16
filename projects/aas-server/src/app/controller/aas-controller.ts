@@ -15,7 +15,7 @@ export abstract class AASController extends Controller {
     protected constructor(
         protected readonly logger: Logger,
         protected readonly auth: AuthService,
-        protected readonly variable: Variable
+        protected readonly variable: Variable,
     ) {
         super();
     }

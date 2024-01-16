@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createSelector } from '@ngrx/store';
-import { StartFeatureState } from './start.state'
+import { StartFeatureState } from './start.state';
 import { ViewMode } from 'projects/aas-lib/src/public-api';
 
 const getState = (state: StartFeatureState) => state.start;
@@ -26,16 +26,12 @@ export const selectIsViewModeList = createSelector(getViewMode, viewMode => view
 
 export const selectIsViewModeTree = createSelector(getViewMode, viewMode => viewMode === ViewMode.Tree);
 
-export const selectLimit = createSelector(getLimit, limit => limit); 
+export const selectLimit = createSelector(getLimit, limit => limit);
 
 export const selectDocuments = createSelector(getDocuments, documents => documents);
 
-export const selectIsFirstPage = createSelector(
-    getState,
-    state => state.isFirstPage);
+export const selectIsFirstPage = createSelector(getState, state => state.isFirstPage);
 
-export const selectIsLastPage = createSelector(
-    getState,
-    state => state.isLastPage);
+export const selectIsLastPage = createSelector(getState, state => state.isLastPage);
 
 export const selectFavorites = createSelector(getState, state => state.favorites);

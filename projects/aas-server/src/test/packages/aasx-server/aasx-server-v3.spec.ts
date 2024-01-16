@@ -14,7 +14,7 @@ import { cloneDeep } from 'lodash-es';
 import { Socket } from 'net';
 import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
 describe('AasxServerV3', function () {
     let logger: Logger;
@@ -29,9 +29,7 @@ describe('AasxServerV3', function () {
         let shell: jest.Mocked<aas.AssetAdministrationShell>;
 
         beforeEach(function () {
-            shell = createSpyObj<aas.AssetAdministrationShell>(
-                {},
-                { id: 'http://localhost/test/aas' });
+            shell = createSpyObj<aas.AssetAdministrationShell>({}, { id: 'http://localhost/test/aas' });
         });
 
         it('returns the URL to "property1"', function () {
@@ -39,7 +37,8 @@ describe('AasxServerV3', function () {
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
             const nodeId = smId + '.submodel1/property1';
             expect(server.resolveNodeId(shell, nodeId)).toEqual(
-                `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`);
+                `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`,
+            );
         });
     });
 
@@ -50,6 +49,10 @@ describe('AasxServerV3', function () {
         beforeEach(async function () {
             source = env;
             destination = cloneDeep(source);
+        });
+
+        afterEach(() => {
+            jest.restoreAllMocks();
         });
 
         it('inserts a submodel', async function () {
@@ -63,10 +66,12 @@ describe('AasxServerV3', function () {
                 return new http.ClientRequest('http://localhost:1234');
             });
 
-            const diffs: DifferenceItem[] = [{
-                type: 'inserted',
-                sourceElement: source.submodels[0]
-            }];
+            const diffs: DifferenceItem[] = [
+                {
+                    type: 'inserted',
+                    sourceElement: source.submodels[0],
+                },
+            ];
 
             await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
         });
@@ -82,14 +87,18 @@ describe('AasxServerV3', function () {
                 return new http.ClientRequest('http://localhost:1234');
             });
 
-            const diffs: DifferenceItem[] = [{
-                type: 'inserted',
-                sourceParent: source.submodels[0],
-                sourceElement: source.submodels[0].submodelElements![0],
-                destinationParent: destination.submodels[0]
-            }];
+            const diffs: DifferenceItem[] = [
+                {
+                    type: 'inserted',
+                    sourceParent: source.submodels[0],
+                    sourceElement: source.submodels[0].submodelElements![0],
+                    destinationParent: destination.submodels[0],
+                },
+            ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement inserted.']);
+            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual([
+                'SubmodelElement inserted.',
+            ]);
         });
 
         it('updates a submodel', async function () {
@@ -103,11 +112,13 @@ describe('AasxServerV3', function () {
                 return new http.ClientRequest('http://localhost:1234');
             });
 
-            const diffs: DifferenceItem[] = [{
-                type: 'changed',
-                sourceElement: source.submodels[0],
-                destinationElement: destination.submodels[0]
-            }];
+            const diffs: DifferenceItem[] = [
+                {
+                    type: 'changed',
+                    sourceElement: source.submodels[0],
+                    destinationElement: destination.submodels[0],
+                },
+            ];
 
             await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
         });
@@ -123,13 +134,15 @@ describe('AasxServerV3', function () {
                 return new http.ClientRequest('http://localhost:1234');
             });
 
-            const diffs: DifferenceItem[] = [{
-                type: 'changed',
-                sourceParent: source.submodels[0],
-                sourceElement: source.submodels[0].submodelElements![0],
-                destinationParent: destination.submodels[0],
-                destinationElement: destination.submodels[0].submodelElements![0]
-            }];
+            const diffs: DifferenceItem[] = [
+                {
+                    type: 'changed',
+                    sourceParent: source.submodels[0],
+                    sourceElement: source.submodels[0].submodelElements![0],
+                    destinationParent: destination.submodels[0],
+                    destinationElement: destination.submodels[0].submodelElements![0],
+                },
+            ];
 
             await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
         });
@@ -145,10 +158,12 @@ describe('AasxServerV3', function () {
                 return new http.ClientRequest('http://localhost:1234');
             });
 
-            const diffs: DifferenceItem[] = [{
-                type: 'deleted',
-                destinationElement: destination.submodels[0]
-            }];
+            const diffs: DifferenceItem[] = [
+                {
+                    type: 'deleted',
+                    destinationElement: destination.submodels[0],
+                },
+            ];
 
             await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
         });
@@ -164,11 +179,13 @@ describe('AasxServerV3', function () {
                 return new http.ClientRequest('http://localhost:1234');
             });
 
-            const diffs: DifferenceItem[] = [{
-                type: 'deleted',
-                destinationParent: destination.submodels[0],
-                destinationElement: destination.submodels[0].submodelElements![0]
-            }];
+            const diffs: DifferenceItem[] = [
+                {
+                    type: 'deleted',
+                    destinationParent: destination.submodels[0],
+                    destinationElement: destination.submodels[0].submodelElements![0],
+                },
+            ];
 
             await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement deleted.']);
         });
@@ -178,7 +195,7 @@ describe('AasxServerV3', function () {
         it('invokes an operation synchronously', async function () {
             const result: OperationResult = {
                 executionState: 'Completed',
-                success: true
+                success: true,
             };
 
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
@@ -196,9 +213,9 @@ describe('AasxServerV3', function () {
                 modelType: 'Operation',
                 parent: {
                     type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }]
-                }
-            }
+                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                },
+            };
 
             await expect(server.invoke(env, operation)).resolves.toEqual(operation);
         });
@@ -218,18 +235,18 @@ describe('AasxServerV3', function () {
                 modelType: 'Operation',
                 parent: {
                     type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }]
-                }
-            }
+                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                },
+            };
 
             await expect(server.invoke(env, operation)).rejects.toThrowError();
         });
 
         it('throws an error if the operation fails', async function () {
             const result: OperationResult = {
-                messages: [{messageType: 'Error', text: 'Operation failed.'}],
+                messages: [{ messageType: 'Error', text: 'Operation failed.' }],
                 executionState: 'Failed',
-                success: false
+                success: false,
             };
 
             jest.spyOn(http, 'request').mockImplementation((options, callback) => {
@@ -247,9 +264,9 @@ describe('AasxServerV3', function () {
                 modelType: 'Operation',
                 parent: {
                     type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }]
-                }
-            }
+                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                },
+            };
 
             await expect(server.invoke(env, operation)).rejects.toThrowError();
         });

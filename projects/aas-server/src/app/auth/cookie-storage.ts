@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Cookie } from "common";
+import { Cookie } from 'common';
 
 export abstract class CookieStorage {
     /**
@@ -24,12 +24,12 @@ export abstract class CookieStorage {
     /**
      * @param id The user identification.
      */
-     public abstract getAllAsync(id: string): Promise<Cookie[]>;
+    public abstract getAllAsync(id: string): Promise<Cookie[]>;
 
     /**
      * @param id The user identification.
      * @param name The cookie name.
-     * @param data 
+     * @param data
      */
     public abstract setAsync(id: string, name: string, data: string): Promise<void>;
 

@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { LiveNode } from "common";
+import { LiveNode } from 'common';
 
 export interface SocketItem {
     node: LiveNode;
-    subscribe(item: any): void;
+    subscribe(item: unknown): void;
     unsubscribe(): void;
 }

@@ -21,7 +21,7 @@ import {
     AASPage,
     AASEndpoint,
     ApplicationError,
-    getChildren
+    getChildren,
 } from 'common';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -44,19 +44,22 @@ export class AASProvider {
     private readonly timeout: number;
     private readonly file: string | undefined;
     private wsServer!: WSServer;
-    private readonly tasks = new Map<number, {
-        id: string;
-        type: 'ScanEndpoint' | 'ScanContainer'
-    }>();
+    private readonly tasks = new Map<
+        number,
+        {
+            id: string;
+            type: 'ScanEndpoint' | 'ScanContainer';
+        }
+    >();
 
     private nextTaskId = 1;
 
-    constructor(
+    public constructor(
         @inject(Variable) variable: Variable,
         @inject('Logger') private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
-        @inject('AASIndex') private readonly index: AASIndex
+        @inject('AASIndex') private readonly index: AASIndex,
     ) {
         this.timeout = variable.TIMEOUT;
         this.parallel.on('message', this.parallelOnMessage);
@@ -132,7 +135,7 @@ export class AASProvider {
         id: string,
         smId: string,
         path: string,
-        options?: object
+        options?: object,
     ): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(name);
         const document = await this.index.get(name, id);
@@ -154,7 +157,7 @@ export class AASProvider {
                 const file = dataElement as aas.File;
                 stream = await pkg.openReadStreamAsync(document.content, file);
                 const extension = file.value ? extname(file.value).toLowerCase() : '';
-                const imageOptions = options as { width?: number, height?: number };
+                const imageOptions = options as { width?: number; height?: number };
                 if (file.contentType.startsWith('image/')) {
                     if (imageOptions?.width || imageOptions?.height) {
                         stream = await ImageProcessing.resizeAsync(stream, imageOptions.width, imageOptions.height);
@@ -240,7 +243,7 @@ export class AASProvider {
      * @param name The endpoint name.
      * @param id The AAS document ID.
      * @param content The new document content.
-     * @returns 
+     * @returns
      */
     public async updateDocumentAsync(name: string, id: string, content: aas.Environment): Promise<string[]> {
         const endpoint = await this.index.getEndpoint(name);
@@ -258,8 +261,7 @@ export class AASProvider {
             }
 
             return await pkg.commitDocumentAsync(document, content);
-        }
-        finally {
+        } finally {
             await resource.closeAsync();
         }
     }
@@ -293,7 +295,8 @@ export class AASProvider {
             throw new ApplicationError(
                 `An AAS container with the name "${name}" does not exist.`,
                 ERRORS.ContainerDoesNotExist,
-                name);
+                name,
+            );
         }
 
         const source = this.resourceFactory.create(endpoint);
@@ -332,7 +335,7 @@ export class AASProvider {
         for (const endpoint of await this.index.getEndpoints()) {
             if (endpoint.type === 'AasxDirectory') {
                 const documents = await factory.create(endpoint).scanAsync();
-                documents.forEach(async (document) => await this.index.add(document));
+                documents.forEach(async document => await this.index.add(document));
             }
         }
     }
@@ -352,15 +355,15 @@ export class AASProvider {
             await resource.openAsync();
             return await resource.invoke(document.content!, operation);
         } finally {
-            await resource.closeAsync()
+            await resource.closeAsync();
         }
     }
 
     /**
-     * 
+     *
      * @param endpoint The endpoint name.
-     * @param id The AAS identifier. 
-     * @returns 
+     * @param id The AAS identifier.
+     * @returns
      */
     public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocument[]> {
         const document = await this.index.get(endpoint, id);
@@ -413,12 +416,7 @@ export class AASProvider {
             if (task.type === 'ScanContainer') {
                 const endpoint = await this.index.getEndpoint(task.id);
                 if (endpoint) {
-                    setTimeout(
-                        this.startContainerScan,
-                        this.timeout,
-                        result.taskId,
-                        endpoint,
-                        result.statistic);
+                    setTimeout(this.startContainerScan, this.timeout, result.taskId, endpoint, result.statistic);
                 }
             }
         }
@@ -436,7 +434,7 @@ export class AASProvider {
             type: 'ScanContainerData',
             taskId,
             statistic,
-            container: { ...endpoint, documents }
+            container: { ...endpoint, documents },
         };
 
         this.tasks.set(taskId, { id: endpoint.name, type: 'ScanContainer' });
@@ -444,11 +442,10 @@ export class AASProvider {
     };
 
     private notify(data: AASServerMessage): void {
-        this.wsServer.notify('WorkspaceChanged',
-            {
-                type: 'AASServerMessage',
-                data: data
-            });
+        this.wsServer.notify('WorkspaceChanged', {
+            type: 'AASServerMessage',
+            data: data,
+        });
     }
 
     private parallelOnMessage = async (result: ScanResult) => {
@@ -489,7 +486,7 @@ export class AASProvider {
     private sendMessage(data: AASServerMessage) {
         this.wsServer.notify('WorkspaceChanged', {
             type: 'AASServerMessage',
-            data: data
+            data: data,
         });
     }
 
@@ -515,7 +512,8 @@ export class AASProvider {
         const content = await this.getDocumentContentAsync(parent);
         for (const reference of this.whereReferenceElement(content.submodels)) {
             const childId = reference.value.keys[0].value;
-            const child = await this.index.find(parent.endpoint, childId) ?? await this.index.find(undefined, childId);
+            const child =
+                (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
             if (child) {
                 const node: AASDocument = { ...child, parent: { ...parent }, content: null };
                 nodes.push(node);

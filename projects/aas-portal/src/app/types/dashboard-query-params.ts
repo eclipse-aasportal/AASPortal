@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 export interface DashboardQueryParams {
-    format: string,
+    format: string;
 }
 
 export interface DashboardQuery {

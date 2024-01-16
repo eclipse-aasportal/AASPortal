@@ -25,9 +25,13 @@ container.register('UserStorage', { useFactory: c => new UserStorageFactory(c).c
 container.register('winston.Logger', { useFactory: () => new LoggerFactory().create() });
 container.register('TemplateStorage', { useFactory: c => new TemplateStorageFactory(c).create() });
 
-container.afterResolution(AASProvider, (_, instance) => {
-    (instance as AASProvider).start(container.resolve(WSServer));
-}, { frequency: 'Once' });
+container.afterResolution(
+    AASProvider,
+    (_, instance) => {
+        (instance as AASProvider).start(container.resolve(WSServer));
+    },
+    { frequency: 'Once' },
+);
 
 container.resolve(WSServer).run();
 container.resolve(AASProvider);

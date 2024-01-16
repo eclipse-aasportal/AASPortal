@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { SubmodelViewDescriptor } from "../submodel-template/submodel-template";
+import { SubmodelViewDescriptor } from '../submodel-template/submodel-template';
 
 export interface ViewQueryParams {
-    format: string,
+    format: string;
 }
 
 export interface ViewQuery {

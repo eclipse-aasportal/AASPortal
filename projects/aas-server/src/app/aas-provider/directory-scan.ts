@@ -14,16 +14,16 @@ import { extname } from 'path';
 import { AASResourceScan } from './aas-resource-scan.js';
 
 export class DirectoryScan extends AASResourceScan {
-    constructor(
+    public constructor(
         private readonly logger: Logger,
-        private readonly source: AasxDirectory
+        private readonly source: AasxDirectory,
     ) {
         super();
     }
 
     public async scanAsync(): Promise<AASDocument[]> {
         try {
-            await this.source.openAsync()
+            await this.source.openAsync();
             const files = await this.source.getStorage().readDir('.');
             const documents: AASDocument[] = [];
 

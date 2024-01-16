@@ -15,8 +15,7 @@ import { Logger } from '../logging/logger.js';
 
 /* istanbul ignore next */
 export class CookieStorageFactory {
-    constructor(private readonly container: DependencyContainer) {
-    }
+    public constructor(private readonly container: DependencyContainer) {}
 
     public create(): CookieStorage {
         const url = this.container.resolve(Variable).USER_STORAGE;

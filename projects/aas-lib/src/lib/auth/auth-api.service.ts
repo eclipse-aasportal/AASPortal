@@ -16,9 +16,7 @@ import { encodeBase64Url } from '../convert';
     providedIn: 'root',
 })
 export class AuthApiService {
-    constructor(
-        private readonly http: HttpClient
-    ) { }
+    public constructor(private readonly http: HttpClient) {}
 
     public register(profile: UserProfile): Observable<AuthResult> {
         return this.http.post<AuthResult>('/api/v1/register', profile);
@@ -49,9 +47,7 @@ export class AuthApiService {
     }
 
     public setCookie(id: string, cookie: Cookie): Observable<void> {
-        return this.http.post<void>(
-            `/api/v1/users/${encodeBase64Url(id)}/cookies/${cookie.name}`,
-            cookie);
+        return this.http.post<void>(`/api/v1/users/${encodeBase64Url(id)}/cookies/${cookie.name}`, cookie);
     }
 
     public deleteCookie(id: string, name: string): Observable<void> {

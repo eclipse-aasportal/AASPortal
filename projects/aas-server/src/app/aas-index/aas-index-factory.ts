@@ -8,7 +8,7 @@
 
 import { DependencyContainer } from 'tsyringe';
 import path from 'path';
-import { JSONFile } from 'lowdb/node'
+import { JSONFile } from 'lowdb/node';
 import { Low } from 'lowdb';
 import { AASIndex } from './aas-index.js';
 import { LowDbIndex } from './lowdb/lowdb-index.js';
@@ -17,9 +17,7 @@ import { LowDbData } from './lowdb/lowdb-types.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
 
 export class AASIndexFactory {
-    constructor(
-        private readonly container: DependencyContainer
-    ) { }
+    public constructor(private readonly container: DependencyContainer) {}
 
     public create(): AASIndex {
         const variable = this.container.resolve(Variable);

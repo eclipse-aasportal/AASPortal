@@ -8,7 +8,21 @@
 
 import { inject, injectable } from 'tsyringe';
 import fs from 'fs';
-import { Body, Delete, Get, OperationId, Path, Post, Put, Queries, Route, Security, Tags, UploadedFile, UploadedFiles } from 'tsoa';
+import {
+    Body,
+    Delete,
+    Get,
+    OperationId,
+    Path,
+    Post,
+    Put,
+    Queries,
+    Route,
+    Security,
+    Tags,
+    UploadedFile,
+    UploadedFiles,
+} from 'tsoa';
 import { AASDocument, aas } from 'common';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
@@ -22,11 +36,11 @@ import { Variable } from '../variable.js';
 @Route('/api/v1/containers')
 @Tags('Containers')
 export class ContainersController extends AASController {
-    constructor(
+    public constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
         @inject(Variable) variable: Variable,
-        @inject(AASProvider) private readonly aasProvider: AASProvider
+        @inject(AASProvider) private readonly aasProvider: AASProvider,
     ) {
         super(logger, auth, variable);
     }
@@ -110,7 +124,10 @@ export class ContainersController extends AASController {
     @Get('{endpoint}/documents/{id}/content')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentContent')
-    public async getDocumentContent(@Path() endpoint: string, @Path() id: string): Promise<aas.Environment | undefined> {
+    public async getDocumentContent(
+        @Path() endpoint: string,
+        @Path() id: string,
+    ): Promise<aas.Environment | undefined> {
         try {
             this.logger.start('getDocumentContent');
             return await this.aasProvider.getContentAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
@@ -118,7 +135,7 @@ export class ContainersController extends AASController {
             this.logger.stop();
         }
     }
-    
+
     /**
      * @summary Gets the thumbnail of the specified AAS document.
      * @param endpoint The endpoint name (Base64Url encoded).
@@ -128,7 +145,10 @@ export class ContainersController extends AASController {
     @Get('{endpoint}/documents/{id}/thumbnail')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentThumbnail')
-    public async getDocumentThumbnail(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream | undefined> {
+    public async getDocumentThumbnail(
+        @Path() endpoint: string,
+        @Path() id: string,
+    ): Promise<NodeJS.ReadableStream | undefined> {
         try {
             this.logger.start('getDocumentThumbnail');
             return await this.aasProvider.getThumbnailAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
@@ -155,7 +175,7 @@ export class ContainersController extends AASController {
         @Path() id: string,
         @Path() smId: string,
         @Path() path: string,
-        @Queries() queryParams: { width?: number, height?: number },
+        @Queries() queryParams: { width?: number; height?: number },
     ): Promise<NodeJS.ReadableStream> {
         try {
             this.logger.start('getDataElementValue');
@@ -164,7 +184,8 @@ export class ContainersController extends AASController {
                 decodeBase64Url(id),
                 decodeBase64Url(smId),
                 path,
-                queryParams);
+                queryParams,
+            );
         } finally {
             this.logger.stop();
         }
@@ -183,7 +204,7 @@ export class ContainersController extends AASController {
     public async updateDocument(
         @Path() endpoint: string,
         @Path() id: string,
-    @UploadedFile() content: Express.Multer.File
+        @UploadedFile() content: Express.Multer.File,
     ): Promise<string[]> {
         try {
             this.logger.start('updateDocument');
@@ -208,7 +229,7 @@ export class ContainersController extends AASController {
     public async invokeOperation(
         @Path() endpoint: string,
         @Path() id: string,
-        @Body() operation: aas.Operation
+        @Body() operation: aas.Operation,
     ): Promise<aas.Operation> {
         try {
             this.logger.start('invokeOperation');
@@ -235,5 +256,4 @@ export class ContainersController extends AASController {
             this.logger.stop();
         }
     }
-
 }

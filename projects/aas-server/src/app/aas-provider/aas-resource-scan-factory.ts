@@ -23,16 +23,15 @@ import { FileStorage } from '../file-storage/file-storage.js';
 
 @singleton()
 export class AASResourceScanFactory {
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(FileStorageFactory) private readonly fileStorageFactory: FileStorageFactory
-    ) {
-    }
+        @inject(FileStorageFactory) private readonly fileStorageFactory: FileStorageFactory,
+    ) {}
 
     public create(endpoint: AASEndpoint): AASResourceScan {
         switch (new URL(endpoint.url).protocol) {
             case 'http:':
-            case 'https':
+            case 'https': {
                 const version = endpoint.version ?? '3.0';
                 let source: AasxServer;
                 if (version === '3.0') {
@@ -44,6 +43,7 @@ export class AASResourceScanFactory {
                 }
 
                 return new AASXServerScan(this.logger, source);
+            }
             case 'opc.tcp:':
                 return new OpcuaServerScan(this.logger, new OpcuaServer(this.logger, endpoint.url, endpoint.name));
             case 'file:':
@@ -53,7 +53,9 @@ export class AASResourceScanFactory {
                         this.logger,
                         endpoint.url,
                         endpoint.name,
-                        this.createLocalFileStorage(new URL(endpoint.url))));
+                        this.createLocalFileStorage(new URL(endpoint.url)),
+                    ),
+                );
             default:
                 throw new Error('Not implemented.');
         }

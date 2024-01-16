@@ -29,12 +29,12 @@ describe('MongoDBUserStorage', () => {
 
     beforeEach(() => {
         johnDoe = {
-            id: "john.doe@email.com",
-            name: "John Doe",
-            role: "editor",
-            password: "$2a$10$6qZT2ZM5jUVU/pLLQUjCvuXplG.GwPnoz48C1Eg/dKqjIrGE8jm0a",
+            id: 'john.doe@email.com',
+            name: 'John Doe',
+            role: 'editor',
+            password: '$2a$10$6qZT2ZM5jUVU/pLLQUjCvuXplG.GwPnoz48C1Eg/dKqjIrGE8jm0a',
             created: new Date(),
-            lastLoggedIn: new Date(0)
+            lastLoggedIn: new Date(0),
         };
     });
 
@@ -67,7 +67,7 @@ describe('MongoDBUserStorage', () => {
         const save = jest.fn<() => Promise<void>>();
         jest.spyOn(userStorage.UserDataModel, 'findOne').mockReturnValue(getPromisify(johnDoe, save));
         await userStorage.writeAsync('john.doe@email.com', { ...johnDoe });
-        expect(save).toHaveBeenCalled
+        expect(save).toHaveBeenCalled;
     });
 
     it('deletes john.doe@email.com', async () => {
@@ -78,19 +78,19 @@ describe('MongoDBUserStorage', () => {
     function getPromisify(user?: UserData, save?: () => Promise<void>): any {
         if (user) {
             return {
-                exec: () => new Promise<UserDataInstance | undefined>(resolve => resolve(getInstance(user, save)))
+                exec: () => new Promise<UserDataInstance | undefined>(resolve => resolve(getInstance(user, save))),
             } as Promisify;
         }
 
         return {
-            exec: () => new Promise<UserDataInstance | undefined>(resolve => resolve(undefined))
+            exec: () => new Promise<UserDataInstance | undefined>(resolve => resolve(undefined)),
         } as Promisify;
     }
 
     function getInstance(user: UserData, save?: () => Promise<void>): UserDataInstance {
         return {
             ...user,
-            save: save ?? (() => new Promise<void>(resolve => resolve()))
-        }
+            save: save ?? (() => new Promise<void>(resolve => resolve())),
+        };
     }
 });

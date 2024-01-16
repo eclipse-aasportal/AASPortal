@@ -6,23 +6,22 @@
  *
  *****************************************************************************/
 
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { NotifyService } from 'projects/aas-lib/src/public-api';
-import { Command } from "../types/command";
+import { Command } from '../types/command';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class CommandHandlerService {
     private commands: Array<Command> = [];
     private position = -1;
 
-    constructor(private notify: NotifyService) {
-    }
+    public constructor(private notify: NotifyService) {}
 
     public execute(command: Command): void {
         if (!command) {
-            throw new Error("Argument command is undefined.");
+            throw new Error('Argument command is undefined.');
         }
 
         try {
@@ -45,15 +44,14 @@ export class CommandHandlerService {
     }
 
     public get canRedo(): boolean {
-        return this.position + 1 < this.commands.length
+        return this.position + 1 < this.commands.length;
     }
 
     public undo(): void {
         try {
             this.commands[this.position].undo();
             --this.position;
-        }
-        catch (error) {
+        } catch (error) {
             this.notify.error(error);
         }
     }
@@ -62,8 +60,7 @@ export class CommandHandlerService {
         try {
             ++this.position;
             this.commands[this.position].redo();
-        }
-        catch (error) {
+        } catch (error) {
             this.notify.error(error);
         }
     }

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, Subscription, Observable, first } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Store } from '@ngrx/store';
@@ -43,21 +43,25 @@ import { DownloadService } from '../download.service';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import { SubmodelViewDescriptor, resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
+import {
+    SubmodelViewDescriptor,
+    resolveSemanticId,
+    supportedSubmodelTemplates,
+} from '../submodel-template/submodel-template';
 import * as AASTreeActions from './aas-tree.actions';
 import * as AASTreeSelectors from './aas-tree.selectors';
 import { AASTreeApiService } from './aas-tree-api.service';
 
 interface PropertyValue {
-    property: aas.Property,
-    value: BehaviorSubject<string | boolean>
+    property: aas.Property;
+    value: BehaviorSubject<string | boolean>;
 }
 
 @Component({
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    providers: [AASTreeSearch]
+    providers: [AASTreeSearch],
 })
 export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTreeFeatureState>;
@@ -70,7 +74,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
-    constructor(
+    public constructor(
         private readonly router: Router,
         store: Store,
         private readonly api: AASTreeApiService,
@@ -89,11 +93,15 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         this.someSelected = this.store.select(AASTreeSelectors.selectSomeSelected);
         this.everySelected = this.store.select(AASTreeSelectors.selectEverySelected);
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectSelectedElements).pipe()
-            .subscribe(elements => {
-                this._selected = elements;
-                this.selectedChange.emit(elements);
-            }));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectSelectedElements)
+                .pipe()
+                .subscribe(elements => {
+                    this._selected = elements;
+                    this.selectedChange.emit(elements);
+                }),
+        );
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -139,45 +147,66 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     public nodes: Observable<AASTreeRow[]>;
 
     public ngOnInit(): void {
-        this.subscription.add(this.store.select(AASTreeSelectors.selectError).pipe().subscribe(error => {
-            if (error) {
-                this.notify.error(error);
-            }
-        }));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectError)
+                .pipe()
+                .subscribe(error => {
+                    if (error) {
+                        this.notify.error(error);
+                    }
+                }),
+        );
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectMatchIndex).pipe().subscribe(index => {
-            if (index >= 0) {
-                this.store.dispatch(AASTreeActions.expandRow({ arg: index }));
-            }
-        }));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectMatchIndex)
+                .pipe()
+                .subscribe(index => {
+                    if (index >= 0) {
+                        this.store.dispatch(AASTreeActions.expandRow({ arg: index }));
+                    }
+                }),
+        );
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectMatchRow).pipe().subscribe(row => {
-            if (row) {
-                setTimeout(() => {
-                    const element = this.dom.getElementById(row.id);
-                    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                })
-            }
-        }));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectMatchRow)
+                .pipe()
+                .subscribe(row => {
+                    if (row) {
+                        setTimeout(() => {
+                            const element = this.dom.getElementById(row.id);
+                            element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        });
+                    }
+                }),
+        );
 
-        this.subscription.add(this.translate.onLangChange.subscribe(() => {
-            this.store.dispatch(AASTreeActions.updateRows({
-                document: this.document,
-                localeId: this.translate.currentLang
-            }));
-        }));
+        this.subscription.add(
+            this.translate.onLangChange.subscribe(() => {
+                this.store.dispatch(
+                    AASTreeActions.updateRows({
+                        document: this.document,
+                        localeId: this.translate.currentLang,
+                    }),
+                );
+            }),
+        );
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes['document']) {
-            this.store.dispatch(AASTreeActions.updateRows({
-                document: this.document,
-                localeId: this.translate.currentLang
-            }));
+            this.store.dispatch(
+                AASTreeActions.updateRows({
+                    document: this.document,
+                    localeId: this.translate.currentLang,
+                }),
+            );
         }
 
         if (changes['search'] && this.search) {
-            this.subscription.add(this.search.subscribe((value) => this.searching.start(value)));
+            this.subscription.add(this.search.subscribe(value => this.searching.start(value)));
         }
 
         const stateChange = changes['state'];
@@ -310,11 +339,13 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
             if (template && this.document) {
                 const descriptor: SubmodelViewDescriptor = {
                     template,
-                    submodels: [{
-                        id: this.document.id,
-                        endpoint: this.document.endpoint,
-                        idShort: submodel.idShort
-                    }]
+                    submodels: [
+                        {
+                            id: this.document.id,
+                            endpoint: this.document.endpoint,
+                            idShort: submodel.idShort,
+                        },
+                    ],
                 };
 
                 this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
@@ -363,7 +394,6 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                     } else if (blob.contentType.startsWith('video/')) {
                         await this.showVideoAsync(name, url);
                     } else if (blob.contentType.endsWith('/pdf')) {
-
                         this.window.open(url);
                     } else if (blob) {
                         await this.downloadFileAsync(name, url);
@@ -431,8 +461,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                 modalRef.componentInstance.operation = operation;
                 await modalRef.result;
             }
-        }
-        catch (error) {
+        } catch (error) {
             if (error) {
                 this.notify.error(error);
             }
@@ -449,17 +478,17 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     private goOnline(): void {
         try {
-            this.store.select(AASTreeSelectors.selectSelectedRows).pipe(first()).subscribe(
-                {
-                    next: (rows) => {
+            this.store
+                .select(AASTreeSelectors.selectSelectedRows)
+                .pipe(first())
+                .subscribe({
+                    next: rows => {
                         this.prepareOnline(rows);
                         this.play();
                     },
-                    error: () => this.stop()
-                }
-            )
-        }
-        catch (error) {
+                    error: () => this.stop(),
+                });
+        } catch (error) {
             this.stop();
         }
     }
@@ -471,12 +500,10 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private play(): void {
         if (this.document) {
             this.webSocketSubject = this.webSocketFactory.create();
-            this.webSocketSubject.subscribe(
-                {
-                    next: this.onMessage,
-                    error: this.onError
-                }
-            );
+            this.webSocketSubject.subscribe({
+                next: this.onMessage,
+                error: this.onError,
+            });
 
             this.webSocketSubject.next(this.createMessage(this.document));
         }
@@ -510,7 +537,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                     if (property.nodeId) {
                         this.liveNodes.push({
                             nodeId: property.nodeId,
-                            valueType: property.valueType ?? 'undefined'
+                            valueType: property.valueType ?? 'undefined',
                         });
 
                         const subject = new BehaviorSubject<string | boolean>(this.getPropertyValue(property));
@@ -524,7 +551,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private createMessage(document: AASDocument): WebSocketData {
         return {
             type: 'LiveRequest',
-            data: { endpoint: document.endpoint, id: document.id, nodes: this.liveNodes } as LiveRequest
+            data: { endpoint: document.endpoint, id: document.id, nodes: this.liveNodes } as LiveRequest,
         };
     }
 
@@ -536,15 +563,16 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                     item.value.next(
                         typeof node.value === 'boolean'
                             ? node.value
-                            : convertToString(node.value, this.translate.currentLang));
+                            : convertToString(node.value, this.translate.currentLang),
+                    );
                 }
             }
         }
-    }
+    };
 
     private onError = (error: unknown): void => {
         this.notify.log(LogType.Error, error);
-    }
+    };
 
     private keyup = () => {
         this.shiftKey = false;
@@ -556,8 +584,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         this.altKey = event.altKey;
     };
 
-    private resolveFile(file: aas.File): { url?: string, name?: string } {
-        const value: { url?: string, name?: string } = {};
+    private resolveFile(file: aas.File): { url?: string; name?: string } {
+        const value: { url?: string; name?: string } = {};
         if (this.document?.content && file.value) {
             const submodel = selectSubmodel(this.document.content, file);
             if (submodel) {

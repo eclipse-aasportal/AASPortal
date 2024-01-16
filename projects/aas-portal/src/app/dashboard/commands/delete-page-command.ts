@@ -6,16 +6,17 @@
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { DashboardPage } from "../dashboard.state";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
+import { Store } from '@ngrx/store';
+import { DashboardPage } from '../dashboard.state';
+import { DashboardService } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
 
 export class DeletePageCommand extends DashboardCommand {
-    constructor(
+    public constructor(
         store: Store,
         private dashboard: DashboardService,
-        private page: DashboardPage) {
+        private page: DashboardPage,
+    ) {
         super('Delete page', store);
     }
 

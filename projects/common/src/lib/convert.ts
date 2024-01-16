@@ -12,97 +12,95 @@ const dateTimeFormat: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric"
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
 };
 
 const invariantDecimalSeparator = '.';
 const invariantGroupSeparator = ',';
 
-const mimeTypes = new Map<string, string>(
-    [
-        ['audio/aac', '.aac'],
-        ['application/x-abiword', '.abw'],
-        ['application/x-freearc', '.arc'],
-        ['image/avif', '.avif'],
-        ['video/x-msvideo', '.avi'],
-        ['application/vnd.amazon.ebook', '.azw'],
-        ['application/octet-stream', '.bin'],
-        ['.bmp', 'image/bmp'],
-        ['application/x-bzip', '.bz'],
-        ['application/x-bzip2', '.bz2'],
-        ['application/x-cdf', '.cda'],
-        ['application/x-csh', '.csh'],
-        ['text/css', '.css'],
-        ['text/csv', '.csv'],
-        ['application/msword', '.doc'],
-        ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
-        ['application/vnd.ms-fontobject', '.eot'],
-        ['application/epub+zip', '.epub'],
-        ['application/gzip', '.gz'],
-        ['image/gif', '.gif'],
-        ['text/html', '.html'],
-        ['image/vnd.microsoft.icon', '.ico'],
-        ['text/calendar', '.ics'],
-        ['application/java-archive', '.jar'],
-        ['image/jpeg', '.jar'],
-        ['text/javascript', '.js'],
-        ['application/json', '.json'],
-        ['application/ld+json', '.jsonld'],
-        ['audio/midi', '.midi'],
-        ['audio/x-midi', '.midi'],
-        ['audio/mpeg', '.mp3'],
-        ['video/mp4', '.mp4'],
-        ['video/mpeg', '.mpeg'],
-        ['application/vnd.apple.installer+xml', '.mpkg'],
-        ['application/vnd.oasis.opendocument.presentation', '.odp'],
-        ['application/vnd.oasis.opendocument.spreadsheet', '.ods'],
-        ['application/vnd.oasis.opendocument.text', '.odt'],
-        ['audio/ogg', '.oga'],
-        ['video/ogg', '.ogv'],
-        ['application/ogg', '.ogx'],
-        ['audio/opus', '.opus'],
-        ['font/otf', '.otf'],
-        ['image/png', '.png'],
-        ['application/pdf', '.pdf'],
-        ['application/x-httpd-php', '.php'],
-        ['application/vnd.ms-powerpoint', '.ppt'],
-        ['application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx'],
-        ['application/vnd.rar', '.rar'],
-        ['application/rtf', '.rtf'],
-        ['application/x-sh', '.sh'],
-        ['image/svg+xml', '.svg'],
-        ['application/x-tar', '.tar'],
-        ['image/tiff', '.tiff'],
-        ['video/mp2t', '.ts'],
-        ['font/ttf', '.ttf'],
-        ['text/plain', '.txt'],
-        ['application/vnd.visio', '.vsd'],
-        ['audio/wav', '.wav'],
-        ['audio/webm', '.weba'],
-        ['video/webm', '.webp'],
-        ['font/woff', '.woff'],
-        ['font/woff2', '.woff2'],
-        ['application/xhtml+xml', '.xhtml'],
-        ['application/vnd.ms-excel', '.xls'],
-        ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
-        ['application/xml', '.xml'],
-        ['text/xml', '.xml'],
-        ['application/vnd.mozilla.xul+xml', '.xul'],
-        ['application/x-pem-file', '.pem'],
-        ['application/zip', '.zip'],
-        ['video/3gpp', '.3gp'],
-        ['audio/3gpp', '.3gp'],
-        ['video/3gpp2', '.3g2'],
-        ['audio/3gpp2', '.3g2'],
-        ['application/x-7z-compressed', '.7z']
-    ]
-);
+const mimeTypes = new Map<string, string>([
+    ['audio/aac', '.aac'],
+    ['application/x-abiword', '.abw'],
+    ['application/x-freearc', '.arc'],
+    ['image/avif', '.avif'],
+    ['video/x-msvideo', '.avi'],
+    ['application/vnd.amazon.ebook', '.azw'],
+    ['application/octet-stream', '.bin'],
+    ['.bmp', 'image/bmp'],
+    ['application/x-bzip', '.bz'],
+    ['application/x-bzip2', '.bz2'],
+    ['application/x-cdf', '.cda'],
+    ['application/x-csh', '.csh'],
+    ['text/css', '.css'],
+    ['text/csv', '.csv'],
+    ['application/msword', '.doc'],
+    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
+    ['application/vnd.ms-fontobject', '.eot'],
+    ['application/epub+zip', '.epub'],
+    ['application/gzip', '.gz'],
+    ['image/gif', '.gif'],
+    ['text/html', '.html'],
+    ['image/vnd.microsoft.icon', '.ico'],
+    ['text/calendar', '.ics'],
+    ['application/java-archive', '.jar'],
+    ['image/jpeg', '.jar'],
+    ['text/javascript', '.js'],
+    ['application/json', '.json'],
+    ['application/ld+json', '.jsonld'],
+    ['audio/midi', '.midi'],
+    ['audio/x-midi', '.midi'],
+    ['audio/mpeg', '.mp3'],
+    ['video/mp4', '.mp4'],
+    ['video/mpeg', '.mpeg'],
+    ['application/vnd.apple.installer+xml', '.mpkg'],
+    ['application/vnd.oasis.opendocument.presentation', '.odp'],
+    ['application/vnd.oasis.opendocument.spreadsheet', '.ods'],
+    ['application/vnd.oasis.opendocument.text', '.odt'],
+    ['audio/ogg', '.oga'],
+    ['video/ogg', '.ogv'],
+    ['application/ogg', '.ogx'],
+    ['audio/opus', '.opus'],
+    ['font/otf', '.otf'],
+    ['image/png', '.png'],
+    ['application/pdf', '.pdf'],
+    ['application/x-httpd-php', '.php'],
+    ['application/vnd.ms-powerpoint', '.ppt'],
+    ['application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx'],
+    ['application/vnd.rar', '.rar'],
+    ['application/rtf', '.rtf'],
+    ['application/x-sh', '.sh'],
+    ['image/svg+xml', '.svg'],
+    ['application/x-tar', '.tar'],
+    ['image/tiff', '.tiff'],
+    ['video/mp2t', '.ts'],
+    ['font/ttf', '.ttf'],
+    ['text/plain', '.txt'],
+    ['application/vnd.visio', '.vsd'],
+    ['audio/wav', '.wav'],
+    ['audio/webm', '.weba'],
+    ['video/webm', '.webp'],
+    ['font/woff', '.woff'],
+    ['font/woff2', '.woff2'],
+    ['application/xhtml+xml', '.xhtml'],
+    ['application/vnd.ms-excel', '.xls'],
+    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
+    ['application/xml', '.xml'],
+    ['text/xml', '.xml'],
+    ['application/vnd.mozilla.xul+xml', '.xul'],
+    ['application/x-pem-file', '.pem'],
+    ['application/zip', '.zip'],
+    ['video/3gpp', '.3gp'],
+    ['audio/3gpp', '.3gp'],
+    ['video/3gpp2', '.3g2'],
+    ['audio/3gpp2', '.3g2'],
+    ['application/x-7z-compressed', '.7z'],
+]);
 
 export type DefaultType = string | number | boolean | bigint;
 
-export type StandardType = string | number | boolean | object
+export type StandardType = string | number | boolean | object;
 
 /**
  * Assigns a XSD data type to a corresponding JS data type.
@@ -116,7 +114,7 @@ export function baseType(type: DataTypeDefXsd): 'string' | 'number' | 'boolean' 
         case 'xs:base64Binary':
             return 'string';
         case 'xs:boolean':
-            return 'boolean'
+            return 'boolean';
         case 'xs:byte':
             return 'number';
         case 'xs:date':
@@ -162,7 +160,7 @@ export function baseType(type: DataTypeDefXsd): 'string' | 'number' | 'boolean' 
         case 'xs:string':
             return 'string';
         case 'xs:time':
-            return 'Date'
+            return 'Date';
         case 'xs:unsignedByte':
             return 'number';
         case 'xs:unsignedInt':
@@ -248,7 +246,7 @@ export function convertToString(value: unknown, localeId?: string): string {
     function getProperties(obj: object): string[] {
         const items: string[] = [];
         for (const property in obj) {
-            items.push(`${property}: ${convertToString((<any>obj)[property], localeId)}`)
+            items.push(`${property}: ${convertToString((obj as { [key: string]: unknown })[property], localeId)}`);
         }
 
         return items;
@@ -269,7 +267,8 @@ export function convertToString(value: unknown, localeId?: string): string {
 export function convertFromString(
     s: string | null | undefined,
     valueType: DataTypeDefXsd,
-    localeId?: string): DefaultType | undefined {
+    localeId?: string,
+): DefaultType | undefined {
     if (!s) {
         return undefined;
     }
@@ -331,7 +330,10 @@ export function parseNumber(s: string, localeId?: string): number {
     }
 
     const groups = items[0].split(groupSeparator);
-    if (groups.length > 1 && groups.some((group, i) => i === 0 && group.length > 3 || i > 0 && group.length !== 3)) {
+    if (
+        groups.length > 1 &&
+        groups.some((group, i) => (i === 0 && group.length > 3) || (i > 0 && group.length !== 3))
+    ) {
         return NaN;
     }
 
@@ -359,7 +361,7 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
         s = s.trim();
         if (localeId) {
             let dateItems: string[] | undefined;
-            let timeTuple: { items: string[], timePeriod?: string } | undefined;
+            let timeTuple: { items: string[]; timePeriod?: string } | undefined;
             const dateTime = splitDateTime(s);
             if (dateTime.length === 1) {
                 if (s.indexOf(tuple.dateDelimiter) >= 0) {
@@ -376,7 +378,8 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
                         now.getDate(),
                         getHours(timeTuple?.items, timeTuple?.timePeriod),
                         getMinutes(timeTuple?.items),
-                        getSeconds(timeTuple?.items));
+                        getSeconds(timeTuple?.items),
+                    );
                 }
             } else if (dateTime.length === 2) {
                 dateItems = dateTime[0].split(tuple.dateDelimiter);
@@ -387,7 +390,8 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
                     getDay(dateItems),
                     getHours(timeTuple?.items, timeTuple?.timePeriod),
                     getMinutes(timeTuple?.items),
-                    getSeconds(timeTuple?.items));
+                    getSeconds(timeTuple?.items),
+                );
             } else {
                 date = new Date(NaN);
             }
@@ -415,15 +419,16 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
     }
 
     function getFormatInfo(parts: Intl.DateTimeFormatPart[]): {
-        dateDelimiter: string,
-        timeDelimiter: string,
-        indexOfYear: number,
-        indexOfMonth: number,
-        indexOfDay: number,
-        hours24: boolean
+        dateDelimiter: string;
+        timeDelimiter: string;
+        indexOfYear: number;
+        indexOfMonth: number;
+        indexOfDay: number;
+        hours24: boolean;
     } {
-        const items = ['year', 'month', 'day']
-            .sort((a, b) => parts.findIndex(item => item.type === a) - parts.findIndex(item => item.type === b));
+        const items = ['year', 'month', 'day'].sort(
+            (a, b) => parts.findIndex(item => item.type === a) - parts.findIndex(item => item.type === b),
+        );
 
         return {
             dateDelimiter: parts[3].value,
@@ -431,11 +436,11 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
             indexOfDay: items.indexOf('day'),
             indexOfMonth: items.indexOf('month'),
             indexOfYear: items.indexOf('year'),
-            hours24: parts.findIndex(part => part.type === 'dayPeriod') < 0
+            hours24: parts.findIndex(part => part.type === 'dayPeriod') < 0,
         };
     }
 
-    function splitTime(exp: string): { items: string[], timePeriod?: string } {
+    function splitTime(exp: string): { items: string[]; timePeriod?: string } {
         if (exp.toLowerCase().endsWith('am')) {
             return { items: exp.substring(0, exp.length - 2).split(tuple.timeDelimiter), timePeriod: 'am' };
         }
@@ -591,8 +596,7 @@ export function getLocaleValue(value?: LangString[], localeId?: string): string 
                 if (lcid === localeId || lcid === language) {
                     localeValue = item.text;
                     break;
-                }
-                else if (!localeValue && getLanguage(item.language) === language) {
+                } else if (!localeValue && getLanguage(item.language) === language) {
                     localeValue = item.text;
                 }
             }
@@ -607,11 +611,6 @@ export function getLocaleValue(value?: LangString[], localeId?: string): string 
 
     function getLanguage(value: string): string {
         return value.split('-')[0].toLowerCase();
-    }
-
-    function getRegion(value: string): string | null {
-        const items = value.split('-');
-        return items.length > 1 ? items[1].toLowerCase() : null;
     }
 }
 
@@ -636,15 +635,17 @@ export function toLocale(value: string | undefined, valueType: DataTypeDefXsd, l
 
     switch (valueType) {
         case 'xs:float':
-        case 'xs:double':
+        case 'xs:double': {
             const d = parseNumber(value);
             return Number.isNaN(d) ? undefined : d.toLocaleString(localeId);
+        }
         case 'xs:integer':
         case 'xs:int':
         case 'xs:unsignedInt':
-        case 'xs:unsignedShort':
+        case 'xs:unsignedShort': {
             const i = parseNumber(value);
             return Number.isNaN(i) ? undefined : i.toLocaleString(localeId);
+        }
         case 'xs:date':
         case 'xs:dateTime':
             return parseDate(value)?.toLocaleString(localeId, dateTimeFormat);
@@ -661,22 +662,28 @@ export function toLocale(value: string | undefined, valueType: DataTypeDefXsd, l
  * @param valueType The value type.
  * @param localeId The source language.
  */
-export function toInvariant(value: string | undefined, valueType: DataTypeDefXsd, localeId: string): string | undefined {
+export function toInvariant(
+    value: string | undefined,
+    valueType: DataTypeDefXsd,
+    localeId: string,
+): string | undefined {
     if (!value) {
         return value;
     }
 
     switch (valueType) {
         case 'xs:float':
-        case 'xs:double':
+        case 'xs:double': {
             const d = parseNumber(value, localeId);
             return Number.isNaN(d) ? undefined : d.toString();
+        }
         case 'xs:integer':
         case 'xs:int':
         case 'xs:unsignedInt':
-        case 'xs:unsignedShort':
+        case 'xs:unsignedShort': {
             const i = parseNumber(value, localeId);
             return Number.isNaN(i) ? undefined : i.toString();
+        }
         case 'xs:date':
         case 'xs:dateTime':
         case 'xs:time':
@@ -729,7 +736,7 @@ export function toBoolean(value: unknown): boolean {
             return true;
         }
 
-        return Number(value) !== 0 ? true : false
+        return Number(value) !== 0 ? true : false;
     }
 
     if (typeof value === 'number') {
@@ -762,7 +769,7 @@ function stringToBoolean(value: string): boolean {
 function stringToSByte(value: string): number | undefined {
     const b = Number(value);
     if (Number.isNaN(b) || b < -256) {
-        return undefined
+        return undefined;
     }
 
     return b < 128 ? b : b - 256;
@@ -784,7 +791,9 @@ function toDouble(value: unknown, localeId?: string): number | undefined {
 
     if (typeof value === 'string') {
         if (localeId) {
-            const decimalPart = Intl.NumberFormat(localeId).formatToParts(1.23).find(part => part.type === 'decimal');
+            const decimalPart = Intl.NumberFormat(localeId)
+                .formatToParts(1.23)
+                .find(part => part.type === 'decimal');
             if (decimalPart) {
                 value = value.replace(decimalPart.value, '.');
             }

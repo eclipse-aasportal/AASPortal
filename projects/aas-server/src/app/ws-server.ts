@@ -26,10 +26,10 @@ export class WSServer extends EventEmitter {
     private readonly clients: Set<SocketClient> = new Set<SocketClient>();
     private readonly server: http.Server | https.Server;
 
-    constructor(
+    public constructor(
         @inject(App) app: App,
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger
+        @inject('Logger') private readonly logger: Logger,
     ) {
         super();
 
@@ -67,7 +67,7 @@ export class WSServer extends EventEmitter {
     public close(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.clients.forEach(client => client.close());
-            this.wss.close((error) => {
+            this.wss.close(error => {
                 if (error) {
                     reject(error);
                 } else {
@@ -83,18 +83,18 @@ export class WSServer extends EventEmitter {
         client.on('close', this.onClientClose);
         client.on('error', this.onClientError);
         this.clients.add(client);
-    }
+    };
 
     private onClose = (): void => {
         this.wss.clients.forEach(ws => ws.close());
         this.wss.off('connection', this.onConnection);
         this.wss.off('close', this.onClose);
         this.wss.off('error', this.onError);
-    }
+    };
 
     private onError = (error: Error): void => {
         this.logger.error(`WebSocket server error: ${error?.message}`);
-    }
+    };
 
     private onClientClose = (code: number, reason: string, client: SocketClient): void => {
         this.emit('close', client);
@@ -106,13 +106,13 @@ export class WSServer extends EventEmitter {
         if (!this.clients.delete(client)) {
             this.logger.error(`Unknown WebSocket client detected.`);
         }
-    }
+    };
 
     private onClientMessage = (data: WebSocketData, client: SocketClient): void => {
         this.emit('message', data, client);
-    }
+    };
 
     private onClientError = (error: Error, client: SocketClient): void => {
         this.emit('error', error, client);
-    }
+    };
 }

@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "aaslist",
+        "aasv",
         "aasv3",
         "angewandten",
         "autohide",
@@ -22,6 +23,7 @@
         "nicht",
         "NMTOKEN",
         "NMTOKENS",
+        "opnxml",
         "owncloud",
         "preprocessors",
         "Qualifiable",
@@ -34,5 +36,6 @@
         "uuid",
         "xmldoc",
         "ZVEI"
-    ]
+    ],
+    "files.eol": "\n",
 }

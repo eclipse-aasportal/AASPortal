@@ -20,14 +20,10 @@ export class UpdateElementCommand extends Command {
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    constructor(
-        store: Store<State>,
-        document: AASDocument,
-        origin: aas.SubmodelElement,
-        element: aas.SubmodelElement) {
+    public constructor(store: Store, document: AASDocument, origin: aas.SubmodelElement, element: aas.SubmodelElement) {
         super('SetValue');
 
-        this.store = store;
+        this.store = store as Store<State>;
         this.document = this.memento = document;
         this.origin = origin;
         this.element = element;

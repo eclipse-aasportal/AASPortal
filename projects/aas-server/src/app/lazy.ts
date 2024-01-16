@@ -16,10 +16,10 @@ export class Lazy<T> {
     private _value?: T;
 
     /**
-     * 
-     * @param initialize The 
+     *
+     * @param initialize The
      */
-    constructor(initialize: () => Promise<T>) {
+    public constructor(initialize: () => Promise<T>) {
         this.initialize = initialize;
     }
 

@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { describe, afterEach, beforeEach, it, expect, jest } from '@jest/globals';
 import fs from 'fs';
+import os from 'os';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { LocaleUserStorage } from '../../app/auth/locale-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 describe('LocaleUserStorage', function () {
     let userStorage: UserStorage;
@@ -19,16 +20,19 @@ describe('LocaleUserStorage', function () {
 
     beforeEach(function () {
         johnDoe = {
-            id: "john.doe@email.com",
-            name: "John Doe",
-            role: "editor",
-            password: "$2a$10$6qZT2ZM5jUVU/pLLQUjCvuXplG.GwPnoz48C1Eg/dKqjIrGE8jm0a",
+            id: 'john.doe@email.com',
+            name: 'John Doe',
+            role: 'editor',
+            password: '$2a$10$6qZT2ZM5jUVU/pLLQUjCvuXplG.GwPnoz48C1Eg/dKqjIrGE8jm0a',
             created: new Date(),
-            lastLoggedIn: new Date(0)
+            lastLoggedIn: new Date(0),
         };
 
-        jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
-        userStorage = new LocaleUserStorage('/users');
+        userStorage = new LocaleUserStorage(os.tmpdir());
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     describe('existsSync', function () {
@@ -45,18 +49,16 @@ describe('LocaleUserStorage', function () {
 
     describe('writeAsync', function () {
         it('writes a new user', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
-            jest.spyOn(fs.promises, 'mkdir').mockImplementation(
-                () => new Promise<string | undefined>(resolve => resolve(undefined)));
-
-            jest.spyOn(fs.promises, 'writeFile').mockImplementation(() => new Promise<void>(resolve => resolve()));
+            jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+            jest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
+            jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
             await userStorage.writeAsync('jane.doe@email.com', {
                 id: 'jane.doe@email.com',
                 name: 'Jane Doe',
                 password: '12345678',
                 role: 'editor',
                 created: new Date(),
-                lastLoggedIn: new Date()
+                lastLoggedIn: new Date(),
             });
 
             expect(fs.promises.mkdir).toHaveBeenCalled();
@@ -66,29 +68,27 @@ describe('LocaleUserStorage', function () {
 
     describe('readAsync', function () {
         it('reads the data of john.doe@email.com', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
-            jest.spyOn(fs.promises, 'readFile').mockImplementation(() => new Promise<Buffer>(
-                resolve => resolve(Buffer.from(JSON.stringify(johnDoe)))));
-
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(JSON.stringify(johnDoe)));
             await expect(userStorage.readAsync('john.doe@email.com')).resolves.toEqual(johnDoe);
         });
 
         it('reads "undefined" for an unknown user', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
+            jest.spyOn(fs, 'existsSync').mockReturnValue(false);
             await expect(userStorage.readAsync('unknown@email.com')).resolves.toBeUndefined();
         });
     });
 
     describe('deleteAsync', function () {
         it('john.doe@email.com', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
             jest.spyOn(fs.promises, 'rm').mockImplementation(() => new Promise<void>(resolve => resolve()));
             await expect(userStorage.deleteAsync('john.doe@email.com')).resolves.toBe(true);
             expect(fs.promises.rm).toHaveBeenCalled();
         });
 
         it('indicates that an unknown user was not deleted', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
+            jest.spyOn(fs, 'existsSync').mockReturnValue(false);
             await expect(userStorage.deleteAsync('unknown@email.com')).resolves.toBe(false);
         });
     });

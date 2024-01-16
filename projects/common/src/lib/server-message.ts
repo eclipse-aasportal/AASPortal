@@ -10,15 +10,15 @@ import { AASContainer, AASDocument, AASEndpoint } from './types.js';
 
 /** Defines the message types. */
 export type AASServerMessageType =
-    'Added' |
-    'Removed' |
-    'Changed' |
-    'Offline' |
-    'ContainerAdded' |
-    'ContainerRemoved' |
-    'EndpointAdded' |
-    'EndpointRemoved' |
-    'Reset';
+    | 'Added'
+    | 'Removed'
+    | 'Changed'
+    | 'Offline'
+    | 'ContainerAdded'
+    | 'ContainerRemoved'
+    | 'EndpointAdded'
+    | 'EndpointRemoved'
+    | 'Reset';
 
 /** Server message. */
 export interface AASServerMessage {
@@ -26,7 +26,7 @@ export interface AASServerMessage {
     type: AASServerMessageType;
     /** The container if type `ContainerAdded` and `ContainerRemoved`. */
     container?: AASContainer;
-     /** The endpoint if type `ContainerAdded`, `ContainerRemoved`, `EndpointAdded`, `EndpointRemoved`. */
+    /** The endpoint if type `ContainerAdded`, `ContainerRemoved`, `EndpointAdded`, `EndpointRemoved`. */
     endpoint?: AASEndpoint;
     /** The document if type `Added`, `Removed` or `Changed` */
     document?: AASDocument;

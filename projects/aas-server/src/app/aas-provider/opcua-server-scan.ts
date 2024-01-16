@@ -18,7 +18,7 @@ export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;
     private readonly server: OpcuaServer;
 
-    constructor(logger: Logger, server: OpcuaServer) {
+    public constructor(logger: Logger, server: OpcuaServer) {
         super();
 
         this.logger = logger;
@@ -49,7 +49,10 @@ export class OpcuaServerScan extends AASResourceScan {
         }
     }
 
-    private async browseAsync(nodeToBrowse: BrowseDescriptionLike, descriptions: ReferenceDescription[] = []): Promise<ReferenceDescription[]> {
+    private async browseAsync(
+        nodeToBrowse: BrowseDescriptionLike,
+        descriptions: ReferenceDescription[] = [],
+    ): Promise<ReferenceDescription[]> {
         const session = this.server.getSession();
         const result = await session.browse(nodeToBrowse);
         if (result.references) {
@@ -67,7 +70,7 @@ export class OpcuaServerScan extends AASResourceScan {
 
     private async isFolderAsync(obj: ReferenceDescription): Promise<boolean> {
         const type = (await this.readQualifiedName(obj)).name;
-        return type === 'FolderType' || type === 'AASEnvironmentType'
+        return type === 'FolderType' || type === 'AASEnvironmentType';
     }
 
     private async isAASTypeAsync(obj: ReferenceDescription): Promise<boolean> {
@@ -75,11 +78,10 @@ export class OpcuaServerScan extends AASResourceScan {
     }
 
     private async readQualifiedName(obj: ReferenceDescription): Promise<QualifiedName> {
-        const node = await (this.server.getSession()).read(
-            {
-                nodeId: obj.typeDefinition,
-                attributeId: AttributeIds.BrowseName
-            });
+        const node = await this.server.getSession().read({
+            nodeId: obj.typeDefinition,
+            attributeId: AttributeIds.BrowseName,
+        });
 
         return node.value.value as QualifiedName;
     }

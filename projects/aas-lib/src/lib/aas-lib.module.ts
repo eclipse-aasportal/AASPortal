@@ -60,7 +60,7 @@ import { AASTableEffects } from './aas-table/aas-table.effects';
         ScoreComponent,
         DigitalNameplateComponent,
         MessageTableComponent,
-        SecuredImageComponent
+        SecuredImageComponent,
     ],
     imports: [
         CommonModule,
@@ -72,7 +72,7 @@ import { AASTableEffects } from './aas-table/aas-table.effects';
         StoreModule.forFeature('aasTable', aasTableReducer),
         StoreModule.forFeature('tree', aasTreeReducer),
         EffectsModule.forFeature(AASTableEffects),
-        HttpClientModule
+        HttpClientModule,
     ],
     exports: [
         NotifyComponent,
@@ -90,8 +90,8 @@ import { AASTableEffects } from './aas-table/aas-table.effects';
         ScoreComponent,
         DigitalNameplateComponent,
         MessageTableComponent,
-        SecuredImageComponent
+        SecuredImageComponent,
     ],
-    providers: []
+    providers: [],
 })
-export class AASLibModule { }
+export class AASLibModule {}

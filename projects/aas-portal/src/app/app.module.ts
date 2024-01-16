@@ -10,7 +10,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { AASLibModule } from 'projects/aas-lib/src/public-api';
@@ -55,7 +55,7 @@ import { FavoritesFormComponent } from './start/favorites-form/favorites-form.co
         EditElementFormComponent,
         UploadFormComponent,
         ViewComponent,
-        FavoritesFormComponent
+        FavoritesFormComponent,
     ],
     imports: [
         BrowserModule,
@@ -64,27 +64,24 @@ import { FavoritesFormComponent } from './start/favorites-form/favorites-form.co
         HttpClientModule,
         FormsModule,
         NgbModule,
-        StoreModule.forRoot(
-            {
-                start: startReducer,
-                aas: aasReducer,
-                view: viewReducer,
-                dashboard: dashboardReducer,
-            }),
+        StoreModule.forRoot({
+            start: startReducer,
+            aas: aasReducer,
+            view: viewReducer,
+            dashboard: dashboardReducer,
+        }),
         EffectsModule.forRoot([StartEffects, AASEffects, ViewEffects]),
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {
                 provide: TranslateLoader,
                 useFactory: HttpLoaderFactory,
-                deps: [HttpClient]
-            }
+                deps: [HttpClient],
+            },
         }),
         AASLibModule,
     ],
-    providers: [
-        httpInterceptorProviders
-    ],
-    bootstrap: [AppComponent]
+    providers: [httpInterceptorProviders],
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

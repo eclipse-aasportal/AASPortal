@@ -27,33 +27,21 @@ export interface UpdateViewAction extends TypedAction<AASTableActionType.UPDATE_
     documents: AASDocument[];
 }
 
-export const setViewMode = createAction(
-    AASTableActionType.SET_VIEW_MODE,
-    props<{ viewMode: ViewMode }>());
+export const setViewMode = createAction(AASTableActionType.SET_VIEW_MODE, props<{ viewMode: ViewMode }>());
 
-export const updateView = createAction(
-    AASTableActionType.UPDATE_VIEW,
-    props<{ documents: AASDocument[] }>());
+export const updateView = createAction(AASTableActionType.UPDATE_VIEW, props<{ documents: AASDocument[] }>());
 
-export const setRows = createAction(
-    AASTableActionType.SET_PAGE,
-    props<{ rows: AASTableRow[] }>());
+export const setRows = createAction(AASTableActionType.SET_PAGE, props<{ rows: AASTableRow[] }>());
 
 export const toggleSelected = createAction(
     AASTableActionType.TOGGLE_SELECTED,
-    props<{ row: AASTableRow, altKey: boolean, shiftKey: boolean }>());
+    props<{ row: AASTableRow; altKey: boolean; shiftKey: boolean }>(),
+);
 
-export const toggleSelections = createAction(
-    AASTableActionType.TOGGLE_SELECTIONS);
+export const toggleSelections = createAction(AASTableActionType.TOGGLE_SELECTIONS);
 
-export const setSelections = createAction(
-    AASTableActionType.SET_SELECTIONS,
-    props<{ documents: AASDocument[] }>());
+export const setSelections = createAction(AASTableActionType.SET_SELECTIONS, props<{ documents: AASDocument[] }>());
 
-export const expandRow = createAction(
-    AASTableActionType.EXPAND,
-    props<{ row: AASTableRow }>());
+export const expandRow = createAction(AASTableActionType.EXPAND, props<{ row: AASTableRow }>());
 
-export const collapseRow = createAction(
-    AASTableActionType.COLLAPSE,
-    props<{ row: AASTableRow }>());
+export const collapseRow = createAction(AASTableActionType.COLLAPSE, props<{ row: AASTableRow }>());

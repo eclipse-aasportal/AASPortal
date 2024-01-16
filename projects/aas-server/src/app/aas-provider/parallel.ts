@@ -22,7 +22,7 @@ import { Variable } from '../variable.js';
 class WorkerTask extends EventEmitter {
     private _worker?: Worker;
 
-    constructor(data: WorkerData) {
+    public constructor(data: WorkerData) {
         super();
 
         this.data = data;
@@ -59,15 +59,15 @@ class WorkerTask extends EventEmitter {
         } else {
             this.emit('message', result);
         }
-    }
+    };
 
     private workerOnError = (error: Error) => {
         this.emit('error', error, this);
-    }
+    };
 
     private workerOnExit = (code: number) => {
         this.emit('exit', code, this);
-    }
+    };
 }
 
 /** Provides a pool of worker threads. */
@@ -77,9 +77,9 @@ export class Parallel extends EventEmitter {
     private readonly waiting = new Array<WorkerTask>();
     private readonly pool = new Map<Worker, boolean>();
 
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         super();
         this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan-worker.js');
@@ -151,7 +151,7 @@ export class Parallel extends EventEmitter {
             if (task) {
                 task.destroy();
                 if (task.worker) {
-                    this.pool.delete(task.worker)
+                    this.pool.delete(task.worker);
                 }
 
                 const index = this.waiting.indexOf(task);
@@ -163,8 +163,7 @@ export class Parallel extends EventEmitter {
                     this.pool.set(new Worker(this.script, { env: SHARE_ENV }), true);
                 }
             }
-        }
-        catch (error) {
+        } catch (error) {
             noop();
         }
     }

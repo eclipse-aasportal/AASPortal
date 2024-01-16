@@ -15,8 +15,7 @@ import { Logger } from '../logging/logger.js';
 
 /* istanbul ignore next */
 export class UserStorageFactory {
-    constructor(private readonly container: DependencyContainer) {
-    }
+    public constructor(private readonly container: DependencyContainer) {}
 
     public create(): UserStorage {
         const url = this.container.resolve(Variable).USER_STORAGE;

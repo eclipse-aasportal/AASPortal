@@ -20,27 +20,28 @@ export interface EndpointItem {
 @Component({
     selector: 'fhg-add-endpoint',
     templateUrl: './add-endpoint-form.component.html',
-    styleUrls: ['./add-endpoint-form.component.scss']
+    styleUrls: ['./add-endpoint-form.component.scss'],
 })
 export class AddEndpointFormComponent {
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
-        private translate: TranslateService) {
+        private translate: TranslateService,
+    ) {
         this.items = [
             {
                 name: this.translate.instant('AASEndpointType.AasxServer'),
                 type: 'AasxServer',
-                value: 'http://'
+                value: 'http://',
             },
             {
                 name: this.translate.instant('AASEndpointType.OpcuaServer'),
                 type: 'OpcuaServer',
-                value: 'opc.tcp://'
+                value: 'opc.tcp://',
             },
             {
                 name: this.translate.instant('AASEndpointType.AasxDirectory'),
                 type: 'AasxDirectory',
-                value: 'file:///'
+                value: 'file:///',
             },
         ];
 
@@ -94,7 +95,6 @@ export class AddEndpointFormComponent {
             this.messages.push(this.createMessage('ERROR_EMPTY_ENDPOINT_NAME'));
             name = undefined;
         } else {
-
             for (const workspace of this.endpoints) {
                 if (workspace.toLocaleLowerCase() === name.toLocaleLowerCase()) {
                     this.messages.push(this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name));

@@ -28,46 +28,21 @@ export const initialState: DashboardState = {
     pages: [],
     editMode: false,
     selectionMode: SelectionMode.Single,
-    rows: []
+    rows: [],
 };
 
-export const dashboardReducer = createReducer(initialState,
-    on(
-        DashboardActions.addNewPage,
-        (state, { name }) => addNewPage(state, name)
-    ),
-    on(
-        DashboardActions.deletePage,
-        (state, { page }) => deletePage(state, page)
-    ),
-    on(
-        DashboardActions.renamePage,
-        (state, { page, name }) => renamePage(state, page, name)
-    ),
-    on(
-        DashboardActions.setPageName,
-        (state, { name }) => setPageName(state, name)
-    ),
-    on(
-        DashboardActions.setPages,
-        (state, { pages }) => setPages(state, pages)
-    ),
-    on(
-        DashboardActions.setState,
-        (_, { state }) => setState(state)
-    ),
-    on(
-        DashboardActions.setEditMode,
-        (state, { editMode }) => setEditMode(state, editMode)
-    ),
-    on(
-        DashboardActions.updatePage,
-        (state, { page, rows }) => updatePage(state, page, rows)
-    ),
-    on(
-        DashboardActions.updateRows,
-        (state, { rows }) => updateRows(state, rows)
-    ));
+export const dashboardReducer = createReducer(
+    initialState,
+    on(DashboardActions.addNewPage, (state, { name }) => addNewPage(state, name)),
+    on(DashboardActions.deletePage, (state, { page }) => deletePage(state, page)),
+    on(DashboardActions.renamePage, (state, { page, name }) => renamePage(state, page, name)),
+    on(DashboardActions.setPageName, (state, { name }) => setPageName(state, name)),
+    on(DashboardActions.setPages, (state, { pages }) => setPages(state, pages)),
+    on(DashboardActions.setState, (_, { state }) => setState(state)),
+    on(DashboardActions.setEditMode, (state, { editMode }) => setEditMode(state, editMode)),
+    on(DashboardActions.updatePage, (state, { page, rows }) => updatePage(state, page, rows)),
+    on(DashboardActions.updateRows, (state, { rows }) => updateRows(state, rows)),
+);
 
 function updateRows(state: DashboardState, rows: DashboardRow[]): DashboardState {
     return { ...state, rows };
@@ -114,12 +89,12 @@ function deletePage(state: DashboardState, page: DashboardPage): DashboardState 
 }
 
 function renamePage(state: DashboardState, page: DashboardPage, name: string): DashboardState {
-    const index = state.pages.indexOf(page)
+    const index = state.pages.indexOf(page);
     if (index < 0) {
         return state;
     }
 
-    const pages = [...state.pages]
+    const pages = [...state.pages];
     pages[index] = { ...page, name };
     return state.name === page.name ? { ...state, pages, name } : { ...state, pages };
 }
@@ -129,7 +104,7 @@ function addNewPage(state: DashboardState, name?: string): DashboardState {
     const page: DashboardPage = {
         name: name,
         items: [],
-        requests: []
+        requests: [],
     };
 
     const pages = [...state.pages, page];

@@ -13,14 +13,14 @@ export type DashboardColor = string;
 
 export enum DashboardItemType {
     Chart = 'Chart',
-    Grid = 'Grid'
+    Grid = 'Grid',
 }
 
 export enum DashboardChartType {
     Line = 'Line',
     BarVertical = 'BarVertical',
     BarHorizontal = 'BarHorizontal',
-    TimeSeries = 'TimeSeries'
+    TimeSeries = 'TimeSeries',
 }
 
 export interface DashboardSource {
@@ -74,7 +74,7 @@ export interface DashboardColumn {
 }
 
 export interface DashboardRow {
-    columns: DashboardColumn[]
+    columns: DashboardColumn[];
 }
 
 export interface DashboardState {
@@ -82,7 +82,7 @@ export interface DashboardState {
     pages: DashboardPage[];
     editMode: boolean;
     selectionMode: SelectionMode;
-    rows: DashboardRow[]
+    rows: DashboardRow[];
 }
 
 export interface State {

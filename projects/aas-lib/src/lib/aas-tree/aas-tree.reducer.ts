@@ -21,7 +21,7 @@ import {
     isBooleanType,
     toLocale,
     toBoolean,
-    mimeTypeToExtension
+    mimeTypeToExtension,
 } from 'common';
 
 import { AASTreeRow, AASTreeState, DisplayType, SearchTerm } from './aas-tree.state';
@@ -32,53 +32,28 @@ const initialState: AASTreeState = {
     rows: [],
     index: -1,
     terms: [],
-    error: null
+    error: null,
 };
 
 export const aasTreeReducer = createReducer(
     initialState,
-    on(
-        AASTreeActions.collapse,
-        (state) => collapse(state)
+    on(AASTreeActions.collapse, state => collapse(state)),
+    on(AASTreeActions.collapseRow, (state, { row }) => collapseRow(state, row)),
+    on(AASTreeActions.expandRow, (state, { arg }) => expandRow(state, arg)),
+    on(AASTreeActions.setMatchIndex, (state, { index }) => setMatchIndex(state, index)),
+    on(AASTreeActions.setSearchText, (state, { terms }) => setSearchText(state, terms)),
+    on(AASTreeActions.toggleSelected, (state, { row, altKey, shiftKey }) =>
+        toggleSelected(state, row, altKey, shiftKey),
     ),
-    on(
-        AASTreeActions.collapseRow,
-        (state, { row }) => collapseRow(state, row)
-    ),
-    on(
-        AASTreeActions.expandRow,
-        (state, { arg }) => expandRow(state, arg)
-    ),
-    on(
-        AASTreeActions.setMatchIndex,
-        (state, { index }) => setMatchIndex(state, index)
-    ),
-    on(
-        AASTreeActions.setSearchText,
-        (state, { terms }) => setSearchText(state, terms)
-    ),
-    on(
-        AASTreeActions.toggleSelected,
-        (state, { row, altKey, shiftKey }) => toggleSelected(state, row, altKey, shiftKey)
-    ),
-    on(
-        AASTreeActions.toggleSelections,
-        (state) => toggleSelections(state)
-    ),
-    on(
-        AASTreeActions.updateRows,
-        (state, { document, localeId }) => {
-            try {
-                return updateRows(state, document, localeId);
-            } catch (error) {
-                return { ...state, error };
-            }
+    on(AASTreeActions.toggleSelections, state => toggleSelections(state)),
+    on(AASTreeActions.updateRows, (state, { document, localeId }) => {
+        try {
+            return updateRows(state, document, localeId);
+        } catch (error) {
+            return { ...state, error };
         }
-    ),
-    on(
-        AASTreeActions.setSelectedElements,
-        (state, {elements}) => setSelectedElements(state, elements),
-    ),
+    }),
+    on(AASTreeActions.setSelectedElements, (state, { elements }) => setSelectedElements(state, elements)),
 );
 
 function updateRows(state: AASTreeState, document: AASDocument | null, localeId: string): AASTreeState {
@@ -104,10 +79,7 @@ function updateRows(state: AASTreeState, document: AASDocument | null, localeId:
 
     return { ...state, rows, error: null };
 
-    function traverse(
-        element: aas.Referable,
-        parent: number,
-        level: number): void {
+    function traverse(element: aas.Referable, parent: number, level: number): void {
         let previous: AASTreeRow | null = null;
         for (const child of getChildren(element)) {
             const row = createRow(child, parent, level, false);
@@ -225,7 +197,8 @@ function updateRows(state: AASTreeState, document: AASDocument | null, localeId:
             isLeaf,
             parent,
             -1,
-            -1);
+            -1,
+        );
 
         function getPropertyDisplayType(property: aas.Property): DisplayType {
             switch (property.valueType) {
@@ -240,22 +213,26 @@ function updateRows(state: AASTreeState, document: AASDocument | null, localeId:
     }
 
     function findRow(rows: AASTreeRow[], referable: aas.Referable): AASTreeRow | undefined {
-        return rows.find((row) => isEqual(createReference(row.element), createReference(referable)));
+        return rows.find(row => isEqual(createReference(row.element), createReference(referable)));
     }
 
     function createReference(referable: aas.Referable): aas.Reference {
         let keys: aas.Key[];
         if (referable.parent) {
-            keys = [...referable.parent.keys.map(key => ({ ...key })),
-            {
-                type: referable.modelType as aas.KeyTypes,
-                value: referable.idShort,
-            }];
+            keys = [
+                ...referable.parent.keys.map(key => ({ ...key })),
+                {
+                    type: referable.modelType as aas.KeyTypes,
+                    value: referable.idShort,
+                },
+            ];
         } else if (isIdentifiable(referable)) {
-            keys = [{
-                type: referable.modelType as aas.KeyTypes,
-                value: referable.id,
-            }];
+            keys = [
+                {
+                    type: referable.modelType as aas.KeyTypes,
+                    value: referable.id,
+                },
+            ];
         } else {
             throw new Error('Unexpected referable.');
         }
@@ -311,7 +288,8 @@ function expandRow(state: AASTreeState, arg: number | AASTreeRow): AASTreeState 
             row.isLeaf,
             row.parent,
             row.firstChild,
-            row.nextSibling);
+            row.nextSibling,
+        );
     }
 }
 
@@ -333,7 +311,8 @@ function collapseRow(state: AASTreeState, row: AASTreeRow): AASTreeState {
         row.isLeaf,
         row.parent,
         row.firstChild,
-        row.nextSibling);
+        row.nextSibling,
+    );
 
     return { ...state, rows, error: null };
 }
@@ -357,7 +336,8 @@ function collapse(state: AASTreeState): AASTreeState {
                     row.isLeaf,
                     row.parent,
                     row.firstChild,
-                    row.nextSibling);
+                    row.nextSibling,
+                );
             }
         } else if (!row.isLeaf && row.expanded) {
             return new AASTreeRow(
@@ -375,7 +355,8 @@ function collapse(state: AASTreeState): AASTreeState {
                 row.isLeaf,
                 row.parent,
                 row.firstChild,
-                row.nextSibling);
+                row.nextSibling,
+            );
         }
 
         return row;
@@ -388,7 +369,7 @@ function toggleSelected(state: AASTreeState, row: AASTreeRow, altKey: boolean, s
     let rows: AASTreeRow[];
     if (altKey) {
         rows = state.rows.map(item =>
-            item === row ? clone(row, !row.selected) : (item.selected ? clone(item, false) : item),
+            item === row ? clone(row, !row.selected) : item.selected ? clone(item, false) : item,
         );
     } else if (shiftKey) {
         const index = state.rows.indexOf(row);
@@ -440,7 +421,7 @@ function toggleSelections(state: AASTreeState): AASTreeState {
 }
 
 function setSelectedElements(state: AASTreeState, elements: aas.Referable[]): AASTreeState {
-    const rows = [ ...state.rows ];
+    const rows = [...state.rows];
     const set = new Set(elements);
     for (let i = 0, n = rows.length; i < n; i++) {
         const row = rows[i];
@@ -470,7 +451,8 @@ function clone(row: AASTreeRow, selected: boolean): AASTreeRow {
         row.isLeaf,
         row.parent,
         row.firstChild,
-        row.nextSibling);
+        row.nextSibling,
+    );
 }
 
 function getTypeInfo(referable: aas.Referable | null): string {
@@ -526,8 +508,7 @@ function getTypeInfo(referable: aas.Referable | null): string {
 
                 if (operation.outputVariables && operation.outputVariables.length === 1) {
                     value += `: ${variableToString(operation.outputVariables[0].value)}`;
-                }
-                else if (operation.outputVariables && operation.outputVariables.length > 1) {
+                } else if (operation.outputVariables && operation.outputVariables.length > 1) {
                     value += ': {' + operation.outputVariables.map(v => variableToString(v.value)).join(', ') + '}';
                 }
                 break;
@@ -551,7 +532,7 @@ function getTypeInfo(referable: aas.Referable | null): string {
             return `${value.idShort}: ${value?.value?.keys.map(key => key.value).join('/')}`;
         }
 
-        return `${value.idShort}: ${value.modelType}`
+        return `${value.idShort}: ${value.modelType}`;
     }
 
     function referenceToString(reference?: aas.Reference): string {
@@ -617,14 +598,14 @@ function setMatchIndex(state: AASTreeState, index: number): AASTreeState {
             ...state,
             rows: updateHighlighted(index),
             index: index,
-            error: null
+            error: null,
         };
     } else {
         return {
             rows: updateHighlighted(-1),
             index: -1,
             terms: [],
-            error: null
+            error: null,
         };
     }
 
@@ -648,9 +629,9 @@ function setMatchIndex(state: AASTreeState, index: number): AASTreeState {
                     row.isLeaf,
                     row.parent,
                     row.firstChild,
-                    row.nextSibling);
-            }
-            else if (rows[i].highlighted) {
+                    row.nextSibling,
+                );
+            } else if (rows[i].highlighted) {
                 rows[i] = new AASTreeRow(
                     row.id,
                     row.element,
@@ -666,7 +647,8 @@ function setMatchIndex(state: AASTreeState, index: number): AASTreeState {
                     row.isLeaf,
                     row.parent,
                     row.firstChild,
-                    row.nextSibling);
+                    row.nextSibling,
+                );
             }
         }
 

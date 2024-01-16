@@ -29,29 +29,19 @@ export const selectError = createSelector(getError, error => error);
 
 export const selectRow = (index: number) => {
     return createSelector(getRows, rows => rows[index]);
-}
+};
 
-export const selectNodes = createSelector(
-    getRows,
-    rows => rows.find(row => row.level === 0)?.getExpanded(rows) ?? []
-);
+export const selectNodes = createSelector(getRows, rows => rows.find(row => row.level === 0)?.getExpanded(rows) ?? []);
 
-export const selectSelectedElements = createSelector(
-    getRows,
-    rows => rows.filter(row => row.selected).map(item => item.element)
+export const selectSelectedElements = createSelector(getRows, rows =>
+    rows.filter(row => row.selected).map(item => item.element),
 );
 
 export const selectSomeSelected = createSelector(
     getRows,
-    rows => rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected)
+    rows => rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected),
 );
 
-export const selectEverySelected = createSelector(
-    getRows,
-    rows => rows.length > 0 && rows.every(row => row.selected)
-);
+export const selectEverySelected = createSelector(getRows, rows => rows.length > 0 && rows.every(row => row.selected));
 
-export const selectSelectedRows = createSelector(
-    getRows,
-    rows => rows.filter(row => row.selected)
-);
+export const selectSelectedRows = createSelector(getRows, rows => rows.filter(row => row.selected));

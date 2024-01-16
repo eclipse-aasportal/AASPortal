@@ -17,14 +17,14 @@ export enum LogType {
     Error,
     Warning,
     Info,
-    Debug
+    Debug,
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class NotifyService {
-    constructor(private translate: TranslateService) { }
+    public constructor(private translate: TranslateService) {}
 
     public messages: MessageEntry[] = [];
 
@@ -35,14 +35,13 @@ export class NotifyService {
     public async error(error: unknown): Promise<void> {
         if (error) {
             const text = await resolveError(error, this.translate);
-            this.messages.push(
-                {
-                    header: this.translate.instant('CAPTION_ERROR'),
-                    text: text,
-                    classname: 'bg-danger',
-                    autohide: false,
-                    delay: 5000
-                });
+            this.messages.push({
+                header: this.translate.instant('CAPTION_ERROR'),
+                text: text,
+                classname: 'bg-danger',
+                autohide: false,
+                delay: 5000,
+            });
         }
     }
 
@@ -53,14 +52,13 @@ export class NotifyService {
     public info(message: string, ...args: unknown[]): void {
         if (message && !isElement(message)) {
             message = stringFormat(this.translate.instant(message), args);
-            this.messages.push(
-                {
-                    header: this.translate.instant('CAPTION_INFO'),
-                    text: message,
-                    classname: 'bg-info',
-                    autohide: true,
-                    delay: 5000
-                });
+            this.messages.push({
+                header: this.translate.instant('CAPTION_INFO'),
+                text: message,
+                classname: 'bg-info',
+                autohide: true,
+                delay: 5000,
+            });
         }
     }
 

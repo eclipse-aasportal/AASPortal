@@ -10,7 +10,10 @@ export class KeyedList<TKey, TValue> {
     private readonly map = new Map<TKey, TValue>();
     private readonly list: TValue[] = [];
 
-    constructor(private readonly getKey: (value: TValue) => TKey, values?: TValue[]) {
+    public constructor(
+        private readonly getKey: (value: TValue) => TKey,
+        values?: TValue[],
+    ) {
         if (values) {
             values.forEach(value => this.set(value));
         }

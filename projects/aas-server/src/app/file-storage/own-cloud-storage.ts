@@ -13,7 +13,7 @@ export class OwnCloudStorage extends FileStorage {
     private promise: Promise<string>;
     private oc: ownCloud;
 
-    constructor(arg: string | URL) {
+    public constructor(arg: string | URL) {
         super();
 
         const url = typeof arg === 'string' ? new URL(arg) : arg;
@@ -23,8 +23,8 @@ export class OwnCloudStorage extends FileStorage {
         url.password = '';
 
         const options: OwnCloudOptions = {
-            baseUrl: url.href
-        }
+            baseUrl: url.href,
+        };
 
         if (username && password) {
             options.auth = { basic: { username, password } };
@@ -36,34 +36,29 @@ export class OwnCloudStorage extends FileStorage {
 
     public readonly root: string = '/';
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public mtime(path: string): Promise<Date> {
         throw new Error('Method not implemented.');
     }
 
     public async exists(path: string): Promise<boolean> {
-        try {
-            await this.promise;
-            const fileInfo = await this.oc.files.fileInfo(path, {});
-            return fileInfo != null;
-        } catch (error) {
-            throw error;
-        }
+        await this.promise;
+        const fileInfo = await this.oc.files.fileInfo(path, {});
+        return fileInfo != null;
     }
 
     public async isDirectory(path: string): Promise<boolean> {
-        try {
-            await this.promise;
-            const fileInfo = await this.oc.files.fileInfo(path, {});
-            return fileInfo.isDir();
-        } catch (error) {
-            throw error;
-        }
+        await this.promise;
+        const fileInfo = await this.oc.files.fileInfo(path, {});
+        return fileInfo.isDir();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public mkdir(path: string, recursive?: boolean | undefined): Promise<string | undefined> {
         throw new Error('Method not implemented.');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public writeFile(path: string, data: string | Buffer): Promise<void> {
         throw new Error('Method not implemented.');
     }
@@ -75,18 +70,22 @@ export class OwnCloudStorage extends FileStorage {
         return [];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public readFile(path: string): Promise<Buffer> {
         throw new Error('Method not implemented.');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public unlink(path: string): Promise<void> {
         throw new Error('Method not implemented.');
     }
 
-    public rename(oldPath: string, newPath: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public override rename(oldPath: string, newPath: string): Promise<void> {
         throw new Error('Method not implemented.');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public createReadStream(path: string): NodeJS.ReadableStream {
         throw new Error('Method not implemented.');
     }

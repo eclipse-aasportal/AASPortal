@@ -6,24 +6,25 @@
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { cloneDeep } from "lodash-es";
-import { DashboardItem, DashboardPage, DashboardRow } from "../dashboard.state";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
+import { Store } from '@ngrx/store';
+import { cloneDeep } from 'lodash-es';
+import { DashboardItem, DashboardPage, DashboardRow } from '../dashboard.state';
+import { DashboardService } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
 
 export class MoveRightCommand extends DashboardCommand {
-    constructor(
+    public constructor(
         store: Store,
         private dashboard: DashboardService,
         private page: DashboardPage,
-        private item: DashboardItem) {
+        private item: DashboardItem,
+    ) {
         super('Move right', store);
     }
 
     protected executing(): void {
         if (!this.dashboard.canMoveRight(this.page, this.item)) {
-            throw new Error(`Item can not be moved to the right.`)
+            throw new Error(`Item can not be moved to the right.`);
         }
 
         let rows: DashboardRow[] | undefined;

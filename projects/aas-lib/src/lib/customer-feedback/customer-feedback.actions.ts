@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { createAction, props } from "@ngrx/store";
-import { FeedbackItem, GeneralItem } from "./customer-feedback.state";
+import { createAction, props } from '@ngrx/store';
+import { FeedbackItem, GeneralItem } from './customer-feedback.state';
 
 export enum CustomerFeedbackActionType {
-    INITIALIZE = '[CustomerFeedback] initialize'
+    INITIALIZE = '[CustomerFeedback] initialize',
 }
 
 export const initialize = createAction(
@@ -20,5 +20,6 @@ export const initialize = createAction(
         count: number;
         starClassNames: string[];
         items: GeneralItem[];
-        feedbacks: FeedbackItem[]
-    }>());
+        feedbacks: FeedbackItem[];
+    }>(),
+);

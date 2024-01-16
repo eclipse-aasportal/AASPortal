@@ -21,9 +21,10 @@ export class XmlReader extends AASReader {
     private readonly document: Document;
     private iec61360 = 'IEC61360';
 
-    constructor(
+    public constructor(
         private readonly logger: Logger,
-        xmlSource: string) {
+        xmlSource: string,
+    ) {
         super();
 
         this.document = new DOMParser().parseFromString(xmlSource);
@@ -34,17 +35,18 @@ export class XmlReader extends AASReader {
         const conceptDescriptions = this.readConceptDescriptions();
         const assetAdministrationShells = this.readAssetAdministrationShells();
         const submodels = this.readSubmodels();
-        return { assetAdministrationShells, submodels, conceptDescriptions }
+        return { assetAdministrationShells, submodels, conceptDescriptions };
     }
 
-    public read(data: any): aas.Referable {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public read(data: unknown): aas.Referable {
         throw new Error('Not implemented.');
     }
 
     private getNamespaces(): { [key: string]: string } {
         let nsMap: { [key: string]: string };
         if ('_nsMap' in this.document.documentElement) {
-            nsMap = ((this.document.documentElement as any) as NamespaceMap)._nsMap;
+            nsMap = (this.document.documentElement as unknown as NamespaceMap)._nsMap;
         } else {
             nsMap = {};
         }
@@ -69,7 +71,7 @@ export class XmlReader extends AASReader {
         const node = this.selectNode('/aas:aasenv/aas:assets/aas:asset', this.document);
         if (node) {
             assetKind = this.selectNode('./aas:kind', node)?.textContent as aas.AssetKind;
-            globalAssetId =  this.readIdentifier(node);
+            globalAssetId = this.readIdentifier(node);
         } else {
             assetKind = 'Instance';
         }
@@ -79,7 +81,10 @@ export class XmlReader extends AASReader {
 
     private readAssetAdministrationShells(): aas.AssetAdministrationShell[] {
         const shells: aas.AssetAdministrationShell[] = [];
-        for (const node of this.selectNodes('/aas:aasenv/aas:assetAdministrationShells/aas:assetAdministrationShell', this.document)) {
+        for (const node of this.selectNodes(
+            '/aas:aasenv/aas:assetAdministrationShells/aas:assetAdministrationShell',
+            this.document,
+        )) {
             const shell = this.readAssetAdministrationShell(node);
             shells.push(shell);
         }
@@ -96,7 +101,7 @@ export class XmlReader extends AASReader {
         const shell: aas.AssetAdministrationShell = {
             ...this.readIdentifiable(node),
             ...this.readHasDataSpecification(node),
-            assetInformation
+            assetInformation,
         };
 
         const submodels = this.readReferences('./aas:submodelRefs/aas:submodelRef', node);
@@ -112,6 +117,7 @@ export class XmlReader extends AASReader {
         return shell;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readAdministrationInformation(path: string, node: Node): aas.AdministrativeInformation | undefined {
         return undefined;
     }
@@ -132,18 +138,18 @@ export class XmlReader extends AASReader {
             ...this.readHaSemantic(node),
             ...this.readQualifiable(node),
             ...this.readHasKind(node),
-            ...this.readHasDataSpecification(node)
+            ...this.readHasDataSpecification(node),
         };
 
-        const submodelElements = this.readSubmodelElements(
-            node,
-            {
-                type: 'ModelReference',
-                keys: [{
+        const submodelElements = this.readSubmodelElements(node, {
+            type: 'ModelReference',
+            keys: [
+                {
                     type: 'Submodel',
                     value: submodel.id,
-                }]
-            });
+                },
+            ],
+        });
         if (submodelElements.length > 0) {
             submodel.submodelElements = submodelElements;
         }
@@ -153,7 +159,7 @@ export class XmlReader extends AASReader {
 
     private readSubmodelElements(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
-        for (const child of this.selectNodes("./aas:submodelElements/aas:submodelElement/*[1]", node)) {
+        for (const child of this.selectNodes('./aas:submodelElements/aas:submodelElement/*[1]', node)) {
             const submodelElement = this.readSubmodelElement(child, parent);
             if (submodelElement) {
                 submodelElements.push(submodelElement);
@@ -165,7 +171,7 @@ export class XmlReader extends AASReader {
 
     private readCollectionValue(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
-        for (const child of this.selectNodes("./aas:value/aas:submodelElement/*[1]", node)) {
+        for (const child of this.selectNodes('./aas:value/aas:submodelElement/*[1]', node)) {
             const submodelElement = this.readSubmodelElement(child, parent);
             if (submodelElement) {
                 submodelElements.push(submodelElement);
@@ -181,6 +187,7 @@ export class XmlReader extends AASReader {
         switch (modelType) {
             case 'AnnotatedRelationshipElement':
                 submodelElement = this.readAnnotatedRelationshipElement(node, parent);
+                break;
             case 'BasicEventElement':
                 submodelElement = this.readBasicEventElement(node, parent);
                 break;
@@ -215,10 +222,12 @@ export class XmlReader extends AASReader {
         return submodelElement;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readAnnotatedRelationshipElement(node: Node, parent?: aas.Reference): aas.AnnotatedRelationshipElement {
         throw new Error('Method not implemented.');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readBasicEventElement(node: Node, parent?: aas.Reference): aas.BasicEventElement {
         throw new Error('Method not implemented.');
     }
@@ -231,7 +240,7 @@ export class XmlReader extends AASReader {
 
         const blob: aas.Blob = {
             ...this.readSubmodelElementType(node, parent),
-            contentType
+            contentType,
         };
 
         const value = this.selectNode('./aas:value', node)?.textContent;
@@ -268,7 +277,7 @@ export class XmlReader extends AASReader {
 
         if (!valueType) {
             valueType = 'xs:string';
-            value = '!!! Undefined value type !!!'
+            value = '!!! Undefined value type !!!';
         }
 
         const property: aas.Property = { ...this.readSubmodelElementType(node, parent), valueType };
@@ -279,10 +288,12 @@ export class XmlReader extends AASReader {
         return property;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readRange(node: Node, parent?: aas.Reference): aas.Range {
         throw new Error('Method not implemented.');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readRelationshipElement(node: Node, parent?: aas.Reference): aas.RelationshipElement {
         throw new Error('Method not implemented.');
     }
@@ -295,7 +306,7 @@ export class XmlReader extends AASReader {
 
         const file: aas.File = {
             ...this.readSubmodelElementType(node, parent),
-            contentType
+            contentType,
         };
 
         const value = this.selectNode('./aas:value', node)?.textContent;
@@ -322,7 +333,7 @@ export class XmlReader extends AASReader {
             ...this.readHaSemantic(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
-            ...this.readQualifiable(node)
+            ...this.readQualifiable(node),
         };
     }
 
@@ -345,7 +356,7 @@ export class XmlReader extends AASReader {
 
         const referable: aas.Referable = {
             idShort,
-            modelType: this.getModelTypeFromLocalName(node)
+            modelType: this.getModelTypeFromLocalName(node),
         };
 
         if (parent) {
@@ -377,7 +388,8 @@ export class XmlReader extends AASReader {
     private readHasDataSpecification(node: Node): aas.HasDataSpecification {
         const embeddedDataSpecifications: aas.EmbeddedDataSpecification[] = [];
         for (const child of this.selectNodes('./aas:embeddedDataSpecification', node)) {
-            const dataSpecification = this.readReference('./aas:hasDataSpecification', child) ??
+            const dataSpecification =
+                this.readReference('./aas:hasDataSpecification', child) ??
                 this.readReference('./aas:dataSpecification', child);
 
             if (!dataSpecification) {
@@ -410,7 +422,7 @@ export class XmlReader extends AASReader {
 
         const dataSpecification: aas.DataSpecificationIEC61360 = {
             modelType: this.getModelTypeFromLocalName(node),
-            preferredName
+            preferredName,
         };
 
         const shortName = this.readLangString(`./${this.iec61360}:shortName`, node);
@@ -471,6 +483,7 @@ export class XmlReader extends AASReader {
         return dataSpecification;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readValueList(path: string, node: Node): aas.ValueList | undefined {
         return undefined;
     }
@@ -548,11 +561,11 @@ export class XmlReader extends AASReader {
             for (const node of this.selectNodes('./aas:langString', content)) {
                 const language = (node as Element).getAttribute('lang')!.toLowerCase();
                 const text = node.textContent ?? '';
-                langString.push({ language, text })
+                langString.push({ language, text });
             }
 
             if (langString.length === 0 && content.textContent) {
-                langString.push({ language: 'en', text: content.textContent })
+                langString.push({ language: 'en', text: content.textContent });
             }
         }
 
@@ -563,7 +576,8 @@ export class XmlReader extends AASReader {
         const conceptDescriptions: aas.ConceptDescription[] = [];
         for (const node of this.selectNodes(
             '/aas:aasenv/aas:conceptDescriptions/aas:conceptDescription',
-            this.document)) {
+            this.document,
+        )) {
             conceptDescriptions.push(this.readConceptDescription(node));
         }
 
@@ -573,12 +587,12 @@ export class XmlReader extends AASReader {
     private readConceptDescription(node: Node): aas.ConceptDescription {
         const conceptDescription: aas.ConceptDescription = {
             ...this.readIdentifiable(node),
-            ...this.readHasDataSpecification(node)
+            ...this.readHasDataSpecification(node),
         };
 
         const isCaseOf: aas.Reference[] = [];
         for (const refNode of this.selectNodes('./isCaseOf', node)) {
-            isCaseOf.push(this.readReference('.', node)!)
+            isCaseOf.push(this.readReference('.', refNode)!);
         }
 
         if (isCaseOf.length > 0) {
@@ -590,7 +604,7 @@ export class XmlReader extends AASReader {
 
     private getModelTypeFromLocalName(node: Node): aas.ModelType {
         const localName: string = (node as Element).localName;
-        return localName.charAt(0).toUpperCase() + localName.substring(1) as aas.ModelType;
+        return (localName.charAt(0).toUpperCase() + localName.substring(1)) as aas.ModelType;
     }
 
     private selectNode(query: string, node: Node): Node | undefined {
@@ -613,7 +627,7 @@ export class XmlReader extends AASReader {
     private getReference(node: Node): aas.Reference {
         return {
             type: 'ModelReference',
-            keys: this.selectNodes('./aas:value/aas:keys/aas:key', node).map(item => this.getKey(item))
+            keys: this.selectNodes('./aas:value/aas:keys/aas:key', node).map(item => this.getKey(item)),
         };
     }
 
@@ -621,7 +635,7 @@ export class XmlReader extends AASReader {
         const element = node as Element;
         return {
             type: element.getAttribute('type') as aas.KeyTypes,
-            value: element.textContent ?? ''
+            value: element.textContent ?? '',
         };
     }
 

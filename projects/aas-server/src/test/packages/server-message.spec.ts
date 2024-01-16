@@ -9,15 +9,19 @@
 import net from 'net';
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
-import { ServerMessage } from "../../app/packages/server-message.js";
+import { ServerMessage } from '../../app/packages/server-message.js';
 import { createSpyObj } from '../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
 describe('ServerMessage', function () {
     let server: ServerMessage;
 
     beforeEach(function () {
         server = new ServerMessage();
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     it('should created', function () {
@@ -38,8 +42,9 @@ describe('ServerMessage', function () {
         });
 
         it('gets an object from a server', async function () {
-            await expect(server.get<{ text: string }>(new URL('http://localhost:1234/hello/world')))
-                .resolves.toEqual({ text: 'Hello World!' });
+            await expect(server.get<{ text: string }>(new URL('http://localhost:1234/hello/world'))).resolves.toEqual({
+                text: 'Hello World!',
+            });
         });
     });
 
@@ -56,7 +61,7 @@ describe('ServerMessage', function () {
 
         it('gets the message response', async function () {
             await expect(server.getResponse(new URL('http://localhost:1234/hello/world'))).resolves.toBeTruthy();
-        })
+        });
     });
 
     describe('put', function () {
@@ -73,8 +78,9 @@ describe('ServerMessage', function () {
         });
 
         it('updates an object on a server', async function () {
-            await expect(server.put(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }))
-                .resolves.toEqual(JSON.stringify('OK'));
+            await expect(
+                server.put(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }),
+            ).resolves.toEqual(JSON.stringify('OK'));
         });
     });
 
@@ -92,8 +98,9 @@ describe('ServerMessage', function () {
         });
 
         it('updates an object on a server', async function () {
-            await expect(server.post(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }))
-                .resolves.toEqual(JSON.stringify('Created'));
+            await expect(
+                server.post(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }),
+            ).resolves.toEqual(JSON.stringify('Created'));
         });
     });
 
@@ -111,8 +118,9 @@ describe('ServerMessage', function () {
         });
 
         it('updates an object on a server', async function () {
-            await expect(server.delete(new URL('http://localhost:1234/hello/world')))
-                .resolves.toEqual(JSON.stringify('Deleted'));
+            await expect(server.delete(new URL('http://localhost:1234/hello/world'))).resolves.toEqual(
+                JSON.stringify('Deleted'),
+            );
         });
     });
 

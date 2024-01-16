@@ -27,15 +27,16 @@ export interface LoginFormResult {
 @Component({
     selector: 'fhg-login',
     templateUrl: './login-form.component.html',
-    styleUrls: ['./login-form.component.scss']
+    styleUrls: ['./login-form.component.scss'],
 })
 export class LoginFormComponent {
     private newPasswordSent = false;
 
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AuthApiService) { }
+        private api: AuthApiService,
+    ) {}
 
     public passwordPerEMail = false;
 
@@ -56,7 +57,10 @@ export class LoginFormComponent {
                 this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
             } else {
                 try {
-                    this.pushMessage(stringFormat(this.translate.instant(INFO.NEW_PASSWORD_SENT), this.userId), 'bg-info w-100');
+                    this.pushMessage(
+                        stringFormat(this.translate.instant(INFO.NEW_PASSWORD_SENT), this.userId),
+                        'bg-info w-100',
+                    );
                 } catch (error) {
                     this.pushMessage(messageToString(error, this.translate));
                 } finally {
@@ -67,7 +71,7 @@ export class LoginFormComponent {
     }
 
     public registerUser(): void {
-        this.modal.close({ action: "register" } as LoginFormResult);
+        this.modal.close({ action: 'register' } as LoginFormResult);
     }
 
     public submit(): void {
@@ -82,18 +86,17 @@ export class LoginFormComponent {
             this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
         } else {
             const credentials: Credentials = { id: this.userId, password: this.password };
-            this.api.login(credentials).subscribe(
-                {
-                    next: value => {
-                        const result: LoginFormResult = {
-                            stayLoggedIn: this.stayLoggedIn,
-                            token: value.token
-                        };
+            this.api.login(credentials).subscribe({
+                next: value => {
+                    const result: LoginFormResult = {
+                        stayLoggedIn: this.stayLoggedIn,
+                        token: value.token,
+                    };
 
-                        this.modal.close(result);
-                    },
-                    error: error => this.pushMessage(messageToString(error, this.translate))
-                });
+                    this.modal.close(result);
+                },
+                error: error => this.pushMessage(messageToString(error, this.translate)),
+            });
         }
     }
 
@@ -102,12 +105,14 @@ export class LoginFormComponent {
     }
 
     private pushMessage(text: string, type = 'bg-danger w-100'): void {
-        this.messages = [{
-            text: text,
-            classname: type,
-            autohide: false,
-            delay: 0
-        }];
+        this.messages = [
+            {
+                text: text,
+                classname: type,
+                autohide: false,
+                delay: 0,
+            },
+        ];
     }
 
     private clearMessages(): void {

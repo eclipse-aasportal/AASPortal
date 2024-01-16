@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { createAction, props } from "@ngrx/store";
-import { DashboardPage, DashboardRow, DashboardState } from "./dashboard.state";
+import { createAction, props } from '@ngrx/store';
+import { DashboardPage, DashboardRow, DashboardState } from './dashboard.state';
 
 export enum DashboardActionType {
     UPDATE_ROWS = '[Dashboard] update rows',
@@ -18,41 +18,26 @@ export enum DashboardActionType {
     UPDATE_PAGE = '[Dashboard] update page',
     DELETE_PAGE = '[Dashboard] delete page',
     RENAME_PAGE = '[Dashboard] rename page',
-    SET_STATE = '[Dashboard] set state'
+    SET_STATE = '[Dashboard] set state',
 }
 
-export const updateRows = createAction(
-    DashboardActionType.UPDATE_ROWS,
-    props<{ rows: DashboardRow[] }>());
+export const updateRows = createAction(DashboardActionType.UPDATE_ROWS, props<{ rows: DashboardRow[] }>());
 
-export const setEditMode = createAction(
-    DashboardActionType.SET_EDIT_MODE,
-    props<{ editMode: boolean }>());
+export const setEditMode = createAction(DashboardActionType.SET_EDIT_MODE, props<{ editMode: boolean }>());
 
-export const setPageName = createAction(
-    DashboardActionType.SET_PAGE_NAME,
-    props<{ name: string }>());
+export const setPageName = createAction(DashboardActionType.SET_PAGE_NAME, props<{ name: string }>());
 
-export const setPages = createAction(
-    DashboardActionType.SET_PAGES,
-    props<{ pages: DashboardPage[] }>());
+export const setPages = createAction(DashboardActionType.SET_PAGES, props<{ pages: DashboardPage[] }>());
 
 export const updatePage = createAction(
     DashboardActionType.UPDATE_PAGE,
-    props<{ page: DashboardPage; rows?: DashboardRow[] }>());
+    props<{ page: DashboardPage; rows?: DashboardRow[] }>(),
+);
 
-export const addNewPage = createAction(
-    DashboardActionType.ADD_NEW_PAGE,
-    props<{ name?: string }>());
+export const addNewPage = createAction(DashboardActionType.ADD_NEW_PAGE, props<{ name?: string }>());
 
-export const deletePage = createAction(
-    DashboardActionType.DELETE_PAGE,
-    props<{ page: DashboardPage }>());
+export const deletePage = createAction(DashboardActionType.DELETE_PAGE, props<{ page: DashboardPage }>());
 
-export const renamePage = createAction(
-    DashboardActionType.RENAME_PAGE,
-    props<{ page: DashboardPage; name: string }>());
+export const renamePage = createAction(DashboardActionType.RENAME_PAGE, props<{ page: DashboardPage; name: string }>());
 
-export const setState = createAction(
-    DashboardActionType.SET_STATE,
-    props<{ state: DashboardState }>());
+export const setState = createAction(DashboardActionType.SET_STATE, props<{ state: DashboardState }>());

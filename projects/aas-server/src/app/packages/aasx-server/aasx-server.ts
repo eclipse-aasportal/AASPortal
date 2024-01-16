@@ -27,7 +27,7 @@ export abstract class AasxServer extends AASResource {
     /**
      * @param url The URL of the AASX-Server.
      */
-    constructor(logger: Logger, url: string, name: string) {
+    public constructor(logger: Logger, url: string, name: string) {
         super(logger, url, name);
     }
 
@@ -44,7 +44,7 @@ export abstract class AasxServer extends AASResource {
             } finally {
                 await this.closeAsync();
             }
-        } 
+        }
     }
 
     /**
@@ -56,7 +56,7 @@ export abstract class AasxServer extends AASResource {
 
     /** Gets the thumbnail of the AAS with the specified identifier.
      * @param id The identifier of the current AAS.
-    */
+     */
     public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
 
     public async openAsync(): Promise<void> {
@@ -84,7 +84,8 @@ export abstract class AasxServer extends AASResource {
     public override createSubscription(
         client: SocketClient,
         message: LiveRequest,
-        env: aas.Environment): SocketSubscription {
+        env: aas.Environment,
+    ): SocketSubscription {
         return new HttpSubscription(this.logger, this, client, message, env);
     }
 
@@ -98,12 +99,13 @@ export abstract class AasxServer extends AASResource {
      * ToDo
      * @param source The source AAS.
      * @param destination The destination
-     * @param diffs 
+     * @param diffs
      */
     public abstract commitAsync(
-        source: aas.Environment, 
-        destination: aas.Environment, 
-        diffs: DifferenceItem[]): Promise<string[]>;
+        source: aas.Environment,
+        destination: aas.Environment,
+        diffs: DifferenceItem[],
+    ): Promise<string[]>;
 
     /**
      * Opens the specified file from the AASX server.
@@ -113,10 +115,10 @@ export abstract class AasxServer extends AASResource {
      */
     public abstract openFileAsync(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream>;
 
-    /** 
+    /**
      * Reads the current value from a submodel element.
      * @param url The path of the submodel element value.
-     * @param valueType The 
+     * @param valueType The
      * @returns The current value.
      */
     public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {

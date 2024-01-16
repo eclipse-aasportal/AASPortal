@@ -18,7 +18,7 @@ interface AASList {
 }
 
 export class AasxServerV0 extends AasxServer {
-    constructor(logger: Logger, url: string, name: string) {
+    public constructor(logger: Logger, url: string, name: string) {
         super(logger, url, name);
     }
 
@@ -30,7 +30,7 @@ export class AasxServerV0 extends AasxServer {
 
     public async getShellsAsync(): Promise<string[]> {
         const value = await this.message.get<AASList>(this.resolve('/server/listaas'));
-        return value.aaslist.map(item => item.split(' : ')[1].trim())
+        return value.aaslist.map(item => item.split(' : ')[1].trim());
     }
 
     public override async readEnvironmentAsync(id: string): Promise<aas.Environment> {
@@ -46,7 +46,8 @@ export class AasxServerV0 extends AasxServer {
     public override async commitAsync(
         source: aas.Environment,
         destination: aas.Environment,
-        diffs: DifferenceItem[]): Promise<string[]> {
+        diffs: DifferenceItem[],
+    ): Promise<string[]> {
         const messages: string[] = [];
         const updateSubmodels = new Set<aas.Submodel>();
         const deleteSubmodels = new Set<aas.Submodel>();
@@ -79,11 +80,11 @@ export class AasxServerV0 extends AasxServer {
         }
 
         if (updateSubmodels.size > 0) {
-            messages.push(...await this.putSubmodelsAsync(destination, updateSubmodels.values()));
+            messages.push(...(await this.putSubmodelsAsync(destination, updateSubmodels.values())));
         }
 
         if (deleteSubmodels.size > 0) {
-            messages.push(...await this.deleteSubmodelsAsync(destination, deleteSubmodels.values()));
+            messages.push(...(await this.deleteSubmodelsAsync(destination, deleteSubmodels.values())));
         }
 
         return messages;
@@ -135,7 +136,8 @@ export class AasxServerV0 extends AasxServer {
 
     private async putSubmodelsAsync(
         destination: aas.Environment,
-        submodels: IterableIterator<aas.Submodel>): Promise<string[]> {
+        submodels: IterableIterator<aas.Submodel>,
+    ): Promise<string[]> {
         const messages: string[] = [];
         const aas = destination.assetAdministrationShells[0].idShort;
         for (const submodel of submodels) {
@@ -147,7 +149,8 @@ export class AasxServerV0 extends AasxServer {
 
     private async deleteSubmodelsAsync(
         destination: aas.Environment,
-        elements: IterableIterator<aas.Submodel>): Promise<string[]> {
+        elements: IterableIterator<aas.Submodel>,
+    ): Promise<string[]> {
         const messages: string[] = [];
         const aas = destination.assetAdministrationShells[0].idShort;
         for (const element of elements) {

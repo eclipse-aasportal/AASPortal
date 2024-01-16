@@ -9,7 +9,6 @@
 import { aas } from 'common';
 
 export abstract class AASReader {
-
     public abstract readEnvironment(): aas.Environment;
 
     public abstract read(data: string | object): aas.Referable;
@@ -34,7 +33,7 @@ export abstract class AASReader {
 
         return path;
     }
-    
+
     protected createReference(parent: aas.Reference, child: aas.Referable): aas.Reference {
         return {
             type: 'ModelReference',
@@ -43,7 +42,8 @@ export abstract class AASReader {
                 {
                     type: child.modelType as aas.KeyTypes,
                     value: child.idShort,
-                }]
+                },
+            ],
         };
     }
 }

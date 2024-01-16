@@ -36,7 +36,7 @@ export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Su
 
 export const supportedSubmodelTemplates = new Map<string, string>([
     [ZVEINameplate, 'Nameplate'],
-    [CustomerFeedback, 'CustomerFeedback']
+    [CustomerFeedback, 'CustomerFeedback'],
 ]);
 
 const semanticIdMap = new Map<string, string>([
@@ -44,7 +44,7 @@ const semanticIdMap = new Map<string, string>([
     [ZVEINameplate, ZVEINameplate],
     ['urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate', ZVEINameplate],
     ['https://admin-shell.io/zvei/nameplate/2/0/Nameplate', ZVEINameplate],
-    [CustomerFeedback, CustomerFeedback]
+    [CustomerFeedback, CustomerFeedback],
 ]);
 
 export function resolveSemanticId(value: aas.HasSemantic | aas.Reference | string): string | undefined {

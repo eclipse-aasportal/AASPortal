@@ -9,5 +9,5 @@
 export enum ViewMode {
     Undefined = '',
     List = 'list',
-    Tree = 'tree'
+    Tree = 'tree',
 }

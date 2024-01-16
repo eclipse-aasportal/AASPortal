@@ -14,12 +14,11 @@ import { SocketSubscription } from '../live/socket-subscription.js';
 
 /** Represents a resource of Asset Administration Shells. */
 export abstract class AASResource {
-    constructor(
-        protected readonly logger: Logger, 
-        public readonly url: string, 
-        public readonly name: string
-        ) {
-    }
+    protected constructor(
+        protected readonly logger: Logger,
+        public readonly url: string,
+        public readonly name: string,
+    ) {}
 
     public abstract readonly version: string;
 
@@ -53,7 +52,8 @@ export abstract class AASResource {
     public abstract createSubscription(
         client: SocketClient,
         message: LiveRequest,
-        env: aas.Environment): SocketSubscription;
+        env: aas.Environment,
+    ): SocketSubscription;
 
     /**
      * Downloads an aasx package form the current source.
@@ -90,7 +90,11 @@ export abstract class AASResource {
      * @param idShortPath The path from the Submodel to the Blob element.
      * @returns The Blob value.
      */
-    public abstract getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined>;
+    public abstract getBlobValueAsync(
+        env: aas.Environment,
+        submodelId: string,
+        idShortPath: string,
+    ): Promise<string | undefined>;
 
     /**
      * Resolves a new URL from the base URL and the specified URL.

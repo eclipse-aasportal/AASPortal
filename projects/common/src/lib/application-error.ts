@@ -6,20 +6,20 @@
  *
  *****************************************************************************/
 
- export class ApplicationError extends Error {
+export class ApplicationError extends Error {
     /**
      * @constructor
      * @param message The error message.
      * @param name The name of the error.
      * @param args Additional arguments for the error message.
      */
-    constructor(message: string, name: string, ...args: Parameters<any>) {
+    public constructor(message: string, name: string, ...args: unknown[]) {
         super(message);
 
-        this.name = name ?? "Application error";
+        this.name = name ?? 'Application error';
         this.args = args ?? [];
     }
 
     /** Gets the additional arguments. */
-    public readonly args: Parameters<any>;
+    public readonly args: unknown[];
 }

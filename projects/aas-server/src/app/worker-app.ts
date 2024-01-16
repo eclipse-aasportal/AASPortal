@@ -17,12 +17,11 @@ import { ScanContainer } from './scan-container.js';
 
 @singleton()
 export class WorkerApp {
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(ScanContainer) private readonly scanContainer: ScanContainer,
-        @inject(UpdateStatistic) private readonly statistic: UpdateStatistic
-    ) {
-    }
+        @inject(UpdateStatistic) private readonly statistic: UpdateStatistic,
+    ) {}
 
     public run(): void {
         parentPort?.on('message', this.parentPortOnMessage);
@@ -42,10 +41,10 @@ export class WorkerApp {
                 taskId: data.taskId,
                 type: ScanResultType.End,
                 statistic: this.statistic.update(data.statistic, ScanResultType.End),
-                messages: this.logger.getMessages()
+                messages: this.logger.getMessages(),
             };
 
             parentPort?.postMessage(toUint8Array(result));
         }
-    }
+    };
 }

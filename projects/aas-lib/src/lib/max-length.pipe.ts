@@ -9,7 +9,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'max'
+    name: 'max',
 })
 export class MaxLengthPipe implements PipeTransform {
     private max = 80;

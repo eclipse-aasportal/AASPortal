@@ -10,16 +10,16 @@ import { ClientMonitoredItem, DataValue } from 'node-opcua';
 import { Logger } from '../../logging/logger.js';
 import { LiveNode } from 'common';
 import { SocketItem } from '../socket-item.js';
-import { SocketClient }from '../socket-client.js';
+import { SocketClient } from '../socket-client.js';
 
 export class OpcuaSocketItem implements SocketItem {
     private item?: ClientMonitoredItem;
 
-    constructor(
-        private readonly logger: Logger, 
-        private readonly client: SocketClient, 
-        public readonly node: LiveNode) {
-    }
+    public constructor(
+        private readonly logger: Logger,
+        private readonly client: SocketClient,
+        public readonly node: LiveNode,
+    ) {}
 
     public subscribe(item: ClientMonitoredItem): void {
         this.item = item;
@@ -40,11 +40,11 @@ export class OpcuaSocketItem implements SocketItem {
         this.node.timeStamp = dataValue.serverTimestamp?.valueOf();
         this.client.notify({
             type: 'LiveNode[]',
-            data: [this.node]
+            data: [this.node],
         });
-    }
+    };
 
     private onError = (message: string): void => {
         this.logger.error(message);
-    }
+    };
 }

@@ -36,7 +36,7 @@ export function getEndpointType(url: string | URL): AASEndpointType {
             return 'AasxDirectory';
         case 'http:':
         case 'https:':
-            return url.searchParams.get('type') as AASEndpointType ?? 'AasxServer';
+            return (url.searchParams.get('type') as AASEndpointType) ?? 'AasxServer';
         case 'opc.tcp:':
             return 'OpcuaServer';
         default:

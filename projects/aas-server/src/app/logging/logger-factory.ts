@@ -30,13 +30,12 @@ export class LoggerFactory {
                     zippedArchive: false,
                     maxSize: '20m',
                     maxFiles: '2d',
-                    format: winston.format.combine(
-                        winston.format.timestamp(),
-                        winston.format.json())
+                    format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
                 }),
                 new winston.transports.Console({
                     format: winston.format.simple(),
-                })]
+                }),
+            ],
         });
     }
 

@@ -25,11 +25,7 @@ export class OpcuaPackage extends AASPackage {
     private readonly nodeId: string;
     private readonly dataTypes: OpcuaDataTypeDictionary;
 
-    constructor(
-        logger: Logger,
-        server: OpcuaServer,
-        nodeId: string,
-        dataTypes?: OpcuaDataTypeDictionary) {
+    public constructor(logger: Logger, server: OpcuaServer, nodeId: string, dataTypes?: OpcuaDataTypeDictionary) {
         super(logger);
 
         this.server = server;
@@ -80,7 +76,7 @@ export class OpcuaPackage extends AASPackage {
         }
 
         const clientFile = new ClientFile(session, file.nodeId);
-        await clientFile.open(OpenFileMode.Read)
+        await clientFile.open(OpenFileMode.Read);
         try {
             const buffer = await clientFile.read(0);
             return Readable.from(buffer);
@@ -91,7 +87,7 @@ export class OpcuaPackage extends AASPackage {
 
     private async crawlAsync(): Promise<OPCUAComponent> {
         const crawler = new NodeCrawler(this.server.getSession());
-        const component = await crawler.read(NodeId.resolveNodeId(this.nodeId)) as OPCUAComponent;
+        const component = (await crawler.read(NodeId.resolveNodeId(this.nodeId))) as OPCUAComponent;
         await this.resolveAsync(component);
         return component;
     }
@@ -129,11 +125,10 @@ export class OpcuaPackage extends AASPackage {
     }
 
     private async readDataValueAsync(session: ClientSession, property: OPCUAProperty): Promise<DataValue> {
-        return await session.read(
-            {
-                nodeId: property.nodeId,
-                attributeId: AttributeIds.Value
-            });
+        return await session.read({
+            nodeId: property.nodeId,
+            attributeId: AttributeIds.Value,
+        });
     }
 
     private readOpaqueStructure(dataValue: DataValue): OpaqueStructure[] | undefined {

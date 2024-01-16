@@ -20,11 +20,11 @@ import { Variable } from '../variable.js';
 @Route('/api/v1/endpoints')
 @Tags('Endpoints')
 export class EndpointsController extends AASController {
-    constructor(
+    public constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
         @inject(Variable) variable: Variable,
-        @inject(AASProvider) private readonly aasProvider: AASProvider
+        @inject(AASProvider) private readonly aasProvider: AASProvider,
     ) {
         super(logger, auth, variable);
     }
@@ -67,7 +67,7 @@ export class EndpointsController extends AASController {
     public deleteEndpoint(@Path() name: string): Promise<void> {
         return this.aasProvider.removeEndpointAsync(name);
     }
-    
+
     /**
      * @summary Resets the AASServer container configuration.
      */

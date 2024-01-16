@@ -19,12 +19,16 @@ import * as MessageTableSelectors from './message-table.selectors';
 @Component({
     selector: 'fhg-message-table',
     templateUrl: './message-table.component.html',
-    styleUrls: ['./message-table.component.scss']
+    styleUrls: ['./message-table.component.scss'],
 })
 export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly dateTimeOptions: Intl.DateTimeFormatOptions = {
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', second: 'numeric'
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
     };
 
     private readonly store: Store<MessageTableFeatureState>;
@@ -35,12 +39,13 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
         showWarning: false,
         showError: true,
         column: '',
-        direction: ''
+        direction: '',
     };
 
-    constructor(
+    public constructor(
         store: Store,
-        private translate: TranslateService) {
+        private translate: TranslateService,
+    ) {
         this.store = store as Store<MessageTableFeatureState>;
     }
 
@@ -74,12 +79,16 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public ngOnInit(): void {
-        this.subscription.add(this.store.select(MessageTableSelectors.selectState).pipe()
-            .subscribe(state => {
-                this.snapshot = state;
-                this.filterSort();
-                this.refreshMessages();
-            }));
+        this.subscription.add(
+            this.store
+                .select(MessageTableSelectors.selectState)
+                .pipe()
+                .subscribe(state => {
+                    this.snapshot = state;
+                    this.filterSort();
+                    this.refreshMessages();
+                }),
+        );
     }
 
     public ngOnDestroy(): void {
@@ -132,18 +141,22 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public timestampToString(value: number): string {
-        return new Intl.DateTimeFormat(this.translate.currentLang, this.dateTimeOptions).format(value)
+        return new Intl.DateTimeFormat(this.translate.currentLang, this.dateTimeOptions).format(value);
     }
 
     private filterSort(): void {
-        if (this.snapshot.showError && this.snapshot.showWarning && this.snapshot.showInfo ||
-            !this.snapshot.showError && !this.snapshot.showWarning && !this.snapshot.showInfo) {
+        if (
+            (this.snapshot.showError && this.snapshot.showWarning && this.snapshot.showInfo) ||
+            (!this.snapshot.showError && !this.snapshot.showWarning && !this.snapshot.showInfo)
+        ) {
             this._collection = this.collection;
-        }
-        else {
-            this._collection = this.collection.filter(item => item.type === 'Error' && this.snapshot.showError ||
-                item.type === 'Warning' && this.snapshot.showWarning ||
-                item.type === 'Info' && this.snapshot.showInfo);
+        } else {
+            this._collection = this.collection.filter(
+                item =>
+                    (item.type === 'Error' && this.snapshot.showError) ||
+                    (item.type === 'Warning' && this.snapshot.showWarning) ||
+                    (item.type === 'Info' && this.snapshot.showInfo),
+            );
         }
 
         if (this.snapshot.column && this.snapshot.direction) {
@@ -159,11 +172,10 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
         switch (column) {
             case 'text':
                 return a.text.localeCompare(b.text, this.translate.currentLang, { sensitivity: 'accent' });
-            case 'type':
-                {
-                    const value = a.type.localeCompare(b.type, this.translate.currentLang, { sensitivity: 'accent' });
-                    return value !== 0 ? value : (a.timestamp - b.timestamp);
-                }
+            case 'type': {
+                const value = a.type.localeCompare(b.type, this.translate.currentLang, { sensitivity: 'accent' });
+                return value !== 0 ? value : a.timestamp - b.timestamp;
+            }
             case 'timestamp':
                 return a.timestamp - b.timestamp;
             default:

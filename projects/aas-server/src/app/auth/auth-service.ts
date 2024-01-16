@@ -27,7 +27,7 @@ import {
     getUserNameFromEMail,
     Cookie,
     JWTPayload,
-    AuthResult
+    AuthResult,
 } from 'common';
 
 @singleton()
@@ -35,11 +35,11 @@ export class AuthService {
     private readonly algorithm: jwt.Algorithm;
     private readonly privateKey: string;
 
-    constructor(
+    public constructor(
         @inject(Mailer) private readonly mailer: Mailer,
         @inject('UserStorage') private readonly userStorage: UserStorage,
         @inject('CookieStorage') private readonly cookieStorage: CookieStorage,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         if (variable.JWT_PUBLIC_KEY) {
             this.algorithm = 'RS256';
@@ -96,7 +96,7 @@ export class AuthService {
                 throw new ApplicationError(
                     `An account already exists for this e-mail '${profile.id}'.`,
                     ERRORS.UserAlreadyExists,
-                    profile.id
+                    profile.id,
                 );
             }
 
@@ -118,7 +118,7 @@ export class AuthService {
             throw new ApplicationError(
                 `An account already exists for this e-mail '${profile.id}'.`,
                 ERRORS.UserAlreadyExists,
-                profile.id
+                profile.id,
             );
         }
 
@@ -137,7 +137,7 @@ export class AuthService {
             role: 'editor',
             password: await bcrypt.hash(profile.password, 10),
             created: new Date(),
-            lastLoggedIn: new Date(0)
+            lastLoggedIn: new Date(0),
         };
 
         const token = this.generateToken(data.id, data.name, data.role);
@@ -185,19 +185,18 @@ export class AuthService {
 
     private generateToken(subject: string, name: string, role: UserRole): string {
         const payload: JWTPayload = { name, role };
-        return jwt.sign(payload, this.privateKey,
-            {
-                subject,
-                expiresIn: this.variable.JWT_EXPIRES_IN,
-                algorithm: this.algorithm
-            });
+        return jwt.sign(payload, this.privateKey, {
+            subject,
+            expiresIn: this.variable.JWT_EXPIRES_IN,
+            algorithm: this.algorithm,
+        });
     }
 
     private generateGuestToken(): string {
         const payload: JWTPayload = { role: 'guest' };
         return jwt.sign(payload, this.privateKey, {
             expiresIn: this.variable.JWT_EXPIRES_IN,
-            algorithm: this.algorithm
+            algorithm: this.algorithm,
         });
     }
 
@@ -206,7 +205,7 @@ export class AuthService {
         return jwt.sign(payload, this.privateKey, {
             subject,
             expiresIn: this.variable.JWT_SHORT_EXP,
-            algorithm: this.algorithm
+            algorithm: this.algorithm,
         });
     }
 

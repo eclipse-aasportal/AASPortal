@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message, AASEndpoint } from 'common';
+import { AASDocument, AASContainer, Message } from 'common';
 
 export enum ScanResultType {
     Added,
@@ -20,23 +20,23 @@ export interface ScanStatistic {
     /** Start time. */
     start: number;
     /** End time */
-    end: number,
+    end: number;
     /** The number of scan cycles. */
-    counter: number,
+    counter: number;
     /** The number of changed AAS documents.*/
-    changed: number,
+    changed: number;
     /** The number of new AAS documents. */
-    new: number,
+    new: number;
     /** The number of deleted AAS documents. */
-    deleted: number,
+    deleted: number;
     /** The number of offline events. */
-    offline: number
+    offline: number;
 }
 
 /** The result of a container scan. */
 export interface ScanResult {
     /** The result. */
-    type: ScanResultType,
+    type: ScanResultType;
     /** The task identifier. */
     taskId: number;
     /** Statistic information. */

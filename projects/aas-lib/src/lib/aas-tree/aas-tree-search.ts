@@ -21,35 +21,50 @@ import {
     convertToString,
     getModelTypeFromAbbreviation,
     parseDate,
-    parseNumber
+    parseNumber,
 } from 'common';
 import { Injectable } from '@angular/core';
 
 @Injectable()
 export class AASTreeSearch {
-    private store: Store<AASTreeFeatureState>
+    private store: Store<AASTreeFeatureState>;
     private readonly loop = true;
     private subscription = new Subscription();
     private terms: SearchTerm[] = [];
     private rows: AASTreeRow[] = [];
     private index = -1;
 
-    constructor(store: Store, private translate: TranslateService) {
-        this.store = store as Store<AASTreeFeatureState>
+    public constructor(
+        store: Store,
+        private translate: TranslateService,
+    ) {
+        this.store = store as Store<AASTreeFeatureState>;
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectRows).pipe()
-            .subscribe(rows => {
-                this.rows = rows;
-            }));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectRows)
+                .pipe()
+                .subscribe(rows => {
+                    this.rows = rows;
+                }),
+        );
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectTerms).pipe()
-            .subscribe(terms => {
-                this.terms = terms;
-                this.findFirst();
-            }));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectTerms)
+                .pipe()
+                .subscribe(terms => {
+                    this.terms = terms;
+                    this.findFirst();
+                }),
+        );
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectMatchIndex).pipe()
-            .subscribe((value) => this.index = value));
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectMatchIndex)
+                .pipe()
+                .subscribe(value => (this.index = value)),
+        );
     }
 
     public destroy(): void {
@@ -87,7 +102,7 @@ export class AASTreeSearch {
 
     public findNext(): boolean {
         let completed = false;
-        if (this.rows.length > 0 && (this.terms.length > 0)) {
+        if (this.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = this.index < 0 ? 0 : this.index + 1;
             const start = i;
@@ -115,7 +130,7 @@ export class AASTreeSearch {
 
     public findPrevious(): boolean {
         let completed = false;
-        if (this.rows.length > 0 && (this.terms.length > 0)) {
+        if (this.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = this.index <= 0 ? this.rows.length - 1 : this.index - 1;
             const start = i;
@@ -146,7 +161,7 @@ export class AASTreeSearch {
     }
 
     private findFirst(): void {
-        if (this.rows.length > 0 && (this.terms.length > 0)) {
+        if (this.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = this.index < 0 ? 0 : this.index;
             const start = i;
@@ -202,7 +217,7 @@ export class AASTreeSearch {
         return query;
     }
 
-    private parseOperator(expression: string): { index: number, operator: Operator } | undefined {
+    private parseOperator(expression: string): { index: number; operator: Operator } | undefined {
         let index = expression.indexOf('<=');
         if (index > 0) {
             return { index: index, operator: '<=' };
@@ -233,7 +248,7 @@ export class AASTreeSearch {
             return { index, operator: '<' };
         }
 
-        return undefined
+        return undefined;
     }
 
     private fromString(s: string): string | boolean {
@@ -268,7 +283,8 @@ export class AASTreeSearch {
                     }
                 }
             } else if (term.text) {
-                match = row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
+                match =
+                    row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
                     row.typeInfo.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
                     (typeof row.value === 'string' &&
                         row.value.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0);
@@ -304,7 +320,9 @@ export class AASTreeSearch {
             }
             case 'MultiLanguageProperty': {
                 const langString = (referable as aas.MultiLanguageProperty).value;
-                return langString ? langString.some(item => item ? this.containsString(item.text, value as string) : false) : false;
+                return langString
+                    ? langString.some(item => (item ? this.containsString(item.text, value as string) : false))
+                    : false;
             }
             default:
                 return false;
@@ -314,7 +332,7 @@ export class AASTreeSearch {
     private matchProperty(property: aas.Property, b: string | boolean, operator: Operator = '='): boolean {
         const a = convertFromString(property.value, property.valueType);
         if (typeof a === 'boolean') {
-            return (typeof b === 'boolean') && a === b;
+            return typeof b === 'boolean' && a === b;
         } else if (typeof b === 'boolean') {
             return false;
         }
@@ -364,8 +382,10 @@ export class AASTreeSearch {
             return false;
         }
 
-        return this.containsString(convertToString(a), b) ||
-            this.containsString(convertToString(a, this.translate.currentLang), b);
+        return (
+            this.containsString(convertToString(a), b) ||
+            this.containsString(convertToString(a, this.translate.currentLang), b)
+        );
     }
 
     private isDate(valueType: aas.DataTypeDefXsd): boolean {

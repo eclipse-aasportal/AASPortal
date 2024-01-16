@@ -16,7 +16,7 @@ import {
     isAssetAdministrationShell,
     isSubmodel,
     isSubmodelElement,
-    isSubmodelElementCollection
+    isSubmodelElementCollection,
 } from 'common';
 
 import { AASState } from '../aas.state';
@@ -29,11 +29,7 @@ export class NewElementCommand extends Command {
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    constructor(
-        store: Store<{ aas: AASState }>,
-        document: AASDocument,
-        parent: aas.Referable,
-        element: aas.Referable) {
+    public constructor(store: Store, document: AASDocument, parent: aas.Referable, element: aas.Referable) {
         super('New Element');
 
         if (!document || !document.content) {
@@ -42,18 +38,18 @@ export class NewElementCommand extends Command {
 
         const children = getChildren(parent, document.content);
         if (!children) {
-            throw new Error('Argument parent is invalid.')
+            throw new Error('Argument parent is invalid.');
         }
 
-        this.store = store;
+        this.store = store as Store<{ aas: AASState }>;
         this.memento = document;
         this.document = {
             ...document,
             content: {
                 ...document.content!,
                 assetAdministrationShells: [...document.content!.assetAdministrationShells],
-                submodels: [...document.content!.submodels]
-            }
+                submodels: [...document.content!.submodels],
+            },
         };
 
         this.parent = parent;
@@ -92,10 +88,12 @@ export class NewElementCommand extends Command {
         const submodels = shell.submodels ? [...shell.submodels] : [];
         submodels.push({
             type: 'ModelReference',
-            keys: [{
-                type: 'Submodel',
-                value: submodel.id,
-            }]
+            keys: [
+                {
+                    type: 'Submodel',
+                    value: submodel.id,
+                },
+            ],
         });
 
         shell = { ...shell, submodels };

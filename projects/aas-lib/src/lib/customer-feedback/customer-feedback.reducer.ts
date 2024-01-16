@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { createReducer, on } from "@ngrx/store";
-import * as CustomerFeedbackActions from "./customer-feedback.actions";
-import { CustomerFeedbackState, FeedbackItem, GeneralItem } from "./customer-feedback.state";
+import { createReducer, on } from '@ngrx/store';
+import * as CustomerFeedbackActions from './customer-feedback.actions';
+import { CustomerFeedbackState, FeedbackItem, GeneralItem } from './customer-feedback.state';
 
 const initialState: CustomerFeedbackState = {
     stars: 0.0,
@@ -16,16 +16,15 @@ const initialState: CustomerFeedbackState = {
     starClassNames: [],
     items: [],
     feedbacks: [],
-    error: null
-}
+    error: null,
+};
 
 export const customerFeedbackReducer = createReducer(
     initialState,
-    on(
-        CustomerFeedbackActions.initialize,
-        (state, { stars, count, starClassNames, items, feedbacks }) => initialize(state, stars, count, starClassNames, items, feedbacks)
-    )
-)
+    on(CustomerFeedbackActions.initialize, (state, { stars, count, starClassNames, items, feedbacks }) =>
+        initialize(state, stars, count, starClassNames, items, feedbacks),
+    ),
+);
 
 function initialize(
     state: CustomerFeedbackState,
@@ -33,7 +32,8 @@ function initialize(
     count: number,
     starClassNames: string[],
     items: GeneralItem[],
-    feedbacks: FeedbackItem[]): CustomerFeedbackState {
+    feedbacks: FeedbackItem[],
+): CustomerFeedbackState {
     return {
         ...state,
         stars: stars,
@@ -41,6 +41,6 @@ function initialize(
         starClassNames: starClassNames,
         items: items,
         feedbacks: feedbacks,
-        error: null
+        error: null,
     };
 }

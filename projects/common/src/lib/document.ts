@@ -28,7 +28,7 @@ export interface DifferenceItem {
  * @returns `true` if the specified documents are equal.
  */
 export function equalDocument(a: AASDocument | null, b: AASDocument | null): boolean {
-    return a === b || a != null && b != null && a.id === b.id && a.endpoint === b.endpoint;
+    return a === b || (a != null && b != null && a.id === b.id && a.endpoint === b.endpoint);
 }
 
 /**
@@ -37,9 +37,7 @@ export function equalDocument(a: AASDocument | null, b: AASDocument | null): boo
  * @param referable The element to check.
  * @returns The parent element or `undefined` if element is the root.
  */
-export function getParent(
-    env: aas.Environment,
-    referable: aas.Referable): aas.Referable | undefined {
+export function getParent(env: aas.Environment, referable: aas.Referable): aas.Referable | undefined {
     return referable.parent ? selectReferable(env, referable.parent) : undefined;
 }
 
@@ -69,10 +67,7 @@ export function selectSubmodel(env: aas.Environment, referable: aas.Referable): 
  * @param element An element to check.
  * @returns `true` if the element is a descendant of the given ancestor; otherwise, `false`.
  */
-export function isDescendant(
-    env: aas.Environment,
-    ancestor: aas.Referable,
-    element: aas.Referable): boolean {
+export function isDescendant(env: aas.Environment, ancestor: aas.Referable, element: aas.Referable): boolean {
     for (let referable = getParent(env, element); referable; referable = getParent(env, referable)) {
         if (referable === ancestor) {
             return true;
@@ -91,18 +86,17 @@ export function isDescendant(
 export function normalize<T>(
     env: aas.Environment,
     elements: T[],
-    access: (item: T) => aas.Referable = (item) => item as aas.Referable): T[] {
+    access: (item: T) => aas.Referable = item => item as aas.Referable,
+): T[] {
     let items: T[] = elements;
     let temp: T[] = [];
     for (let i = 0; i < items.length; ++i) {
         for (let j = 0; j < items.length; j++) {
             if (i !== j) {
-                if (items[i] !== items[j] &&
-                    !isDescendant(env, access(items[i]), access(items[j]))) {
+                if (items[i] !== items[j] && !isDescendant(env, access(items[i]), access(items[j]))) {
                     temp.push(items[j]);
                 }
-            }
-            else {
+            } else {
                 temp.push(items[i]);
             }
         }
@@ -126,7 +120,10 @@ export function* traverse(root: aas.Referable): Generator<[string, [aas.Referabl
         yield item;
     }
 
-    function* traverseChildren(parent: aas.Referable, path: string): Generator<[string, [aas.Referable, aas.Referable]]> {
+    function* traverseChildren(
+        parent: aas.Referable,
+        path: string,
+    ): Generator<[string, [aas.Referable, aas.Referable]]> {
         for (const child of getChildren(parent)) {
             const childPath = path + child.idShort;
             yield [path + child.idShort, [parent, child]];
@@ -139,8 +136,8 @@ export function* traverse(root: aas.Referable): Generator<[string, [aas.Referabl
 }
 
 /**
- * 
- * @param root 
+ *
+ * @param root
  */
 export function* flat(root: aas.Referable): Generator<aas.Referable> {
     yield root;
@@ -166,9 +163,7 @@ export function* flat(root: aas.Referable): Generator<aas.Referable> {
  * @param targetEnv The destination element.
  * @returns The differences between the source and destination element.
  */
-export function diff(
-    sourceEnv: aas.Environment,
-    targetEnv: aas.Environment): DifferenceItem[] {
+export function diff(sourceEnv: aas.Environment, targetEnv: aas.Environment): DifferenceItem[] {
     if (sourceEnv && targetEnv && sourceEnv === targetEnv) {
         return [];
     }
@@ -176,14 +171,15 @@ export function diff(
     return [
         ...diffCollection(sourceEnv.assetAdministrationShells, targetEnv.assetAdministrationShells),
         ...diffCollection(sourceEnv.submodels, targetEnv.submodels),
-        ...diffCollection(sourceEnv.conceptDescriptions, targetEnv.conceptDescriptions)];
+        ...diffCollection(sourceEnv.conceptDescriptions, targetEnv.conceptDescriptions),
+    ];
 
     function diffCollection(sources: aas.Referable[], targets: aas.Referable[]): DifferenceItem[] {
         const diffs: DifferenceItem[] = [];
         for (let i = 0; i < sources.length; i++) {
             const j = targets.findIndex(item => item.idShort === sources[i].idShort);
             if (j < 0) {
-                diffs.push({ type: 'inserted', sourceIndex: i, sourceElement: sources[i] })
+                diffs.push({ type: 'inserted', sourceIndex: i, sourceElement: sources[i] });
             } else {
                 diffs.push(...diffReferable(sources[i], targets[j]));
             }
@@ -222,7 +218,7 @@ export function diff(
                         sourceIndex: indexOf(srcParent, src),
                         destinationParent: dstParent,
                         destinationElement: dst,
-                        destinationIndex: indexOf(dstParent, dst)
+                        destinationIndex: indexOf(dstParent, dst),
                     });
                 } else {
                     const i = indexOf(srcParent, src);
@@ -235,7 +231,7 @@ export function diff(
                             sourceIndex: i,
                             destinationParent: dstParent,
                             destinationElement: dst,
-                            destinationIndex: j
+                            destinationIndex: j,
                         });
                     }
                 }
@@ -245,7 +241,7 @@ export function diff(
                     sourceParent: getParent(targetEnv, destinationItem[1][1]),
                     destinationParent: destinationItem[1][0],
                     destinationElement: destinationItem[1][1],
-                    destinationIndex: indexOf(destinationItem[1][0], destinationItem[1][1])
+                    destinationIndex: indexOf(destinationItem[1][0], destinationItem[1][1]),
                 });
             }
         }
@@ -257,7 +253,7 @@ export function diff(
                     sourceParent: item[1][0],
                     sourceElement: item[1][1],
                     sourceIndex: indexOf(item[1][0], item[1][1]),
-                    destinationParent: getParent(targetEnv, item[1][1])
+                    destinationParent: getParent(targetEnv, item[1][1]),
                 });
             }
         }
@@ -269,7 +265,7 @@ export function diff(
     }
 
     function twins(a?: aas.Referable, b?: aas.Referable): boolean {
-        return a && b ? a === b || equalReference(a.parent, b.parent) && a.idShort === b.idShort : false;
+        return a && b ? a === b || (equalReference(a.parent, b.parent) && a.idShort === b.idShort) : false;
     }
 
     function indexOf(parent: aas.Referable | undefined, child: aas.Referable): number {
@@ -284,19 +280,23 @@ export function diff(
             if (a.modelType === 'SubmodelElementCollection') {
                 equal = isEqual(
                     { ...a, value: undefined } as aas.SubmodelElementCollection,
-                    { ...b, value: undefined } as aas.SubmodelElementCollection);
+                    { ...b, value: undefined } as aas.SubmodelElementCollection,
+                );
             } else if (a.modelType === 'SubmodelElementList') {
                 equal = isEqual(
                     { ...a, value: undefined } as aas.SubmodelElementList,
-                    { ...b, value: undefined } as aas.SubmodelElementList);
+                    { ...b, value: undefined } as aas.SubmodelElementList,
+                );
             } else if (a.modelType === 'Submodel') {
                 equal = isEqual(
                     { ...a, submodelElements: undefined } as aas.Submodel,
-                    { ...b, submodelElements: undefined } as aas.Submodel);
+                    { ...b, submodelElements: undefined } as aas.Submodel,
+                );
             } else if (a.modelType === 'AssetAdministrationShell') {
                 equal = isEqual(
                     { ...a, submodels: undefined } as aas.AssetAdministrationShell,
-                    { ...b, submodels: undefined } as aas.AssetAdministrationShell);
+                    { ...b, submodels: undefined } as aas.AssetAdministrationShell,
+                );
             } else {
                 equal = isEqual(a, b);
             }
@@ -331,15 +331,19 @@ export function diffAsync(source: aas.Environment, destination: aas.Environment)
 export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
     const queue: [aas.Referable, aas.Referable][] = [];
     if (a && b) {
-        if (!equalLength(a.assetAdministrationShells, b.assetAdministrationShells) ||
+        if (
+            !equalLength(a.assetAdministrationShells, b.assetAdministrationShells) ||
             !equalLength(a.submodels, b.submodels) ||
-            !equalLength(a.conceptDescriptions, b.conceptDescriptions)) {
+            !equalLength(a.conceptDescriptions, b.conceptDescriptions)
+        ) {
             return false;
         }
 
-        if (!queueReferables(a.assetAdministrationShells, b.assetAdministrationShells) ||
+        if (
+            !queueReferables(a.assetAdministrationShells, b.assetAdministrationShells) ||
             !queueReferables(a.submodels, b.submodels) ||
-            !queueReferables(a.conceptDescriptions, b.conceptDescriptions)) {
+            !queueReferables(a.conceptDescriptions, b.conceptDescriptions)
+        ) {
             return false;
         }
 
@@ -382,7 +386,10 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
             case 'Submodel':
                 return equalSubmodel(a as aas.Submodel, b as aas.Submodel);
             case 'SubmodelElementCollection':
-                return equalSubmodelElementCollection(a as aas.SubmodelElementCollection, b as aas.SubmodelElementCollection);
+                return equalSubmodelElementCollection(
+                    a as aas.SubmodelElementCollection,
+                    b as aas.SubmodelElementCollection,
+                );
             case 'SubmodelElementList':
                 return equalSubmodelElementList(a as aas.SubmodelElementList, b as aas.SubmodelElementList);
             case 'AssetAdministrationShell':
@@ -403,12 +410,15 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
     }
 
     function equalIdentifiable(a: aas.Identifiable, b: aas.Identifiable): boolean {
-        return equalReferable(a, b) &&
-            a.id === b.id &&
-            equalAdministrativeInformation(a.administration, b.administration);
+        return (
+            equalReferable(a, b) && a.id === b.id && equalAdministrativeInformation(a.administration, b.administration)
+        );
     }
 
-    function equalAdministrativeInformation(a?: aas.AdministrativeInformation, b?: aas.AdministrativeInformation): boolean {
+    function equalAdministrativeInformation(
+        a?: aas.AdministrativeInformation,
+        b?: aas.AdministrativeInformation,
+    ): boolean {
         if (a === b) {
             return true;
         }
@@ -424,7 +434,10 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         return equalEmbeddedDataSpecifications(a.embeddedDataSpecifications, b.embeddedDataSpecifications);
     }
 
-    function equalEmbeddedDataSpecifications(a?: aas.EmbeddedDataSpecification[], b?: aas.EmbeddedDataSpecification[]): boolean {
+    function equalEmbeddedDataSpecifications(
+        a?: aas.EmbeddedDataSpecification[],
+        b?: aas.EmbeddedDataSpecification[],
+    ): boolean {
         if (a === b) {
             return true;
         }
@@ -442,11 +455,17 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         return false;
     }
 
-    function equalEmbeddedDataSpecification(a: aas.EmbeddedDataSpecification, b: aas.EmbeddedDataSpecification): boolean {
-        return equalReference(a.dataSpecification, b.dataSpecification) &&
-            equalDataSpecificationContent(a.dataSpecificationContent, b.dataSpecificationContent);
+    function equalEmbeddedDataSpecification(
+        a: aas.EmbeddedDataSpecification,
+        b: aas.EmbeddedDataSpecification,
+    ): boolean {
+        return (
+            equalReference(a.dataSpecification, b.dataSpecification) &&
+            equalDataSpecificationContent(a.dataSpecificationContent, b.dataSpecificationContent)
+        );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function equalDataSpecificationContent(a: aas.DataSpecificationContent, b: aas.DataSpecificationContent): boolean {
         // ToDo:
         return true;
@@ -479,8 +498,13 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
     }
 
     function equalQualifier(a: aas.Qualifier, b: aas.Qualifier) {
-        return a.kind === b.kind && a.type === b.type && a.valueType === b.valueType && a.value === b.value &&
-            equalReference(a.valueId, b.valueId);
+        return (
+            a.kind === b.kind &&
+            a.type === b.type &&
+            a.valueType === b.valueType &&
+            a.value === b.value &&
+            equalReference(a.valueId, b.valueId)
+        );
     }
 
     function equalHasKind(a: aas.HasKind, b: aas.HasKind): boolean {
@@ -492,16 +516,20 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
             return false;
         }
 
-        return equalReferences(a.submodels, b.submodels) &&
+        return (
+            equalReferences(a.submodels, b.submodels) &&
             equalAssetInformation(a.assetInformation, b.assetInformation) &&
-            equalReference(a.derivedFrom, b.derivedFrom);
+            equalReference(a.derivedFrom, b.derivedFrom)
+        );
     }
 
     function equalAssetInformation(a: aas.AssetInformation, b: aas.AssetInformation): boolean {
-        return a.assetKind === b.assetKind &&
+        return (
+            a.assetKind === b.assetKind &&
             a.globalAssetId === b.globalAssetId &&
             equalSpecificIds(a.specificAssetIds, b.specificAssetIds) &&
-            equalResource(a.defaultThumbnail, b.defaultThumbnail);
+            equalResource(a.defaultThumbnail, b.defaultThumbnail)
+        );
     }
 
     function equalSpecificIds(a?: aas.SpecificAssetId[], b?: aas.SpecificAssetId[]): boolean {
@@ -527,28 +555,34 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
     }
 
     function equalSubmodel(a: aas.Submodel, b: aas.Submodel): boolean {
-        return equalIdentifiable(a, b) &&
+        return (
+            equalIdentifiable(a, b) &&
             equalHasDataSpecification(a, b) &&
             equalHasSemantic(a, b) &&
             equalQualifiable(a, b) &&
             equalHasKind(a, b) &&
-            queueReferables(a.submodelElements, b.submodelElements);
+            queueReferables(a.submodelElements, b.submodelElements)
+        );
     }
 
     function equalReferable(a: aas.Referable, b: aas.Referable): boolean {
-        return a.modelType === b.modelType &&
+        return (
+            a.modelType === b.modelType &&
             a.idShort === b.idShort &&
             a.category === b.category &&
             equalLangStrings(a.descriptions, b.descriptions) &&
-            equalReference(a.parent, b.parent);
+            equalReference(a.parent, b.parent)
+        );
     }
 
     function equalSubmodelElement(a: aas.SubmodelElement, b: aas.SubmodelElement): boolean {
-        return equalReferable(a, b) &&
+        return (
+            equalReferable(a, b) &&
             equalHasDataSpecification(a, b) &&
             equalHasSemantic(a, b) &&
             equalQualifiable(a, b) &&
-            equalHasKind(a, b);
+            equalHasKind(a, b)
+        );
     }
 
     function equalProperty(a: aas.Property, b: aas.Property): boolean {
@@ -573,17 +607,21 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         return equalSubmodelElement(a, b) && equalLangStrings(a.value, b.value);
     }
 
-    function equalSubmodelElementCollection(a: aas.SubmodelElementCollection, b: aas.SubmodelElementCollection): boolean {
-        return equalSubmodelElement(a, b) &&
-            queueReferables(a.value, b.value);
+    function equalSubmodelElementCollection(
+        a: aas.SubmodelElementCollection,
+        b: aas.SubmodelElementCollection,
+    ): boolean {
+        return equalSubmodelElement(a, b) && queueReferables(a.value, b.value);
     }
 
     function equalSubmodelElementList(a: aas.SubmodelElementList, b: aas.SubmodelElementList): boolean {
-        return equalSubmodelElement(a, b) &&
+        return (
+            equalSubmodelElement(a, b) &&
             a.orderRelevant === b.orderRelevant &&
             a.typeValueListElement === b.typeValueListElement &&
             equalReference(a.semanticIdListElement, b.semanticIdListElement) &&
-            queueReferables(a.value, b.value);
+            queueReferables(a.value, b.value)
+        );
     }
 
     function equalLangStrings(a?: aas.LangString[], b?: aas.LangString[]): boolean {
@@ -609,17 +647,25 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
     }
 
     function equalEntity(a: aas.Entity, b: aas.Entity): boolean {
-        return equalSubmodelElement(a, b) &&
+        return (
+            equalSubmodelElement(a, b) &&
             a.entityType == b.entityType &&
             a.globalAssetId === b.globalAssetId &&
             equalSpecificAssetId(a.specificAssetId, b.specificAssetId) &&
-            queueReferables(a.statements, b.statements);
+            queueReferables(a.statements, b.statements)
+        );
     }
 
     function equalSpecificAssetId(a?: aas.SpecificAssetId, b?: aas.SpecificAssetId): boolean {
-        return a === b ||
-            a != null && b != null && equalHasSemantic(a, b) && a.name === b.name && a.value === b.value &&
-            equalReference(a.externalSubjectId, b.externalSubjectId);
+        return (
+            a === b ||
+            (a != null &&
+                b != null &&
+                equalHasSemantic(a, b) &&
+                a.name === b.name &&
+                a.value === b.value &&
+                equalReference(a.externalSubjectId, b.externalSubjectId))
+        );
     }
 
     function equalFile(a: aas.File, b: aas.File): boolean {
@@ -661,7 +707,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
             return true;
         }
 
-        if (a && b && a.keys && b.keys && (a.keys.length === b.keys.length)) {
+        if (a && b && a.keys && b.keys && a.keys.length === b.keys.length) {
             for (let i = 0, n = a.keys.length; i < n; i++) {
                 if (!equalKey(a.keys[i], b.keys[i])) {
                     return false;
@@ -726,7 +772,7 @@ export function getAbbreviation(modelType: aas.ModelType): AASAbbreviation | und
         case 'ReferenceElement':
             return 'Ref';
         case 'RelationshipElement':
-            return 'Rel'
+            return 'Rel';
         case 'Submodel':
             return 'SM';
         case 'SubmodelElementCollection':
@@ -783,7 +829,8 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
  */
 export function selectReferable<T extends aas.Referable>(
     env: aas.Environment,
-    reference: aas.Reference): T | undefined {
+    reference: aas.Reference,
+): T | undefined {
     let referable: aas.Referable | undefined;
     for (const key of reference.keys) {
         switch (key.type) {
@@ -824,9 +871,9 @@ export function selectElement<T extends aas.Referable>(env: aas.Environment, ...
                 if (current.modelType === 'Submodel') {
                     current = (current as aas.Submodel).submodelElements?.find(item => item.idShort === idShort);
                 } else if (current.modelType === 'SubmodelElementCollection') {
-                    current = (current as aas.SubmodelElementCollection).value?.find(item => item.idShort === idShort)
+                    current = (current as aas.SubmodelElementCollection).value?.find(item => item.idShort === idShort);
                 } else if (current.modelType === 'SubmodelElementList') {
-                    current = (current as aas.SubmodelElementList).value?.find(item => item.idShort === idShort)
+                    current = (current as aas.SubmodelElementList).value?.find(item => item.idShort === idShort);
                 }
 
                 if (!current) {
@@ -845,9 +892,7 @@ export function selectElement<T extends aas.Referable>(env: aas.Environment, ...
  * @param reference The reference.
  * @returns The referables that belongs to the specified reference.
  */
-export function resolveReference(
-    env: aas.Environment,
-    reference: aas.Reference): aas.Referable[] | undefined {
+export function resolveReference(env: aas.Environment, reference: aas.Reference): aas.Referable[] | undefined {
     let parent: aas.Referable | undefined;
     const referables: aas.Referable[] = [];
     for (const key of reference.keys) {
@@ -891,18 +936,22 @@ export function resolveReference(
 }
 
 /**
- * 
- * @param env 
- * @param referable 
- * @returns 
+ *
+ * @param env
+ * @param referable
+ * @returns
  */
 export function getIEC61360Content(
     env: aas.Environment,
-    referable: aas.Referable): aas.DataSpecificationIEC61360 | undefined {
+    referable: aas.Referable,
+): aas.DataSpecificationIEC61360 | undefined {
     const hasDataSpecification = referable as aas.HasDataSpecification;
     if (hasDataSpecification.embeddedDataSpecifications) {
         for (const item of hasDataSpecification.embeddedDataSpecifications) {
-            if (item.dataSpecification.keys[0].value === 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360') {
+            if (
+                item.dataSpecification.keys[0].value ===
+                'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360'
+            ) {
                 return item.dataSpecificationContent as aas.DataSpecificationIEC61360;
             }
         }
@@ -920,19 +969,19 @@ export function getIEC61360Content(
 }
 
 /**
- * 
- * @param env 
- * @param referable 
+ *
+ * @param env
+ * @param referable
  */
 export function getUnit(env: aas.Environment, referable: aas.Referable): string | undefined {
     return getIEC61360Content(env, referable)?.unit;
 }
 
 /**
- * 
- * @param env 
- * @param referable 
- * @returns 
+ *
+ * @param env
+ * @param referable
+ * @returns
  */
 export function getPreferredName(env: aas.Environment, referable: aas.Referable): aas.LangString[] | undefined {
     return getIEC61360Content(env, referable)?.preferredName;
@@ -978,7 +1027,7 @@ export function getAbsolutePath(referable: aas.Referable): string[] {
 }
 
 /**
- * Gets the idShort path of the specified 
+ * Gets the idShort path of the specified
  * @param referable The current referable.
  * @returns The idShort path of the specified referable.
  */
@@ -1003,8 +1052,11 @@ function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
             return true;
         }
 
-        if (a.keys.length === b.keys.length && a.type === b.type &&
-            equalReference(a.referredSemanticId, b.referredSemanticId)) {
+        if (
+            a.keys.length === b.keys.length &&
+            a.type === b.type &&
+            equalReference(a.referredSemanticId, b.referredSemanticId)
+        ) {
             for (let i = 0; i < a.keys.length; i++) {
                 if (a.keys[i].type !== b.keys[i].type || a.keys[i].value === b.keys[i].value) {
                     return false;
@@ -1017,4 +1069,3 @@ function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
 
     return false;
 }
-

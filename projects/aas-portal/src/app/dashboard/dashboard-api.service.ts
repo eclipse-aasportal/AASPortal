@@ -11,12 +11,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DashboardApiService {
-    constructor(
-        private readonly http: HttpClient
-    ) { }
+    public constructor(private readonly http: HttpClient) {}
 
     public getBlobValue(url: string): Observable<string> {
         return this.http.get<string>(url);

@@ -9,8 +9,7 @@
 import { RowDataPacket } from 'mysql2/promise';
 import { AASEndpoint, AASDocument } from 'common';
 
-export interface MySqlEndpoint extends AASEndpoint, RowDataPacket {
-}
+export interface MySqlEndpoint extends AASEndpoint, RowDataPacket {}
 
 export interface MySqlDocument extends AASDocument, RowDataPacket {
     uuid: string;

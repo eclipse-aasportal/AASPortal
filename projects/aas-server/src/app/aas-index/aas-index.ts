@@ -17,7 +17,7 @@ import {
     isProperty,
     parseDate,
     parseNumber,
-    toBoolean
+    toBoolean,
 } from 'common';
 
 export abstract class AASIndex {
@@ -58,15 +58,14 @@ export abstract class AASIndex {
 
     protected toStringValue(referable: aas.Referable): string | undefined {
         switch (referable.modelType) {
-            case 'Property':
-                {
-                    const property = referable as aas.Property;
-                    if (baseType(property.valueType) === 'string') {
-                        return property.value;
-                    }
-
-                    return undefined;
+            case 'Property': {
+                const property = referable as aas.Property;
+                if (baseType(property.valueType) === 'string') {
+                    return property.value;
                 }
+
+                return undefined;
+            }
             case 'MultiLanguageProperty':
                 return (referable as aas.MultiLanguageProperty).value?.map(item => item.text).join(' ');
             case 'File':

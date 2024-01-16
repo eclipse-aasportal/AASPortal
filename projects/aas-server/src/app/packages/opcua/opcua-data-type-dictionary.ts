@@ -25,7 +25,7 @@ export class OpcuaDataTypeDictionary {
 
         return this.toDataTypeDefXsd(entry?.name);
     }
- 
+
     public async initializeAsync(session: ClientSession): Promise<void> {
         this.dataTypes.clear();
         await this.browseAsync(session, 'DataTypesFolder');
@@ -38,7 +38,7 @@ export class OpcuaDataTypeDictionary {
                 if (obj.nodeClass === NodeClass.DataType && obj.browseName.name) {
                     this.dataTypes.set(obj.nodeId.toString(), {
                         name: obj.browseName.name,
-                        baseType: null
+                        baseType: null,
                     });
                 }
 
@@ -48,7 +48,8 @@ export class OpcuaDataTypeDictionary {
             }
         }
     }
-       
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private toDataTypeDefXsd(name: string | undefined): aas.DataTypeDefXsd {
         throw new Error('Method not implemented.');
     }

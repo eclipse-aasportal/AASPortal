@@ -17,33 +17,24 @@ export enum AASActionType {
     APPLY_DOCUMENT = '[AAS] apply document',
     RESET_MODIFIED = '[AAS] reset modified',
     SET_DASHBOARD = '[AAS] set dashboard',
-    SET_SEARCH = '[AAS] set search'
+    SET_SEARCH = '[AAS] set search',
 }
 export interface GetDocumentAction extends TypedAction<AASActionType.GET_DOCUMENT> {
     id: string;
     name?: string;
 }
 
-export const getDocument = createAction(
-    AASActionType.GET_DOCUMENT, 
-    props<{ id: string, name?: string }>());
+export const getDocument = createAction(AASActionType.GET_DOCUMENT, props<{ id: string; name?: string }>());
 
-export const setDocument = createAction(
-    AASActionType.SET_DOCUMENT, 
-    props<{ document: AASDocument | null }>());
+export const setDocument = createAction(AASActionType.SET_DOCUMENT, props<{ document: AASDocument | null }>());
 
-export const applyDocument = createAction(
-    AASActionType.APPLY_DOCUMENT, 
-    props<{ document: AASDocument }>());
+export const applyDocument = createAction(AASActionType.APPLY_DOCUMENT, props<{ document: AASDocument }>());
 
 export const setTemplateStorage = createAction(
-    AASActionType.SET_TEMPLATE_STORAGE, 
-    props<{ templates: TemplateDescriptor[] }>());
+    AASActionType.SET_TEMPLATE_STORAGE,
+    props<{ templates: TemplateDescriptor[] }>(),
+);
 
-export const resetModified = createAction(
-    AASActionType.RESET_MODIFIED,
-     props<{ document: AASDocument }>());
+export const resetModified = createAction(AASActionType.RESET_MODIFIED, props<{ document: AASDocument }>());
 
-export const setSearch = createAction(
-    AASActionType.SET_SEARCH, 
-    props<{ search: string }>());
+export const setSearch = createAction(AASActionType.SET_SEARCH, props<{ search: string }>());

@@ -16,13 +16,14 @@ import { environment } from '../../environments/environment';
 @Component({
     selector: 'fhg-about',
     templateUrl: './about.component.html',
-    styleUrls: ['./about.component.scss']
+    styleUrls: ['./about.component.scss'],
 })
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
-    constructor(
+    public constructor(
         private serverApi: ServerApiService,
         private translate: TranslateService,
-        private toolbar: ToolbarService) {
+        private toolbar: ToolbarService,
+    ) {
         this.author = environment.author;
         this.version = environment.version;
         this.homepage = environment.homepage;
@@ -33,7 +34,7 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public version = '';
 
-    public serverVersion = ''
+    public serverVersion = '';
 
     public author = '';
 
@@ -44,13 +45,12 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     public messages: Message[] = [];
 
     public ngOnInit(): void {
-
         this.serverApi.getInfo().subscribe(info => {
             this.serverVersion = info.version;
             this.libraries = info.libraries ?? [];
         });
 
-        this.serverApi.getMessages().subscribe(messages => this.messages = messages);
+        this.serverApi.getMessages().subscribe(messages => (this.messages = messages));
     }
 
     public ngAfterViewInit(): void {

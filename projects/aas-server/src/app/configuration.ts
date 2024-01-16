@@ -10,7 +10,7 @@ import { AASEndpoint, AASEndpointType } from 'common';
 
 /** The AAS Server configuration. */
 export interface AASServerConfiguration {
-    endpoints: AASEndpoint[]
+    endpoints: AASEndpoint[];
 }
 
 /**
@@ -41,7 +41,7 @@ export function getEndpointType(url: string | URL): AASEndpointType {
             return 'AasxDirectory';
         case 'http:':
         case 'https:':
-            return url.searchParams.get('type') as AASEndpointType ?? 'AasxServer';
+            return (url.searchParams.get('type') as AASEndpointType) ?? 'AasxServer';
         case 'opc.tcp:':
             return 'OpcuaServer';
         default:
@@ -55,7 +55,12 @@ export function getEndpointType(url: string | URL): AASEndpointType {
  * @param options The container endpoint options or name.
  * @returns The endpoint URL as string.
  */
-export function createEndpoint(url: string, name: string, type: AASEndpointType = 'AasxServer', version: string = '3.0'): AASEndpoint {
+export function createEndpoint(
+    url: string,
+    name: string,
+    type: AASEndpointType = 'AasxServer',
+    version: string = '3.0',
+): AASEndpoint {
     return { url, name, type, version };
 }
 
@@ -67,7 +72,7 @@ export function createEndpoint(url: string, name: string, type: AASEndpointType 
 export function urlToEndpoint(url: string): AASEndpoint {
     const value = new URL(url);
     const name = value.searchParams.get('name');
-    const type = value.searchParams.get('type') as AASEndpointType ?? getEndpointType(value);
+    const type = (value.searchParams.get('type') as AASEndpointType) ?? getEndpointType(value);
     const version = value.searchParams.get('version') ?? '3.0';
 
     value.search = '';

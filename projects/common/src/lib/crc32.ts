@@ -10,7 +10,7 @@ export class Crc32 {
     private readonly table: number[];
     private crc = 0;
 
-    public constructor(private readonly reversedPolynomial = 0xEDB88320) {
+    public constructor(private readonly reversedPolynomial = 0xedb88320) {
         this.table = this.generate();
     }
 
@@ -41,8 +41,8 @@ export class Crc32 {
         const dataView = new DataView(data);
         const table = this.generate();
         let crc = this.initial();
-        for (let i = 0; i < dataView.byteLength; i++) { 
-            crc = this.addByte(table, crc, dataView.getUint8(i)); 
+        for (let i = 0; i < dataView.byteLength; i++) {
+            crc = this.addByte(table, crc, dataView.getUint8(i));
         }
 
         return this.final(crc);
@@ -69,7 +69,7 @@ export class Crc32 {
                     n = n >>> 1;
                 }
             }
-            
+
             table[i] = n;
         }
 
@@ -77,17 +77,17 @@ export class Crc32 {
     }
 
     private initial(): number {
-        return 0xFFFFFFFF;
+        return 0xffffffff;
     }
 
     private addByte(table: number[], crc: number, byte: number): number {
-        crc = (crc >>> 8) ^ table[(byte) ^ (crc & 0x000000FF)];
+        crc = (crc >>> 8) ^ table[byte ^ (crc & 0x000000ff)];
         return crc;
     }
 
     private final(crc: number): number {
         crc = ~crc;
-        crc = (crc < 0) ? (0xFFFFFFFF + crc + 1) : crc;
+        crc = crc < 0 ? 0xffffffff + crc + 1 : crc;
         return crc;
     }
 }

@@ -6,21 +6,18 @@
  *
  *****************************************************************************/
 
-import { createReducer, on } from "@ngrx/store";
+import { createReducer, on } from '@ngrx/store';
 import { DocumentSubmodelPair } from 'projects/aas-lib/src/public-api';
-import * as ViewActions from "./view.actions";
-import { ViewState } from "./view.state";
+import * as ViewActions from './view.actions';
+import { ViewState } from './view.state';
 
 const initialState: ViewState = {
-    submodels: []
+    submodels: [],
 };
 
 export const viewReducer = createReducer(
     initialState,
-    on(
-        ViewActions.initView,
-        (state, { submodels, template }) => initView(state, submodels, template)
-    )
+    on(ViewActions.initView, (state, { submodels, template }) => initView(state, submodels, template)),
 );
 
 function initView(state: ViewState, submodels: DocumentSubmodelPair[], template: string | undefined): ViewState {

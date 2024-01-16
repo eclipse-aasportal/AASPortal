@@ -17,13 +17,17 @@ import { AASApiService } from './aas-api.service';
 export class AASEffects {
     public constructor(
         private readonly actions: Actions,
-        private readonly api: AASApiService
-    ) { }
+        private readonly api: AASApiService,
+    ) {}
 
     public getDocument = createEffect(() => {
         return this.actions.pipe(
             ofType<AASActions.GetDocumentAction>(AASActions.AASActionType.GET_DOCUMENT),
-            exhaustMap(action => this.api.getDocument(action.id, action.name).pipe(
-                map(document => AASActions.setDocument({ document })))));
+            exhaustMap(action =>
+                this.api
+                    .getDocument(action.id, action.name)
+                    .pipe(map(document => AASActions.setDocument({ document }))),
+            ),
+        );
     });
 }

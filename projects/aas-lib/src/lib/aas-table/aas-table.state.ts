@@ -10,15 +10,15 @@ import { AASDocument } from 'common';
 import { ViewMode } from '../types/view-mode';
 
 export class AASTableRow {
-    constructor(
+    public constructor(
         public readonly document: AASDocument,
         public readonly selected: boolean,
         public readonly expanded: boolean,
         public readonly isLeaf: boolean,
         public readonly level: number,
         public firstChild: number,
-        public nextSibling: number) {
-    }
+        public nextSibling: number,
+    ) {}
 
     public get id(): string {
         return this.document.id;

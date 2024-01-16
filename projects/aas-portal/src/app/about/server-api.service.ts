@@ -6,20 +6,17 @@
  *
  *****************************************************************************/
 
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { PackageInfo, Message } from "common";
-import { Observable } from "rxjs";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { PackageInfo, Message } from 'common';
+import { Observable } from 'rxjs';
 
 /** Realizes the IServer service. */
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ServerApiService {
-    constructor(
-        private readonly http: HttpClient,
-    ) {
-    }
+    public constructor(private readonly http: HttpClient) {}
 
     public getInfo(): Observable<PackageInfo> {
         return this.http.get<PackageInfo>('/api/v1/app/info');

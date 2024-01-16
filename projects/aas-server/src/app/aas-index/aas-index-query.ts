@@ -9,7 +9,10 @@
 import { AASQuery, OrExpression, QueryParser } from 'common';
 
 export abstract class AASIndexQuery {
-    protected constructor(expression: string, protected readonly language: string) {
+    protected constructor(
+        expression: string,
+        protected readonly language: string,
+    ) {
         this.queryParser = new QueryParser(expression, language);
     }
 

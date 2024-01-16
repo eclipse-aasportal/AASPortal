@@ -18,7 +18,7 @@ export enum LinkId {
     AAS = 1,
     VIEW = 2,
     DASHBOARD = 3,
-    ABOUT = 4
+    ABOUT = 4,
 }
 
 export interface LinkDescriptor {
@@ -30,37 +30,47 @@ export interface LinkDescriptor {
 @Component({
     selector: 'fhg-main',
     templateUrl: './main.component.html',
-    styleUrls: ['./main.component.scss']
+    styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements OnInit, OnDestroy {
     private readonly subscription = new Subscription();
     private readonly _links: LinkDescriptor[] = [
         {
-            id: LinkId.START, name: "CAPTION_START", url: "/start"
+            id: LinkId.START,
+            name: 'CAPTION_START',
+            url: '/start',
         },
         {
-            id: LinkId.AAS, name: "CAPTION_AAS", url: '/aas'
+            id: LinkId.AAS,
+            name: 'CAPTION_AAS',
+            url: '/aas',
         },
         {
-            id: LinkId.VIEW, name: "CAPTION_VIEW", url: '/view'
+            id: LinkId.VIEW,
+            name: 'CAPTION_VIEW',
+            url: '/view',
         },
         {
-            id: LinkId.DASHBOARD, name: "CAPTION_DASHBOARD", url: '/dashboard'
+            id: LinkId.DASHBOARD,
+            name: 'CAPTION_DASHBOARD',
+            url: '/dashboard',
         },
         {
-            id: LinkId.ABOUT, name: "CAPTION_ABOUT", url: "/about"
-        }
+            id: LinkId.ABOUT,
+            name: 'CAPTION_ABOUT',
+            url: '/about',
+        },
     ];
 
-    constructor(
+    public constructor(
         private readonly router: Router,
         private readonly window: WindowService,
         private readonly api: MainApiService,
         private readonly clipboard: ClipboardService,
         private readonly viewContainer: ViewContainerRef,
-        private readonly toolbar: ToolbarService) {
-
-        this.toolbarTemplate = this.toolbar.toolbarTemplate.pipe(map(value => this.nextToolbar(value)))
+        private readonly toolbar: ToolbarService,
+    ) {
+        this.toolbarTemplate = this.toolbar.toolbarTemplate.pipe(map(value => this.nextToolbar(value)));
     }
 
     @ViewChild('emptyToolbar', { read: TemplateRef })
@@ -78,14 +88,17 @@ export class MainComponent implements OnInit, OnDestroy {
         const params = this.window.getQueryParams();
         const id = params.get('id');
         if (id) {
-            this.api.getDocument(id).pipe(first()).subscribe(document => {
-                if (document) {
-                    this.clipboard.set('AASQuery', { id: document.id } as AASQuery);
-                    this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
-                } else {
-                    this.router.navigateByUrl('/start', { skipLocationChange: true });
-                }
-            });
+            this.api
+                .getDocument(id)
+                .pipe(first())
+                .subscribe(document => {
+                    if (document) {
+                        this.clipboard.set('AASQuery', { id: document.id } as AASQuery);
+                        this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
+                    } else {
+                        this.router.navigateByUrl('/start', { skipLocationChange: true });
+                    }
+                });
         } else {
             this.router.navigateByUrl('/start', { skipLocationChange: true });
         }

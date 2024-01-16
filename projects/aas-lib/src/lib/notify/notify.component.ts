@@ -13,11 +13,10 @@ import { NotifyService } from './notify.service';
 @Component({
     selector: 'fhg-notify',
     templateUrl: './notify.component.html',
-    styleUrls: ['./notify.component.scss']
+    styleUrls: ['./notify.component.scss'],
 })
 export class NotifyComponent implements OnInit {
-
-    constructor(notify: NotifyService) {
+    public constructor(notify: NotifyService) {
         this.notify = notify;
     }
 

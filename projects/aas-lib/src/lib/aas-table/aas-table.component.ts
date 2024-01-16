@@ -23,7 +23,7 @@ import { ViewMode } from '../types/view-mode';
 @Component({
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.component.html',
-    styleUrls: ['./aas-table.component.scss']
+    styleUrls: ['./aas-table.component.scss'],
 })
 export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
@@ -32,19 +32,23 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private shiftKey = false;
     private altKey = false;
 
-    constructor(
+    public constructor(
         private readonly router: Router,
         store: Store,
         private readonly clipboard: ClipboardService,
-        private readonly window: WindowService
+        private readonly window: WindowService,
     ) {
         this.store = store as Store<AASTableFeatureState>;
         this.rows = this.store.select(AASTableSelectors.selectRows);
         this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
         this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
-        this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
-            .subscribe(values => this._selected = values));
+        this.subscription.add(
+            this.store
+                .select(AASTableSelectors.selectSelectedDocuments)
+                .pipe()
+                .subscribe(values => (this._selected = values)),
+        );
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -77,24 +81,32 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     public readonly rows: Observable<AASTableRow[]>;
 
     public ngOnInit(): void {
-        this.subscription.add(this.store.select(AASTableSelectors.selectSelectedDocuments).pipe()
-            .subscribe(documents => {
-                this._selected = documents;
-                this.selectedChange.emit(documents);
-            }));
+        this.subscription.add(
+            this.store
+                .select(AASTableSelectors.selectSelectedDocuments)
+                .pipe()
+                .subscribe(documents => {
+                    this._selected = documents;
+                    this.selectedChange.emit(documents);
+                }),
+        );
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes['viewMode'] && this.viewMode != null) {
-            this.subscription.add(this.viewMode.subscribe(value => {
-                this.store.dispatch(AASTableActions.setViewMode({ viewMode: value }));
-            }));
+            this.subscription.add(
+                this.viewMode.subscribe(value => {
+                    this.store.dispatch(AASTableActions.setViewMode({ viewMode: value }));
+                }),
+            );
         }
 
         if (changes['documents'] && this.documents != null) {
-            this.subscription.add(this.documents.subscribe(values => {
-                this.store.dispatch(AASTableActions.updateView({ documents: values }));
-            }));
+            this.subscription.add(
+                this.documents.subscribe(values => {
+                    this.store.dispatch(AASTableActions.updateView({ documents: values }));
+                }),
+            );
         }
     }
 

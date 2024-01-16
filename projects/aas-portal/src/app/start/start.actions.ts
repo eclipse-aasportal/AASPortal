@@ -38,49 +38,40 @@ export interface GetFavoritesAction extends TypedAction<StartActionType.GET_FIRS
     documents: AASDocument[];
 }
 
-export const setListView = createAction(
-    StartActionType.SET_LIST_VIEW);
+export const setListView = createAction(StartActionType.SET_LIST_VIEW);
 
-export const setTreeView = createAction(
-    StartActionType.SET_TREE_VIEW);
+export const setTreeView = createAction(StartActionType.SET_TREE_VIEW);
 
-export const setViewMode = createAction(
-    StartActionType.SET_VIEW_MODE,
-    props<{ viewMode: ViewMode }>());
+export const setViewMode = createAction(StartActionType.SET_VIEW_MODE, props<{ viewMode: ViewMode }>());
 
-export const addTree = createAction(
-    StartActionType.ADD_TREE,
-    props<{ documents: AASDocument[] }>());
+export const addTree = createAction(StartActionType.ADD_TREE, props<{ documents: AASDocument[] }>());
 
-export const getFirstPage = createAction(
-    StartActionType.GET_FIRST_PAGE,
-    props<{ limit?: number, filter?: string }>());
+export const getFirstPage = createAction(StartActionType.GET_FIRST_PAGE, props<{ limit?: number; filter?: string }>());
 
-export const getNextPage = createAction(
-    StartActionType.GET_NEXT_PAGE);
+export const getNextPage = createAction(StartActionType.GET_NEXT_PAGE);
 
-export const getPreviousPage = createAction(
-    StartActionType.GET_PREVIOUS_PAGE);
+export const getPreviousPage = createAction(StartActionType.GET_PREVIOUS_PAGE);
 
-export const getLastPage = createAction(
-    StartActionType.GET_LAST_PAGE);
+export const getLastPage = createAction(StartActionType.GET_LAST_PAGE);
 
 export const setPage = createAction(
     StartActionType.SET_PAGE,
-    props<{ page: AASPage, limit: number | undefined, filter: string | undefined }>());
+    props<{ page: AASPage; limit: number | undefined; filter: string | undefined }>(),
+);
 
 export const setContent = createAction(
     StartActionType.SET_CONTENT,
-    props<{ document: AASDocument, content: aas.Environment }>());
+    props<{ document: AASDocument; content: aas.Environment }>(),
+);
 
 export const getFavorites = createAction(
     StartActionType.GET_FAVORITES,
-    props<{ name: string, documents: AASDocument[] }>());
+    props<{ name: string; documents: AASDocument[] }>(),
+);
 
 export const setFavorites = createAction(
     StartActionType.SET_FAVORITES,
-    props<{ name: string, documents: AASDocument[] }>());
+    props<{ name: string; documents: AASDocument[] }>(),
+);
 
-export const removeFavorites = createAction(
-    StartActionType.REMOVE_FAVORITES,
-    props<{ favorites: AASDocument[] }>());
+export const removeFavorites = createAction(StartActionType.REMOVE_FAVORITES, props<{ favorites: AASDocument[] }>());

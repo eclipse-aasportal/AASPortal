@@ -14,10 +14,13 @@ import { DomSanitizer } from '@angular/platform-browser';
 @Component({
     selector: 'fhg-img',
     templateUrl: './secured-image.component.html',
-    styleUrls: ['./secured-image.component.scss']
+    styleUrls: ['./secured-image.component.scss'],
 })
 export class SecuredImageComponent implements OnChanges {
-    constructor(private httpClient: HttpClient, private domSanitizer: DomSanitizer) {
+    public constructor(
+        private httpClient: HttpClient,
+        private domSanitizer: DomSanitizer,
+    ) {
         this.dataUrl$ = this.src$.pipe(switchMap(url => this.loadImage(url)));
     }
 

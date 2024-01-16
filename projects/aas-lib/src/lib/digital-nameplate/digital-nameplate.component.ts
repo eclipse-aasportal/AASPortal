@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     aas,
@@ -14,7 +14,7 @@ import {
     getLocaleValue,
     isMultiLanguageProperty,
     isProperty,
-    isSubmodelElementCollection
+    isSubmodelElementCollection,
 } from 'common';
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
 
@@ -32,11 +32,10 @@ export interface DigitalNameplate {
 @Component({
     selector: 'fhg-digital-nameplate',
     templateUrl: './digital-nameplate.component.html',
-    styleUrls: ['./digital-nameplate.component.scss']
+    styleUrls: ['./digital-nameplate.component.scss'],
 })
 export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
-
-    constructor(private readonly translate: TranslateService) { }
+    public constructor(private readonly translate: TranslateService) {}
 
     @Input()
     public submodels: DocumentSubmodelPair[] | null = null;
@@ -50,19 +49,20 @@ export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
     }
 
     private init() {
-        this.nameplates = this.submodels?.map(pair => {
-            const submodel = pair.submodel;
-            return {
-                serialNumber: this.getPropertyValue(submodel, ['SerialNumber']),
-                productCountryOfOrigin: this.getPropertyValue(submodel, ['ProductCountryOfOrigin']),
-                yearOfConstruction: this.getPropertyValue(submodel, ['YearOfConstruction']),
-                manufacturerName: this.getPropertyValue(submodel, ['ManufacturerName']),
-                countryCode: this.getPropertyValue(submodel, ['PhysicalAddress', 'CountryCode']),
-                zip: this.getPropertyValue(submodel, ['PhysicalAddress', 'Zip']),
-                cityTown: this.getPropertyValue(submodel, ['PhysicalAddress', 'CityTown']),
-                street: this.getPropertyValue(submodel, ['PhysicalAddress', 'Street'])
-            };
-        }) ?? [];
+        this.nameplates =
+            this.submodels?.map(pair => {
+                const submodel = pair.submodel;
+                return {
+                    serialNumber: this.getPropertyValue(submodel, ['SerialNumber']),
+                    productCountryOfOrigin: this.getPropertyValue(submodel, ['ProductCountryOfOrigin']),
+                    yearOfConstruction: this.getPropertyValue(submodel, ['YearOfConstruction']),
+                    manufacturerName: this.getPropertyValue(submodel, ['ManufacturerName']),
+                    countryCode: this.getPropertyValue(submodel, ['PhysicalAddress', 'CountryCode']),
+                    zip: this.getPropertyValue(submodel, ['PhysicalAddress', 'Zip']),
+                    cityTown: this.getPropertyValue(submodel, ['PhysicalAddress', 'CityTown']),
+                    street: this.getPropertyValue(submodel, ['PhysicalAddress', 'Street']),
+                };
+            }) ?? [];
     }
 
     private getPropertyValue(submodel: aas.Submodel, path: string[]): string {

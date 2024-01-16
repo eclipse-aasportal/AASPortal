@@ -8,5 +8,5 @@
 
 export enum SelectionMode {
     Single = 'Single',
-    Multiple = 'Multiple'
+    Multiple = 'Multiple',
 }

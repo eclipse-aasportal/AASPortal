@@ -7,23 +7,23 @@
  *****************************************************************************/
 
 export type AasSubmodelElements =
-    'AnnotatedRelationshipElement' |
-    'BasicEventElement' |
-    'Blob' |
-    'Capability' |
-    'DataElement' |
-    'Entity' |
-    'EventElement' |
-    'File' |
-    'MultiLanguageProperty' |
-    'Operation' |
-    'Property' |
-    'Range' |
-    'ReferenceElement' |
-    'RelationshipElement' |
-    'SubmodelElement' |
-    'SubmodelElementCollection' |
-    'SubmodelElementList';
+    | 'AnnotatedRelationshipElement'
+    | 'BasicEventElement'
+    | 'Blob'
+    | 'Capability'
+    | 'DataElement'
+    | 'Entity'
+    | 'EventElement'
+    | 'File'
+    | 'MultiLanguageProperty'
+    | 'Operation'
+    | 'Property'
+    | 'Range'
+    | 'ReferenceElement'
+    | 'RelationshipElement'
+    | 'SubmodelElement'
+    | 'SubmodelElementCollection'
+    | 'SubmodelElementList';
 
 export interface AdministrativeInformation extends HasDataSpecification {
     version?: string;
@@ -69,8 +69,7 @@ export interface Blob extends DataElement {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Capability extends SubmodelElement {
-}
+export interface Capability extends SubmodelElement {}
 
 export interface ConceptDescription extends Identifiable, HasDataSpecification {
     isCaseOf?: Reference[];
@@ -101,57 +100,57 @@ export interface DataSpecificationIEC61360 extends DataSpecificationContent {
 }
 
 export type DataTypeDefXsd =
-    'xs:anyURI' |
-    'xs:base64Binary' |
-    'xs:boolean' |
-    'xs:byte' |
-    'xs:date' |
-    'xs:dateTime' |
-    'xs:decimal' |
-    'xs:double' |
-    'xs:duration' |
-    'xs:float' |
-    'xs:gDay' |
-    'xs:gMonth' |
-    'xs:gMonthDay' |
-    'xs:gYear' |
-    'xs:gYearMonth' |
-    'xs:hexBinary' |
-    'xs:int' |
-    'xs:integer' |
-    'xs:long' |
-    'xs:negativeInteger' |
-    'xs:nonNegativeInteger' |
-    'xs:nonPositiveInteger' |
-    'xs:positiveInteger' |
-    'xs:short' |
-    'xs:string' |
-    'xs:time' |
-    'xs:unsignedByte' |
-    'xs:unsignedInt' |
-    'xs:unsignedLong' |
-    'xs:unsignedShort';
+    | 'xs:anyURI'
+    | 'xs:base64Binary'
+    | 'xs:boolean'
+    | 'xs:byte'
+    | 'xs:date'
+    | 'xs:dateTime'
+    | 'xs:decimal'
+    | 'xs:double'
+    | 'xs:duration'
+    | 'xs:float'
+    | 'xs:gDay'
+    | 'xs:gMonth'
+    | 'xs:gMonthDay'
+    | 'xs:gYear'
+    | 'xs:gYearMonth'
+    | 'xs:hexBinary'
+    | 'xs:int'
+    | 'xs:integer'
+    | 'xs:long'
+    | 'xs:negativeInteger'
+    | 'xs:nonNegativeInteger'
+    | 'xs:nonPositiveInteger'
+    | 'xs:positiveInteger'
+    | 'xs:short'
+    | 'xs:string'
+    | 'xs:time'
+    | 'xs:unsignedByte'
+    | 'xs:unsignedInt'
+    | 'xs:unsignedLong'
+    | 'xs:unsignedShort';
 
 export type DataTypeIEC61360 =
-    'BLOB' |
-    'BOOLEAN' |
-    'DATE' |
-    'FILE' |
-    'HTML' |
-    'INTEGER_COUNT' |
-    'INTEGER_CURRENCY' |
-    'INTEGER_MEASURE' |
-    'IRDI' |
-    'IRI' |
-    'RATIONAL' |
-    'RATIONAL_MEASURE' |
-    'REAL_COUNT' |
-    'REAL_CURRENCY' |
-    'REAL_MEASURE' |
-    'STRING' |
-    'STRING_TRANSLATABLE' |
-    'TIME' |
-    'TIMESTAMP';
+    | 'BLOB'
+    | 'BOOLEAN'
+    | 'DATE'
+    | 'FILE'
+    | 'HTML'
+    | 'INTEGER_COUNT'
+    | 'INTEGER_CURRENCY'
+    | 'INTEGER_MEASURE'
+    | 'IRDI'
+    | 'IRI'
+    | 'RATIONAL'
+    | 'RATIONAL_MEASURE'
+    | 'REAL_COUNT'
+    | 'REAL_CURRENCY'
+    | 'REAL_MEASURE'
+    | 'STRING'
+    | 'STRING_TRANSLATABLE'
+    | 'TIME'
+    | 'TIMESTAMP';
 
 export type Direction = 'input' | 'output';
 
@@ -176,8 +175,7 @@ export interface Environment {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EventElement extends SubmodelElement {
-}
+export interface EventElement extends SubmodelElement {}
 
 export interface EventPayload extends SubmodelElement {
     source: Reference;
@@ -230,30 +228,30 @@ export interface Key {
 }
 
 export type KeyTypes =
-    'AnnotatedRelationshipElement' |
-    'AssetAdministrationShell' |
-    'BasicEventElement' |
-    'Blob' |
-    'Capability' |
-    'ConceptDescription' |
-    'DataElement' |
-    'Entity' |
-    'EventElement' |
-    'File' |
-    'FragmentReference' |
-    'GlobalReference' |
-    'Identifiable' |
-    'MultiLanguageProperty' |
-    'Operation' |
-    'Property' |
-    'Range' |
-    'Referable' |
-    'ReferenceElement' |
-    'RelationshipElement' |
-    'Submodel' |
-    'SubmodelElement' |
-    'SubmodelElementCollection' |
-    'SubmodelElementList';
+    | 'AnnotatedRelationshipElement'
+    | 'AssetAdministrationShell'
+    | 'BasicEventElement'
+    | 'Blob'
+    | 'Capability'
+    | 'ConceptDescription'
+    | 'DataElement'
+    | 'Entity'
+    | 'EventElement'
+    | 'File'
+    | 'FragmentReference'
+    | 'GlobalReference'
+    | 'Identifiable'
+    | 'MultiLanguageProperty'
+    | 'Operation'
+    | 'Property'
+    | 'Range'
+    | 'Referable'
+    | 'ReferenceElement'
+    | 'RelationshipElement'
+    | 'Submodel'
+    | 'SubmodelElement'
+    | 'SubmodelElementCollection'
+    | 'SubmodelElementList';
 
 export interface LangString {
     language: string;
@@ -263,24 +261,24 @@ export interface LangString {
 export type LevelType = 'Max' | 'Min' | 'Nom' | 'Typ';
 
 export type ModelType =
-    'AnnotatedRelationshipElement' |
-    'AssetAdministrationShell' |
-    'BasicEventElement' |
-    'Blob' |
-    'Capability' |
-    'ConceptDescription' |
-    'DataSpecificationIEC61360' |
-    'Entity' |
-    'File' |
-    'MultiLanguageProperty' |
-    'Operation' |
-    'Property' |
-    'Range' |
-    'ReferenceElement' |
-    'RelationshipElement' |
-    'Submodel' |
-    'SubmodelElementCollection' |
-    'SubmodelElementList';
+    | 'AnnotatedRelationshipElement'
+    | 'AssetAdministrationShell'
+    | 'BasicEventElement'
+    | 'Blob'
+    | 'Capability'
+    | 'ConceptDescription'
+    | 'DataSpecificationIEC61360'
+    | 'Entity'
+    | 'File'
+    | 'MultiLanguageProperty'
+    | 'Operation'
+    | 'Property'
+    | 'Range'
+    | 'ReferenceElement'
+    | 'RelationshipElement'
+    | 'Submodel'
+    | 'SubmodelElementCollection'
+    | 'SubmodelElementList';
 
 export type ModellingKind = 'Template' | 'Instance';
 
@@ -376,8 +374,7 @@ export interface Submodel extends Identifiable, HasKind, HasSemantic, Qualifiabl
     submodelElements?: SubmodelElement[];
 }
 
-export interface SubmodelElement extends Referable, HasKind, HasSemantic, Qualifiable, HasDataSpecification {
-}
+export interface SubmodelElement extends Referable, HasKind, HasSemantic, Qualifiable, HasDataSpecification {}
 
 export interface SubmodelElementCollection extends SubmodelElement {
     value?: SubmodelElement[];
@@ -392,7 +389,7 @@ export interface SubmodelElementList extends SubmodelElement {
 }
 
 export interface ValueList {
-    valueReferencePairs: ValueReferencePair[]
+    valueReferencePairs: ValueReferencePair[];
 }
 
 export interface ValueReferencePair {

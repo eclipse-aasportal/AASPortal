@@ -19,34 +19,15 @@ const initialState: AASTableState = {
 
 export const aasTableReducer = createReducer(
     initialState,
-    on(
-        AASTableActions.setViewMode,
-        (state, { viewMode }) => setViewMode(state, viewMode),
+    on(AASTableActions.setViewMode, (state, { viewMode }) => setViewMode(state, viewMode)),
+    on(AASTableActions.collapseRow, (state, { row }) => collapseRow(state, row)),
+    on(AASTableActions.expandRow, (state, { row }) => expandRow(state, row)),
+    on(AASTableActions.setRows, (state, { rows }) => setRows(state, rows)),
+    on(AASTableActions.toggleSelected, (state, { row, altKey, shiftKey }) =>
+        toggleSelected(state, row, altKey, shiftKey),
     ),
-    on(
-        AASTableActions.collapseRow,
-        (state, { row }) => collapseRow(state, row)
-    ),
-    on(
-        AASTableActions.expandRow,
-        (state, { row }) => expandRow(state, row)
-    ),
-    on(
-        AASTableActions.setRows,
-        (state, { rows }) => setRows(state, rows)
-    ),
-    on(
-        AASTableActions.toggleSelected,
-        (state, { row, altKey, shiftKey }) => toggleSelected(state, row, altKey, shiftKey)
-    ),
-    on(
-        AASTableActions.toggleSelections,
-        (state) => toggleSelections(state)
-    ),
-    on(
-        AASTableActions.setSelections,
-        (state, { documents }) => setSelections(state, documents)
-    ),
+    on(AASTableActions.toggleSelections, state => toggleSelections(state)),
+    on(AASTableActions.setSelections, (state, { documents }) => setSelections(state, documents)),
 );
 
 function setViewMode(state: AASTableState, viewMode: ViewMode): AASTableState {
@@ -57,7 +38,7 @@ function setRows(state: AASTableState, rows: AASTableRow[]): AASTableState {
 }
 
 function setSelections(state: AASTableState, documents: AASDocument[]): AASTableState {
-    const rows = [ ...state.rows ];
+    const rows = [...state.rows];
     const set = new Set(documents);
     for (let i = 0, n = rows.length; i < n; i++) {
         const row = rows[i];
@@ -71,16 +52,11 @@ function setSelections(state: AASTableState, documents: AASDocument[]): AASTable
     return { ...state, rows };
 }
 
-function toggleSelected(
-    state: AASTableState,
-    row: AASTableRow,
-    altKey: boolean,
-    shiftKey: boolean,
-): AASTableState {
+function toggleSelected(state: AASTableState, row: AASTableRow, altKey: boolean, shiftKey: boolean): AASTableState {
     let rows: AASTableRow[];
     if (altKey) {
         rows = state.rows.map(item =>
-            item === row ? clone(row, !row.selected) : (item.selected ? clone(item, false) : item)
+            item === row ? clone(row, !row.selected) : item.selected ? clone(item, false) : item,
         );
     } else if (shiftKey) {
         const index = state.rows.indexOf(row);
@@ -128,7 +104,7 @@ function toggleSelections(state: AASTableState): AASTableState {
         }
     }
 
-    return { ...state, rows }
+    return { ...state, rows };
 }
 
 function clone(row: AASTableRow, selected?: boolean): AASTableRow {
@@ -143,20 +119,14 @@ function clone(row: AASTableRow, selected?: boolean): AASTableRow {
         row.isLeaf,
         row.level,
         row.firstChild,
-        row.nextSibling)
+        row.nextSibling,
+    );
 }
 
 function expandRow(state: AASTableState, row: AASTableRow): AASTableState {
     const rows = [...state.rows];
     const index = rows.indexOf(row);
-    rows[index] = new AASTableRow(
-        row.document,
-        false,
-        true,
-        row.isLeaf,
-        row.level,
-        row.firstChild,
-        row.nextSibling);
+    rows[index] = new AASTableRow(row.document, false, true, row.isLeaf, row.level, row.firstChild, row.nextSibling);
 
     return { ...state, rows };
 }
@@ -164,14 +134,7 @@ function expandRow(state: AASTableState, row: AASTableRow): AASTableState {
 function collapseRow(state: AASTableState, row: AASTableRow): AASTableState {
     const rows = [...state.rows];
     const index = rows.indexOf(row);
-    rows[index] = new AASTableRow(
-        row.document,
-        false,
-        false,
-        row.isLeaf,
-        row.level,
-        row.firstChild,
-        row.nextSibling);
+    rows[index] = new AASTableRow(row.document, false, false, row.isLeaf, row.level, row.firstChild, row.nextSibling);
 
     return { ...state, rows };
 }

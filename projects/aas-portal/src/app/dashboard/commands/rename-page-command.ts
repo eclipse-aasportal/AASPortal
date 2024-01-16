@@ -6,17 +6,18 @@
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { DashboardPage } from "../dashboard.state";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
+import { Store } from '@ngrx/store';
+import { DashboardPage } from '../dashboard.state';
+import { DashboardService } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
 
 export class RenamePageCommand extends DashboardCommand {
-    constructor(
+    public constructor(
         store: Store,
         private dashboard: DashboardService,
         private page: DashboardPage,
-        private newName: string) {
+        private newName: string,
+    ) {
         super('Delete page', store);
     }
 

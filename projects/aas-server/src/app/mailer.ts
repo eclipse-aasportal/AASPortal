@@ -7,24 +7,22 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import nodemailer from "nodemailer";
-import { Logger } from "./logging/logger.js";
+import nodemailer from 'nodemailer';
+import { Logger } from './logging/logger.js';
 
 @singleton()
 export class Mailer {
-    private transporter: any;
+    private transporter: unknown;
 
-    constructor(
-        @inject('Logger') private readonly logger: Logger) {
-
+    public constructor(@inject('Logger') private readonly logger: Logger) {
         this.transporter = nodemailer.createTransport({
-            host: "smtp.example.com",
+            host: 'smtp.example.com',
             port: 587,
             secure: false,
             auth: {
-                user: "username",
-                pass: "password"
-            }
+                user: 'username',
+                pass: 'password',
+            },
         });
     }
 
@@ -32,6 +30,7 @@ export class Mailer {
      * Sends a new password to the specified e-mail.
      * @param email The e-mail address.
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public sendNewPassword(email: string, password: string): void {
         throw new Error('Sending e-mails not implemented');
     }
@@ -40,6 +39,7 @@ export class Mailer {
      * Sends an initial password to a new user withe the specified e-mail.
      * @param email The e-mail of the new user.
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public sendPassword(email: string, password: string) {
         throw new Error('Sending e-mails not implemented');
     }

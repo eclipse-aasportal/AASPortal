@@ -23,7 +23,7 @@ import {
     isAssetAdministrationShell,
     isSubmodel,
     isSubmodelElement,
-    selectSubmodel
+    selectSubmodel,
 } from 'common';
 
 interface PackageDescriptor {
@@ -63,7 +63,7 @@ interface PagedResult<T extends aas.Identifiable> {
 }
 
 export class AasxServerV3 extends AasxServer {
-    constructor(logger: Logger, url: string, name: string) {
+    public constructor(logger: Logger, url: string, name: string) {
         super(logger, url, name);
     }
 
@@ -74,24 +74,21 @@ export class AasxServerV3 extends AasxServer {
     public readonly onlineReady = true;
 
     public async getShellsAsync(): Promise<string[]> {
-        const pagedResult = await this.message.get<PagedResult<aas.AssetAdministrationShell>>(
-            this.resolve('/shells'));
+        const pagedResult = await this.message.get<PagedResult<aas.AssetAdministrationShell>>(this.resolve('/shells'));
 
         return pagedResult.result.map(shell => shell.id);
     }
 
     public async readEnvironmentAsync(id: string): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id);
-        const shell = await this.message.get<aas.AssetAdministrationShell>(
-            this.resolve(`/shells/${aasId}`));
+        const shell = await this.message.get<aas.AssetAdministrationShell>(this.resolve(`/shells/${aasId}`));
 
         const submodels: aas.Submodel[] = [];
         if (shell.submodels) {
             for (const reference of shell.submodels) {
                 const submodelId = encodeBase64Url(reference.keys[0].value);
                 try {
-                    submodels.push(await this.message.get<aas.Submodel>(
-                        this.resolve(`/submodels/${submodelId}`)));
+                    submodels.push(await this.message.get<aas.Submodel>(this.resolve(`/submodels/${submodelId}`)));
                 } catch (error) {
                     this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
                 }
@@ -99,12 +96,13 @@ export class AasxServerV3 extends AasxServer {
         }
 
         const pagedResult = await this.message.get<PagedResult<aas.ConceptDescription>>(
-            this.resolve(`/concept-descriptions`));
+            this.resolve(`/concept-descriptions`),
+        );
 
         const sourceEnv: aas.Environment = {
             assetAdministrationShells: [shell],
             submodels,
-            conceptDescriptions: pagedResult.result
+            conceptDescriptions: pagedResult.result,
         };
 
         return new JsonReader(this.logger, sourceEnv).readEnvironment();
@@ -117,7 +115,8 @@ export class AasxServerV3 extends AasxServer {
     public async commitAsync(
         source: aas.Environment,
         target: aas.Environment,
-        diffs: DifferenceItem[]): Promise<string[]> {
+        diffs: DifferenceItem[],
+    ): Promise<string[]> {
         const messages: string[] = [];
         const aasId = encodeBase64Url(target.assetAdministrationShells[0].id);
         for (const diff of diffs) {
@@ -135,7 +134,9 @@ export class AasxServerV3 extends AasxServer {
                     messages.push(await this.putSubmodelAsync(aasId, diff.sourceElement));
                 } else if (isSubmodelElement(diff.sourceElement)) {
                     const submodel = this.getSubmodel(target, diff.destinationElement);
-                    messages.push(await this.putSubmodelElementAsync(submodel, diff.sourceElement as aas.SubmodelElement));
+                    messages.push(
+                        await this.putSubmodelElementAsync(submodel, diff.sourceElement as aas.SubmodelElement),
+                    );
                 } else if (isAssetAdministrationShell(diff.sourceElement)) {
                     messages.push(await this.putShellAsync(diff.sourceElement));
                 } else {
@@ -204,26 +205,35 @@ export class AasxServerV3 extends AasxServer {
             inoutputVariables: cloneDeep(operation.inoutputVariables),
         };
 
-        const result: OperationResult = JSON.parse(await this.message.post(
-            this.resolve(`/shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
-            request));
+        const result: OperationResult = JSON.parse(
+            await this.message.post(
+                this.resolve(`/shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
+                request,
+            ),
+        );
 
         if (!result.success) {
             throw new ApplicationError(
                 `Invoking the operation ${operation.idShort} failed: {0}`,
                 ERRORS.InvokeOperationFailed,
-                result.messages?.map(message => message.text).join(' ') ?? 'No messages.');
+                result.messages?.map(message => message.text).join(' ') ?? 'No messages.',
+            );
         }
 
         return { ...operation, outputVariables: result.outputVariables, inoutputVariables: result.inoutputVariables };
     }
 
-    public async getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public async getBlobValueAsync(
+        env: aas.Environment,
+        submodelId: string,
+        idShortPath: string,
+    ): Promise<string | undefined> {
         const blob = await this.message.get<aas.Blob>(
-            this.resolve(`/submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`));
+            this.resolve(`/submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
+        );
 
         if (!blob) {
-            throw new Error(`Blob element "${submodelId}.${idShortPath}" does not exist.`)
+            throw new Error(`Blob element "${submodelId}.${idShortPath}" does not exist.`);
         }
 
         return blob.value;
@@ -231,48 +241,59 @@ export class AasxServerV3 extends AasxServer {
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
         const aasId = encodeBase64Url(shell.id);
-        return await this.message.put(
-            this.resolve(`/shells/${aasId}`),
-            new JsonWriter().write(shell));
+        return await this.message.put(this.resolve(`/shells/${aasId}`), new JsonWriter().write(shell));
     }
 
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.message.put(
             this.resolve(`/shells/${aasId}/submodels/${smId}`),
-            new JsonWriter().write(submodel));
+            new JsonWriter().write(submodel),
+        );
     }
 
     private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         return await this.message.post(
-            this.resolve(`/submodels?aasIdentifier=${aasId}`), new JsonWriter().write(submodel));
+            this.resolve(`/submodels?aasIdentifier=${aasId}`),
+            new JsonWriter().write(submodel),
+        );
     }
 
     private async deleteSubmodelAsync(smId: string): Promise<string> {
         return await this.message.delete(this.resolve(`/submodels/${encodeBase64Url(smId)}`));
     }
 
-    private async putSubmodelElementAsync(submodel: aas.Submodel, submodelElement: aas.SubmodelElement): Promise<string> {
+    private async putSubmodelElementAsync(
+        submodel: aas.Submodel,
+        submodelElement: aas.SubmodelElement,
+    ): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.put(
             this.resolve(`/submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriter().write(submodelElement));
+            new JsonWriter().write(submodelElement),
+        );
     }
 
-    private async postSubmodelElementAsync(submodel: aas.Submodel, submodelElement: aas.SubmodelElement): Promise<string> {
+    private async postSubmodelElementAsync(
+        submodel: aas.Submodel,
+        submodelElement: aas.SubmodelElement,
+    ): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.post(
             this.resolve(`/submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriter().write(submodelElement));
+            new JsonWriter().write(submodelElement),
+        );
     }
 
-    private async deleteSubmodelElementAsync(submodel: aas.Submodel, submodelElement: aas.SubmodelElement): Promise<string> {
+    private async deleteSubmodelElementAsync(
+        submodel: aas.Submodel,
+        submodelElement: aas.SubmodelElement,
+    ): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
-        return await this.message.delete(
-            this.resolve(`/submodels/${smId}/submodel-elements/${path}`));
+        return await this.message.delete(this.resolve(`/submodels/${smId}/submodel-elements/${path}`));
     }
 
     private getSubmodel(env: aas.Environment, referable?: aas.Referable): aas.Submodel {

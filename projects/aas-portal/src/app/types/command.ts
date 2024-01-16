@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { aas, isIdentifiable } from "common";
+import { aas, isIdentifiable } from 'common';
 
 enum CommandState {
     Idle,
     Executed,
-    Aborted
+    Aborted,
 }
 
 /** Abstract base implementation of a command. */
@@ -21,12 +21,11 @@ export abstract class Command {
     /**
      * @param name The command name.
      */
-    constructor(public readonly name: string) {
-    }
+    protected constructor(public readonly name: string) {}
 
     public execute(): void {
         if (this.state !== CommandState.Idle) {
-            throw new Error("Invalid command state.");
+            throw new Error('Invalid command state.');
         }
 
         this.onExecute();
@@ -35,7 +34,7 @@ export abstract class Command {
 
     public undo(): void {
         if (this.state !== CommandState.Executed) {
-            throw new Error("Invalid command state.");
+            throw new Error('Invalid command state.');
         }
 
         this.onUndo();
@@ -43,7 +42,7 @@ export abstract class Command {
 
     public redo(): void {
         if (this.state !== CommandState.Executed) {
-            throw new Error("Invalid command state.");
+            throw new Error('Invalid command state.');
         }
 
         this.onRedo();
@@ -51,7 +50,7 @@ export abstract class Command {
 
     public abort() {
         if (this.state !== CommandState.Idle) {
-            throw new Error("Invalid command state.");
+            throw new Error('Invalid command state.');
         }
 
         this.onAbort();
@@ -70,10 +69,12 @@ export abstract class Command {
         if (isIdentifiable(referable)) {
             reference = {
                 type: 'ModelReference',
-                keys: [{
-                    value: referable.id,
-                    type: referable.modelType as aas.KeyTypes,
-                }]
+                keys: [
+                    {
+                        value: referable.id,
+                        type: referable.modelType as aas.KeyTypes,
+                    },
+                ],
             };
         } else if (referable.parent) {
             reference = {
@@ -83,7 +84,8 @@ export abstract class Command {
                     {
                         type: referable.modelType as aas.KeyTypes,
                         value: referable.idShort,
-                    }]
+                    },
+                ],
             };
         }
 

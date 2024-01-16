@@ -6,18 +6,18 @@
  *
  *****************************************************************************/
 
-import { Component } from "@angular/core";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Component } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-show-video',
     templateUrl: './show-video-form.component.html',
-    styleUrls: ['./show-video-form.component.scss']
+    styleUrls: ['./show-video-form.component.scss'],
 })
 export class ShowVideoFormComponent {
     private readonly _modal: NgbActiveModal;
 
-    constructor(modal: NgbActiveModal) {
+    public constructor(modal: NgbActiveModal) {
         this._modal = modal;
     }
 

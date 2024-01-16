@@ -10,12 +10,12 @@ import { Injectable, TemplateRef } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ToolbarService {
     private readonly toolbarTemplate$ = new BehaviorSubject<TemplateRef<unknown> | null>(null);
 
-    constructor() {
+    public constructor() {
         this.toolbarTemplate = this.toolbarTemplate$.asObservable();
     }
 

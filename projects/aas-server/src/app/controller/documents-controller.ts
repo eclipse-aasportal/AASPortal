@@ -20,11 +20,11 @@ import { decodeBase64Url } from '../convert.js';
 @Route('/api/v1/documents')
 @Tags('Documents')
 export class DocumentsController extends AASController {
-    constructor(
+    public constructor(
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
         @inject(Variable) variable: Variable,
-        @inject(AASProvider) private readonly aasProvider: AASProvider
+        @inject(AASProvider) private readonly aasProvider: AASProvider,
     ) {
         super(logger, auth, variable);
     }
@@ -39,9 +39,10 @@ export class DocumentsController extends AASController {
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocuments')
     public async getDocuments(
-        @Query() cursor: string, 
-        @Query() filter?:string, 
-        @Query() language?: string): Promise<AASPage> {
+        @Query() cursor: string,
+        @Query() filter?: string,
+        @Query() language?: string,
+    ): Promise<AASPage> {
         try {
             this.logger.start('getDocuments');
             if (filter) {

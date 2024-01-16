@@ -25,34 +25,27 @@ export enum AASTreeActionType {
 
 export const updateRows = createAction(
     AASTreeActionType.UPDATE_ROWS,
-    props<{ document: AASDocument | null; localeId: string }>());
+    props<{ document: AASDocument | null; localeId: string }>(),
+);
 
-export const expandRow = createAction(
-    AASTreeActionType.EXPAND_ROW,
-    props<{ arg: number | AASTreeRow }>());
+export const expandRow = createAction(AASTreeActionType.EXPAND_ROW, props<{ arg: number | AASTreeRow }>());
 
-export const collapseRow = createAction(
-    AASTreeActionType.COLLAPSE_ROW,
-    props<{ row: AASTreeRow }>());
+export const collapseRow = createAction(AASTreeActionType.COLLAPSE_ROW, props<{ row: AASTreeRow }>());
 
-export const collapse = createAction(
-    AASTreeActionType.COLLAPSE);
+export const collapse = createAction(AASTreeActionType.COLLAPSE);
 
 export const toggleSelected = createAction(
     AASTreeActionType.TOGGLE_SELECTED,
-    props<{ row: AASTreeRow, altKey: boolean, shiftKey: boolean }>());
+    props<{ row: AASTreeRow; altKey: boolean; shiftKey: boolean }>(),
+);
 
-export const toggleSelections = createAction(
-    AASTreeActionType.TOGGLE_SELECTIONS);
+export const toggleSelections = createAction(AASTreeActionType.TOGGLE_SELECTIONS);
 
-export const setSearchText = createAction(
-    AASTreeActionType.SET_SEARCH_TEXT,
-    props<{ terms: SearchTerm[] }>());
+export const setSearchText = createAction(AASTreeActionType.SET_SEARCH_TEXT, props<{ terms: SearchTerm[] }>());
 
-export const setMatchIndex = createAction(
-    AASTreeActionType.SET_MATCH_INDEX,
-    props<{ index: number }>());
+export const setMatchIndex = createAction(AASTreeActionType.SET_MATCH_INDEX, props<{ index: number }>());
 
 export const setSelectedElements = createAction(
     AASTreeActionType.SET_SELECTED_ELEMENTS,
-    props<{ elements: aas.Referable[] }>());
+    props<{ elements: aas.Referable[] }>(),
+);

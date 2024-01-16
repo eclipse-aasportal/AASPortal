@@ -19,17 +19,17 @@ import { selectCustomerFeedback } from './customer-feedback.selectors';
 @Component({
     selector: 'fhg-customer-feedback',
     templateUrl: './customer-feedback.component.html',
-    styleUrls: ['./customer-feedback.component.scss']
+    styleUrls: ['./customer-feedback.component.scss'],
 })
 export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnChanges, OnDestroy {
     private static readonly maxStars = 5;
-    private readonly store: Store<CustomerFeedbackFeatureState>
+    private readonly store: Store<CustomerFeedbackFeatureState>;
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
 
-    constructor(
+    public constructor(
         store: Store,
-        private readonly translate: TranslateService
+        private readonly translate: TranslateService,
     ) {
         this.store = store as Store<CustomerFeedbackFeatureState>;
     }
@@ -41,9 +41,12 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
         let value: string | undefined;
         if (this.submodels) {
             const names = this.submodels.map(
-                item => getLocaleValue(
-                    getPreferredName(item.document.content!, item.submodel),
-                    this.translate.currentLang) ?? item.submodel.idShort);
+                item =>
+                    getLocaleValue(
+                        getPreferredName(item.document.content!, item.submodel),
+                        this.translate.currentLang,
+                    ) ?? item.submodel.idShort,
+            );
 
             if (names.length <= 2) {
                 value = names.join(', ');
@@ -66,17 +69,24 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
     public starClassNames: string[] = [];
 
     public ngOnInit(): void {
-        this.subscription.add(this.store.select(selectCustomerFeedback).pipe().subscribe(state => {
-            this.stars = state.stars;
-            this.count = state.count;
-            this.starClassNames = state.starClassNames;
-            this.items = state.items.filter(item => item.count > 0);
-            this.feedbacks = state.feedbacks;
-        }));
+        this.subscription.add(
+            this.store
+                .select(selectCustomerFeedback)
+                .pipe()
+                .subscribe(state => {
+                    this.stars = state.stars;
+                    this.count = state.count;
+                    this.starClassNames = state.starClassNames;
+                    this.items = state.items.filter(item => item.count > 0);
+                    this.feedbacks = state.feedbacks;
+                }),
+        );
 
-        this.subscription.add(this.translate.onLangChange.subscribe(() => {
-            this.init();
-        }));
+        this.subscription.add(
+            this.translate.onLangChange.subscribe(() => {
+                this.init();
+            }),
+        );
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
@@ -101,9 +111,11 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
             for (const pair of this.submodels) {
                 if (pair.submodel.submodelElements) {
                     for (const feedback of pair.submodel.submodelElements.filter(
-                        item => item.modelType === 'SubmodelElementCollection')) {
+                        item => item.modelType === 'SubmodelElementCollection',
+                    )) {
                         const general = (feedback as aas.SubmodelElementCollection).value?.find(
-                            item => item.modelType === 'SubmodelElementCollection' && item.idShort === 'General');
+                            item => item.modelType === 'SubmodelElementCollection' && item.idShort === 'General',
+                        );
 
                         if (general) {
                             sumStars += this.getStars(feedback);
@@ -115,7 +127,7 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
                             stars: this.initStarClassNames(this.getStars(feedback)),
                             createdAt: this.getCreatedAt(feedback),
                             subject: pair.submodel.idShort,
-                            message: this.getMessage(feedback)
+                            message: this.getMessage(feedback),
                         });
                     }
                 }
@@ -134,13 +146,15 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
             starClassNames = this.initStarClassNames(0);
         }
 
-        this.store.dispatch(CustomerFeedbackActions.initialize({
-            stars,
-            count,
-            starClassNames,
-            items,
-            feedbacks
-        }));
+        this.store.dispatch(
+            CustomerFeedbackActions.initialize({
+                stars,
+                count,
+                starClassNames,
+                items,
+                feedbacks,
+            }),
+        );
     }
 
     private buildItems(general: aas.SubmodelElementCollection, items: GeneralItem[]): void {
@@ -153,7 +167,7 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
                         score: 0,
                         sum: 0.0,
                         count: 0,
-                        like: false
+                        like: false,
                     };
 
                     this.map.set(element.idShort, item);
@@ -220,7 +234,6 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
     }
 
     private findProperty(element: aas.SubmodelElementCollection, name: string): aas.Property | undefined {
-        return element.value?.find(
-            child => child.modelType === 'Property' && child.idShort === name) as aas.Property;
+        return element.value?.find(child => child.modelType === 'Property' && child.idShort === name) as aas.Property;
     }
 }

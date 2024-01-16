@@ -11,7 +11,7 @@ import path from 'path';
 
 @singleton()
 export class Variable {
-    constructor() {
+    public constructor() {
         this.JWT_SECRET = process.env.JWT_SECRET ?? 'The quick brown fox jumps over the lazy dog.';
         this.JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
         this.JWT_EXPIRES_IN = process.env.JWT_EXPIRED_IN ? Number(process.env.JWT_EXPIRED_IN) : 604800;

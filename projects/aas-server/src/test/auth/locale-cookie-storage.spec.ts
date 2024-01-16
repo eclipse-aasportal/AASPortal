@@ -8,110 +8,183 @@
 
 import 'reflect-metadata';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { Cookie } from 'common';
 import { CookieStorage } from '../../app/auth/cookie-storage.js';
 import { LocaleCookieStorage } from '../../app/auth/locale-cookie-storage.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 import { createSpyObj } from '../utils.js';
 import { Logger } from '../../app/logging/logger.js';
 
-describe('LocaleCookieStorage', function () {
-    let usersDir: string;
+describe('LocaleCookieStorage', () => {
     let cookieStorage: CookieStorage;
-    let cookies: Cookie[];
+    let cookies: Buffer;
+    let usersDir: string;
 
-    beforeEach(async function () {
-        usersDir = '/users';
-        cookies = [
-            {
-                name: 'Cookie1',
-                data: 'The quick brown fox jumps over the lazy dog.'
-            },
-            {
-                name: 'Cookie2',
-                data: '42'
-            }
-        ];
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
 
-        jest.spyOn(fs.promises, 'readFile').mockImplementation(() => {
-            return new Promise<Buffer>(resolve => resolve(Buffer.from(JSON.stringify(cookies))));
-        });
+    beforeEach(async () => {
+        usersDir = os.tmpdir();
+        cookies = Buffer.from(
+            JSON.stringify([
+                {
+                    name: 'Cookie1',
+                    data: 'The quick brown fox jumps over the lazy dog.',
+                },
+                {
+                    name: 'Cookie2',
+                    data: 42,
+                },
+            ]),
+        );
 
         cookieStorage = new LocaleCookieStorage(createSpyObj<Logger>(['error']), usersDir);
     });
 
-    describe('checkAsync', function () {
-        it('indicates that "Cookie1" for john.doe@email.com exist', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
+    describe('checkAsync', () => {
+        it('indicates that "Cookie1" for john.doe@email.com exist', async () => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
             await expect(cookieStorage.checkAsync('john.doe@email.com', 'Cookie1')).resolves.toBe(true);
         });
 
-        it('indicates that "unknown" for john.doe@email.com not exist', async function () {
-            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
+        it('indicates that "unknown" for john.doe@email.com not exist', async () => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
             await expect(cookieStorage.checkAsync('john.doe@email.com', 'unknown')).resolves.toBe(false);
         });
 
-        it('indicates that "Cookie1" for jane.doe@email.com not exist', async function () {
+        it('indicates that "Cookie1" for jane.doe@email.com not exist', async () => {
             jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
             await expect(cookieStorage.checkAsync('jane.doe@email.com', 'Cookie1')).resolves.toBe(false);
         });
     });
 
-    // describe('getAsync', function () {
-    //     it('returns the value of "Cookie1" for john.doe@email.com', async function () {
-    //         await expect(cookieStorage.getAsync('john.doe@email.com', 'Cookie1'))
-    //             .resolves.toEqual({ name: 'Cookie1', data: 'The quick brown fox jumps over the lazy dog.' });
-    //     });
+    describe('getAsync', () => {
+        beforeEach(() => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+        });
 
-    //     it('returns "undefined" for "unknown" for john.doe@email.com', async function () {
-    //         await expect(cookieStorage.getAsync('john.doe@email.com', 'unknown'))
-    //             .resolves.toBeUndefined();
-    //     });
+        it('returns the value of "Cookie1" for john.doe@email.com', async () => {
+            await expect(cookieStorage.getAsync('john.doe@email.com', 'Cookie1')).resolves.toEqual({
+                name: 'Cookie1',
+                data: 'The quick brown fox jumps over the lazy dog.',
+            });
+        });
 
-    //     it('returns "undefined" for "Cookie1" for jane.doe@email.com', async function () {
-    //         await expect(cookieStorage.getAsync('jane.doe@email.com', 'unknown'))
-    //             .resolves.toBeUndefined();
-    //     });
-    // });
+        it('returns "undefined" for "unknown" for john.doe@email.com', async () => {
+            await expect(cookieStorage.getAsync('john.doe@email.com', 'unknown')).resolves.toBeUndefined();
+        });
 
-    // describe('getAllAsync', function () {
-    //     it('returns all cookies for john.doe@email.com', async function () {
-    //         await expect(cookieStorage.getAllAsync('john.doe@email.com'))
-    //             .resolves.toEqual([
-    //                 {
-    //                     name: 'Cookie1',
-    //                     data: 'The quick brown fox jumps over the lazy dog.'
-    //                 },
-    //                 {
-    //                     name: 'Cookie2',
-    //                     data: '42'
-    //                 }
-    //             ]);
-    //     });
-    // });
+        it('returns "undefined" for "Cookie1" for jane.doe@email.com', async () => {
+            await expect(cookieStorage.getAsync('jane.doe@email.com', 'unknown')).resolves.toBeUndefined();
+        });
+    });
 
-    // describe('setAsync', function () {
-    //     it('can set a new Cookie3 for john.doe@email.com', async function () {
-    //         await cookieStorage.setAsync('john.doe@email.com', 'Cookie3', 'Hello World!');
-    //         let items = JSON.parse((await readFile(join(userDir, 'cookies.json'))).toString()) as Cookie[];
-    //         expect(items.find(item => item.name === 'Cookie3')).toEqual({ name: 'Cookie3', data: 'Hello World!' } as Cookie);
-    //     });
+    describe('getAllAsync', () => {
+        beforeEach(() => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+        });
 
-    //     it('can update the existing Cookie2 for john.doe@email.com', async function () {
-    //         await cookieStorage.setAsync('john.doe@email.com', 'Cookie2', 'Hello World!');
-    //         let items = JSON.parse((await readFile(join(userDir, 'cookies.json'))).toString()) as Cookie[];
-    //         expect(items.find(item => item.name === 'Cookie2')).toEqual({ name: 'Cookie2', data: 'Hello World!' } as Cookie);
-    //     });
-    // });
+        it('returns all cookies for john.doe@email.com', async () => {
+            await expect(cookieStorage.getAllAsync('john.doe@email.com')).resolves.toEqual([
+                {
+                    name: 'Cookie1',
+                    data: 'The quick brown fox jumps over the lazy dog.',
+                },
+                {
+                    name: 'Cookie2',
+                    data: 42,
+                },
+            ] as Cookie[]);
+        });
+    });
 
-    // describe('deleteAsync', function () {
-    //     it('can delete a cookie', async function () {
-    //         await cookieStorage.deleteAsync('john.doe@email.com', 'Cookie1');
-    //         let items = JSON.parse((await readFile(join(userDir, 'cookies.json'))).toString()) as Cookie[];
-    //         expect(items.find(item => item.name === 'Cookie1')).toBeUndefined();
+    describe('setAsync', () => {
+        beforeEach(() => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+        });
 
-    //         await cookieStorage.deleteAsync('john.doe@email.com', 'Cookie2');
-    //         expect(existsSync(join(userDir, 'cookies.json'))).toBeFalsy();
-    //     });
-    // });
+        it('can set a new Cookie3 for john.doe@email.com', async () => {
+            jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+            await cookieStorage.setAsync('john.doe@email.com', 'Cookie3', 'Hello World!');
+            expect(fs.promises.writeFile).toHaveBeenCalledWith(
+                path.join(usersDir, 'john.doe@email.com', 'cookies.json'),
+                JSON.stringify([
+                    {
+                        name: 'Cookie1',
+                        data: 'The quick brown fox jumps over the lazy dog.',
+                    },
+                    {
+                        name: 'Cookie2',
+                        data: 42,
+                    },
+                    {
+                        name: 'Cookie3',
+                        data: 'Hello World!',
+                    },
+                ] as Cookie[]),
+            );
+        });
+
+        it('can update the existing Cookie2 for john.doe@email.com', async () => {
+            jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+            await cookieStorage.setAsync('john.doe@email.com', 'Cookie2', 'Hello World!');
+            expect(fs.promises.writeFile).toHaveBeenCalledWith(
+                path.join(usersDir, 'john.doe@email.com', 'cookies.json'),
+                JSON.stringify([
+                    {
+                        name: 'Cookie1',
+                        data: 'The quick brown fox jumps over the lazy dog.',
+                    },
+                    {
+                        name: 'Cookie2',
+                        data: 'Hello World!',
+                    },
+                ] as Cookie[]),
+            );
+        });
+    });
+
+    describe('deleteAsync', () => {
+        it('can delete a cookie', async () => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+            jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+            await cookieStorage.deleteAsync('john.doe@email.com', 'Cookie1');
+            expect(fs.promises.writeFile).toHaveBeenCalledWith(
+                path.join(usersDir, 'john.doe@email.com', 'cookies.json'),
+                JSON.stringify([
+                    {
+                        name: 'Cookie2',
+                        data: 42,
+                    },
+                ]),
+            );
+        });
+
+        it('removes the cookies file on empty cookies', async () => {
+            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs.promises, 'readFile').mockResolvedValue(
+                Buffer.from(
+                    JSON.stringify([
+                        {
+                            name: 'Cookie2',
+                            data: 42,
+                        },
+                    ]),
+                ),
+            );
+
+            jest.spyOn(fs.promises, 'unlink').mockResolvedValue();
+            await cookieStorage.deleteAsync('john.doe@email.com', 'Cookie2');
+            expect(fs.promises.unlink).toHaveBeenCalled();
+        });
+    });
 });

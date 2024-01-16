@@ -13,7 +13,7 @@ import { NotifyService } from 'projects/aas-lib/src/public-api';
 import { CommandHandlerService } from '../../app/aas/command-handler.service';
 
 class TestCommand extends Command {
-    constructor(private spy?: jasmine.Spy, private undoSpy?: jasmine.Spy, private redoSpy?: jasmine.Spy) {
+    public constructor(private spy?: jasmine.Spy, private undoSpy?: jasmine.Spy, private redoSpy?: jasmine.Spy) {
         super("TestCommand");
     }
 
@@ -41,7 +41,7 @@ class TestCommand extends Command {
 }
 
 class FailCommand extends Command {
-    constructor(private abortSpy: jasmine.Spy) {
+    public constructor(private abortSpy: jasmine.Spy) {
         super("TestCommand");
     }
 

@@ -8,7 +8,17 @@
 
 import { Low } from 'lowdb';
 import { v4 } from 'uuid';
-import { AASCursor, AASDocument, AASDocumentId, AASEndpoint, AASPage, ApplicationError, BaseValueType, aas, flat } from 'common';
+import {
+    AASCursor,
+    AASDocument,
+    AASDocumentId,
+    AASEndpoint,
+    AASPage,
+    ApplicationError,
+    BaseValueType,
+    aas,
+    flat,
+} from 'common';
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
 import { Variable } from '../../variable.js';
@@ -19,7 +29,10 @@ import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
 
-    public constructor(private readonly db: Low<LowDbData>, private readonly variable: Variable) {
+    public constructor(
+        private readonly db: Low<LowDbData>,
+        private readonly variable: Variable,
+    ) {
         super();
 
         this.promise = this.initialize();
@@ -46,7 +59,8 @@ export class LowDbIndex extends AASIndex {
             throw new ApplicationError(
                 `An endpoint with the name "${name}" already exists.`,
                 ERRORS.RegistryAlreadyExists,
-                endpoint.name);
+                endpoint.name,
+            );
         }
 
         this.db.data.endpoints.push(endpoint);
@@ -158,8 +172,7 @@ export class LowDbIndex extends AASIndex {
 
     public async reset(): Promise<void> {
         this.db.data.documents = [];
-        this.db.data.endpoints =
-            this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
+        this.db.data.endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
 
         await this.db.write();
     }
@@ -203,7 +216,13 @@ export class LowDbIndex extends AASIndex {
         const elements = this.db.data.elements;
         for (const document of this.db.data.documents) {
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
+            if (
+                !filter ||
+                filter.do(
+                    document,
+                    elements.filter(element => element.uuid === uuid),
+                )
+            ) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -235,7 +254,13 @@ export class LowDbIndex extends AASIndex {
         for (let m = items.length; i < m; i++) {
             const document = items[i];
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
+            if (
+                !filter ||
+                filter.do(
+                    document,
+                    elements.filter(element => element.uuid === uuid),
+                )
+            ) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -256,7 +281,7 @@ export class LowDbIndex extends AASIndex {
             return { previous: null, documents, next: null };
         }
 
-        const n = limit + 1
+        const n = limit + 1;
         const items = this.db.data.documents;
         let i = this.findIndexReverse(current);
         if (i < 0) {
@@ -267,7 +292,13 @@ export class LowDbIndex extends AASIndex {
         for (; i >= 0; --i) {
             const document = items[i];
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
+            if (
+                !filter ||
+                filter.do(
+                    document,
+                    elements.filter(element => element.uuid === uuid),
+                )
+            ) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -288,13 +319,19 @@ export class LowDbIndex extends AASIndex {
             return { previous: null, documents, next: null };
         }
 
-        const n = limit + 1
+        const n = limit + 1;
         const items = this.db.data.documents;
         const elements = this.db.data.elements;
         for (let i = items.length - 1; i >= 0; --i) {
             const document = items[i];
             const uuid = document.uuid;
-            if (!filter || filter.do(document, elements.filter(element => element.uuid === uuid))) {
+            if (
+                !filter ||
+                filter.do(
+                    document,
+                    elements.filter(element => element.uuid === uuid),
+                )
+            ) {
                 documents.push(this.toDocument(document));
                 if (documents.length >= n) {
                     break;
@@ -345,7 +382,7 @@ export class LowDbIndex extends AASIndex {
         const element: LowDbElement = {
             uuid: uuid,
             modelType: this.toAbbreviation(referable),
-            idShort: referable.idShort
+            idShort: referable.idShort,
         };
 
         let value: BaseValueType | undefined = this.toStringValue(referable);

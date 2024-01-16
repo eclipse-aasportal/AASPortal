@@ -8,7 +8,16 @@
 
 import { Injectable } from '@angular/core';
 import { v4 as uuid } from 'uuid';
-import { aas, AASDocument, AASEndpointType, ApplicationError, EndpointType, getIdShortPath, getUnit, LiveNode } from 'common';
+import {
+    aas,
+    AASDocument,
+    AASEndpointType,
+    ApplicationError,
+    EndpointType,
+    getIdShortPath,
+    getUnit,
+    LiveNode,
+} from 'common';
 import { cloneDeep } from 'lodash-es';
 import { ERRORS } from '../types/errors';
 import { Observable } from 'rxjs';
@@ -24,11 +33,11 @@ import {
     DashboardChartType,
     DashboardItem,
     DashboardRow,
-    State
+    State,
 } from './dashboard.state';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DashboardService {
     private readonly store: Store<State>;
@@ -36,9 +45,9 @@ export class DashboardService {
     private _name = '';
     private modified = false;
 
-    constructor(
+    public constructor(
         store: Store,
-        private auth: AuthService
+        private auth: AuthService,
     ) {
         this.store = store as Store<State>;
 
@@ -46,8 +55,8 @@ export class DashboardService {
         this.pages = this.store.select(DashboardSelectors.selectPages);
         this.name = this.store.select(DashboardSelectors.selectName);
 
-        this.pages.subscribe(pages => this._pages = pages);
-        this.name.subscribe(name => this._name = name);
+        this.pages.subscribe(pages => (this._pages = pages));
+        this.name.subscribe(name => (this._name = name));
     }
 
     public get defaultPage(): DashboardPage {
@@ -72,7 +81,12 @@ export class DashboardService {
         }
     }
 
-    public add(name: string, document: AASDocument, elements: aas.SubmodelElement[], chartType: DashboardChartType): void {
+    public add(
+        name: string,
+        document: AASDocument,
+        elements: aas.SubmodelElement[],
+        chartType: DashboardChartType,
+    ): void {
         const pages = this._pages;
         const i = pages.findIndex(item => item.name === name);
         if (i < 0) {
@@ -80,11 +94,9 @@ export class DashboardService {
         }
 
         const page = cloneDeep(pages[i]);
-        const properties = elements.filter(item => item.modelType === 'Property')
-            .map(item => item as aas.Property);
+        const properties = elements.filter(item => item.modelType === 'Property').map(item => item as aas.Property);
 
-        const blobs = elements.filter(item => item.modelType === 'Blob')
-            .map(item => item as aas.Blob);
+        const blobs = elements.filter(item => item.modelType === 'Blob').map(item => item as aas.Blob);
 
         const nodes = this.getNodes(page, document);
         if (properties.length > 0) {
@@ -118,7 +130,8 @@ export class DashboardService {
             throw new ApplicationError(
                 `A page withe name "${name}" already exists.`,
                 ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
-                name);
+                name,
+            );
         }
 
         this.store.dispatch(DashboardActions.addNewPage({ name }));
@@ -135,7 +148,8 @@ export class DashboardService {
             throw new ApplicationError(
                 `A page withe name "${name}" already exists.`,
                 ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
-                name);
+                name,
+            );
         }
 
         this.store.dispatch(DashboardActions.renamePage({ page, name }));
@@ -145,7 +159,7 @@ export class DashboardService {
     public getGrid(page: DashboardPage): DashboardItem[][] {
         const map = new Map<number, DashboardItem[]>();
         page.items.forEach(item => {
-            const y = item.positions[0].y
+            const y = item.positions[0].y;
             let row = map.get(y);
             if (!row) {
                 row = [];
@@ -157,7 +171,7 @@ export class DashboardService {
 
         const grid: DashboardItem[][] = [];
         let y = 0;
-        for (let i = 0; i < map.size;) {
+        for (let i = 0; i < map.size; ) {
             const row = map.get(y);
             if (row) {
                 row.sort((a, b) => a.positions[0].x - b.positions[0].x);
@@ -176,13 +190,13 @@ export class DashboardService {
             columns: row.map(item => ({
                 id: item.id,
                 item: item,
-                itemType: item.type
-            }))
+                itemType: item.type,
+            })),
         }));
     }
 
     public canMoveLeft(page: DashboardPage, item: DashboardItem): boolean {
-        return item.positions[0].x > 0
+        return item.positions[0].x > 0;
     }
 
     public canMoveRight(page: DashboardPage, item: DashboardItem): boolean {
@@ -195,7 +209,7 @@ export class DashboardService {
         const y = item.positions[0].y;
         if (y > 0) {
             if (grid[y - 1].length < 12) {
-                return true
+                return true;
             }
         } else if (grid[y].length > 1) {
             return true;
@@ -239,7 +253,8 @@ export class DashboardService {
         page: DashboardPage,
         env: aas.Environment,
         properties: aas.Property[],
-        nodes: LiveNode[] | null): void {
+        nodes: LiveNode[] | null,
+    ): void {
         let columnIndex = 0;
         let rowIndex = page.items.length > 0 ? Math.max(...page.items.map(item => item.positions[0].y)) + 1 : 0;
         for (const property of properties) {
@@ -261,12 +276,14 @@ export class DashboardService {
                 type: DashboardItemType.Chart,
                 chartType: DashboardChartType.Line,
                 positions: [{ x: columnIndex, y: rowIndex }],
-                sources: [{
-                    label: property.idShort,
-                    color: this.createRandomColor(),
-                    element: property,
-                    node: node,
-                }]
+                sources: [
+                    {
+                        label: property.idShort,
+                        color: this.createRandomColor(),
+                        element: property,
+                        node: node,
+                    },
+                ],
             };
 
             page.items.push(item);
@@ -283,7 +300,7 @@ export class DashboardService {
             type: DashboardItemType.Chart,
             chartType: DashboardChartType.BarVertical,
             positions: [{ x: 0, y: rowIndex }],
-            sources: []
+            sources: [],
         };
 
         for (const property of properties) {
@@ -320,13 +337,15 @@ export class DashboardService {
                     type: DashboardItemType.Chart,
                     chartType: DashboardChartType.TimeSeries,
                     positions: [{ x: columnIndex, y: rowIndex }],
-                    sources: [{
-                        label: blob.idShort,
-                        color: this.createRandomColor(),
-                        element: blob,
-                        node: null,
-                        url: `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`
-                    }]
+                    sources: [
+                        {
+                            label: blob.idShort,
+                            color: this.createRandomColor(),
+                            element: blob,
+                            node: null,
+                            url: `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`,
+                        },
+                    ],
                 };
 
                 page.items.push(item);
@@ -349,7 +368,7 @@ export class DashboardService {
                 page.requests.push({
                     endpoint: document.endpoint,
                     id: document.id,
-                    nodes: nodes
+                    nodes: nodes,
                 });
             }
         }

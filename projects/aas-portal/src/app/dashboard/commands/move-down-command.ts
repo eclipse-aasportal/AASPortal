@@ -6,24 +6,25 @@
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { cloneDeep } from "lodash-es";
-import { DashboardItem, DashboardPage, DashboardRow } from "../dashboard.state";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
+import { Store } from '@ngrx/store';
+import { cloneDeep } from 'lodash-es';
+import { DashboardItem, DashboardPage, DashboardRow } from '../dashboard.state';
+import { DashboardService } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
 
 export class MoveDownCommand extends DashboardCommand {
-    constructor(
+    public constructor(
         store: Store,
         private dashboard: DashboardService,
         private page: DashboardPage,
-        private item: DashboardItem) {
+        private item: DashboardItem,
+    ) {
         super('Move down', store);
     }
 
     protected executing(): void {
         if (!this.dashboard.canMoveDown(this.page, this.item)) {
-            throw new Error(`Item can not be moved down.`)
+            throw new Error(`Item can not be moved down.`);
         }
 
         let rows: DashboardRow[] | undefined;

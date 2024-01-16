@@ -17,9 +17,10 @@ import { Logger } from '../logging/logger.js';
 export class LocaleCookieStorage extends CookieStorage {
     private readonly usersDirectory: string;
 
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject('USERS_DIR') dir: string) {
+        @inject('USERS_DIR') dir: string,
+    ) {
         super();
 
         this.usersDirectory = path.resolve(dir);
@@ -65,7 +66,7 @@ export class LocaleCookieStorage extends CookieStorage {
             cookies[index].data = data;
         }
 
-        await await fs.promises.writeFile(file, JSON.stringify(cookies));
+        await fs.promises.writeFile(file, JSON.stringify(cookies));
     }
 
     public async deleteAsync(id: string, name: string): Promise<void> {

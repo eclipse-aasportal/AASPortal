@@ -16,7 +16,7 @@ describe('MySqlQuery', () => {
             const values: unknown[] = [];
             expect(query.createSql(values)).toEqual(
                 "(documents.endpoint LIKE '%Hello World%' OR documents.id LIKE '%Hello World%' OR documents.idShort LIKE '%Hello World%')"
-                );
+            );
         });
 
         it('A && (B || C)', () => {

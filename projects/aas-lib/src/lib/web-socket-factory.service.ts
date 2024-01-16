@@ -11,7 +11,7 @@ import { WebSocketData } from 'common';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class WebSocketFactoryService {
     /**

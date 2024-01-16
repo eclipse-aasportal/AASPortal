@@ -6,27 +6,29 @@
  *
  *****************************************************************************/
 
-import { Injectable } from "@angular/core";
-import { ActivatedRouteSnapshot, UrlTree } from "@angular/router";
-import { Store } from "@ngrx/store";
-import { Observable } from "rxjs";
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, UrlTree } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { AASQueryParams } from 'projects/aas-lib/src/public-api';
 import * as AASSelectors from './aas.selectors';
 import { State } from './aas.state';
 
 @Injectable()
-export class CanActivateAAS  {
+export class CanActivateAAS {
     private readonly store: Store<State>;
-    constructor(store: Store) {
+    public constructor(store: Store) {
         this.store = store as Store<State>;
-     }
+    }
 
-    public canActivate(route: ActivatedRouteSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
+    public canActivate(
+        route: ActivatedRouteSnapshot,
+    ): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
         const params: AASQueryParams = route.queryParams;
         if (params.id || params.format) {
             return true;
         }
-        
+
         return this.store.select(AASSelectors.selectHasDocument);
     }
 }

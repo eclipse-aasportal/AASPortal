@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import * as aas from "./aas.js";
+import * as aas from './aas.js';
 
 /** Defines the supported endpoint types. */
 export type EndpointType = 'file' | 'http' | 'opc';
@@ -19,31 +19,31 @@ export interface Endpoint {
 
 /** Abbreviations for AAS model elements. */
 export type AASAbbreviation =
-    'AAS' |
-    'Cap' |
-    'CD' |
-    'DE' |
-    'DST' |
-    'Ent' |
-    'Evt' |
-    'InOut' |
-    'In' |
-    'Id' |
-    'MLP' |
-    'File' |
-    'Blob' |
-    'Opr' |
-    'Out' |
-    'Qfr' |
-    'Prop' |
-    'Range' |
-    'Ref' |
-    'Rel' |
-    'RelA' |
-    'SM' |
-    'SMC' |
-    'SME' |
-    'SML';
+    | 'AAS'
+    | 'Cap'
+    | 'CD'
+    | 'DE'
+    | 'DST'
+    | 'Ent'
+    | 'Evt'
+    | 'InOut'
+    | 'In'
+    | 'Id'
+    | 'MLP'
+    | 'File'
+    | 'Blob'
+    | 'Opr'
+    | 'Out'
+    | 'Qfr'
+    | 'Prop'
+    | 'Range'
+    | 'Ref'
+    | 'Rel'
+    | 'RelA'
+    | 'SM'
+    | 'SMC'
+    | 'SME'
+    | 'SML';
 
 /** The kind of AAS container or server. */
 export type AASEndpointType = 'AasxDirectory' | 'AasxServer' | 'OpcuaServer' | 'AASRegistry';
@@ -73,7 +73,7 @@ export interface AASDocumentId {
 export interface AASDocument extends AASDocumentId {
     /** The address of the AAS in the container. */
     address: string;
-    /** The root element of the AAS structure (content), `null` if the content is not loaded or 
+    /** The root element of the AAS structure (content), `null` if the content is not loaded or
      * `undefined` if the content is not available. */
     content?: aas.Environment | null;
     /** Checksum to detect changes. */
@@ -126,13 +126,13 @@ export interface AASWorkspace {
 
 export interface LiveValue {
     nodeId: string;
-    value?: any;
+    value?: unknown;
     timeStamp?: number;
 }
 
 export interface LiveNode {
     nodeId: string;
-    value?: any;
+    value?: unknown;
     valueType: aas.DataTypeDefXsd;
     timeStamp?: number;
 }
@@ -140,7 +140,7 @@ export interface LiveNode {
 export interface LiveRequest {
     endpoint: string;
     id: string;
-    nodes: LiveNode[]
+    nodes: LiveNode[];
 }
 
 export interface PackageInfo {
@@ -204,5 +204,5 @@ export interface WebSocketData {
     /** The message type. */
     type: string;
     /** The data. */
-    data: any;
+    data: unknown;
 }

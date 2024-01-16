@@ -9,16 +9,14 @@
 import { inject, injectable } from 'tsyringe';
 import path from 'path';
 import fs from 'fs';
-import { UserStorage } from "./user-storage.js";
+import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
 
 @injectable()
 export class LocaleUserStorage extends UserStorage {
     private readonly usersDirectory: string;
 
-    constructor(
-        @inject('USERS_DIR') usersDirectory: string
-    ) {
+    public constructor(@inject('USERS_DIR') usersDirectory: string) {
         super();
 
         this.usersDirectory = path.resolve(usersDirectory);
@@ -29,7 +27,7 @@ export class LocaleUserStorage extends UserStorage {
     }
 
     public existAsync(userId: string): Promise<boolean> {
-        return new Promise<boolean>((resolve) => resolve(fs.existsSync(this.getUserDir(userId))));
+        return new Promise<boolean>(resolve => resolve(fs.existsSync(this.getUserDir(userId))));
     }
 
     public async readAsync(userId: string): Promise<UserData | undefined> {

@@ -94,7 +94,10 @@ export class AasxPackage extends AASPackage {
         let stream: NodeJS.ReadableStream | undefined;
         const relationships = await this.getRelationshipsAsync('_rels/.rels');
         for (const relationship of relationships) {
-            if (relationship.getAttribute('Type') === 'http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail') {
+            if (
+                relationship.getAttribute('Type') ===
+                'http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail'
+            ) {
                 const value = relationship.getAttribute('Target');
                 if (value) {
                     stream = (await this.zip.getValueAsync()).file(this.normalize(value))?.nodeStream();
@@ -116,12 +119,14 @@ export class AasxPackage extends AASPackage {
         const name = await this.getOriginNameAsync();
         const extension = extname(name);
         switch (extension) {
-            case '.xml':
+            case '.xml': {
                 const xml = await this.getZipEntryAsync(name);
                 return new XmlReader(this.logger, xml);
-            case '.json':
+            }
+            case '.json': {
                 const env = JSON.parse(await this.getZipEntryAsync(name));
                 return this.createJsonReader(env);
+            }
             default:
                 throw new Error(`The AAS origin ${extension} is not supported.`);
         }
@@ -169,10 +174,10 @@ export class AasxPackage extends AASPackage {
         const zip = await this.zip.getValueAsync();
         const file = zip.file(path);
         if (file === null) {
-            throw new Error(`${path} is not a valid ZIP file.`)
+            throw new Error(`${path} is not a valid ZIP file.`);
         }
 
-        return await file.async(contentType) as string;
+        return (await file.async(contentType)) as string;
     }
 
     private getContentType(fileName: string): jszip.OutputType {

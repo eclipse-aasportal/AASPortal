@@ -16,9 +16,7 @@ import { inject, singleton } from 'tsyringe';
 export class ApplicationInfo {
     private data?: PackageInfo;
 
-    constructor(
-        @inject('Logger') private readonly logger: Logger, 
-    ) { }
+    public constructor(@inject('Logger') private readonly logger: Logger) {}
 
     public async getAsync(file?: string): Promise<PackageInfo> {
         if (!this.data) {
@@ -55,7 +53,7 @@ export class ApplicationInfo {
                 description: '',
                 license: '',
                 homepage: '',
-                libraries: []
+                libraries: [],
             };
         }
     }

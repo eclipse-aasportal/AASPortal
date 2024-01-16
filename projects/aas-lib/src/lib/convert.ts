@@ -26,7 +26,6 @@ export function messageToString(message: unknown, translate: TranslateService): 
     } else if (typeof message === 'string') {
         text = message;
     } else if (message instanceof HttpErrorResponse) {
-
         if (isErrorData(message.error)) {
             text = format(message.error.message, message.error.name, message.error.args);
         } else {
@@ -58,7 +57,7 @@ export function messageToString(message: unknown, translate: TranslateService): 
  * Resolves the specified error to an displayable object.
  * @param error The error.
  * @param translate The translation service.
- * @returns 
+ * @returns
  */
 export async function resolveError(error: unknown, translate: TranslateService): Promise<string> {
     let message = error;

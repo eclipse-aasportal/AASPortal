@@ -21,29 +21,37 @@ import { ViewApiService } from './view-api.service';
 @Component({
     selector: 'fhg-view',
     templateUrl: './view.component.html',
-    styleUrls: ['./view.component.scss']
+    styleUrls: ['./view.component.scss'],
 })
 export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly store: Store<State>;
     private readonly subscription = new Subscription();
 
-    constructor(
+    public constructor(
         store: Store,
         private readonly route: ActivatedRoute,
         private readonly api: ViewApiService,
         private readonly clipboard: lib.ClipboardService,
-        private readonly toolbar: ToolbarService
+        private readonly toolbar: ToolbarService,
     ) {
         this.store = store as Store<State>;
-        this.subscription.add(this.store.select(ViewSelectors.selectSubmodels)
-            .pipe().subscribe(submodels => {
-                this.submodels = submodels;
-            }));
+        this.subscription.add(
+            this.store
+                .select(ViewSelectors.selectSubmodels)
+                .pipe()
+                .subscribe(submodels => {
+                    this.submodels = submodels;
+                }),
+        );
 
-        this.subscription.add(this.store.select(ViewSelectors.selectTemplate)
-            .pipe().subscribe(template => {
-                this.template = template;
-            }));
+        this.subscription.add(
+            this.store
+                .select(ViewSelectors.selectTemplate)
+                .pipe()
+                .subscribe(template => {
+                    this.template = template;
+                }),
+        );
     }
 
     @ViewChild('viewToolbar', { read: TemplateRef })
@@ -62,19 +70,23 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (query?.descriptor) {
             const descriptor: lib.SubmodelViewDescriptor = query.descriptor;
-            zip(of(descriptor.template), from(descriptor.submodels).pipe(
-                mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
-                mergeMap(tuple => {
-                    const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
-                    if (submodel?.modelType === 'Submodel') {
-                        return of({ document: tuple[0], submodel } as lib.DocumentSubmodelPair);
-                    }
+            zip(
+                of(descriptor.template),
+                from(descriptor.submodels).pipe(
+                    mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
+                    mergeMap(tuple => {
+                        const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
+                        if (submodel?.modelType === 'Submodel') {
+                            return of({ document: tuple[0], submodel } as lib.DocumentSubmodelPair);
+                        }
 
-                    return EMPTY;
-                }),
-                toArray()
-            )).subscribe(tuple => this.store.dispatch(
-                ViewActions.initView({ submodels: tuple[1], template: tuple[0] })));
+                        return EMPTY;
+                    }),
+                    toArray(),
+                ),
+            ).subscribe(tuple =>
+                this.store.dispatch(ViewActions.initView({ submodels: tuple[1], template: tuple[0] })),
+            );
         }
     }
 

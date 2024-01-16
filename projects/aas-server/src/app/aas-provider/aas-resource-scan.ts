@@ -11,7 +11,6 @@ import { AASDocument } from 'common';
 
 /** Defines an automate to scan an AAS resource for Asset Administration Shells. */
 export abstract class AASResourceScan extends EventEmitter {
-
     /** Gets all documents of the current container. */
     public abstract scanAsync(): Promise<AASDocument[]>;
 }

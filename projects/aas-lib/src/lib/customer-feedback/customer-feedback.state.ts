@@ -27,7 +27,7 @@ export interface CustomerFeedbackState {
     starClassNames: string[];
     items: GeneralItem[];
     feedbacks: FeedbackItem[];
-    error: unknown
+    error: unknown;
 }
 
 export interface CustomerFeedbackFeatureState {

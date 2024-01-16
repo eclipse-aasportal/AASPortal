@@ -25,7 +25,7 @@ export class ServerMessage {
                 port: url.port,
                 path: url.pathname + url.search,
                 method: 'GET',
-                timeout: 3000
+                timeout: 3000,
             };
 
             const request = http.request(options, response => {
@@ -46,7 +46,8 @@ export class ServerMessage {
                 response.on('error', error => reject(error));
             });
 
-            request.on('timeout', () => request.destroy())
+            request
+                .on('timeout', () => request.destroy())
                 .on('error', error => reject(error))
                 .end();
         });
@@ -64,11 +65,12 @@ export class ServerMessage {
                 port: url.port,
                 path: url.pathname + url.search,
                 method: 'GET',
-                timeout: 3000
+                timeout: 3000,
             };
 
             const request = http.request(options, response => result(response));
-            request.on('timeout', () => request.destroy())
+            request
+                .on('timeout', () => request.destroy())
                 .on('error', error => reject(error))
                 .end();
         });
@@ -89,27 +91,29 @@ export class ServerMessage {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
-                }
+                    'Content-Length': Buffer.byteLength(data),
+                },
             };
 
-            const request = http.request(options, (response) => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
+            const request = http
+                .request(options, response => {
+                    let responseData = '';
+                    response.on('data', (chunk: string) => {
+                        responseData += chunk;
+                    });
 
-                response.on('end', () => {
-                    try {
-                        ServerMessage.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
+                    response.on('end', () => {
+                        try {
+                            ServerMessage.checkStatusCode(response, responseData);
+                            result(responseData);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    });
 
-                response.on('error', error => reject(error));
-            }).on('error', error => reject(error));
+                    response.on('error', error => reject(error));
+                })
+                .on('error', error => reject(error));
 
             request.write(data);
             request.end();
@@ -137,8 +141,8 @@ export class ServerMessage {
                 path: url.pathname + url.search,
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             };
 
             http.request(options, response => {
@@ -157,7 +161,8 @@ export class ServerMessage {
                 });
 
                 response.on('error', error => reject(error));
-            }).on('error', error => reject(error))
+            })
+                .on('error', error => reject(error))
                 .end();
         });
     }
@@ -202,27 +207,29 @@ export class ServerMessage {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
-                }
+                    'Content-Length': Buffer.byteLength(data),
+                },
             };
 
-            const request = http.request(options, (response) => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
+            const request = http
+                .request(options, response => {
+                    let responseData = '';
+                    response.on('data', (chunk: string) => {
+                        responseData += chunk;
+                    });
 
-                response.on('end', () => {
-                    try {
-                        ServerMessage.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
+                    response.on('end', () => {
+                        try {
+                            ServerMessage.checkStatusCode(response, responseData);
+                            result(responseData);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    });
 
-                response.on('error', error => reject(error));
-            }).on('error', error => reject(error));
+                    response.on('error', error => reject(error));
+                })
+                .on('error', error => reject(error));
 
             request.write(data);
             request.end();
@@ -236,26 +243,28 @@ export class ServerMessage {
                 port: url.port,
                 path: url.pathname + url.search,
                 method: 'POST',
-                headers: formData.getHeaders()
+                headers: formData.getHeaders(),
             };
 
-            const request = http.request(options, (response) => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
+            const request = http
+                .request(options, response => {
+                    let responseData = '';
+                    response.on('data', (chunk: string) => {
+                        responseData += chunk;
+                    });
 
-                response.on('end', function () {
-                    try {
-                        ServerMessage.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
+                    response.on('end', function () {
+                        try {
+                            ServerMessage.checkStatusCode(response, responseData);
+                            result(responseData);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    });
 
-                response.on('error', error => reject(error));
-            }).on('error', error => reject(error));
+                    response.on('error', error => reject(error));
+                })
+                .on('error', error => reject(error));
 
             formData.pipe(request);
         });
@@ -267,9 +276,11 @@ export class ServerMessage {
         }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
-            throw new Error(data 
-                ? `(${response.statusCode}) ${response.statusMessage}: ${data}` 
-                : `(${response.statusCode}) ${response.statusMessage}.`);
+            throw new Error(
+                data
+                    ? `(${response.statusCode}) ${response.statusMessage}: ${data}`
+                    : `(${response.statusCode}) ${response.statusMessage}.`,
+            );
         }
     }
 }

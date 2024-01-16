@@ -8,17 +8,14 @@
 
 import path from 'path';
 import { inject, singleton } from 'tsyringe';
-import { FileStorage } from "./file-storage.js";
-import { LocalFileStorage } from "./local-file-storage.js";
+import { FileStorage } from './file-storage.js';
+import { LocalFileStorage } from './local-file-storage.js';
 import { parseUrl } from '../convert.js';
 import { Variable } from '../variable.js';
 
 @singleton()
 export class FileStorageFactory {
-    constructor(
-        @inject(Variable) private readonly variable: Variable
-    ) {
-    }
+    public constructor(@inject(Variable) private readonly variable: Variable) {}
 
     /**
      * Creates a FileStorage for the specified URL.
@@ -31,6 +28,6 @@ export class FileStorageFactory {
             return new LocalFileStorage(path.join(this.variable.ASSETS, temp.pathname));
         }
 
-        throw new Error('Not implemented.')
+        throw new Error('Not implemented.');
     }
 }

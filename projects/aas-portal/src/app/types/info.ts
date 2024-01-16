@@ -7,5 +7,5 @@
  *****************************************************************************/
 
 export const INFO = {
-    NEW_PASSWORD_SENT: 'INFO_NEW_PASSWORD_SENT'
+    NEW_PASSWORD_SENT: 'INFO_NEW_PASSWORD_SENT',
 };

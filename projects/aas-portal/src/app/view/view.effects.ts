@@ -16,25 +16,29 @@ import { ViewApiService } from './view-api.service';
 /** Currently not used. Does not work with ProjectService */
 @Injectable()
 export class ViewEffects {
-    constructor(
+    public constructor(
         private readonly actions: Actions,
-        private readonly api: ViewApiService
-    ) { }
+        private readonly api: ViewApiService,
+    ) {}
 
     public setSubmodels = createEffect(() => {
         return this.actions.pipe(
             ofType<ViewActions.SetSubmodelsAction>(ViewActions.ViewActionType.SET_SUBMODELS),
-            exhaustMap(action => from(action.descriptor.submodels).pipe(
-                mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
-                mergeMap(tuple => {
-                    const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
-                    if (submodel?.modelType === 'Submodel') {
-                        return of({ document: tuple[0], submodel } as DocumentSubmodelPair);
-                    }
+            exhaustMap(action =>
+                from(action.descriptor.submodels).pipe(
+                    mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
+                    mergeMap(tuple => {
+                        const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
+                        if (submodel?.modelType === 'Submodel') {
+                            return of({ document: tuple[0], submodel } as DocumentSubmodelPair);
+                        }
 
-                    return EMPTY;
-                }),
-                toArray(),
-                map(submodels => ViewActions.initView({ submodels })))));
+                        return EMPTY;
+                    }),
+                    toArray(),
+                    map(submodels => ViewActions.initView({ submodels })),
+                ),
+            ),
+        );
     });
 }

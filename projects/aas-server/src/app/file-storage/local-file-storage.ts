@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import { FileStorage } from './file-storage.js';
 
 export class LocalFileStorage extends FileStorage {
-    constructor(root: string) { 
+    public constructor(root: string) {
         super();
 
         this.root = resolve(root);

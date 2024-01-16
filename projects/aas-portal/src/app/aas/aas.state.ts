@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, TemplateDescriptor } from "common";
+import { AASDocument, TemplateDescriptor } from 'common';
 
 export interface TemplateStorage {
     timestamp: number;
@@ -25,9 +25,9 @@ export const initialState: AASState = {
     search: '',
     templateStorage: {
         timestamp: 0,
-        templates: []
+        templates: [],
     },
-    error: null
+    error: null,
 };
 
 export interface State {

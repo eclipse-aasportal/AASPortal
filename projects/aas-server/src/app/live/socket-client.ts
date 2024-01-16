@@ -15,7 +15,7 @@ export class SocketClient extends EventEmitter {
     private readonly ws: WebSocket;
     private readonly subscriptions = new Map<string, SocketSubscription>();
 
-    constructor(ws: WebSocket) {
+    public constructor(ws: WebSocket) {
         super();
 
         this.ws = ws;
@@ -50,7 +50,7 @@ export class SocketClient extends EventEmitter {
             data = JSON.parse(rawData.toString());
             this.emit('message', data, this);
         }
-    }
+    };
 
     private onClose = (code: number, reason: string): void => {
         this.ws.removeAllListeners();
@@ -62,9 +62,9 @@ export class SocketClient extends EventEmitter {
         this.subscriptions.clear();
 
         this.emit('close', code, reason, this);
-    }
+    };
 
     private onError = (error: Error): void => {
         this.emit('error', error, this);
-    }
+    };
 }

@@ -17,16 +17,16 @@ import { ViewComponent } from './view/view.component';
 
 const routes: Routes = [
     { path: 'start', component: StartComponent },
-    { path: 'aas', component: AASComponent, canActivate: [CanActivateAAS]},
+    { path: 'aas', component: AASComponent, canActivate: [CanActivateAAS] },
     { path: 'view', component: ViewComponent },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'about', component: AboutComponent },
-    { path: '', pathMatch: 'full', redirectTo: 'start' }
+    { path: '', pathMatch: 'full', redirectTo: 'start' },
 ];
 
 @NgModule({
     imports: [RouterModule.forRoot(routes)],
     exports: [RouterModule],
-    providers: [CanActivateAAS]
+    providers: [CanActivateAAS],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

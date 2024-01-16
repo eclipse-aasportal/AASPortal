@@ -26,5 +26,5 @@ export const ERRORS = {
     InvalidURL: 'ERROR_INVALID_URL',
     DeleteAASNotSupported: 'ERROR_DELETE_AAS_NOT_SUPPORTED',
     InvalidContainerUrl: 'ERROR_INVALID_CONTAINER_URL',
-    InvokeOperationFailed: 'ERROR_INVOKE_OPERATION_FAILED'
+    InvokeOperationFailed: 'ERROR_INVOKE_OPERATION_FAILED',
 };

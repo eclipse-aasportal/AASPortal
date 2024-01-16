@@ -6,18 +6,18 @@
  *
  *****************************************************************************/
 
-import { Component } from "@angular/core";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { Component } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-show-image',
     templateUrl: './show-image-form.component.html',
-    styleUrls: ['./show-image-form.component.scss']
+    styleUrls: ['./show-image-form.component.scss'],
 })
 export class ShowImageFormComponent {
     private readonly _modal: NgbActiveModal;
 
-    constructor(modal: NgbActiveModal) {
+    public constructor(modal: NgbActiveModal) {
         this._modal = modal;
     }
 

@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { injectable } from 'tsyringe';
-import { Cookie } from "common";
-import { model, Schema } from "mongoose";
-import { CookieStorage } from "./cookie-storage.js";
+import { Cookie } from 'common';
+import { model, Schema } from 'mongoose';
+import { CookieStorage } from './cookie-storage.js';
 
 export interface UserCookies {
     id: string;
@@ -23,8 +23,8 @@ export class MongoDBCookieStorage extends CookieStorage {
         cookies: [
             {
                 name: String,
-                data: String
-            }
+                data: String,
+            },
         ],
     });
 

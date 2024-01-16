@@ -11,10 +11,10 @@ import { SocketItem } from '../socket-item.js';
 import { noop } from 'lodash-es';
 
 export class HttpSocketItem implements SocketItem {
-    constructor(
-        public readonly node: LiveNode, 
-        public readonly url: string) {
-    }
+    public constructor(
+        public readonly node: LiveNode,
+        public readonly url: string,
+    ) {}
 
     public subscribe(): void {
         noop();
@@ -23,4 +23,4 @@ export class HttpSocketItem implements SocketItem {
     public unsubscribe(): void {
         noop();
     }
- }
+}

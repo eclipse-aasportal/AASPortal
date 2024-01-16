@@ -7,10 +7,10 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { Logger } from "../../../app/logging/logger.js";
+import { Logger } from '../../../app/logging/logger.js';
 import { OpcuaReader } from '../../../app/packages/opcua/opcua-reader.js';
-import { OPCUAComponent } from "../../../app/packages/opcua/opcua.js";
-import { OpcuaDataTypeDictionary } from "../../../app/packages/opcua/opcua-data-type-dictionary.js";
+import { OPCUAComponent } from '../../../app/packages/opcua/opcua.js';
+import { OpcuaDataTypeDictionary } from '../../../app/packages/opcua/opcua-data-type-dictionary.js';
 import { createSpyObj } from '../../utils.js';
 
 describe('OpcuaReader', function () {
