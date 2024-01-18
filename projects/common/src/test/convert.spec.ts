@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals';
 import { LangString } from '../lib/aas.js';
 import {
     changeType,
@@ -22,7 +22,7 @@ import {
     parseNumber,
     toBoolean,
     mimeTypeToExtension,
-    extensionToMimeType
+    extensionToMimeType,
 } from '../lib/convert.js';
 
 describe('Convert', function () {
@@ -94,12 +94,14 @@ describe('Convert', function () {
             expect(convertToString(new Date('1/1/1970, 1:02:03 AM'), 'en-us')).toEqual('1/1/1970, 1:02:03 AM');
         });
 
-        it ('converts an array', function() {
+        it('converts an array', function () {
             expect(convertToString([1, 2])).toEqual('[1, 2]');
         });
 
-        it('converts an object', function() {
-            expect(convertToString({ text: 'Hello world!', number: 42 })).toEqual('{ text: Hello world!, number: 42 }');
+        it('converts an object', function () {
+            expect(convertToString({ text: 'Hello world!', number: 42 })).toEqual(
+                JSON.stringify({ text: 'Hello world!', number: 42 }, undefined, 2),
+            );
         });
     });
 
@@ -207,20 +209,20 @@ describe('Convert', function () {
             localizable = [
                 {
                     language: 'en-us',
-                    text: 'Hello World!'
+                    text: 'Hello World!',
                 },
                 {
                     language: 'de-de',
-                    text: 'Hallo Deutschland!'
+                    text: 'Hallo Deutschland!',
                 },
                 {
                     language: 'de-LU',
-                    text: 'Hallo Luxembourg!'
+                    text: 'Hallo Luxembourg!',
                 },
                 {
                     language: 'de',
-                    text: 'Hallo Welt!'
-                }
+                    text: 'Hallo Welt!',
+                },
             ];
         });
 
@@ -229,15 +231,15 @@ describe('Convert', function () {
         });
 
         it('gets "Hallo Welt!" for de-de', function () {
-            expect(getLocaleValue(localizable, 'de-de')).toEqual('Hallo Deutschland!')
+            expect(getLocaleValue(localizable, 'de-de')).toEqual('Hallo Deutschland!');
         });
 
         it('gets "Hallo Welt!" for de', function () {
-            expect(getLocaleValue(localizable, 'de')).toEqual('Hallo Welt!')
+            expect(getLocaleValue(localizable, 'de')).toEqual('Hallo Welt!');
         });
 
         it('gets "Hallo Welt!" for de-ch', function () {
-            expect(getLocaleValue(localizable, 'de-lu')).toEqual('Hallo Luxembourg!')
+            expect(getLocaleValue(localizable, 'de-lu')).toEqual('Hallo Luxembourg!');
         });
 
         it('gets first entry for unknown language', function () {
@@ -395,7 +397,7 @@ describe('Convert', function () {
             expect(toBoolean('false')).toBeFalsy();
         });
     });
-    
+
     describe('mimeTypeToExtension', function () {
         it('return ".png" for "image/png"', function () {
             expect(mimeTypeToExtension('image/png')).toEqual('.png');
