@@ -237,20 +237,11 @@ export function convertToString(value: unknown, localeId?: string): string {
         } else if (Array.isArray(value)) {
             s = `[${getItems(value).join(', ')}]`;
         } else if (typeof value === 'object') {
-            s = `{ ${getProperties(value).join(', ')} }`;
+            s = JSON.stringify(value, undefined, 2);
         }
     }
 
     return s;
-
-    function getProperties(obj: object): string[] {
-        const items: string[] = [];
-        for (const property in obj) {
-            items.push(`${property}: ${convertToString((obj as { [key: string]: unknown })[property], localeId)}`);
-        }
-
-        return items;
-    }
 
     function getItems(array: unknown[]): string[] {
         return array.map(item => convertToString(item, localeId));
