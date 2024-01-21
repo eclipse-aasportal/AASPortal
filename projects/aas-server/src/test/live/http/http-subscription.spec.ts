@@ -64,7 +64,7 @@ describe('HttpSubscription', function () {
         expect(subscription).toBeTruthy();
     });
 
-    it('open/close subscription', function (done: DoneFn) {
+    it('open/close subscription', (done: DoneFn) => {
         jest.useFakeTimers();
         aasxServer.readValueAsync.mockReturnValue(
             new Promise<DefaultType>(result => {

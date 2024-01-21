@@ -51,7 +51,7 @@ export function createSpyObj<T extends object>(
     return obj as jest.Mocked<T>;
 }
 
-export type DoneFn = (...args: unknown[]) => void;
+export type DoneFn = (...args: any[]) => void;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function fail(message?: string) {
