@@ -1,15 +1,16 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import { Cookie } from 'common';
 import { model, Schema } from 'mongoose';
 import { CookieStorage } from './cookie-storage.js';
+import { MongoDBConnection } from './mongo-db-connection.js';
 
 export interface UserCookies {
     id: string;
@@ -28,10 +29,15 @@ export class MongoDBCookieStorage extends CookieStorage {
         ],
     });
 
-    public readonly UserCookiesModel = model<UserCookies>('UserCookiesModel', this.userCookiesSchema);
+    public readonly model = model<UserCookies>('UserCookiesModel', this.userCookiesSchema);
+
+    public constructor(@inject(MongoDBConnection) private readonly connection: MongoDBConnection) {
+        super();
+    }
 
     public async checkAsync(id: string, name: string): Promise<boolean> {
-        const user = await this.UserCookiesModel.findOne({ id: id }).exec();
+        await this.connection.ensureConnected();
+        const user = await this.model.findOne({ id: id }).exec();
         if (user != null) {
             return user.cookies.some(cookie => cookie.name === name);
         }
@@ -40,7 +46,8 @@ export class MongoDBCookieStorage extends CookieStorage {
     }
 
     public async getAsync(id: string, name: string): Promise<Cookie | undefined> {
-        const user = await this.UserCookiesModel.findOne({ id: id }).exec();
+        await this.connection.ensureConnected();
+        const user = await this.model.findOne({ id: id }).exec();
         if (user != null) {
             return user.cookies.find(cookie => cookie.name === name);
         }
@@ -49,7 +56,8 @@ export class MongoDBCookieStorage extends CookieStorage {
     }
 
     public async getAllAsync(id: string): Promise<Cookie[]> {
-        const user = await this.UserCookiesModel.findOne({ id: id }).exec();
+        await this.connection.ensureConnected();
+        const user = await this.model.findOne({ id: id }).exec();
         if (user != null) {
             return user.cookies;
         }
@@ -58,7 +66,8 @@ export class MongoDBCookieStorage extends CookieStorage {
     }
 
     public async setAsync(id: string, name: string, data: string): Promise<void> {
-        let user = await this.UserCookiesModel.findOne({ id: id }).exec();
+        await this.connection.ensureConnected();
+        let user = await this.model.findOne({ id: id }).exec();
         if (user) {
             const index = user.cookies.findIndex(cookie => cookie.name === name);
             if (index < 0) {
@@ -67,14 +76,15 @@ export class MongoDBCookieStorage extends CookieStorage {
                 user.cookies[index].data = data;
             }
         } else {
-            user = new this.UserCookiesModel({ id: id, cookies: [{ name, data }] });
+            user = new this.model({ id: id, cookies: [{ name, data }] });
         }
 
         await user.save();
     }
 
     public async deleteAsync(id: string, name: string): Promise<void> {
-        const user = await this.UserCookiesModel.findOne({ id: id }).exec();
+        await this.connection.ensureConnected();
+        const user = await this.model.findOne({ id: id }).exec();
         if (user) {
             const index = user.cookies.findIndex(cookie => cookie.name === name);
             if (index >= 0) {
