@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals';
 import { MultiKeyMap } from '../lib/multi-key-map.js';
 
 describe('MultiKeyMap', function () {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals';
 import { createSpyObj } from './utils.js';
 import {
     aas,
@@ -21,7 +21,7 @@ import {
     isUrlSafeBase64,
     isValidEMail,
     isValidPassword,
-    stringFormat
+    stringFormat,
 } from '../lib/index.js';
 
 describe('index', function () {
@@ -52,7 +52,6 @@ describe('index', function () {
         it('indicates that "{}" is not a SubmodelElement', function () {
             expect(isSubmodelElement({})).toBeFalsy();
         });
-
     });
 
     describe('isAssetAdministrationShell', function () {
@@ -132,7 +131,10 @@ describe('index', function () {
 
     describe('isMultiLanguageProperty', function () {
         it('identifies a MultiLanguageProperty', function () {
-            const multiLanguageProperty = createSpyObj<aas.ReferenceElement>({}, { modelType: 'MultiLanguageProperty' });
+            const multiLanguageProperty = createSpyObj<aas.ReferenceElement>(
+                {},
+                { modelType: 'MultiLanguageProperty' },
+            );
             expect(isMultiLanguageProperty(multiLanguageProperty)).toBeTruthy();
         });
 
@@ -184,76 +186,75 @@ describe('index', function () {
         });
     });
 
-    describe("Is valid e-mail", function () {
-        it("recognize valid e-mail format", function () {
-            expect(isValidEMail("webaas@iosb-ina.fraunhofer.de")).toBeTruthy();
+    describe('Is valid e-mail', function () {
+        it('recognize valid e-mail format', function () {
+            expect(isValidEMail('webaas@iosb-ina.fraunhofer.de')).toBeTruthy();
         });
 
-        it("recognize invalid e-mail format", function () {
-            expect(isValidEMail("invalid")).toBeFalsy();
-        });
-    });
-
-    describe("Is valid password", function () {
-        it("valid password", function () {
-            expect(isValidPassword("aZ0-+_$%!§?#*~.,;:")).toBeTruthy();
-        });
-
-        it("at least 8 characters", function () {
-            expect(isValidPassword("1234567")).toBeFalsy();
-        });
-
-
-        it("more then 20 characters", function () {
-            expect(isValidPassword("123456789012345678901")).toBeFalsy();
-        });
-
-        it("invalid characters", function () {
-            expect(isValidPassword("1234567\\/ ")).toBeFalsy();
+        it('recognize invalid e-mail format', function () {
+            expect(isValidEMail('invalid')).toBeFalsy();
         });
     });
 
-
-    describe("stringFormat", function () {
-        it("returns a string with no format items", function () {
-            expect(stringFormat("Hello World!")).toEqual("Hello World!");
+    describe('Is valid password', function () {
+        it('valid password', function () {
+            expect(isValidPassword('aZ0-+_$%!§?#*~.,;:')).toBeTruthy();
         });
 
-        it("string format item", function () {
-            expect(stringFormat("Hello {0}!", "World")).toEqual("Hello World!");
+        it('at least 8 characters', function () {
+            expect(isValidPassword('1234567')).toBeFalsy();
         });
 
-        it("two string format items", function () {
-            expect(stringFormat("{1} {0}!", "World", "Hello")).toEqual("Hello World!");
+        it('more then 20 characters', function () {
+            expect(isValidPassword('123456789012345678901')).toBeFalsy();
         });
 
-        it("twice string format item", function () {
-            expect(stringFormat("Hello {0}, {0}!", "World")).toEqual("Hello World, World!");
+        it('invalid characters', function () {
+            expect(isValidPassword('1234567\\/ ')).toBeFalsy();
+        });
+    });
+
+    describe('stringFormat', function () {
+        it('returns a string with no format items', function () {
+            expect(stringFormat('Hello World!')).toEqual('Hello World!');
         });
 
-        it("number format item", function () {
-            expect(stringFormat("PI is {0}", Math.PI)).toEqual("PI is " + Math.PI.toString());
+        it('string format item', function () {
+            expect(stringFormat('Hello {0}!', 'World')).toEqual('Hello World!');
         });
 
-        it("boolean format item", function () {
-            expect(stringFormat("True is {0} and false is {1}.", true, false))
-                .toEqual("True is true and false is false.");
+        it('two string format items', function () {
+            expect(stringFormat('{1} {0}!', 'World', 'Hello')).toEqual('Hello World!');
         });
 
-        it("formats item with toString method", function () {
+        it('twice string format item', function () {
+            expect(stringFormat('Hello {0}, {0}!', 'World')).toEqual('Hello World, World!');
+        });
+
+        it('number format item', function () {
+            expect(stringFormat('PI is {0}', Math.PI)).toEqual('PI is ' + Math.PI.toString());
+        });
+
+        it('boolean format item', function () {
+            expect(stringFormat('True is {0} and false is {1}.', true, false)).toEqual(
+                'True is true and false is false.',
+            );
+        });
+
+        it('formats item with toString method', function () {
             expect(stringFormat('Hello {0}', { toString: () => 'World!' })).toEqual('Hello World!');
         });
 
-        it("undefined format item", function () {
-            expect(stringFormat("{0}", undefined)).toEqual("<undefined>");
+        it('undefined format item', function () {
+            expect(stringFormat('{0}', undefined)).toEqual('<undefined>');
         });
 
-        it("null format item", function () {
-            expect(stringFormat("{0}", null)).toEqual("<null>");
+        it('null format item', function () {
+            expect(stringFormat('{0}', null)).toEqual('<null>');
         });
 
-        it("invalid format item", function () {
-            expect(stringFormat("{1}", "Invalid")).toEqual("<undefined>");
+        it('invalid format item', function () {
+            expect(stringFormat('{1}', 'Invalid')).toEqual('<undefined>');
         });
     });
 
@@ -263,7 +264,9 @@ describe('index', function () {
         });
 
         it('indicates that "aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw" is url-safe-base64 encoded', function () {
-            expect(isUrlSafeBase64('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw')).toBeTruthy();
+            expect(
+                isUrlSafeBase64('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw'),
+            ).toBeTruthy();
         });
     });
 });

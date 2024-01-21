@@ -38,28 +38,26 @@ describe('ContainersController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
-        aasProvider = createSpyObj<AASProvider>(
-            [
-                'updateDocumentAsync',
-                'getContentAsync',
-                'getPackageAsync',
-                'getDocumentAsync',
-                'addPackagesAsync',
-                'deletePackageAsync',
-                'getDataElementValueAsync',
-                'invoke',
-                'resetAsync'
-            ]);
+        aasProvider = createSpyObj<AASProvider>([
+            'updateDocumentAsync',
+            'getContentAsync',
+            'getPackageAsync',
+            'getDocumentAsync',
+            'addPackagesAsync',
+            'deletePackageAsync',
+            'getDataElementValueAsync',
+            'invoke',
+            'resetAsync',
+        ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
@@ -81,12 +79,14 @@ describe('ContainersController', function () {
     });
 
     it('getPackage: /api/v1/containers/:endpoint/packages/:id', async function () {
-        aasProvider.getPackageAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
-            const s = new Readable();
-            s.push('Hello World!');
-            s.push(null);
-            resolve(s);
-        }));
+        aasProvider.getPackageAsync.mockReturnValue(
+            new Promise<NodeJS.ReadableStream>(resolve => {
+                const s = new Readable();
+                s.push('Hello World!');
+                s.push(null);
+                resolve(s);
+            }),
+        );
 
         const response = await request(app)
             .get(`/api/v1/containers/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA`)
@@ -117,7 +117,7 @@ describe('ContainersController', function () {
         expect(response.statusCode).toBe(204);
         expect(aasProvider.deletePackageAsync).toHaveBeenCalled();
     });
-    
+
     it('getDocument: /api/v1/containers/:endpoint/documents/:id', async function () {
         aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
         const response = await request(app)
@@ -130,9 +130,11 @@ describe('ContainersController', function () {
     });
 
     it('getDocumentContent: /api/v1/containers/:url/documents/:id/content', async function () {
-        aasProvider.getContentAsync.mockReturnValue(new Promise<aas.Environment>(resolve => {
-            resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
-        }));
+        aasProvider.getContentAsync.mockReturnValue(
+            new Promise<aas.Environment>(resolve => {
+                resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
+            }),
+        );
 
         const response = await request(app)
             .get('/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/content')
@@ -144,15 +146,19 @@ describe('ContainersController', function () {
 
     describe('getDataElementValue: /api/v1/containers/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', function () {
         it('gets the value of a File that represents an image', async function () {
-            aasProvider.getDataElementValueAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
-                const s = new Readable();
-                s.push('Hello World!');
-                s.push(null);
-                resolve(s);
-            }));
+            aasProvider.getDataElementValueAsync.mockReturnValue(
+                new Promise<NodeJS.ReadableStream>(resolve => {
+                    const s = new Readable();
+                    s.push('Hello World!');
+                    s.push(null);
+                    resolve(s);
+                }),
+            );
 
             const response = await request(app)
-                .get('/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/submodels/U3VibW9kZWw/submodel-elements/collection.file/value?width=200&height=100')
+                .get(
+                    '/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/submodels/U3VibW9kZWw/submodel-elements/collection.file/value?width=200&height=100',
+                )
                 .set('Authorization', `Bearer ${getToken()}`);
 
             expect(response.statusCode).toBe(200);
@@ -160,15 +166,19 @@ describe('ContainersController', function () {
         });
 
         it('gets the value of a File', async function () {
-            aasProvider.getDataElementValueAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
-                const s = new Readable();
-                s.push('Hello World!');
-                s.push(null);
-                resolve(s);
-            }));
+            aasProvider.getDataElementValueAsync.mockReturnValue(
+                new Promise<NodeJS.ReadableStream>(resolve => {
+                    const s = new Readable();
+                    s.push('Hello World!');
+                    s.push(null);
+                    resolve(s);
+                }),
+            );
 
             const response = await request(app)
-                .get('/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/submodels/U3VibW9kZWw/submodel-elements/collection.file/value')
+                .get(
+                    '/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/submodels/U3VibW9kZWw/submodel-elements/collection.file/value',
+                )
                 .set('Authorization', `Bearer ${getToken()}`);
 
             expect(response.statusCode).toBe(200);
@@ -177,15 +187,19 @@ describe('ContainersController', function () {
         });
 
         it('gets the value of a Blob', async function () {
-            aasProvider.getDataElementValueAsync.mockReturnValue(new Promise<NodeJS.ReadableStream>(resolve => {
-                const s = new Readable();
-                s.push(Buffer.from('Hello world!').toString('base64'));
-                s.push(null);
-                resolve(s);
-            }));
+            aasProvider.getDataElementValueAsync.mockReturnValue(
+                new Promise<NodeJS.ReadableStream>(resolve => {
+                    const s = new Readable();
+                    s.push(Buffer.from('Hello world!').toString('base64'));
+                    s.push(null);
+                    resolve(s);
+                }),
+            );
 
             const response = await request(app)
-                .get(`/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/submodels/U3VibW9kZWw/submodel-elements/collection.blob/value`)
+                .get(
+                    `/api/v1/containers/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/submodels/U3VibW9kZWw/submodel-elements/collection.blob/value`,
+                )
                 .set('Authorization', `Bearer ${getToken()}`);
 
             expect(response.statusCode).toBe(200);
@@ -204,7 +218,7 @@ describe('ContainersController', function () {
         const response = await request(app)
             .put(`/api/v1/containers/${url}/documents/${id}`)
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .attach('content',  resolve('./src/test/assets/aas-example.json'));
+            .attach('content', resolve('./src/test/assets/aas-example.json'));
 
         expect(response.statusCode).toBe(200);
         expect(aasProvider.updateDocumentAsync).toHaveBeenCalled();

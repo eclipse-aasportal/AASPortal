@@ -33,15 +33,14 @@ describe('AuthController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
@@ -66,8 +65,7 @@ describe('AuthController', function () {
             const token = getToken();
             auth.loginAsync.mockReturnValue(new Promise<AuthResult>(resolve => resolve({ token })));
 
-            const response = await request(app)
-                .post('/api/v1/guest');
+            const response = await request(app).post('/api/v1/guest');
 
             expect(response.statusCode).toBe(200);
             expect(response.body).toEqual({ token } as AuthResult);
@@ -92,7 +90,8 @@ describe('AuthController', function () {
         it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
             auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
             auth.getCookieAsync.mockReturnValue(
-                new Promise<Cookie>(resolve => resolve({ name: 'Cookie1', data: 'Hello World!' })));
+                new Promise<Cookie>(resolve => resolve({ name: 'Cookie1', data: 'Hello World!' })),
+            );
 
             const response = await request(app)
                 .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
@@ -115,10 +114,13 @@ describe('AuthController', function () {
         it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async function () {
             auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
             auth.getCookiesAsync.mockReturnValue(
-                new Promise<Cookie[]>(resolve => resolve([
-                    { name: 'Cookie1', data: 'Hello World!' },
-                    { name: 'Cookie2', data: '42' }
-                ])));
+                new Promise<Cookie[]>(resolve =>
+                    resolve([
+                        { name: 'Cookie1', data: 'Hello World!' },
+                        { name: 'Cookie2', data: '42' },
+                    ]),
+                ),
+            );
 
             const response = await request(app)
                 .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies')
@@ -127,7 +129,7 @@ describe('AuthController', function () {
             expect(response.statusCode).toBe(200);
             expect(response.body).toEqual([
                 { name: 'Cookie1', data: 'Hello World!' },
-                { name: 'Cookie2', data: '42' }
+                { name: 'Cookie2', data: '42' },
             ]);
         });
 

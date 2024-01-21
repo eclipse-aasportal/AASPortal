@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest, beforeAll } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { MySqlQuery } from '../../../app/aas-index/mysql/mysql-query.js';
 
 describe('MySqlQuery', () => {
@@ -15,7 +15,7 @@ describe('MySqlQuery', () => {
             const query = new MySqlQuery('"Hello World"');
             const values: unknown[] = [];
             expect(query.createSql(values)).toEqual(
-                "(documents.endpoint LIKE '%Hello World%' OR documents.id LIKE '%Hello World%' OR documents.idShort LIKE '%Hello World%')"
+                "(documents.endpoint LIKE '%Hello World%' OR documents.id LIKE '%Hello World%' OR documents.idShort LIKE '%Hello World%')",
             );
         });
 

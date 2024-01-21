@@ -23,13 +23,15 @@ describe('OpcuaSubscription', function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
         server = createSpyObj<OpcuaServer>(['getSession']);
-        subscription = new OpcuaSubscription(logger, client, server, [{
-            nodeId: 'ns=1;i=42',
-            valueType: 'xs:integer'
-        }]);
+        subscription = new OpcuaSubscription(logger, client, server, [
+            {
+                nodeId: 'ns=1;i=42',
+                valueType: 'xs:integer',
+            },
+        ]);
     });
 
-    it('should be created', function() {
+    it('should be created', function () {
         expect(subscription).toBeTruthy();
     });
 });

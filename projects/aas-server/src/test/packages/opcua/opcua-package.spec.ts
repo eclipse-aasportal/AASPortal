@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { OpcuaPackage } from "../../../app/packages/opcua/opcua-package.js";
-import { Logger } from "../../../app/logging/logger.js";
-import { createSpyObj } from "../../utils.js";
-import { OpcuaServer } from "../../../app/packages/opcua/opcua-server.js";
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { OpcuaPackage } from '../../../app/packages/opcua/opcua-package.js';
+import { Logger } from '../../../app/logging/logger.js';
+import { createSpyObj } from '../../utils.js';
+import { OpcuaServer } from '../../../app/packages/opcua/opcua-server.js';
 
 describe('OpcuaPackage', function () {
     let aasPackage: OpcuaPackage;

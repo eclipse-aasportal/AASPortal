@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals';
 import { KeyedList } from '../lib/keyed-list.js';
 
 interface KeyValue {
@@ -18,9 +18,14 @@ describe('KeyedList', function () {
     let instance: KeyedList<string, KeyValue>;
 
     beforeEach(function () {
-        instance = new KeyedList<string, KeyValue>((value) => value.key, [
-            { key: 'a', value: 1 }, { key: 'b', value: 2 }, { key: 'c', value: 3 }
-        ]);
+        instance = new KeyedList<string, KeyValue>(
+            value => value.key,
+            [
+                { key: 'a', value: 1 },
+                { key: 'b', value: 2 },
+                { key: 'c', value: 3 },
+            ],
+        );
     });
 
     it('should create an instance', function () {
@@ -33,8 +38,10 @@ describe('KeyedList', function () {
 
     it('returns the values', function () {
         expect([...instance.values()]).toEqual([
-            { key: 'a', value: 1 }, { key: 'b', value: 2 }, { key: 'c', value: 3 }
-        ])
+            { key: 'a', value: 1 },
+            { key: 'b', value: 2 },
+            { key: 'c', value: 3 },
+        ]);
     });
 
     it('returns the keys', function () {

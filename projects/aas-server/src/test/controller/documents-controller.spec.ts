@@ -37,29 +37,27 @@ describe('DocumentsController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
-        aasProvider = createSpyObj<AASProvider>(
-            [
-                'updateDocumentAsync',
-                'getContentAsync',
-                'getPackageAsync',
-                'getDocumentAsync',
-                'getDocumentsAsync',
-                'addPackagesAsync',
-                'deletePackageAsync',
-                'getDataElementValueAsync',
-                'invoke',
-                'resetAsync'
-            ]);
+        aasProvider = createSpyObj<AASProvider>([
+            'updateDocumentAsync',
+            'getContentAsync',
+            'getPackageAsync',
+            'getDocumentAsync',
+            'getDocumentsAsync',
+            'addPackagesAsync',
+            'deletePackageAsync',
+            'getDataElementValueAsync',
+            'invoke',
+            'resetAsync',
+        ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);

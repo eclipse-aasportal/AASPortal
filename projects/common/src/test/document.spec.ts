@@ -61,8 +61,9 @@ describe('Document', function () {
         });
 
         it('return the submodel elements of a SubmodelElementCollection', function () {
-            expect(doc.getChildren(testSubmodelElementCollection).length)
-                .toEqual(testSubmodelElementCollection.value!.length);
+            expect(doc.getChildren(testSubmodelElementCollection).length).toEqual(
+                testSubmodelElementCollection.value!.length,
+            );
         });
 
         it('returns an empty array of a Property', function () {
@@ -70,8 +71,9 @@ describe('Document', function () {
         });
 
         it('returns the submodels of an AssetAdministrationShell', function () {
-            expect(doc.getChildren(aasEnvironment.assetAdministrationShells[0], aasEnvironment))
-                .toEqual(aasEnvironment.submodels!);
+            expect(doc.getChildren(aasEnvironment.assetAdministrationShells[0], aasEnvironment)).toEqual(
+                aasEnvironment.submodels!,
+            );
         });
     });
 
@@ -85,17 +87,20 @@ describe('Document', function () {
         it('resolves a reference ', function () {
             const reference: aas.Reference = {
                 type: 'ModelReference',
-                keys: [{
-                    type: 'Submodel',
-                    value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                }, {
-                    type: 'SubmodelElementCollection',
-                    value: 'OperatingManual',
-                }, {
-                    type: 'File',
-                    value: 'DigitalFile_PDF',
-                }
-                ]
+                keys: [
+                    {
+                        type: 'Submodel',
+                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                    },
+                    {
+                        type: 'SubmodelElementCollection',
+                        value: 'OperatingManual',
+                    },
+                    {
+                        type: 'File',
+                        value: 'DigitalFile_PDF',
+                    },
+                ],
             };
 
             expect(doc.resolveReference(env, reference)).toBeDefined();
@@ -104,17 +109,20 @@ describe('Document', function () {
         it('returns undefined for an invalid reference', function () {
             const reference: aas.Reference = {
                 type: 'ModelReference',
-                keys: [{
-                    type: 'Submodel',
-                    value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152'
-                }, {
-                    type: 'SubmodelElementCollection',
-                    value: 'OperatingManual'
-                }, {
-                    type: 'File',
-                    value: 'unknown'
-                }
-                ]
+                keys: [
+                    {
+                        type: 'Submodel',
+                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                    },
+                    {
+                        type: 'SubmodelElementCollection',
+                        value: 'OperatingManual',
+                    },
+                    {
+                        type: 'File',
+                        value: 'unknown',
+                    },
+                ],
             };
 
             expect(doc.resolveReference(env, reference)).toBeUndefined();
@@ -193,10 +201,10 @@ describe('Document', function () {
                 type: 'ModelReference',
                 keys: [
                     {
-                        type: "AssetAdministrationShell",
-                        value: "http://customer.com/aas/9175_7013_7091_9168"
-                    }
-                ]
+                        type: 'AssetAdministrationShell',
+                        value: 'http://customer.com/aas/9175_7013_7091_9168',
+                    },
+                ],
             };
 
             expect(doc.selectReferable(env, reference)).toEqual(env.assetAdministrationShells[0]);
@@ -207,10 +215,10 @@ describe('Document', function () {
                 type: 'ModelReference',
                 keys: [
                     {
-                        type: "Submodel",
-                        value: "http://i40.customer.com/type/1/1/1A7B62B529F19152"
-                    }
-                ]
+                        type: 'Submodel',
+                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                    },
+                ],
             };
 
             const submodel: aas.Submodel = doc.selectElement(env, 'Documentation')!;
@@ -223,18 +231,18 @@ describe('Document', function () {
                 type: 'ModelReference',
                 keys: [
                     {
-                        type: "Submodel",
-                        value: "http://i40.customer.com/type/1/1/1A7B62B529F19152"
+                        type: 'Submodel',
+                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                     },
                     {
-                        type: "SubmodelElementCollection",
-                        value: "OperatingManual"
+                        type: 'SubmodelElementCollection',
+                        value: 'OperatingManual',
                     },
                     {
-                        type: "Property",
-                        value: "DocumentId"
-                    }
-                ]
+                        type: 'Property',
+                        value: 'DocumentId',
+                    },
+                ],
             };
 
             expect(doc.selectReferable(env, reference)).toEqual(property);
@@ -249,7 +257,11 @@ describe('Document', function () {
         });
 
         it('returns "OperatingManual" as parent of "DocumentId"', function () {
-            const collection: aas.SubmodelElementCollection = doc.selectElement(env, 'Documentation', 'OperatingManual')!;
+            const collection: aas.SubmodelElementCollection = doc.selectElement(
+                env,
+                'Documentation',
+                'OperatingManual',
+            )!;
             const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
             expect(doc.getParent(env, property)).toEqual(collection);
         });
@@ -268,7 +280,11 @@ describe('Document', function () {
         });
 
         it('indicates that "DocumentId" is a descendant of "OperatingManual"', function () {
-            const collection: aas.SubmodelElementCollection = doc.selectElement(env, 'Documentation', 'OperatingManual')!;
+            const collection: aas.SubmodelElementCollection = doc.selectElement(
+                env,
+                'Documentation',
+                'OperatingManual',
+            )!;
             const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
             expect(doc.isDescendant(env, collection, property)).toBeTruthy();
         });
@@ -294,7 +310,11 @@ describe('Document', function () {
         });
 
         it('bla', function () {
-            const collection: aas.SubmodelElementCollection = doc.selectElement(env, 'Documentation', 'OperatingManual')!;
+            const collection: aas.SubmodelElementCollection = doc.selectElement(
+                env,
+                'Documentation',
+                'OperatingManual',
+            )!;
             const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
             expect(doc.normalize(env, [collection, property])).toEqual([collection]);
         });
@@ -338,21 +358,25 @@ describe('Document', function () {
 
         it('detects a new submodel in source', function () {
             const target = { ...env, submodels: env.submodels!.slice(1) };
-            expect(doc.diff(env, target)).toEqual([{
-                type: 'inserted',
-                sourceIndex: 0,
-                sourceElement: env.submodels![0]
-            }]);
+            expect(doc.diff(env, target)).toEqual([
+                {
+                    type: 'inserted',
+                    sourceIndex: 0,
+                    sourceElement: env.submodels![0],
+                },
+            ]);
         });
 
         it('detects a deleted submodel in source', function () {
             const target = cloneDeep(env);
             const source = { ...env, submodels: env.submodels!.slice(1) };
-            expect(doc.diff(source, target)).toEqual([{
-                type: 'deleted',
-                destinationIndex: 0,
-                destinationElement: target.submodels![0]
-            }]);
+            expect(doc.diff(source, target)).toEqual([
+                {
+                    type: 'deleted',
+                    destinationIndex: 0,
+                    destinationElement: target.submodels![0],
+                },
+            ]);
         });
 
         it('detects a changed property value', function () {
@@ -360,28 +384,37 @@ describe('Document', function () {
             const source = cloneDeep(env);
             const property: aas.Property = doc.selectElement(source, 'TechnicalData', 'MaxTorque')!;
             property.value = '42';
-            expect(doc.diff(source, target)).toEqual([{
-                type: 'changed',
-                destinationParent: doc.selectElement(target, 'TechnicalData'),
-                destinationElement: doc.selectElement(target, 'TechnicalData', 'MaxTorque'),
-                destinationIndex: 1,
-                sourceParent: doc.selectElement(source, 'TechnicalData'),
-                sourceElement: doc.selectElement(source, 'TechnicalData', 'MaxTorque'),
-                sourceIndex: 1
-            }]);
+            expect(doc.diff(source, target)).toEqual([
+                {
+                    type: 'changed',
+                    destinationParent: doc.selectElement(target, 'TechnicalData'),
+                    destinationElement: doc.selectElement(target, 'TechnicalData', 'MaxTorque'),
+                    destinationIndex: 1,
+                    sourceParent: doc.selectElement(source, 'TechnicalData'),
+                    sourceElement: doc.selectElement(source, 'TechnicalData', 'MaxTorque'),
+                    sourceIndex: 1,
+                },
+            ]);
         });
     });
 
     describe('getAbsolutePath', function () {
         it('gets the absolute path of "MaxTorque"', function () {
             const property: aas.Property = doc.selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
-            expect(doc.getAbsolutePath(property)).toEqual(['http.//i40.customer.com/type/1/1/7A7104BDAB57E184', 'MaxTorque']);
+            expect(doc.getAbsolutePath(property)).toEqual([
+                'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                'MaxTorque',
+            ]);
         });
     });
 
     describe('getIdShortPath', function () {
         it('gets the idShort path of "DocumentId"', function () {
-            const property: aas.Property = doc.selectElement(aasEnvironment, 'Documentation', 'OperatingManual.DocumentId')!;
+            const property: aas.Property = doc.selectElement(
+                aasEnvironment,
+                'Documentation',
+                'OperatingManual.DocumentId',
+            )!;
             expect(doc.getIdShortPath(property)).toEqual('OperatingManual.DocumentId');
         });
     });

@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals'
-import { getUserNameFromEMail, isUserAuthorized } from "../lib/authentication.js";
+import { describe, it, expect } from '@jest/globals';
+import { getUserNameFromEMail, isUserAuthorized } from '../lib/authentication.js';
 
 describe('authentication', function () {
     describe('getUserNameFromEMail', function () {
@@ -52,7 +52,7 @@ describe('authentication', function () {
         it('false for actual: editor, expected: admin', function () {
             expect(isUserAuthorized('editor', 'admin')).toBeFalsy();
         });
-        
+
         it('true for actual: admin, expected: guest', function () {
             expect(isUserAuthorized('admin', 'guest')).toBeTruthy();
         });

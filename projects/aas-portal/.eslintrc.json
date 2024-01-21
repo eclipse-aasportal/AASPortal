@@ -1,7 +1,7 @@
 {
     "extends": "../../.eslintrc.json",
     "ignorePatterns": [
-        "!**/*"
+        "src/test/assets/**/*"
     ],
     "overrides": [
         {

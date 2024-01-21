@@ -6,7 +6,9 @@
  *
  *****************************************************************************/
 
-import { expect, jest } from '@jest/globals'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { expect, jest } from '@jest/globals';
 
 type Func = (...args: any[]) => any;
 
@@ -18,12 +20,15 @@ export type SpyObjPropertyNames<T = undefined> = T extends undefined
     ? ReadonlyArray<string> | { [propertyName: string]: any }
     : ReadonlyArray<keyof T> | { [P in keyof T]?: T[P] };
 
-export function createSpyObj<T extends object>(methodNames: SpyObjMethodNames<T>, propertyNames?: SpyObjPropertyNames<T>): jest.Mocked<T> {
-    let obj: any = {};
+export function createSpyObj<T extends object>(
+    methodNames: SpyObjMethodNames<T>,
+    propertyNames?: SpyObjPropertyNames<T>,
+): jest.Mocked<T> {
+    const obj: any = {};
 
     if (Array.isArray(methodNames)) {
-        for (let i = 0; i < methodNames.length; i++) {
-            obj[methodNames[i] as string] = jest.fn();
+        for (const methodName of methodNames) {
+            obj[methodName as string] = jest.fn();
         }
     } else {
         for (const methodName in methodNames) {
@@ -46,8 +51,9 @@ export function createSpyObj<T extends object>(methodNames: SpyObjMethodNames<T>
     return obj as jest.Mocked<T>;
 }
 
-export type DoneFn = (...args: any[]) => void;
+export type DoneFn = (...args: unknown[]) => void;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function fail(message?: string) {
     expect(false).toBe(true);
 }
