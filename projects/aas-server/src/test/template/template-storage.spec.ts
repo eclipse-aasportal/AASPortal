@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import path from 'path';
 import { TemplateDescriptor, aas } from 'common';
 import { TemplateStorage } from '../../app/template/template-storage.js';
 import { createSpyObj } from '../utils.js';
@@ -54,7 +55,7 @@ describe('TemplateStorage', function () {
                 },
             ] as TemplateDescriptor[]);
 
-            expect(fileStorage.readFile).toHaveBeenCalledWith('templates\\submodel.json');
+            expect(fileStorage.readFile).toHaveBeenCalledWith(path.join('templates', 'submodel.json'));
         });
     });
 });
