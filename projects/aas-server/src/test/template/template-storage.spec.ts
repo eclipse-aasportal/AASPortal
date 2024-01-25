@@ -53,6 +53,8 @@ describe('TemplateStorage', function () {
                     template: submodel,
                 },
             ] as TemplateDescriptor[]);
+
+            expect(fileStorage.readFile).toHaveBeenCalledWith('templates\\submodel.json');
         });
     });
 });
