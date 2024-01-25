@@ -21,7 +21,7 @@ export class TemplateStorageFactory {
     public create(): TemplateStorage {
         let fileStorage: FileStorage;
         const variable = this.container.resolve(Variable);
-        const url = variable.TEMPLATE_STORAGE;
+        const url = variable.FILE_STORAGE;
         if (url) {
             fileStorage = new OwnCloudStorage(url, '/');
         } else {

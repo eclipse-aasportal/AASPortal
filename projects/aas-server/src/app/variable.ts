@@ -18,7 +18,7 @@ export class Variable {
         this.NODE_SERVER_PORT = Number(process.env.NODE_SERVER_PORT);
         this.MAX_WORKERS = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 8;
         this.USER_STORAGE = process.env.USER_STORAGE;
-        this.TEMPLATE_STORAGE = process.env.TEMPLATE_STORAGE;
+        this.FILE_STORAGE = process.env.FILE_STORAGE;
         this.CORS_ORIGIN = process.env.CORS_ORIGIN ? JSON.parse(process.env.CORS_ORIGIN) : '*';
         this.CONTENT_ROOT = path.resolve(process.env.CONTENT_ROOT ?? './');
         this.WEB_ROOT = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
@@ -53,7 +53,7 @@ export class Variable {
     public readonly USER_STORAGE?: string;
 
     /** The URL of the template storage. */
-    public readonly TEMPLATE_STORAGE?: string;
+    public readonly FILE_STORAGE?: string;
 
     /** */
     public readonly CORS_ORIGIN: string | string[];
