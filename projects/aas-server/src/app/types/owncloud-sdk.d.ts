@@ -34,7 +34,7 @@ declare module 'owncloud-sdk' {
     }
 
     export class Files {
-        public list(path: string, depth = '1', properties: { [key: string]: string } = {}): Promise<FileInfo[]>;
+        public list(path: string, depth = '1', properties: unknown[] = []): Promise<FileInfo[]>;
         public getFileContents(path: string, options?: { [key: string]: string }): Promise<string>;
         public getFileUrl(path: string): string;
         public getPathForFileId(fileId: number): Promise<string>;
@@ -45,17 +45,19 @@ declare module 'owncloud-sdk' {
         ): Promise<boolean>;
         public createFolder(path: string): Promise<boolean>;
         public delete(path: string): Promise<boolean>;
-        public fileInfo(path: string, properties: { [key: string]: string }): Promise<FileInfo>;
+        public fileInfo(path: string, properties: unknown[]): Promise<FileInfo>;
         public move(source: string, target: string, overwrite = false): Promise<boolean>;
         public copy(source: string, target: string, overwrite = false): Promise<boolean>;
     }
+
+    export type UserInfo = { [key: string]: unknown };
 
     export default class ownCloud {
         public constructor(options?: OwnCloudOptions);
 
         public files: Files;
 
-        public login(): Promise<string>;
+        public login(): Promise<UserInfo>;
         public logout(): void;
     }
 }

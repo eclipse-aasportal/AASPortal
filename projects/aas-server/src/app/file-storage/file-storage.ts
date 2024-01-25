@@ -8,7 +8,7 @@
 
 /** Defines a file based AASX package source. */
 export abstract class FileStorage {
-    public abstract readonly root: string;
+    protected constructor(public readonly root: string) {}
     public abstract mtime(path: string): Promise<Date>;
     public abstract exists(path: string): Promise<boolean>;
     public abstract isDirectory(path: string): Promise<boolean>;

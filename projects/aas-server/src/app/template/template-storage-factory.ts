@@ -23,9 +23,9 @@ export class TemplateStorageFactory {
         const variable = this.container.resolve(Variable);
         const url = variable.TEMPLATE_STORAGE;
         if (url) {
-            fileStorage = new OwnCloudStorage(url);
+            fileStorage = new OwnCloudStorage(url, '/');
         } else {
-            fileStorage = new LocalFileStorage(path.resolve(variable.ASSETS, 'templates'));
+            fileStorage = new LocalFileStorage(path.resolve(variable.ASSETS));
         }
 
         return new TemplateStorage(this.container.resolve<Logger>('Logger'), fileStorage);

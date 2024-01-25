@@ -19,12 +19,13 @@ export class TemplateStorage {
     public constructor(
         private readonly logger: Logger,
         private readonly fileStorage: FileStorage,
+        private readonly root = 'templates',
     ) {}
 
     public async readAsync(): Promise<TemplateDescriptor[]> {
         const descriptors: TemplateDescriptor[] = [];
-        if (await this.fileStorage.exists(this.fileStorage.root)) {
-            await this.readDirAsync(this.fileStorage.root, descriptors);
+        if (await this.fileStorage.exists(this.root)) {
+            await this.readDirAsync(this.root, descriptors);
         }
 
         return descriptors;

@@ -17,7 +17,6 @@ COPY --from=build /usr/src/app/projects/aas-server/app-info.json /usr/src/app/ap
 COPY --from=build /usr/src/app/projects/common/dist/ /usr/src/app/node_modules/common/dist/
 COPY --from=build /usr/src/app/projects/common/package.json /usr/src/app/node_modules/common/package.json
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ /usr/src/app/wwwroot/
-RUN npm install chalk@4.1.2
 RUN npm install -w=aas-server --omit=dev
 COPY projects/aas-server/src/assets assets/
 ENV NODE_LOG=./log/debug.log

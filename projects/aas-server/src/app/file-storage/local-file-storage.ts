@@ -12,12 +12,8 @@ import { FileStorage } from './file-storage.js';
 
 export class LocalFileStorage extends FileStorage {
     public constructor(root: string) {
-        super();
-
-        this.root = resolve(root);
+        super(resolve(root));
     }
-
-    public readonly root: string;
 
     public async mtime(path: string): Promise<Date> {
         return (await fs.promises.stat(resolve(this.root, path))).mtime;
