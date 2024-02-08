@@ -9,7 +9,7 @@
 import { head } from 'lodash-es';
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
 import * as lib from 'projects/aas-lib/src/public-api';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
@@ -47,7 +47,6 @@ import {
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly store: Store<State>;
-    private readonly $state = new BehaviorSubject<lib.OnlineState>('offline');
     private readonly subscription = new Subscription();
     private _dashboardPage = '';
     private templates: TemplateDescriptor[] = [];
@@ -69,11 +68,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly clipboard: lib.ClipboardService
     ) {
         this.store = store as Store<State>;
-        this.state = this.$state.asObservable();
+        this.state = this.store.select(AASSelectors.selectState);
         this.search = this.store.select(AASSelectors.selectSearch);
+        this.canPlay = this.store.select(AASSelectors.selectCanPlay);
+        this.canStop = this.store.select(AASSelectors.selectCanStop);
 
         this.dashboardPages = this.dashboard.pages.pipe((map(pages => pages.map(page => page.name))));
-        this.editable = this.store.select(AASSelectors.selectEditable);
+        this.readOnly = this.store.select(AASSelectors.selectReadOnly);
     }
 
     @ViewChild('aasTree')
@@ -118,14 +119,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.versionToString(head(this.document?.content?.assetAdministrationShells)?.administration);
     }
 
-    public get onlineReady(): boolean {
-        return this.document?.onlineReady ?? false;
-    }
-
-    public get readonly(): boolean {
-        return this.document?.readonly ?? true;
-    }
-
     public readonly dashboardPages: Observable<string[]>;
 
     public get dashboardPage(): string {
@@ -136,7 +129,19 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dashboard.setPageName(value);
     }
 
-    public readonly editable: Observable<boolean>;
+    public readonly readOnly: Observable<boolean>;
+
+    public get canUndo(): boolean {
+        return this.commandHandler.canUndo;
+    }
+
+    public get canRedo(): boolean {
+        return this.commandHandler.canRedo;
+    }
+
+    public readonly canPlay: Observable<boolean>;
+
+    public readonly canStop: Observable<boolean>;
 
     public ngOnInit(): void {
         const params = this.route.snapshot.queryParams as lib.AASQueryParams;
@@ -213,13 +218,11 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public play(): void {
-        if (this.onlineReady && this.$state.value === 'offline') {
-            this.$state.next('online');
-        }
+        this.store.dispatch(AASActions.setState({ value: 'online' }));
     }
 
     public stop(): void {
-        this.$state.next('offline');
+        this.store.dispatch(AASActions.setState({ value: 'offline' }));
     }
 
     public canAddToDashboard(): boolean {
@@ -268,24 +271,12 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     }
 
-    public canUndo(): boolean {
-        return !this.readonly && this.commandHandler.canUndo;
-    }
-
     public undo(): void {
-        if (this.canUndo()) {
-            this.commandHandler.undo();
-        }
-    }
-
-    public canRedo(): boolean {
-        return !this.readonly && this.commandHandler.canRedo;
+        this.commandHandler.undo();
     }
 
     public redo(): void {
-        if (this.canRedo()) {
-            this.commandHandler.redo();
-        }
+        this.commandHandler.redo();
     }
 
     public canNewElement(): boolean {

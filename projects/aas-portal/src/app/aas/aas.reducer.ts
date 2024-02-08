@@ -31,7 +31,11 @@ export const aasReducer = createReducer(initialState,
     on(
         AASActions.setTemplateStorage,
         (state, { templates }) => setTemplateStorage(state, templates)
-    )
+    ),
+    on(
+        AASActions.setState,
+        (state, { value }) => setState(state, value),
+    ),
 );
 
 function setTemplateStorage(state: AASState, templates: TemplateDescriptor[]): AASState {
@@ -52,4 +56,8 @@ function resetModified(state: AASState, document: AASDocument): AASState {
 
 function setSearch(state: AASState, search: string): AASState {
     return { ...state, search };
+}
+
+function setState(state: AASState, value: 'offline' | 'online'): AASState {
+    return { ...state, state: value };
 }

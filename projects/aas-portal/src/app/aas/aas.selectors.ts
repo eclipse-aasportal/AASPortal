@@ -15,12 +15,11 @@ const getSearch = (state: State) => state.aas.search;
 const getDocument = (state: State) => state.aas.document;
 const getTemplateStorage = (state: State) => state.aas.templateStorage;
 const getTemplates = (state: State) => state.aas.templateStorage.templates;
+const getState = (state: State) => state.aas;
 
 export const selectOnlineReady = createSelector(getOnlineReady, onlineReady => onlineReady);
 
 export const selectReadOnly = createSelector(getReadOnly, readOnly => readOnly);
-
-export const selectEditable = createSelector(getReadOnly, readonly => !readonly);
 
 export const selectSearch = createSelector(getSearch, search => search);
 
@@ -31,3 +30,15 @@ export const selectHasDocument = createSelector(getDocument, document => documen
 export const selectTemplateStorage = createSelector(getTemplateStorage, templateStorage => templateStorage);
 
 export const selectTemplates = createSelector(getTemplates, templates => templates);
+
+export const selectState = createSelector(getState, state => state.state);
+
+export const selectCanPlay = createSelector(
+    getState,
+    state => ((state.document?.onlineReady ?? false) && state.state === 'offline'),
+);
+
+export const selectCanStop = createSelector(
+    getState,
+    state => ((state.document?.onlineReady ?? false) && state.state === 'online'),
+);

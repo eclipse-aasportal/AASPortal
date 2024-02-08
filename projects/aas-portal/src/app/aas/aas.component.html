@@ -38,10 +38,10 @@
 
 <ng-template #aasToolbar>
     <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="(state | async) === 'offline'">
+        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="(canPlay | async) === false">
             <i class="bi bi-play-fill"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="(state | async) === 'online'">
+        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="(canStop | async) === false">
             <i class="bi bi-stop-fill"></i>
         </button>
     </div>
@@ -58,7 +58,7 @@
             <i class="bi bi-bar-chart-line-fill"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="(editable | async) === false">
+    <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
         <button type="button" class="btn btn-primary" (click)="synchronize()" [disabled]="!canSynchronize()">
             <i class="bi bi-arrow-repeat"></i>
         </button>
@@ -68,15 +68,15 @@
             <i class="bi bi-download"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="(editable | async) === false">
-        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="!canUndo()">
+    <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
+        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="canUndo === false">
             <i class="bi bi-arrow-90deg-left"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="!canRedo()">
+        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="canRedo === false">
             <i class="bi bi-arrow-90deg-right"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="(editable | async) === false">
+    <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
         <button type="button" class="btn btn-primary" (click)="newElement()" [disabled]="!canNewElement()">
             <i class="bi bi-plus-lg"></i>
         </button>
