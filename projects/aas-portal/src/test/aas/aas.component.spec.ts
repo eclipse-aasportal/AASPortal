@@ -11,7 +11,7 @@ import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, aas } from 'common';
-import { Observable, noop, of } from 'rxjs';
+import { Observable, first, noop, of } from 'rxjs';
 import { AASTree, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
 import { CommonModule } from '@angular/common';
 
@@ -158,12 +158,25 @@ describe('AASComponent', () => {
         expect(component.assetId).toEqual(assetId);
     });
 
-    it('indicates that the sample AAS is not online ready', function () {
-        expect(component.onlineReady).toBeFalse();
+    it('indicates that "play" is disabled while sample AAS is not online ready', (done: DoneFn) => {
+        component.canPlay.pipe(first()).subscribe(value => {
+            expect(value).toBeFalse();
+            done();
+        });
     });
 
-    it('indicates that the sample AAS is editable', function () {
-        expect(component.readonly).toBeFalse();
+    it('indicates that "stop" is disabled while sample AAS is not online ready', (done: DoneFn) => {
+        component.canStop.pipe(first()).subscribe(value => {
+            expect(value).toBeFalse();
+            done();
+        });
+    });
+
+    it('indicates that the sample AAS is editable', (done: DoneFn) => {
+        component.readOnly.pipe(first()).subscribe(value => {
+            expect(value).toBeFalse();
+            done();
+        });
     });
 
     it('can add the selected properties to the dashboard', async function () {
