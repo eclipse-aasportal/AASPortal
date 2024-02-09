@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { FavoritesList } from './start.state';
 import { AASDocument } from 'common';
-import { AuthService } from 'projects/aas-lib/src/public-api';
+import { AuthService } from 'aas-lib';
 
 @Injectable({
     providedIn: 'root',

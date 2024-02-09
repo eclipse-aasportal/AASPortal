@@ -17,7 +17,7 @@ describe('WebDAVStorage', () => {
 
     beforeEach(() => {
         client = createSpyObj<WebDAVClient>(['exists', 'getDirectoryContents', 'getFileContents']);
-        storage = new WebDAVStorage('http://localhost:1234/', client);
+        storage = new WebDAVStorage('webdav://localhost:1234/', client);
     });
 
     afterEach(() => {

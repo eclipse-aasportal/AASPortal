@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { ViewMode } from 'aas-lib';
 import { AASDocument, AASPage, aas } from 'common';
 import * as StartActions from './start.actions';
 import { StartState } from './start.state';

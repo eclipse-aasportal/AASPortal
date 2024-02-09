@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AASCursor, AASDocument, AASEndpoint, AASPage, aas } from 'common';
-import { encodeBase64Url } from 'projects/aas-lib/src/public-api';
+import { encodeBase64Url } from 'aas-lib';
 
 /** The client side AAS provider service. */
 @Injectable({

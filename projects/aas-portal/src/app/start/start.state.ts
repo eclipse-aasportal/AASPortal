@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { ViewMode } from 'aas-lib';
 import { AASDocument } from 'common';
 
 export interface StartState {

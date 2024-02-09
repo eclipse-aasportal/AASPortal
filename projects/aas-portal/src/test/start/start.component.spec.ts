@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Store, StoreModule } from '@ngrx/store';
-import { WindowService, ViewMode, AuthService, NotifyService, DownloadService } from 'projects/aas-lib/src/public-api';
+import { WindowService, ViewMode, AuthService, NotifyService, DownloadService } from 'aas-lib';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';

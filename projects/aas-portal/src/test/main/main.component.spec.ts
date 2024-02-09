@@ -17,7 +17,7 @@ import { AASDocument } from 'common';
 
 import { AppRoutingModule } from '../../app/app-routing.module';
 import { MainComponent } from '../../app/main/main.component';
-import { AASLibModule } from 'projects/aas-lib/src/public-api';
+import { AASLibModule } from 'aas-lib';
 import { MainApiService } from '../../app/main/main-api.service';
 
 describe('MainComponent', () => {

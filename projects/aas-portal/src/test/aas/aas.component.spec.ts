@@ -12,7 +12,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, aas } from 'common';
 import { Observable, first, noop, of } from 'rxjs';
-import { AuthService, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
+import { AuthService, DownloadService, NotifyService, OnlineState } from 'aas-lib';
 import { CommonModule } from '@angular/common';
 
 import { AASComponent } from '../../app/aas/aas.component';

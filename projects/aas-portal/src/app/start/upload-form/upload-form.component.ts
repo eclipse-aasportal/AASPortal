@@ -9,7 +9,7 @@
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { DownloadService } from 'projects/aas-lib/src/public-api';
+import { DownloadService } from 'aas-lib';
 import { AASEndpoint } from 'common';
 
 @Component({

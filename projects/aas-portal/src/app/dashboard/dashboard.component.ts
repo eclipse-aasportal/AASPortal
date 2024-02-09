@@ -22,7 +22,7 @@ import {
 import { isNumber } from 'lodash-es';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'common';
-import * as lib from 'projects/aas-lib/src/public-api';
+import * as lib from 'aas-lib';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Observable, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';

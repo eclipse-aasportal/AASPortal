@@ -7,6 +7,6 @@
  *****************************************************************************/
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from 'projects/aas-lib/src/public-api';
+import { AuthInterceptor } from 'aas-lib';
 
 export const httpInterceptorProviders = [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }];

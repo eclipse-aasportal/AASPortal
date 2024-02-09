@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { NotifyService } from 'projects/aas-lib/src/public-api';
+import { NotifyService } from 'aas-lib';
 import { Command } from '../types/command';
 
 @Injectable({

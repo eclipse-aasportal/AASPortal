@@ -9,7 +9,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Command } from '../../app/types/command';
 import { noop } from 'rxjs';
-import { NotifyService } from 'projects/aas-lib/src/public-api';
+import { NotifyService } from 'aas-lib';
 import { CommandHandlerService } from '../../app/aas/command-handler.service';
 
 class TestCommand extends Command {

@@ -10,7 +10,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } f
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EMPTY, from, mergeMap, of, Subscription, toArray, zip } from 'rxjs';
-import * as lib from 'projects/aas-lib/src/public-api';
+import * as lib from 'aas-lib';
 
 import { State } from './view.state';
 import * as ViewActions from './view.actions';

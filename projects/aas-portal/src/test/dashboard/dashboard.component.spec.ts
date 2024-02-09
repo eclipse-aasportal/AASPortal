@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { JWTPayload, WebSocketData } from 'common';
 import { first, of, Subject } from 'rxjs';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
+import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
 import { EffectsModule } from '@ngrx/effects';
 import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';

@@ -12,7 +12,7 @@ import { Action, Store } from '@ngrx/store';
 import { AASDocument, AASDocumentId, AASPage } from 'common';
 import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { ViewMode } from 'aas-lib';
 
 import * as StartActions from './start.actions';
 import * as StartSelectors from './start.selectors';

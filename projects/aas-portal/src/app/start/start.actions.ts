@@ -9,7 +9,7 @@
 import { createAction, props } from '@ngrx/store';
 import { AASDocument, AASPage, aas } from 'common';
 import { TypedAction } from '@ngrx/store/src/models';
-import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { ViewMode } from 'aas-lib';
 
 export enum StartActionType {
     SET_TREE_VIEW = '[Start] set tree view',

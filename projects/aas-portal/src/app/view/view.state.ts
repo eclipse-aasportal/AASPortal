@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { DocumentSubmodelPair } from 'projects/aas-lib/src/public-api';
+import { DocumentSubmodelPair } from 'aas-lib';
 
 export interface ViewState {
     template?: string;

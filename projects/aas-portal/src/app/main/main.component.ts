@@ -9,7 +9,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subscription, first, map } from 'rxjs';
-import { ClipboardService, WindowService, AASQuery } from 'projects/aas-lib/src/public-api';
+import { ClipboardService, WindowService, AASQuery } from 'aas-lib';
 import { ToolbarService } from '../toolbar.service';
 import { MainApiService } from './main-api.service';
 

@@ -12,9 +12,9 @@ import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { first, of } from 'rxjs';
-import { SubmodelViewDescriptor, ViewQuery } from 'projects/aas-lib/src/public-api';
+import { SubmodelViewDescriptor, ViewQuery } from 'aas-lib';
 import { EffectsModule } from '@ngrx/effects';
-import { AASLibModule, ClipboardService } from 'projects/aas-lib/src/public-api';
+import { AASLibModule, ClipboardService } from 'aas-lib';
 
 import { AppRoutingModule } from '../../app/app-routing.module';
 import { viewReducer } from '../../app/view/view.reducer';

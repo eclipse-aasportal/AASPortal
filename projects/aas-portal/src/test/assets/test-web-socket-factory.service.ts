@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
+import { WebSocketFactoryService } from 'aas-lib';
 import { WebSocketData } from 'common';
 import { Subject } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';

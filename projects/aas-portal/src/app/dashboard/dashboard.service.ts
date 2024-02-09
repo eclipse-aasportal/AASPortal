@@ -22,7 +22,7 @@ import { cloneDeep } from 'lodash-es';
 import { ERRORS } from '../types/errors';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { encodeBase64Url, AuthService } from 'projects/aas-lib/src/public-api';
+import { encodeBase64Url, AuthService } from 'aas-lib';
 import * as DashboardSelectors from './dashboard.selectors';
 import * as DashboardActions from './dashboard.actions';
 import { createPageName } from './dashboard.reducer';

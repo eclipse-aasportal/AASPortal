@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Environment } from 'projects/aas-lib/src/public-api';
+import { Environment } from 'aas-lib';
 
 export const environment: Environment = {
     production: true,

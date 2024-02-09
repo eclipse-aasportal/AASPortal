@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, UrlTree } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { AASQueryParams } from 'projects/aas-lib/src/public-api';
+import { AASQueryParams } from 'aas-lib';
 import * as AASSelectors from './aas.selectors';
 import { State } from './aas.state';
 

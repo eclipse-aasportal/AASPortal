@@ -8,7 +8,7 @@
 
 import { createSelector } from '@ngrx/store';
 import { StartFeatureState } from './start.state';
-import { ViewMode } from 'projects/aas-lib/src/public-api';
+import { ViewMode } from 'aas-lib';
 
 const getState = (state: StartFeatureState) => state.start;
 const getFilter = (state: StartFeatureState) => state.start.filter;

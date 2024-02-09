@@ -26,7 +26,7 @@ import {
     ZVEINameplate,
     resolveSemanticId,
     supportedSubmodelTemplates,
-} from 'projects/aas-lib/src/public-api';
+} from 'aas-lib';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
