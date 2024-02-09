@@ -15,14 +15,14 @@ import { AasxServerV0 } from './aasx-server/aasx-server-v0.js';
 import { AasxServerV3 } from './aasx-server/aasx-server-v3.js';
 import { OpcuaServer } from './opcua/opcua-server.js';
 import { ERRORS } from '../errors.js';
-import { FileStorageFactory } from '../file-storage/file-storage-factory.js';
+import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 
 @singleton()
 export class AASResourceFactory {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(FileStorageFactory) private readonly fileStorageFactory: FileStorageFactory,
+        @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
     ) {}
 
     /**
@@ -48,7 +48,7 @@ export class AASResourceFactory {
                 source = new OpcuaServer(this.logger, endpoint.url, endpoint.name);
                 break;
             case 'file:':
-                source = new AasxDirectory(this.logger, endpoint.url, endpoint.name, this.createLocalFileStorage(url));
+                source = new AasxDirectory(this.logger, endpoint.url, endpoint.name, this.getFileStorage(url));
                 break;
             default:
                 throw new Error('Not implemented.');
@@ -86,7 +86,7 @@ export class AASResourceFactory {
                         this.logger,
                         endpoint.url,
                         endpoint.name,
-                        this.createLocalFileStorage(url),
+                        this.getFileStorage(url),
                     ).testAsync();
                     break;
                 default:
@@ -101,7 +101,7 @@ export class AASResourceFactory {
         }
     }
 
-    private createLocalFileStorage(url: URL): FileStorage {
-        return this.fileStorageFactory.create(`file:///endpoints` + url.pathname);
+    private getFileStorage(url: URL): FileStorage {
+        return this.fileStorageProvider.get(url);
     }
 }

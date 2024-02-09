@@ -13,6 +13,7 @@ import { Logger } from '../../../app/logging/logger.js';
 import { LocalFileStorage } from '../../../app/file-storage/local-file-storage.js';
 import { createSpyObj } from '../../utils.js';
 import { FileStorage } from '../../../app/file-storage/file-storage.js';
+import { resolve } from 'path';
 
 describe('AasxPackage', function () {
     let logger: jest.Mocked<Logger>;
@@ -21,7 +22,7 @@ describe('AasxPackage', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        fileStorage = new LocalFileStorage('./src/test/assets/samples');
+        fileStorage = new LocalFileStorage('./src/test/assets/');
         source = new AasxDirectory(logger, 'file:///samples', 'Samples', fileStorage);
     });
 

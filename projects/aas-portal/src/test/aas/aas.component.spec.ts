@@ -11,7 +11,7 @@ import { Store, StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, aas } from 'common';
-import { Observable, noop, of } from 'rxjs';
+import { Observable, first, noop, of } from 'rxjs';
 import { AuthService, DownloadService, NotifyService, OnlineState } from 'projects/aas-lib/src/public-api';
 import { CommonModule } from '@angular/common';
 
@@ -40,7 +40,7 @@ class TestDashboardService implements Partial<DashboardService> {
 @Component({
     selector: 'fhg-aas-tree',
     template: '<div></div>',
-    styleUrls: []
+    styleUrls: [],
 })
 class TestAASTreeComponent {
     @Input()
@@ -66,7 +66,7 @@ class TestAASTreeComponent {
 @Component({
     selector: 'fhg-img',
     template: '<div></div>',
-    styleUrls: []
+    styleUrls: [],
 })
 class TestSecureImageComponent {
     @Input()
@@ -92,31 +92,22 @@ describe('AASComponent', () => {
 
     beforeEach(() => {
         api = jasmine.createSpyObj<AASApiService>(['getDocument', 'getTemplates', 'putDocument']);
-        download = jasmine.createSpyObj<DownloadService>(
-            [
-                'downloadDocument',
-                'downloadFileAsync',
-                'uploadDocuments',
-            ]);
+        download = jasmine.createSpyObj<DownloadService>(['downloadDocument', 'downloadFileAsync', 'uploadDocuments']);
 
         TestBed.configureTestingModule({
-            declarations: [
-                AASComponent,
-                TestAASTreeComponent,
-                TestSecureImageComponent
-            ],
+            declarations: [AASComponent, TestAASTreeComponent, TestSecureImageComponent],
             providers: [
                 {
                     provide: AASApiService,
-                    useValue: api
+                    useValue: api,
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error'])
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: DashboardService,
-                    useValue: new TestDashboardService()
+                    useValue: new TestDashboardService(),
                 },
                 {
                     provide: DownloadService,
@@ -136,10 +127,9 @@ describe('AASComponent', () => {
                 AppRoutingModule,
                 HttpClientTestingModule,
                 NgbModule,
-                StoreModule.forRoot(
-                    {
-                        aas: aasReducer
-                    }),
+                StoreModule.forRoot({
+                    aas: aasReducer,
+                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -173,18 +163,31 @@ describe('AASComponent', () => {
         expect(component.assetId).toEqual(assetId);
     });
 
-    it('indicates that the sample AAS is not online ready', function () {
-        expect(component.onlineReady).toBeFalse();
+    it('indicates that "play" is disabled while sample AAS is not online ready', (done: DoneFn) => {
+        component.canPlay.pipe(first()).subscribe(value => {
+            expect(value).toBeFalse();
+            done();
+        });
     });
 
-    it('indicates that the sample AAS is editable', function () {
-        expect(component.readonly).toBeFalse();
+    it('indicates that "stop" is disabled while sample AAS is not online ready', (done: DoneFn) => {
+        component.canStop.pipe(first()).subscribe(value => {
+            expect(value).toBeFalse();
+            done();
+        });
+    });
+
+    it('indicates that the sample AAS is editable', (done: DoneFn) => {
+        component.readOnly.pipe(first()).subscribe(value => {
+            expect(value).toBeFalse();
+            done();
+        });
     });
 
     describe('canAddToDashboard', () => {
         beforeEach(() => {
             component.selectedElements = [torque, rotationSpeed];
-        })
+        });
 
         it('can add the selected properties to the dashboard', async function () {
             spyOn(dashboard, 'add');

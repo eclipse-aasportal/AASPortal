@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { resolve } from 'path';
-import { FileStorage } from './file-storage.js';
+import { normalize, resolve, sep } from 'path';
+import { FileStorage, FileStorageEntry } from './file-storage.js';
 
 export class LocalFileStorage extends FileStorage {
     public constructor(root: string) {
@@ -20,38 +20,43 @@ export class LocalFileStorage extends FileStorage {
     }
 
     public exists(path: string): Promise<boolean> {
-        return Promise.resolve(fs.existsSync(resolve(this.root, path)));
+        return Promise.resolve(fs.existsSync(this.resolve(path)));
     }
 
-    public async isDirectory(path: string): Promise<boolean> {
-        return (await fs.promises.stat(resolve(this.root, path))).isDirectory();
-    }
-
-    public mkdir(path: string, recursive = false): Promise<string | undefined> {
-        return fs.promises.mkdir(resolve(this.root, path), { recursive: recursive });
+    public override async createDir(path: string, recursive = false): Promise<void> {
+        await fs.promises.mkdir(this.resolve(path), { recursive: recursive });
     }
 
     public writeFile(path: string, data: string | Buffer): Promise<void> {
-        return fs.promises.writeFile(resolve(this.root, path), data);
+        return fs.promises.writeFile(this.resolve(path), data);
     }
 
-    public readDir(path: string): Promise<string[]> {
-        return fs.promises.readdir(resolve(this.root, path));
+    public async readDir(path: string): Promise<FileStorageEntry[]> {
+        return (await fs.promises.readdir(this.resolve(path), { withFileTypes: true })).map(entry => ({
+            name: entry.name,
+            path: entry.path,
+            type: entry.isDirectory() ? 'directory' : 'file',
+        }));
     }
 
     public readFile(path: string): Promise<Buffer> {
-        return fs.promises.readFile(resolve(this.root, path));
+        return fs.promises.readFile(this.resolve(path));
     }
 
-    public unlink(path: string): Promise<void> {
-        return fs.promises.unlink(resolve(this.root, path));
-    }
-
-    public rename(oldPath: string, newPath: string): Promise<void> {
-        return fs.promises.rename(resolve(this.root, oldPath), resolve(this.root, newPath));
+    public delete(path: string): Promise<void> {
+        return fs.promises.unlink(this.resolve(path));
     }
 
     public createReadStream(path: string): NodeJS.ReadableStream {
-        return fs.createReadStream(resolve(this.root, path));
+        return fs.createReadStream(this.resolve(path));
+    }
+
+    private resolve(path: string): string {
+        path = normalize(path);
+        if (path.startsWith(sep)) {
+            path = path.substring(1);
+        }
+
+        return resolve(this.root, path);
     }
 }

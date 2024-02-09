@@ -24,9 +24,8 @@ export class DirectoryScan extends AASResourceScan {
     public async scanAsync(): Promise<AASDocument[]> {
         try {
             await this.source.openAsync();
-            const files = await this.source.getStorage().readDir('.');
+            const files = await this.source.readDir();
             const documents: AASDocument[] = [];
-
             for (const file of files) {
                 try {
                     const extension = extname(file);

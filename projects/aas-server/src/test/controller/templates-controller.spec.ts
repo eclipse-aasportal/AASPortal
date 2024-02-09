@@ -12,9 +12,9 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
+import { TemplateDescriptor } from 'common';
 
 import { Logger } from '../../app/logging/logger.js';
-import { TemplateDescriptor } from 'common';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from '../utils.js';
 import { Variable } from '../../app/variable.js';
@@ -51,7 +51,7 @@ describe('TemplateController', function () {
         container.registerInstance(AuthService, auth);
         container.registerInstance('Logger', logger);
         container.registerInstance(Variable, variable);
-        container.registerInstance('TemplateStorage', templateStorage);
+        container.registerInstance(TemplateStorage, templateStorage);
         container.registerInstance(Authentication, authentication);
 
         app = express();

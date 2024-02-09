@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { decodeBase64Url, encodeBase64Url } from '../app/convert.js';
+import { decodeBase64Url, encodeBase64Url, join } from '../app/convert.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('convert', () => {

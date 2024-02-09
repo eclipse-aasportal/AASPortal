@@ -42,7 +42,7 @@ checkFilesAsync([
 async function checkFilesAsync(dirs) {
     const files = [];
     for (const dir of dirs) {
-        await traverseFilesAsync(dir, [".ts", ".js", ".html", ".css"], files);
+        await traverseFilesAsync(dir, [".ts", ".js", ".html", ".css", ".scss"], files);
     }
 
     for (const file of files) {
@@ -110,6 +110,7 @@ async function checkFilesAsync(dirs) {
             case ".ts":
             case ".js":
             case ".css":
+            case ".scss":
                 return hasValidJsCopyrightHeader(text);
             case ".html":
                 return hasValidHtmlCopyrightHeader(text);
@@ -162,6 +163,7 @@ async function checkFilesAsync(dirs) {
             case ".ts":
             case ".js":
             case ".css":
+            case ".scss":
                 return removeJsCopyrightHeader(text);
             case ".html":
                 return removeHtmlCopyrightHeader(text);
@@ -254,6 +256,7 @@ async function checkFilesAsync(dirs) {
             case ".ts":
             case ".js":
             case ".css":
+            case ".scss":
                 insertJsCopyrightHeader(text);
                 break;
             case ".html":

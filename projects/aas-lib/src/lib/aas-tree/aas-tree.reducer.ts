@@ -425,8 +425,10 @@ function setSelectedElements(state: AASTreeState, elements: aas.Referable[]): AA
     const set = new Set(elements);
     for (let i = 0, n = rows.length; i < n; i++) {
         const row = rows[i];
-        if (!row.selected && set.has(row.element)) {
-            rows[i] = clone(row, true);
+        if (set.has(row.element)) {
+            if (!row.selected) {
+                rows[i] = clone(row, true);
+            }
         } else if (row.selected) {
             rows[i] = clone(row, false);
         }

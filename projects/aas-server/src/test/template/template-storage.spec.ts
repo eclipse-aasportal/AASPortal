@@ -6,23 +6,31 @@
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import path from 'path';
 import { TemplateDescriptor, aas } from 'common';
 import { TemplateStorage } from '../../app/template/template-storage.js';
 import { createSpyObj } from '../utils.js';
 import { Logger } from '../../app/logging/logger.js';
-import { FileStorage } from '../../app/file-storage/file-storage.js';
+import { FileStorage, FileStorageEntry } from '../../app/file-storage/file-storage.js';
+import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
+import { Variable } from '../../app/variable.js';
 
 describe('TemplateStorage', function () {
     let templateStorage: TemplateStorage;
     let logger: jest.Mocked<Logger>;
     let fileStorage: jest.Mocked<FileStorage>;
+    let fileStorageProvider: jest.Mocked<FileStorageProvider>;
+    let variable: jest.Mocked<Variable>;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error']);
-        fileStorage = createSpyObj<FileStorage>(['exists', 'isDirectory', 'readDir', 'readFile'], { root: './' });
-        templateStorage = new TemplateStorage(logger, fileStorage);
+        fileStorageProvider = createSpyObj<FileStorageProvider>(['get']);
+        fileStorage = createSpyObj<FileStorage>(['exists', 'readDir', 'readFile']);
+        fileStorageProvider.get.mockReturnValue(fileStorage);
+
+        variable = createSpyObj<Variable>([], { TEMPLATE_STORAGE: 'file:///templates' });
+        templateStorage = new TemplateStorage(logger, variable, fileStorageProvider);
     });
 
     it('should create', function () {
@@ -43,8 +51,10 @@ describe('TemplateStorage', function () {
 
         it('reads all available templates', async function () {
             fileStorage.exists.mockResolvedValue(true);
-            fileStorage.isDirectory.mockResolvedValue(false);
-            fileStorage.readDir.mockResolvedValue(['submodel.json']);
+            fileStorage.readDir.mockResolvedValue([
+                { name: 'submodel.json', path: '/submodel.json', type: 'file' } as FileStorageEntry,
+            ]);
+
             fileStorage.readFile.mockResolvedValue(Buffer.from(JSON.stringify(submodel)));
             await expect(templateStorage.readAsync()).resolves.toEqual([
                 {
@@ -55,7 +65,7 @@ describe('TemplateStorage', function () {
                 },
             ] as TemplateDescriptor[]);
 
-            expect(fileStorage.readFile).toHaveBeenCalledWith(path.join('templates', 'submodel.json'));
+            expect(fileStorage.readFile).toHaveBeenCalledWith('/templates/submodel.json');
         });
     });
 });

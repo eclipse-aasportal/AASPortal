@@ -89,7 +89,7 @@ AASServer provides a user management. Authentication of a user is based on Json 
 | MAX_WORKERS      | Number of background worker that scan AAS containers.                 | 8                                              |
 | NODE_SERVER_PORT | The port number where AASServer is listening.                         | 80                                             |
 | USER_STORAGE     | URL of the user database.                                             | './users'                                      |
-| FILE_STORAGE | URL of the template storage                                           |                                                |
+| TEMPLATE_STORAGE | URL of the template storage                                           |                                                |
 | TIMEOUT          | Timeout until a new scan starts (ms).                                 | 5000                                           |
 | WEB_ROOT         | The root directory for static file resources.                         | './wwwroot'                                    |
 

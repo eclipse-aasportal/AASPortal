@@ -11,7 +11,7 @@ import * as aas from './aas.js';
 /** Defines the supported endpoint types. */
 export type EndpointType = 'file' | 'http' | 'opc';
 
-/** Represents an endpoint of a AAS resource. */
+/** Represents an endpoint of an AAS resource. */
 export interface Endpoint {
     address: string;
     type: EndpointType;

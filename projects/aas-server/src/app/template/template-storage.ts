@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { basename, extname, join } from 'path';
+import { basename, extname, join } from 'path/posix';
 import { TemplateDescriptor, aas } from 'common';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
@@ -14,17 +14,29 @@ import { AASReader } from '../packages/aas-reader.js';
 import { JsonReader } from '../packages/json-reader.js';
 import { JsonReaderV2 } from '../packages/json-reader-v2.js';
 import * as aasV2 from '../types/aas-v2.js';
+import { inject, singleton } from 'tsyringe';
+import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
+import { Variable } from '../variable.js';
 
+@singleton()
 export class TemplateStorage {
+    private readonly fileStorage: FileStorage;
+    private readonly root: string;
+
     public constructor(
-        private readonly logger: Logger,
-        private readonly fileStorage: FileStorage,
-        private readonly root = 'templates',
-    ) {}
+        @inject('Logger') private readonly logger: Logger,
+        @inject(Variable) variable: Variable,
+        @inject(FileStorageProvider) provider: FileStorageProvider,
+    ) {
+        const url = new URL(variable.TEMPLATE_STORAGE);
+        this.root = url.pathname;
+        url.pathname = '';
+        this.fileStorage = provider.get(url);
+    }
 
     public async readAsync(): Promise<TemplateDescriptor[]> {
         const descriptors: TemplateDescriptor[] = [];
-        if (await this.fileStorage.exists(this.root)) {
+        if ((await this.fileStorage.exists(this.root)) === true) {
             await this.readDirAsync('', descriptors);
         }
 
@@ -32,24 +44,29 @@ export class TemplateStorage {
     }
 
     private async readDirAsync(dir: string, descriptors: TemplateDescriptor[]): Promise<void> {
-        for (const entry of await this.fileStorage.readDir(join(this.root, dir))) {
-            const path = join(dir, entry);
-            if (await this.fileStorage.isDirectory(path)) {
-                await this.readDirAsync(path, descriptors);
-            } else {
-                const format = extname(path).toLowerCase();
-                switch (format) {
-                    case '.json':
-                        descriptors.push({
-                            name: basename(path, extname(format)),
-                            endpoint: { type: 'file', address: path },
-                            format: '.json',
-                            template: await this.readTemplateAsync(path),
-                        });
-                        break;
+        const directories: string[] = [dir];
 
-                    case '.xml':
-                        throw new Error(`Template format '${format}' is not implemented`);
+        while (directories.length > 0) {
+            const directory = directories.pop()!;
+            for (const entry of await this.fileStorage.readDir(join(this.root, directory))) {
+                const path = join(directory, entry.name);
+                if (entry.type === 'directory') {
+                    directories.push(path);
+                } else {
+                    const format = extname(path).toLowerCase();
+                    switch (format) {
+                        case '.json':
+                            descriptors.push({
+                                name: basename(path, extname(format)),
+                                endpoint: { type: 'file', address: path },
+                                format: '.json',
+                                template: await this.readTemplateAsync(path),
+                            });
+                            break;
+
+                        case '.xml':
+                            throw new Error(`Template format '${format}' is not implemented`);
+                    }
                 }
             }
         }

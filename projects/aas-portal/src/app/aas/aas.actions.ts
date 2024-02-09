@@ -18,7 +18,9 @@ export enum AASActionType {
     RESET_MODIFIED = '[AAS] reset modified',
     SET_DASHBOARD = '[AAS] set dashboard',
     SET_SEARCH = '[AAS] set search',
+    SET_STATE = '[AAS] Set State',
 }
+
 export interface GetDocumentAction extends TypedAction<AASActionType.GET_DOCUMENT> {
     id: string;
     name?: string;
@@ -38,3 +40,6 @@ export const setTemplateStorage = createAction(
 export const resetModified = createAction(AASActionType.RESET_MODIFIED, props<{ document: AASDocument }>());
 
 export const setSearch = createAction(AASActionType.SET_SEARCH, props<{ search: string }>());
+export const setState = createAction(
+    AASActionType.SET_STATE,
+    props<{ value: 'offline' | 'online' }>());

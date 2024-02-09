@@ -133,7 +133,7 @@ export class AasxPackage extends AASPackage {
     }
 
     private async initializeZip(): Promise<jszip> {
-        const data = await this.source.getStorage().readFile(this.file);
+        const data = await this.source.readFile(this.file);
         return await jszip.loadAsync(data);
     }
 

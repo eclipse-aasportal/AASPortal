@@ -18,14 +18,14 @@ import { AasxDirectory } from '../packages/aasx-directory/aasx-directory.js';
 import { AasxServer } from '../packages/aasx-server/aasx-server.js';
 import { AasxServerV3 } from '../packages/aasx-server/aasx-server-v3.js';
 import { AasxServerV0 } from '../packages/aasx-server/aasx-server-v0.js';
-import { FileStorageFactory } from '../file-storage/file-storage-factory.js';
+import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 
 @singleton()
 export class AASResourceScanFactory {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(FileStorageFactory) private readonly fileStorageFactory: FileStorageFactory,
+        @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
     ) {}
 
     public create(endpoint: AASEndpoint): AASResourceScan {
@@ -53,7 +53,7 @@ export class AASResourceScanFactory {
                         this.logger,
                         endpoint.url,
                         endpoint.name,
-                        this.createLocalFileStorage(new URL(endpoint.url)),
+                        this.getFileStorage(new URL(endpoint.url)),
                     ),
                 );
             default:
@@ -61,7 +61,7 @@ export class AASResourceScanFactory {
         }
     }
 
-    private createLocalFileStorage(url: URL): FileStorage {
-        return this.fileStorageFactory.create(`file:///endpoints` + url.pathname);
+    private getFileStorage(url: URL): FileStorage {
+        return this.fileStorageProvider.get(url);
     }
 }

@@ -7,9 +7,10 @@
  *****************************************************************************/
 
 import { aas } from 'common';
-import { BrowseDescriptionLike, ClientSession, NodeClass, NodeIdLike, resolveNodeId } from 'node-opcua';
+import { BrowseDescriptionLike, ClientSession, NodeClass, NodeIdLike, ReferenceDescription, resolveNodeId } from 'node-opcua';
 
 interface DataTypeEntry {
+    obj: ReferenceDescription;
     name: string;
     baseType: string | null;
 }
@@ -37,6 +38,7 @@ export class OpcuaDataTypeDictionary {
             for (const obj of result.references) {
                 if (obj.nodeClass === NodeClass.DataType && obj.browseName.name) {
                     this.dataTypes.set(obj.nodeId.toString(), {
+                        obj: obj,
                         name: obj.browseName.name,
                         baseType: null,
                     });

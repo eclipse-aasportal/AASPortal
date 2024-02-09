@@ -33,3 +33,20 @@ export function parseUrl(url: string): URL {
 export function toUint8Array<T extends object>(data: T): Uint8Array {
     return Uint8Array.from(Buffer.from(JSON.stringify(data)));
 }
+
+export function join(...args: string[]): string {
+    let path = '';
+    for (const arg of args.map(item => item.trim()).filter(item => item)) {
+        if (arg === '/') {
+            path += arg;
+        } else if (arg.endsWith('/')) {
+            path += arg.startsWith('/') ? arg.substring(1) : arg;
+        } else if (path) {
+            path += arg.startsWith('/') ? arg : '/' + arg;
+        } else {
+            path = arg;
+        }
+    }
+
+    return path;
+}

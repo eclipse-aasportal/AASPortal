@@ -26,7 +26,7 @@ export class TemplatesController extends AASController {
         @inject('Logger') logger: Logger,
         @inject(AuthService) auth: AuthService,
         @inject(Variable) variable: Variable,
-        @inject('TemplateStorage') private readonly templateStorage: TemplateStorage,
+        @inject(TemplateStorage) private readonly templateStorage: TemplateStorage,
     ) {
         super(logger, auth, variable);
     }

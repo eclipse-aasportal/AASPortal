@@ -6,17 +6,21 @@
  *
  *****************************************************************************/
 
+export interface FileStorageEntry {
+    name: string;
+    path: string;
+    type: 'file' | 'directory';
+}
+
 /** Defines a file based AASX package source. */
 export abstract class FileStorage {
     protected constructor(public readonly root: string) {}
     public abstract mtime(path: string): Promise<Date>;
     public abstract exists(path: string): Promise<boolean>;
-    public abstract isDirectory(path: string): Promise<boolean>;
-    public abstract mkdir(path: string, recursive?: boolean): Promise<string | undefined>;
+    public abstract createDir(path: string, recursive?: boolean): Promise<void>;
     public abstract writeFile(path: string, data: string | Buffer): Promise<void>;
-    public abstract readDir(path: string): Promise<string[]>;
+    public abstract readDir(path: string): Promise<FileStorageEntry[]>;
     public abstract readFile(path: string): Promise<Buffer>;
-    public abstract unlink(path: string): Promise<void>;
-    public abstract rename(oldPath: string, newPath: string): Promise<void>;
+    public abstract delete(path: string): Promise<void>;
     public abstract createReadStream(path: string): NodeJS.ReadableStream;
 }

@@ -13,6 +13,7 @@ import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { isEqual } from 'lodash-es';
 import {
     aas,
     LiveNode,
@@ -48,6 +49,7 @@ import {
     resolveSemanticId,
     supportedSubmodelTemplates,
 } from '../submodel-template/submodel-template';
+
 import * as AASTreeActions from './aas-tree.actions';
 import * as AASTreeSelectors from './aas-tree.selectors';
 import { AASTreeApiService } from './aas-tree-api.service';
@@ -122,7 +124,9 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public set selected(values: aas.Referable[]) {
-        this.store.dispatch(AASTreeActions.setSelectedElements({ elements: values }));
+        if (!isEqual(values, this._selected)) {
+            this.store.dispatch(AASTreeActions.setSelectedElements({ elements: values }));
+        }
     }
 
     @Output()

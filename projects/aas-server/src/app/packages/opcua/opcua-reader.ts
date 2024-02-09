@@ -7,7 +7,8 @@
  *****************************************************************************/
 
 import { aas, convertToString, determineType } from 'common';
-import { ArgumentOptions, LocalizedText, VariantArrayType, VariantOptions } from 'node-opcua';
+import { ArgumentOptions, LocalizedText } from 'node-opcua';
+import { noop } from 'lodash-es';
 import { Logger } from '../../logging/logger.js';
 import { AASReader } from '../aas-reader.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
@@ -20,7 +21,6 @@ import {
     UAKeyElements,
     ValueType,
 } from './opcua.js';
-import { noop } from 'lodash-es';
 
 export class OpcuaReader extends AASReader {
     public constructor(
@@ -73,12 +73,12 @@ export class OpcuaReader extends AASReader {
         let globalAssetId: string | undefined;
         const assetComponent = this.selectComponent(this.origin, 'Asset');
         if (assetComponent) {
-            assetKind = this.readEnumProperty(assetComponent, 'AssetKind') ?? 'Instance';
+            assetKind = this.readAssetKind(assetComponent, 'AssetKind') ?? 'Instance';
             globalAssetId = this.readIdentifier(assetComponent);
         } else {
             const infoComponent = this.selectComponent(component, undefined, 'AASAssetInformationType');
             if (infoComponent) {
-                assetKind = this.readEnumProperty(infoComponent, 'AssetKind') ?? 'Instance';
+                assetKind = this.readAssetKind(infoComponent, 'AssetKind') ?? 'Instance';
                 globalAssetId = this.readReference(infoComponent, 'GlobalAssetId')?.keys[0].value;
             }
         }
@@ -503,7 +503,7 @@ export class OpcuaReader extends AASReader {
             referable.parent = parent;
         }
 
-        const category = this.readEnumProperty<aas.Category>(component, 'Category');
+        const category = this.readCategory(component, 'Category');
         if (category) {
             referable.category = category;
         }
@@ -522,7 +522,7 @@ export class OpcuaReader extends AASReader {
     }
 
     private readHasKind(component: OPCUAComponent): aas.HasKind {
-        return { kind: this.readEnumProperty(component, 'ModellingKind') ?? 'Instance' };
+        return { kind: this.readModellingKind(component, 'ModellingKind') ?? 'Instance' };
     }
 
     private readHasDataSpecification(component: OPCUAComponent): aas.HasDataSpecification {
@@ -594,35 +594,92 @@ export class OpcuaReader extends AASReader {
         return value;
     }
 
-    private readEnumProperty<T extends string>(component: OPCUAComponent, propertyName: string): T | undefined {
+    private readAssetKind(component: OPCUAComponent, propertyName: string): aas.AssetKind | undefined {
         const property = this.findProperty(component, propertyName);
-        const value = property?.dataValue.value?.value;
-        if (value && typeof value !== 'string') {
-            throw new Error(`Unexpected value type: expected string, actual ${typeof value}`);
+        if (!property) {
+            return undefined;
         }
 
-        return value;
+        const value = property.dataValue.value?.value;
+        if (!value) {
+            return undefined;
+        }
+
+        if (typeof value === 'string') {
+            return value as aas.AssetKind;
+        }
+
+        if (typeof value === 'number') {
+            switch (value) {
+                case 0:
+                    return 'Type';
+                case 1:
+                    return 'Instance';
+            }
+        }
+
+        throw new Error(`Unexpected value type: expected string or number, actual ${typeof value}`);
+    }
+
+    private readCategory(component: OPCUAComponent, propertyName: string): aas.Category | undefined {
+        const property = this.findProperty(component, propertyName);
+        if (!property) {
+            return undefined;
+        }
+
+        const value = property.dataValue.value?.value;
+        if (!value) {
+            return undefined;
+        }
+
+        if (typeof value === 'string') {
+            return value as aas.Category;
+        }
+
+        if (typeof value === 'number') {
+            switch (value) {
+                case 0:
+                    return 'CONSTANT';
+                case 1:
+                    return 'PARAMETER';
+                default:
+                    return 'VARIABLE';
+            }
+        }
+
+        throw new Error(`Unexpected value type: expected string or number, actual ${typeof value}`);
+    }
+
+    private readModellingKind(component: OPCUAComponent, propertyName: string): aas.ModellingKind | undefined {
+        const property = this.findProperty(component, propertyName);
+        if (!property) {
+            return undefined;
+        }
+
+        const value = property.dataValue.value?.value;
+        if (!value) {
+            return undefined;
+        }
+
+        if (typeof value === 'string') {
+            return value as aas.ModellingKind;
+        }
+
+        if (typeof value === 'number') {
+            switch (value) {
+                case 0:
+                    return 'Template';
+                case 1:
+                    return 'Instance';
+            }
+        }
+
+        throw new Error(`Unexpected value type: expected string or number, actual ${typeof value}`);
     }
 
     private readPropertyValue<T>(component: OPCUAComponent, propertyName: string): T {
         const property = this.findProperty(component, propertyName);
         return property?.dataValue.value?.value;
-    }
-
-    private getConceptDescription(semanticId: aas.Key | null): aas.ConceptDescription | undefined {
-        const conceptDescription: aas.ConceptDescription | undefined = undefined;
-        if (semanticId) {
-            throw new Error('Not implemented');
-        }
-
-        return conceptDescription;
-    }
-
-    private toReference(value: UAKey[]): aas.Reference {
-        return {
-            type: 'ModelReference',
-            keys: value.map(item => this.readKey(item)),
-        };
     }
 
     private where(components: OPCUAComponent[] | undefined, ...types: TypeDefinition[]): OPCUAComponent[] {
@@ -669,14 +726,6 @@ export class OpcuaReader extends AASReader {
         }
 
         return value ? (UAEntityType[value] as aas.EntityType) : undefined;
-    }
-
-    private isArray(value: VariantOptions | undefined): boolean {
-        return value != null && (value.arrayType === VariantArrayType.Array || value.arrayType === 'Array');
-    }
-
-    private getArray<T>(value: VariantOptions | undefined): T[] {
-        return value !== undefined ? (value.value as T[]) : [];
     }
 
     private readDataTypeDefXsd(value?: ValueType | string): aas.DataTypeDefXsd | undefined {

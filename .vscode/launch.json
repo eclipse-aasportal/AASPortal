@@ -28,10 +28,7 @@
                 "CONTENT_ROOT": "projects/aas-server/build",
                 "WEB_ROOT": "projects/aas-portal/dist",
                 "ASSETS": "projects/aas-server/src/assets",
-                "USER_STORAGE": "mongodb://localhost:27017/aasportal-users",
-                "FILE_STORAGE": "http://aasportal:aas-server@localhost:1234",
-                "AAS_INDEX": "mysql://aasportal:aas-server@localhost:3306",
-                "ENDPOINTS": "[\"file:///samples?name=Samples\"]",
+                "ENDPOINTS": "[\"file:///endpoints/samples?name=Samples\"]",
             }
         },
         {
@@ -77,6 +74,21 @@
                 "test:debug",
                 "-w",
                 "aas-server"
+            ],
+        },
+        {
+            "name": "Debug aas-server test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test:debug",
+                "-w",
+                "aas-server",
+                "--testPathPattern",
+                "${fileBasename}"
             ],
         },
         {

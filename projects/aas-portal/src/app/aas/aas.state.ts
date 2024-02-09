@@ -15,6 +15,7 @@ export interface TemplateStorage {
 
 export interface AASState {
     document: AASDocument | null;
+    state: 'online' | 'offline';
     search: string;
     templateStorage: TemplateStorage;
     error: Error | null;
@@ -23,6 +24,7 @@ export interface AASState {
 export const initialState: AASState = {
     document: null,
     search: '',
+    state: 'offline',
     templateStorage: {
         timestamp: 0,
         templates: [],

@@ -7,13 +7,13 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { describe, beforeEach, it, expect } from '@jest/globals';
 import { resolve } from 'path';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { readFile } from 'fs/promises';
 import { PackageInfo } from 'common';
 import { createSpyObj } from './utils.js';
-import { describe, beforeEach, it, expect } from '@jest/globals';
 
 describe('Application Info service', () => {
     let logger: Logger;
