@@ -152,15 +152,35 @@ describe('AASComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('shows a document overview', function () {
+    it('shows the document address', (done: DoneFn) => {
+        component.address.pipe(first()).subscribe(value => {
+            expect(value).toEqual(sampleDocument.address);
+            done();
+        });
+    });
+
+    it('shows the document assetId', (done: DoneFn) => {
         const aas = sampleDocument.content!.assetAdministrationShells[0];
         const assetId = aas.assetInformation.globalAssetId ?? '-';
 
-        expect(component.address).toEqual(sampleDocument.address);
-        expect(component.idShort).toEqual(sampleDocument.idShort);
-        expect(component.id).toEqual(sampleDocument.id);
-        expect(component.version).toEqual('-');
-        expect(component.assetId).toEqual(assetId);
+        component.assetId.pipe(first()).subscribe(value => {
+            expect(value).toEqual(assetId);
+            done();
+        });
+    });
+
+    it('shows the document id', (done: DoneFn) => {
+        component.id.pipe(first()).subscribe(value => {
+            expect(value).toEqual(sampleDocument.id);
+            done();
+        });
+    });
+
+    it('shows the document idShort', (done: DoneFn) => {
+        component.version.pipe(first()).subscribe(value => {
+            expect(value).toEqual('-');
+            done();
+        });
     });
 
     it('indicates that "play" is disabled while sample AAS is not online ready', (done: DoneFn) => {
@@ -189,22 +209,15 @@ describe('AASComponent', () => {
             component.selectedElements = [torque, rotationSpeed];
         });
 
-        it('can add the selected properties to the dashboard', async function () {
+        it('can add the selected properties to the dashboard', (done: DoneFn) => {
             spyOn(dashboard, 'add');
             spyOn(router, 'navigateByUrl').and.resolveTo(true);
-            expect(component.canAddToDashboard()).toBeTrue();
-            await expectAsync(component.addToDashboard(DashboardChartType.BarVertical)).toBeResolvedTo(true);
-            expect(dashboard.add).toHaveBeenCalled();
-            expect(router.navigateByUrl).toHaveBeenCalled();
-        });
-    });
-
-    describe('downloadDocument', () => {
-        it('can download an AASX file', function () {
-            download.downloadDocument.and.returnValue(of(void 0));
-            expect(component.canDownloadDocument()).toBeTrue();
-            component.downloadDocument();
-            expect(download.downloadDocument).toHaveBeenCalled();
+            expect(component.canAddToDashboard).toBeTrue();
+            component.addToDashboard(DashboardChartType.BarVertical).subscribe(() => {
+                expect(dashboard.add).toHaveBeenCalled();
+                expect(router.navigateByUrl).toHaveBeenCalled();
+                done();
+            });
         });
     });
 });

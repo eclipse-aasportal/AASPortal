@@ -8,7 +8,7 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, map, mergeMap, Observable, Subscription, from, of, first } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, Subscription, from, of, first, catchError } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TemplateDescriptor, aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
@@ -232,28 +232,29 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.store.dispatch(AASActions.setState({ value: 'offline' }));
     }
 
-    public addToDashboard(chartType: string): void {
-        this.store
-            .select(AASSelectors.selectDocument)
-            .pipe(
-                first(),
-                mergeMap(document => {
-                    if (!document) {
-                        return EMPTY;
-                    }
+    public addToDashboard(chartType: string): Observable<boolean> {
+        return this.store.select(AASSelectors.selectDocument).pipe(
+            first(),
+            mergeMap(document => {
+                if (!document) {
+                    return EMPTY;
+                }
 
-                    this.dashboard.add(
-                        this.dashboardPage,
-                        document,
-                        this.selectedElements,
-                        chartType as DashboardChartType,
-                    );
+                this.dashboard.add(
+                    this.dashboardPage,
+                    document,
+                    this.selectedElements,
+                    chartType as DashboardChartType,
+                );
 
-                    this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
-                    return from(this.router.navigateByUrl('/dashboard?format=DashboardQuery'));
-                }),
-            )
-            .subscribe({ error: error => this.notify.error(error) });
+                this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
+                return from(this.router.navigateByUrl('/dashboard?format=DashboardQuery'));
+            }),
+            catchError(error => {
+                this.notify.error(error);
+                return of(false);
+            }),
+        );
     }
 
     public synchronize(): void {

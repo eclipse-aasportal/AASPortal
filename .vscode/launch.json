@@ -46,7 +46,7 @@
                 "CONTENT_ROOT": "projects/aas-server/dist",
                 "WEB_ROOT": "projects/aas-portal/dist",
                 "ASSETS": "projects/aas-server/src/assets",
-                "ENDPOINTS": "[\"file:///samples?name=Samples\"]"
+                "ENDPOINTS": "[\"file:///endpoints/samples?name=Samples\"]"
             }
         },
         {
@@ -102,6 +102,21 @@
                 "test",
                 "-w",
                 "common"
+            ]
+        },
+        {
+            "name": "Debug common test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "common",
+                "--testPathPattern",
+                "${fileBasename}"
             ]
         }
     ]

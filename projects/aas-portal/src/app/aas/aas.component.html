@@ -52,11 +52,11 @@
             <option [ngValue]="option">{{option}}</option>
             }
         </select>
-        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')"
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line').subscribe()"
             [disabled]="!canAddToDashboard">
             <i class="bi bi-graph-up"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="addToDashboard('BarVertical')"
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('BarVertical').subscribe()"
             [disabled]="!canAddToDashboard">
             <i class="bi bi-bar-chart-line-fill"></i>
         </button>
