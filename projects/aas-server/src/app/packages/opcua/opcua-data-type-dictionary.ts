@@ -7,7 +7,14 @@
  *****************************************************************************/
 
 import { aas } from 'common';
-import { BrowseDescriptionLike, ClientSession, NodeClass, NodeIdLike, ReferenceDescription, resolveNodeId } from 'node-opcua';
+import {
+    BrowseDescriptionLike,
+    ClientSession,
+    NodeClass,
+    NodeIdLike,
+    ReferenceDescription,
+    resolveNodeId,
+} from 'node-opcua';
 
 interface DataTypeEntry {
     obj: ReferenceDescription;

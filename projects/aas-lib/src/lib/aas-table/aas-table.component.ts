@@ -128,6 +128,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
         const query: AASQuery = {
             id: row.id,
             name: row.endpoint,
+            document: row.document,
         };
 
         this.clipboard.set('AASQuery', query);

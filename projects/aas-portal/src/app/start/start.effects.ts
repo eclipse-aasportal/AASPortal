@@ -9,9 +9,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { AASDocument, AASDocumentId, AASPage } from 'common';
-import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable } from 'rxjs';
+import { AASDocument, AASDocumentId, AASPage } from 'common';
 import { ViewMode } from 'aas-lib';
 
 import * as StartActions from './start.actions';

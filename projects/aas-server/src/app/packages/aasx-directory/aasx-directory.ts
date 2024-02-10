@@ -10,7 +10,7 @@ import { aas, ApplicationError } from 'common';
 import { join } from 'path';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
-import { FileStorage, FileStorageEntry } from '../../file-storage/file-storage.js';
+import { FileStorage } from '../../file-storage/file-storage.js';
 import { Logger } from '../../logging/logger.js';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';

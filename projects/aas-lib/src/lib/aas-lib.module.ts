@@ -39,6 +39,7 @@ import { messageTableReducer } from './message-table/massage-table.reducer';
 import { MessageTableComponent } from './message-table/message-table.component';
 import { SecuredImageComponent } from './secured-image/secured-image.component';
 import { AASTableEffects } from './aas-table/aas-table.effects';
+import { ClipboardService } from './clipboard.service';
 
 @NgModule({
     declarations: [
@@ -92,6 +93,6 @@ import { AASTableEffects } from './aas-table/aas-table.effects';
         MessageTableComponent,
         SecuredImageComponent,
     ],
-    providers: [],
+    providers: [ClipboardService],
 })
 export class AASLibModule {}

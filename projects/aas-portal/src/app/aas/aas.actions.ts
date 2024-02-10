@@ -40,6 +40,4 @@ export const setTemplateStorage = createAction(
 export const resetModified = createAction(AASActionType.RESET_MODIFIED, props<{ document: AASDocument }>());
 
 export const setSearch = createAction(AASActionType.SET_SEARCH, props<{ search: string }>());
-export const setState = createAction(
-    AASActionType.SET_STATE,
-    props<{ value: 'offline' | 'online' }>());
+export const setState = createAction(AASActionType.SET_STATE, props<{ value: 'offline' | 'online' }>());

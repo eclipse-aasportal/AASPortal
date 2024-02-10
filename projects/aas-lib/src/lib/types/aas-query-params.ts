@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+import { AASDocument } from 'common';
+
 export interface AASQueryParams {
     format?: string;
     id?: string;
@@ -15,4 +17,5 @@ export interface AASQuery {
     id: string;
     name?: string;
     search?: string;
+    document?: AASDocument;
 }

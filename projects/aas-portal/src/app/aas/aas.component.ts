@@ -169,7 +169,11 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         if (query) {
-            this.store.dispatch(AASActions.getDocument({ id: query.id, name: query.name }));
+            if (!query.document || !query.document.content) {
+                this.store.dispatch(AASActions.getDocument({ id: query.id, name: query.name }));
+            } else {
+                this.store.dispatch(AASActions.setDocument({ document: query.document }));
+            }
         }
 
         this.subscription.add(
