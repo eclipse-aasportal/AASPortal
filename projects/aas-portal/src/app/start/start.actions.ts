@@ -26,6 +26,7 @@ export enum StartActionType {
     GET_FAVORITES = '[Start] get favorites',
     SET_FAVORITES = '[Start] set favorites',
     REMOVE_FAVORITES = '[Start] remove favorites',
+    SET_FILTER = '[Start] set filter',
 }
 
 export interface GetFirstPageAction extends TypedAction<StartActionType.GET_FIRST_PAGE> {
@@ -75,3 +76,5 @@ export const setFavorites = createAction(
 );
 
 export const removeFavorites = createAction(StartActionType.REMOVE_FAVORITES, props<{ favorites: AASDocument[] }>());
+
+export const setFilter = createAction(StartActionType.SET_FILTER, props<{ filter: string }>());

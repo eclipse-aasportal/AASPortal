@@ -7,7 +7,8 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-container" class="container-fluid">
-    <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"></fhg-aas-table>
+    <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"
+        [filter]="filter"></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
@@ -43,20 +44,22 @@
                 <i class="bi bi-gear"></i>
             </button>
             <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
-                <button ngbDropdownItem (click)="addEndpoint()" translate>CMD_ADD_ENDPOINT</button>
-                <button ngbDropdownItem (click)="removeEndpoint()" translate>CMD_REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="reset()" translate>CMD_RESET_CONFIGURATION</button>
+                <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>CMD_ADD_ENDPOINT</button>
+                <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>CMD_REMOVE_ENDPOINT</button>
+                <button ngbDropdownItem (click)="reset().subscribe()" translate>CMD_RESET_CONFIGURATION</button>
             </div>
         </div>
     </div>
     <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="uploadDocument()" [disabled]="!canUploadDocument()">
+        <button type="button" class="btn btn-primary" (click)="uploadDocument().subscribe()">
             <i class="bi bi-upload"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="downloadDocument()" [disabled]="!canDownloadDocument()">
+        <button type="button" class="btn btn-primary" (click)="downloadDocument().subscribe()"
+            [disabled]="!canDownloadDocument">
             <i class="bi bi-download"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="deleteDocument()" [disabled]="!canDeleteDocument()">
+        <button type="button" class="btn btn-primary" (click)="deleteDocument().subscribe()"
+            [disabled]="!canDeleteDocument">
             <i class="bi bi-trash"></i>
         </button>
     </div>
@@ -77,14 +80,13 @@
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints"
                 translate>LABEL_VIEWS</button>
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
+                <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback"
                     translate>CMD_VIEW_USER_FEEDBACK</button>
-                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
+                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate"
                     translate>CMD_VIEW_NAMEPLATE</button>
             </div>
         </div>
     </div>
-    @if (favoritesList === '-') {
     <div class="input-group flex-grow-1 me-2">
         <div class="input-group-text">
             <i class="bi bi-filter"></i>
@@ -93,5 +95,4 @@
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
             (keydown.enter)="textInput.blur()">
     </div>
-    }
 </ng-template>

@@ -21,6 +21,7 @@ export enum AASTableActionType {
     TOGGLE_SELECTIONS = '[AASTable] toggle selections',
     SET_SELECTIONS = '[AASTable] set selections',
     UPDATE_VIEW = '[AASTable] update view',
+    SET_FILTER = '[AASTable] set filter',
 }
 
 export interface UpdateViewAction extends TypedAction<AASTableActionType.UPDATE_VIEW> {
@@ -45,3 +46,5 @@ export const setSelections = createAction(AASTableActionType.SET_SELECTIONS, pro
 export const expandRow = createAction(AASTableActionType.EXPAND, props<{ row: AASTableRow }>());
 
 export const collapseRow = createAction(AASTableActionType.COLLAPSE, props<{ row: AASTableRow }>());
+
+export const setFilter = createAction(AASTableActionType.SET_FILTER, props<{ filter?: string }>());

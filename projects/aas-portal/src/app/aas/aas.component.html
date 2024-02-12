@@ -62,7 +62,7 @@
         </button>
     </div>
     <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
-        <button type="button" class="btn btn-primary" (click)="synchronize()"
+        <button type="button" class="btn btn-primary" (click)="synchronize().subscribe()"
             [disabled]="(canSynchronize | async) === false">
             <i class="bi bi-arrow-repeat"></i>
         </button>
@@ -81,13 +81,14 @@
         </button>
     </div>
     <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
-        <button type="button" class="btn btn-primary" (click)="newElement()" [disabled]="!canNewElement">
+        <button type="button" class="btn btn-primary" (click)="newElement().subscribe()" [disabled]="!canNewElement">
             <i class="bi bi-plus-lg"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="editElement()" [disabled]="!canEditElement">
+        <button type="button" class="btn btn-primary" (click)="editElement().subscribe()" [disabled]="!canEditElement">
             <i class="bi bi-pencil"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="deleteElement()" [disabled]="!canDeleteElement">
+        <button type="button" class="btn btn-primary" (click)="deleteElement().subscribe()"
+            [disabled]="!canDeleteElement">
             <i class="bi bi-trash"></i>
         </button>
     </div>

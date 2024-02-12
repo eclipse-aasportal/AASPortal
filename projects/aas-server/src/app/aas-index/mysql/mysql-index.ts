@@ -14,6 +14,7 @@ import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { MySqlQuery } from './mysql-query.js';
 import { MySqlDocument, MySqlEndpoint } from './mysql-types.js';
+import { isEmpty } from 'lodash-es';
 
 export class MySqlIndex extends AASIndex {
     private readonly connection: Promise<Connection>;
@@ -413,12 +414,14 @@ export class MySqlIndex extends AASIndex {
 
     private async initialize(): Promise<Connection> {
         const url = new URL(this.variable.AAS_INDEX!);
+        const username = isEmpty(url.username) ? this.variable.USERNAME : url.username;
+        const password = isEmpty(url.password) ? this.variable.PASSWORD : url.password;
         const connection = await mysql.createConnection({
             host: url.hostname,
             port: Number(url.port),
             database: 'aas-index',
-            user: url.username,
-            password: url.password,
+            user: username,
+            password: password,
         });
 
         const result = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`');

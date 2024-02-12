@@ -8,19 +8,18 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Store, StoreModule } from '@ngrx/store';
+import { StoreModule } from '@ngrx/store';
 import { WindowService, ViewMode, AuthService, NotifyService, DownloadService } from 'aas-lib';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { EffectsModule } from '@ngrx/effects';
-import { Observable, first, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { AASDocument, aas } from 'common';
 
 import { startReducer } from '../../app/start/start.reducer';
 import { StartComponent } from '../../app/start/start.component';
-import { StartState } from '../../app/start/start.state';
 import { StartApiService } from '../../app/start/start-api.service';
 import { StartEffects } from '../../app/start/start.effects';
 import { FavoritesService } from '../../app/start/favorites.service';
@@ -29,7 +28,7 @@ import { ToolbarService } from '../../app/toolbar.service';
 @Component({
     selector: 'fhg-aas-table',
     template: '<div></div>',
-    styleUrls: []
+    styleUrls: [],
 })
 export class TestAASTableComponent {
     @Input()
@@ -40,10 +39,11 @@ export class TestAASTableComponent {
     public selectedChange = new EventEmitter<AASDocument[]>();
     @Input()
     public selected: AASDocument[] = [];
+    @Input()
+    public filter: Observable<string> | null = null;
 }
 
 describe('StartComponent', () => {
-    let store: Store<{ start: StartState }>;
     let window: jasmine.SpyObj<WindowService>;
     let api: jasmine.SpyObj<StartApiService>;
     let component: StartComponent;
@@ -69,28 +69,30 @@ describe('StartComponent', () => {
             'getHierarchy',
             'getPage',
             'removeEndpoint',
-            'reset']);
+            'reset',
+        ]);
 
-        api.getPage.and.returnValue(of({
-            previous: null,
-            next: null,
-            documents: [],
-        }));
+        api.getPage.and.returnValue(
+            of({
+                previous: null,
+                next: null,
+                documents: [],
+            }),
+        );
 
-        api.getContent.and.returnValue(of({
-            assetAdministrationShells: [],
-            submodels: [],
-            conceptDescriptions: []
-        } as aas.Environment));
+        api.getContent.and.returnValue(
+            of({
+                assetAdministrationShells: [],
+                submodels: [],
+                conceptDescriptions: [],
+            } as aas.Environment),
+        );
 
         favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], { lists: [] });
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });
 
         TestBed.configureTestingModule({
-            declarations: [
-                StartComponent,
-                TestAASTableComponent,
-            ],
+            declarations: [StartComponent, TestAASTableComponent],
             providers: [
                 {
                     provide: StartApiService,
@@ -138,7 +140,6 @@ describe('StartComponent', () => {
             ],
         });
 
-        store = TestBed.inject(Store);
         fixture = TestBed.createComponent(StartComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

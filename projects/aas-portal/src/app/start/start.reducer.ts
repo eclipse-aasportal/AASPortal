@@ -31,6 +31,7 @@ export const startReducer = createReducer(
     on(StartActions.setContent, (state, { document, content }) => setContent(state, document, content)),
     on(StartActions.setFavorites, (state, { name, documents }) => setFavorites(state, name, documents)),
     on(StartActions.removeFavorites, (state, { favorites }) => removeFavorites(state, favorites)),
+    on(StartActions.setFilter, (state, { filter }) => setFilter(state, filter)),
 );
 
 function setViewMode(state: StartState, viewMode: ViewMode): StartState {
@@ -78,4 +79,8 @@ function removeFavorites(state: StartState, favorites: AASDocument[]): StartStat
     );
 
     return { ...state, documents };
+}
+
+function setFilter(state: StartState, filter: string): StartState {
+    return { ...state, filter };
 }

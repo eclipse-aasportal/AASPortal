@@ -9,7 +9,6 @@
 import { FileStat, WebDAVClient, createClient } from 'webdav';
 import { join, normalize, sep } from 'path/posix';
 import { FileStorage, FileStorageEntry } from './file-storage.js';
-import isEmpty from 'lodash-es/isEmpty.js';
 
 export class WebDAVStorage extends FileStorage {
     private url: URL;
@@ -67,8 +66,8 @@ export class WebDAVStorage extends FileStorage {
         if (!this._client) {
             const url = new URL(this.url);
             url.pathname = '/remote.php/webdav';
-            const username = isEmpty(url.username) ? 'admin' : url.username;
-            const password = isEmpty(url.password) ? 'admin' : url.password;
+            const username = url.username;
+            const password = url.password;
             url.username = '';
             url.password = '';
 

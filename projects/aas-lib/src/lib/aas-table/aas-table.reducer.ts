@@ -28,6 +28,7 @@ export const aasTableReducer = createReducer(
     ),
     on(AASTableActions.toggleSelections, state => toggleSelections(state)),
     on(AASTableActions.setSelections, (state, { documents }) => setSelections(state, documents)),
+    on(AASTableActions.setFilter, (state, { filter }) => setFilter(state, filter)),
 );
 
 function setViewMode(state: AASTableState, viewMode: ViewMode): AASTableState {
@@ -137,4 +138,8 @@ function collapseRow(state: AASTableState, row: AASTableRow): AASTableState {
     rows[index] = new AASTableRow(row.document, false, false, row.isLeaf, row.level, row.firstChild, row.nextSibling);
 
     return { ...state, rows };
+}
+
+function setFilter(state: AASTableState, filter?: string): AASTableState {
+    return { ...state, filter };
 }

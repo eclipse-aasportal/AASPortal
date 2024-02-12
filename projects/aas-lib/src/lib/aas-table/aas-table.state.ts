@@ -88,6 +88,7 @@ export class AASTableRow {
 
 export interface AASTableState {
     viewMode: ViewMode;
+    filter?: string;
     rows: AASTableRow[];
 }
 

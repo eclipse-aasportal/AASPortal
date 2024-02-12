@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
+import { isEmpty } from 'lodash-es';
 import { FileStorage } from './file-storage.js';
 import { LocalFileStorage } from './local-file-storage.js';
 import { Variable } from '../variable.js';
@@ -41,6 +42,14 @@ export class FileStorageProvider {
                 return new LocalFileStorage(this.variable.ASSETS);
             case 'http:':
             case 'https:':
+                if (isEmpty(url.username)) {
+                    url.username = this.variable.USERNAME;
+                }
+
+                if (isEmpty(url.password)) {
+                    url.password = this.variable.PASSWORD;
+                }
+
                 return new WebDAVStorage(url);
             default:
                 throw new Error(`${url.href} is an invalid URL or a not supported file storage.`);

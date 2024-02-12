@@ -257,28 +257,26 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
-    public synchronize(): void {
-        this.auth
-            .ensureAuthorized('editor')
-            .pipe(
-                mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
-                mergeMap(document => {
-                    if (!document) {
-                        return EMPTY;
-                    }
+    public synchronize(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            mergeMap(document => {
+                if (!document) {
+                    return EMPTY;
+                }
 
-                    return this.api.putDocument(document).pipe(
-                        map(messages => {
-                            if (messages && messages.length > 0) {
-                                this.notify.info(messages.join('\r\n'));
-                            }
+                return this.api.putDocument(document).pipe(
+                    map(messages => {
+                        if (messages && messages.length > 0) {
+                            this.notify.info(messages.join('\r\n'));
+                        }
 
-                            this.store.dispatch(AASActions.resetModified({ document }));
-                        }),
-                    );
-                }),
-            )
-            .subscribe({ error: error => this.notify.error(error) });
+                        this.store.dispatch(AASActions.resetModified({ document }));
+                    }),
+                );
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
     public undo(): void {
@@ -289,84 +287,73 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.commandHandler.redo();
     }
 
-    public newElement(): void {
-        this.auth
-            .ensureAuthorized('editor')
-            .pipe(
-                mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
-                mergeMap(document => {
-                    if (!document || this.selectedElements.length !== 1) {
-                        return EMPTY;
-                    }
+    public newElement(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            mergeMap(document => {
+                if (!document || this.selectedElements.length !== 1) {
+                    return EMPTY;
+                }
 
-                    return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
-                        mergeMap(modalRef => {
-                            modalRef.componentInstance.initialize(
-                                document.content,
-                                this.selectedElements[0],
-                                this.templates,
+                return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
+                    mergeMap(modalRef => {
+                        modalRef.componentInstance.initialize(
+                            document.content,
+                            this.selectedElements[0],
+                            this.templates,
+                        );
+
+                        return from<Promise<NewElementResult | undefined>>(modalRef.result);
+                    }),
+                    map(result => {
+                        if (result) {
+                            this.commandHandler.execute(
+                                new NewElementCommand(this.store, document, this.selectedElements[0], result.element),
                             );
-
-                            return from<Promise<NewElementResult | undefined>>(modalRef.result);
-                        }),
-                        map(result => {
-                            if (result) {
-                                this.commandHandler.execute(
-                                    new NewElementCommand(
-                                        this.store,
-                                        document,
-                                        this.selectedElements[0],
-                                        result.element,
-                                    ),
-                                );
-                            }
-                        }),
-                    );
-                }),
-            )
-            .subscribe({ error: error => this.notify.error(error) });
+                        }
+                    }),
+                );
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public editElement(): void {
-        this.auth
-            .ensureAuthorized('editor')
-            .pipe(
-                mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
-                mergeMap(document => {
-                    if (!document || this.selectedElements.length !== 1) {
-                        return EMPTY;
-                    }
+    public editElement(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            mergeMap(document => {
+                if (!document || this.selectedElements.length !== 1) {
+                    return EMPTY;
+                }
 
-                    return of(this.modal.open(EditElementFormComponent, { backdrop: 'static' })).pipe(
-                        mergeMap(modalRef => {
-                            modalRef.componentInstance.initialize(this.selectedElements[0]);
-                            return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
-                        }),
-                        map(result => {
-                            if (result) {
-                                this.commandHandler.execute(
-                                    new UpdateElementCommand(this.store, document, this.selectedElements[0], result),
-                                );
-                            }
-                        }),
-                    );
-                }),
-            )
-            .subscribe({ error: error => this.notify.error(error) });
+                return of(this.modal.open(EditElementFormComponent, { backdrop: 'static' })).pipe(
+                    mergeMap(modalRef => {
+                        modalRef.componentInstance.initialize(this.selectedElements[0]);
+                        return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
+                    }),
+                    map(result => {
+                        if (result) {
+                            this.commandHandler.execute(
+                                new UpdateElementCommand(this.store, document, this.selectedElements[0], result),
+                            );
+                        }
+                    }),
+                );
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public deleteElement(): void {
-        this.auth
-            .ensureAuthorized('editor')
-            .pipe(
-                mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
-                map(document => {
-                    if (document && this.selectedElements.length > 0) {
-                        this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
-                    }
-                }),
-            )
-            .subscribe({ error: error => this.notify.error(error) });
+    public deleteElement(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            map(document => {
+                if (document && this.selectedElements.length > 0) {
+                    this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
+                }
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
     public downloadDocument(): void {

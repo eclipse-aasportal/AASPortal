@@ -19,6 +19,7 @@ import { AASQuery } from '../types/aas-query-params';
 import { ClipboardService } from '../clipboard.service';
 import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -29,17 +30,19 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
     private readonly subscription: Subscription = new Subscription();
     private _selected: AASDocument[] = [];
+    private _filter: Observable<string> | null = null;
     private shiftKey = false;
     private altKey = false;
 
     public constructor(
         private readonly router: Router,
+        private readonly translate: TranslateService,
         store: Store,
         private readonly clipboard: ClipboardService,
         private readonly window: WindowService,
     ) {
         this.store = store as Store<AASTableFeatureState>;
-        this.rows = this.store.select(AASTableSelectors.selectRows);
+        this.rows = this.store.select(AASTableSelectors.selectRows(this.translate));
         this.everySelected = this.store.select(AASTableSelectors.selectEverySelected);
         this.someSelected = this.store.select(AASTableSelectors.selectSomeSelected);
 
@@ -66,6 +69,22 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     @Input()
     public get selected(): AASDocument[] {
         return this._selected;
+    }
+
+    @Input()
+    public get filter(): Observable<string> | null {
+        return this._filter;
+    }
+
+    public set filter(value: Observable<string> | null) {
+        if (value !== this._filter) {
+            this._filter = value;
+            if (this._filter) {
+                this.subscription.add(
+                    this._filter.subscribe(value => this.store.dispatch(AASTableActions.setFilter({ filter: value }))),
+                );
+            }
+        }
     }
 
     public set selected(values: AASDocument[]) {

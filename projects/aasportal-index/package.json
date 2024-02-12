@@ -1,0 +1,11 @@
+{
+  "name": "aas-index",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "docker-compose rm -v -f db && docker-compose up"
+  },
+  "author": "",
+  "license": "ISC"
+}

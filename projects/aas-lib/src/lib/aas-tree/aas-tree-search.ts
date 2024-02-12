@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { Store } from '@ngrx/store';
+import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { trim } from 'lodash-es';
 import { Subscription } from 'rxjs';
@@ -23,7 +24,6 @@ import {
     parseDate,
     parseNumber,
 } from 'common';
-import { Injectable } from '@angular/core';
 
 @Injectable()
 export class AASTreeSearch {

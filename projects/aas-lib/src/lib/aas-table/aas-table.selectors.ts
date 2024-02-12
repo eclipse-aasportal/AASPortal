@@ -9,6 +9,8 @@
 import { createSelector } from '@ngrx/store';
 import { AASDocument } from 'common';
 import { AASTableRow, AASTableFeatureState } from './aas-table.state';
+import { TranslateService } from '@ngx-translate/core';
+import { AASTableFilter } from './aas-table.filter';
 
 const getRows = (state: AASTableFeatureState) => state.aasTable.rows;
 const getState = (state: AASTableFeatureState) => state.aasTable;
@@ -27,6 +29,13 @@ export const selectEverySelected = createSelector(getRows, (rows: AASTableRow[])
     return rows.length > 0 && rows.every(row => row.selected);
 });
 
-export const selectRows = createSelector(getState, state => {
-    return state.rows;
-});
+export const selectRows = (translate: TranslateService) => {
+    return createSelector(getState, state => {
+        if (state.filter) {
+            const filter = new AASTableFilter(state.filter, translate.currentLang);
+            return state.rows.filter(row => filter.match(row.document));
+        }
+
+        return state.rows;
+    });
+};
