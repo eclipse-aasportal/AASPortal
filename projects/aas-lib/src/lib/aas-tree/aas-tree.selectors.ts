@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createSelector } from '@ngrx/store';
-import { AASTreeFeatureState } from './aas-tree.state';
+import { AASTree, AASTreeFeatureState } from './aas-tree.state';
 
 const getState = (state: AASTreeFeatureState) => state.tree;
 const getRows = (state: AASTreeFeatureState) => state.tree.rows;
@@ -31,7 +31,7 @@ export const selectRow = (index: number) => {
     return createSelector(getRows, rows => rows[index]);
 };
 
-export const selectNodes = createSelector(getRows, rows => rows.find(row => row.level === 0)?.getExpanded(rows) ?? []);
+export const selectNodes = createSelector(getRows, rows => new AASTree(rows).expanded);
 
 export const selectSelectedElements = createSelector(getRows, rows =>
     rows.filter(row => row.selected).map(item => item.element),

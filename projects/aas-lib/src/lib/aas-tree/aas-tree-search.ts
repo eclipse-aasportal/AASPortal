@@ -105,6 +105,10 @@ export class AASTreeSearch {
         if (this.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = this.index < 0 ? 0 : this.index + 1;
+            if (i >= this.rows.length) {
+                i = 0;
+            }
+
             const start = i;
             while (this.loop) {
                 if (this.match(this.rows[i])) {

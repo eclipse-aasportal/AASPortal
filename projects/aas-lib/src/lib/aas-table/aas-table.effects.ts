@@ -53,10 +53,10 @@ export class AASTableEffects {
         const rows = documents.map(document => {
             const row = map.get(`${document.endpoint}:${document.id}`);
             if (row) {
-                return row.document === document ? row : this.cloneD(row, document);
+                return row.document === document ? row : this.cloneWithNewDocument(row, document);
             }
 
-            return new AASTableRow(document, false, false, false, -1, -1, -1);
+            return new AASTableRow(document, -1, false, false, false, false, -1, -1, -1);
         });
 
         return rows;
@@ -69,7 +69,7 @@ export class AASTableEffects {
         documents.forEach(document => {
             const row = map.get(`${document.endpoint}:${document.id}`);
             if (row) {
-                rows.push(row.document === document ? row : this.cloneD(row, document));
+                rows.push(row.document === document ? row : this.cloneWithNewDocument(row, document));
             } else {
                 nodes.push(document);
             }
@@ -89,6 +89,8 @@ export class AASTableEffects {
             const children = nodes.filter(node => this.isChild(root, node));
             const rootRow = new AASTableRow(
                 root,
+                -1,
+                false,
                 false,
                 false,
                 children.length === 0,
@@ -115,7 +117,17 @@ export class AASTableEffects {
         let previous: AASTableRow | null = null;
         const children = nodes.filter(node => this.isChild(parent, node));
         for (const child of children) {
-            const row = new AASTableRow(child, false, false, children.length === 0, level, -1, -1);
+            const row = new AASTableRow(
+                child,
+                rows.length - 1,
+                false,
+                false,
+                false,
+                children.length === 0,
+                level,
+                -1,
+                -1,
+            );
 
             rows.push(row);
             if (previous) {
@@ -142,8 +154,10 @@ export class AASTableEffects {
     private clone(row: AASTableRow): AASTableRow {
         return new AASTableRow(
             row.document,
+            row.parent,
             row.selected,
             row.expanded,
+            row.highlighted,
             row.isLeaf,
             row.level,
             row.firstChild,
@@ -151,11 +165,13 @@ export class AASTableEffects {
         );
     }
 
-    private cloneD(row: AASTableRow, document: AASDocument): AASTableRow {
+    private cloneWithNewDocument(row: AASTableRow, document: AASDocument): AASTableRow {
         return new AASTableRow(
             document,
+            row.parent,
             row.selected,
             row.expanded,
+            row.highlighted,
             row.isLeaf,
             row.level,
             row.firstChild,

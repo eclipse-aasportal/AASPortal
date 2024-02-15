@@ -59,7 +59,7 @@ function setFavorites(state: StartState, favorites: string, documents: AASDocume
     return { ...state, favorites, documents, viewMode: ViewMode.List };
 }
 
-function setContent(state: StartState, document: AASDocument, content: aas.Environment): StartState {
+function setContent(state: StartState, document: AASDocument, content: aas.Environment | null | undefined): StartState {
     const documents = [...state.documents];
     const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
     if (index >= 0) {

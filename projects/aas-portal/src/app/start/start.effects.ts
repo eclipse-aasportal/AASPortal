@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable } from 'rxjs';
+import { EMPTY, exhaustMap, map, mergeMap, first, concat, of, from, Observable, catchError } from 'rxjs';
 import { AASDocument, AASDocumentId, AASPage } from 'common';
 import { ViewMode } from 'aas-lib';
 
@@ -189,9 +189,10 @@ export class StartEffects {
                     of(StartActions.setFavorites({ name: action.name, documents: action.documents })),
                     from(action.documents).pipe(
                         mergeMap(document =>
-                            this.api
-                                .getContent(document.endpoint, document.id)
-                                .pipe(map(content => StartActions.setContent({ document, content }))),
+                            this.api.getContent(document.endpoint, document.id).pipe(
+                                catchError(() => of(undefined)),
+                                map(content => StartActions.setContent({ document, content })),
+                            ),
                         ),
                     ),
                 ),
@@ -208,9 +209,10 @@ export class StartEffects {
             of(StartActions.setPage({ page, limit, filter })),
             from(page.documents).pipe(
                 mergeMap(document =>
-                    this.api
-                        .getContent(document.endpoint, document.id)
-                        .pipe(map(content => StartActions.setContent({ document, content }))),
+                    this.api.getContent(document.endpoint, document.id).pipe(
+                        catchError(() => of(undefined)),
+                        map(content => StartActions.setContent({ document, content })),
+                    ),
                 ),
             ),
         );

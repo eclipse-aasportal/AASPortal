@@ -62,7 +62,7 @@ export const setPage = createAction(
 
 export const setContent = createAction(
     StartActionType.SET_CONTENT,
-    props<{ document: AASDocument; content: aas.Environment }>(),
+    props<{ document: AASDocument; content: aas.Environment | null | undefined }>(),
 );
 
 export const getFavorites = createAction(

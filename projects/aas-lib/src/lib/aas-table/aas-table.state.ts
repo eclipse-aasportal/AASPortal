@@ -8,17 +8,22 @@
 
 import { AASDocument } from 'common';
 import { ViewMode } from '../types/view-mode';
+import { Tree, TreeNode } from '../tree';
 
-export class AASTableRow {
+export class AASTableRow extends TreeNode<AASDocument> {
     public constructor(
         public readonly document: AASDocument,
-        public readonly selected: boolean,
-        public readonly expanded: boolean,
+        parent: number,
+        selected: boolean,
+        expanded: boolean,
+        highlighted: boolean,
         public readonly isLeaf: boolean,
-        public readonly level: number,
-        public firstChild: number,
-        public nextSibling: number,
-    ) {}
+        level: number,
+        firstChild: number,
+        nextSibling: number,
+    ) {
+        super(document, parent, level, expanded, selected, highlighted, firstChild, nextSibling);
+    }
 
     public get id(): string {
         return this.document.id;
@@ -36,10 +41,6 @@ export class AASTableRow {
         return this.document.endpoint;
     }
 
-    public get hasChildren(): boolean {
-        return this.firstChild >= 0;
-    }
-
     public get state(): 'loaded' | 'unloaded' | 'unavailable' {
         if (this.document.content === null) {
             return 'unloaded';
@@ -51,38 +52,41 @@ export class AASTableRow {
 
         return 'unavailable';
     }
+}
 
-    public getChildren(rows: AASTableRow[]): AASTableRow[] {
-        const children: AASTableRow[] = [];
-        if (this.firstChild >= 0) {
-            let child = rows[this.firstChild];
-            children.push(child);
-            while (child.nextSibling >= 0) {
-                child = rows[child.nextSibling];
-                children.push(child);
-            }
-        }
+export class AASTableTree extends Tree<AASDocument, AASTableRow> {
+    private _nodes: AASTableRow[];
 
-        return children;
+    public constructor(nodes: AASTableRow[]) {
+        super();
+
+        this._nodes = nodes;
     }
 
-    public getExpanded(rows: AASTableRow[]): AASTableRow[] {
-        return this.traverse(rows, this, [this]);
+    public get nodes(): AASTableRow[] {
+        return this._nodes;
     }
 
-    private traverse(rows: AASTableRow[], row: AASTableRow, expanded: AASTableRow[]): AASTableRow[] {
-        if (row.firstChild >= 0 && row.expanded) {
-            let child = rows[row.firstChild];
-            expanded.push(child);
-            this.traverse(rows, child, expanded);
-            while (child.nextSibling >= 0) {
-                child = rows[child.nextSibling];
-                expanded.push(child);
-                this.traverse(rows, child, expanded);
-            }
-        }
+    protected override getNodes(): AASTableRow[] {
+        return this._nodes;
+    }
 
-        return expanded;
+    protected override setNodes(nodes: AASTableRow[]): void {
+        this._nodes = nodes;
+    }
+
+    protected override cloneNode(node: AASTableRow): AASTableRow {
+        return new AASTableRow(
+            node.document,
+            node.parent,
+            node.selected,
+            node.expanded,
+            node.highlighted,
+            node.isLeaf,
+            node.level,
+            node.firstChild,
+            node.nextSibling,
+        );
     }
 }
 
