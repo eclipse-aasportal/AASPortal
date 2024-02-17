@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { Cookie } from 'common';
 import { UserData } from './user-data.js';
 
 /** Defines user storage. */
@@ -36,4 +37,34 @@ export abstract class UserStorage {
      * @returns `true` if the specified user was successfully deleted; otherwise, `false`.
      */
     public abstract deleteAsync(userId: string): Promise<boolean>;
+
+    /**
+     * @param userId The user identification.
+     * @param name The cookie name.
+     */
+    public abstract checkCookieAsync(userId: string, name: string): Promise<boolean>;
+
+    /**
+     * @param userId The user identification.
+     * @param name The cookie name.
+     */
+    public abstract getCookieAsync(userId: string, name: string): Promise<Cookie | undefined>;
+
+    /**
+     * @param userId The user identification.
+     */
+    public abstract getCookiesAsync(userId: string): Promise<Cookie[]>;
+
+    /**
+     * @param userId The user identification.
+     * @param name The cookie name.
+     * @param data
+     */
+    public abstract setCookieAsync(userId: string, name: string, data: string): Promise<void>;
+
+    /**
+     * @param userId The user identification.
+     * @param name The cookie name.
+     */
+    public abstract deleteCookieAsync(userId: string, name: string): Promise<void>;
 }

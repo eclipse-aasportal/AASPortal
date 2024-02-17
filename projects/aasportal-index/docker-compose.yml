@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: mysql:latest
-    container_name: AASPortalIndex
+    container_name: aasportal-index
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - "./schema.sql:/docker-entrypoint-initdb.d/1.sql"

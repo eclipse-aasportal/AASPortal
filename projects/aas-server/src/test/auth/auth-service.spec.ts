@@ -15,7 +15,6 @@ import { ERRORS } from '../../app/errors.js';
 import { Mailer } from '../../app/mailer.js';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { CookieStorage } from '../../app/auth/cookie-storage.js';
 import { createSpyObj } from '../utils.js';
 import { Variable } from '../../app/variable.js';
 
@@ -23,16 +22,24 @@ describe('AuthService', function () {
     let mailer: Mailer;
     let auth: AuthService;
     let userStorage: jest.Mocked<UserStorage>;
-    let cookieStorage: jest.Mocked<CookieStorage>;
     let variable: jest.Mocked<Variable>;
     let johnDoeData: UserData;
 
     beforeEach(function () {
         mailer = createSpyObj<Mailer>(['sendPassword', 'sendNewPassword']);
-        userStorage = createSpyObj<UserStorage>(['existAsync', 'readAsync', 'writeAsync', 'deleteAsync']);
-        cookieStorage = createSpyObj<CookieStorage>(['checkAsync', 'getAsync', 'setAsync', 'deleteAsync']);
+        userStorage = createSpyObj<UserStorage>([
+            'existAsync',
+            'readAsync',
+            'writeAsync',
+            'deleteAsync',
+            'checkCookieAsync',
+            'getCookieAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
+
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecret', JWT_EXPIRES_IN: 60 });
-        auth = new AuthService(mailer, userStorage, cookieStorage, variable);
+        auth = new AuthService(mailer, userStorage, variable);
 
         johnDoeData = {
             id: 'john.doe@email.com',

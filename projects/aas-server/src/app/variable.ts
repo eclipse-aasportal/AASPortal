@@ -29,8 +29,8 @@ export class Variable {
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
         this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
         this.AAS_INDEX = process.env.AAS_INDEX;
-        this.USERNAME = process.env.USERNAME ?? 'aas-server';
-        this.PASSWORD = process.env.PASSWORD ?? 'aas-server';
+        this.AAS_SERVER_USERNAME = process.env.AAS_SERVER_USERNAME ?? 'aas-server';
+        this.AAS_SERVER_PASSWORD = process.env.AAS_SERVER_PASSWORD ?? 'aas-server';
     }
 
     /** The secret for HS256 encryption or the private key file for RS256 encryption. */
@@ -87,7 +87,9 @@ export class Variable {
     /** The AASIndex realization. */
     public readonly AAS_INDEX?: string;
 
-    public readonly USERNAME: string;
+    /** ToDo */
+    public readonly AAS_SERVER_USERNAME: string;
 
-    public readonly PASSWORD: string;
+    /** ToDo */
+    public readonly AAS_SERVER_PASSWORD: string;
 }

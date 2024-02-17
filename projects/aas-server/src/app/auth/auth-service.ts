@@ -15,7 +15,6 @@ import { Mailer } from '../mailer.js';
 import { ERRORS } from '../errors.js';
 import { UserData } from './user-data.js';
 import { UserStorage } from './user-storage.js';
-import { CookieStorage } from './cookie-storage.js';
 import { Variable } from '../variable.js';
 import {
     Credentials,
@@ -38,7 +37,6 @@ export class AuthService {
     public constructor(
         @inject(Mailer) private readonly mailer: Mailer,
         @inject('UserStorage') private readonly userStorage: UserStorage,
-        @inject('CookieStorage') private readonly cookieStorage: CookieStorage,
         @inject(Variable) private readonly variable: Variable,
     ) {
         if (variable.JWT_PUBLIC_KEY) {
@@ -164,19 +162,19 @@ export class AuthService {
     }
 
     public getCookieAsync(id: string, name: string): Promise<Cookie | undefined> {
-        return this.cookieStorage.getAsync(id, name);
+        return this.userStorage.getCookieAsync(id, name);
     }
 
     public getCookiesAsync(id: string): Promise<Cookie[]> {
-        return this.cookieStorage.getAllAsync(id);
+        return this.userStorage.getCookiesAsync(id);
     }
 
     public setCookieAsync(id: string, name: string, data: string): Promise<void> {
-        return this.cookieStorage.setAsync(id, name, data);
+        return this.userStorage.setCookieAsync(id, name, data);
     }
 
     public deleteCookieAsync(id: string, name: string): Promise<void> {
-        return this.cookieStorage.deleteAsync(id, name);
+        return this.userStorage.deleteCookieAsync(id, name);
     }
 
     public hasUserAsync(id: string): Promise<boolean> {

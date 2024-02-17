@@ -43,11 +43,11 @@ export class FileStorageProvider {
             case 'http:':
             case 'https:':
                 if (isEmpty(url.username)) {
-                    url.username = this.variable.USERNAME;
+                    url.username = this.variable.AAS_SERVER_USERNAME;
                 }
 
                 if (isEmpty(url.password)) {
-                    url.password = this.variable.PASSWORD;
+                    url.password = this.variable.AAS_SERVER_PASSWORD;
                 }
 
                 return new WebDAVStorage(url);

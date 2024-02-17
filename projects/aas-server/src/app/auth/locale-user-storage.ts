@@ -9,14 +9,19 @@
 import { inject, injectable } from 'tsyringe';
 import path from 'path';
 import fs from 'fs';
+import { Cookie } from 'common';
 import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
+import { Logger } from '../logging/logger.js';
 
 @injectable()
 export class LocaleUserStorage extends UserStorage {
     private readonly usersDirectory: string;
 
-    public constructor(@inject('USERS_DIR') usersDirectory: string) {
+    public constructor(
+        @inject('Logger') private readonly logger: Logger,
+        @inject('USERS_DIR') usersDirectory: string,
+    ) {
         super();
 
         this.usersDirectory = path.resolve(usersDirectory);
@@ -52,6 +57,76 @@ export class LocaleUserStorage extends UserStorage {
         }
 
         return false;
+    }
+
+    public async checkCookieAsync(userId: string, name: string): Promise<boolean> {
+        const file = this.getCookiesFile(userId);
+        if (fs.existsSync(file)) {
+            const cookies = await this.readCookies(file);
+            return cookies.some(cookie => cookie.name === name);
+        }
+
+        return false;
+    }
+
+    public async getCookieAsync(userId: string, name: string): Promise<Cookie | undefined> {
+        const file = this.getCookiesFile(userId);
+        if (fs.existsSync(file)) {
+            const cookies = await this.readCookies(file);
+            return cookies.find(cookie => cookie.name === name);
+        }
+
+        return undefined;
+    }
+
+    public async getCookiesAsync(userId: string): Promise<Cookie[]> {
+        const file = this.getCookiesFile(userId);
+        if (fs.existsSync(file)) {
+            const cookies = await this.readCookies(file);
+            return cookies;
+        }
+
+        return [];
+    }
+
+    public async setCookieAsync(userId: string, name: string, data: string): Promise<void> {
+        const file = this.getCookiesFile(userId);
+        const cookies = fs.existsSync(file) ? await this.readCookies(file) : [];
+        const index = cookies.findIndex(cookie => cookie.name === name);
+        if (index < 0) {
+            cookies.push({ name, data });
+        } else {
+            cookies[index].data = data;
+        }
+
+        await fs.promises.writeFile(file, JSON.stringify(cookies));
+    }
+
+    public async deleteCookieAsync(userId: string, name: string): Promise<void> {
+        const file = this.getCookiesFile(userId);
+        const cookies = fs.existsSync(file) ? await this.readCookies(file) : [];
+        const index = cookies.findIndex(cookie => cookie.name === name);
+        if (index >= 0) {
+            cookies.splice(index, 1);
+            if (cookies.length > 0) {
+                await fs.promises.writeFile(file, JSON.stringify(cookies));
+            } else {
+                await fs.promises.unlink(file);
+            }
+        }
+    }
+
+    private getCookiesFile(userId: string): string {
+        return path.join(this.usersDirectory, userId, 'cookies.json');
+    }
+
+    private async readCookies(path: string): Promise<Cookie[]> {
+        try {
+            return JSON.parse((await fs.promises.readFile(path)).toString()) as Cookie[];
+        } catch (error) {
+            this.logger.error(`Reading cookies failed: ${error?.message}`);
+            return [];
+        }
     }
 
     private async readUserData(path: string): Promise<UserData> {

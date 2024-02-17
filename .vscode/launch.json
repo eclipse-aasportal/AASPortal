@@ -28,8 +28,8 @@
                 "CONTENT_ROOT": "projects/aas-server/build",
                 "WEB_ROOT": "projects/aas-portal/dist",
                 "ASSETS": "projects/aas-server/src/assets",
-                // "USER_STORAGE": "mongodb://localhost:27017/aasportal-users",
-                // "TEMPLATE_STORAGE": "http://localhost:8080/templates",
+                "USER_STORAGE": "mongodb://localhost:27017/aasportal-users",
+                "TEMPLATE_STORAGE": "http://localhost:8080/templates",
                 // "AAS_INDEX": "mysql://localhost:3306",
                 "ENDPOINTS": "[\"file:///endpoints/samples?name=Samples\"]",
             }

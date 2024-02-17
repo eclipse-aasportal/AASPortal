@@ -414,8 +414,8 @@ export class MySqlIndex extends AASIndex {
 
     private async initialize(): Promise<Connection> {
         const url = new URL(this.variable.AAS_INDEX!);
-        const username = isEmpty(url.username) ? this.variable.USERNAME : url.username;
-        const password = isEmpty(url.password) ? this.variable.PASSWORD : url.password;
+        const username = isEmpty(url.username) ? this.variable.AAS_SERVER_USERNAME : url.username;
+        const password = isEmpty(url.password) ? this.variable.AAS_SERVER_PASSWORD : url.password;
         const connection = await mysql.createConnection({
             host: url.hostname,
             port: Number(url.port),

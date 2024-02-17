@@ -8,7 +8,6 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { CookieStorageFactory } from './auth/cookie-storage-factory.js';
 import { UserStorageFactory } from './auth/user-storage-factory.js';
 import { LoggerFactory } from './logging/logger-factory.js';
 import { FileLogger } from './logging/file-logger.js';
@@ -19,7 +18,6 @@ import { AASIndexFactory } from './aas-index/aas-index-factory.js';
 container.registerInstance('USERS_DIR', './users');
 container.registerSingleton('Logger', FileLogger);
 container.register('AASIndex', { useFactory: c => new AASIndexFactory(c).create() });
-container.register('CookieStorage', { useFactory: c => new CookieStorageFactory(c).create() });
 container.register('UserStorage', { useFactory: c => new UserStorageFactory(c).create() });
 container.register('winston.Logger', { useFactory: () => new LoggerFactory().create() });
 
