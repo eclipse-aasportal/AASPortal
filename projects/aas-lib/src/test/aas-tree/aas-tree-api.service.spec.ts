@@ -24,12 +24,10 @@ describe('AASTreeApiService', function () {
             providers: [
                 {
                     provide: AuthService,
-                    useValue: auth
-                }
+                    useValue: auth,
+                },
             ],
-            imports: [
-                HttpClientTestingModule
-            ],
+            imports: [HttpClientTestingModule],
         });
 
         service = TestBed.inject(AASTreeApiService);
@@ -46,10 +44,13 @@ describe('AASTreeApiService', function () {
 
     describe('invoke', function () {
         it('invokes an operation', async function () {
-            const document = jasmine.createSpyObj<AASDocument>({}, {
-                endpoint: 'Samples',
-                id: 'http://localhost/aas'
-            });
+            const document = jasmine.createSpyObj<AASDocument>(
+                {},
+                {
+                    endpoint: 'Samples',
+                    id: 'http://localhost/aas',
+                },
+            );
 
             const operation: aas.Operation = {
                 idShort: 'Noop',
@@ -57,7 +58,7 @@ describe('AASTreeApiService', function () {
             };
 
             const promise = service.invoke(document, operation);
-            const url = `/api/v1/containers/U2FtcGxlcw/documents/aHR0cDovL2xvY2FsaG9zdC9hYXM`
+            const url = `/api/v1/containers/U2FtcGxlcw/documents/aHR0cDovL2xvY2FsaG9zdC9hYXM`;
             const req = httpTestingController.expectOne(url);
             req.flush(operation);
             await expectAsync(promise).toBeResolvedTo(operation);

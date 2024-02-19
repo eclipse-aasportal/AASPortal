@@ -31,7 +31,7 @@ export class TemplateService {
     }
 
     /**
-     * Gets the templates.
+     * Gets the list of available templates.
      * @returns An array of `TemplateDescriptor` items.
      */
     public getTemplates(): Observable<TemplateDescriptor[]> {
