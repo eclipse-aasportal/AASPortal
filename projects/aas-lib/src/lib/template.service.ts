@@ -39,8 +39,9 @@ export class TemplateService {
     }
 
     /**
-     *
-     * @param descriptor
+     * Gets the template from the specified endpoint.
+     * @param endpoint The template endpoint.
+     * @returns The template.
      */
     public getTemplate(endpoint: Endpoint): Observable<aas.Referable> {
         return this.http.get<aas.Referable>(`/api/v1/templates/${encodeBase64Url(endpoint.address)}`);
