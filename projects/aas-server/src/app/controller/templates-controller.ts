@@ -12,8 +12,9 @@ import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { TemplateDescriptor } from 'common';
+import { aas, TemplateDescriptor } from 'common';
 import { TemplateStorage } from '../template/template-storage.js';
+import { decodeBase64Url } from '../convert.js';
 
 /**
  * Asset Administration Shell referable templates.
@@ -40,8 +41,25 @@ export class TemplatesController extends AASController {
     @OperationId('getTemplates')
     public async getTemplates(): Promise<TemplateDescriptor[]> {
         try {
-            this.logger.start('templates');
-            return await this.templateStorage.readAsync();
+            this.logger.start('getTemplates');
+            return await this.templateStorage.readTemplatesAsync();
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Gets the template with the specified path.
+     * @param path The path of the template (base64 URL encoded).
+     * @returns The template.
+     */
+    @Get('{path}')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getTemplate')
+    public async getTemplate(path: string): Promise<aas.Referable> {
+        try {
+            this.logger.start('getTemplate');
+            return await this.templateStorage.readTemplateAsync(decodeBase64Url(path));
         } finally {
             this.logger.stop();
         }

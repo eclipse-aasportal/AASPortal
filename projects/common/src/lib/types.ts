@@ -110,10 +110,12 @@ export interface AASCursor {
 
 /** Describes a template. */
 export interface TemplateDescriptor {
-    name: string;
+    idShort: string;
+    id?: string;
     endpoint?: Endpoint;
     format?: '.json' | '.xml';
-    template?: aas.Referable;
+    modelType: aas.ModelType | '';
+    template: aas.Referable | null;
 }
 
 /** Represents a named source of Asset Administration Shells. */

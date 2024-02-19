@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { AASDocument, TemplateDescriptor } from 'common';
+import { AASDocument } from 'common';
 import * as AASActions from './aas.actions';
 import { AASState, initialState } from './aas.state';
 
@@ -17,13 +17,8 @@ export const aasReducer = createReducer(
     on(AASActions.resetModified, (state, { document }) => resetModified(state, document)),
     on(AASActions.setDocument, (state, { document }) => setDocument(state, document)),
     on(AASActions.setSearch, (state, { search }) => setSearch(state, search)),
-    on(AASActions.setTemplateStorage, (state, { templates }) => setTemplateStorage(state, templates)),
     on(AASActions.setState, (state, { value }) => setState(state, value)),
 );
-
-function setTemplateStorage(state: AASState, templates: TemplateDescriptor[]): AASState {
-    return { ...state, templateStorage: { templates, timestamp: Date.now() }, error: null };
-}
 
 function setDocument(state: AASState, document: AASDocument | null): AASState {
     return { ...state, document, error: null };

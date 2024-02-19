@@ -32,8 +32,8 @@
     </div>
     <div class="form-floating mb-3">
       <select class="form-select" id="selectTemplate" [(ngModel)]="template" name="template">
-        @for (item of templates; track item) {
-          <option [ngValue]="item">{{item.name}}</option>
+        @for (item of templates | async; track item) {
+          <option [ngValue]="item">{{item.endpoint?.address}}</option>
         }
       </select>
       <label for="selectTemplate" translate>LABEL_MODEL_TYPE_TEMPLATE</label>

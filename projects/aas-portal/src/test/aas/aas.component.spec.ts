@@ -91,7 +91,7 @@ describe('AASComponent', () => {
     let download: jasmine.SpyObj<DownloadService>;
 
     beforeEach(() => {
-        api = jasmine.createSpyObj<AASApiService>(['getDocument', 'getTemplates', 'putDocument']);
+        api = jasmine.createSpyObj<AASApiService>(['getDocument', 'putDocument']);
         download = jasmine.createSpyObj<DownloadService>(['downloadDocument', 'downloadFileAsync', 'uploadDocuments']);
 
         TestBed.configureTestingModule({

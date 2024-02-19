@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AASDocument, TemplateDescriptor } from 'common';
+import { AASDocument } from 'common';
 import { Observable } from 'rxjs';
 import { encodeBase64Url } from 'aas-lib';
 
@@ -33,14 +33,6 @@ export class AASApiService {
         }
 
         return this.http.get<AASDocument>(`/api/v1/documents/${encodeBase64Url(id)}`);
-    }
-
-    /**
-     * Gets the templates.
-     * @returns An array of `TemplateDescriptor` items.
-     */
-    public getTemplates(): Observable<TemplateDescriptor[]> {
-        return this.http.get<TemplateDescriptor[]>('/api/v1/templates');
     }
 
     /**

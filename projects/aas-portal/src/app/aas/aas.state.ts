@@ -6,18 +6,12 @@
  *
  *****************************************************************************/
 
-import { AASDocument, TemplateDescriptor } from 'common';
-
-export interface TemplateStorage {
-    timestamp: number;
-    templates: TemplateDescriptor[];
-}
+import { AASDocument } from 'common';
 
 export interface AASState {
     document: AASDocument | null;
     state: 'online' | 'offline';
     search: string;
-    templateStorage: TemplateStorage;
     error: Error | null;
 }
 
@@ -25,10 +19,6 @@ export const initialState: AASState = {
     document: null,
     search: '',
     state: 'offline',
-    templateStorage: {
-        timestamp: 0,
-        templates: [],
-    },
     error: null,
 };
 

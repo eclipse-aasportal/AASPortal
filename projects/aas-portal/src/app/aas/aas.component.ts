@@ -11,7 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, map, mergeMap, Observable, Subscription, from, of, first, catchError } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
-import { TemplateDescriptor, aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
+import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
 import {
     AASQuery,
     AASQueryParams,
@@ -28,7 +28,7 @@ import { UpdateElementCommand } from './commands/update-element-command';
 import { DeleteCommand } from './commands/delete-command';
 import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
-import { NewElementFormComponent, NewElementResult } from './new-element-form/new-element-form.component';
+import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import * as AASActions from './aas.actions';
 import * as AASSelectors from './aas.selectors';
@@ -46,7 +46,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly store: Store<State>;
     private readonly subscription = new Subscription();
     private _dashboardPage = '';
-    private templates: TemplateDescriptor[] = [];
 
     public constructor(
         store: Store,
@@ -177,36 +176,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         this.subscription.add(
-            this.store
-                .select(AASSelectors.selectTemplateStorage)
-                .pipe(
-                    mergeMap(templateStorage => {
-                        if (templateStorage.timestamp === 0) {
-                            return this.api
-                                .getTemplates()
-                                .pipe(
-                                    map(templates => this.store.dispatch(AASActions.setTemplateStorage({ templates }))),
-                                );
-                        } else {
-                            return EMPTY;
-                        }
-                    }),
-                )
-                .subscribe({
-                    error: error => this.notify.error(error),
-                }),
-        );
-
-        this.subscription.add(
-            this.store
-                .select(AASSelectors.selectTemplates)
-                .pipe()
-                .subscribe(templates => {
-                    this.templates = templates;
-                }),
-        );
-
-        this.subscription.add(
             this.dashboard.name.subscribe(name => {
                 this._dashboardPage = name;
             }),
@@ -297,18 +266,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
                 return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
                     mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(
-                            document.content,
-                            this.selectedElements[0],
-                            this.templates,
-                        );
-
-                        return from<Promise<NewElementResult | undefined>>(modalRef.result);
+                        modalRef.componentInstance.initialize(document.content, this.selectedElements[0]);
+                        return from<Promise<aas.Referable | undefined>>(modalRef.result);
                     }),
                     map(result => {
                         if (result) {
                             this.commandHandler.execute(
-                                new NewElementCommand(this.store, document, this.selectedElements[0], result.element),
+                                new NewElementCommand(this.store, document, this.selectedElements[0], result),
                             );
                         }
                     }),

@@ -8,13 +8,10 @@
 
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TemplateDescriptor, aas, getChildren, isSubmodel } from 'common';
-import { cloneDeep, head } from 'lodash-es';
-
-export interface NewElementResult {
-    index?: number;
-    element: aas.Referable;
-}
+import { Observable, map } from 'rxjs';
+import { TemplateService } from 'aas-lib';
+import { TemplateDescriptor, aas, getChildren } from 'common';
+import { head } from 'lodash-es';
 
 @Component({
     selector: 'fhg-new-element',
@@ -24,11 +21,21 @@ export interface NewElementResult {
 export class NewElementFormComponent {
     private env?: aas.Environment;
     private parent?: aas.Referable;
-    private _templates: TemplateDescriptor[] = [];
     private _modelType?: aas.ModelType;
     private _template?: TemplateDescriptor;
 
-    public constructor(private readonly modal: NgbActiveModal) {}
+    public constructor(
+        private readonly modal: NgbActiveModal,
+        private readonly api: TemplateService,
+    ) {
+        this.templates = this.api.getTemplates().pipe(
+            map(values => {
+                const templates = this.modelType ? values.filter(item => item.modelType === this.modelType) : values;
+                this.template = head(templates);
+                return [{ idShort: '-', template: null, modelType: '' }, ...templates];
+            }),
+        );
+    }
 
     public modelTypes: aas.ModelType[] = [];
 
@@ -38,14 +45,9 @@ export class NewElementFormComponent {
 
     public set modelType(value: aas.ModelType | undefined) {
         this._modelType = value;
-        this.template = head(this.templates);
     }
 
-    public get templates(): TemplateDescriptor[] {
-        return this.modelType
-            ? this._templates.filter(item => item.template?.modelType === this.modelType)
-            : this._templates;
-    }
+    public readonly templates: Observable<TemplateDescriptor[]>;
 
     public get template(): TemplateDescriptor | undefined {
         return this._template;
@@ -53,7 +55,7 @@ export class NewElementFormComponent {
 
     public set template(value: TemplateDescriptor | undefined) {
         this._template = value;
-        this.idShort = value?.template?.idShort ?? '';
+        this.idShort = value?.idShort ?? '';
     }
 
     public idShort = '';
@@ -64,10 +66,9 @@ export class NewElementFormComponent {
         this.modal.close();
     }
 
-    public initialize(env: aas.Environment, parent: aas.Referable, templates: TemplateDescriptor[]): void {
+    public initialize(env: aas.Environment, parent: aas.Referable): void {
         this.env = env;
         this.parent = parent;
-        this.templates.push({ name: '-' }, ...templates);
 
         switch (this.parent.modelType) {
             case 'AssetAdministrationShell':
@@ -106,20 +107,15 @@ export class NewElementFormComponent {
     public submit(): void {
         this.clearMessages();
         if (this.validate()) {
-            this.modal.close({
-                element: this.createElement(),
-            } as NewElementResult);
+            this.api.getTemplate(this._template!.endpoint!).subscribe(template => {
+                template.idShort = this.idShort;
+                return this.modal.close(template);
+            });
         }
     }
 
-    private createElement(): aas.Referable {
-        const element = cloneDeep(this.template!.template!);
-        element.idShort = this.idShort;
-        return element;
-    }
-
     private validate(): boolean {
-        if (!this.idShort || !this.parent || !this.env || !this.template?.template) {
+        if (!this.idShort || !this.parent || !this.env || !this._template?.endpoint) {
             this.pushMessage(`Invalid name.`);
             return false;
         }
@@ -130,8 +126,8 @@ export class NewElementFormComponent {
             return false;
         }
 
-        if (isSubmodel(this.template.template)) {
-            const id = this.template.template.id;
+        if (this._template.modelType === 'Submodel') {
+            const id = this._template.id;
             if (this.env.submodels.some(child => child.id === id)) {
                 this.pushMessage(`A ${this.modelType} with the identification "${id}" already exists.`);
                 return false;

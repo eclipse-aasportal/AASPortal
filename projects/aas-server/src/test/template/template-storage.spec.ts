@@ -56,12 +56,14 @@ describe('TemplateStorage', function () {
             ]);
 
             fileStorage.readFile.mockResolvedValue(Buffer.from(JSON.stringify(submodel)));
-            await expect(templateStorage.readAsync()).resolves.toEqual([
+            await expect(templateStorage.readTemplatesAsync()).resolves.toEqual([
                 {
-                    name: 'submodel.json',
+                    idShort: 'aSubmodel',
+                    id: 'http://aas/submodel',
+                    modelType: 'Submodel',
                     format: '.json',
                     endpoint: { type: 'file', address: 'submodel.json' },
-                    template: submodel,
+                    template: null,
                 },
             ] as TemplateDescriptor[]);
 

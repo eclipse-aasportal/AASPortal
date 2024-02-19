@@ -8,10 +8,9 @@
 
 import { createAction, props } from '@ngrx/store';
 import { TypedAction } from '@ngrx/store/src/models';
-import { AASDocument, TemplateDescriptor } from 'common';
+import { AASDocument } from 'common';
 
 export enum AASActionType {
-    SET_TEMPLATE_STORAGE = '[AAS] Set template storage',
     GET_DOCUMENT = '[AAS] get document',
     SET_DOCUMENT = '[AAS] set document',
     APPLY_DOCUMENT = '[AAS] apply document',
@@ -32,12 +31,8 @@ export const setDocument = createAction(AASActionType.SET_DOCUMENT, props<{ docu
 
 export const applyDocument = createAction(AASActionType.APPLY_DOCUMENT, props<{ document: AASDocument }>());
 
-export const setTemplateStorage = createAction(
-    AASActionType.SET_TEMPLATE_STORAGE,
-    props<{ templates: TemplateDescriptor[] }>(),
-);
-
 export const resetModified = createAction(AASActionType.RESET_MODIFIED, props<{ document: AASDocument }>());
 
 export const setSearch = createAction(AASActionType.SET_SEARCH, props<{ search: string }>());
+
 export const setState = createAction(AASActionType.SET_STATE, props<{ value: 'offline' | 'online' }>());

@@ -12,7 +12,7 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
-import { TemplateDescriptor } from 'common';
+import { TemplateDescriptor, aas } from 'common';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -24,7 +24,7 @@ import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
 import { TemplateStorage } from '../../app/template/template-storage.js';
 
-describe('TemplateController', function () {
+describe('TemplateController', () => {
     let app: Express;
     let logger: Logger;
     let auth: jest.Mocked<AuthService>;
@@ -32,7 +32,7 @@ describe('TemplateController', function () {
     let variable: jest.Mocked<Variable>;
     let authentication: jest.Mocked<Authentication>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>([
@@ -44,7 +44,7 @@ describe('TemplateController', function () {
             'deleteCookieAsync',
         ]);
 
-        templateStorage = createSpyObj<TemplateStorage>(['readAsync']);
+        templateStorage = createSpyObj<TemplateStorage>(['readTemplatesAsync', 'readTemplateAsync']);
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
 
@@ -64,13 +64,33 @@ describe('TemplateController', function () {
         app.use(errorHandler);
     });
 
-    it('getTemplates: /api/v1/templates', async function () {
-        const templates: TemplateDescriptor[] = [{ name: 'TestTemplate' }];
-        templateStorage.readAsync.mockResolvedValue(templates);
+    it('getTemplates: /api/v1/templates', async () => {
+        const templates: TemplateDescriptor[] = [
+            { idShort: 'TestTemplate', id: 'http://localhost:1234/a/b/c', template: null, modelType: 'Submodel' },
+        ];
+
+        templateStorage.readTemplatesAsync.mockResolvedValue(templates);
         const response = await request(app).get('/api/v1/templates').set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(templates);
-        expect(templateStorage.readAsync).toHaveBeenCalled();
+        expect(templateStorage.readTemplatesAsync).toHaveBeenCalled();
+    });
+
+    it('getTemplate: /api/v1/templates/{path}', async () => {
+        const template: aas.Submodel = {
+            modelType: 'Submodel',
+            id: 'http://localhost:1234/a/b/c',
+            idShort: 'TestSubmodel',
+        };
+
+        templateStorage.readTemplateAsync.mockResolvedValue(template);
+        const response = await request(app)
+            .get('/api/v1/templates/cGF0aC90by9UZXN0U3VibW9kZWwuanNvbg')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(template);
+        expect(templateStorage.readTemplateAsync).toHaveBeenCalledWith('path/to/TestSubmodel.json');
     });
 });

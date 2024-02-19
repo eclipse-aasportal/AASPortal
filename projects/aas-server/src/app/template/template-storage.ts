@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { basename, extname, join } from 'path/posix';
-import { TemplateDescriptor, aas } from 'common';
+import { extname, join } from 'path/posix';
+import { TemplateDescriptor, aas, isSubmodel } from 'common';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { AASReader } from '../packages/aas-reader.js';
@@ -34,7 +34,7 @@ export class TemplateStorage {
         this.fileStorage = provider.get(url);
     }
 
-    public async readAsync(): Promise<TemplateDescriptor[]> {
+    public async readTemplatesAsync(): Promise<TemplateDescriptor[]> {
         const descriptors: TemplateDescriptor[] = [];
         if ((await this.fileStorage.exists(this.root)) === true) {
             await this.readDirAsync('', descriptors);
@@ -43,9 +43,14 @@ export class TemplateStorage {
         return descriptors;
     }
 
+    public async readTemplateAsync(path: string): Promise<aas.Referable> {
+        const referable = JSON.parse((await this.fileStorage.readFile(join(this.root, path))).toString());
+        const reader = this.createReader(referable);
+        return reader.read(referable);
+    }
+
     private async readDirAsync(dir: string, descriptors: TemplateDescriptor[]): Promise<void> {
         const directories: string[] = [dir];
-
         while (directories.length > 0) {
             const directory = directories.pop()!;
             for (const entry of await this.fileStorage.readDir(join(this.root, directory))) {
@@ -56,12 +61,22 @@ export class TemplateStorage {
                     const format = extname(path).toLowerCase();
                     switch (format) {
                         case '.json':
-                            descriptors.push({
-                                name: basename(path, extname(format)),
-                                endpoint: { type: 'file', address: path },
-                                format: '.json',
-                                template: await this.readTemplateAsync(path),
-                            });
+                            {
+                                const template = await this.readTemplateAsync(path);
+                                const descriptor: TemplateDescriptor = {
+                                    idShort: template.idShort,
+                                    endpoint: { type: 'file', address: path },
+                                    format: '.json',
+                                    template: null,
+                                    modelType: template.modelType,
+                                };
+
+                                if (isSubmodel(template)) {
+                                    descriptor.id = template.id;
+                                }
+
+                                descriptors.push(descriptor);
+                            }
                             break;
 
                         case '.xml':
@@ -70,12 +85,6 @@ export class TemplateStorage {
                 }
             }
         }
-    }
-
-    private async readTemplateAsync(path: string): Promise<aas.Referable> {
-        const referable = JSON.parse((await this.fileStorage.readFile(join(this.root, path))).toString());
-        const reader = this.createReader(referable);
-        return reader.read(referable);
     }
 
     private createReader(referable: object): AASReader {
