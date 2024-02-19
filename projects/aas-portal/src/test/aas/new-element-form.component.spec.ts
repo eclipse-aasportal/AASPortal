@@ -12,19 +12,21 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
+import { TemplateService } from 'aas-lib';
+import { of } from 'rxjs';
 
 describe('NewElementFormComponent', () => {
     let component: NewElementFormComponent;
     let fixture: ComponentFixture<NewElementFormComponent>;
+    let api: jasmine.SpyObj<TemplateService>;
 
     beforeEach(() => {
+        api = jasmine.createSpyObj<TemplateService>(['getTemplate', 'getTemplates']);
+        api.getTemplates.and.returnValue(of([]));
+
         TestBed.configureTestingModule({
-            declarations: [
-                NewElementFormComponent
-            ],
-            providers: [
-                NgbActiveModal
-            ],
+            declarations: [NewElementFormComponent],
+            providers: [NgbActiveModal, { provide: TemplateService, useValue: api }],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -32,10 +34,10 @@ describe('NewElementFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(NewElementFormComponent);
