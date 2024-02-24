@@ -13,7 +13,7 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import { Readable } from 'stream';
-import { resolve } from 'path';
+import { resolve } from 'path/posix';
 import { aas } from 'common';
 
 import { sampleDocument } from '../assets/sample-document.js';

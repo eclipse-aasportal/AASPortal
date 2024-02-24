@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { normalize } from 'path';
+import { normalize } from 'path/posix';
 import { AASDocument, BaseValueType, AASQuery, AASQueryOperator, AASQueryValueType, OrExpression } from 'common';
 
 import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-types.js';

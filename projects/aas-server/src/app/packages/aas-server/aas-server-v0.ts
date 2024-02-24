@@ -9,7 +9,7 @@
 import { aas, DifferenceItem, selectSubmodel } from 'common';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
-import { AasxServer } from './aasx-server.js';
+import { AASServer } from './aas-server.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import * as aasV2 from '../../types/aas-v2.js';
 
@@ -17,7 +17,7 @@ interface AASList {
     aaslist: string[];
 }
 
-export class AasxServerV0 extends AasxServer {
+export class AASServerV0 extends AASServer {
     public constructor(logger: Logger, url: string, name: string) {
         super(logger, url, name);
     }

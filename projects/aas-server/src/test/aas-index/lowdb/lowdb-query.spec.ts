@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, beforeAll } from '@jest/globals';
-import path from 'path';
+import path from 'path/posix';
 import fs from 'fs';
 import { LowDbQuery } from '../../../app/aas-index/lowdb/lowdb-query.js';
 import { LowDbData, LowDbDocument, LowDbElement } from '../../../app/aas-index/lowdb/lowdb-types.js';

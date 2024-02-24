@@ -11,12 +11,12 @@ import { aas, DefaultType, LiveRequest } from 'common';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
+import { AASServer } from '../../../app/packages/aas-server/aas-server.js';
 import env from '../../assets/aas-environment.js';
 import { createSpyObj, DoneFn } from '../../utils.js';
 
 describe('HttpSubscription', function () {
-    let aasxServer: jest.Mocked<AasxServer>;
+    let aasxServer: jest.Mocked<AASServer>;
     let logger: jest.Mocked<Logger>;
     let client: jest.Mocked<SocketClient>;
     let subscription: HttpSubscription;
@@ -24,7 +24,7 @@ describe('HttpSubscription', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        aasxServer = createSpyObj<AasxServer>([
+        aasxServer = createSpyObj<AASServer>([
             'getShellsAsync',
             'commitAsync',
             'openFileAsync',
@@ -47,7 +47,7 @@ describe('HttpSubscription', function () {
         };
 
         const request: LiveRequest = {
-            endpoint: 'AasxDirectory',
+            endpoint: 'FileSystem',
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             nodes: [
                 {

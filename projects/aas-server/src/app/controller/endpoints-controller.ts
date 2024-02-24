@@ -54,7 +54,12 @@ export class EndpointsController extends AASController {
     @Security('bearerAuth', ['editor'])
     @OperationId('addEndpoint')
     public addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
-        return this.aasProvider.addEndpointAsync(name, endpoint);
+        try {
+            this.logger.start('addEndpoint');
+            return this.aasProvider.addEndpointAsync(name, endpoint);
+        } finally {
+            this.logger.stop();
+        }
     }
 
     /**
@@ -65,7 +70,12 @@ export class EndpointsController extends AASController {
     @Security('bearerAuth', ['editor'])
     @OperationId('deleteEndpoint')
     public deleteEndpoint(@Path() name: string): Promise<void> {
-        return this.aasProvider.removeEndpointAsync(name);
+        try {
+            this.logger.start('deleteEndpoint');
+            return this.aasProvider.removeEndpointAsync(name);
+        } finally {
+            this.logger.stop();
+        }
     }
 
     /**

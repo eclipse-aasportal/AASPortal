@@ -10,13 +10,14 @@ import 'reflect-metadata';
 import { describe, afterEach, beforeEach, it, expect, jest } from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
-import path from 'path';
+import path from 'path/posix';
 import { Cookie } from 'common';
 import { UserStorage } from '../../app/auth/user-storage.js';
-import { LocaleUserStorage } from '../../app/auth/locale-user-storage.js';
+import { LocalUserStorage } from '../../app/auth/local-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
 import { createSpyObj } from '../utils.js';
 import { Logger } from '../../app/logging/logger.js';
+import { slash } from '../../app/convert.js';
 
 describe('LocaleUserStorage', function () {
     let userStorage: UserStorage;
@@ -34,7 +35,7 @@ describe('LocaleUserStorage', function () {
                 lastLoggedIn: new Date(0),
             };
 
-            userStorage = new LocaleUserStorage(createSpyObj<Logger>(['error']), os.tmpdir());
+            userStorage = new LocalUserStorage(createSpyObj<Logger>(['error']), os.tmpdir());
         });
 
         afterEach(() => {
@@ -42,19 +43,19 @@ describe('LocaleUserStorage', function () {
         });
 
         describe('existsSync', function () {
-            it('indicates that john.doe@email.com exists', async function () {
+            it('indicates that john.doe@email.com exists', async () => {
                 jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
                 await expect(userStorage.existAsync('john.doe@email.com')).resolves.toBe(true);
             });
 
-            it('indicates that unknown@email.com does not exist', async function () {
+            it('indicates that unknown@email.com does not exist', async () => {
                 jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
                 await expect(userStorage.existAsync('unknown@email.com')).resolves.toBe(false);
             });
         });
 
         describe('writeAsync', function () {
-            it('writes a new user', async function () {
+            it('writes a new user', async () => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(false);
                 jest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
                 jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
@@ -73,27 +74,27 @@ describe('LocaleUserStorage', function () {
         });
 
         describe('readAsync', function () {
-            it('reads the data of john.doe@email.com', async function () {
+            it('reads the data of john.doe@email.com', async () => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(true);
                 jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(JSON.stringify(johnDoe)));
                 await expect(userStorage.readAsync('john.doe@email.com')).resolves.toEqual(johnDoe);
             });
 
-            it('reads "undefined" for an unknown user', async function () {
+            it('reads "undefined" for an unknown user', async () => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(false);
                 await expect(userStorage.readAsync('unknown@email.com')).resolves.toBeUndefined();
             });
         });
 
         describe('deleteAsync', function () {
-            it('john.doe@email.com', async function () {
+            it('john.doe@email.com', async () => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(true);
                 jest.spyOn(fs.promises, 'rm').mockImplementation(() => new Promise<void>(resolve => resolve()));
                 await expect(userStorage.deleteAsync('john.doe@email.com')).resolves.toBe(true);
                 expect(fs.promises.rm).toHaveBeenCalled();
             });
 
-            it('indicates that an unknown user was not deleted', async function () {
+            it('indicates that an unknown user was not deleted', async () => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(false);
                 await expect(userStorage.deleteAsync('unknown@email.com')).resolves.toBe(false);
             });
@@ -109,7 +110,7 @@ describe('LocaleUserStorage', function () {
         });
 
         beforeEach(async () => {
-            usersDir = os.tmpdir();
+            usersDir = slash(os.tmpdir());
             cookies = Buffer.from(
                 JSON.stringify([
                     {
@@ -123,10 +124,10 @@ describe('LocaleUserStorage', function () {
                 ]),
             );
 
-            userStorage = new LocaleUserStorage(createSpyObj<Logger>(['error']), usersDir);
+            userStorage = new LocalUserStorage(createSpyObj<Logger>(['error']), usersDir);
         });
 
-        describe('checkAsync', () => {
+        describe('checkCookieAsync', () => {
             it('indicates that "Cookie1" for john.doe@email.com exist', async () => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(true);
                 jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
@@ -145,7 +146,7 @@ describe('LocaleUserStorage', function () {
             });
         });
 
-        describe('getAsync', () => {
+        describe('getCookieAsync', () => {
             beforeEach(() => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(true);
                 jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
@@ -167,7 +168,7 @@ describe('LocaleUserStorage', function () {
             });
         });
 
-        describe('getAllAsync', () => {
+        describe('getCookiesAsync', () => {
             beforeEach(() => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(true);
                 jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
@@ -187,7 +188,7 @@ describe('LocaleUserStorage', function () {
             });
         });
 
-        describe('setAsync', () => {
+        describe('setCookieAsync', () => {
             beforeEach(() => {
                 jest.spyOn(fs, 'existsSync').mockReturnValue(true);
                 jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));

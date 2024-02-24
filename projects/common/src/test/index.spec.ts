@@ -11,6 +11,8 @@ import { createSpyObj } from './utils.js';
 import {
     aas,
     equalUrls,
+    getEndpointName,
+    getEndpointType,
     isAssetAdministrationShell,
     isBlob,
     isMultiLanguageProperty,
@@ -267,6 +269,50 @@ describe('index', function () {
             expect(
                 isUrlSafeBase64('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw'),
             ).toBeTruthy();
+        });
+    });
+
+    describe('getEndpointName', function () {
+        it('gets the endpoint name from an URL string', function () {
+            expect(getEndpointName('http://localhost:1234/?name=Test')).toEqual('Test');
+        });
+
+        it('gets the endpoint name from a URL', function () {
+            expect(getEndpointName(new URL('http://localhost:1234/?name=Test'))).toEqual('Test');
+        });
+
+        it('gets the default name of an AASX server', function () {
+            expect(getEndpointName('http://localhost:1234/')).toEqual('http://localhost:1234/');
+        });
+
+        it('gets the default name of an cloud server', function () {
+            expect(getEndpointName('http://localhost:1234/endpoints/samples')).toEqual('samples');
+        });
+
+        it('gets the default name of an OPCUA server', function () {
+            expect(getEndpointName(new URL('opc.tcp://172.16.160.178:30001/I4AASServer'))).toEqual('I4AASServer');
+        });
+
+        it('gets the default name of an file system directory', function () {
+            expect(getEndpointName('file:///endpoints/samples')).toEqual('samples');
+        });
+    });
+
+    describe('getEndpointType', function () {
+        it('gets the endpoint type from an URL string', function () {
+            expect(getEndpointType('http://localhost:1234/')).toEqual('AASServer');
+        });
+
+        it('gets the endpoint type from a URL', function () {
+            expect(getEndpointType(new URL('opc.tcp://localhost:1234/I4AASServer'))).toEqual('OpcuaServer');
+        });
+
+        it('gets "AASServer" as default', function () {
+            expect(getEndpointType('http://localhost:1234/endpoints/sample')).toEqual('WebDAV');
+        });
+
+        it('gets "WebDAV" as default', function () {
+            expect(getEndpointType('file:///endpoints/samples')).toEqual('FileSystem');
         });
     });
 });

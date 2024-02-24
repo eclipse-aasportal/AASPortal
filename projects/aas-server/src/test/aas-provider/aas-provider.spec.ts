@@ -41,7 +41,7 @@ describe('AASProvider', function () {
 
     describe('getEndpoints', () => {
         it('gets the endpoints of all registered AAS containers', async () => {
-            const endpoints: AASEndpoint[] = [{ name: 'Samples', url: '../assets/samples', type: 'AasxDirectory' }];
+            const endpoints: AASEndpoint[] = [{ name: 'Samples', url: '../assets/samples', type: 'FileSystem' }];
             index.getEndpoints.mockResolvedValue(endpoints);
             await expect(aasProvider.getEndpoints()).resolves.toEqual(endpoints);
         });

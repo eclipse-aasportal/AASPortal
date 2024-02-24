@@ -8,9 +8,9 @@
 
 import { AASDocument } from 'common';
 import { Logger } from '../logging/logger.js';
-import { AasxPackage } from '../packages/aasx-directory/aasx-package.js';
-import { AasxDirectory } from '../packages/aasx-directory/aasx-directory.js';
-import { extname } from 'path';
+import { AasxPackage } from '../packages/file-system/aasx-package.js';
+import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
+import { extname } from 'path/posix';
 import { AASResourceScan } from './aas-resource-scan.js';
 
 export class DirectoryScan extends AASResourceScan {

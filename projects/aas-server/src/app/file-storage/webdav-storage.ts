@@ -23,12 +23,12 @@ export class WebDAVStorage extends FileStorage {
         this.url = url;
     }
 
-    public async mtime(path: string): Promise<Date> {
+    public override async mtime(path: string): Promise<Date> {
         const stat = (await this.client.stat(this.resolve(path))) as FileStat;
         return new Date(stat.lastmod);
     }
 
-    public exists(path: string): Promise<boolean> {
+    public override exists(path: string): Promise<boolean> {
         return this.client.exists(this.resolve(path));
     }
 
@@ -36,16 +36,16 @@ export class WebDAVStorage extends FileStorage {
         return this.client.createDirectory(this.resolve(path), { recursive });
     }
 
-    public async writeFile(path: string, data: string | Buffer): Promise<void> {
+    public override async writeFile(path: string, data: string | Buffer): Promise<void> {
         await this.client.putFileContents(this.resolve(path), data, { overwrite: true });
     }
 
-    public async readDir(path: string): Promise<FileStorageEntry[]> {
+    public override async readDir(path: string): Promise<FileStorageEntry[]> {
         const items = (await this.client.getDirectoryContents(this.resolve(path))) as FileStat[];
         return items.map(item => ({ name: item.basename, path: item.filename, type: item.type }));
     }
 
-    public async readFile(path: string): Promise<Buffer> {
+    public override async readFile(path: string): Promise<Buffer> {
         const contents = await this.client.getFileContents(this.resolve(path));
         if (typeof contents === 'string') {
             return Buffer.from(contents);
@@ -54,7 +54,7 @@ export class WebDAVStorage extends FileStorage {
         return contents as Buffer;
     }
 
-    public async delete(path: string): Promise<void> {
+    public override delete(path: string): Promise<void> {
         return this.client.deleteFile(this.resolve(path));
     }
 

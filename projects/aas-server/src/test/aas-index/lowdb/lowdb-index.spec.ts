@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { beforeAll, beforeEach, describe, it, expect, jest } from '@jest/globals';
-import path from 'path';
+import path from 'path/posix';
 import fs from 'fs';
 import { Low } from 'lowdb';
 import { AASCursor, AASDocument, AASDocumentId } from 'common';

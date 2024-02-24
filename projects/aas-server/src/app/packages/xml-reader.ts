@@ -11,23 +11,19 @@ import { useNamespaces, XPathSelect } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import { Logger } from '../logging/logger.js';
 import { AASReader } from './aas-reader.js';
-
-interface NamespaceMap {
-    _nsMap: { [key: string]: string };
-}
+import { HTMLDocumentElement } from '../types/html-document-element.js';
 
 export class XmlReader extends AASReader {
     private readonly select: XPathSelect;
     private readonly document: Document;
-    private iec61360 = 'IEC61360';
 
     public constructor(
         private readonly logger: Logger,
-        xmlSource: string,
+        xmlSource: string | Document,
     ) {
         super();
 
-        this.document = new DOMParser().parseFromString(xmlSource);
+        this.document = typeof xmlSource === 'string' ? new DOMParser().parseFromString(xmlSource) : xmlSource;
         this.select = useNamespaces(this.getNamespaces());
     }
 
@@ -44,20 +40,11 @@ export class XmlReader extends AASReader {
     }
 
     private getNamespaces(): { [key: string]: string } {
-        let nsMap: { [key: string]: string };
-        if ('_nsMap' in this.document.documentElement) {
-            nsMap = (this.document.documentElement as unknown as NamespaceMap)._nsMap;
-        } else {
-            nsMap = {};
-        }
-
+        const nsMap = (this.document.documentElement as HTMLDocumentElement)._nsMap ?? {};
         const namespaces: { [key: string]: string } = {};
         for (const prefix in nsMap) {
             const uri = nsMap[prefix];
-            if (uri.startsWith('http://www.admin-shell.io/IEC61360/')) {
-                this.iec61360 = prefix;
-                namespaces[prefix] = uri;
-            } else if (uri.startsWith('http://www.admin-shell.io/aas/')) {
+            if (uri === 'https://admin-shell.io/aas/3/0') {
                 namespaces['aas'] = uri;
             }
         }
@@ -65,24 +52,96 @@ export class XmlReader extends AASReader {
         return namespaces;
     }
 
-    private readAssetInformation(): aas.AssetInformation {
-        let assetKind: aas.AssetKind | undefined;
-        let globalAssetId: string | undefined;
-        const node = this.selectNode('/aas:aasenv/aas:assets/aas:asset', this.document);
-        if (node) {
-            assetKind = this.selectNode('./aas:kind', node)?.textContent as aas.AssetKind;
-            globalAssetId = this.readIdentifier(node);
-        } else {
-            assetKind = 'Instance';
+    private readAssetInformation(node: Node): aas.AssetInformation {
+        const asset = this.selectNode('/aas:assetInformation', node);
+        if (!asset) {
+            return { assetKind: 'Instance' };
         }
 
-        return { assetKind, globalAssetId };
+        const value: aas.AssetInformation = {
+            assetKind: this.getTextContent('./aas:kind', asset) as aas.AssetKind,
+        };
+
+        const globalAssetId = this.selectTextContent('./aas:identification', asset);
+        if (globalAssetId) {
+            value.globalAssetId = globalAssetId;
+        }
+
+        const assetType = this.selectTextContent('./aas:assetKind', asset);
+        if (assetType) {
+            value.assetType = assetType;
+        }
+
+        const defaultThumbnail = this.readResource(this.selectNode('./aas:defaultThumbnail', asset));
+        if (defaultThumbnail) {
+            value.defaultThumbnail = defaultThumbnail;
+        }
+
+        const specificAssetIds = this.readSpecificAssetIds(this.selectNode('./aas:specificAssetIds', asset));
+        if (specificAssetIds) {
+            value.specificAssetIds = specificAssetIds;
+        }
+
+        return value;
+    }
+
+    private readResource(node: Node | undefined): aas.Resource | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const value: aas.Resource = {
+            path: this.getTextContent('./aas:path', node),
+        };
+
+        const contentType = this.selectTextContent('./aas:contentType', node);
+        if (contentType) {
+            value.contentType = contentType;
+        }
+
+        return value;
+    }
+
+    private readSpecificAssetIds(node: Node | undefined): aas.SpecificAssetId[] | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const values: aas.SpecificAssetId[] = [];
+        for (const child of this.selectNodes('./aas:specificAssetId', node)) {
+            const value = this.readSpecificAssetId(child);
+            if (value) {
+                values.push(value);
+            }
+        }
+
+        return values;
+    }
+
+    private readSpecificAssetId(node: Node | undefined): aas.SpecificAssetId | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const externalSubjectId = this.readReference(this.selectNode('./aas:externalSubjectId', node));
+        if (!externalSubjectId) {
+            throw new Error('SpecificAssetId.externalSubjectId');
+        }
+
+        const value: aas.SpecificAssetId = {
+            ...this.readHasSemantic(node),
+            name: this.getTextContent('./aas:name', node),
+            value: this.getTextContent('./aas:value', node),
+            externalSubjectId,
+        };
+
+        return value;
     }
 
     private readAssetAdministrationShells(): aas.AssetAdministrationShell[] {
         const shells: aas.AssetAdministrationShell[] = [];
         for (const node of this.selectNodes(
-            '/aas:aasenv/aas:assetAdministrationShells/aas:assetAdministrationShell',
+            '/aas:environment/aas:assetAdministrationShells/aas:assetAdministrationShell',
             this.document,
         )) {
             const shell = this.readAssetAdministrationShell(node);
@@ -93,9 +152,9 @@ export class XmlReader extends AASReader {
     }
 
     private readAssetAdministrationShell(node: Node): aas.AssetAdministrationShell {
-        const assetInformation = this.readAssetInformation();
+        const assetInformation = this.readAssetInformation(node);
         if (!assetInformation) {
-            throw new Error('AssetAdministrationShell.asset');
+            throw new Error('AssetAdministrationShell.assetInformation');
         }
 
         const shell: aas.AssetAdministrationShell = {
@@ -104,12 +163,12 @@ export class XmlReader extends AASReader {
             assetInformation,
         };
 
-        const submodels = this.readReferences('./aas:submodelRefs/aas:submodelRef', node);
+        const submodels = this.readReferences('./aas:submodels/aas:reference', node);
         if (submodels.length > 0) {
             shell.submodels = submodels;
         }
 
-        const administration = this.readAdministrationInformation('./aas:administration', node);
+        const administration = this.readAdministrativeInformation(this.selectNode('./aas:administration', node));
         if (administration) {
             shell.administration = administration;
         }
@@ -117,14 +176,9 @@ export class XmlReader extends AASReader {
         return shell;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    private readAdministrationInformation(path: string, node: Node): aas.AdministrativeInformation | undefined {
-        return undefined;
-    }
-
     private readSubmodels(): aas.Submodel[] {
         const submodels: aas.Submodel[] = [];
-        for (const node of this.selectNodes('/aas:aasenv/aas:submodels/aas:submodel', this.document)) {
+        for (const node of this.selectNodes('/aas:environment/aas:submodels/aas:submodel', this.document)) {
             const submodel = this.readSubmodel(node);
             submodels.push(submodel);
         }
@@ -135,7 +189,7 @@ export class XmlReader extends AASReader {
     private readSubmodel(node: Node): aas.Submodel {
         const submodel: aas.Submodel = {
             ...this.readIdentifiable(node),
-            ...this.readHaSemantic(node),
+            ...this.readHasSemantic(node),
             ...this.readQualifiable(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
@@ -150,6 +204,7 @@ export class XmlReader extends AASReader {
                 },
             ],
         });
+
         if (submodelElements.length > 0) {
             submodel.submodelElements = submodelElements;
         }
@@ -159,19 +214,7 @@ export class XmlReader extends AASReader {
 
     private readSubmodelElements(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
-        for (const child of this.selectNodes('./aas:submodelElements/aas:submodelElement/*[1]', node)) {
-            const submodelElement = this.readSubmodelElement(child, parent);
-            if (submodelElement) {
-                submodelElements.push(submodelElement);
-            }
-        }
-
-        return submodelElements;
-    }
-
-    private readCollectionValue(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
-        const submodelElements: aas.SubmodelElement[] = [];
-        for (const child of this.selectNodes('./aas:value/aas:submodelElement/*[1]', node)) {
+        for (const child of this.selectNodes('./aas:submodelElements/*', node)) {
             const submodelElement = this.readSubmodelElement(child, parent);
             if (submodelElement) {
                 submodelElements.push(submodelElement);
@@ -215,6 +258,9 @@ export class XmlReader extends AASReader {
             case 'SubmodelElementCollection':
                 submodelElement = this.readSubmodelElementCollection(node, parent);
                 break;
+            case 'SubmodelElementList':
+                submodelElement = this.readSubmodelElementList(node, parent);
+                break;
             default:
                 break;
         }
@@ -222,20 +268,124 @@ export class XmlReader extends AASReader {
         return submodelElement;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readAnnotatedRelationshipElement(node: Node, parent?: aas.Reference): aas.AnnotatedRelationshipElement {
-        throw new Error('Method not implemented.');
+        const base = this.readSubmodelElementType(node, parent);
+        const first = this.readReference(this.selectNode('./aas:first', node));
+        if (!first) {
+            throw new Error('RelationshipElement.first');
+        }
+
+        const second = this.readReference(this.selectNode('./aas:second', node));
+        if (!second) {
+            throw new Error('RelationshipElement.second');
+        }
+
+        const annotations = this.readAnnotations(node, parent ? this.createReference(parent, base) : undefined);
+
+        return {
+            ...base,
+            first,
+            second,
+            annotations,
+        };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private readAnnotations(node: Node, parent?: aas.Reference): aas.DataElement[] {
+        const dataElements: aas.DataElement[] = [];
+        for (const child of this.selectNodes('./aas:annotations/*', node)) {
+            const dataElement = this.readDataElement(child, parent);
+            if (dataElement) {
+                dataElements.push(dataElement);
+            }
+        }
+
+        return dataElements;
+    }
+
+    private readDataElement(node: Node, parent?: aas.Reference): aas.DataElement | undefined {
+        let dataElement: aas.DataElement | undefined;
+        const modelType = this.getModelTypeFromLocalName(node);
+        switch (modelType) {
+            case 'Blob':
+                dataElement = this.readBlob(node, parent);
+                break;
+            case 'File':
+                dataElement = this.readFile(node, parent);
+                break;
+            case 'MultiLanguageProperty':
+                dataElement = this.readMultiLanguageProperty(node, parent);
+                break;
+            case 'Property':
+                dataElement = this.readProperty(node, parent);
+                break;
+            case 'Range':
+                dataElement = this.readRange(node, parent);
+                break;
+            case 'ReferenceElement':
+                dataElement = this.readReferenceElement(node, parent);
+                break;
+            default:
+                break;
+        }
+
+        return dataElement;
+    }
+
     private readBasicEventElement(node: Node, parent?: aas.Reference): aas.BasicEventElement {
-        throw new Error('Method not implemented.');
+        const observed = this.readReference(this.selectNode('./aas:observed', node));
+        if (!observed) {
+            throw new Error('BasicEventElement.observed');
+        }
+
+        const direction = this.selectTextContent('./aas:direction', node) as aas.Direction | undefined;
+        if (!direction) {
+            throw new Error('BasicEventElement.direction');
+        }
+
+        const state = this.selectTextContent('./aas:state', node) as aas.StateOfEvent | undefined;
+        if (!state) {
+            throw new Error('BasicEventElement.state');
+        }
+
+        const basicEvent: aas.BasicEventElement = {
+            ...this.readSubmodelElementType(node, parent),
+            observed,
+            direction,
+            state,
+        };
+
+        const messageTopic = this.selectTextContent('./aas:messageTopic', node);
+        if (messageTopic) {
+            basicEvent.messageTopic = messageTopic;
+        }
+
+        const messageBroker = this.readReference(this.selectNode('./aas:messageBroker', node));
+        if (messageBroker) {
+            basicEvent.messageBroker = messageBroker;
+        }
+
+        const lastUpdate = this.selectTextContent('./aas:lastUpdate', node);
+        if (lastUpdate) {
+            basicEvent.lastUpdate = lastUpdate;
+        }
+
+        const minInterval = this.selectTextContent('./aas:minInterval', node);
+        if (minInterval) {
+            basicEvent.minInterval = minInterval;
+        }
+
+        const maxInterval = this.selectTextContent('./aas:maxInterval', node);
+        if (maxInterval) {
+            basicEvent.maxInterval = maxInterval;
+        }
+
+        return basicEvent;
     }
 
     private readBlob(node: Node, parent?: aas.Reference): aas.Blob {
-        const contentType = this.selectNode('./aas:mimeType', node)?.textContent;
+        const contentType = this.selectNode('./aas:contentType', node)?.textContent;
         if (!contentType) {
-            throw new Error('File.mimetype');
+            throw new Error('File.contentType');
         }
 
         const blob: aas.Blob = {
@@ -261,6 +411,29 @@ export class XmlReader extends AASReader {
         return collection;
     }
 
+    private readSubmodelElementList(node: Node, parent?: aas.Reference): aas.SubmodelElementList {
+        const base = this.readSubmodelElementType(node, parent);
+        const list: aas.SubmodelElementList = {
+            ...base,
+            value: this.readCollectionValue(node, parent ? this.createReference(parent, base) : undefined),
+            typeValueListElement: this.getTextContent('./aas:typeValueListElement', node) as aas.AasSubmodelElements,
+        };
+
+        return list;
+    }
+
+    private readCollectionValue(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
+        const submodelElements: aas.SubmodelElement[] = [];
+        for (const child of this.selectNodes('./aas:value/*', node)) {
+            const submodelElement = this.readSubmodelElement(child, parent);
+            if (submodelElement) {
+                submodelElements.push(submodelElement);
+            }
+        }
+
+        return submodelElements;
+    }
+
     private readProperty(node: Node, parent?: aas.Reference): aas.Property {
         const valueNode = this.selectNode('./aas:value', node);
         let value = valueNode?.textContent;
@@ -268,7 +441,7 @@ export class XmlReader extends AASReader {
         const valueTypeNode = this.selectNode('./aas:valueType', node);
         let valueType: aas.DataTypeDefXsd | undefined;
         if (valueTypeNode?.textContent) {
-            valueType = this.toDataTypeDefXsd(valueTypeNode.textContent);
+            valueType = valueTypeNode.textContent as aas.DataTypeDefXsd;
         }
 
         if (!valueType && value != null) {
@@ -288,14 +461,41 @@ export class XmlReader extends AASReader {
         return property;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readRange(node: Node, parent?: aas.Reference): aas.Range {
-        throw new Error('Method not implemented.');
+        const range: aas.Range = {
+            ...this.readSubmodelElementType(node, parent),
+            valueType: this.getTextContent('./aas:valueType', node) as aas.DataTypeDefXsd,
+        };
+
+        const min = this.selectTextContent('./aas:min', node);
+        if (min) {
+            range.min = min;
+        }
+
+        const max = this.selectTextContent('./aas:max', node);
+        if (max) {
+            range.max = max;
+        }
+
+        return range;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readRelationshipElement(node: Node, parent?: aas.Reference): aas.RelationshipElement {
-        throw new Error('Method not implemented.');
+        const first = this.readReference(this.selectNode('./aas:first', node));
+        if (!first) {
+            throw new Error('RelationshipElement.first');
+        }
+
+        const second = this.readReference(this.selectNode('./aas:second', node));
+        if (!second) {
+            throw new Error('RelationshipElement.second');
+        }
+
+        return {
+            ...this.readSubmodelElementType(node, parent),
+            first,
+            second,
+        };
     }
 
     private readFile(node: Node, parent?: aas.Reference): aas.File {
@@ -323,14 +523,22 @@ export class XmlReader extends AASReader {
     }
 
     private readReferenceElement(node: Node, parent?: aas.Reference): aas.ReferenceElement {
-        const value = this.getReference(node);
-        return { ...this.readSubmodelElementType(node, parent), value };
+        const reference: aas.ReferenceElement = {
+            ...this.readSubmodelElementType(node, parent),
+        };
+
+        const value = this.readReference(this.selectNode('./aas:value', node));
+        if (value) {
+            reference.value = value;
+        }
+
+        return reference;
     }
 
     private readSubmodelElementType(node: Node, parent?: aas.Reference): aas.SubmodelElement {
         return {
             ...this.readReferable(node, undefined, parent),
-            ...this.readHaSemantic(node),
+            ...this.readHasSemantic(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
             ...this.readQualifiable(node),
@@ -338,9 +546,10 @@ export class XmlReader extends AASReader {
     }
 
     private readIdentifiable(node: Node): aas.Identifiable {
-        const id = this.readIdentifier(node);
+        const id = this.getTextContent('./aas:id', node);
         const identifiable: aas.Identifiable = { ...this.readReferable(node, id), id };
-        const administration = this.readAdministrativeInformation(node);
+
+        const administration = this.readAdministrativeInformation(this.selectNode('./aas:administration', node));
         if (administration) {
             identifiable.administration = administration;
         }
@@ -349,12 +558,13 @@ export class XmlReader extends AASReader {
     }
 
     private readReferable(node: Node, id?: string, parent?: aas.Reference): aas.Referable {
-        let idShort = this.selectNode('./aas:idShort', node)?.textContent;
+        let idShort = this.selectTextContent('./aas:idShort', node);
         if (!idShort) {
             idShort = id ? this.createIdShort(id) : '';
         }
 
         const referable: aas.Referable = {
+            ...this.readHasExtensions(node),
             idShort,
             modelType: this.getModelTypeFromLocalName(node),
         };
@@ -363,7 +573,7 @@ export class XmlReader extends AASReader {
             referable.parent = parent;
         }
 
-        const category = this.selectNode('./aas:category', node)?.textContent as aas.Category | undefined;
+        const category = this.selectTextContent('./aas:category', node) as aas.Category | undefined;
         if (category) {
             referable.category = category;
         }
@@ -371,13 +581,36 @@ export class XmlReader extends AASReader {
         return referable;
     }
 
-    private readHaSemantic(node: Node): aas.HasSemantic {
-        const semanticId = this.readReference('./aas:semanticId', node);
+    private readHasExtensions(node: Node): aas.HasExtensions {
+        const values: aas.HasExtensions = {};
+        const extensions: aas.Extension[] = [];
+        for (const child of this.selectNodes('./aas:extensions/aas:extension', node)) {
+            extensions.push(this.readExtension(child));
+        }
+
+        if (extensions.length > 0) {
+            values.extensions = extensions;
+        }
+
+        return values;
+    }
+
+    private readExtension(node: Node): aas.Extension {
+        const extension: aas.Extension = {
+            ...this.readHasSemantic(node),
+            name: this.getTextContent('./aas:name', node),
+        };
+
+        return extension;
+    }
+
+    private readHasSemantic(node: Node): aas.HasSemantic {
+        const semanticId = this.readReference(this.selectNode('./aas:semanticId', node));
         return semanticId ? { semanticId } : {};
     }
 
     private readHasKind(node: Node): aas.HasKind {
-        let kind = this.selectNode('aas:kind', node)?.textContent as aas.ModellingKind;
+        let kind = this.selectNode('./aas:kind', node)?.textContent as aas.ModellingKind;
         if (!kind) {
             kind = 'Instance';
         }
@@ -386,36 +619,54 @@ export class XmlReader extends AASReader {
     }
 
     private readHasDataSpecification(node: Node): aas.HasDataSpecification {
-        const embeddedDataSpecifications: aas.EmbeddedDataSpecification[] = [];
-        for (const child of this.selectNodes('./aas:embeddedDataSpecification', node)) {
-            const dataSpecification =
-                this.readReference('./aas:hasDataSpecification', child) ??
-                this.readReference('./aas:dataSpecification', child);
-
-            if (!dataSpecification) {
-                throw new Error('EmbeddedDataSpecification.dataSpecification');
-            }
-
-            const dataSpecificationContent = this.readDataSpecificationContent(child);
-            if (dataSpecificationContent) {
-                embeddedDataSpecifications.push({ dataSpecification, dataSpecificationContent });
-            }
+        const value: aas.HasDataSpecification = {};
+        const parent = this.selectNode('./aas:embeddedDataSpecifications', node);
+        if (!parent) {
+            return value;
         }
 
-        return embeddedDataSpecifications.length > 0 ? { embeddedDataSpecifications } : {};
+        const embeddedDataSpecifications: aas.EmbeddedDataSpecification[] = [];
+        for (const child of this.selectNodes('./aas:embeddedDataSpecification', parent)) {
+            embeddedDataSpecifications.push(this.readEmbeddedDataSpecification(child));
+        }
+
+        if (embeddedDataSpecifications.length > 0) {
+            value.embeddedDataSpecifications = embeddedDataSpecifications;
+        }
+
+        return value;
     }
 
-    private readDataSpecificationContent(parent: Node): aas.DataSpecificationContent | undefined {
-        const node = this.selectNode('./aas:dataSpecificationContent/aas:dataSpecificationIEC61360', parent);
-        if (node) {
-            return this.readDataSpecificationIEC61360(node);
+    private readEmbeddedDataSpecification(node: Node): aas.EmbeddedDataSpecification {
+        const dataSpecification = this.readReference(this.selectNode('./aas:dataSpecification', node));
+        if (!dataSpecification) {
+            throw new Error('EmbeddedDataSpecification.dataSpecification');
+        }
+
+        const dataSpecificationContent = this.readDataSpecificationContent(node);
+        if (!dataSpecificationContent) {
+            throw new Error('EmbeddedDataSpecification.dataSpecificationContent');
+        }
+
+        const value: aas.EmbeddedDataSpecification = {
+            dataSpecification: dataSpecification,
+            dataSpecificationContent: dataSpecificationContent,
+        };
+
+        return value;
+    }
+
+    private readDataSpecificationContent(node: Node): aas.DataSpecificationContent | undefined {
+        const child = this.selectNode('./aas:dataSpecificationContent/aas:dataSpecificationIEC61360', node);
+        if (child) {
+            return this.readDataSpecificationIEC61360(child);
         }
 
         return undefined;
     }
 
     private readDataSpecificationIEC61360(node: Node): aas.DataSpecificationIEC61360 {
-        const preferredName = this.readLangString(`./${this.iec61360}:preferredName`, node);
+        const preferredName = this.readLangString('./aas:preferredName/aas:langStringPreferredNameTypeIec61360', node);
         if (!preferredName) {
             throw new Error('DataSpecificationIEC61360Content.preferredName');
         }
@@ -425,57 +676,57 @@ export class XmlReader extends AASReader {
             preferredName,
         };
 
-        const shortName = this.readLangString(`./${this.iec61360}:shortName`, node);
+        const shortName = this.readLangString('./aas:shortName/langStringShortNameTypeIec61360', node);
         if (shortName) {
             dataSpecification.shortName = shortName;
         }
 
-        const unit = this.selectNode(`./${this.iec61360}:unit`, node)?.textContent;
+        const unit = this.selectTextContent('./aas:unit', node);
         if (unit) {
             dataSpecification.unit = unit;
         }
 
-        const unitId = this.readReference(`./${this.iec61360}:unitId`, node);
+        const unitId = this.readReference(this.selectNode('./aas:unitId', node));
         if (unit) {
             dataSpecification.unitId = unitId;
         }
 
-        const sourceOfDefinition = this.selectNode(`./${this.iec61360}:sourceOfDefinition`, node)?.textContent;
+        const sourceOfDefinition = this.selectTextContent('./aas:sourceOfDefinition', node);
         if (sourceOfDefinition) {
             dataSpecification.sourceOfDefinition = sourceOfDefinition;
         }
 
-        const symbol = this.selectNode(`./${this.iec61360}:symbol`, node)?.textContent;
+        const symbol = this.selectTextContent('./aas:symbol', node);
         if (symbol) {
             dataSpecification.symbol = symbol;
         }
 
-        const dataType = this.selectNode(`./${this.iec61360}:dataType`, node)?.textContent as aas.DataTypeIEC61360;
+        const dataType = this.selectTextContent('./aas:dataType', node) as aas.DataTypeIEC61360;
         if (dataType) {
             dataSpecification.dataType = dataType;
         }
 
-        const definition = this.readLangString(`./${this.iec61360}:definition`, node);
+        const definition = this.readLangString('./aas:definition/langStringDefinitionTypeIec61360', node);
         if (definition) {
             dataSpecification.definition = definition;
         }
 
-        const valueFormat = this.selectNode(`./${this.iec61360}:valueFormat`, node)?.textContent;
+        const valueFormat = this.selectTextContent('./aas:valueFormat', node);
         if (valueFormat) {
             dataSpecification.valueFormat = valueFormat;
         }
 
-        const valueList = this.readValueList(`./${this.iec61360}:valueList`, node);
+        const valueList = this.readValueList(this.selectNode('./aas:valueList/valueReferencePairs', node));
         if (valueList) {
             dataSpecification.valueList = valueList;
         }
 
-        const value = this.selectNode(`./${this.iec61360}:value`, node)?.textContent;
+        const value = this.selectTextContent('./aas:value', node);
         if (value) {
             dataSpecification.value = value;
         }
 
-        const levelType = this.selectNode(`./${this.iec61360}:levelType`, node)?.textContent as aas.LevelType;
+        const levelType = this.selectTextContent('./aas:levelType', node) as aas.LevelType;
         if (levelType) {
             dataSpecification.levelType = levelType;
         }
@@ -483,14 +734,45 @@ export class XmlReader extends AASReader {
         return dataSpecification;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    private readValueList(path: string, node: Node): aas.ValueList | undefined {
-        return undefined;
+    private readValueList(node: Node | undefined): aas.ValueList | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const valueReferencePairs: aas.ValueReferencePair[] = [];
+        for (const child of this.selectNodes('./aas:valueReferencePair', node)) {
+            valueReferencePairs.push(this.readReferenceValuePairs(child));
+        }
+
+        const value: aas.ValueList = {
+            valueReferencePairs,
+        };
+
+        return value;
+    }
+
+    private readReferenceValuePairs(node: Node): aas.ValueReferencePair {
+        const value = this.selectTextContent('./aas:value', node);
+        if (!value) {
+            throw new Error('ValueReferencePair.value');
+        }
+
+        const valueId = this.readReference(this.selectNode('./aas:valueId', node));
+        if (!valueId) {
+            throw new Error('ValueReferencePair.valueId');
+        }
+
+        const pair: aas.ValueReferencePair = {
+            value: value,
+            valueId: valueId,
+        };
+
+        return pair;
     }
 
     private readQualifiable(node: Node): aas.Qualifiable {
         const qualifiable: aas.Qualifiable = {};
-        const qualifiers = this.readQualifiers('./aas.qualifier', node);
+        const qualifiers = this.readQualifiers('./aas:qualifier', node);
         if (qualifiers) {
             qualifiable.qualifiers = qualifiers;
         }
@@ -508,74 +790,76 @@ export class XmlReader extends AASReader {
         return qualifiers;
     }
 
-    private readReference(path: string, parent: Node): aas.Reference | undefined {
-        let reference: aas.Reference | undefined;
-        const node = this.selectNode(path, parent);
-        if (node) {
-            reference = { type: 'ModelReference', keys: [] };
-            for (const keyNode of this.selectNodes('./aas:keys/aas:key', node)) {
-                reference.keys.push(this.getKey(keyNode));
-            }
+    private readReference(node: Node | undefined): aas.Reference | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const reference: aas.Reference = {
+            type: this.getTextContent('./aas:type', node) as aas.ReferenceTypes,
+            keys: [],
+        };
+
+        for (const keyNode of this.selectNodes('./aas:keys/aas:key', node)) {
+            reference.keys.push(this.getKey(keyNode));
         }
 
         return reference;
     }
 
-    private readReferences(path: string, parent: Node): aas.Reference[] {
+    private readReferences(expression: string, parent: Node): aas.Reference[] {
         const references: aas.Reference[] = [];
-        for (const node of this.selectNodes(path, parent)) {
-            const reference: aas.Reference = { type: 'ModelReference', keys: [] };
-            for (const keyNode of this.selectNodes('./aas:keys/aas:key', node)) {
-                reference.keys.push(this.getKey(keyNode));
+        for (const node of this.selectNodes(expression, parent)) {
+            const reference = this.readReference(node);
+            if (reference) {
+                references.push(reference);
             }
-
-            references.push(reference);
         }
 
         return references;
     }
 
-    private readAdministrativeInformation(node: Node): aas.AdministrativeInformation | undefined {
-        let value: aas.AdministrativeInformation | undefined;
-        const version = this.selectNode('./aas.administration/aas.version', node)?.textContent;
-        const revision = this.selectNode('./aas.administration/aas.revision', node)?.textContent;
-        if (version || revision) {
-            value = {};
-            if (version) {
-                value.version = version;
-            }
+    private readAdministrativeInformation(node: Node | undefined): aas.AdministrativeInformation | undefined {
+        if (!node) {
+            return undefined;
+        }
 
-            if (revision) {
-                value.revision = revision;
-            }
+        const value: aas.AdministrativeInformation = {
+            ...this.readHasDataSpecification(node),
+        };
+
+        const version = this.selectTextContent('./aas:version', node);
+        if (version) {
+            value.version = version;
+        }
+        const revision = this.selectTextContent('./aas:revision', node);
+        if (revision) {
+            value.revision = revision;
         }
 
         return value;
     }
 
-    private readLangString(path: string, parent: Node): aas.LangString[] | undefined {
-        let langString: aas.LangString[] | undefined;
-        const content = this.selectNode(path, parent);
-        if (content) {
-            langString = [];
-            for (const node of this.selectNodes('./aas:langString', content)) {
-                const language = (node as Element).getAttribute('lang')!.toLowerCase();
-                const text = node.textContent ?? '';
-                langString.push({ language, text });
-            }
-
-            if (langString.length === 0 && content.textContent) {
-                langString.push({ language: 'en', text: content.textContent });
-            }
+    private readLangString(expression: string, node: Node | undefined): aas.LangString[] | undefined {
+        if (!node) {
+            return undefined;
         }
 
-        return langString;
+        const values: aas.LangString[] = [];
+        for (const child of this.selectNodes(expression, node)) {
+            values.push({
+                language: this.getTextContent('./aas:language', child),
+                text: this.getTextContent('./aas:text', child),
+            });
+        }
+
+        return values;
     }
 
     private readConceptDescriptions(): aas.ConceptDescription[] {
         const conceptDescriptions: aas.ConceptDescription[] = [];
         for (const node of this.selectNodes(
-            '/aas:aasenv/aas:conceptDescriptions/aas:conceptDescription',
+            '/aas:environment/aas:conceptDescriptions/aas:conceptDescription',
             this.document,
         )) {
             conceptDescriptions.push(this.readConceptDescription(node));
@@ -591,8 +875,8 @@ export class XmlReader extends AASReader {
         };
 
         const isCaseOf: aas.Reference[] = [];
-        for (const refNode of this.selectNodes('./isCaseOf', node)) {
-            isCaseOf.push(this.readReference('.', refNode)!);
+        for (const refNode of this.selectNodes('./aas:isCaseOf/aas:reference', node)) {
+            isCaseOf.push(this.readReference(refNode)!);
         }
 
         if (isCaseOf.length > 0) {
@@ -607,8 +891,21 @@ export class XmlReader extends AASReader {
         return (localName.charAt(0).toUpperCase() + localName.substring(1)) as aas.ModelType;
     }
 
-    private selectNode(query: string, node: Node): Node | undefined {
-        return this.select(query, node, true) as Node | undefined;
+    private selectNode(expression: string, node: Node): Node | undefined {
+        return this.select(expression, node, true) as Node | undefined;
+    }
+
+    private selectTextContent(expression: string, node: Node): string | null | undefined {
+        return (this.select(expression, node, true) as Node)?.textContent;
+    }
+
+    private getTextContent(expression: string, node: Node): string {
+        const value = (this.select(expression, node, true) as Node)?.textContent;
+        if (value == null) {
+            throw new Error(`${expression} ToDo.`);
+        }
+
+        return value;
     }
 
     private getNode(query: string, node: Node): Node {
@@ -624,104 +921,10 @@ export class XmlReader extends AASReader {
         return this.select(query, node) as Node[];
     }
 
-    private getReference(node: Node): aas.Reference {
-        return {
-            type: 'ModelReference',
-            keys: this.selectNodes('./aas:value/aas:keys/aas:key', node).map(item => this.getKey(item)),
-        };
-    }
-
     private getKey(node: Node): aas.Key {
-        const element = node as Element;
         return {
-            type: element.getAttribute('type') as aas.KeyTypes,
-            value: element.textContent ?? '',
+            type: this.getTextContent('./aas:type', node) as aas.KeyTypes,
+            value: this.getTextContent('./aas:value', node),
         };
-    }
-
-    private readIdentifier(node: Node): string {
-        const id = this.selectNode('./aas:identification', node)?.textContent;
-        if (id == null) {
-            throw new Error('./aas:identification');
-        }
-
-        return id;
-    }
-
-    private toDataTypeDefXsd(source: string): aas.DataTypeDefXsd {
-        switch (source) {
-            case 'anyURI':
-                return 'xs:anyURI';
-            case 'base64Binary':
-                return 'xs:base64Binary';
-            case 'boolean':
-                return 'xs:boolean';
-            case 'byte':
-                return 'xs:byte';
-            case 'Date':
-            case 'date':
-                return 'xs:date';
-            case 'dateTime':
-                return 'xs:dateTime';
-            case 'dateTimeStamp':
-                return 'xs:dateTime';
-            case 'dayTimeDuration':
-                return 'xs:duration';
-            case 'Decimal':
-            case 'decimal':
-                return 'xs:decimal';
-            case 'double':
-                return 'xs:double';
-            case 'duration':
-                return 'xs:duration';
-            case 'float':
-                return 'xs:float';
-            case 'gDay':
-                return 'xs:gDay';
-            case 'gMonth':
-                return 'xs:gMonth';
-            case 'gMonthDay':
-                return 'xs:gMonthDay';
-            case 'gYear':
-                return 'xs:gYear';
-            case 'gYearMonth':
-                return 'xs:gYearMonth';
-            case 'hexBinary':
-                return 'xs:hexBinary';
-            case 'int':
-                return 'xs:int';
-            case 'integer':
-                return 'xs:integer';
-            case 'long':
-                return 'xs:long';
-            case 'negativeInteger':
-                return 'xs:negativeInteger';
-            case 'nonNegativeInteger':
-                return 'xs:nonNegativeInteger';
-            case 'nonPositiveInteger':
-                return 'xs:nonPositiveInteger';
-            case 'positiveInteger':
-                return 'xs:positiveInteger';
-            case 'short':
-                return 'xs:short';
-            case 'langString':
-            case 'String':
-            case 'string':
-                return 'xs:string';
-            case 'time':
-                return 'xs:time';
-            case 'unsignedByte':
-                return 'xs:unsignedByte';
-            case 'unsignedInt':
-                return 'xs:unsignedInt';
-            case 'unsignedLong':
-                return 'xs:unsignedLong';
-            case 'unsignedShort':
-                return 'xs:unsignedShort';
-            case 'yearMonthDuration':
-                return 'xs:duration';
-            default:
-                throw new Error(`${source} is an unknown value type.`);
-        }
     }
 }

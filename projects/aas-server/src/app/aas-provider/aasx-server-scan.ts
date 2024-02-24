@@ -8,15 +8,15 @@
 
 import { AASDocument } from 'common';
 import { Logger } from '../logging/logger.js';
-import { AasxServer } from '../packages/aasx-server/aasx-server.js';
-import { AasxServerPackage } from '../packages/aasx-server/aasx-server-package.js';
+import { AASServer } from '../packages/aas-server/aas-server.js';
+import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 
 export class AASXServerScan extends AASResourceScan {
     private readonly logger: Logger;
-    private readonly server: AasxServer;
+    private readonly server: AASServer;
 
-    public constructor(logger: Logger, server: AasxServer) {
+    public constructor(logger: Logger, server: AASServer) {
         super();
 
         this.logger = logger;
@@ -30,7 +30,7 @@ export class AASXServerScan extends AASResourceScan {
             const listAAS = await this.server.getShellsAsync();
             for (const idShort of listAAS) {
                 try {
-                    const aasxPackage = new AasxServerPackage(this.logger, this.server, idShort);
+                    const aasxPackage = new AASServerPackage(this.logger, this.server, idShort);
                     const document = await aasxPackage.createDocumentAsync();
                     documents.push(document);
                     this.emit('scanned', document);

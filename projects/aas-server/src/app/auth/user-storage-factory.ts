@@ -8,7 +8,7 @@
 
 import { DependencyContainer } from 'tsyringe';
 import { UserStorage } from './user-storage.js';
-import { LocaleUserStorage } from './locale-user-storage.js';
+import { LocalUserStorage } from './local-user-storage.js';
 import { Variable } from '../variable.js';
 import { MongoDBUserStorage } from './mongo-db-user-storage.js';
 import { Logger } from '../logging/logger.js';
@@ -34,7 +34,7 @@ export class UserStorageFactory {
             }
         }
 
-        const storage = this.container.resolve(LocaleUserStorage);
+        const storage = this.container.resolve(LocalUserStorage);
         logger.info(`Using local user storage.`);
         return storage;
     }

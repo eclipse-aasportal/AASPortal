@@ -7,15 +7,17 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import path from 'path';
+import { join } from 'path/posix';
+import { resolve } from 'path';
 import fs from 'fs';
 import { Cookie } from 'common';
 import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
 import { Logger } from '../logging/logger.js';
+import { slash } from '../convert.js';
 
 @injectable()
-export class LocaleUserStorage extends UserStorage {
+export class LocalUserStorage extends UserStorage {
     private readonly usersDirectory: string;
 
     public constructor(
@@ -24,7 +26,7 @@ export class LocaleUserStorage extends UserStorage {
     ) {
         super();
 
-        this.usersDirectory = path.resolve(usersDirectory);
+        this.usersDirectory = slash(resolve(usersDirectory));
 
         if (!fs.existsSync(this.usersDirectory)) {
             fs.mkdirSync(this.usersDirectory);
@@ -117,7 +119,7 @@ export class LocaleUserStorage extends UserStorage {
     }
 
     private getCookiesFile(userId: string): string {
-        return path.join(this.usersDirectory, userId, 'cookies.json');
+        return join(this.usersDirectory, userId, 'cookies.json');
     }
 
     private async readCookies(path: string): Promise<Cookie[]> {
@@ -137,10 +139,10 @@ export class LocaleUserStorage extends UserStorage {
     }
 
     private getUserFile(userId: string): string {
-        return path.join(this.usersDirectory, userId, 'user.json');
+        return join(this.usersDirectory, userId, 'user.json');
     }
 
     private getUserDir(userId: string): string {
-        return path.join(this.usersDirectory, userId);
+        return join(this.usersDirectory, userId);
     }
 }

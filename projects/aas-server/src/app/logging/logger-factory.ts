@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import path from 'path';
+import path from 'path/posix';
 import fs from 'fs';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';

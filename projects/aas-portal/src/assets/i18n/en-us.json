@@ -163,9 +163,9 @@
     "OPTION_BAR_VERTICAL_CHART": "Vertical bar chart",
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "AASEndpointType": {
-        "AasxDirectory": "Directory",
-        "AasxServer": "AASX Server",
-        "AASRegistry": "AAS Registry",
+        "FileSystem": "File system",
+        "AASServer": "AAS server",
+        "WebDAV": "Cloud server",
         "OpcuaServer": "OPC UA Server"
     },
     "CustomerFeedback": {

@@ -66,7 +66,7 @@ describe('TemplateController', () => {
 
     it('getTemplates: /api/v1/templates', async () => {
         const templates: TemplateDescriptor[] = [
-            { idShort: 'TestTemplate', id: 'http://localhost:1234/a/b/c', template: null, modelType: 'Submodel' },
+            { idShort: 'TestTemplate', id: 'http://localhost:1234/a/b/c', modelType: 'Submodel' },
         ];
 
         templateStorage.readTemplatesAsync.mockResolvedValue(templates);

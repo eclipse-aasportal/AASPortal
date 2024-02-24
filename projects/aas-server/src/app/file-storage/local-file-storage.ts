@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { normalize, resolve, sep } from 'path';
+import { normalize, resolve, sep } from 'path/posix';
 import { FileStorage, FileStorageEntry } from './file-storage.js';
 
 export class LocalFileStorage extends FileStorage {

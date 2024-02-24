@@ -9,24 +9,24 @@
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { aas } from 'common';
 import { Logger } from '../../../app/logging/logger.js';
-import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
-import { AasxServerPackage } from '../../../app/packages/aasx-server/aasx-server-package.js';
+import { AASServer } from '../../../app/packages/aas-server/aas-server.js';
+import { AASServerPackage } from '../../../app/packages/aas-server/aas-server-package.js';
 import { createSpyObj } from '../../utils.js';
 
 describe('AasxServerPackage', () => {
-    let aasPackage: AasxServerPackage;
+    let aasPackage: AASServerPackage;
     let logger: jest.Mocked<Logger>;
-    let server: jest.Mocked<AasxServer>;
+    let server: jest.Mocked<AASServer>;
     let env: aas.Environment;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = createSpyObj<AasxServer>(['readEnvironmentAsync'], {
+        server = createSpyObj<AASServer>(['readEnvironmentAsync'], {
             url: 'http:/localhost:1234',
             name: 'Test',
         });
 
-        aasPackage = new AasxServerPackage(logger, server, 'CunaCup_Becher1');
+        aasPackage = new AASServerPackage(logger, server, 'CunaCup_Becher1');
         env = {
             assetAdministrationShells: [
                 {

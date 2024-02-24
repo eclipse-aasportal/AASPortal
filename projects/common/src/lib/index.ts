@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { AASEndpointType } from './types.js';
 import {
     AssetAdministrationShell,
     Blob,
@@ -18,6 +19,7 @@ import {
     SubmodelElement,
     SubmodelElementCollection,
 } from './aas.js';
+import { isEmpty } from 'lodash-es';
 
 export * from './document.js';
 export * from './types.js';
@@ -229,4 +231,55 @@ export function isSubmodelElementCollection(referable?: Referable | null): refer
  */
 export function isUrlSafeBase64(s: string): boolean {
     return /^[A-Za-z0-9_-]*[.=]{0,2}$/.test(s);
+}
+
+/**
+ * Gets the endpoint name from the specified URL.
+ * @param url The endpoint URL.
+ * @returns The name.
+ */
+export function getEndpointName(url: string | URL): string {
+    if (typeof url === 'string') {
+        url = new URL(url);
+    }
+
+    const name = url.searchParams.get('name');
+    if (name) {
+        return name;
+    }
+
+    const pathname = url.pathname;
+    if (pathname) {
+        const names = pathname.split('/').filter(item => !isEmpty(item));
+        if (names.length > 0) {
+            return names[names.length - 1];
+        }
+    }
+
+    return url.href.split('?')[0];
+}
+
+/**
+ * Gets the endpoint type from the specified URL.
+ * @param url The URL.
+ * @returns The endpoint type.
+ */
+export function getEndpointType(url: string | URL): AASEndpointType {
+    if (typeof url === 'string') {
+        url = new URL(url);
+    }
+
+    switch (url.protocol) {
+        case 'file:':
+            return 'FileSystem';
+        case 'http:':
+        case 'https:': {
+            const pathname = url.pathname;
+            return pathname && pathname !== '/' ? 'WebDAV' : 'AASServer';
+        }
+        case 'opc.tcp:':
+            return 'OpcuaServer';
+        default:
+            throw new Error(`Protocol "${url.protocol}" is not supported.`);
+    }
 }

@@ -24,12 +24,8 @@ describe('AddEndpointFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                AddEndpointFormComponent
-            ],
-            providers: [
-                NgbActiveModal
-            ],
+            declarations: [AddEndpointFormComponent],
+            providers: [NgbActiveModal],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -37,10 +33,10 @@ describe('AddEndpointFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(AddEndpointFormComponent);
@@ -59,9 +55,9 @@ describe('AddEndpointFormComponent', () => {
 
     it('submits endpoint Name: "My endpoint", URL: "file:///my-endpoint"', function () {
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake((result) => endpoint = result);
+        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[2];
+        component.item = component.items[3];
         component.name = 'My endpoint';
         component.item.value = 'file:///my-endpoint';
 
@@ -69,14 +65,14 @@ describe('AddEndpointFormComponent', () => {
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('My endpoint');
         expect(endpoint?.url).toEqual('file:///my-endpoint');
-        expect(endpoint?.type).toEqual('AasxDirectory');
+        expect(endpoint?.type).toEqual('FileSystem');
     });
 
     it('submits AAS endpoint Name: "My endpoint", URL: "file:///a\\b\\my-endpoint"', function () {
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake((result) => endpoint = result);
+        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[2];
+        component.item = component.items[3];
         component.name = 'My endpoint';
         component.item.value = 'file:///a\\b\\my-endpoint';
 
@@ -84,13 +80,13 @@ describe('AddEndpointFormComponent', () => {
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('My endpoint');
         expect(endpoint?.url).toEqual('file:///a/b/my-endpoint');
-        expect(endpoint?.type).toEqual('AasxDirectory');
+        expect(endpoint?.type).toEqual('FileSystem');
     });
 
     it('ignores AAS endpoint: Name: "", URL: "file:///my-endpoint"', function () {
         spyOn(modal, 'close');
 
-        component.item = component.items[2];
+        component.item = component.items[3];
         component.name = '';
         component.item.value = 'file:///my-endpoint';
 
@@ -102,7 +98,7 @@ describe('AddEndpointFormComponent', () => {
     it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', function () {
         spyOn(modal, 'close');
 
-        component.item = component.items[2];
+        component.item = component.items[3];
         component.name = 'My endpoint';
         component.item.value = 'file:///';
 
@@ -111,18 +107,18 @@ describe('AddEndpointFormComponent', () => {
         expect(component.messages.length > 0).toBeTrue();
     });
 
-    it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://172.16.160.178:30001/I4AASServer"', function () {
+    it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://localhost:30001/I4AASServer"', function () {
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake((result) => endpoint = result);
+        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
         component.item = component.items[1];
         component.name = 'I4AAS Server';
-        component.item.value = 'opc.tcp://172.16.160.178:30001/I4AASServer';
+        component.item.value = 'opc.tcp://localhost:30001/I4AASServer';
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('I4AAS Server');
-        expect(endpoint?.url).toEqual('opc.tcp://172.16.160.178:30001/I4AASServer');
+        expect(endpoint?.url).toEqual('opc.tcp://localhost:30001/I4AASServer');
         expect(endpoint?.type).toEqual('OpcuaServer');
     });
 
@@ -142,18 +138,33 @@ describe('AddEndpointFormComponent', () => {
         expect(component.messages.length > 0).toBeTrue();
     });
 
-    it('submits AASX server Name: "AASX Server", URL: "http://172.16.160.188:50001/"', function () {
+    it('submits AASX server Name: "AASX Server", URL: "http://localhost:50001/"', function () {
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake((result) => endpoint = result);
+        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
         component.item = component.items[0];
         component.name = 'AASX Server';
-        component.item.value = 'http://172.16.160.188:50001/';
+        component.item.value = 'http://localhost:50001/';
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('AASX Server');
-        expect(endpoint?.url).toEqual('http://172.16.160.188:50001/');
-        expect(endpoint?.type).toEqual('AasxServer');
+        expect(endpoint?.url).toEqual('http://localhost:50001/');
+        expect(endpoint?.type).toEqual('AASServer');
+    });
+
+    it('submits WebDAV server Name: "WebDAV", URL: "http://localhost:8080/root/folder"', function () {
+        let endpoint: AASEndpoint | undefined;
+        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
+
+        component.item = component.items[2];
+        component.name = 'WebDAV Server';
+        component.item.value = 'http://localhost:8080/root/folder';
+
+        form.dispatchEvent(new Event('submit'));
+        expect(modal.close).toHaveBeenCalled();
+        expect(endpoint?.name).toEqual('WebDAV Server');
+        expect(endpoint?.url).toEqual('http://localhost:8080/root/folder');
+        expect(endpoint?.type).toEqual('WebDAV');
     });
 });

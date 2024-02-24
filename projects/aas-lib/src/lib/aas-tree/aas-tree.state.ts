@@ -279,7 +279,7 @@ class TreeInitialize {
                     return blob.contentType ? `${blob.idShort}${extension}` : '-';
                 }
                 case 'ReferenceElement':
-                    return (referable as aas.ReferenceElement).value.keys.map(item => item.value).join('/');
+                    return (referable as aas.ReferenceElement).value?.keys.map(item => item.value).join('/');
                 case 'RelationshipElement':
                     return this.getRelationshipElementValue(referable as aas.RelationshipElement);
                 case 'MultiLanguageProperty':

@@ -37,6 +37,7 @@ export class FileStorageProvider {
     }
 
     private create(url: URL): FileStorage {
+        url = new URL(url);
         switch (url.protocol) {
             case 'file:':
                 return new LocalFileStorage(this.variable.ASSETS);
@@ -49,6 +50,8 @@ export class FileStorageProvider {
                 if (isEmpty(url.password)) {
                     url.password = this.variable.AAS_SERVER_PASSWORD;
                 }
+
+                url.pathname = '';
 
                 return new WebDAVStorage(url);
             default:

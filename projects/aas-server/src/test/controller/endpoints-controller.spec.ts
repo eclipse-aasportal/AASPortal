@@ -74,7 +74,7 @@ describe('EndpointsController', function () {
         const endpoints: AASEndpoint = {
             name: 'Test',
             url: 'http://localhost:1234',
-            type: 'AasxServer',
+            type: 'AASServer',
         };
 
         aasProvider.getEndpoints.mockResolvedValue([endpoints]);
@@ -86,7 +86,7 @@ describe('EndpointsController', function () {
     });
 
     it('POST: /api/v1/endpoints/:name', async function () {
-        const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'AasxDirectory' };
+        const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'FileSystem' };
         aasProvider.addEndpointAsync.mockResolvedValue();
         auth.hasUserAsync.mockResolvedValue(true);
         const response = await request(app)

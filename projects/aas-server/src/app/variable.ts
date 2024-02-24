@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { singleton } from 'tsyringe';
-import path from 'path';
+import path from 'path/posix';
 
 @singleton()
 export class Variable {

@@ -10,25 +10,25 @@ import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { aas, selectElement } from 'common';
-import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
+import { AASServer } from '../../../app/packages/aas-server/aas-server.js';
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';
 import submodels from '../../assets/test-aas/submodels.js';
 import nameplate from '../../assets/test-aas/nameplate-becher1.js';
 import digitalProductPassport from '../../assets/test-aas/digital-product-passport-becher1.js';
 import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js';
-import { AasxServerV0 } from '../../../app/packages/aasx-server/aasx-server-v0.js';
+import { AASServerV0 } from '../../../app/packages/aas-server/aas-server-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import aasEnvironment from '../../assets/aas-environment.js';
 import { createSpyObj } from '../../utils.js';
 
-describe('AasxServerV0', function () {
+describe('AASServerV0', function () {
     let logger: jest.Mocked<Logger>;
-    let server: AasxServer;
+    let server: AASServer;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AasxServerV0(logger, 'http://localhost:1234', 'AASX Server');
+        server = new AASServerV0(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     afterEach(() => {

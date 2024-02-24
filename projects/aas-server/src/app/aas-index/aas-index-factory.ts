@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { DependencyContainer } from 'tsyringe';
-import path from 'path';
+import path from 'path/posix';
 import { JSONFile } from 'lowdb/node';
 import { Low } from 'lowdb';
 import { AASIndex } from './aas-index.js';

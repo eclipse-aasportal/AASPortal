@@ -10,11 +10,11 @@ import { AASDocument, diffAsync, aas } from 'common';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { Logger } from '../../logging/logger.js';
-import { AasxServer } from './aasx-server.js';
+import { AASServer } from './aas-server.js';
 import { ImageProcessing } from '../../image-processing.js';
 
-export class AasxServerPackage extends AASPackage {
-    private readonly server: AasxServer;
+export class AASServerPackage extends AASPackage {
+    private readonly server: AASServer;
     private readonly idShort: string;
 
     /**
@@ -26,7 +26,7 @@ export class AasxServerPackage extends AASPackage {
     public constructor(logger: Logger, resource: AASResource, idShort: string) {
         super(logger);
 
-        this.server = resource as AasxServer;
+        this.server = resource as AASServer;
         this.idShort = idShort;
     }
 

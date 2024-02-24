@@ -506,14 +506,13 @@ export class JsonReader extends AASReader {
     }
 
     private readReferenceElement(source: aas.ReferenceElement, ancestors?: aas.Referable[]): aas.ReferenceElement {
-        if (!source.value) {
-            throw new Error('ReferenceElement.value');
-        }
-
         const reference: aas.ReferenceElement = {
             ...this.readSubmodelElementType(source, ancestors),
-            value: this.readReference(source.value),
         };
+
+        if (source.value) {
+            reference.value = this.readReference(source.value);
+        }
 
         return reference;
     }

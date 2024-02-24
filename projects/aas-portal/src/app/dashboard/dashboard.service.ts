@@ -380,7 +380,7 @@ export class DashboardService {
         switch (type) {
             case 'OpcuaServer':
                 return 'opc';
-            case 'AasxDirectory':
+            case 'FileSystem':
                 return 'file';
             default:
                 return 'http';

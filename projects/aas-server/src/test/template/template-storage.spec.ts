@@ -63,7 +63,6 @@ describe('TemplateStorage', function () {
                     modelType: 'Submodel',
                     format: '.json',
                     endpoint: { type: 'file', address: 'submodel.json' },
-                    template: null,
                 },
             ] as TemplateDescriptor[]);
 

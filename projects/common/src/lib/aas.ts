@@ -330,7 +330,7 @@ export interface Range extends DataElement {
 /** Metainformation if SubmodelElement is DataElement */
 export type Category = 'CONSTANT' | 'PARAMETER' | 'VARIABLE';
 
-export interface Referable {
+export interface Referable extends HasExtensions {
     category?: string;
     idShort: string;
     displayName?: LangString[];
@@ -347,7 +347,7 @@ export interface Reference {
 }
 
 export interface ReferenceElement extends DataElement {
-    value: Reference;
+    value?: Reference;
 }
 
 export type ReferenceTypes = 'ExternalReference' | 'ModelReference';

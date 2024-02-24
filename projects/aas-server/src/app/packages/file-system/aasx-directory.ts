@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, ApplicationError } from 'common';
-import { join } from 'path';
+import { join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';

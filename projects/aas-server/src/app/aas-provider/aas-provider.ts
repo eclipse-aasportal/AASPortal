@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { extname } from 'path';
+import { extname } from 'path/posix';
 import Jimp from 'jimp';
 import { Readable } from 'stream';
 import {
@@ -333,7 +333,7 @@ export class AASProvider {
     /** Only used for test. */
     public async scanAsync(factory: AASResourceScanFactory): Promise<void> {
         for (const endpoint of await this.index.getEndpoints()) {
-            if (endpoint.type === 'AasxDirectory') {
+            if (endpoint.type === 'FileSystem') {
                 const documents = await factory.create(endpoint).scanAsync();
                 documents.forEach(async document => await this.index.add(document));
             }
@@ -511,13 +511,16 @@ export class AASProvider {
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
         const content = await this.getDocumentContentAsync(parent);
         for (const reference of this.whereReferenceElement(content.submodels)) {
-            const childId = reference.value.keys[0].value;
-            const child =
-                (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
-            if (child) {
-                const node: AASDocument = { ...child, parent: { ...parent }, content: null };
-                nodes.push(node);
-                await this.collectDescendants(node, nodes);
+            if (reference.value) {
+                const childId = reference.value.keys[0].value;
+                const child =
+                    (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
+
+                if (child) {
+                    const node: AASDocument = { ...child, parent: { ...parent }, content: null };
+                    nodes.push(node);
+                    await this.collectDescendants(node, nodes);
+                }
             }
         }
     }
@@ -530,7 +533,11 @@ export class AASProvider {
             for (const child of children) {
                 if (child.modelType === 'ReferenceElement') {
                     const value = child as aas.ReferenceElement;
-                    if (value && value.value.keys.some(item => item.type === 'AssetAdministrationShell')) {
+                    if (
+                        value &&
+                        value.value &&
+                        value.value.keys.some(item => item.type === 'AssetAdministrationShell')
+                    ) {
                         yield value;
                     }
                 }

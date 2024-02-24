@@ -35,7 +35,6 @@ describe('TemplateService', () => {
             idShort: '',
             modelType: 'Property',
             endpoint: { type: 'file', address: 'property.json' },
-            template: null,
         };
 
         const url = `/api/v1/templates`;

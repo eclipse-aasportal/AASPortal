@@ -7,62 +7,34 @@
  *****************************************************************************/
 
 import { readFile } from 'fs/promises';
-import { resolve } from 'path';
+import { resolve } from 'path/posix';
 import { Logger } from '../../app/logging/logger.js';
-import { XmlReader } from '../../app/packages/xml-reader.js';
 import { createSpyObj } from '../utils.js';
 import { describe, beforeAll, beforeEach, it, expect, jest } from '@jest/globals';
+import { XmlReader } from '../../app/packages/xml-reader.js';
 
 describe('XmlReader', function () {
-    describe('with default namespace v2.0', function () {
-        let reader: XmlReader;
-        let logger: jest.Mocked<Logger>;
-        let xml: string;
-        let path: string;
+    let reader: XmlReader;
+    let logger: jest.Mocked<Logger>;
+    let xml: string;
+    let path: string;
 
-        beforeAll(async function () {
-            path = resolve('./src/test/assets/aas-default-namespace.xml');
-            xml = (await readFile(path)).toString();
-        });
-
-        beforeEach(function () {
-            logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-            reader = new XmlReader(logger, xml);
-        });
-
-        it('should be created', function () {
-            expect(reader).toBeTruthy();
-        });
-
-        it('reads the AAS environment from a xml source', function () {
-            const environment = reader.readEnvironment();
-            expect(environment).toBeDefined();
-        });
+    beforeAll(async function () {
+        path = resolve('./src/test/assets/aas-example-v3.xml');
+        xml = (await readFile(path)).toString();
     });
 
-    describe('with prefix namespace v1.0', function () {
-        let reader: XmlReader;
-        let logger: jest.Mocked<Logger>;
-        let xml: string;
-        let path: string;
+    beforeEach(function () {
+        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        reader = new XmlReader(logger, xml);
+    });
 
-        beforeAll(async function () {
-            path = resolve('./src/test/assets/aas-prefix-namespace.xml');
-            xml = (await readFile(path)).toString();
-        });
+    it('should be created', function () {
+        expect(reader).toBeTruthy();
+    });
 
-        beforeEach(function () {
-            logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-            reader = new XmlReader(logger, xml);
-        });
-
-        it('should be created', function () {
-            expect(reader).toBeTruthy();
-        });
-
-        it('reads the AAS environment from a xml source', function () {
-            const environment = reader.readEnvironment();
-            expect(environment).toBeDefined();
-        });
+    it('reads the AAS environment from a xml source', function () {
+        const environment = reader.readEnvironment();
+        expect(environment).toBeDefined();
     });
 });

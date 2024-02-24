@@ -13,7 +13,7 @@ export function createContainer(url: string, documents: AASDocument[]): AASConta
         documents: documents,
         url: url,
         name: url,
-        type: 'AasxDirectory'
+        type: 'FileSystem'
     };
 }
 

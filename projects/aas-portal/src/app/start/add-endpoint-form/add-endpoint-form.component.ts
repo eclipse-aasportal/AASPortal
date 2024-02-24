@@ -29,8 +29,8 @@ export class AddEndpointFormComponent {
     ) {
         this.items = [
             {
-                name: this.translate.instant('AASEndpointType.AasxServer'),
-                type: 'AasxServer',
+                name: this.translate.instant('AASEndpointType.AASServer'),
+                type: 'AASServer',
                 value: 'http://',
             },
             {
@@ -39,8 +39,13 @@ export class AddEndpointFormComponent {
                 value: 'opc.tcp://',
             },
             {
-                name: this.translate.instant('AASEndpointType.AasxDirectory'),
-                type: 'AasxDirectory',
+                name: this.translate.instant('AASEndpointType.WebDAV'),
+                type: 'WebDAV',
+                value: 'http://',
+            },
+            {
+                name: this.translate.instant('AASEndpointType.FileSystem'),
+                type: 'FileSystem',
                 value: 'file:///',
             },
         ];
@@ -48,13 +53,13 @@ export class AddEndpointFormComponent {
         this.item = this.items[0];
     }
 
-    public endpoints: string[] = [];
+    public endpoints: AASEndpoint[] = [];
 
     public messages: string[] = [];
 
     public name = '';
 
-    public version = '3.0';
+    public version = 'v3';
 
     public readonly items: EndpointItem[];
 
@@ -95,8 +100,8 @@ export class AddEndpointFormComponent {
             this.messages.push(this.createMessage('ERROR_EMPTY_ENDPOINT_NAME'));
             name = undefined;
         } else {
-            for (const workspace of this.endpoints) {
-                if (workspace.toLocaleLowerCase() === name.toLocaleLowerCase()) {
+            for (const endpoint of this.endpoints) {
+                if (endpoint.name.toLocaleLowerCase() === name.toLocaleLowerCase()) {
                     this.messages.push(this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name));
                     name = undefined;
                     break;
@@ -110,22 +115,18 @@ export class AddEndpointFormComponent {
     private validateUrl(value: string): URL | undefined {
         try {
             const url = new URL(value);
-            switch (url.protocol) {
-                case 'opc.tcp:':
-                    if (url.pathname === '//') {
-                        throw new Error('Empty pathname.');
-                    }
+            switch (this.item.type) {
+                case 'AASServer':
+                    this.validateAASServerEndpoint(url);
                     break;
-                case 'http:':
+                case 'FileSystem':
+                    this.validateFileSystemEndpoint(url);
                     break;
-                case 'file:':
-                    if (url.hostname !== '') {
-                        throw new Error(`Invalid host name ${url.hostname}.`);
-                    }
-
-                    if (url.pathname === '/') {
-                        throw new Error('Empty pathname.');
-                    }
+                case 'OpcuaServer':
+                    this.validateOpcuaEndpoint(url);
+                    break;
+                case 'WebDAV':
+                    this.validateWebDAVEndpoint(url);
                     break;
             }
 
@@ -138,5 +139,49 @@ export class AddEndpointFormComponent {
 
     private createMessage(id: string, ...args: unknown[]): string {
         return stringFormat(this.translate.instant(id), args);
+    }
+
+    private validateAASServerEndpoint(url: URL): void {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            throw new Error('Protocol "http:" or "https:" expected.');
+        }
+
+        if (url.pathname !== '/') {
+            throw new Error(`Unexpected pathname "${url.pathname}".`);
+        }
+    }
+
+    private validateFileSystemEndpoint(url: URL): void {
+        if (url.protocol !== 'file:') {
+            throw new Error('Protocol "file:" expected');
+        }
+
+        if (url.hostname !== '') {
+            throw new Error(`Invalid host name ${url.hostname}.`);
+        }
+
+        if (url.pathname === '/') {
+            throw new Error('Empty pathname.');
+        }
+    }
+
+    private validateOpcuaEndpoint(url: URL): void {
+        if (url.protocol !== 'opc.tcp:') {
+            throw new Error('Protocol "opc.tcp:" expected.');
+        }
+
+        if (url.pathname === '//' || url.pathname === '/') {
+            throw new Error('Empty pathname.');
+        }
+    }
+
+    private validateWebDAVEndpoint(url: URL): void {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            throw new Error('Protocol "http:" or "https:" expected.');
+        }
+
+        if (url.pathname === '/') {
+            throw new Error('Empty pathname.');
+        }
     }
 }

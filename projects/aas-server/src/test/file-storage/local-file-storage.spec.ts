@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import fs, { Dirent } from 'fs';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
-import { resolve, sep } from 'path';
+import { resolve, sep } from 'path/posix';
 import { createSpyObj } from '../utils.js';
 
 describe('LocalFileStorage', () => {

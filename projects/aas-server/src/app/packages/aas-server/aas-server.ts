@@ -13,7 +13,7 @@ import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
-import { AasxServerPackage } from './aasx-server-package.js';
+import { AASServerPackage } from './aas-server-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 
 interface PropertyValue {
@@ -21,7 +21,7 @@ interface PropertyValue {
 }
 
 /** Provides access to an AASX-Server. */
-export abstract class AasxServer extends AASResource {
+export abstract class AASServer extends AASResource {
     private reentry = 0;
 
     /**
@@ -78,7 +78,7 @@ export abstract class AasxServer extends AASResource {
     }
 
     public createPackage(address: string): AASPackage {
-        return new AasxServerPackage(this.logger, this, address);
+        return new AASServerPackage(this.logger, this, address);
     }
 
     public override createSubscription(

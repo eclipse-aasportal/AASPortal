@@ -8,7 +8,7 @@
 
 import http, { IncomingMessage } from 'http';
 import env from '../../assets/aas-environment.js';
-import { AasxServerV3, OperationResult } from '../../../app/packages/aasx-server/aasx-server-v3.js';
+import { AASServerV3, OperationResult } from '../../../app/packages/aas-server/aas-server-v3.js';
 import { aas, DifferenceItem } from 'common';
 import { cloneDeep } from 'lodash-es';
 import { Socket } from 'net';
@@ -16,13 +16,13 @@ import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
-describe('AasxServerV3', function () {
+describe('AASServerV3', function () {
     let logger: Logger;
-    let server: AasxServerV3;
+    let server: AASServerV3;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AasxServerV3(logger, 'http://localhost:1234', 'AASX Server');
+        server = new AASServerV3(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     describe('resolveNodeId', function () {

@@ -11,7 +11,7 @@ import { aas, changeType, LiveNode, LiveRequest } from 'common';
 import { HttpSocketItem } from './http-socket-item.js';
 import { Logger } from '../../logging/logger.js';
 import { SocketClient } from '../socket-client.js';
-import { AasxServer } from '../../packages/aasx-server/aasx-server.js';
+import { AASServer } from '../../packages/aas-server/aas-server.js';
 import { SocketSubscription } from '../socket-subscription.js';
 
 export class HttpSubscription extends SocketSubscription {
@@ -21,7 +21,7 @@ export class HttpSubscription extends SocketSubscription {
 
     public constructor(
         private readonly logger: Logger,
-        private readonly server: AasxServer,
+        private readonly server: AASServer,
         private readonly client: SocketClient,
         message: LiveRequest,
         env: aas.Environment,

@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect } from '@jest/globals';
-import { resolve } from 'path';
+import { resolve } from 'path/posix';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { readFile } from 'fs/promises';

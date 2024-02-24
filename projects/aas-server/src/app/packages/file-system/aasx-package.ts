@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { basename, extname } from 'path';
+import { basename, extname } from 'path/posix';
 import jszip from 'jszip';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
@@ -17,12 +17,15 @@ import { Lazy } from '../../lazy.js';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { Logger } from '../../logging/logger.js';
-import { XmlReader } from '../xml-reader.js';
+import { XmlReaderV1 } from '../xml-reader-v1.js';
 import { AASReader } from '../aas-reader.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { JsonReader } from '../json-reader.js';
 import * as aasV2 from '../../types/aas-v2.js';
 import { ImageProcessing } from '../../image-processing.js';
+import { HTMLDocumentElement } from '../../types/html-document-element.js';
+import { XmlReaderV2 } from '../xml-reader_v2.js';
+import { XmlReader } from '../xml-reader.js';
 
 export class AasxPackage extends AASPackage {
     private readonly file: string;
@@ -121,7 +124,7 @@ export class AasxPackage extends AASPackage {
         switch (extension) {
             case '.xml': {
                 const xml = await this.getZipEntryAsync(name);
-                return new XmlReader(this.logger, xml);
+                return this.createXmlReader(xml);
             }
             case '.json': {
                 const env = JSON.parse(await this.getZipEntryAsync(name));
@@ -216,6 +219,27 @@ export class AasxPackage extends AASPackage {
         }
 
         throw new Error('Not implemented.');
+    }
+
+    private createXmlReader(xml: string): AASReader {
+        const document = new DOMParser().parseFromString(xml);
+        const nsMap = (document.documentElement as HTMLDocumentElement)._nsMap ?? {};
+        for (const prefix in nsMap) {
+            const uri = nsMap[prefix];
+            if (uri === 'http://www.admin-shell.io/aas/1/0') {
+                return new XmlReaderV1(this.logger, document);
+            }
+
+            if (uri === 'http://www.admin-shell.io/aas/2/0') {
+                return new XmlReaderV2(this.logger, document);
+            }
+
+            if (uri === 'https://admin-shell.io/aas/3/0') {
+                return new XmlReader(this.logger, document);
+            }
+        }
+
+        throw new Error('Invalid operation.');
     }
 
     private async createThumbnail(): Promise<string | undefined> {

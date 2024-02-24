@@ -14,10 +14,10 @@ import { DirectoryScan } from './directory-scan.js';
 import { AASXServerScan } from './aasx-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
 import { OpcuaServer } from '../packages/opcua/opcua-server.js';
-import { AasxDirectory } from '../packages/aasx-directory/aasx-directory.js';
-import { AasxServer } from '../packages/aasx-server/aasx-server.js';
-import { AasxServerV3 } from '../packages/aasx-server/aasx-server-v3.js';
-import { AasxServerV0 } from '../packages/aasx-server/aasx-server-v0.js';
+import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
+import { AASServer } from '../packages/aas-server/aas-server.js';
+import { AASServerV3 } from '../packages/aas-server/aas-server-v3.js';
+import { AASServerV0 } from '../packages/aas-server/aas-server-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 
@@ -29,24 +29,26 @@ export class AASResourceScanFactory {
     ) {}
 
     public create(endpoint: AASEndpoint): AASResourceScan {
-        switch (new URL(endpoint.url).protocol) {
-            case 'http:':
-            case 'https': {
-                const version = endpoint.version ?? '3.0';
-                let source: AasxServer;
-                if (version === '3.0') {
-                    source = new AasxServerV3(this.logger, endpoint.url, endpoint.name);
-                } else if (version === '0.0') {
-                    source = new AasxServerV0(this.logger, endpoint.url, endpoint.name);
-                } else {
-                    throw new Error('Not implemented.');
+        switch (endpoint.type) {
+            case 'AASServer': {
+                let source: AASServer;
+                switch (endpoint.version) {
+                    case 'v0':
+                        source = new AASServerV0(this.logger, endpoint.url, endpoint.name);
+                        break;
+                    case 'v3':
+                        source = new AASServerV3(this.logger, endpoint.url, endpoint.name);
+                        break;
+                    default:
+                        throw new Error('Not implemented.');
                 }
 
                 return new AASXServerScan(this.logger, source);
             }
-            case 'opc.tcp:':
+            case 'OpcuaServer':
                 return new OpcuaServerScan(this.logger, new OpcuaServer(this.logger, endpoint.url, endpoint.name));
-            case 'file:':
+            case 'WebDAV':
+            case 'FileSystem':
                 return new DirectoryScan(
                     this.logger,
                     new AasxDirectory(

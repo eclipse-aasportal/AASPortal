@@ -28,14 +28,12 @@ describe('NewElementCommand', function () {
 
         TestBed.configureTestingModule({
             declarations: [],
-            providers: [
-            ],
+            providers: [],
             imports: [
-                StoreModule.forRoot(
-                    {
-                        aas: aasReducer
-                    }),
-            ]
+                StoreModule.forRoot({
+                    aas: aasReducer,
+                }),
+            ],
         });
 
         store = TestBed.inject(Store);
@@ -47,25 +45,34 @@ describe('NewElementCommand', function () {
     });
 
     it('can be executed', function (done: DoneFn) {
-        store.select(state => state.aas.document).pipe(first()).subscribe(document => {
-            const element = selectElement(document!.content!, 'TechnicalData');
-            expect(element).toBeDefined();
-            done();
-        });
+        store
+            .select(state => state.aas.document)
+            .pipe(first())
+            .subscribe(document => {
+                const element = selectElement(document!.content!, 'TechnicalData');
+                expect(element).toBeDefined();
+                done();
+            });
     });
 
     it('can be undone/redone', function (done: DoneFn) {
         command.undo();
-        store.select(state => state.aas.document).pipe(first()).subscribe(document => {
-            const element = selectElement(document!.content!, 'TechnicalData');
-            expect(element).toBeUndefined();
-        });
+        store
+            .select(state => state.aas.document)
+            .pipe(first())
+            .subscribe(document => {
+                const element = selectElement(document!.content!, 'TechnicalData');
+                expect(element).toBeUndefined();
+            });
 
         command.redo();
-        store.select(state => state.aas.document).pipe(first()).subscribe(document => {
-            const element = selectElement(document!.content!, 'TechnicalData');
-            expect(element).toBeDefined();
-            done();
-        });
+        store
+            .select(state => state.aas.document)
+            .pipe(first())
+            .subscribe(document => {
+                const element = selectElement(document!.content!, 'TechnicalData');
+                expect(element).toBeDefined();
+                done();
+            });
     });
 });

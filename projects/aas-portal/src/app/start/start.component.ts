@@ -185,7 +185,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             mergeMap(() => this.api.getEndpoints()),
             map(endpoints => {
                 const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.workspaces = endpoints;
+                modalRef.componentInstance.endpoints = endpoints;
                 return modalRef;
             }),
             mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),

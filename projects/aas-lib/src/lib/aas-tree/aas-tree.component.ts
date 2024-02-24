@@ -22,11 +22,9 @@ import {
     AASDocument,
     convertToString,
     toLocale,
-    EndpointType,
     selectSubmodel,
     getIdShortPath,
     mimeTypeToExtension,
-    AASEndpointType,
 } from 'common';
 
 import { AASTreeRow, AASTreeFeatureState } from './aas-tree.state';
@@ -510,17 +508,6 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
             });
 
             this.webSocketSubject.next(this.createMessage(this.document));
-        }
-    }
-
-    private toEndpointType(type: AASEndpointType): EndpointType {
-        switch (type) {
-            case 'OpcuaServer':
-                return 'opc';
-            case 'AasxDirectory':
-                return 'file';
-            default:
-                return 'http';
         }
     }
 

@@ -46,7 +46,7 @@ export type AASAbbreviation =
     | 'SML';
 
 /** The kind of AAS container or server. */
-export type AASEndpointType = 'AasxDirectory' | 'AasxServer' | 'OpcuaServer' | 'AASRegistry';
+export type AASEndpointType = 'FileSystem' | 'AASServer' | 'OpcuaServer' | 'WebDAV';
 
 /** The endpoint to an AAS container */
 export type AASEndpoint = {
@@ -113,9 +113,8 @@ export interface TemplateDescriptor {
     idShort: string;
     id?: string;
     endpoint?: Endpoint;
-    format?: '.json' | '.xml';
+    format?: '.json' | '.xml' | '.aasx';
     modelType: aas.ModelType | '';
-    template: aas.Referable | null;
 }
 
 /** Represents a named source of Asset Administration Shells. */

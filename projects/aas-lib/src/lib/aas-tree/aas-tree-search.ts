@@ -320,6 +320,10 @@ export class AASTreeSearch {
             }
             case 'ReferenceElement': {
                 const referenceElement = referable as aas.ReferenceElement;
+                if (!referenceElement.value) {
+                    return false;
+                }
+
                 return referenceElement.value.keys.some(key => this.containsString(key.value, value as string));
             }
             case 'MultiLanguageProperty': {

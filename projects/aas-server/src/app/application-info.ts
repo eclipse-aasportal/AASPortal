@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { isAbsolute, resolve } from 'path';
+import { isAbsolute, resolve } from 'path/posix';
 import { Message, PackageInfo } from 'common';
 import { Logger } from './logging/logger.js';
 import { readFile } from 'fs/promises';

@@ -9,7 +9,7 @@
 import { Logger } from '../../app/logging/logger.js';
 import { readFile } from 'fs/promises';
 import { JsonReader } from '../../app/packages/json-reader.js';
-import { resolve } from 'path';
+import { resolve } from 'path/posix';
 import { createSpyObj } from '../utils.js';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 

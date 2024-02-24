@@ -7,13 +7,12 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { AasxPackage } from '../../../app/packages/aasx-directory/aasx-package.js';
-import { AasxDirectory } from '../../../app/packages/aasx-directory/aasx-directory.js';
+import { AasxPackage } from '../../../app/packages/file-system/aasx-package.js';
+import { AasxDirectory } from '../../../app/packages/file-system/aasx-directory.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { LocalFileStorage } from '../../../app/file-storage/local-file-storage.js';
 import { createSpyObj } from '../../utils.js';
 import { FileStorage } from '../../../app/file-storage/file-storage.js';
-import { resolve } from 'path';
 
 describe('AasxPackage', function () {
     let logger: jest.Mocked<Logger>;

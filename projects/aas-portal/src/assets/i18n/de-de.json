@@ -163,9 +163,9 @@
     "OPTION_BAR_VERTICAL_CHART": "Balkendiagramm vertikal",
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "AASEndpointType": {
-        "AasxDirectory": "Verzeichnis",
-        "AasxServer": "AASX-Server",
-        "AASRegistry": "AAS-Registry",
+        "FileSystem": "Verzeichnis",
+        "AASServer": "AAS-Server",
+        "WebDAV": "Cloud-Server",
         "OpcuaServer": "OPC-UA-Server"
     },
     "CustomerFeedback": {

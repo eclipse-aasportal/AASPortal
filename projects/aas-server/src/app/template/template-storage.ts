@@ -67,7 +67,6 @@ export class TemplateStorage {
                                     idShort: template.idShort,
                                     endpoint: { type: 'file', address: path },
                                     format: '.json',
-                                    template: null,
                                     modelType: template.modelType,
                                 };
 
