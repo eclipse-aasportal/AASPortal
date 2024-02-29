@@ -21,7 +21,7 @@ export class WebSocketFactoryService {
      */
     public create(url?: string): WebSocketSubject<WebSocketData> {
         if (!url) {
-            const protocol = 'ws:'; // window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             url = `${protocol}//${window.location.host}/websocket`;
         }
 
