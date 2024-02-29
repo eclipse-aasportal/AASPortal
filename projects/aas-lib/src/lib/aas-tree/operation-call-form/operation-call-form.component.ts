@@ -158,7 +158,7 @@ export class OperationCallFormComponent {
                     targets.push({
                         submodelElement: source,
                         name: source.idShort,
-                        description: getLocaleValue(source.descriptions),
+                        description: getLocaleValue(source.description),
                         type: valueType,
                         inputType: inputType,
                         value: inputType === 'checkbox' ? toBoolean(value) : value,
@@ -168,7 +168,7 @@ export class OperationCallFormComponent {
                     targets.push({
                         submodelElement: source,
                         name: source.idShort,
-                        description: getLocaleValue(source.descriptions),
+                        description: getLocaleValue(source.description),
                         type: 'xs:string',
                         inputType: 'text',
                         value: 'not implemented',

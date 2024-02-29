@@ -17,8 +17,8 @@ const initialState: StartState = {
     limit: 10,
     filter: '',
     documents: [],
-    isFirstPage: false,
-    isLastPage: false,
+    previous: null,
+    next: null,
     totalCount: 0,
     favorites: '-',
 };
@@ -50,8 +50,8 @@ function setPage(state: StartState, page: AASPage, limit: number | undefined, fi
         limit: limit ?? state.limit,
         filter: filter != null ? filter : state.filter,
         documents: page.documents,
-        isFirstPage: page.previous === null,
-        isLastPage: page.next === null,
+        previous: page.previous,
+        next: page.next,
     };
 }
 

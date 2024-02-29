@@ -701,7 +701,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'ENTITY',
                         definition: [
@@ -738,7 +738,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'STRING',
                         definition: [
@@ -773,7 +773,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'STRING',
                         definition: [
@@ -808,7 +808,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'STRING_TRANSLATABLE',
                         definition: [
@@ -843,7 +843,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'EN',
@@ -887,7 +887,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'DE',
@@ -931,7 +931,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'DE',
@@ -986,7 +986,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'DE',
@@ -1025,7 +1025,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'EN',
@@ -1069,7 +1069,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'EN',
@@ -1113,7 +1113,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'DATE',
                         definition: [
@@ -1148,7 +1148,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'STRING',
                         definition: [
@@ -1183,7 +1183,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'FILE',
                         definition: [
@@ -1218,7 +1218,7 @@ const data: unknown = {
                         keys: [],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'de',
@@ -1273,7 +1273,7 @@ const data: unknown = {
                         keys: [],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'EN',
@@ -1323,7 +1323,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'DE',
@@ -1378,7 +1378,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [],
                         dataType: 'REAL_MEASURE',
                         definition: [
@@ -1423,7 +1423,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'DE',
@@ -1467,7 +1467,7 @@ const data: unknown = {
                         ],
                     },
                     dataSpecificationContent: {
-                        modelType: 'DataSpecificationIEC61360',
+                        modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
                                 language: 'EN',

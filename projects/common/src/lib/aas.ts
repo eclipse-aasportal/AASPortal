@@ -84,7 +84,7 @@ export interface DataSpecificationContent {
     modelType: ModelType;
 }
 
-export interface DataSpecificationIEC61360 extends DataSpecificationContent {
+export interface DataSpecificationIec61360 extends DataSpecificationContent {
     preferredName: LangString[];
     shortName?: LangString[];
     unit?: string;
@@ -267,7 +267,7 @@ export type ModelType =
     | 'Blob'
     | 'Capability'
     | 'ConceptDescription'
-    | 'DataSpecificationIEC61360'
+    | 'DataSpecificationIec61360'
     | 'Entity'
     | 'File'
     | 'MultiLanguageProperty'
@@ -331,11 +331,11 @@ export interface Range extends DataElement {
 export type Category = 'CONSTANT' | 'PARAMETER' | 'VARIABLE';
 
 export interface Referable extends HasExtensions {
-    category?: string;
     idShort: string;
-    displayName?: LangString[];
-    descriptions?: LangString[];
     modelType: ModelType;
+    category?: string;
+    displayName?: LangString[];
+    description?: LangString[];
     /** For internal use. */
     parent?: Reference;
 }
@@ -365,7 +365,7 @@ export interface Resource {
 export interface SpecificAssetId extends HasSemantic {
     name: string;
     value: string;
-    externalSubjectId: Reference;
+    externalSubjectId?: Reference;
 }
 
 export type StateOfEvent = 'on' | 'off';

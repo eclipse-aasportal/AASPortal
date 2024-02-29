@@ -241,21 +241,21 @@ export class AASServerV3 extends AASServer {
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
         const aasId = encodeBase64Url(shell.id);
-        return await this.message.put(this.resolve(`/shells/${aasId}`), new JsonWriter().write(shell));
+        return await this.message.put(this.resolve(`/shells/${aasId}`), new JsonWriter().convert(shell));
     }
 
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.message.put(
             this.resolve(`/shells/${aasId}/submodels/${smId}`),
-            new JsonWriter().write(submodel),
+            new JsonWriter().convert(submodel),
         );
     }
 
     private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         return await this.message.post(
             this.resolve(`/submodels?aasIdentifier=${aasId}`),
-            new JsonWriter().write(submodel),
+            new JsonWriter().convert(submodel),
         );
     }
 
@@ -271,7 +271,7 @@ export class AASServerV3 extends AASServer {
         const path = getIdShortPath(submodelElement);
         return await this.message.put(
             this.resolve(`/submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriter().write(submodelElement),
+            new JsonWriter().convert(submodelElement),
         );
     }
 
@@ -283,7 +283,7 @@ export class AASServerV3 extends AASServer {
         const path = getIdShortPath(submodelElement);
         return await this.message.post(
             this.resolve(`/submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriter().write(submodelElement),
+            new JsonWriter().convert(submodelElement),
         );
     }
 

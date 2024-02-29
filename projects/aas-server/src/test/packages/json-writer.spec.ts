@@ -19,7 +19,7 @@ describe('JsonWriter', function () {
         });
 
         it('writes an AAS environment', () => {
-            expect(writer.writeEnvironment(env)).toBeDefined();
+            expect(writer.write(env)).toBeDefined();
         });
     });
 
@@ -31,7 +31,7 @@ describe('JsonWriter', function () {
         });
 
         it('does not support writing an AAS', () => {
-            expect(() => writer.write(env.assetAdministrationShells[0])).toThrowError();
+            expect(() => writer.convert(env.assetAdministrationShells[0])).toThrowError();
         });
     });
 });

@@ -7,14 +7,14 @@
  *****************************************************************************/
 
 import { ViewMode } from 'aas-lib';
-import { AASDocument } from 'common';
+import { AASDocument, AASDocumentId } from 'common';
 
 export interface StartState {
     viewMode: ViewMode;
     filter: string;
     limit: number;
-    isFirstPage: boolean;
-    isLastPage: boolean;
+    previous: AASDocumentId | null;
+    next: AASDocumentId | null;
     totalCount: number;
     documents: AASDocument[];
     favorites: string;

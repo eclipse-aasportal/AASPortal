@@ -12,13 +12,13 @@ import * as aasv2 from '../types/aas-v2.js';
 
 export class JsonWriterV2 extends AASWriter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public writeEnvironment<T>(env: aas.Environment): T {
+    public override write(env: aas.Environment): string {
         throw new Error('Method not implemented.');
     }
 
-    public write<T>(source: aas.Referable): T {
+    public convert<T extends aasv2.Referable>(source: aas.Referable): T {
         if (source.modelType === 'Submodel') {
-            return this.writeSubmodel(source as aas.Submodel) as T;
+            return this.writeSubmodel(source as aas.Submodel) as unknown as T;
         }
 
         return this.writeSubmodelElement(source as aas.SubmodelElement) as T;
@@ -371,8 +371,8 @@ export class JsonWriterV2 extends AASWriter {
             referable.category = source.category as aasv2.Category;
         }
 
-        if (source.descriptions) {
-            referable.descriptions = source.descriptions.map(item => ({ language: item.language, text: item.text }));
+        if (source.description) {
+            referable.descriptions = source.description.map(item => ({ language: item.language, text: item.text }));
         }
 
         return referable;
@@ -399,7 +399,7 @@ export class JsonWriterV2 extends AASWriter {
         }
 
         const dataSpecificationContent = this.writeDataSpecificationIEC61360(
-            source.dataSpecificationContent as aas.DataSpecificationIEC61360,
+            source.dataSpecificationContent as aas.DataSpecificationIec61360,
         );
 
         const specification: aasv2.EmbeddedDataSpecification = {
@@ -411,13 +411,13 @@ export class JsonWriterV2 extends AASWriter {
     }
 
     private writeDataSpecificationIEC61360(
-        source: aas.DataSpecificationIEC61360,
-    ): aasv2.DataSpecificationIEC61360Content {
+        source: aas.DataSpecificationIec61360,
+    ): aasv2.DataSpecificationIec61360Content {
         if (!source.preferredName) {
-            throw new Error(`DataSpecificationIEC61360.preferredName`);
+            throw new Error(`DataSpecificationIec61360.preferredName`);
         }
 
-        const iec61360: aasv2.DataSpecificationIEC61360Content = {
+        const iec61360: aasv2.DataSpecificationIec61360Content = {
             preferredName: source.preferredName,
         };
 

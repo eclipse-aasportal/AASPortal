@@ -35,7 +35,7 @@ export class XmlReader extends AASReader {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public read(data: unknown): aas.Referable {
+    public read(data: string | object): aas.Referable {
         throw new Error('Not implemented.');
     }
 
@@ -518,8 +518,8 @@ export class XmlReader extends AASReader {
     }
 
     private readMultiLanguageProperty(node: Node, parent?: aas.Reference): aas.MultiLanguageProperty {
-        const langString = this.readLangString('./aas:value', node) ?? [];
-        return { ...this.readSubmodelElementType(node, parent), value: langString };
+        const value = this.readLangStrings('./aas:value', node) ?? [];
+        return { ...this.readSubmodelElementType(node, parent), value };
     }
 
     private readReferenceElement(node: Node, parent?: aas.Reference): aas.ReferenceElement {
@@ -657,27 +657,27 @@ export class XmlReader extends AASReader {
     }
 
     private readDataSpecificationContent(node: Node): aas.DataSpecificationContent | undefined {
-        const child = this.selectNode('./aas:dataSpecificationContent/aas:dataSpecificationIEC61360', node);
+        const child = this.selectNode('./aas:dataSpecificationContent/aas:dataSpecificationIec61360', node);
         if (child) {
-            return this.readDataSpecificationIEC61360(child);
+            return this.readDataSpecificationIec61360(child);
         }
 
         return undefined;
     }
 
-    private readDataSpecificationIEC61360(node: Node): aas.DataSpecificationIEC61360 {
-        const preferredName = this.readLangString('./aas:preferredName/aas:langStringPreferredNameTypeIec61360', node);
+    private readDataSpecificationIec61360(node: Node): aas.DataSpecificationIec61360 {
+        const preferredName = this.readLangStrings('./aas:preferredName/aas:langStringPreferredNameTypeIec61360', node);
         if (!preferredName) {
-            throw new Error('DataSpecificationIEC61360Content.preferredName');
+            throw new Error('DataSpecificationIec61360Content.preferredName');
         }
 
-        const dataSpecification: aas.DataSpecificationIEC61360 = {
+        const dataSpecification: aas.DataSpecificationIec61360 = {
             modelType: this.getModelTypeFromLocalName(node),
             preferredName,
         };
 
-        const shortName = this.readLangString('./aas:shortName/langStringShortNameTypeIec61360', node);
-        if (shortName) {
+        const shortName = this.readLangStrings('./aas:shortName/langStringShortNameTypeIec61360', node);
+        if (shortName && shortName.length > 0) {
             dataSpecification.shortName = shortName;
         }
 
@@ -706,8 +706,8 @@ export class XmlReader extends AASReader {
             dataSpecification.dataType = dataType;
         }
 
-        const definition = this.readLangString('./aas:definition/langStringDefinitionTypeIec61360', node);
-        if (definition) {
+        const definition = this.readLangStrings('./aas:definition/langStringDefinitionTypeIec61360', node);
+        if (definition && definition.length > 0) {
             dataSpecification.definition = definition;
         }
 
@@ -840,7 +840,7 @@ export class XmlReader extends AASReader {
         return value;
     }
 
-    private readLangString(expression: string, node: Node | undefined): aas.LangString[] | undefined {
+    private readLangStrings(expression: string, node: Node | undefined): aas.LangString[] | undefined {
         if (!node) {
             return undefined;
         }

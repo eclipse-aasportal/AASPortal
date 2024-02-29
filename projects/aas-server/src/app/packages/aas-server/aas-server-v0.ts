@@ -141,7 +141,7 @@ export class AASServerV0 extends AASServer {
         const messages: string[] = [];
         const aas = destination.assetAdministrationShells[0].idShort;
         for (const submodel of submodels) {
-            await this.putSubmodelAsync(aas, new JsonWriterV2().write(submodel));
+            await this.putSubmodelAsync(aas, new JsonWriterV2().convert(submodel));
         }
 
         return messages;
@@ -160,8 +160,8 @@ export class AASServerV0 extends AASServer {
         return messages;
     }
 
-    private putSubmodelAsync(aas: string, submodel: aas.Submodel): Promise<string> {
-        return this.message.put(this.resolve('/aas/' + aas + '/submodels/'), new JsonWriterV2().write(submodel));
+    private putSubmodelAsync(aas: string, submodel: aasV2.Submodel): Promise<string> {
+        return this.message.put(this.resolve('/aas/' + aas + '/submodels/'), submodel);
     }
 
     private deleteSubmodelAsync(aas: string, submodelId: string): Promise<string> {

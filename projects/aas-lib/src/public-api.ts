@@ -17,6 +17,7 @@ export * from './lib/sortable-header.directive';
 export * from './lib/max-length.pipe';
 export * from './lib/convert';
 export * from './lib/template.service';
+export * from './lib/index-change.service';
 
 export * from './lib/notify/notify.component';
 export * from './lib/notify/notify.service';

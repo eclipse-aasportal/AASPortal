@@ -14,8 +14,6 @@ export type AASServerMessageType =
     | 'Removed'
     | 'Changed'
     | 'Offline'
-    | 'ContainerAdded'
-    | 'ContainerRemoved'
     | 'EndpointAdded'
     | 'EndpointRemoved'
     | 'Reset';

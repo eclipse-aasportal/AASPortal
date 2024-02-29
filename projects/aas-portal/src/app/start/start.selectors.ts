@@ -30,8 +30,8 @@ export const selectLimit = createSelector(getLimit, limit => limit);
 
 export const selectDocuments = createSelector(getDocuments, documents => documents);
 
-export const selectIsFirstPage = createSelector(getState, state => state.isFirstPage);
+export const selectIsFirstPage = createSelector(getState, state => state.previous === null);
 
-export const selectIsLastPage = createSelector(getState, state => state.isLastPage);
+export const selectIsLastPage = createSelector(getState, state => state.next === null);
 
 export const selectFavorites = createSelector(getState, state => state.favorites);

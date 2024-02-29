@@ -508,9 +508,9 @@ export class OpcuaReader extends AASReader {
             referable.category = category;
         }
 
-        const descriptions = this.readLangStringSet(component, 'Description');
-        if (descriptions) {
-            referable.descriptions = descriptions;
+        const description = this.readLangStringSet(component, 'Description');
+        if (description) {
+            referable.description = description;
         }
 
         return referable;

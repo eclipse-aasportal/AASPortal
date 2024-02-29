@@ -20,6 +20,7 @@ export enum StartActionType {
     GET_FIRST_PAGE = '[Start] get first page',
     GET_NEXT_PAGE = '[Start] get next page',
     GET_PREVIOUS_PAGE = '[Start] previous next page',
+    REFRESH_PAGE = '[Start] refresh current page',
     GET_LAST_PAGE = '[Start] get last page',
     SET_PAGE = '[Start] set page',
     SET_CONTENT = '[Start] set content',
@@ -54,6 +55,8 @@ export const getNextPage = createAction(StartActionType.GET_NEXT_PAGE);
 export const getPreviousPage = createAction(StartActionType.GET_PREVIOUS_PAGE);
 
 export const getLastPage = createAction(StartActionType.GET_LAST_PAGE);
+
+export const refreshPage = createAction(StartActionType.REFRESH_PAGE);
 
 export const setPage = createAction(
     StartActionType.SET_PAGE,

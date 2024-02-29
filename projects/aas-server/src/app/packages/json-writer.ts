@@ -12,11 +12,14 @@ import { AASWriter } from './aas-writer.js';
 
 /** */
 export class JsonWriter extends AASWriter {
-    public override writeEnvironment<T>(env: aas.Environment): T {
-        const conceptDescriptions = this.writeConceptDescriptions(env);
-        const assetAdministrationShells = this.writeAssetAdministrationShells(env);
-        const submodels = this.writeSubmodels(env);
-        return { assetAdministrationShells, submodels, conceptDescriptions } as T;
+    public override write(env: aas.Environment): string {
+        const data: aas.Environment = {
+            assetAdministrationShells: this.writeAssetAdministrationShells(env),
+            submodels: this.writeSubmodels(env),
+            conceptDescriptions: this.writeConceptDescriptions(env),
+        };
+
+        return JSON.stringify(data);
     }
 
     /**
@@ -24,14 +27,14 @@ export class JsonWriter extends AASWriter {
      * @param data The serialized Submodel or SubmodelElement.
      * @returns The deserialized Submodel or SubmodelElement.
      */
-    public write<T>(source: aas.Referable): T {
+    public convert(source: aas.Referable): aas.Referable {
         switch (source.modelType) {
             case 'AssetAdministrationShell':
                 throw new Error('Invalid operation.');
             case 'Submodel':
-                return this.writeSubmodel(source as aas.Submodel) as T;
+                return this.writeSubmodel(source as aas.Submodel);
             default:
-                return this.writeSubmodelElement(source as aas.SubmodelElement) as T;
+                return this.writeSubmodelElement(source as aas.SubmodelElement);
         }
     }
 
@@ -177,16 +180,13 @@ export class JsonWriter extends AASWriter {
     private writeSubmodelElements(sources: aas.SubmodelElement[]): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const source of sources) {
-            const submodelElement = this.writeSubmodelElement(source);
-            if (submodelElement) {
-                submodelElements.push(submodelElement);
-            }
+            submodelElements.push(this.writeSubmodelElement(source));
         }
 
         return submodelElements;
     }
 
-    private writeSubmodelElement(source: aas.SubmodelElement): aas.SubmodelElement | undefined {
+    private writeSubmodelElement(source: aas.SubmodelElement): aas.SubmodelElement {
         switch (source.modelType) {
             case 'AnnotatedRelationshipElement':
                 return this.writeAnnotatedRelationshipElement(source as aas.AnnotatedRelationshipElement);
@@ -215,7 +215,7 @@ export class JsonWriter extends AASWriter {
             case 'SubmodelElementList':
                 throw this.writeSubmodelElementList(source as aas.SubmodelElementList);
             default:
-                return undefined;
+                throw new Error('Not implemented.');
         }
     }
 
@@ -565,8 +565,8 @@ export class JsonWriter extends AASWriter {
             referable.category = source.category as aas.Category;
         }
 
-        if (source.descriptions) {
-            referable.descriptions = source.descriptions.map(item => ({ text: item.text, language: item.language }));
+        if (source.description) {
+            referable.description = source.description.map(item => ({ text: item.text, language: item.language }));
         }
 
         return referable;
@@ -630,9 +630,9 @@ export class JsonWriter extends AASWriter {
         }
 
         let dataSpecificationContent: aas.DataSpecificationContent;
-        if (source.dataSpecificationContent.modelType === 'DataSpecificationIEC61360') {
+        if (source.dataSpecificationContent.modelType === 'DataSpecificationIec61360') {
             dataSpecificationContent = this.writeDataSpecificationIEC61360(
-                source.dataSpecificationContent as aas.DataSpecificationIEC61360,
+                source.dataSpecificationContent as aas.DataSpecificationIec61360,
             );
         } else {
             throw new Error(
@@ -648,12 +648,12 @@ export class JsonWriter extends AASWriter {
         return specification;
     }
 
-    private writeDataSpecificationIEC61360(source: aas.DataSpecificationIEC61360): aas.DataSpecificationIEC61360 {
+    private writeDataSpecificationIEC61360(source: aas.DataSpecificationIec61360): aas.DataSpecificationIec61360 {
         if (!source.preferredName) {
-            throw new Error(`DataSpecificationIEC61360.preferredName`);
+            throw new Error(`DataSpecificationIec61360.preferredName`);
         }
 
-        const iec61360: aas.DataSpecificationIEC61360 = {
+        const iec61360: aas.DataSpecificationIec61360 = {
             modelType: source.modelType,
             preferredName: source.preferredName,
         };

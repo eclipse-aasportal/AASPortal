@@ -161,6 +161,33 @@ export class StartEffects {
         );
     });
 
+    public refreshPage = createEffect(() => {
+        return this.actions.pipe(
+            ofType(StartActions.StartActionType.REFRESH_PAGE),
+            exhaustMap(() =>
+                concat(
+                    of(StartActions.setViewMode({ viewMode: ViewMode.List })),
+                    this.store.select(StartSelectors.selectState).pipe(
+                        first(),
+                        mergeMap(state => {
+                            if (state.documents.length === 0) return EMPTY;
+
+                            return this.api.getPage(
+                                {
+                                    previous: state.previous,
+                                    limit: state.limit,
+                                },
+                                state.filter,
+                                this.translate.currentLang,
+                            );
+                        }),
+                        mergeMap(page => this.setPageAndLoadContents(page)),
+                    ),
+                ),
+            ),
+        );
+    });
+
     public setTreeView = createEffect(() => {
         return this.actions.pipe(
             ofType(StartActions.StartActionType.SET_TREE_VIEW),

@@ -41,6 +41,7 @@ import { SecuredImageComponent } from './secured-image/secured-image.component';
 import { AASTableEffects } from './aas-table/aas-table.effects';
 import { ClipboardService } from './clipboard.service';
 import { TemplateService } from './template.service';
+import { IndexChangeService } from './index-change.service';
 
 @NgModule({
     declarations: [
@@ -94,6 +95,6 @@ import { TemplateService } from './template.service';
         MessageTableComponent,
         SecuredImageComponent,
     ],
-    providers: [ClipboardService, TemplateService],
+    providers: [ClipboardService, TemplateService, IndexChangeService],
 })
 export class AASLibModule {}

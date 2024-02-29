@@ -546,7 +546,7 @@ export class JsonReaderV2 extends AASReader {
         }
 
         if (source.descriptions) {
-            referable.descriptions = this.readLangStringSet(source.descriptions);
+            referable.description = this.readLangStringSet(source.descriptions);
         }
 
         if (source.parent) {
@@ -624,9 +624,9 @@ export class JsonReaderV2 extends AASReader {
         }
 
         let dataSpecificationContent: aas.DataSpecificationContent;
-        if ((source.dataSpecificationContent as aasv2.DataSpecificationIEC61360Content).preferredName) {
-            dataSpecificationContent = this.readDataSpecificationIEC61360(
-                source.dataSpecificationContent as aasv2.DataSpecificationIEC61360Content,
+        if ((source.dataSpecificationContent as aasv2.DataSpecificationIec61360Content).preferredName) {
+            dataSpecificationContent = this.readDataSpecificationIec61360(
+                source.dataSpecificationContent as aasv2.DataSpecificationIec61360Content,
             );
         } else {
             throw new Error('Not implemented.');
@@ -640,15 +640,15 @@ export class JsonReaderV2 extends AASReader {
         return specification;
     }
 
-    private readDataSpecificationIEC61360(
-        source: aasv2.DataSpecificationIEC61360Content,
-    ): aas.DataSpecificationIEC61360 {
+    private readDataSpecificationIec61360(
+        source: aasv2.DataSpecificationIec61360Content,
+    ): aas.DataSpecificationIec61360 {
         if (!source.preferredName) {
-            throw new Error(`DataSpecificationIEC61360.preferredName`);
+            throw new Error(`DataSpecificationIec61360.preferredName`);
         }
 
-        const iec61360: aas.DataSpecificationIEC61360 = {
-            modelType: 'DataSpecificationIEC61360',
+        const iec61360: aas.DataSpecificationIec61360 = {
+            modelType: 'DataSpecificationIec61360',
             preferredName: this.readLangStringSet(source.preferredName),
         };
 

@@ -18,6 +18,7 @@ import {
     ClipboardService,
     CustomerFeedback,
     DownloadService,
+    IndexChangeService,
     NotifyService,
     SubmodelViewDescriptor,
     ViewMode,
@@ -64,6 +65,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         private readonly download: DownloadService,
         private readonly clipboard: ClipboardService,
         private readonly favorites: FavoritesService,
+        private readonly indexChange: IndexChangeService,
     ) {
         this.store = store as Store<StartFeatureState>;
         this.filter = this.store.select(StartSelectors.selectFilter);
@@ -134,7 +136,9 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
     public readonly endpoints: Observable<AASEndpoint[]>;
 
-    public documents: Observable<AASDocument[]>;
+    public readonly documents: Observable<AASDocument[]>;
+
+    public readonly count = this.indexChange.count;
 
     public get selected(): AASDocument[] {
         return this._selected;
@@ -372,6 +376,11 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
     public lastPage(): void {
         this.store.dispatch(StartActions.getLastPage());
+    }
+
+    public refreshPage(): void {
+        this.store.dispatch(StartActions.refreshPage());
+        this.indexChange.clear();
     }
 
     public addToFavorites(): void {

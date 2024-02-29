@@ -191,7 +191,7 @@ export class AASProvider {
     public async addEndpointAsync(name: string, endpoint: AASEndpoint): Promise<void> {
         await this.resourceFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
-        this.wsServer.notify('WorkspaceChanged', {
+        this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: {
                 type: 'EndpointAdded',
@@ -210,7 +210,7 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(name);
         if (endpoint) {
             await this.index.removeEndpoint(name);
-            this.wsServer.notify('WorkspaceChanged', {
+            this.wsServer.notify('IndexChange', {
                 type: 'AASServerMessage',
                 data: {
                     type: 'EndpointRemoved',
@@ -227,7 +227,7 @@ export class AASProvider {
         this.tasks.clear();
         await this.index.reset();
 
-        this.wsServer.notify('WorkspaceChanged', {
+        this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: {
                 type: 'Reset',
@@ -379,7 +379,7 @@ export class AASProvider {
                 case 'LiveRequest':
                     client.subscribe(data.type, await this.createSubscription(data.data as LiveRequest, client));
                     break;
-                case 'WorkspaceChanged':
+                case 'IndexChange':
                     client.subscribe(data.type, new EmptySubscription());
                     break;
                 default:
@@ -442,7 +442,7 @@ export class AASProvider {
     };
 
     private notify(data: AASServerMessage): void {
-        this.wsServer.notify('WorkspaceChanged', {
+        this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: data,
         });
@@ -484,7 +484,7 @@ export class AASProvider {
     }
 
     private sendMessage(data: AASServerMessage) {
-        this.wsServer.notify('WorkspaceChanged', {
+        this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: data,
         });

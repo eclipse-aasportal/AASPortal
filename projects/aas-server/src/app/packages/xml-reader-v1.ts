@@ -405,13 +405,13 @@ export class XmlReaderV1 extends AASReader {
         return undefined;
     }
 
-    private readDataSpecificationIEC61360(node: Node): aas.DataSpecificationIEC61360 {
+    private readDataSpecificationIEC61360(node: Node): aas.DataSpecificationIec61360 {
         const preferredName = this.readLangString(`./${this.iec61360}:preferredName`, node);
         if (!preferredName) {
             throw new Error('DataSpecificationIEC61360Content.preferredName');
         }
 
-        const dataSpecification: aas.DataSpecificationIEC61360 = {
+        const dataSpecification: aas.DataSpecificationIec61360 = {
             modelType: this.getModelTypeFromLocalName(node),
             preferredName,
         };

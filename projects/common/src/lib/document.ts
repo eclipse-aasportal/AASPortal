@@ -570,7 +570,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
             a.modelType === b.modelType &&
             a.idShort === b.idShort &&
             a.category === b.category &&
-            equalLangStrings(a.descriptions, b.descriptions) &&
+            equalLangStrings(a.description, b.description) &&
             equalReference(a.parent, b.parent)
         );
     }
@@ -944,7 +944,7 @@ export function resolveReference(env: aas.Environment, reference: aas.Reference)
 export function getIEC61360Content(
     env: aas.Environment,
     referable: aas.Referable,
-): aas.DataSpecificationIEC61360 | undefined {
+): aas.DataSpecificationIec61360 | undefined {
     const hasDataSpecification = referable as aas.HasDataSpecification;
     if (hasDataSpecification.embeddedDataSpecifications) {
         for (const item of hasDataSpecification.embeddedDataSpecifications) {
@@ -952,7 +952,7 @@ export function getIEC61360Content(
                 item.dataSpecification.keys[0].value ===
                 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360'
             ) {
-                return item.dataSpecificationContent as aas.DataSpecificationIEC61360;
+                return item.dataSpecificationContent as aas.DataSpecificationIec61360;
             }
         }
     } else {

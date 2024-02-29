@@ -105,7 +105,7 @@ export type DataTypeDefXsd =
     | 'yearMonthDuration';
 
 /** Enumeration of simple data types for a IEC61360 concept description
- * using the data specification template DataSpecificationIEC61360 */
+ * using the data specification template DataSpecificationIec61360 */
 export type DataTypeIEC61360 =
     | 'DATE'
     | 'STRING'
@@ -231,7 +231,7 @@ export interface DataSpecificationContent {}
 
 /** Content of data specification template for concept descriptions for properties,
  * values and value lists conformant to IEC 61360. */
-export interface DataSpecificationIEC61360Content extends DataSpecificationContent {
+export interface DataSpecificationIec61360Content extends DataSpecificationContent {
     preferredName: LangString[];
     shortName?: LangString[];
     unit?: string;

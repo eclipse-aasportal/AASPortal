@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
+import { describe, beforeAll, beforeEach, it, expect, jest } from '@jest/globals';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path/posix';
 import { Logger } from '../../app/logging/logger.js';
 import { createSpyObj } from '../utils.js';
-import { describe, beforeAll, beforeEach, it, expect, jest } from '@jest/globals';
 import { XmlReader } from '../../app/packages/xml-reader.js';
 
 describe('XmlReader', function () {
