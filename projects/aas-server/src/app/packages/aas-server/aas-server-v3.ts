@@ -105,7 +105,7 @@ export class AASServerV3 extends AASServer {
             conceptDescriptions: pagedResult.result,
         };
 
-        return new JsonReader(this.logger, sourceEnv).readEnvironment();
+        return new JsonReader(sourceEnv).readEnvironment();
     }
 
     public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {

@@ -10,13 +10,12 @@ import { extname, join } from 'path/posix';
 import { TemplateDescriptor, aas, isSubmodel } from 'common';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
-import { AASReader } from '../packages/aas-reader.js';
-import { JsonReader } from '../packages/json-reader.js';
-import { JsonReaderV2 } from '../packages/json-reader-v2.js';
-import * as aasV2 from '../types/aas-v2.js';
 import { inject, singleton } from 'tsyringe';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { Variable } from '../variable.js';
+import { createJsonReader } from '../packages/create-json-reader.js';
+import { createXmlReader } from '../packages/create-xml-reader.js';
+import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 
 @singleton()
 export class TemplateStorage {
@@ -44,9 +43,39 @@ export class TemplateStorage {
     }
 
     public async readTemplateAsync(path: string): Promise<aas.Referable> {
+        switch (extname(path)) {
+            case '.json':
+                return this.readFromJson(path);
+            case '.xml':
+                return this.readFromXml(path);
+            case 'aasx':
+                return this.readFromAasx(path);
+            default:
+                throw new Error('Not implemented.');
+        }
+    }
+
+    private async readFromAasx(file: string): Promise<aas.Referable> {
+        let source: AasxDirectory | undefined;
+        try {
+            source = new AasxDirectory(this.logger, this.fileStorage);
+            await source.openAsync();
+            const pkg = source.createPackage(file);
+            return (await pkg.readEnvironmentAsync()).submodels[0];
+        } finally {
+            await source?.closeAsync();
+        }
+    }
+
+    private async readFromXml(path: string): Promise<aas.Referable> {
+        const xml = (await this.fileStorage.readFile(join(this.root, path))).toString();
+        const env = createXmlReader(xml).readEnvironment();
+        return env.submodels[0];
+    }
+
+    private async readFromJson(path: string): Promise<aas.Referable> {
         const referable = JSON.parse((await this.fileStorage.readFile(join(this.root, path))).toString());
-        const reader = this.createReader(referable);
-        return reader.read(referable);
+        return createJsonReader(referable).read(referable);
     }
 
     private async readDirAsync(dir: string, descriptors: TemplateDescriptor[]): Promise<void> {
@@ -54,47 +83,89 @@ export class TemplateStorage {
         while (directories.length > 0) {
             const directory = directories.pop()!;
             for (const entry of await this.fileStorage.readDir(join(this.root, directory))) {
-                const path = join(directory, entry.name);
+                const file = join(directory, entry.name);
                 if (entry.type === 'directory') {
-                    directories.push(path);
+                    directories.push(file);
                 } else {
-                    const format = extname(path).toLowerCase();
+                    const format = extname(file).toLowerCase();
+                    let descriptor: TemplateDescriptor | undefined;
                     switch (format) {
                         case '.json':
-                            {
-                                const template = await this.readTemplateAsync(path);
-                                const descriptor: TemplateDescriptor = {
-                                    idShort: template.idShort,
-                                    endpoint: { type: 'file', address: path },
-                                    format: '.json',
-                                    modelType: template.modelType,
-                                };
-
-                                if (isSubmodel(template)) {
-                                    descriptor.id = template.id;
-                                }
-
-                                descriptors.push(descriptor);
-                            }
+                            descriptor = await this.fromJsonFile(file);
                             break;
 
                         case '.xml':
-                            throw new Error(`Template format '${format}' is not implemented`);
+                            descriptor = await this.fromXmlFile(file);
+                            break;
+
+                        case '.aasx':
+                            descriptor = await this.fromAasxFile(file);
+                            break;
+                    }
+
+                    if (descriptor) {
+                        descriptors.push(descriptor);
                     }
                 }
             }
         }
     }
 
-    private createReader(referable: object): AASReader {
-        if (typeof (referable as aas.Referable).modelType === 'string') {
-            return new JsonReader(this.logger);
-        }
+    private async fromJsonFile(file: string): Promise<TemplateDescriptor | undefined> {
+        try {
+            const referable = JSON.parse((await this.fileStorage.readFile(join(this.root, file))).toString());
+            const template = createJsonReader(referable).read(referable);
+            const descriptor: TemplateDescriptor = {
+                idShort: template.idShort,
+                endpoint: { type: 'file', address: file },
+                format: '.json',
+                modelType: template.modelType,
+            };
 
-        if (typeof (referable as aasV2.Referable).modelType?.name === 'string') {
-            return new JsonReaderV2(this.logger);
-        }
+            if (isSubmodel(template)) {
+                descriptor.id = template.id;
+            }
 
-        throw new Error('Not implemented.');
+            return descriptor;
+        } catch {
+            return undefined;
+        }
+    }
+
+    private async fromXmlFile(file: string): Promise<TemplateDescriptor | undefined> {
+        try {
+            const xml = (await this.fileStorage.readFile(join(this.root, file))).toString();
+            const submodel = createXmlReader(xml).readEnvironment().submodels[0];
+            return {
+                modelType: submodel.modelType,
+                idShort: submodel.idShort,
+                id: submodel.id,
+                format: '.xml',
+                endpoint: { type: 'file', address: file },
+            };
+        } catch {
+            return undefined;
+        }
+    }
+
+    private async fromAasxFile(file: string): Promise<TemplateDescriptor | undefined> {
+        let source: AasxDirectory | undefined;
+        try {
+            source = new AasxDirectory(this.logger, this.fileStorage);
+            await source.openAsync();
+            const pkg = source.createPackage(file);
+            const submodel = (await pkg.readEnvironmentAsync()).submodels[0];
+            return {
+                modelType: submodel.modelType,
+                idShort: submodel.idShort,
+                id: submodel.id,
+                format: '.xml',
+                endpoint: { type: 'file', address: file },
+            };
+        } catch {
+            return undefined;
+        } finally {
+            await source?.closeAsync();
+        }
     }
 }

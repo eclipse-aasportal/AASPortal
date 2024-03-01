@@ -15,6 +15,7 @@ export interface FileStorageEntry {
 /** Defines a file based AASX package source. */
 export abstract class FileStorage {
     protected constructor(public readonly root: string) {}
+    public abstract get url(): string;
     public abstract mtime(path: string): Promise<Date>;
     public abstract exists(path: string): Promise<boolean>;
     public abstract createDir(path: string, recursive?: boolean): Promise<void>;

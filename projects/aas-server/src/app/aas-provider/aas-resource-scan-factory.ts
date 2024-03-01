@@ -19,7 +19,6 @@ import { AASServer } from '../packages/aas-server/aas-server.js';
 import { AASServerV3 } from '../packages/aas-server/aas-server-v3.js';
 import { AASServerV0 } from '../packages/aas-server/aas-server-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
-import { FileStorage } from '../file-storage/file-storage.js';
 
 @singleton()
 export class AASResourceScanFactory {
@@ -51,19 +50,10 @@ export class AASResourceScanFactory {
             case 'FileSystem':
                 return new DirectoryScan(
                     this.logger,
-                    new AasxDirectory(
-                        this.logger,
-                        endpoint.url,
-                        endpoint.name,
-                        this.getFileStorage(new URL(endpoint.url)),
-                    ),
+                    new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint.name),
                 );
             default:
                 throw new Error('Not implemented.');
         }
-    }
-
-    private getFileStorage(url: URL): FileStorage {
-        return this.fileStorageProvider.get(url);
     }
 }

@@ -21,8 +21,8 @@ describe('AasxPackage', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        fileStorage = new LocalFileStorage('./src/test/assets/');
-        source = new AasxDirectory(logger, 'file:///samples', 'Samples', fileStorage);
+        fileStorage = new LocalFileStorage('file:///samples', './src/test/assets/');
+        source = new AasxDirectory(logger, fileStorage, 'Samples');
     });
 
     describe('createDocumentAsync', function () {

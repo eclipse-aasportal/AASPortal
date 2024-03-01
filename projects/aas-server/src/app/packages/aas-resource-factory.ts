@@ -16,7 +16,6 @@ import { AASServerV3 } from './aas-server/aas-server-v3.js';
 import { OpcuaServer } from './opcua/opcua-server.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
-import { FileStorage } from '../file-storage/file-storage.js';
 
 @singleton()
 export class AASResourceFactory {
@@ -45,9 +44,7 @@ export class AASResourceFactory {
                 return new OpcuaServer(this.logger, endpoint.url, endpoint.name);
             case 'WebDAV':
             case 'FileSystem': {
-                const url = new URL(endpoint.url);
-                url.pathname = '';
-                return new AasxDirectory(this.logger, endpoint.url, endpoint.name, this.getFileStorage(url));
+                return new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint.name);
             }
             default:
                 throw new Error('Not implemented.');
@@ -80,13 +77,10 @@ export class AASResourceFactory {
                 case 'WebDAV':
                 case 'FileSystem':
                     {
-                        const url = new URL(endpoint.url);
-                        url.pathname = '';
                         await new AasxDirectory(
                             this.logger,
-                            endpoint.url,
+                            this.fileStorageProvider.get(endpoint.url),
                             endpoint.name,
-                            this.getFileStorage(url),
                         ).testAsync();
                     }
                     break;
@@ -100,9 +94,5 @@ export class AASResourceFactory {
                 endpoint.url,
             );
         }
-    }
-
-    private getFileStorage(url: string | URL): FileStorage {
-        return this.fileStorageProvider.get(url);
     }
 }

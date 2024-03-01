@@ -8,15 +8,12 @@
 
 import { readFile } from 'fs/promises';
 import { resolve } from 'path/posix';
-import { Logger } from '../../app/logging/logger.js';
 import { XmlReaderV1 } from '../../app/packages/xml-reader-v1.js';
-import { createSpyObj } from '../utils.js';
-import { describe, beforeAll, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeAll, beforeEach, it, expect } from '@jest/globals';
 
 describe('XmlReader', function () {
     describe('with default namespace v2.0', function () {
         let reader: XmlReaderV1;
-        let logger: jest.Mocked<Logger>;
         let xml: string;
         let path: string;
 
@@ -26,8 +23,7 @@ describe('XmlReader', function () {
         });
 
         beforeEach(function () {
-            logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-            reader = new XmlReaderV1(logger, xml);
+            reader = new XmlReaderV1(xml);
         });
 
         it('should be created', function () {
@@ -42,7 +38,6 @@ describe('XmlReader', function () {
 
     describe('with prefix namespace v1.0', function () {
         let reader: XmlReaderV1;
-        let logger: jest.Mocked<Logger>;
         let xml: string;
         let path: string;
 
@@ -52,8 +47,7 @@ describe('XmlReader', function () {
         });
 
         beforeEach(function () {
-            logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-            reader = new XmlReaderV1(logger, xml);
+            reader = new XmlReaderV1(xml);
         });
 
         it('should be created', function () {

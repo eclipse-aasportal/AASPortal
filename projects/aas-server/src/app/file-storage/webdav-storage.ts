@@ -7,21 +7,21 @@
  *****************************************************************************/
 
 import { FileStat, WebDAVClient, createClient } from 'webdav';
-import { join, normalize, sep } from 'path/posix';
+import { dirname, join, normalize, relative, sep } from 'path/posix';
 import { FileStorage, FileStorageEntry } from './file-storage.js';
 
 export class WebDAVStorage extends FileStorage {
-    private url: URL;
-
     public constructor(
         url: string | URL,
         private _client?: WebDAVClient,
     ) {
         url = typeof url === 'string' ? new URL(url) : url;
-        super(url.pathname);
+        super(sep);
 
-        this.url = url;
+        this.url = typeof url === 'string' ? url : url.href;
     }
+
+    public override readonly url: string;
 
     public override async mtime(path: string): Promise<Date> {
         const stat = (await this.client.stat(this.resolve(path))) as FileStat;
@@ -42,7 +42,11 @@ export class WebDAVStorage extends FileStorage {
 
     public override async readDir(path: string): Promise<FileStorageEntry[]> {
         const items = (await this.client.getDirectoryContents(this.resolve(path))) as FileStat[];
-        return items.map(item => ({ name: item.basename, path: item.filename, type: item.type }));
+        return items.map(item => ({
+            name: item.basename,
+            path: sep + relative(this.root, dirname(item.filename)),
+            type: item.type,
+        }));
     }
 
     public override async readFile(path: string): Promise<Buffer> {

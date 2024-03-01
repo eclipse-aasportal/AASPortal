@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { Logger } from '../logging/logger.js';
 import { AASReader } from './aas-reader.js';
 import { aas, determineType, extensionToMimeType, isIdentifiable } from 'common';
 import { cloneDeep } from 'lodash-es';
@@ -15,10 +14,7 @@ import { encodeBase64Url } from '../convert.js';
 export class JsonReader extends AASReader {
     private readonly origin: aas.Environment;
 
-    public constructor(
-        private readonly logger: Logger,
-        origin?: aas.Environment | string,
-    ) {
+    public constructor(origin?: aas.Environment | string) {
         super();
 
         if (origin) {

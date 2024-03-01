@@ -55,8 +55,8 @@ describe('WebDAVStorage', () => {
         it('returns the directory contents', async () => {
             client.getDirectoryContents.mockResolvedValue(files);
             await expect(storage.readDir('./')).resolves.toEqual([
-                { name: 'A', path: '/A', type: 'file' },
-                { name: 'B', path: '/B', type: 'directory' },
+                { name: 'A', path: '/', type: 'file' },
+                { name: 'B', path: '/', type: 'directory' },
             ]);
 
             expect(client.getDirectoryContents).toHaveBeenCalledWith('/');

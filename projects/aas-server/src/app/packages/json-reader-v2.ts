@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { Logger } from '../logging/logger.js';
 import { AASReader } from './aas-reader.js';
 import { determineType, aas, isSubmodelElement, isIdentifiable } from 'common';
 import { encodeBase64Url } from '../convert.js';
@@ -15,10 +14,7 @@ import * as aasv2 from '../types/aas-v2.js';
 export class JsonReaderV2 extends AASReader {
     private readonly origin: aasv2.AssetAdministrationShellEnvironment;
 
-    public constructor(
-        private readonly logger: Logger,
-        origin?: aasv2.AssetAdministrationShellEnvironment | string,
-    ) {
+    public constructor(origin?: aasv2.AssetAdministrationShellEnvironment | string) {
         super();
 
         if (origin) {

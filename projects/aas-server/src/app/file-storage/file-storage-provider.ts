@@ -40,7 +40,7 @@ export class FileStorageProvider {
         url = new URL(url);
         switch (url.protocol) {
             case 'file:':
-                return new LocalFileStorage(this.variable.ASSETS);
+                return new LocalFileStorage(url.href, this.variable.ASSETS);
             case 'http:':
             case 'https:':
                 if (isEmpty(url.username)) {

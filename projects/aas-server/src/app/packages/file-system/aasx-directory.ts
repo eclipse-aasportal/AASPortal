@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, ApplicationError } from 'common';
-import { join } from 'path/posix';
+import { basename, extname, join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
@@ -23,13 +23,12 @@ export class AasxDirectory extends AASResource {
 
     public constructor(
         logger: Logger,
-        url: string,
-        name: string,
         private readonly fileStorage: FileStorage,
+        name?: string,
     ) {
-        super(logger, url, name);
+        super(logger, fileStorage.url, name ?? basename(fileStorage.url));
 
-        this.root = new URL(url).pathname;
+        this.root = new URL(fileStorage.url).pathname;
     }
 
     public get isOpen(): boolean {
@@ -47,9 +46,9 @@ export class AasxDirectory extends AASResource {
     }
 
     public async readDir(): Promise<string[]> {
-        return (await this.fileStorage.readDir(this.root))
-            .filter(entry => entry.type === 'file')
-            .map(entry => entry.name);
+        const files: string[] = [];
+        await this.readDirectoryAsync(this.root, '', files);
+        return files;
     }
 
     public async testAsync(): Promise<void> {
@@ -82,7 +81,7 @@ export class AasxDirectory extends AASResource {
         });
     }
 
-    public createPackage(address: string): AASPackage {
+    public override createPackage(address: string): AASPackage {
         return new AasxPackage(this.logger, this, address);
     }
 
@@ -90,17 +89,13 @@ export class AasxDirectory extends AASResource {
         throw new Error('Not implemented.');
     }
 
-    public async getPackageAsync(_: string, name: string): Promise<NodeJS.ReadableStream> {
+    public override async getPackageAsync(_: string, name: string): Promise<NodeJS.ReadableStream> {
         const path = join(this.root, name);
         if (!(await this.fileStorage.exists(path))) {
             throw new Error(`The file '${path}' does not exist.`);
         }
 
         return this.fileStorage.createReadStream(path);
-    }
-
-    public readEnvironmentAsync(): Promise<aas.Environment> {
-        throw new Error('Not implemented.');
     }
 
     public override async postPackageAsync(file: Express.Multer.File): Promise<string> {
@@ -139,5 +134,16 @@ export class AasxDirectory extends AASResource {
 
     public override getBlobValueAsync(): Promise<string | undefined> {
         throw new Error('Not implemented.');
+    }
+
+    private async readDirectoryAsync(dir: string, path: string, files: string[]): Promise<void> {
+        const entries = await this.fileStorage.readDir(dir);
+        for (const entry of entries) {
+            if (entry.type === 'directory') {
+                await this.readDirectoryAsync(join(dir, entry.name), join(path, entry.name), files);
+            } else if (extname(entry.name) === '.aasx') {
+                files.push(join(path, entry.name));
+            }
+        }
     }
 }

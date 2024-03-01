@@ -1,0 +1,27 @@
+import { DOMParser } from '@xmldom/xmldom';
+import { AASReader } from './aas-reader.js';
+import { HTMLDocumentElement } from '../types/html-document-element.js';
+import { XmlReaderV1 } from './xml-reader-v1.js';
+import { XmlReaderV2 } from './xml-reader_v2.js';
+import { XmlReader } from './xml-reader.js';
+
+export function createXmlReader(xml: string): AASReader {
+    const document = new DOMParser().parseFromString(xml);
+    const nsMap = (document.documentElement as HTMLDocumentElement)._nsMap ?? {};
+    for (const prefix in nsMap) {
+        const uri = nsMap[prefix];
+        if (uri === 'http://www.admin-shell.io/aas/1/0') {
+            return new XmlReaderV1(document);
+        }
+
+        if (uri === 'http://www.admin-shell.io/aas/2/0') {
+            return new XmlReaderV2(document);
+        }
+
+        if (uri === 'https://admin-shell.io/aas/3/0') {
+            return new XmlReader(document);
+        }
+    }
+
+    throw new Error('Invalid operation.');
+}

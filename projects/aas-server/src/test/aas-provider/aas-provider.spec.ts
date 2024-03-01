@@ -32,7 +32,10 @@ describe('AASProvider', function () {
 
     beforeEach(function () {
         fileStorageFactory = createSpyObj<FileStorageProvider>(['get']);
-        fileStorageFactory.get.mockReturnValue(new LocalFileStorage('./src/test/assets/samples'));
+        fileStorageFactory.get.mockReturnValue(
+            new LocalFileStorage('file:///endpoints/samples', './src/test/assets/samples'),
+        );
+
         resourceFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
         variable = createSpyObj<Variable>({}, { ENDPOINTS: [] });
         index = createSpyObj<AASIndex>(['getEndpoints']);

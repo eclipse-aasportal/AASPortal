@@ -6,16 +6,13 @@
  *
  *****************************************************************************/
 
-import { describe, beforeAll, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeAll, beforeEach, it, expect } from '@jest/globals';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path/posix';
-import { Logger } from '../../app/logging/logger.js';
-import { createSpyObj } from '../utils.js';
 import { XmlReader } from '../../app/packages/xml-reader.js';
 
 describe('XmlReader', function () {
     let reader: XmlReader;
-    let logger: jest.Mocked<Logger>;
     let xml: string;
     let path: string;
 
@@ -25,8 +22,7 @@ describe('XmlReader', function () {
     });
 
     beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        reader = new XmlReader(logger, xml);
+        reader = new XmlReader(xml);
     });
 
     it('should be created', function () {

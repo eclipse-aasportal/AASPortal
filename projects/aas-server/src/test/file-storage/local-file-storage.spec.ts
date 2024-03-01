@@ -17,7 +17,7 @@ describe('LocalFileStorage', () => {
     let storage: LocalFileStorage;
 
     beforeEach(() => {
-        storage = new LocalFileStorage(sep);
+        storage = new LocalFileStorage('file:///endpoints/samples', sep);
     });
 
     afterEach(() => {

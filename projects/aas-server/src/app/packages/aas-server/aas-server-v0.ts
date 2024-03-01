@@ -36,7 +36,7 @@ export class AASServerV0 extends AASServer {
     public override async readEnvironmentAsync(id: string): Promise<aas.Environment> {
         const url = this.resolve(`/aas/${id}/aasenv`);
         const sourceEnv = await this.message.get<aasV2.AssetAdministrationShellEnvironment>(url);
-        return new JsonReaderV2(this.logger, sourceEnv).readEnvironment();
+        return new JsonReaderV2(sourceEnv).readEnvironment();
     }
 
     public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {

@@ -9,7 +9,6 @@
 import { aas, determineType } from 'common';
 import { useNamespaces, XPathSelect } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
-import { Logger } from '../logging/logger.js';
 import { AASReader } from './aas-reader.js';
 import { HTMLDocumentElement } from '../types/html-document-element.js';
 
@@ -18,10 +17,7 @@ export class XmlReaderV2 extends AASReader {
     private readonly document: Document;
     private iec61360 = 'IEC61360';
 
-    public constructor(
-        private readonly logger: Logger,
-        xmlSource: string | Document,
-    ) {
+    public constructor(xmlSource: string | Document) {
         super();
 
         this.document = typeof xmlSource === 'string' ? new DOMParser().parseFromString(xmlSource) : xmlSource;

@@ -7,19 +7,23 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { normalize, resolve, sep } from 'path/posix';
+import { normalize, resolve, sep, relative } from 'path/posix';
 import { FileStorage, FileStorageEntry } from './file-storage.js';
 
 export class LocalFileStorage extends FileStorage {
-    public constructor(root: string) {
+    public constructor(url: string | URL, root: string) {
         super(resolve(root));
+
+        this.url = typeof url === 'string' ? url : url.href;
     }
 
-    public async mtime(path: string): Promise<Date> {
+    public readonly url: string;
+
+    public override async mtime(path: string): Promise<Date> {
         return (await fs.promises.stat(resolve(this.root, path))).mtime;
     }
 
-    public exists(path: string): Promise<boolean> {
+    public override exists(path: string): Promise<boolean> {
         return Promise.resolve(fs.existsSync(this.resolve(path)));
     }
 
@@ -27,27 +31,27 @@ export class LocalFileStorage extends FileStorage {
         await fs.promises.mkdir(this.resolve(path), { recursive: recursive });
     }
 
-    public writeFile(path: string, data: string | Buffer): Promise<void> {
+    public override writeFile(path: string, data: string | Buffer): Promise<void> {
         return fs.promises.writeFile(this.resolve(path), data);
     }
 
-    public async readDir(path: string): Promise<FileStorageEntry[]> {
+    public override async readDir(path: string): Promise<FileStorageEntry[]> {
         return (await fs.promises.readdir(this.resolve(path), { withFileTypes: true })).map(entry => ({
             name: entry.name,
-            path: entry.path,
+            path: sep + relative(this.root, entry.path),
             type: entry.isDirectory() ? 'directory' : 'file',
         }));
     }
 
-    public readFile(path: string): Promise<Buffer> {
+    public override readFile(path: string): Promise<Buffer> {
         return fs.promises.readFile(this.resolve(path));
     }
 
-    public delete(path: string): Promise<void> {
+    public override delete(path: string): Promise<void> {
         return fs.promises.unlink(this.resolve(path));
     }
 
-    public createReadStream(path: string): NodeJS.ReadableStream {
+    public override createReadStream(path: string): NodeJS.ReadableStream {
         return fs.createReadStream(this.resolve(path));
     }
 
