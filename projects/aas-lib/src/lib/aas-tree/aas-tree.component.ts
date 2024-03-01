@@ -444,7 +444,7 @@ export class AASTreeComponent implements AASTree, OnInit, OnChanges, OnDestroy {
 
     private play(): void {
         if (this.document) {
-            this.webSocketSubject = this.webSocketFactory.create('ws://172.16.160.171/websocket');
+            this.webSocketSubject = this.webSocketFactory.create();
             this.webSocketSubject.subscribe(
                 {
                     next: this.onMessage,
