@@ -48,7 +48,7 @@ export class TemplateStorage {
                 return this.readFromJson(path);
             case '.xml':
                 return this.readFromXml(path);
-            case 'aasx':
+            case '.aasx':
                 return this.readFromAasx(path);
             default:
                 throw new Error('Not implemented.');
