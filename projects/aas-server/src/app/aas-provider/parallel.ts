@@ -83,11 +83,7 @@ export class Parallel extends EventEmitter {
     ) {
         super();
         this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan-worker.js');
-        if (fs.existsSync(this.script)) {
-            for (let i = 0; i < this.variable.MAX_WORKERS; i++) {
-                this.pool.set(new Worker(this.script, { env: SHARE_ENV }), true);
-            }
-        } else {
+        if (!fs.existsSync(this.script)) {
             this.logger.error(`${this.script} does not exist.`);
         }
     }
@@ -116,6 +112,12 @@ export class Parallel extends EventEmitter {
                 this.pool.set(entry[0], false);
                 return entry[0];
             }
+        }
+
+        if (this.pool.size < this.variable.MAX_WORKERS) {
+            const worker = new Worker(this.script, { env: SHARE_ENV });
+            this.pool.set(worker, true);
+            return worker;
         }
 
         return undefined;
