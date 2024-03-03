@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { extname, join } from 'path/posix';
-import { TemplateDescriptor, aas, isSubmodel } from 'common';
+import { TemplateDescriptor, aas } from 'common';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
@@ -16,21 +16,33 @@ import { Variable } from '../variable.js';
 import { createJsonReader } from '../packages/create-json-reader.js';
 import { createXmlReader } from '../packages/create-xml-reader.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
+import { ScanTemplatesData } from '../aas-provider/worker-data.js';
+import { ScanResult, ScanResultType, ScanStatistic, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { Parallel } from '../aas-provider/parallel.js';
+import { TaskHandler } from '../aas-provider/task-handler.js';
 
 @singleton()
 export class TemplateStorage {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
+    private readonly timeout: number;
+    private descriptors: TemplateDescriptor[] = [];
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(Variable) variable: Variable,
         @inject(FileStorageProvider) provider: FileStorageProvider,
+        @inject(Parallel) private readonly parallel: Parallel,
+        @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
         const url = new URL(variable.TEMPLATE_STORAGE);
+        this.timeout = variable.SCAN_TEMPLATES_TIMEOUT;
         this.root = url.pathname;
         url.pathname = '';
         this.fileStorage = provider.get(url);
+
+        this.parallel.on('message', this.parallelOnMessage);
+        this.parallel.on('end', this.parallelOnEnd);
     }
 
     public async readTemplatesAsync(): Promise<TemplateDescriptor[]> {
@@ -55,6 +67,17 @@ export class TemplateStorage {
         }
     }
 
+    private startScan = async (taskId: number, statistic: ScanStatistic) => {
+        const data: ScanTemplatesData = {
+            type: 'ScanTemplatesData',
+            taskId,
+            statistic,
+        };
+
+        this.taskHandler.set(taskId, { id: 'TemplateStorage', owner: 'TemplateStorage', type: 'ScanTemplates' });
+        this.parallel.execute(data);
+    };
+
     private async readFromAasx(file: string): Promise<aas.Referable> {
         let source: AasxDirectory | undefined;
         try {
@@ -78,94 +101,33 @@ export class TemplateStorage {
         return createJsonReader(referable).read(referable);
     }
 
-    private async readDirAsync(dir: string, descriptors: TemplateDescriptor[]): Promise<void> {
-        const directories: string[] = [dir];
-        while (directories.length > 0) {
-            const directory = directories.pop()!;
-            for (const entry of await this.fileStorage.readDir(join(this.root, directory))) {
-                const file = join(directory, entry.name);
-                if (entry.type === 'directory') {
-                    directories.push(file);
-                } else {
-                    const format = extname(file).toLowerCase();
-                    let descriptor: TemplateDescriptor | undefined;
-                    switch (format) {
-                        case '.json':
-                            descriptor = await this.fromJsonFile(file);
-                            break;
+    private parallelOnMessage = async (result: ScanResult) => {
+        try {
+            if (this.isScanTemplatesResult(result)) {
+                this.descriptors = result.descriptors;
+            }
+        } catch (error) {
+            this.logger.error(error);
+        }
+    };
 
-                        case '.xml':
-                            descriptor = await this.fromXmlFile(file);
-                            break;
-
-                        case '.aasx':
-                            descriptor = await this.fromAasxFile(file);
-                            break;
-                    }
-
-                    if (descriptor) {
-                        descriptors.push(descriptor);
-                    }
-                }
+    private parallelOnEnd = async (result: ScanResult) => {
+        const task = this.taskHandler.get(result.taskId);
+        if (task) {
+            this.taskHandler.delete(result.taskId);
+            if (task.type === 'ScanTemplates') {
+                setTimeout(this.startScan, this.timeout, result.taskId, result.statistic);
             }
         }
-    }
 
-    private async fromJsonFile(file: string): Promise<TemplateDescriptor | undefined> {
-        try {
-            const referable = JSON.parse((await this.fileStorage.readFile(join(this.root, file))).toString());
-            const template = createJsonReader(referable).read(referable);
-            const descriptor: TemplateDescriptor = {
-                idShort: template.idShort,
-                endpoint: { type: 'file', address: file },
-                format: '.json',
-                modelType: template.modelType,
-            };
-
-            if (isSubmodel(template)) {
-                descriptor.id = template.id;
-            }
-
-            return descriptor;
-        } catch {
-            return undefined;
+        if (result.messages) {
+            this.logger.start(`scan ${task?.id ?? 'undefined'}`);
+            result.messages.forEach(message => this.logger.log(message));
+            this.logger.stop();
         }
-    }
+    };
 
-    private async fromXmlFile(file: string): Promise<TemplateDescriptor | undefined> {
-        try {
-            const xml = (await this.fileStorage.readFile(join(this.root, file))).toString();
-            const submodel = createXmlReader(xml).readEnvironment().submodels[0];
-            return {
-                modelType: submodel.modelType,
-                idShort: submodel.idShort,
-                id: submodel.id,
-                format: '.xml',
-                endpoint: { type: 'file', address: file },
-            };
-        } catch {
-            return undefined;
-        }
-    }
-
-    private async fromAasxFile(file: string): Promise<TemplateDescriptor | undefined> {
-        let source: AasxDirectory | undefined;
-        try {
-            source = new AasxDirectory(this.logger, this.fileStorage);
-            await source.openAsync();
-            const pkg = source.createPackage(file);
-            const submodel = (await pkg.readEnvironmentAsync()).submodels[0];
-            return {
-                modelType: submodel.modelType,
-                idShort: submodel.idShort,
-                id: submodel.id,
-                format: '.xml',
-                endpoint: { type: 'file', address: file },
-            };
-        } catch {
-            return undefined;
-        } finally {
-            await source?.closeAsync();
-        }
+    private isScanTemplatesResult(result: ScanResult): result is ScanTemplatesResult {
+        return Array.isArray((result as ScanTemplatesResult).descriptors);
     }
 }

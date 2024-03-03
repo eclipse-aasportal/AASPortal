@@ -11,7 +11,7 @@ import { ScanStatistic } from './scan-result.js';
 
 export interface WorkerData {
     taskId: number;
-    type: 'ScanContainerData';
+    type: 'ScanContainerData' | 'ScanTemplatesData';
     statistic: ScanStatistic;
 }
 
@@ -20,6 +20,14 @@ export interface ScanContainerData extends WorkerData {
     container: AASContainer;
 }
 
+export interface ScanTemplatesData extends WorkerData {
+    type: 'ScanTemplatesData';
+}
+
 export function isScanContainerData(data: WorkerData): data is ScanContainerData {
     return data.type === 'ScanContainerData';
+}
+
+export function isScanTemplates(data: WorkerData): data is ScanTemplatesData {
+    return data.type === 'ScanTemplates';
 }

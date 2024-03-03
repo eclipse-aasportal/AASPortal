@@ -38,21 +38,13 @@ import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
+import { TaskHandler } from './task-handler.js';
 
 @singleton()
 export class AASProvider {
     private readonly timeout: number;
     private readonly file: string | undefined;
     private wsServer!: WSServer;
-    private readonly tasks = new Map<
-        number,
-        {
-            id: string;
-            type: 'ScanEndpoint' | 'ScanContainer';
-        }
-    >();
-
-    private nextTaskId = 1;
 
     public constructor(
         @inject(Variable) variable: Variable,
@@ -60,8 +52,9 @@ export class AASProvider {
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
         @inject('AASIndex') private readonly index: AASIndex,
+        @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        this.timeout = variable.TIMEOUT;
+        this.timeout = variable.SCAN_CONTAINER_TIMEOUT;
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
     }
@@ -199,7 +192,7 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        this.startContainerScan(this.createTaskId(), endpoint, this.createScanStatistic());
+        this.startContainerScan(this.taskHandler.createTaskId(), endpoint, this.createScanStatistic());
     }
 
     /**
@@ -224,7 +217,7 @@ export class AASProvider {
      * Restores the default AAS server configuration.
      */
     public async resetAsync(): Promise<void> {
-        this.tasks.clear();
+        this.taskHandler.clear('AASProvider');
         await this.index.reset();
 
         this.wsServer.notify('IndexChange', {
@@ -402,7 +395,7 @@ export class AASProvider {
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
-                await this.startContainerScan(this.createTaskId(), endpoint, this.createScanStatistic());
+                await this.startContainerScan(this.taskHandler.createTaskId(), endpoint, this.createScanStatistic());
             }
         } catch (error) {
             this.logger.error(error);
@@ -410,9 +403,9 @@ export class AASProvider {
     };
 
     private parallelOnEnd = async (result: ScanResult) => {
-        const task = this.tasks.get(result.taskId);
+        const task = this.taskHandler.get(result.taskId);
         if (task) {
-            this.tasks.delete(result.taskId);
+            this.taskHandler.delete(result.taskId);
             if (task.type === 'ScanContainer') {
                 const endpoint = await this.index.getEndpoint(task.id);
                 if (endpoint) {
@@ -437,7 +430,7 @@ export class AASProvider {
             container: { ...endpoint, documents },
         };
 
-        this.tasks.set(taskId, { id: endpoint.name, type: 'ScanContainer' });
+        this.taskHandler.set(taskId, { id: endpoint.name, owner: 'AASProvider', type: 'ScanContainer' });
         this.parallel.execute(data);
     };
 
@@ -488,12 +481,6 @@ export class AASProvider {
             type: 'AASServerMessage',
             data: data,
         });
-    }
-
-    private createTaskId(): number {
-        const taskId = this.nextTaskId;
-        ++this.nextTaskId;
-        return taskId;
     }
 
     private createScanStatistic(): ScanStatistic {

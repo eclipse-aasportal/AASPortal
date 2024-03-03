@@ -24,7 +24,8 @@ export class Variable {
         this.WEB_ROOT = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
         this.ASSETS = path.resolve(process.env.ASSETS ?? './assets');
         this.ENDPOINTS = process.env.ENDPOINTS ? JSON.parse(process.env.ENDPOINTS) : ['file:///samples?name=Samples'];
-        this.TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
+        this.SCAN_TEMPLATES_TIMEOUT = process.env.SCAN_TEMPLATES_TIMEOUT ? Number(process.env.TIMEOUT) : 300000;
+        this.SCAN_CONTAINER_TIMEOUT = process.env.SCAN_CONTAINER_TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
         this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
@@ -73,7 +74,10 @@ export class Variable {
     public readonly ENDPOINTS: string[];
 
     /** */
-    public readonly TIMEOUT: number;
+    public readonly SCAN_CONTAINER_TIMEOUT: number;
+
+    /** */
+    public readonly SCAN_TEMPLATES_TIMEOUT: number;
 
     /** The key file if AASServer supports HTTPS. */
     public readonly HTTPS_KEY_FILE?: string;

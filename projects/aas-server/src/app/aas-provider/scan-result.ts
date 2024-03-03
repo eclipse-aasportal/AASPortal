@@ -6,12 +6,13 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message } from 'common';
+import { AASDocument, AASContainer, Message, TemplateDescriptor } from 'common';
 
 export enum ScanResultType {
     Added,
     Removed,
     Changed,
+    Update,
     End,
 }
 
@@ -51,4 +52,9 @@ export interface ScanContainerResult extends ScanResult {
     container: AASContainer;
     /** The result subject. */
     document: AASDocument;
+}
+
+/** The result of a container scan. */
+export interface ScanTemplatesResult extends ScanResult {
+    descriptors: TemplateDescriptor[];
 }
