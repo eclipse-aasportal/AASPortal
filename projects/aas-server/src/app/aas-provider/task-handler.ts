@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { singleton } from 'tsyringe';
 
 export interface Task {
@@ -16,13 +24,8 @@ export class TaskHandler {
         this.tasks.delete(taskId);
     }
 
-    public get(taskId: number): Task {
-        const task = this.tasks.get(taskId);
-        if (!task) {
-            throw new Error('Invalid operation.');
-        }
-
-        return task;
+    public get(taskId: number): Task | undefined {
+        return this.tasks.get(taskId);
     }
 
     public set(taskId: number, task: Task) {

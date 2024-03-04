@@ -10,6 +10,7 @@ import { AASEndpointType } from './types.js';
 import {
     AssetAdministrationShell,
     Blob,
+    Environment,
     Identifiable,
     MultiLanguageProperty,
     Property,
@@ -143,6 +144,15 @@ export function isSubmodelElement(value: unknown): value is SubmodelElement {
     }
 
     return false;
+}
+
+/** Indicates whether the specified value if of type `Environment`. */
+export function isEnvironment(value: unknown): value is Environment {
+    return (
+        Array.isArray((value as Environment).assetAdministrationShells) &&
+        Array.isArray((value as Environment).submodels) &&
+        Array.isArray((value as Environment).conceptDescriptions)
+    );
 }
 
 /**

@@ -7,12 +7,10 @@
  *****************************************************************************/
 
 import { AASContainer } from 'common';
-import { ScanStatistic } from './scan-result.js';
 
 export interface WorkerData {
     taskId: number;
     type: 'ScanContainerData' | 'ScanTemplatesData';
-    statistic: ScanStatistic;
 }
 
 export interface ScanContainerData extends WorkerData {
@@ -28,6 +26,6 @@ export function isScanContainerData(data: WorkerData): data is ScanContainerData
     return data.type === 'ScanContainerData';
 }
 
-export function isScanTemplates(data: WorkerData): data is ScanTemplatesData {
-    return data.type === 'ScanTemplates';
+export function isScanTemplatesData(data: WorkerData): data is ScanTemplatesData {
+    return data.type === 'ScanTemplatesData';
 }

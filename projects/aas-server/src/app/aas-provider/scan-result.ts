@@ -16,32 +16,12 @@ export enum ScanResultType {
     End,
 }
 
-/** Provides statistic information about a container scan. */
-export interface ScanStatistic {
-    /** Start time. */
-    start: number;
-    /** End time */
-    end: number;
-    /** The number of scan cycles. */
-    counter: number;
-    /** The number of changed AAS documents.*/
-    changed: number;
-    /** The number of new AAS documents. */
-    new: number;
-    /** The number of deleted AAS documents. */
-    deleted: number;
-    /** The number of offline events. */
-    offline: number;
-}
-
 /** The result of a container scan. */
 export interface ScanResult {
     /** The result. */
     type: ScanResultType;
     /** The task identifier. */
     taskId: number;
-    /** Statistic information. */
-    statistic: ScanStatistic;
     /** The message memory. */
     messages?: Message[];
 }
@@ -56,5 +36,5 @@ export interface ScanContainerResult extends ScanResult {
 
 /** The result of a container scan. */
 export interface ScanTemplatesResult extends ScanResult {
-    descriptors: TemplateDescriptor[];
+    templates: TemplateDescriptor[];
 }

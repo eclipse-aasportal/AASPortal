@@ -13,7 +13,6 @@ import { DOMParser } from '@xmldom/xmldom';
 import { AasxDirectory } from './aasx-directory.js';
 import { AASDocument, aas } from 'common';
 
-import { Lazy } from '../../lazy.js';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { Logger } from '../../logging/logger.js';
@@ -25,7 +24,7 @@ import { createJsonReader } from '../create-json-reader.js';
 export class AasxPackage extends AASPackage {
     private readonly file: string;
     private readonly source: AasxDirectory;
-    private readonly zip: Lazy<jszip>;
+    private readonly zip: Promise<jszip>;
     private originName: string | null = null;
 
     public constructor(logger: Logger, source: AASResource, file: string) {
@@ -33,7 +32,7 @@ export class AasxPackage extends AASPackage {
 
         this.source = source as AasxDirectory;
         this.file = file;
-        this.zip = new Lazy<jszip>(this.initializeZip.bind(this));
+        this.zip = this.loadAsync();
     }
 
     public async createDocumentAsync(): Promise<AASDocument> {
@@ -80,7 +79,7 @@ export class AasxPackage extends AASPackage {
         }
 
         const name = this.normalize(file.value);
-        const stream = (await this.zip.getValueAsync()).file(name)?.nodeStream();
+        const stream = (await this.zip).file(name)?.nodeStream();
         if (!stream) {
             throw Error(`ZIP entry '${name}' could not be opened.`);
         }
@@ -98,7 +97,7 @@ export class AasxPackage extends AASPackage {
             ) {
                 const value = relationship.getAttribute('Target');
                 if (value) {
-                    stream = (await this.zip.getValueAsync()).file(this.normalize(value))?.nodeStream();
+                    stream = (await this.zip).file(this.normalize(value))?.nodeStream();
                     if (stream) {
                         break;
                     }
@@ -130,7 +129,7 @@ export class AasxPackage extends AASPackage {
         }
     }
 
-    private async initializeZip(): Promise<jszip> {
+    private async loadAsync(): Promise<jszip> {
         const data = await this.source.readFile(this.file);
         return await jszip.loadAsync(data);
     }
@@ -169,7 +168,7 @@ export class AasxPackage extends AASPackage {
             contentType = this.getContentType(basename(path));
         }
 
-        const zip = await this.zip.getValueAsync();
+        const zip = await this.zip;
         const file = zip.file(path);
         if (file === null) {
             throw new Error(`${path} is not a valid ZIP file.`);

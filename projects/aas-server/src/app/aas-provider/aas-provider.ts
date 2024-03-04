@@ -26,7 +26,7 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from '../aas-index/aas-index.js';
-import { ScanResultType, ScanResult, ScanStatistic, ScanContainerResult } from './scan-result.js';
+import { ScanResultType, ScanResult, ScanContainerResult } from './scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
 import { ScanContainerData } from './worker-data.js';
@@ -192,7 +192,7 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        this.startContainerScan(this.taskHandler.createTaskId(), endpoint, this.createScanStatistic());
+        this.scanContainer(this.taskHandler.createTaskId(), endpoint);
     }
 
     /**
@@ -395,7 +395,7 @@ export class AASProvider {
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
-                await this.startContainerScan(this.taskHandler.createTaskId(), endpoint, this.createScanStatistic());
+                await this.scanContainer(this.taskHandler.createTaskId(), endpoint);
             }
         } catch (error) {
             this.logger.error(error);
@@ -404,13 +404,11 @@ export class AASProvider {
 
     private parallelOnEnd = async (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
-        if (task) {
+        if (task && task.type === 'ScanContainer') {
             this.taskHandler.delete(result.taskId);
-            if (task.type === 'ScanContainer') {
-                const endpoint = await this.index.getEndpoint(task.id);
-                if (endpoint) {
-                    setTimeout(this.startContainerScan, this.timeout, result.taskId, endpoint, result.statistic);
-                }
+            const endpoint = await this.index.getEndpoint(task.id);
+            if (endpoint) {
+                setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
             }
         }
 
@@ -421,12 +419,11 @@ export class AASProvider {
         }
     };
 
-    private startContainerScan = async (taskId: number, endpoint: AASEndpoint, statistic: ScanStatistic) => {
+    private scanContainer = async (taskId: number, endpoint: AASEndpoint) => {
         const documents = await this.index.getContainerDocuments(endpoint.name);
         const data: ScanContainerData = {
             type: 'ScanContainerData',
             taskId,
-            statistic,
             container: { ...endpoint, documents },
         };
 
@@ -481,18 +478,6 @@ export class AASProvider {
             type: 'AASServerMessage',
             data: data,
         });
-    }
-
-    private createScanStatistic(): ScanStatistic {
-        return {
-            start: 0,
-            end: 0,
-            counter: 0,
-            changed: 0,
-            new: 0,
-            deleted: 0,
-            offline: 0,
-        };
     }
 
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {

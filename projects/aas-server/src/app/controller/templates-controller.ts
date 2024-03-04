@@ -42,7 +42,7 @@ export class TemplatesController extends AASController {
     public async getTemplates(): Promise<TemplateDescriptor[]> {
         try {
             this.logger.start('getTemplates');
-            return await this.templateStorage.readTemplatesAsync();
+            return await this.templateStorage.getTemplatesAsync();
         } finally {
             this.logger.stop();
         }
@@ -56,7 +56,7 @@ export class TemplatesController extends AASController {
     @Get('{path}')
     @Security('bearerAuth', ['guest'])
     @OperationId('getTemplate')
-    public async getTemplate(path: string): Promise<aas.Referable> {
+    public async getTemplate(path: string): Promise<aas.Referable | aas.Environment> {
         try {
             this.logger.start('getTemplate');
             return await this.templateStorage.readTemplateAsync(decodeBase64Url(path));

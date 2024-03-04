@@ -44,7 +44,7 @@ describe('TemplateController', () => {
             'deleteCookieAsync',
         ]);
 
-        templateStorage = createSpyObj<TemplateStorage>(['readTemplatesAsync', 'readTemplateAsync']);
+        templateStorage = createSpyObj<TemplateStorage>(['getTemplatesAsync', 'readTemplateAsync']);
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
 
@@ -69,12 +69,12 @@ describe('TemplateController', () => {
             { idShort: 'TestTemplate', id: 'http://localhost:1234/a/b/c', modelType: 'Submodel' },
         ];
 
-        templateStorage.readTemplatesAsync.mockResolvedValue(templates);
+        templateStorage.getTemplatesAsync.mockResolvedValue(templates);
         const response = await request(app).get('/api/v1/templates').set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(templates);
-        expect(templateStorage.readTemplatesAsync).toHaveBeenCalled();
+        expect(templateStorage.getTemplatesAsync).toHaveBeenCalled();
     });
 
     it('getTemplate: /api/v1/templates/{path}', async () => {

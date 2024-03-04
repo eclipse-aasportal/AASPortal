@@ -17,7 +17,7 @@ import { createJsonReader } from '../packages/create-json-reader.js';
 import { createXmlReader } from '../packages/create-xml-reader.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { ScanTemplatesData } from '../aas-provider/worker-data.js';
-import { ScanResult, ScanResultType, ScanStatistic, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { ScanResult, ScanResultType, ScanTemplatesResult } from '../aas-provider/scan-result.js';
 import { Parallel } from '../aas-provider/parallel.js';
 import { TaskHandler } from '../aas-provider/task-handler.js';
 
@@ -26,7 +26,7 @@ export class TemplateStorage {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
     private readonly timeout: number;
-    private descriptors: TemplateDescriptor[] = [];
+    private templates: TemplateDescriptor[] = [];
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
@@ -45,16 +45,15 @@ export class TemplateStorage {
         this.parallel.on('end', this.parallelOnEnd);
     }
 
-    public async readTemplatesAsync(): Promise<TemplateDescriptor[]> {
-        const descriptors: TemplateDescriptor[] = [];
-        if ((await this.fileStorage.exists(this.root)) === true) {
-            await this.readDirAsync('', descriptors);
-        }
-
-        return descriptors;
+    public start(): void {
+        setTimeout(this.startScan, 100);
     }
 
-    public async readTemplateAsync(path: string): Promise<aas.Referable> {
+    public getTemplatesAsync(): Promise<TemplateDescriptor[]> {
+        return Promise.resolve(this.templates);
+    }
+
+    public async readTemplateAsync(path: string): Promise<aas.Referable | aas.Environment> {
         switch (extname(path)) {
             case '.json':
                 return this.readFromJson(path);
@@ -67,33 +66,36 @@ export class TemplateStorage {
         }
     }
 
-    private startScan = async (taskId: number, statistic: ScanStatistic) => {
+    private startScan = () => {
+        this.scan(this.taskHandler.createTaskId());
+    };
+
+    private scan = async (taskId: number) => {
         const data: ScanTemplatesData = {
             type: 'ScanTemplatesData',
             taskId,
-            statistic,
         };
 
         this.taskHandler.set(taskId, { id: 'TemplateStorage', owner: 'TemplateStorage', type: 'ScanTemplates' });
         this.parallel.execute(data);
     };
 
-    private async readFromAasx(file: string): Promise<aas.Referable> {
+    private async readFromAasx(file: string): Promise<aas.Environment> {
         let source: AasxDirectory | undefined;
         try {
             source = new AasxDirectory(this.logger, this.fileStorage);
             await source.openAsync();
             const pkg = source.createPackage(file);
-            return (await pkg.readEnvironmentAsync()).submodels[0];
+            return await pkg.readEnvironmentAsync();
         } finally {
             await source?.closeAsync();
         }
     }
 
-    private async readFromXml(path: string): Promise<aas.Referable> {
+    private async readFromXml(path: string): Promise<aas.Environment> {
         const xml = (await this.fileStorage.readFile(join(this.root, path))).toString();
         const env = createXmlReader(xml).readEnvironment();
-        return env.submodels[0];
+        return env;
     }
 
     private async readFromJson(path: string): Promise<aas.Referable> {
@@ -101,23 +103,21 @@ export class TemplateStorage {
         return createJsonReader(referable).read(referable);
     }
 
-    private parallelOnMessage = async (result: ScanResult) => {
+    private parallelOnMessage = (result: ScanResult) => {
         try {
             if (this.isScanTemplatesResult(result)) {
-                this.descriptors = result.descriptors;
+                this.templates = result.templates;
             }
         } catch (error) {
             this.logger.error(error);
         }
     };
 
-    private parallelOnEnd = async (result: ScanResult) => {
+    private parallelOnEnd = (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
-        if (task) {
+        if (task && task.type === 'ScanTemplates') {
             this.taskHandler.delete(result.taskId);
-            if (task.type === 'ScanTemplates') {
-                setTimeout(this.startScan, this.timeout, result.taskId, result.statistic);
-            }
+            setTimeout(this.scan, this.timeout, result.taskId);
         }
 
         if (result.messages) {
@@ -128,6 +128,6 @@ export class TemplateStorage {
     };
 
     private isScanTemplatesResult(result: ScanResult): result is ScanTemplatesResult {
-        return Array.isArray((result as ScanTemplatesResult).descriptors);
+        return result.type === ScanResultType.Update;
     }
 }

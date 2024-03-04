@@ -14,6 +14,7 @@ import { FileLogger } from './logging/file-logger.js';
 import { WSServer } from './ws-server.js';
 import { AASProvider } from './aas-provider/aas-provider.js';
 import { AASIndexFactory } from './aas-index/aas-index-factory.js';
+import { TemplateStorage } from './template/template-storage.js';
 
 container.registerInstance('USERS_DIR', './users');
 container.registerSingleton('Logger', FileLogger);
@@ -31,3 +32,4 @@ container.afterResolution(
 
 container.resolve(WSServer).run();
 container.resolve(AASProvider);
+container.resolve(TemplateStorage).start();

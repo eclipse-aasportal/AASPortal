@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { parentPort } from 'worker_threads';
 import { extname, join } from 'path/posix';
 import { TemplateDescriptor, isSubmodel } from 'common';
@@ -12,7 +20,6 @@ import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { ScanResultType, ScanTemplatesResult } from '../aas-provider/scan-result.js';
 import { toUint8Array } from '../convert.js';
 import { WorkerData } from '../aas-provider/worker-data.js';
-import { UpdateStatistic } from '../update-statistic.js';
 
 @singleton()
 export class TemplateScan {
@@ -22,7 +29,6 @@ export class TemplateScan {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(Variable) variable: Variable,
-        @inject(UpdateStatistic) private readonly statistic: UpdateStatistic,
         @inject(FileStorageProvider) provider: FileStorageProvider,
     ) {
         const url = new URL(variable.TEMPLATE_STORAGE);
@@ -32,16 +38,15 @@ export class TemplateScan {
     }
 
     public async scanAsync(data: WorkerData): Promise<void> {
-        const descriptors: TemplateDescriptor[] = [];
+        const templates: TemplateDescriptor[] = [];
         if ((await this.fileStorage.exists(this.root)) === true) {
-            await this.readDirAsync('', descriptors);
+            await this.readDirAsync('', templates);
         }
 
         const value: ScanTemplatesResult = {
             taskId: data.taskId,
             type: ScanResultType.Update,
-            statistic: this.statistic.update(data.statistic, ScanResultType.Added),
-            descriptors: descriptors,
+            templates: templates,
         };
 
         const array = toUint8Array(value);
@@ -123,13 +128,13 @@ export class TemplateScan {
         try {
             source = new AasxDirectory(this.logger, this.fileStorage);
             await source.openAsync();
-            const pkg = source.createPackage(file);
+            const pkg = source.createPackage(join(this.root, file));
             const submodel = (await pkg.readEnvironmentAsync()).submodels[0];
             return {
                 modelType: submodel.modelType,
                 idShort: submodel.idShort,
                 id: submodel.id,
-                format: '.xml',
+                format: '.aasx',
                 endpoint: { type: 'file', address: file },
             };
         } catch {

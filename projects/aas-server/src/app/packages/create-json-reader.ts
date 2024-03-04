@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { aas } from 'common';
 import { AASReader } from './aas-reader.js';
 import { JsonReaderV2 } from './json-reader-v2.js';

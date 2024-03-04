@@ -43,7 +43,7 @@ export class TemplateService {
      * @param endpoint The template endpoint.
      * @returns The template.
      */
-    public getTemplate(endpoint: Endpoint): Observable<aas.Referable> {
-        return this.http.get<aas.Referable>(`/api/v1/templates/${encodeBase64Url(endpoint.address)}`);
+    public getTemplate(endpoint: Endpoint): Observable<aas.Referable | aas.Environment> {
+        return this.http.get<aas.Referable | aas.Environment>(`/api/v1/templates/${encodeBase64Url(endpoint.address)}`);
     }
 }

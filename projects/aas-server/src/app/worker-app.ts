@@ -9,10 +9,9 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { WorkerData, isScanContainerData, isScanTemplates } from './aas-provider/worker-data.js';
+import { WorkerData, isScanContainerData, isScanTemplatesData } from './aas-provider/worker-data.js';
 import { ScanResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
-import { UpdateStatistic } from './update-statistic.js';
 import { ScanContainer } from './scan-container.js';
 import { TemplateScan } from './template/template-scan.js';
 
@@ -22,7 +21,6 @@ export class WorkerApp {
         @inject('Logger') private readonly logger: Logger,
         @inject(ScanContainer) private readonly scanContainer: ScanContainer,
         @inject(TemplateScan) private readonly templateScan: TemplateScan,
-        @inject(UpdateStatistic) private readonly statistic: UpdateStatistic,
     ) {}
 
     public run(): void {
@@ -34,7 +32,7 @@ export class WorkerApp {
             this.logger.start(`Scan ${data.taskId}`);
             if (isScanContainerData(data)) {
                 await this.scanContainer.scanAsync(data);
-            } else if (isScanTemplates(data)) {
+            } else if (isScanTemplatesData(data)) {
                 await this.templateScan.scanAsync(data);
             }
         } catch (error) {
@@ -44,7 +42,6 @@ export class WorkerApp {
             const result: ScanResult = {
                 taskId: data.taskId,
                 type: ScanResultType.End,
-                statistic: this.statistic.update(data.statistic, ScanResultType.End),
                 messages: this.logger.getMessages(),
             };
 

@@ -19,6 +19,7 @@ import { createSpyObj } from '../utils.js';
 import { Variable } from '../../app/variable.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
 import { AASIndex } from '../../app/aas-index/aas-index.js';
+import { TaskHandler } from '../../app/aas-provider/task-handler.js';
 
 describe('AASProvider', function () {
     let aasProvider: AASProvider;
@@ -39,7 +40,7 @@ describe('AASProvider', function () {
         resourceFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
         variable = createSpyObj<Variable>({}, { ENDPOINTS: [] });
         index = createSpyObj<AASIndex>(['getEndpoints']);
-        aasProvider = new AASProvider(variable, logger, parallel, resourceFactory, index);
+        aasProvider = new AASProvider(variable, logger, parallel, resourceFactory, index, new TaskHandler());
     });
 
     describe('getEndpoints', () => {

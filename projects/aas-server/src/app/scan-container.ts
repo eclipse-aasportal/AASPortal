@@ -9,21 +9,20 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { AASDocument, aas, isDeepEqual } from 'common';
+import { AASDocument } from 'common';
 import { ScanContainerData } from './aas-provider/worker-data.js';
 import { ScanContainerResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
-import { UpdateStatistic } from './update-statistic.js';
 import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
 import { Variable } from './variable.js';
 
 @singleton()
 export class ScanContainer {
     private data!: ScanContainerData;
+    private startTime = 0;
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(UpdateStatistic) private readonly statistic: UpdateStatistic,
         @inject(AASResourceScanFactory) private readonly resourceScanFactory: AASResourceScanFactory,
         @inject(Variable) private readonly variable: Variable,
     ) {}
@@ -32,6 +31,7 @@ export class ScanContainer {
         this.data = data;
         let documents: AASDocument[];
         const scan = this.resourceScanFactory.create(data.container);
+        this.startTime = Date.now();
         try {
             scan.on('scanned', this.onDocumentScanned);
             scan.on('error', this.onError);
@@ -75,7 +75,6 @@ export class ScanContainer {
             type: ScanResultType.Changed,
             container: this.data.container,
             document: document,
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Changed),
         };
 
         const array = toUint8Array(value);
@@ -88,7 +87,6 @@ export class ScanContainer {
             type: ScanResultType.Removed,
             container: this.data.container,
             document: document,
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Removed),
         };
 
         const array = toUint8Array(value);
@@ -101,7 +99,6 @@ export class ScanContainer {
             type: ScanResultType.Added,
             container: this.data.container,
             document: document,
-            statistic: this.statistic.update(this.data.statistic, ScanResultType.Added),
         };
 
         const array = toUint8Array(value);
@@ -119,16 +116,16 @@ export class ScanContainer {
         return true;
     }
 
-    private equalContent(a: aas.Environment | null, b: aas.Environment | null): boolean {
-        let equals: boolean;
-        if (a === b) {
-            equals = true;
-        } else if (a !== null && b !== null) {
-            equals = isDeepEqual(a, b);
-        } else {
-            equals = false;
-        }
+    // private equalContent(a: aas.Environment | null, b: aas.Environment | null): boolean {
+    //     let equals: boolean;
+    //     if (a === b) {
+    //         equals = true;
+    //     } else if (a !== null && b !== null) {
+    //         equals = isDeepEqual(a, b);
+    //     } else {
+    //         equals = false;
+    //     }
 
-        return equals;
-    }
+    //     return equals;
+    // }
 }

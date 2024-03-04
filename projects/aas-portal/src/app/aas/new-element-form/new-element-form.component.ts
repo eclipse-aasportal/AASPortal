@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, map } from 'rxjs';
 import { TemplateService } from 'aas-lib';
-import { TemplateDescriptor, aas, getChildren } from 'common';
+import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'common';
 import { head } from 'lodash-es';
 
 @Component({
@@ -108,7 +108,11 @@ export class NewElementFormComponent {
         this.clearMessages();
         if (this.validate()) {
             this.api.getTemplate(this._template!.endpoint!).subscribe(template => {
-                template.idShort = this.idShort;
+                if (isEnvironment(template)) {
+                    template.submodels[0].idShort = this.idShort;
+                } else {
+                    template.idShort = this.idShort;
+                }
                 return this.modal.close(template);
             });
         }
