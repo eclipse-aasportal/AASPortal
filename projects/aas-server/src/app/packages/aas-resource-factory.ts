@@ -44,7 +44,12 @@ export class AASResourceFactory {
                 return new OpcuaServer(this.logger, endpoint.url, endpoint.name);
             case 'WebDAV':
             case 'FileSystem': {
-                return new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint.name);
+                return new AasxDirectory(
+                    this.logger,
+                    this.fileStorageProvider.get(endpoint.url),
+                    endpoint.url,
+                    endpoint.name,
+                );
             }
             default:
                 throw new Error('Not implemented.');
@@ -80,6 +85,7 @@ export class AASResourceFactory {
                         await new AasxDirectory(
                             this.logger,
                             this.fileStorageProvider.get(endpoint.url),
+                            endpoint.url,
                             endpoint.name,
                         ).testAsync();
                     }

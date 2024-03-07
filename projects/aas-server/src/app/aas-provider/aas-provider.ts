@@ -45,6 +45,9 @@ export class AASProvider {
     private readonly timeout: number;
     private readonly file: string | undefined;
     private wsServer!: WSServer;
+    private shutDown = false;
+    private resetRequested = false;
+    private removeEndpointRequests = new Map<string, AASEndpoint>();
 
     public constructor(
         @inject(Variable) variable: Variable,
@@ -192,7 +195,7 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        this.scanContainer(this.taskHandler.createTaskId(), endpoint);
+        setTimeout(this.scanContainer, 0, this.taskHandler.createTaskId(), endpoint);
     }
 
     /**
@@ -202,14 +205,14 @@ export class AASProvider {
     public async removeEndpointAsync(name: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
         if (endpoint) {
-            await this.index.removeEndpoint(name);
-            this.wsServer.notify('IndexChange', {
-                type: 'AASServerMessage',
-                data: {
-                    type: 'EndpointRemoved',
-                    endpoint: endpoint,
-                } as AASServerMessage,
-            });
+            if (this.removeEndpointRequests.has(endpoint.name)) {
+                return;
+            }
+
+            this.removeEndpointRequests.set(endpoint.name, endpoint);
+            if (this.taskHandler.empty(this, endpoint.name)) {
+                await this.doRemoveEndpointAsync(endpoint);
+            }
         }
     }
 
@@ -217,18 +220,18 @@ export class AASProvider {
      * Restores the default AAS server configuration.
      */
     public async resetAsync(): Promise<void> {
-        this.taskHandler.clear('AASProvider');
-        await this.index.reset();
+        if (this.resetRequested) {
+            return;
+        }
 
-        this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
-            data: {
-                type: 'Reset',
-            } as AASServerMessage,
-        });
+        this.resetRequested = true;
+        this.shutDown = true;
 
-        this.startScan();
-        this.logger.info('AAS Server configuration restored.');
+        if (!this.taskHandler.empty(this)) {
+            return;
+        }
+
+        await this.doResetAsync();
     }
 
     /**
@@ -366,6 +369,36 @@ export class AASProvider {
         return nodes;
     }
 
+    private async doResetAsync(): Promise<void> {
+        await this.index.reset();
+
+        this.wsServer.notify('IndexChange', {
+            type: 'AASServerMessage',
+            data: {
+                type: 'Reset',
+            } as AASServerMessage,
+        });
+
+        this.resetRequested = false;
+        this.removeEndpointRequests.clear();
+        this.startScan();
+        this.logger.info('AAS Server configuration restored.');
+    }
+
+    private async doRemoveEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+        await this.index.removeEndpoint(endpoint.name);
+        this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
+        this.wsServer.notify('IndexChange', {
+            type: 'AASServerMessage',
+            data: {
+                type: 'EndpointRemoved',
+                endpoint: endpoint,
+            } as AASServerMessage,
+        });
+
+        this.removeEndpointRequests.delete(endpoint.name);
+    }
+
     private onClientMessage = async (data: WebSocketData, client: SocketClient): Promise<void> => {
         try {
             switch (data.type) {
@@ -394,28 +427,12 @@ export class AASProvider {
 
     private startScan = async (): Promise<void> => {
         try {
+            this.shutDown = false;
             for (const endpoint of await this.index.getEndpoints()) {
-                await this.scanContainer(this.taskHandler.createTaskId(), endpoint);
+                setTimeout(this.scanContainer, 0, this.taskHandler.createTaskId(), endpoint);
             }
         } catch (error) {
             this.logger.error(error);
-        }
-    };
-
-    private parallelOnEnd = async (result: ScanResult) => {
-        const task = this.taskHandler.get(result.taskId);
-        if (task && task.type === 'ScanContainer') {
-            this.taskHandler.delete(result.taskId);
-            const endpoint = await this.index.getEndpoint(task.id);
-            if (endpoint) {
-                setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
-            }
-        }
-
-        if (result.messages) {
-            this.logger.start(`scan ${task?.id ?? 'undefined'}`);
-            result.messages.forEach(message => this.logger.log(message));
-            this.logger.stop();
         }
     };
 
@@ -427,7 +444,7 @@ export class AASProvider {
             container: { ...endpoint, documents },
         };
 
-        this.taskHandler.set(taskId, { id: endpoint.name, owner: 'AASProvider', type: 'ScanContainer' });
+        this.taskHandler.set(taskId, { name: endpoint.name, owner: this, type: 'ScanContainer' });
         this.parallel.execute(data);
     };
 
@@ -437,6 +454,36 @@ export class AASProvider {
             data: data,
         });
     }
+
+    private parallelOnEnd = async (result: ScanResult) => {
+        const task = this.taskHandler.get(result.taskId);
+        if (!task || task.owner !== this) {
+            return;
+        }
+
+        this.taskHandler.delete(result.taskId);
+        const endpoint = await this.index.getEndpoint(task.name);
+        if (endpoint && this.shutDown === false && !this.removeEndpointRequests.has(task.name)) {
+            setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
+        }
+
+        if (result.messages) {
+            this.logger.start(`scan ${task.name ?? 'undefined'}`);
+            result.messages.forEach(message => this.logger.log(message));
+            this.logger.stop();
+        }
+
+        if (this.resetRequested) {
+            if (this.taskHandler.empty(this)) {
+                await this.doResetAsync();
+            }
+        } else if (this.removeEndpointRequests.size > 0) {
+            const endpoint = this.removeEndpointRequests.get(task.name);
+            if (endpoint && this.taskHandler.empty(this, endpoint.name)) {
+                await this.doRemoveEndpointAsync(endpoint);
+            }
+        }
+    };
 
     private parallelOnMessage = async (result: ScanResult) => {
         try {

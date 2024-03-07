@@ -22,7 +22,7 @@ describe('AasxPackage', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         fileStorage = new LocalFileStorage('file:///samples', './src/test/assets/');
-        source = new AasxDirectory(logger, fileStorage, 'Samples');
+        source = new AasxDirectory(logger, fileStorage, 'file:///samples', 'Samples');
     });
 
     describe('createDocumentAsync', function () {

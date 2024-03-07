@@ -26,6 +26,7 @@ export class TemplateStorage {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
     private readonly timeout: number;
+    private readonly url: URL;
     private templates: TemplateDescriptor[] = [];
 
     public constructor(
@@ -35,11 +36,10 @@ export class TemplateStorage {
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        const url = new URL(variable.TEMPLATE_STORAGE);
+        this.url = new URL(variable.TEMPLATE_STORAGE);
         this.timeout = variable.SCAN_TEMPLATES_TIMEOUT;
-        this.root = url.pathname;
-        url.pathname = '';
-        this.fileStorage = provider.get(url);
+        this.root = this.url.pathname;
+        this.fileStorage = provider.get(this.url);
 
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
@@ -67,23 +67,23 @@ export class TemplateStorage {
     }
 
     private startScan = () => {
-        this.scan(this.taskHandler.createTaskId());
+        this.scanTemplates(this.taskHandler.createTaskId());
     };
 
-    private scan = async (taskId: number) => {
+    private scanTemplates = async (taskId: number) => {
         const data: ScanTemplatesData = {
             type: 'ScanTemplatesData',
             taskId,
         };
 
-        this.taskHandler.set(taskId, { id: 'TemplateStorage', owner: 'TemplateStorage', type: 'ScanTemplates' });
+        this.taskHandler.set(taskId, { name: 'TemplateStorage', owner: this, type: 'ScanTemplates' });
         this.parallel.execute(data);
     };
 
     private async readFromAasx(file: string): Promise<aas.Environment> {
         let source: AasxDirectory | undefined;
         try {
-            source = new AasxDirectory(this.logger, this.fileStorage);
+            source = new AasxDirectory(this.logger, this.fileStorage, this.url);
             await source.openAsync();
             const pkg = source.createPackage(file);
             return await pkg.readEnvironmentAsync();
@@ -94,8 +94,7 @@ export class TemplateStorage {
 
     private async readFromXml(path: string): Promise<aas.Environment> {
         const xml = (await this.fileStorage.readFile(join(this.root, path))).toString();
-        const env = createXmlReader(xml).readEnvironment();
-        return env;
+        return createXmlReader(xml).readEnvironment();
     }
 
     private async readFromJson(path: string): Promise<aas.Referable> {
@@ -115,13 +114,15 @@ export class TemplateStorage {
 
     private parallelOnEnd = (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
-        if (task && task.type === 'ScanTemplates') {
-            this.taskHandler.delete(result.taskId);
-            setTimeout(this.scan, this.timeout, result.taskId);
+        if (!task || task.owner !== this) {
+            return;
         }
 
+        this.taskHandler.delete(result.taskId);
+        setTimeout(this.scanTemplates, this.timeout, result.taskId);
+
         if (result.messages) {
-            this.logger.start(`scan ${task?.id ?? 'undefined'}`);
+            this.logger.start(`scan ${task?.name ?? 'undefined'}`);
             result.messages.forEach(message => this.logger.log(message));
             this.logger.stop();
         }

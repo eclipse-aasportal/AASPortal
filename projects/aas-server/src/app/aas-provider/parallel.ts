@@ -44,7 +44,6 @@ class WorkerTask extends EventEmitter {
     }
 
     public destroy(): void {
-        this.removeAllListeners();
         if (this._worker) {
             this._worker.off('message', this.workerOnMessage);
             this._worker.off('exit', this.workerOnExit);
@@ -82,6 +81,7 @@ export class Parallel extends EventEmitter {
         @inject(Variable) private readonly variable: Variable,
     ) {
         super();
+
         this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan-worker.js');
         if (!fs.existsSync(this.script)) {
             this.logger.error(`${this.script} does not exist.`);
@@ -94,9 +94,9 @@ export class Parallel extends EventEmitter {
      */
     public execute(data: WorkerData): void {
         const task = new WorkerTask(data);
-        task.on('message', this.taskOnMessage.bind(this));
-        task.on('end', this.taskOnEnd.bind(this));
-        task.on('error', this.taskOnError.bind(this));
+        task.on('message', this.taskOnMessage);
+        task.on('end', this.taskOnEnd);
+        task.on('error', this.taskOnError);
 
         const worker = this.nextWorker();
         if (worker) {
@@ -116,22 +116,25 @@ export class Parallel extends EventEmitter {
 
         if (this.pool.size < this.variable.MAX_WORKERS) {
             const worker = new Worker(this.script, { env: SHARE_ENV });
-            this.pool.set(worker, true);
+            this.pool.set(worker, false);
             return worker;
         }
 
         return undefined;
     }
 
-    private taskOnMessage(result: ScanResult) {
+    private taskOnMessage = (result: ScanResult) => {
         this.emit('message', result);
-    }
+    };
 
-    private taskOnEnd(task: WorkerTask, result: ScanResult) {
+    private taskOnEnd = (task: WorkerTask, result: ScanResult) => {
         this.emit('end', result);
 
         if (task) {
             const worker = task.worker;
+            task.off('message', this.taskOnMessage);
+            task.off('end', this.taskOnEnd);
+            task.off('error', this.taskOnError);
             task.destroy();
             if (worker) {
                 if (this.waiting.length > 0) {
@@ -144,13 +147,16 @@ export class Parallel extends EventEmitter {
                 }
             }
         }
-    }
+    };
 
-    private taskOnError(error: Error, task: WorkerTask): void {
+    private taskOnError = (error: Error, task: WorkerTask) => {
         this.logger.error(error);
 
         try {
             if (task) {
+                task.off('message', this.taskOnMessage);
+                task.off('end', this.taskOnEnd);
+                task.off('error', this.taskOnError);
                 task.destroy();
                 if (task.worker) {
                     this.pool.delete(task.worker);
@@ -160,13 +166,9 @@ export class Parallel extends EventEmitter {
                 if (index >= 0) {
                     this.waiting.splice(index, 1);
                 }
-
-                while (this.pool.size < this.variable.MAX_WORKERS) {
-                    this.pool.set(new Worker(this.script, { env: SHARE_ENV }), true);
-                }
             }
         } catch (error) {
             noop();
         }
-    }
+    };
 }

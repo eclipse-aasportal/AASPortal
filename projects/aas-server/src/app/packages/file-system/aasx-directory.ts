@@ -24,11 +24,16 @@ export class AasxDirectory extends AASResource {
     public constructor(
         logger: Logger,
         private readonly fileStorage: FileStorage,
+        url: string | URL,
         name?: string,
     ) {
-        super(logger, fileStorage.url, name ?? basename(fileStorage.url));
+        if (typeof url === 'string') {
+            url = new URL(url);
+        }
 
-        this.root = new URL(fileStorage.url).pathname;
+        super(logger, url.href, name ?? basename(url.pathname));
+
+        this.root = url.pathname;
     }
 
     public get isOpen(): boolean {
@@ -45,9 +50,9 @@ export class AasxDirectory extends AASResource {
         return this.fileStorage.readFile(join(this.root, name));
     }
 
-    public async readDir(): Promise<string[]> {
+    public async getFiles(): Promise<string[]> {
         const files: string[] = [];
-        await this.readDirectoryAsync(this.root, '', files);
+        await this.readDirAsync(this.root, '', files);
         return files;
     }
 
@@ -136,11 +141,11 @@ export class AasxDirectory extends AASResource {
         throw new Error('Not implemented.');
     }
 
-    private async readDirectoryAsync(dir: string, path: string, files: string[]): Promise<void> {
+    private async readDirAsync(dir: string, path: string, files: string[]): Promise<void> {
         const entries = await this.fileStorage.readDir(dir);
         for (const entry of entries) {
             if (entry.type === 'directory') {
-                await this.readDirectoryAsync(join(dir, entry.name), join(path, entry.name), files);
+                await this.readDirAsync(join(dir, entry.name), join(path, entry.name), files);
             } else if (extname(entry.name) === '.aasx') {
                 files.push(join(path, entry.name));
             }

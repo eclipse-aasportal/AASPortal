@@ -25,16 +25,16 @@ import { WorkerData } from '../aas-provider/worker-data.js';
 export class TemplateScan {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
+    private readonly url: URL;
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(Variable) variable: Variable,
         @inject(FileStorageProvider) provider: FileStorageProvider,
     ) {
-        const url = new URL(variable.TEMPLATE_STORAGE);
-        this.root = url.pathname;
-        url.pathname = '';
-        this.fileStorage = provider.get(url);
+        this.url = new URL(variable.TEMPLATE_STORAGE);
+        this.root = this.url.pathname;
+        this.fileStorage = provider.get(this.url);
     }
 
     public async scanAsync(data: WorkerData): Promise<void> {
@@ -126,9 +126,9 @@ export class TemplateScan {
     private async fromAasxFile(file: string): Promise<TemplateDescriptor | undefined> {
         let source: AasxDirectory | undefined;
         try {
-            source = new AasxDirectory(this.logger, this.fileStorage);
+            source = new AasxDirectory(this.logger, this.fileStorage, this.url);
             await source.openAsync();
-            const pkg = source.createPackage(join(this.root, file));
+            const pkg = source.createPackage(file);
             const submodel = (await pkg.readEnvironmentAsync()).submodels[0];
             return {
                 modelType: submodel.modelType,

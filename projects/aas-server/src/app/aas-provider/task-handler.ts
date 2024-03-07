@@ -9,8 +9,8 @@
 import { singleton } from 'tsyringe';
 
 export interface Task {
-    id: string;
-    owner: string;
+    name: string;
+    owner: object;
     type: 'ScanContainer' | 'ScanTemplates';
 }
 
@@ -32,8 +32,14 @@ export class TaskHandler {
         this.tasks.set(taskId, task);
     }
 
-    public clear(owner: string): void {
-        [...this.tasks].filter(item => item[1].owner === owner).forEach(item => this.tasks.delete(item[0]));
+    public empty(owner: object, name?: string): boolean {
+        for (const task of this.tasks.values()) {
+            if (task.owner === owner && (!name || task.name === name)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public createTaskId(): number {

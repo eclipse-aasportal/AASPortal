@@ -12,7 +12,7 @@ import { AASServer } from '../packages/aas-server/aas-server.js';
 import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 
-export class AASXServerScan extends AASResourceScan {
+export class AASServerScan extends AASResourceScan {
     private readonly logger: Logger;
     private readonly server: AASServer;
 
@@ -27,11 +27,11 @@ export class AASXServerScan extends AASResourceScan {
         try {
             await this.server.openAsync();
             const documents: AASDocument[] = [];
-            const listAAS = await this.server.getShellsAsync();
-            for (const idShort of listAAS) {
+            const idShorts = await this.server.getShellsAsync();
+            for (const idShort of idShorts) {
                 try {
-                    const aasxPackage = new AASServerPackage(this.logger, this.server, idShort);
-                    const document = await aasxPackage.createDocumentAsync();
+                    const aasPackage = new AASServerPackage(this.logger, this.server, idShort);
+                    const document = await aasPackage.createDocumentAsync();
                     documents.push(document);
                     this.emit('scanned', document);
                 } catch (error) {

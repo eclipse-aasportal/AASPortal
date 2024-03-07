@@ -19,7 +19,6 @@ import { Variable } from './variable.js';
 @singleton()
 export class ScanContainer {
     private data!: ScanContainerData;
-    private startTime = 0;
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
@@ -31,7 +30,6 @@ export class ScanContainer {
         this.data = data;
         let documents: AASDocument[];
         const scan = this.resourceScanFactory.create(data.container);
-        this.startTime = Date.now();
         try {
             scan.on('scanned', this.onDocumentScanned);
             scan.on('error', this.onError);

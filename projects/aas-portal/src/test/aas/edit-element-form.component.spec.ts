@@ -22,14 +22,12 @@ describe('EditElementFormComponent', () => {
     beforeEach(() => {
         activeModal = jasmine.createSpyObj('NgbActiveModal', ['close']);
         TestBed.configureTestingModule({
-            declarations: [
-                EditElementFormComponent
-            ],
+            declarations: [EditElementFormComponent],
             providers: [
                 {
                     provide: NgbActiveModal,
-                    useValue: activeModal
-                }
+                    useValue: activeModal,
+                },
             ],
             imports: [
                 CommonModule,
@@ -38,10 +36,10 @@ describe('EditElementFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(EditElementFormComponent);
@@ -62,7 +60,7 @@ describe('EditElementFormComponent', () => {
                 modelType: 'Property',
                 category: 'CONSTANT',
                 kind: 'Instance',
-                valueType: 'xs:string'
+                valueType: 'xs:string',
             };
 
             component.initialize(property);
@@ -130,7 +128,7 @@ describe('EditElementFormComponent', () => {
                 modelType: 'MultiLanguageProperty',
                 category: 'CONSTANT',
                 kind: 'Instance',
-                value: [{ language: 'de', text: 'Hallo Welt!' }]
+                value: [{ language: 'de', text: 'Hallo Welt!' }],
             };
 
             component.initialize(property);
@@ -165,7 +163,7 @@ describe('EditElementFormComponent', () => {
                     { language: 'de', text: 'Hallo Welt!' },
                     { language: 'en', text: 'Hello World!' },
                 ];
-                
+
                 expect((result as aas.MultiLanguageProperty).value).toEqual(expected);
                 done();
             });

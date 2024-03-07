@@ -19,6 +19,7 @@ import {
     Submodel,
     SubmodelElement,
     SubmodelElementCollection,
+    SubmodelElementList,
 } from './aas.js';
 import { isEmpty } from 'lodash-es';
 
@@ -176,8 +177,8 @@ export function isIdentifiable(referable?: Referable | null): referable is Ident
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `AssetAdministrationShell`; otherwise, `false`.
  */
-export function isAssetAdministrationShell(referable?: Referable | null): referable is AssetAdministrationShell {
-    return referable?.modelType === 'AssetAdministrationShell';
+export function isAssetAdministrationShell(referable: unknown): referable is AssetAdministrationShell {
+    return (referable as Referable)?.modelType === 'AssetAdministrationShell';
 }
 
 /**
@@ -185,8 +186,8 @@ export function isAssetAdministrationShell(referable?: Referable | null): refera
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `Submodel`; otherwise, `false`.
  */
-export function isSubmodel(referable?: Referable | null): referable is Submodel {
-    return referable?.modelType === 'Submodel';
+export function isSubmodel(referable: unknown): referable is Submodel {
+    return (referable as Referable)?.modelType === 'Submodel';
 }
 
 /**
@@ -194,8 +195,8 @@ export function isSubmodel(referable?: Referable | null): referable is Submodel 
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `Property`; otherwise, `false`.
  */
-export function isProperty(referable?: Referable | null): referable is Property {
-    return referable?.modelType === 'Property';
+export function isProperty(referable: unknown): referable is Property {
+    return (referable as Referable)?.modelType === 'Property';
 }
 
 /**
@@ -203,8 +204,8 @@ export function isProperty(referable?: Referable | null): referable is Property 
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `Blob`; otherwise, `false`.
  */
-export function isBlob(referable?: Referable | null): referable is Blob {
-    return referable?.modelType === 'Blob';
+export function isBlob(referable: unknown): referable is Blob {
+    return (referable as Referable)?.modelType === 'Blob';
 }
 
 /**
@@ -212,8 +213,8 @@ export function isBlob(referable?: Referable | null): referable is Blob {
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `MultiLanguageProperty`; otherwise, `false`.
  */
-export function isMultiLanguageProperty(referable?: Referable | null): referable is MultiLanguageProperty {
-    return referable?.modelType === 'MultiLanguageProperty';
+export function isMultiLanguageProperty(referable: unknown): referable is MultiLanguageProperty {
+    return (referable as Referable)?.modelType === 'MultiLanguageProperty';
 }
 
 /**
@@ -221,17 +222,26 @@ export function isMultiLanguageProperty(referable?: Referable | null): referable
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `ReferenceElement`; otherwise, `false`.
  */
-export function isReferenceElement(referable?: Referable | null): referable is ReferenceElement {
-    return referable?.modelType === 'ReferenceElement';
+export function isReferenceElement(referable: unknown): referable is ReferenceElement {
+    return (referable as Referable)?.modelType === 'ReferenceElement';
 }
 
 /**
- * Determines whether the specified referable represents a reference element.
+ * Determines whether the specified referable represents a submodel element collection.
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `SubmodelElementCollection`; otherwise, `false`.
  */
-export function isSubmodelElementCollection(referable?: Referable | null): referable is SubmodelElementCollection {
-    return referable?.modelType === 'SubmodelElementCollection';
+export function isSubmodelElementCollection(referable: unknown): referable is SubmodelElementCollection {
+    return (referable as Referable)?.modelType === 'SubmodelElementCollection';
+}
+
+/**
+ * Determines whether the specified referable represents a submodel element list.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `SubmodelElementList`; otherwise, `false`.
+ */
+export function isSubmodelElementList(referable: unknown): referable is SubmodelElementList {
+    return (referable as Referable)?.modelType === 'SubmodelElementList';
 }
 
 /**

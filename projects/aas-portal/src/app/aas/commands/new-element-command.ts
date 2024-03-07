@@ -14,9 +14,11 @@ import {
     AASDocument,
     getChildren,
     isAssetAdministrationShell,
+    isEnvironment,
     isSubmodel,
     isSubmodelElement,
     isSubmodelElementCollection,
+    isSubmodelElementList,
 } from 'common';
 
 import { AASState } from '../aas.state';
@@ -24,12 +26,16 @@ import * as AASActions from '../aas.actions';
 
 export class NewElementCommand extends Command {
     private readonly store: Store<{ aas: AASState }>;
-    private readonly parent: aas.Referable;
-    private readonly element: aas.Referable;
     private readonly memento: AASDocument;
     private document: AASDocument;
+    private content: aas.Environment;
 
-    public constructor(store: Store, document: AASDocument, parent: aas.Referable, element: aas.Referable) {
+    public constructor(
+        store: Store,
+        document: AASDocument,
+        private readonly parent: aas.Referable,
+        private readonly element: aas.Referable | aas.Environment,
+    ) {
         super('New Element');
 
         if (!document || !document.content) {
@@ -43,21 +49,26 @@ export class NewElementCommand extends Command {
 
         this.store = store as Store<{ aas: AASState }>;
         this.memento = document;
-        this.document = {
-            ...document,
-            content: {
-                ...document.content!,
-                assetAdministrationShells: [...document.content!.assetAdministrationShells],
-                submodels: [...document.content!.submodels],
-            },
+        this.content = {
+            assetAdministrationShells: [...document.content.assetAdministrationShells],
+            submodels: [...document.content.submodels],
+            conceptDescriptions: [...document.content.conceptDescriptions],
         };
 
+        this.document = { ...document, content: this.content };
         this.parent = parent;
         this.element = element;
     }
 
     protected onExecute(): void {
-        if (isSubmodel(this.element) && isAssetAdministrationShell(this.parent)) {
+        if (isEnvironment(this.element)) {
+            const submodel = this.element.submodels[0];
+            this.insertSubmodel(submodel);
+
+            for (const conceptDescription of this.element.conceptDescriptions) {
+                this.insertConceptDescription(conceptDescription);
+            }
+        } else if (isSubmodel(this.element)) {
             this.insertSubmodel(this.element);
         } else if (isSubmodelElement(this.element)) {
             this.insertSubmodelElement(this.element);
@@ -81,10 +92,16 @@ export class NewElementCommand extends Command {
     }
 
     private insertSubmodel(submodel: aas.Submodel): void {
-        const children = this.document.content!.submodels;
-        children.push(submodel);
+        if (!isAssetAdministrationShell(this.parent)) {
+            throw new Error('Invalid operation.');
+        }
 
-        let shell = this.document.content!.assetAdministrationShells[0];
+        if (this.content.submodels.some(item => item.id === submodel.id)) {
+            throw new Error(`A submodel with the identifier "${submodel.id}" already exists.`);
+        }
+
+        this.content.submodels.push(submodel);
+        const shell = this.content.assetAdministrationShells[0];
         const submodels = shell.submodels ? [...shell.submodels] : [];
         submodels.push({
             type: 'ModelReference',
@@ -96,19 +113,25 @@ export class NewElementCommand extends Command {
             ],
         });
 
-        shell = { ...shell, submodels };
-        this.document.content!.assetAdministrationShells[0] = shell;
+        this.content.assetAdministrationShells[0] = { ...shell, submodels };
     }
 
     private insertSubmodelElement(element: aas.SubmodelElement) {
         const sourceSubmodel = this.getSubmodel(this.parent);
-        const parentReference = this.createReference(this.parent);
-        const index = this.document.content!.submodels.indexOf(sourceSubmodel);
+        const index = this.content.submodels.indexOf(sourceSubmodel);
         const targetSubmodel = cloneDeep(sourceSubmodel);
-        this.document.content!.submodels[index] = targetSubmodel;
-        const children = this.getTargetChildren(targetSubmodel, parentReference);
+        this.content.submodels[index] = targetSubmodel;
+
+        const parentReference = this.createReference(this.parent);
+        const value = this.getTargetValue(targetSubmodel, parentReference);
         element.parent = parentReference;
-        children.push(element);
+        value.push(element);
+    }
+
+    private insertConceptDescription(conceptDescription: aas.ConceptDescription): void {
+        if (this.content.conceptDescriptions.every(item => item.id !== conceptDescription.id)) {
+            this.content.conceptDescriptions.push(conceptDescription);
+        }
     }
 
     private getSubmodel(referable: aas.Referable): aas.Submodel {
@@ -131,7 +154,7 @@ export class NewElementCommand extends Command {
         return submodel;
     }
 
-    private getTargetChildren(submodel: aas.Submodel, target: aas.Reference): aas.SubmodelElementCollection[] {
+    private getTargetValue(submodel: aas.Submodel, target: aas.Reference): aas.SubmodelElementCollection[] {
         let referable: aas.Referable | undefined = submodel;
         if (!submodel.submodelElements) {
             submodel.submodelElements = [];
@@ -141,7 +164,7 @@ export class NewElementCommand extends Command {
         for (let i = 1, n = target.keys.length; i < n; i++) {
             const key = target.keys[i];
             referable = children?.find(item => item.idShort === key.value);
-            if (isSubmodelElementCollection(referable)) {
+            if (isSubmodelElementCollection(referable) || isSubmodelElementList(referable)) {
                 if (!referable.value) {
                     referable.value = [];
                 }

@@ -20,6 +20,8 @@ import {
     isReferenceElement,
     isSubmodel,
     isSubmodelElement,
+    isSubmodelElementCollection,
+    isSubmodelElementList,
     isUrlSafeBase64,
     isValidEMail,
     isValidPassword,
@@ -113,6 +115,40 @@ describe('index', function () {
 
         it('indicates that "undefined" is not a ReferenceElement', function () {
             expect(isReferenceElement(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isSubmodelElementCollection', function () {
+        it('identifies a SubmodelElementCollection', function () {
+            const collection = createSpyObj<aas.SubmodelElementCollection>(
+                {},
+                { modelType: 'SubmodelElementCollection' },
+            );
+
+            expect(isSubmodelElementCollection(collection)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a SubmodelElementCollection', function () {
+            expect(isSubmodelElementCollection(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a SubmodelElementCollection', function () {
+            expect(isSubmodelElementCollection(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isSubmodelElementList', function () {
+        it('identifies a SubmodelElementList', function () {
+            const list = createSpyObj<aas.SubmodelElementList>({}, { modelType: 'SubmodelElementList' });
+            expect(isSubmodelElementList(list)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a SubmodelElementList', function () {
+            expect(isSubmodelElementList(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a SubmodelElementList', function () {
+            expect(isSubmodelElementList(undefined)).toBeFalsy();
         });
     });
 
