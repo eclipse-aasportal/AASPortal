@@ -2,12 +2,12 @@
 FROM node:lts-alpine3.19 as build
 WORKDIR /usr/src/app
 COPY . .
-RUN apk add g++ make py3-pip
+# RUN apk add g++ make py3-pip
 RUN npm install
 RUN node create-app-info.js
 RUN npm run build
 
-FROM node:lts-alpine3.19 as aas-server-app
+FROM node:lts-alpine3.19 as aasportal
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY package.json package.json
@@ -21,7 +21,7 @@ RUN npm install -w=aas-server --omit=dev
 COPY projects/aas-server/src/assets assets/
 ENV NODE_LOG=./log/debug.log
 ENV NODE_SERVER_PORT=80
-ENV ENDPOINTS=["\"file:///samples?name=Samples\""]
+ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]
 ENV NODE_ENV=production
 
 EXPOSE 80
