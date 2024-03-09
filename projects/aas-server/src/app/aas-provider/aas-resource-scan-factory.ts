@@ -13,11 +13,11 @@ import { Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
-import { OpcuaServer } from '../packages/opcua/opcua-server.js';
+import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
-import { AASServer } from '../packages/aas-server/aas-server.js';
-import { AASServerV3 } from '../packages/aas-server/aas-server-v3.js';
-import { AASServerV0 } from '../packages/aas-server/aas-server-v0.js';
+import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
+import { AASApiClientV3 } from '../packages/aas-server/aas-api-client-v3.js';
+import { AASApiClientV0 } from '../packages/aas-server/aas-api-client-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 
 @singleton()
@@ -30,13 +30,13 @@ export class AASResourceScanFactory {
     public create(endpoint: AASEndpoint): AASResourceScan {
         switch (endpoint.type) {
             case 'AASServer': {
-                let source: AASServer;
+                let source: AASApiClient;
                 switch (endpoint.version) {
                     case 'v0':
-                        source = new AASServerV0(this.logger, endpoint.url, endpoint.name);
+                        source = new AASApiClientV0(this.logger, endpoint.url, endpoint.name);
                         break;
                     case 'v3':
-                        source = new AASServerV3(this.logger, endpoint.url, endpoint.name);
+                        source = new AASApiClientV3(this.logger, endpoint.url, endpoint.name);
                         break;
                     default:
                         throw new Error('Not implemented.');
@@ -45,7 +45,7 @@ export class AASResourceScanFactory {
                 return new AASServerScan(this.logger, source);
             }
             case 'OpcuaServer':
-                return new OpcuaServerScan(this.logger, new OpcuaServer(this.logger, endpoint.url, endpoint.name));
+                return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint.url, endpoint.name));
             case 'WebDAV':
             case 'FileSystem':
                 return new DirectoryScan(

@@ -8,7 +8,7 @@
 
 import { LiveNode } from 'common';
 import { OpcuaSocketItem } from './opcua-socket-item.js';
-import { OpcuaServer } from '../../packages/opcua/opcua-server.js';
+import { OpcuaClient } from '../../packages/opcua/opcua-client.js';
 import { Logger } from '../../logging/logger.js';
 import { SocketClient } from '../socket-client.js';
 import { SocketSubscription } from '../socket-subscription.js';
@@ -23,14 +23,14 @@ import {
 } from 'node-opcua';
 
 export class OpcuaSubscription extends SocketSubscription {
-    private readonly server: OpcuaServer;
+    private readonly server: OpcuaClient;
     private readonly items: OpcuaSocketItem[];
     private subscription?: ClientSubscription;
 
     public constructor(
         private readonly logger: Logger,
         client: SocketClient,
-        server: OpcuaServer,
+        server: OpcuaClient,
         nodes: LiveNode[],
     ) {
         super();

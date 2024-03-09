@@ -8,15 +8,15 @@
 
 import { AASDocument } from 'common';
 import { Logger } from '../logging/logger.js';
-import { AASServer } from '../packages/aas-server/aas-server.js';
+import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
 import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 
 export class AASServerScan extends AASResourceScan {
     private readonly logger: Logger;
-    private readonly server: AASServer;
+    private readonly server: AASApiClient;
 
-    public constructor(logger: Logger, server: AASServer) {
+    public constructor(logger: Logger, server: AASApiClient) {
         super();
 
         this.logger = logger;

@@ -21,7 +21,7 @@ interface PropertyValue {
 }
 
 /** Provides access to an AASX-Server. */
-export abstract class AASServer extends AASResource {
+export abstract class AASApiClient extends AASResource {
     private reentry = 0;
 
     /**

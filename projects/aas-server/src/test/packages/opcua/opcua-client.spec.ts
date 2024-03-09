@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { OpcuaServer } from '../../../app/packages/opcua/opcua-server.js';
+import { OpcuaClient } from '../../../app/packages/opcua/opcua-client.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
 import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, StatusCodes, Variant } from 'node-opcua';
@@ -17,13 +17,13 @@ import env from '../../assets/aas-environment.js';
 
 type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodResult>;
 
-describe('OpcuaServer', function () {
-    let server: OpcuaServer;
+describe('OpcuaClient', function () {
+    let server: OpcuaClient;
     let logger: jest.Mocked<Logger>;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new OpcuaServer(logger, 'opc.tcp://localhost:1234/I4AASServer', 'OPCUA Server');
+        server = new OpcuaClient(logger, 'opc.tcp://localhost:1234/I4AASServer', 'OPCUA Server');
     });
 
     afterEach(() => {

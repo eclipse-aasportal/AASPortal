@@ -10,7 +10,7 @@ import { AttributeIds, ClientSession, DataType, DataValue, NodeId, VariantArrayT
 import { NodeCrawler } from 'node-opcua-client-crawler';
 import { OpaqueStructure } from 'node-opcua-extension-object';
 import { Readable } from 'stream';
-import { OpcuaServer } from './opcua-server.js';
+import { OpcuaClient } from './opcua-client.js';
 import { OPCUAComponent, OPCUAProperty, readDataTypeAsync } from './opcua.js';
 import { AASPackage } from '../aas-package.js';
 import { Logger } from '../../logging/logger.js';
@@ -21,11 +21,11 @@ import { AASDocument, aas } from 'common';
 import { OpcuaReader } from './opcua-reader.js';
 
 export class OpcuaPackage extends AASPackage {
-    private readonly server: OpcuaServer;
+    private readonly server: OpcuaClient;
     private readonly nodeId: string;
     private readonly dataTypes: OpcuaDataTypeDictionary;
 
-    public constructor(logger: Logger, server: OpcuaServer, nodeId: string, dataTypes?: OpcuaDataTypeDictionary) {
+    public constructor(logger: Logger, server: OpcuaClient, nodeId: string, dataTypes?: OpcuaDataTypeDictionary) {
         super(logger);
 
         this.server = server;

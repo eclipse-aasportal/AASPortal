@@ -8,7 +8,7 @@
 
 import http, { IncomingMessage } from 'http';
 import env from '../../assets/aas-environment.js';
-import { AASServerV3, OperationResult } from '../../../app/packages/aas-server/aas-server-v3.js';
+import { AASApiClientV3, OperationResult } from '../../../app/packages/aas-server/aas-api-client-v3.js';
 import { aas, DifferenceItem } from 'common';
 import { cloneDeep } from 'lodash-es';
 import { Socket } from 'net';
@@ -16,13 +16,13 @@ import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from '../../utils.js';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
-describe('AASServerV3', function () {
+describe('AASApiClientV3', function () {
     let logger: Logger;
-    let server: AASServerV3;
+    let client: AASApiClientV3;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AASServerV3(logger, 'http://localhost:1234', 'AASX Server');
+        client = new AASApiClientV3(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     describe('resolveNodeId', function () {
@@ -36,7 +36,7 @@ describe('AASServerV3', function () {
             const aasId = Buffer.from('http://localhost/test/aas').toString('base64url');
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
             const nodeId = smId + '.submodel1/property1';
-            expect(server.resolveNodeId(shell, nodeId)).toEqual(
+            expect(client.resolveNodeId(shell, nodeId)).toEqual(
                 `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`,
             );
         });
@@ -73,7 +73,7 @@ describe('AASServerV3', function () {
                 },
             ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
+            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
         });
 
         it('inserts a submodel-element', async function () {
@@ -96,7 +96,7 @@ describe('AASServerV3', function () {
                 },
             ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual([
+            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual([
                 'SubmodelElement inserted.',
             ]);
         });
@@ -120,7 +120,7 @@ describe('AASServerV3', function () {
                 },
             ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
+            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
         });
 
         it('updates a submodel-element', async function () {
@@ -144,7 +144,7 @@ describe('AASServerV3', function () {
                 },
             ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
+            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
         });
 
         it('deletes a submodel', async function () {
@@ -165,7 +165,7 @@ describe('AASServerV3', function () {
                 },
             ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
+            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
         });
 
         it('deletes a submodel-element', async function () {
@@ -187,7 +187,7 @@ describe('AASServerV3', function () {
                 },
             ];
 
-            await expect(server.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement deleted.']);
+            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement deleted.']);
         });
     });
 
@@ -217,7 +217,7 @@ describe('AASServerV3', function () {
                 },
             };
 
-            await expect(server.invoke(env, operation)).resolves.toEqual(operation);
+            await expect(client.invoke(env, operation)).resolves.toEqual(operation);
         });
 
         it('throws an error if the server returns with status code 500', async function () {
@@ -239,7 +239,7 @@ describe('AASServerV3', function () {
                 },
             };
 
-            await expect(server.invoke(env, operation)).rejects.toThrowError();
+            await expect(client.invoke(env, operation)).rejects.toThrowError();
         });
 
         it('throws an error if the operation fails', async function () {
@@ -268,7 +268,7 @@ describe('AASServerV3', function () {
                 },
             };
 
-            await expect(server.invoke(env, operation)).rejects.toThrowError();
+            await expect(client.invoke(env, operation)).rejects.toThrowError();
         });
     });
 });

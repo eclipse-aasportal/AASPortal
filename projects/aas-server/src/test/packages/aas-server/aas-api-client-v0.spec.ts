@@ -10,25 +10,25 @@ import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { aas, selectElement } from 'common';
-import { AASServer } from '../../../app/packages/aas-server/aas-server.js';
+import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';
 import submodels from '../../assets/test-aas/submodels.js';
 import nameplate from '../../assets/test-aas/nameplate-becher1.js';
 import digitalProductPassport from '../../assets/test-aas/digital-product-passport-becher1.js';
 import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js';
-import { AASServerV0 } from '../../../app/packages/aas-server/aas-server-v0.js';
+import { AASApiClientV0 } from '../../../app/packages/aas-server/aas-api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import aasEnvironment from '../../assets/aas-environment.js';
 import { createSpyObj } from '../../utils.js';
 
-describe('AASServerV0', function () {
+describe('AASApiClientV0', function () {
     let logger: jest.Mocked<Logger>;
-    let server: AASServer;
+    let client: AASApiClient;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new AASServerV0(logger, 'http://localhost:1234', 'AASX Server');
+        client = new AASApiClientV0(logger, 'http://localhost:1234', 'AASX Server');
     });
 
     afterEach(() => {
@@ -46,7 +46,7 @@ describe('AASServerV0', function () {
             return new http.ClientRequest('http://localhost:1234');
         });
 
-        await expect(server.getShellsAsync()).resolves.toEqual([
+        await expect(client.getShellsAsync()).resolves.toEqual([
             'AssistanceSystem_Dte',
             'CunaCup_Becher1',
             'CunaCup_Becher2',
@@ -85,7 +85,7 @@ describe('AASServerV0', function () {
             return new http.ClientRequest('http://localhost:1234');
         });
 
-        await expect(server.readEnvironmentAsync('CunaCup_Becher1')).resolves.toBeTruthy();
+        await expect(client.readEnvironmentAsync('CunaCup_Becher1')).resolves.toBeTruthy();
     });
 
     it('can open a file', async function () {
@@ -105,7 +105,7 @@ describe('AASServerV0', function () {
         });
 
         await expect(
-            server.openFileAsync(
+            client.openFileAsync(
                 aasEnvironment.assetAdministrationShells[0],
                 selectElement(aasEnvironment, 'Documentation', 'OperatingManual', 'DigitalFile_PDF')!,
             ),
@@ -124,7 +124,7 @@ describe('AASServerV0', function () {
             return new http.ClientRequest('http://localhost:1234');
         });
 
-        await expect(server.readValueAsync('http://localhost:1234', 'xs:int')).resolves.toBe(42);
+        await expect(client.readValueAsync('http://localhost:1234', 'xs:int')).resolves.toBe(42);
     });
 
     describe('resolveNodeId', function () {
@@ -137,7 +137,7 @@ describe('AASServerV0', function () {
         it('returns the URL to "property1"', function () {
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64');
             const nodeId = smId + '.submodel1/property1';
-            expect(server.resolveNodeId(shell, nodeId)).toEqual(
+            expect(client.resolveNodeId(shell, nodeId)).toEqual(
                 `http://localhost:1234/aas/aas1/submodels/submodel1/elements/property1/value`,
             );
         });

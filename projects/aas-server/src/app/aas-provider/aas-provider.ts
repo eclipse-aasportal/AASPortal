@@ -281,9 +281,9 @@ export class AASProvider {
     }
 
     /**
-     * Uploads an AASX package.
+     * Uploads one or more AASX packages.
      * @param name The name of the destination endpoint.
-     * @param files The AASX package file.
+     * @param files A list of AASX package files.
      */
     public async addPackagesAsync(name: string, files: Express.Multer.File[]): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);

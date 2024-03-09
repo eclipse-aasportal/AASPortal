@@ -10,15 +10,15 @@ import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescriptio
 import { AASDocument } from 'common';
 import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../packages/opcua/opcua-data-type-dictionary.js';
-import { OpcuaServer } from '../packages/opcua/opcua-server.js';
+import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { OpcuaPackage } from '../packages/opcua/opcua-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 
 export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;
-    private readonly server: OpcuaServer;
+    private readonly server: OpcuaClient;
 
-    public constructor(logger: Logger, server: OpcuaServer) {
+    public constructor(logger: Logger, server: OpcuaClient) {
         super();
 
         this.logger = logger;

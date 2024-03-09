@@ -29,7 +29,7 @@ import {
     coerceNodeId,
 } from 'node-opcua';
 
-export class OpcuaServer extends AASResource {
+export class OpcuaClient extends AASResource {
     private readonly options: OPCUAClientOptions;
     private client: OPCUAClient | null = null;
     private session: ClientSession | null = null;

@@ -11,18 +11,18 @@ import { OpcuaSubscription } from '../../../app/live/opcua/opcua-subscription.js
 import { createSpyObj } from '../../utils.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { OpcuaServer } from '../../../app/packages/opcua/opcua-server.js';
+import { OpcuaClient } from '../../../app/packages/opcua/opcua-client.js';
 
 describe('OpcuaSubscription', function () {
     let subscription: OpcuaSubscription;
     let logger: jest.Mocked<Logger>;
     let client: jest.Mocked<SocketClient>;
-    let server: jest.Mocked<OpcuaServer>;
+    let server: jest.Mocked<OpcuaClient>;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        server = createSpyObj<OpcuaServer>(['getSession']);
+        server = createSpyObj<OpcuaClient>(['getSession']);
         subscription = new OpcuaSubscription(logger, client, server, [
             {
                 nodeId: 'ns=1;i=42',

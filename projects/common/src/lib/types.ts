@@ -117,14 +117,6 @@ export interface TemplateDescriptor {
     modelType: aas.ModelType | '';
 }
 
-/** Represents a named source of Asset Administration Shells. */
-export interface AASWorkspace {
-    /** The configuration name. */
-    name: string;
-    /** The assigned containers */
-    containers: AASContainer[];
-}
-
 export interface LiveValue {
     nodeId: string;
     value?: unknown;

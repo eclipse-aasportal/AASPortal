@@ -11,9 +11,9 @@ import { AASEndpoint, ApplicationError } from 'common';
 import { Logger } from '../logging/logger.js';
 import { AASResource } from './aas-resource.js';
 import { AasxDirectory } from './file-system/aasx-directory.js';
-import { AASServerV0 } from './aas-server/aas-server-v0.js';
-import { AASServerV3 } from './aas-server/aas-server-v3.js';
-import { OpcuaServer } from './opcua/opcua-server.js';
+import { AASApiClientV0 } from './aas-server/aas-api-client-v0.js';
+import { AASApiClientV3 } from './aas-server/aas-api-client-v3.js';
+import { OpcuaClient } from './opcua/opcua-client.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 
@@ -34,14 +34,14 @@ export class AASResourceFactory {
             case 'AASServer':
                 switch (endpoint.version) {
                     case 'v3':
-                        return new AASServerV3(this.logger, endpoint.url, endpoint.name);
+                        return new AASApiClientV3(this.logger, endpoint.url, endpoint.name);
                     case 'v0':
-                        return new AASServerV0(this.logger, endpoint.url, endpoint.name);
+                        return new AASApiClientV0(this.logger, endpoint.url, endpoint.name);
                     default:
                         throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                 }
             case 'OpcuaServer':
-                return new OpcuaServer(this.logger, endpoint.url, endpoint.name);
+                return new OpcuaClient(this.logger, endpoint.url, endpoint.name);
             case 'WebDAV':
             case 'FileSystem': {
                 return new AasxDirectory(
@@ -67,17 +67,17 @@ export class AASResourceFactory {
                 case 'AASServer':
                     switch (endpoint.version) {
                         case 'v3':
-                            await new AASServerV3(this.logger, endpoint.url, endpoint.name).testAsync();
+                            await new AASApiClientV3(this.logger, endpoint.url, endpoint.name).testAsync();
                             break;
                         case 'v0':
-                            await new AASServerV0(this.logger, endpoint.url, endpoint.name).testAsync();
+                            await new AASApiClientV0(this.logger, endpoint.url, endpoint.name).testAsync();
                             break;
                         default:
                             throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                     }
                     break;
                 case 'OpcuaServer':
-                    await new OpcuaServer(this.logger, endpoint.url, endpoint.name).testAsync();
+                    await new OpcuaClient(this.logger, endpoint.url, endpoint.name).testAsync();
                     break;
                 case 'WebDAV':
                 case 'FileSystem':

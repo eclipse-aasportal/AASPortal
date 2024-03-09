@@ -10,7 +10,7 @@ import FormData from 'form-data';
 import { cloneDeep } from 'lodash-es';
 import { createReadStream } from 'fs';
 import { encodeBase64Url } from '../../convert.js';
-import { AASServer } from './aas-server.js';
+import { AASApiClient } from './aas-api-client.js';
 import { Logger } from '../../logging/logger.js';
 import { JsonReader } from '../json-reader.js';
 import { JsonWriter } from '../json-writer.js';
@@ -62,7 +62,7 @@ interface PagedResult<T extends aas.Identifiable> {
     paging_metadata: PagedResultPagingMetadata;
 }
 
-export class AASServerV3 extends AASServer {
+export class AASApiClientV3 extends AASApiClient {
     public constructor(logger: Logger, url: string, name: string) {
         super(logger, url, name);
     }
