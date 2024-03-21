@@ -24,5 +24,4 @@ ENV ENDPOINTS=["\"file:///samples?name=Samples\""]
 ENV NODE_ENV=production
 
 EXPOSE 1337
-EXPOSE 1338
 CMD ["node", "aas-server.js" ]
