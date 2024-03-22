@@ -187,9 +187,9 @@ export class EditElementFormComponent {
 
     private initMultiLanguageProperty(): void {
         const multiLangProperty = this.element as aas.MultiLanguageProperty;
-        this.langStrings = multiLangProperty.value.map(
-            (item, index) => ({ ...item, selected: false, index }) as LangStringRow,
-        );
+        this.langStrings = multiLangProperty.value
+            ? multiLangProperty.value.map((item, index) => ({ ...item, selected: false, index }) as LangStringRow)
+            : [];
 
         this.langStrings.push({ language: '', text: '', selected: false, index: -1 });
     }

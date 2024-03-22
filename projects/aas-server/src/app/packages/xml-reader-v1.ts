@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, determineType } from 'common';
+import { aas, determineType, toBoolean } from 'common';
 import { useNamespaces, XPathSelect } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import { AASReader } from './aas-reader.js';
@@ -350,7 +350,7 @@ export class XmlReaderV1 extends AASReader {
             referable.parent = parent;
         }
 
-        const category = this.selectNode('./aas:category', node)?.textContent as aas.Category | undefined;
+        const category = this.selectNode('./aas:category', node)?.textContent;
         if (category) {
             referable.category = category;
         }
@@ -358,7 +358,7 @@ export class XmlReaderV1 extends AASReader {
         return referable;
     }
 
-    private readHaSemantic(node: Node): aas.HasSemantic {
+    private readHaSemantic(node: Node): aas.HasSemantics {
         const semanticId = this.readReference('./aas:semanticId', node);
         return semanticId ? { semanticId } : {};
     }
@@ -437,7 +437,7 @@ export class XmlReaderV1 extends AASReader {
             dataSpecification.symbol = symbol;
         }
 
-        const dataType = this.selectNode(`./${this.iec61360}:dataType`, node)?.textContent as aas.DataTypeIEC61360;
+        const dataType = this.selectNode(`./${this.iec61360}:dataType`, node)?.textContent as aas.DataTypeIec61360;
         if (dataType) {
             dataSpecification.dataType = dataType;
         }
@@ -462,9 +462,14 @@ export class XmlReaderV1 extends AASReader {
             dataSpecification.value = value;
         }
 
-        const levelType = this.selectNode(`./${this.iec61360}:levelType`, node)?.textContent as aas.LevelType;
+        const levelType = this.selectNode(`./${this.iec61360}:levelType`, node);
         if (levelType) {
-            dataSpecification.levelType = levelType;
+            dataSpecification.levelType = {
+                min: toBoolean(this.selectNode('./min', levelType)!.textContent),
+                max: toBoolean(this.selectNode('./max', levelType)!.textContent),
+                nom: toBoolean(this.selectNode('./nom', levelType)!.textContent),
+                typ: toBoolean(this.selectNode('./typ', levelType)!.textContent),
+            };
         }
 
         return dataSpecification;

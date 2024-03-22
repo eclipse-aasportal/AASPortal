@@ -449,8 +449,8 @@ export class JsonReaderV2 extends AASReader {
         return this.readDataTypeDefXsd(source.dataObjectType?.name) as aas.DataTypeDefXsd;
     }
 
-    private readHasSemantic(source: aasv2.HasSemantic): aas.HasSemantic {
-        const hasSemantic: aas.HasSemantic = {};
+    private readHasSemantic(source: aasv2.HasSemantic): aas.HasSemantics {
+        const hasSemantic: aas.HasSemantics = {};
         if (source.semanticId) {
             hasSemantic.semanticId = this.readReference(source.semanticId);
         }
@@ -657,7 +657,7 @@ export class JsonReaderV2 extends AASReader {
         }
 
         if (source.levelType) {
-            iec61360.levelType = source.levelType;
+            iec61360.levelType = { ...source.levelType };
         }
 
         if (source.shortName) {
@@ -804,7 +804,7 @@ export class JsonReaderV2 extends AASReader {
         }
     }
 
-    private readDataTypeIEC61360(source: string): aas.DataTypeIEC61360 {
+    private readDataTypeIEC61360(source: string): aas.DataTypeIec61360 {
         switch (source) {
             case 'DATE':
                 return 'DATE';
@@ -837,7 +837,7 @@ export class JsonReaderV2 extends AASReader {
             case 'TIMESTAMP':
                 return 'TIMESTAMP';
             default:
-                return source as aas.DataTypeIEC61360;
+                return source as aas.DataTypeIec61360;
         }
     }
 }

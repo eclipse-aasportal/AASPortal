@@ -42,7 +42,7 @@ export class AasxDirectory extends AASResource {
 
     public override readonly version = '';
 
-    public readonly readOnly = true;
+    public readonly readOnly = false;
 
     public readonly onlineReady = false;
 

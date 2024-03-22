@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, determineType } from 'common';
+import { aas, determineType, toBoolean } from 'common';
 import { useNamespaces, XPathSelect } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import { AASReader } from './aas-reader.js';
@@ -412,7 +412,7 @@ export class XmlReader extends AASReader {
         const list: aas.SubmodelElementList = {
             ...base,
             value: this.readCollectionValue(node, parent ? this.createReference(parent, base) : undefined),
-            typeValueListElement: this.getTextContent('./aas:typeValueListElement', node) as aas.AasSubmodelElements,
+            typeValueListElement: this.getTextContent('./aas:typeValueListElement', node) as aas.AASSubmodelElements,
         };
 
         return list;
@@ -569,7 +569,7 @@ export class XmlReader extends AASReader {
             referable.parent = parent;
         }
 
-        const category = this.selectTextContent('./aas:category', node) as aas.Category | undefined;
+        const category = this.selectTextContent('./aas:category', node);
         if (category) {
             referable.category = category;
         }
@@ -600,7 +600,7 @@ export class XmlReader extends AASReader {
         return extension;
     }
 
-    private readHasSemantic(node: Node): aas.HasSemantic {
+    private readHasSemantic(node: Node): aas.HasSemantics {
         const semanticId = this.readReference(this.selectNode('./aas:semanticId', node));
         return semanticId ? { semanticId } : {};
     }
@@ -634,9 +634,9 @@ export class XmlReader extends AASReader {
     }
 
     private readEmbeddedDataSpecification(node: Node): aas.EmbeddedDataSpecification {
-        const dataSpecification = this.readReference(this.selectNode('./aas:dataSpecification', node));
+        let dataSpecification = this.readReference(this.selectNode('./aas:dataSpecification', node));
         if (!dataSpecification) {
-            throw new Error('EmbeddedDataSpecification.dataSpecification');
+            dataSpecification = { type: 'ModelReference', keys: [] };
         }
 
         const dataSpecificationContent = this.readDataSpecificationContent(node);
@@ -697,7 +697,7 @@ export class XmlReader extends AASReader {
             dataSpecification.symbol = symbol;
         }
 
-        const dataType = this.selectTextContent('./aas:dataType', node) as aas.DataTypeIEC61360;
+        const dataType = this.selectTextContent('./aas:dataType', node) as aas.DataTypeIec61360;
         if (dataType) {
             dataSpecification.dataType = dataType;
         }
@@ -722,9 +722,14 @@ export class XmlReader extends AASReader {
             dataSpecification.value = value;
         }
 
-        const levelType = this.selectTextContent('./aas:levelType', node) as aas.LevelType;
+        const levelType = this.selectNode('./aas:levelType', node);
         if (levelType) {
-            dataSpecification.levelType = levelType;
+            dataSpecification.levelType = {
+                min: toBoolean(this.getTextContent('./min', levelType)),
+                max: toBoolean(this.getTextContent('./max', levelType)),
+                nom: toBoolean(this.getTextContent('./nom', levelType)),
+                typ: toBoolean(this.getTextContent('./typ', levelType)),
+            };
         }
 
         return dataSpecification;
@@ -902,15 +907,6 @@ export class XmlReader extends AASReader {
         }
 
         return value;
-    }
-
-    private getNode(query: string, node: Node): Node {
-        const result = this.select(query, node, true);
-        if (!result) {
-            throw new Error(`Query '${query}' returns no result.`);
-        }
-
-        return result as Node;
     }
 
     private selectNodes(query: string, node: Node): Node[] {

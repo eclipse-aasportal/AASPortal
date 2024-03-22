@@ -129,7 +129,7 @@ export class TemplateScan {
             source = new AasxDirectory(this.logger, this.fileStorage, this.url);
             await source.openAsync();
             const pkg = source.createPackage(file);
-            const submodel = (await pkg.readEnvironmentAsync()).submodels[0];
+            const submodel = (await pkg.getEnvironmentAsync()).submodels[0];
             return {
                 modelType: submodel.modelType,
                 idShort: submodel.idShort,

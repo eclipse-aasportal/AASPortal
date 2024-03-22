@@ -64,16 +64,16 @@ export class AASServerPackage extends AASPackage {
         return document;
     }
 
-    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+    public override async getEnvironmentAsync(): Promise<aas.Environment> {
         return await this.server.readEnvironmentAsync(this.idShort);
     }
 
-    public async commitDocumentAsync(target: AASDocument, content: aas.Environment): Promise<string[]> {
+    public async setEnvironmentAsync(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {
         let messages: string[] | undefined;
-        if (target.content && content) {
-            const diffs = await diffAsync(content, target.content);
+        if (reference && content) {
+            const diffs = await diffAsync(content, reference);
             if (diffs.length > 0) {
-                messages = await this.server.commitAsync(content, target.content, diffs);
+                messages = await this.server.commitAsync(content, reference, diffs);
             }
         }
 

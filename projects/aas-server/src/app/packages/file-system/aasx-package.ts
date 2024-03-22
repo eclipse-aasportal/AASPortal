@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import fs from 'fs';
 import { basename, extname } from 'path/posix';
 import jszip from 'jszip';
 import xpath from 'xpath';
@@ -20,6 +21,7 @@ import { AASReader } from '../aas-reader.js';
 import { ImageProcessing } from '../../image-processing.js';
 import { createXmlReader } from '../create-xml-reader.js';
 import { createJsonReader } from '../create-json-reader.js';
+import { XmlWriter } from '../xml-writer.js';
 
 export class AasxPackage extends AASPackage {
     private readonly file: string;
@@ -65,15 +67,20 @@ export class AasxPackage extends AASPackage {
         return document;
     }
 
-    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+    public override async getEnvironmentAsync(): Promise<aas.Environment> {
         return (await this.createReaderAsync()).readEnvironment();
     }
 
-    public commitDocumentAsync(): Promise<string[]> {
-        throw new Error('Method not implemented.');
+    public override async setEnvironmentAsync(env: aas.Environment): Promise<string[]> {
+        const writer = new XmlWriter();
+        const xml = writer.write(env);
+        const path = await this.getOriginNameAsync();
+        (await this.zip).file(path, xml, { compression: 'DEFLATE' });
+        await this.saveAsync();
+        return [`${this.file} successfully written.`];
     }
 
-    public async openReadStreamAsync(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public override async openReadStreamAsync(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
         if (!file.value) {
             throw new Error('Invalid operation.');
         }
@@ -87,7 +94,7 @@ export class AasxPackage extends AASPackage {
         return stream;
     }
 
-    public async getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+    public override async getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
         let stream: NodeJS.ReadableStream | undefined;
         const relationships = await this.getRelationshipsAsync('_rels/.rels');
         for (const relationship of relationships) {
@@ -175,6 +182,16 @@ export class AasxPackage extends AASPackage {
         }
 
         return (await file.async(contentType)) as string;
+    }
+
+    private async saveAsync(): Promise<void> {
+        const zip = await this.zip;
+        await new Promise<void>((resolve, reject) => {
+            zip.generateNodeStream({ type: 'nodebuffer', streamFiles: true })
+                .pipe(fs.createWriteStream(this.file))
+                .on('finish', () => resolve())
+                .on('error', error => reject(error));
+        });
     }
 
     private getContentType(fileName: string): jszip.OutputType {

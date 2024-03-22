@@ -223,7 +223,6 @@ export class JsonWriter extends AASWriter {
         return {
             ...this.writeReferable(source),
             ...this.writeHasSemantic(source),
-            ...this.writeHasKind(source),
             ...this.writeHasDataSpecification(source),
             ...this.writeQualifiable(source),
         };
@@ -405,8 +404,8 @@ export class JsonWriter extends AASWriter {
             entity.globalAssetId = source.globalAssetId;
         }
 
-        if (source.specificAssetId) {
-            entity.specificAssetId = this.writeSpecificAssetId(source.specificAssetId);
+        if (source.specificAssetIds) {
+            entity.specificAssetIds = source.specificAssetIds.map(item => this.writeSpecificAssetId(item));
         }
 
         return entity;
@@ -502,8 +501,8 @@ export class JsonWriter extends AASWriter {
         return range;
     }
 
-    private writeHasSemantic(source: aas.HasSemantic): aas.HasSemantic {
-        const hasSemantic: aas.HasSemantic = {};
+    private writeHasSemantic(source: aas.HasSemantics): aas.HasSemantics {
+        const hasSemantic: aas.HasSemantics = {};
         if (source.semanticId) {
             hasSemantic.semanticId = this.writeReference(source.semanticId);
         }
@@ -562,7 +561,7 @@ export class JsonWriter extends AASWriter {
         const referable: aas.Referable = { idShort: source.idShort, modelType: source.modelType };
 
         if (source.category) {
-            referable.category = source.category as aas.Category;
+            referable.category = source.category;
         }
 
         if (source.description) {

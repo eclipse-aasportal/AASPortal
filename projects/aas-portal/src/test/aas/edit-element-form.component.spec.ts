@@ -59,7 +59,6 @@ describe('EditElementFormComponent', () => {
                 idShort: 'Text',
                 modelType: 'Property',
                 category: 'CONSTANT',
-                kind: 'Instance',
                 valueType: 'xs:string',
             };
 
@@ -127,7 +126,6 @@ describe('EditElementFormComponent', () => {
                 idShort: 'A multi language property',
                 modelType: 'MultiLanguageProperty',
                 category: 'CONSTANT',
-                kind: 'Instance',
                 value: [{ language: 'de', text: 'Hallo Welt!' }],
             };
 

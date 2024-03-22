@@ -48,7 +48,7 @@ export type AASTypeDefinition =
 export interface AssetInformation {
     kind: aas.AssetKind;
     globalAssetId: aas.Reference;
-    category?: aas.Category;
+    category?: string;
     billOfMaterial?: aas.Reference[];
     specificAssetId?: aas.Reference[];
 }

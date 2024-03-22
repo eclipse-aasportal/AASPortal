@@ -37,14 +37,16 @@ export abstract class AASPackage {
     public abstract openReadStreamAsync(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream>;
 
     /**
-     * Applies the state of the source document into the destination document.
-     * @param source The source document.
-     * @param content The new document content.
-     */
-    public abstract commitDocumentAsync(source: AASDocument, content: aas.Environment): Promise<string[]>;
+     * Gets the AAS environment from the package.
+     * */
+    public abstract getEnvironmentAsync(): Promise<aas.Environment>;
 
-    /** Reads the AAS environment. */
-    public abstract readEnvironmentAsync(): Promise<aas.Environment>;
+    /**
+     * Applies the state of the source document into the destination document.
+     * @param env The new AAS environment.
+     * @param reference The previous state.
+     */
+    public abstract setEnvironmentAsync(env: aas.Environment, reference?: aas.Environment): Promise<string[]>;
 
     protected normalize(path: string): string {
         path = path.replace(/\\/g, '/');

@@ -29,10 +29,7 @@ describe('OperationCallFormComponent', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [OperationCallFormComponent],
-            providers: [
-                NgbModal,
-                NgbActiveModal
-            ],
+            providers: [NgbModal, NgbActiveModal],
             imports: [
                 HttpClientTestingModule,
                 CommonModule,
@@ -41,10 +38,10 @@ describe('OperationCallFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         api = TestBed.inject(AASTreeApiService);
@@ -56,14 +53,13 @@ describe('OperationCallFormComponent', () => {
 
         operation = {
             category: 'CONSTANT',
-            kind: 'Instance',
             methodId: '123',
             modelType: 'Operation',
             idShort: 'convert',
             objectId: 'abc',
             inputVariables: [],
             inoutputVariables: [],
-            outputVariables: []
+            outputVariables: [],
         };
     });
 
@@ -79,7 +75,7 @@ describe('OperationCallFormComponent', () => {
         (resultOp.inputVariables![0].value as aas.Property).value = 'Hello World!';
         (resultOp.outputVariables![0].value as aas.Property).value = 'Hello World!'.toUpperCase();
 
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>((result) => result(resultOp)))
+        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
         component.document = document;
         component.operation = operation;
         component.inputVariables[0].value = 'Hello World!';
@@ -98,7 +94,7 @@ describe('OperationCallFormComponent', () => {
         (resultOp.inputVariables![0].value as aas.Property).value = 'false';
         (resultOp.outputVariables![0].value as aas.Property).value = 'true';
 
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>((result) => result(resultOp)))
+        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
         component.document = document;
         component.operation = operation;
         component.inputVariables[0].value = false;
@@ -117,7 +113,7 @@ describe('OperationCallFormComponent', () => {
         (resultOp.inputVariables![0].value as aas.Property).value = '42';
         (resultOp.outputVariables![0].value as aas.Property).value = '43';
 
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>((result) => result(resultOp)))
+        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
         component.document = document;
         component.operation = operation;
         component.inputVariables[0].value = '42';
@@ -154,7 +150,7 @@ describe('OperationCallFormComponent', () => {
         operation.outputVariables = [createVariable('out', 'xs:int', 0)];
 
         const dummy = cloneDeep(operation);
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>((result) => result(dummy)))
+        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(dummy)));
 
         component.document = document;
         component.operation = operation;
@@ -166,15 +162,14 @@ describe('OperationCallFormComponent', () => {
         expect(component.canCall).toBeTrue();
     });
 
-    function createVariable(name: string, valueType?: aas.DataTypeDefXsd, value?: any): aas.OperationVariable {
+    function createVariable(name: string, valueType?: aas.DataTypeDefXsd, value?: unknown): aas.OperationVariable {
         return {
             value: {
                 modelType: 'Property',
                 idShort: name,
-                kind: 'Instance',
                 valueType: valueType,
-                value: convertToString(value)
-            } as aas.Property
+                value: convertToString(value),
+            } as aas.Property,
         };
     }
 });

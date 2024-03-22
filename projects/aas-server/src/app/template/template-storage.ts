@@ -86,7 +86,7 @@ export class TemplateStorage {
             source = new AasxDirectory(this.logger, this.fileStorage, this.url);
             await source.openAsync();
             const pkg = source.createPackage(file);
-            return await pkg.readEnvironmentAsync();
+            return await pkg.getEnvironmentAsync();
         } finally {
             await source?.closeAsync();
         }

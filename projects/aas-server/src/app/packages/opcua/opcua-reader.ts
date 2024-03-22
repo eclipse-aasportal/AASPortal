@@ -440,7 +440,6 @@ export class OpcuaReader extends AASReader {
         const value: aas.Property = {
             modelType: 'Property',
             idShort: argument.name!,
-            kind: 'Instance',
             valueType: this.dataTypes.get(argument.dataType),
         };
 
@@ -516,7 +515,7 @@ export class OpcuaReader extends AASReader {
         return referable;
     }
 
-    private readHasSemantic(component: OPCUAComponent): aas.HasSemantic {
+    private readHasSemantic(component: OPCUAComponent): aas.HasSemantics {
         const semanticId = this.readReference(component, 'SemanticId');
         return semanticId ? { semanticId } : {};
     }
@@ -621,7 +620,7 @@ export class OpcuaReader extends AASReader {
         throw new Error(`Unexpected value type: expected string or number, actual ${typeof value}`);
     }
 
-    private readCategory(component: OPCUAComponent, propertyName: string): aas.Category | undefined {
+    private readCategory(component: OPCUAComponent, propertyName: string): string | undefined {
         const property = this.findProperty(component, propertyName);
         if (!property) {
             return undefined;
@@ -633,7 +632,7 @@ export class OpcuaReader extends AASReader {
         }
 
         if (typeof value === 'string') {
-            return value as aas.Category;
+            return value;
         }
 
         if (typeof value === 'number') {

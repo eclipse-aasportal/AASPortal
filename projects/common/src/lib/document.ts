@@ -471,7 +471,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         return true;
     }
 
-    function equalHasSemantic(a: aas.HasSemantic, b: aas.HasSemantic): boolean {
+    function equalHasSemantic(a: aas.HasSemantics, b: aas.HasSemantics): boolean {
         return equalReference(a.semanticId, b.semanticId);
     }
 
@@ -577,11 +577,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
 
     function equalSubmodelElement(a: aas.SubmodelElement, b: aas.SubmodelElement): boolean {
         return (
-            equalReferable(a, b) &&
-            equalHasDataSpecification(a, b) &&
-            equalHasSemantic(a, b) &&
-            equalQualifiable(a, b) &&
-            equalHasKind(a, b)
+            equalReferable(a, b) && equalHasDataSpecification(a, b) && equalHasSemantic(a, b) && equalQualifiable(a, b)
         );
     }
 
@@ -651,9 +647,27 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
             equalSubmodelElement(a, b) &&
             a.entityType == b.entityType &&
             a.globalAssetId === b.globalAssetId &&
-            equalSpecificAssetId(a.specificAssetId, b.specificAssetId) &&
+            equalSpecificAssetIds(a.specificAssetIds, b.specificAssetIds) &&
             queueReferables(a.statements, b.statements)
         );
+    }
+
+    function equalSpecificAssetIds(a?: aas.SpecificAssetId[], b?: aas.SpecificAssetId[]): boolean {
+        if (a === b) {
+            return true;
+        }
+
+        if (!a || !b || a.length != b.length) {
+            return false;
+        }
+
+        for (let i = 0, n = a.length; i < n; i++) {
+            if (!equalSpecificAssetId(a[i], b[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     function equalSpecificAssetId(a?: aas.SpecificAssetId, b?: aas.SpecificAssetId): boolean {
@@ -956,7 +970,7 @@ export function getIEC61360Content(
             }
         }
     } else {
-        const semanticId = (referable as aas.HasSemantic).semanticId;
+        const semanticId = (referable as aas.HasSemantics).semanticId;
         if (semanticId) {
             const conceptDescription = selectReferable(env, semanticId);
             if (conceptDescription) {

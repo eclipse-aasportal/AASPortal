@@ -47,7 +47,7 @@ const semanticIdMap = new Map<string, string>([
     [CustomerFeedback, CustomerFeedback],
 ]);
 
-export function resolveSemanticId(value: aas.HasSemantic | aas.Reference | string): string | undefined {
+export function resolveSemanticId(value: aas.HasSemantics | aas.Reference | string): string | undefined {
     let semanticId: string | undefined;
     if (value) {
         if (typeof value === 'string') {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-export type AasSubmodelElements =
+export type AASSubmodelElements =
     | 'AnnotatedRelationshipElement'
     | 'BasicEventElement'
     | 'Blob'
@@ -25,79 +25,7 @@ export type AasSubmodelElements =
     | 'SubmodelElementCollection'
     | 'SubmodelElementList';
 
-export interface AdministrativeInformation extends HasDataSpecification {
-    version?: string;
-    revision?: string;
-    creator?: Reference;
-    template?: string;
-}
-
-export interface AnnotatedRelationshipElement extends RelationshipElement {
-    annotations: DataElement[];
-}
-
-export interface AssetAdministrationShell extends Identifiable, HasDataSpecification {
-    derivedFrom?: Reference;
-    assetInformation: AssetInformation;
-    submodels?: Reference[];
-}
-
-export interface AssetInformation {
-    assetKind: AssetKind;
-    globalAssetId?: string;
-    specificAssetIds?: SpecificAssetId[];
-    assetType?: string;
-    defaultThumbnail?: Resource;
-}
-
-export type AssetKind = 'Type' | 'NotApplicable' | 'Instance';
-
-export interface BasicEventElement extends EventElement {
-    observed: Reference;
-    direction: Direction;
-    state: StateOfEvent;
-    messageTopic?: string;
-    messageBroker?: Reference;
-    lastUpdate?: string;
-    minInterval?: string;
-    maxInterval?: string;
-}
-
-export interface Blob extends DataElement {
-    contentType: string;
-    value?: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Capability extends SubmodelElement {}
-
-export interface ConceptDescription extends Identifiable, HasDataSpecification {
-    isCaseOf?: Reference[];
-}
-
-export interface DataElement extends SubmodelElement {
-    /** OPC UA */
-    nodeId?: string;
-}
-
-export interface DataSpecificationContent {
-    modelType: ModelType;
-}
-
-export interface DataSpecificationIec61360 extends DataSpecificationContent {
-    preferredName: LangString[];
-    shortName?: LangString[];
-    unit?: string;
-    unitId?: Reference;
-    sourceOfDefinition?: string;
-    symbol?: string;
-    dataType?: DataTypeIEC61360;
-    definition?: LangString[];
-    valueFormat?: string;
-    valueList?: ValueList;
-    value?: string;
-    levelType?: LevelType;
-}
+export type AssetKind = 'Instance' | 'NotApplicable' | 'Type';
 
 export type DataTypeDefXsd =
     | 'xs:anyURI'
@@ -131,7 +59,7 @@ export type DataTypeDefXsd =
     | 'xs:unsignedLong'
     | 'xs:unsignedShort';
 
-export type DataTypeIEC61360 =
+export type DataTypeIec61360 =
     | 'BLOB'
     | 'BOOLEAN'
     | 'DATE'
@@ -154,78 +82,7 @@ export type DataTypeIEC61360 =
 
 export type Direction = 'input' | 'output';
 
-export interface EmbeddedDataSpecification {
-    dataSpecification: Reference;
-    dataSpecificationContent: DataSpecificationContent;
-}
-
-export interface Entity extends SubmodelElement {
-    statements?: SubmodelElement[];
-    entityType: EntityType;
-    globalAssetId?: string;
-    specificAssetId?: SpecificAssetId;
-}
-
 export type EntityType = 'CoManagedEntity' | 'SelfManagedEntity';
-
-export interface Environment {
-    assetAdministrationShells: AssetAdministrationShell[];
-    submodels: Submodel[];
-    conceptDescriptions: ConceptDescription[];
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EventElement extends SubmodelElement {}
-
-export interface EventPayload extends SubmodelElement {
-    source: Reference;
-    sourceSemanticId?: Reference;
-    observableReference: Reference;
-    observableSemanticId?: Reference;
-    topic?: string;
-    subjectId?: Reference;
-    timeStamp: string;
-    payload?: string;
-}
-
-export interface Extension extends HasSemantic {
-    name: string;
-    valueType?: DataTypeDefXsd;
-    value?: string;
-    refersTo?: Reference;
-}
-
-export interface File extends DataElement {
-    contentType: string;
-    value?: string;
-}
-
-export interface HasDataSpecification {
-    embeddedDataSpecifications?: EmbeddedDataSpecification[];
-}
-
-export interface HasExtensions {
-    extensions?: Extension[];
-}
-
-export interface HasKind {
-    kind?: ModellingKind;
-}
-
-export interface HasSemantic {
-    semanticId?: Reference;
-    supplementalSemanticIds?: Reference;
-}
-
-export interface Identifiable extends Referable {
-    administration?: AdministrativeInformation;
-    id: string;
-}
-
-export interface Key {
-    type: KeyTypes;
-    value: string;
-}
 
 export type KeyTypes =
     | 'AnnotatedRelationshipElement'
@@ -253,13 +110,6 @@ export type KeyTypes =
     | 'SubmodelElementCollection'
     | 'SubmodelElementList';
 
-export interface LangString {
-    language: string;
-    text: string;
-}
-
-export type LevelType = 'Max' | 'Min' | 'Nom' | 'Typ';
-
 export type ModelType =
     | 'AnnotatedRelationshipElement'
     | 'AssetAdministrationShell'
@@ -280,21 +130,177 @@ export type ModelType =
     | 'SubmodelElementCollection'
     | 'SubmodelElementList';
 
-export type ModellingKind = 'Template' | 'Instance';
+export type ModellingKind = 'Instance' | 'Template';
+
+export type QualifierKind = 'ConceptQualifier' | 'TemplateQualifier' | 'ValueQualifier';
+
+export type ReferenceTypes = 'ExternalReference' | 'ModelReference';
+
+export type StateOfEvent = 'off' | 'on';
+
+export interface LangString {
+    language: string;
+    text: string;
+}
+
+export interface AdministrativeInformation extends HasDataSpecification {
+    creator?: Reference;
+    revision?: string;
+    templateId?: string;
+    version?: string;
+}
+
+export interface AnnotatedRelationshipElement extends RelationshipElement {
+    annotations?: DataElement[];
+}
+
+export interface AssetAdministrationShell extends HasDataSpecification, Identifiable {
+    assetInformation: AssetInformation;
+    derivedFrom?: Reference;
+    submodels?: Reference[];
+}
+
+export interface AssetInformation {
+    assetKind: AssetKind;
+    assetType?: string;
+    defaultThumbnail?: Resource;
+    globalAssetId?: string;
+    specificAssetIds?: SpecificAssetId[];
+}
+
+export interface BasicEventElement extends EventElement {
+    direction: Direction;
+    lastUpdate?: string;
+    maxInterval?: string;
+    messageBroker?: Reference;
+    messageTopic?: string;
+    minInterval?: string;
+    observed: Reference;
+    state: StateOfEvent;
+}
+
+export interface Blob extends DataElement {
+    contentType: string;
+    value?: string;
+}
+
+export type Capability = SubmodelElement;
+
+export interface ConceptDescription extends HasDataSpecification, Identifiable {
+    isCaseOf?: Reference[];
+}
+
+export interface DataElement extends SubmodelElement {
+    nodeId?: string;
+}
+
+export interface DataSpecificationContent {
+    modelType: ModelType;
+}
+
+export interface DataSpecificationIec61360 extends DataSpecificationContent {
+    dataType?: DataTypeIec61360;
+    definition?: LangString[];
+    levelType?: LevelType;
+    preferredName: LangString[];
+    shortName?: LangString[];
+    sourceOfDefinition?: string;
+    symbol?: string;
+    unit?: string;
+    unitId?: Reference;
+    value?: string;
+    valueFormat?: string;
+    valueList?: ValueList;
+}
+
+export interface EmbeddedDataSpecification {
+    dataSpecification: Reference;
+    dataSpecificationContent: DataSpecificationContent;
+}
+
+export interface Entity extends SubmodelElement {
+    entityType: EntityType;
+    globalAssetId?: string;
+    specificAssetIds?: SpecificAssetId[];
+    statements?: SubmodelElement[];
+}
+
+export interface Environment {
+    assetAdministrationShells: AssetAdministrationShell[];
+    conceptDescriptions: ConceptDescription[];
+    submodels: Submodel[];
+}
+
+export type EventElement = SubmodelElement;
+
+export interface EventPayload {
+    observableReference: Reference;
+    observableSemanticId?: Reference;
+    payload?: string;
+    source: Reference;
+    sourceSemanticId?: Reference;
+    subjectId?: Reference;
+    timeStamp: string;
+    topic?: string;
+}
+
+export interface Extension extends HasSemantics {
+    name: string;
+    refersTo?: Reference[];
+    value?: string;
+    valueType?: DataTypeDefXsd;
+}
+
+export interface File extends DataElement {
+    contentType: string;
+    value?: string;
+}
+
+export interface HasDataSpecification {
+    embeddedDataSpecifications?: EmbeddedDataSpecification[];
+}
+
+export interface HasExtensions {
+    extensions?: Extension[];
+}
+
+export interface HasKind {
+    kind?: ModellingKind;
+}
+
+export interface HasSemantics {
+    semanticId?: Reference;
+    supplementalSemanticIds?: Reference[];
+}
+
+export interface Identifiable extends Referable {
+    administration?: AdministrativeInformation;
+    id: string;
+}
+
+export interface Key {
+    type: KeyTypes;
+    value: string;
+}
+
+export interface LevelType {
+    max: boolean;
+    min: boolean;
+    nom: boolean;
+    typ: boolean;
+}
 
 export interface MultiLanguageProperty extends DataElement {
-    value: LangString[];
+    value?: LangString[];
     valueId?: Reference;
 }
 
 export interface Operation extends SubmodelElement {
-    inputVariables?: OperationVariable[];
-    outputVariables?: OperationVariable[];
     inoutputVariables?: OperationVariable[];
-    /** The node ID of the operation node. */
+    inputVariables?: OperationVariable[];
     methodId?: string;
-    /** The node ID of the operation submodel element. */
     objectId?: string;
+    outputVariables?: OperationVariable[];
 }
 
 export interface OperationVariable {
@@ -302,55 +308,47 @@ export interface OperationVariable {
 }
 
 export interface Property extends DataElement {
-    valueType: DataTypeDefXsd;
     value?: string;
     valueId?: Reference;
+    valueType: DataTypeDefXsd;
 }
 
 export interface Qualifiable {
     qualifiers?: Qualifier[];
 }
 
-export interface Qualifier extends HasSemantic {
+export interface Qualifier extends HasSemantics {
     kind?: QualifierKind;
     type: string;
-    valueType: DataTypeDefXsd;
     value?: string;
     valueId?: Reference;
+    valueType: DataTypeDefXsd;
 }
-
-export type QualifierKind = 'ConceptQualifier' | 'TemplateQualifier' | 'ValueQualifier';
 
 export interface Range extends DataElement {
-    valueType: DataTypeDefXsd;
-    min?: string;
     max?: string;
+    min?: string;
+    valueType: DataTypeDefXsd;
 }
 
-/** Metainformation if SubmodelElement is DataElement */
-export type Category = 'CONSTANT' | 'PARAMETER' | 'VARIABLE';
-
 export interface Referable extends HasExtensions {
+    category?: string;
+    description?: LangString[];
+    displayName?: LangString[];
     idShort: string;
     modelType: ModelType;
-    category?: string;
-    displayName?: LangString[];
-    description?: LangString[];
-    /** For internal use. */
     parent?: Reference;
 }
 
 export interface Reference {
-    type: ReferenceTypes;
-    referredSemanticId?: Reference;
     keys: Key[];
+    referredSemanticId?: Reference;
+    type: ReferenceTypes;
 }
 
 export interface ReferenceElement extends DataElement {
     value?: Reference;
 }
-
-export type ReferenceTypes = 'ExternalReference' | 'ModelReference';
 
 export interface RelationshipElement extends SubmodelElement {
     first: Reference;
@@ -358,23 +356,21 @@ export interface RelationshipElement extends SubmodelElement {
 }
 
 export interface Resource {
-    path: string;
     contentType?: string;
+    path: string;
 }
 
-export interface SpecificAssetId extends HasSemantic {
+export interface SpecificAssetId extends HasSemantics {
+    externalSubjectId?: Reference;
     name: string;
     value: string;
-    externalSubjectId?: Reference;
 }
 
-export type StateOfEvent = 'on' | 'off';
-
-export interface Submodel extends Identifiable, HasKind, HasSemantic, Qualifiable, HasDataSpecification {
+export interface Submodel extends Qualifiable, HasKind, HasSemantics, HasDataSpecification, Identifiable {
     submodelElements?: SubmodelElement[];
 }
 
-export interface SubmodelElement extends Referable, HasKind, HasSemantic, Qualifiable, HasDataSpecification {}
+export interface SubmodelElement extends Qualifiable, HasDataSpecification, HasSemantics, Referable {}
 
 export interface SubmodelElementCollection extends SubmodelElement {
     value?: SubmodelElement[];
@@ -383,9 +379,9 @@ export interface SubmodelElementCollection extends SubmodelElement {
 export interface SubmodelElementList extends SubmodelElement {
     orderRelevant?: boolean;
     semanticIdListElement?: Reference;
-    typeValueListElement: AasSubmodelElements;
-    valueTypeListElement?: DataTypeDefXsd;
+    typeValueListElement: AASSubmodelElements;
     value?: SubmodelElement[];
+    valueTypeListElement?: DataTypeDefXsd;
 }
 
 export interface ValueList {

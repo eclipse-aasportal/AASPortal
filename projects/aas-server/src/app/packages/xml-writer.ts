@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas } from 'common';
+import { aas, convertToString } from 'common';
 import { camelCase } from 'lodash-es';
 import { DOMImplementation, XMLSerializer } from '@xmldom/xmldom';
 import { AASWriter } from './aas-writer.js';
@@ -70,7 +70,7 @@ export class XmlWriter extends AASWriter {
         this.writeTextNode(node, 'name', extension.name);
 
         if (extension.refersTo) {
-            this.writeReference(extension.refersTo, this.appendChild(node, 'refersTo'));
+            extension.refersTo.forEach(item => this.writeReference(item, this.appendChild(node, 'refersTo')));
         }
     }
 
@@ -153,7 +153,14 @@ export class XmlWriter extends AASWriter {
 
         this.writeTextNode(node, 'valueFormat', content.valueFormat);
         this.writeTextNode(node, 'value', content.value);
-        this.writeTextNode(node, 'levelType', content.levelType);
+
+        if (content.levelType) {
+            const levelType = this.appendChild(node, 'levelType');
+            this.writeTextNode(levelType, 'min', convertToString(content.levelType.min));
+            this.writeTextNode(levelType, 'max', convertToString(content.levelType.max));
+            this.writeTextNode(levelType, 'nom', convertToString(content.levelType.nom));
+            this.writeTextNode(levelType, 'typ', convertToString(content.levelType.typ));
+        }
     }
 
     private writeEmbeddedDataSpecification(embeddedDataSpecification: aas.EmbeddedDataSpecification, node: Node): void {
@@ -192,13 +199,16 @@ export class XmlWriter extends AASWriter {
         }
     }
 
-    private writeHasSemantic(hasSemantic: aas.HasSemantic, node: Node): void {
+    private writeHasSemantic(hasSemantic: aas.HasSemantics, node: Node): void {
         if (hasSemantic.semanticId) {
             this.writeReference(hasSemantic.semanticId, this.appendChild(node, 'semanticId'));
         }
 
         if (hasSemantic.supplementalSemanticIds) {
-            this.writeReference(hasSemantic.supplementalSemanticIds, this.appendChild(node, 'supplementalSemanticIds'));
+            const child = this.appendChild(node, 'supplementalSemanticIds');
+            hasSemantic.supplementalSemanticIds.forEach(item =>
+                this.writeReference(item, this.appendChild(child, 'reference')),
+            );
         }
     }
 
@@ -279,7 +289,6 @@ export class XmlWriter extends AASWriter {
 
     private writeSubmodelElement(submodelElement: aas.SubmodelElement, node: Node): void {
         this.writeReferable(submodelElement, node);
-        this.writeHasKind(submodelElement, node);
         this.writeHasSemantic(submodelElement, node);
         this.writeQualifiable(submodelElement, node);
         this.writeHasDataSpecification(submodelElement, node);
@@ -332,7 +341,6 @@ export class XmlWriter extends AASWriter {
 
     private writeDataElement(dataElement: aas.DataElement, node: Node): void {
         this.writeReferable(dataElement, node);
-        this.writeHasKind(dataElement, node);
         this.writeHasSemantic(dataElement, node);
         this.writeQualifiable(dataElement, node);
         this.writeHasDataSpecification(dataElement, node);
@@ -362,9 +370,11 @@ export class XmlWriter extends AASWriter {
     private writeAnnotatedRelationshipElement(relationship: aas.AnnotatedRelationshipElement, node: Node) {
         this.writeRelationshipElement(relationship, node);
 
-        const annotationsNode = this.appendChild(node, 'annotations');
-        for (const annotation of relationship.annotations) {
-            this.writeDataElement(annotation, this.appendChild(annotationsNode, camelCase(annotation.modelType)));
+        if (relationship.annotations) {
+            const annotationsNode = this.appendChild(node, 'annotations');
+            for (const annotation of relationship.annotations) {
+                this.writeDataElement(annotation, this.appendChild(annotationsNode, camelCase(annotation.modelType)));
+            }
         }
     }
 
@@ -395,8 +405,11 @@ export class XmlWriter extends AASWriter {
         this.writeTextNode(node, 'entityType', entity.entityType);
         this.writeTextNode(node, 'globalAssetId', entity.globalAssetId);
 
-        if (entity.specificAssetId) {
-            this.writeSpecificAssetId(entity.specificAssetId, this.appendChild(node, 'specificAssetId'));
+        if (entity.specificAssetIds) {
+            const child = this.appendChild(node, 'specificAssetIds');
+            entity.specificAssetIds.forEach(item =>
+                this.writeSpecificAssetId(item, this.appendChild(child, 'specificAssetId')),
+            );
         }
 
         if (entity.statements) {

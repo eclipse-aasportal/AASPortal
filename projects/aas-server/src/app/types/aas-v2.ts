@@ -106,7 +106,7 @@ export type DataTypeDefXsd =
 
 /** Enumeration of simple data types for a IEC61360 concept description
  * using the data specification template DataSpecificationIec61360 */
-export type DataTypeIEC61360 =
+export type DataTypeIec61360 =
     | 'DATE'
     | 'STRING'
     | 'STRING_TRANSLATABLE'
@@ -238,7 +238,7 @@ export interface DataSpecificationIec61360Content extends DataSpecificationConte
     unitId?: Reference;
     sourceOfDefinition?: string;
     symbol?: string;
-    dataType?: DataTypeIEC61360;
+    dataType?: DataTypeIec61360;
     definition?: LangString[];
     valueFormat?: string;
     valueList?: ValueList;
@@ -246,7 +246,12 @@ export interface DataSpecificationIec61360Content extends DataSpecificationConte
     levelType?: LevelType;
 }
 
-export type LevelType = 'Max' | 'Min' | 'Nom' | 'Typ';
+export interface LevelType {
+    max: boolean;
+    min: boolean;
+    nom: boolean;
+    typ: boolean;
+}
 
 /** Content of data specification template for concept descriptions for physical units
  * conformant to IEC 61360. */

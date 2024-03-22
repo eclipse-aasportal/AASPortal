@@ -55,18 +55,18 @@ export class OpcuaPackage extends AASPackage {
         return document;
     }
 
-    public override async readEnvironmentAsync(): Promise<aas.Environment> {
+    public override async getEnvironmentAsync(): Promise<aas.Environment> {
         const component = await this.crawlAsync();
         const reader = new OpcuaReader(this.logger, component, this.dataTypes);
         return await reader.readEnvironment();
     }
 
-    public getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+    public override setEnvironmentAsync(): Promise<string[]> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public commitDocumentAsync(): Promise<string[]> {
-        throw new Error('Method not implemented.');
+    public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public async openReadStreamAsync(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {

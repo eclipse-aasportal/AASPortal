@@ -93,7 +93,7 @@ export class AASProvider {
         try {
             await resource.openAsync();
             if (!document.content) {
-                document.content = await resource.createPackage(document.address).readEnvironmentAsync();
+                document.content = await resource.createPackage(document.address).getEnvironmentAsync();
             }
 
             return document;
@@ -108,7 +108,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            return await resource.createPackage(document.address).readEnvironmentAsync();
+            return await resource.createPackage(document.address).getEnvironmentAsync();
         } finally {
             await resource.closeAsync();
         }
@@ -141,7 +141,7 @@ export class AASProvider {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address);
             if (!document.content) {
-                document.content = await pkg.readEnvironmentAsync();
+                document.content = await pkg.getEnvironmentAsync();
             }
 
             const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, path);
@@ -253,10 +253,10 @@ export class AASProvider {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address);
             if (!document.content) {
-                document.content = await pkg.readEnvironmentAsync();
+                document.content = await pkg.getEnvironmentAsync();
             }
 
-            return await pkg.commitDocumentAsync(document, content);
+            return await pkg.setEnvironmentAsync(content, document.content);
         } finally {
             await resource.closeAsync();
         }
@@ -421,7 +421,7 @@ export class AASProvider {
         const document = await this.index.get(message.endpoint, message.id);
         const resource = this.resourceFactory.create(endpoint);
         await resource.openAsync();
-        const env = await resource.createPackage(document.address).readEnvironmentAsync();
+        const env = await resource.createPackage(document.address).getEnvironmentAsync();
         return resource.createSubscription(client, message, env);
     }
 
@@ -574,7 +574,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            return await resource.createPackage(document.address).readEnvironmentAsync();
+            return await resource.createPackage(document.address).getEnvironmentAsync();
         } finally {
             await resource.closeAsync();
         }

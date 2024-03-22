@@ -327,7 +327,6 @@ export class JsonWriterV2 extends AASWriter {
             ...this.writeHasSemantic(source),
             ...this.writeHasDataSpecification(source),
             ...this.writeQualifiable(source),
-            ...this.writeHasKind(source),
         };
     }
 
@@ -489,17 +488,17 @@ export class JsonWriterV2 extends AASWriter {
         };
     }
 
-    private writeDataTypeIEC61360(source: aas.DataTypeIEC61360): aasv2.DataTypeIEC61360 {
+    private writeDataTypeIEC61360(source: aas.DataTypeIec61360): aasv2.DataTypeIec61360 {
         switch (source) {
             case 'IRDI':
             case 'IRI':
                 return 'URL';
             default:
-                return source as aasv2.DataTypeIEC61360;
+                return source as aasv2.DataTypeIec61360;
         }
     }
 
-    private writeHasSemantic(source: aas.HasSemantic): aasv2.HasSemantic {
+    private writeHasSemantic(source: aas.HasSemantics): aasv2.HasSemantic {
         const hasSemantic: aasv2.HasSemantic = {};
         if (source.semanticId) {
             hasSemantic.semanticId = this.writeReference(source.semanticId);

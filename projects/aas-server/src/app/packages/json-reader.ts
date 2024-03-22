@@ -249,7 +249,6 @@ export class JsonReader extends AASReader {
         return {
             ...this.readReferable(source, ancestors),
             ...this.readHasSemantic(source),
-            ...this.readHasKind(source),
             ...this.readHasDataSpecification(source),
             ...this.readQualifiable(source),
         };
@@ -447,8 +446,8 @@ export class JsonReader extends AASReader {
             entity.globalAssetId = source.globalAssetId;
         }
 
-        if (source.specificAssetId) {
-            entity.specificAssetId = this.readSpecificAssetId(source.specificAssetId);
+        if (source.specificAssetIds) {
+            entity.specificAssetIds = source.specificAssetIds.map(item => this.readSpecificAssetId(item));
         }
 
         return entity;
@@ -555,8 +554,8 @@ export class JsonReader extends AASReader {
         return range;
     }
 
-    private readHasSemantic(source: aas.HasSemantic): aas.HasSemantic {
-        const hasSemantic: aas.HasSemantic = {};
+    private readHasSemantic(source: aas.HasSemantics): aas.HasSemantics {
+        const hasSemantic: aas.HasSemantics = {};
         if (source.semanticId && source.semanticId.keys.length > 0) {
             hasSemantic.semanticId = this.readReference(source.semanticId);
         }
@@ -648,7 +647,7 @@ export class JsonReader extends AASReader {
         }
 
         if (source.category) {
-            referable.category = source.category as aas.Category;
+            referable.category = source.category;
         }
 
         if (source.description) {
@@ -711,9 +710,9 @@ export class JsonReader extends AASReader {
     }
 
     private readEmbeddedDatSpecification(source: aas.EmbeddedDataSpecification): aas.EmbeddedDataSpecification {
-        if (!source.dataSpecification) {
-            throw new Error('EmbeddedDataSpecification.dataSpecification');
-        }
+        const dataSpecification = source.dataSpecification
+            ? this.readReference(source.dataSpecification)
+            : ({ type: 'ModelReference', keys: [] } as aas.Reference);
 
         if (!source.dataSpecificationContent) {
             throw new Error('EmbeddedDataSpecification.dataSpecificationContent');
@@ -734,7 +733,7 @@ export class JsonReader extends AASReader {
         }
 
         const specification: aas.EmbeddedDataSpecification = {
-            dataSpecification: this.readReference(source.dataSpecification),
+            dataSpecification,
             dataSpecificationContent,
         };
 
@@ -742,13 +741,9 @@ export class JsonReader extends AASReader {
     }
 
     private readDataSpecificationIEC61360(source: aas.DataSpecificationIec61360): aas.DataSpecificationIec61360 {
-        if (!source.preferredName) {
-            throw new Error(`DataSpecificationIec61360.preferredName`);
-        }
-
         const iec61360: aas.DataSpecificationIec61360 = {
             modelType: source.modelType,
-            preferredName: source.preferredName,
+            preferredName: source.preferredName ? source.preferredName.map(item => this.readLangString(item)) : [],
         };
 
         if (source.dataType) {
@@ -756,7 +751,7 @@ export class JsonReader extends AASReader {
         }
 
         if (source.definition) {
-            iec61360.definition = source.definition;
+            iec61360.definition = source.definition.map(item => this.readLangString(item));
         }
 
         if (source.levelType) {
@@ -820,5 +815,9 @@ export class JsonReader extends AASReader {
         }
 
         return { value: source.value, valueId: this.readReference(source.valueId) };
+    }
+
+    private readLangString(source: aas.LangString): aas.LangString {
+        return { language: source.language, text: source.text } as aas.LangString;
     }
 }
