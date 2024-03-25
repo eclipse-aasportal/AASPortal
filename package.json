@@ -6,8 +6,8 @@
     "scripts": {
         "tsoa": "npm run tsoa -w aas-server",
         "start": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
-        "header": "node copyright-header.js",
-        "coverage": "node coverage-summary.js",
+        "header": "tsx copyright-header.ts",
+        "coverage": "tsx coverage-summary.ts",
         "user-db": "docker run -p 27017:27017 -d --name aasportal-users -e MONGO_INITDB_DATABASE=aasportal-users mongo",
         "lint": "npm run lint -ws",
         "format": "npm run format -ws",

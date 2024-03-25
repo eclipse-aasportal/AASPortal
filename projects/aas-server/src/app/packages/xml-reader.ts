@@ -233,6 +233,9 @@ export class XmlReader extends AASReader {
             case 'Blob':
                 submodelElement = this.readBlob(node, parent);
                 break;
+            case 'Entity':
+                submodelElement = this.readEntity(node, parent);
+                break;
             case 'File':
                 submodelElement = this.readFile(node, parent);
                 break;
@@ -376,6 +379,47 @@ export class XmlReader extends AASReader {
         }
 
         return basicEvent;
+    }
+
+    private readEntity(node: Node, parent?: aas.Reference): aas.Entity {
+        const entityType = this.selectNode('./aas:entityType', node)?.textContent as aas.EntityType;
+        if (!entityType) {
+            throw new Error('File.contentType');
+        }
+
+        const entity: aas.Entity = {
+            ...this.readSubmodelElementType(node, parent),
+            entityType,
+        };
+
+        const globalAssetId = this.selectNode('./aas:globalAssetId', node)?.textContent;
+        if (globalAssetId) {
+            entity.globalAssetId = globalAssetId;
+        }
+
+        const specificAssetIds = this.readSpecificAssetIds(this.selectNode('./aas:specificAssetIds', node));
+        if (specificAssetIds) {
+            entity.specificAssetIds = specificAssetIds;
+        }
+
+        const statements = this.readStatements(node, parent ? this.createReference(parent, entity) : undefined);
+        if (statements.length > 0) {
+            entity.statements = statements;
+        }
+
+        return entity;
+    }
+
+    private readStatements(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
+        const statements: aas.SubmodelElement[] = [];
+        for (const child of this.selectNodes('./aas:statements/*', node)) {
+            const submodelElement = this.readSubmodelElement(child, parent);
+            if (submodelElement) {
+                statements.push(submodelElement);
+            }
+        }
+
+        return statements;
     }
 
     private readBlob(node: Node, parent?: aas.Reference): aas.Blob {
@@ -672,7 +716,7 @@ export class XmlReader extends AASReader {
             preferredName,
         };
 
-        const shortName = this.readLangStrings('./aas:shortName/langStringShortNameTypeIec61360', node);
+        const shortName = this.readLangStrings('./aas:shortName/aas:langStringShortNameTypeIec61360', node);
         if (shortName && shortName.length > 0) {
             dataSpecification.shortName = shortName;
         }
@@ -702,7 +746,7 @@ export class XmlReader extends AASReader {
             dataSpecification.dataType = dataType;
         }
 
-        const definition = this.readLangStrings('./aas:definition/langStringDefinitionTypeIec61360', node);
+        const definition = this.readLangStrings('./aas:definition/aas:langStringDefinitionTypeIec61360', node);
         if (definition && definition.length > 0) {
             dataSpecification.definition = definition;
         }
@@ -712,7 +756,7 @@ export class XmlReader extends AASReader {
             dataSpecification.valueFormat = valueFormat;
         }
 
-        const valueList = this.readValueList(this.selectNode('./aas:valueList/valueReferencePairs', node));
+        const valueList = this.readValueList(this.selectNode('./aas:valueList/aas:valueReferencePairs', node));
         if (valueList) {
             dataSpecification.valueList = valueList;
         }
@@ -900,10 +944,14 @@ export class XmlReader extends AASReader {
         return (this.select(expression, node, true) as Node)?.textContent;
     }
 
-    private getTextContent(expression: string, node: Node): string {
-        const value = (this.select(expression, node, true) as Node)?.textContent;
+    private getTextContent(expression: string, node: Node, defaultValue?: string): string {
+        let value = (this.select(expression, node, true) as Node)?.textContent;
         if (value == null) {
-            throw new Error(`${expression} ToDo.`);
+            if (defaultValue == null) {
+                throw new Error(`${expression} ToDo.`);
+            }
+
+            value = defaultValue;
         }
 
         return value;
@@ -916,7 +964,7 @@ export class XmlReader extends AASReader {
     private getKey(node: Node): aas.Key {
         return {
             type: this.getTextContent('./aas:type', node) as aas.KeyTypes,
-            value: this.getTextContent('./aas:value', node),
+            value: this.getTextContent('./aas:value', node, ''),
         };
     }
 }

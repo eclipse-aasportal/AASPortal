@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { isEqual } from 'lodash-es';
 import {
     AASDocument,
     aas,
@@ -25,7 +26,6 @@ import {
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../convert';
-import { isEqual } from 'lodash-es';
 
 export class AASTreeRow extends TreeNode<aas.Referable> {
     public constructor(
@@ -39,7 +39,6 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         public readonly name: string,
         public readonly typeInfo: string,
         public readonly value: string | boolean | undefined,
-        public readonly displayType: DisplayType,
         public readonly isLeaf: boolean,
         parent: number,
         firstChild: number,
@@ -61,13 +60,40 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
 
         return false;
     }
-}
 
-export enum DisplayType {
-    undefined = '',
-    Text = 'text',
-    Boolean = 'boolean',
-    Url = 'url',
+    public get annotatedRelationship(): aas.AnnotatedRelationshipElement | undefined {
+        return this.element.modelType === 'AnnotatedRelationshipElement'
+            ? (this.element as aas.AnnotatedRelationshipElement)
+            : undefined;
+    }
+
+    public get blob(): aas.Blob | undefined {
+        return this.element.modelType === 'Blob' ? (this.element as aas.Blob) : undefined;
+    }
+
+    public get entity(): aas.Entity | undefined {
+        return this.element.modelType === 'Entity' ? (this.element as aas.Entity) : undefined;
+    }
+
+    public get file(): aas.File | undefined {
+        return this.element.modelType === 'File' ? (this.element as aas.File) : undefined;
+    }
+
+    public get property(): aas.Property | undefined {
+        return this.element.modelType === 'Property' ? (this.element as aas.Property) : undefined;
+    }
+
+    public get reference(): aas.ReferenceElement | undefined {
+        return this.element.modelType === 'ReferenceElement' ? (this.element as aas.ReferenceElement) : undefined;
+    }
+
+    public get relationship(): aas.RelationshipElement | undefined {
+        return this.element.modelType === 'RelationshipElement' ? (this.element as aas.RelationshipElement) : undefined;
+    }
+
+    public get submodel(): aas.Submodel | undefined {
+        return this.element.modelType === 'Submodel' ? (this.element as aas.Submodel) : undefined;
+    }
 }
 
 export interface SearchTerm {
@@ -123,7 +149,6 @@ class TreeInitialize {
     }
 
     private createRow(element: aas.Referable, parent: number, level: number, expanded: boolean): AASTreeRow {
-        let valueType = DisplayType.undefined;
         let isLeaf = true;
         switch (element.modelType) {
             case 'AssetAdministrationShell':
@@ -132,26 +157,14 @@ class TreeInitialize {
             case 'SubmodelElementList':
                 isLeaf = false;
                 break;
-            case 'Property':
-                valueType = this.getPropertyDisplayType(element as aas.Property);
-                break;
-            case 'MultiLanguageProperty':
-            case 'Range':
-                valueType = DisplayType.Text;
-                break;
-            case 'Entity':
-            case 'ReferenceElement':
-            case 'Operation':
-                valueType = DisplayType.Url;
-                break;
-            case 'File': {
-                const file = element as aas.File;
-                valueType = file.contentType && file.value ? DisplayType.Url : DisplayType.Text;
+            case 'AnnotatedRelationshipElement': {
+                const relationship = element as aas.AnnotatedRelationshipElement;
+                isLeaf = !relationship.annotations || relationship.annotations.length === 0;
                 break;
             }
-            case 'Blob': {
-                const blob = element as aas.Blob;
-                valueType = blob.contentType ? DisplayType.Url : DisplayType.Text;
+            case 'Entity': {
+                const entity = element as aas.Entity;
+                isLeaf = !entity.statements || entity.statements.length === 0;
                 break;
             }
         }
@@ -167,7 +180,6 @@ class TreeInitialize {
             element.idShort,
             this.getTypeInfo(element),
             this.getValue(element, this.language),
-            valueType,
             isLeaf,
             parent,
             -1,
@@ -216,6 +228,8 @@ class TreeInitialize {
                 return (referable as aas.SubmodelElementCollection).value ?? [];
             case 'SubmodelElementList':
                 return (referable as aas.SubmodelElementList).value ?? [];
+            case 'Entity':
+                return (referable as aas.Entity).statements ?? [];
             default:
                 return [];
         }
@@ -247,17 +261,6 @@ class TreeInitialize {
         }
 
         return { type: 'ModelReference', keys };
-    }
-
-    private getPropertyDisplayType(property: aas.Property): DisplayType {
-        switch (property.valueType) {
-            case 'xs:anyURI':
-                return DisplayType.Url;
-            case 'xs:boolean':
-                return DisplayType.Boolean;
-            default:
-                return DisplayType.Text;
-        }
     }
 
     private getValue(referable: aas.Referable | null, localeId: string): boolean | string | undefined {
@@ -311,6 +314,14 @@ class TreeInitialize {
             case 'SubmodelElementList': {
                 const list = referable as aas.SubmodelElementList;
                 return list.value != null && list.value.length > 0;
+            }
+            case 'Entity': {
+                const entity = referable as aas.Entity;
+                return entity.statements != null && entity.statements.length > 0;
+            }
+            case 'AnnotatedRelationshipElement': {
+                const relationship = referable as aas.AnnotatedRelationshipElement;
+                return relationship.annotations != null && relationship.annotations.length > 0;
             }
             default:
                 return false;
@@ -460,7 +471,6 @@ export class AASTree extends Tree<aas.Referable, AASTreeRow> {
             node.name,
             node.typeInfo,
             node.value,
-            node.displayType,
             node.isLeaf,
             node.parent,
             node.firstChild,

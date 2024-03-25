@@ -50,7 +50,7 @@ export class UpdateElementCommand extends Command {
         noop();
     }
 
-    private getChildren(document: AASDocument, element: aas.SubmodelElement): aas.SubmodelElementCollection[] {
+    private getChildren(document: AASDocument, element: aas.SubmodelElement): aas.SubmodelElement[] {
         if (!element.parent) {
             throw new Error(`${element.idShort} is not referable.`);
         }
@@ -65,6 +65,12 @@ export class UpdateElementCommand extends Command {
             children = (parent as aas.Submodel).submodelElements;
         } else if (parent.modelType === 'SubmodelElementCollection') {
             children = (parent as aas.SubmodelElementCollection).value;
+        } else if (parent.modelType === 'SubmodelElementList') {
+            children = (parent as aas.SubmodelElementList).value;
+        } else if (parent.modelType === 'Entity') {
+            children = (parent as aas.Entity).statements;
+        } else if (parent.modelType === 'AnnotatedRelationshipElement') {
+            children = (parent as aas.AnnotatedRelationshipElement).annotations;
         }
 
         if (!children) {

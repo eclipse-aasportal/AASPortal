@@ -1018,6 +1018,10 @@ export function getChildren(parent: aas.Referable, env?: aas.Environment): aas.R
                 return (parent as aas.Submodel).submodelElements ?? [];
             case 'AssetAdministrationShell':
                 return env && env.submodels ? env.submodels : [];
+            case 'Entity':
+                return (parent as aas.Entity).statements ?? [];
+            case 'AnnotatedRelationshipElement':
+                return (parent as aas.AnnotatedRelationshipElement).annotations ?? [];
         }
     }
 

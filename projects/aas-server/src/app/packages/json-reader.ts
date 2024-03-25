@@ -258,14 +258,16 @@ export class JsonReader extends AASReader {
         source: aas.AnnotatedRelationshipElement,
         ancestors?: aas.Referable[],
     ): aas.AnnotatedRelationshipElement {
-        if (!source.annotations) {
-            throw new Error('AnnotatedRelationshipElement.annotation');
-        }
-
         const relationship: aas.AnnotatedRelationshipElement = {
             ...this.readRelationshipElement(source, ancestors),
-            annotations: this.readSubmodelElements(source.annotations),
         };
+
+        if (source.annotations) {
+            relationship.annotations = this.readSubmodelElements(
+                source.annotations,
+                ancestors ? [...ancestors, relationship] : undefined,
+            );
+        }
 
         return relationship;
     }
@@ -389,27 +391,26 @@ export class JsonReader extends AASReader {
     }
 
     private readFile(source: aas.File, ancestors?: aas.Referable[]): aas.File {
-        if (!source.contentType && source.value) {
-            let contentType: string | undefined;
-            const i = source.value.lastIndexOf('.');
+        const value = source.value?.trim();
+        let contentType: string | undefined = source.contentType?.trim();
+        if (!contentType && value) {
+            const i = value.lastIndexOf('.');
             if (i >= 0) {
-                contentType = extensionToMimeType(source.value.substring(i));
+                contentType = extensionToMimeType(value.substring(i));
             }
 
             if (!contentType) {
                 throw new Error('File.contentType');
             }
-
-            source.contentType = contentType;
         }
 
         const file: aas.File = {
             ...this.readSubmodelElementType(source, ancestors),
-            contentType: source.contentType,
+            contentType,
         };
 
-        if (source.value) {
-            file.value = source.value;
+        if (value) {
+            file.value = value;
         }
 
         return file;
@@ -439,7 +440,9 @@ export class JsonReader extends AASReader {
         };
 
         if (source.statements) {
-            entity.statements = source.statements.map(item => this.readSubmodelElement(item)!);
+            entity.statements = source.statements.map(
+                item => this.readSubmodelElement(item, ancestors ? [...ancestors, entity] : undefined)!,
+            );
         }
 
         if (source.globalAssetId) {
@@ -686,13 +689,9 @@ export class JsonReader extends AASReader {
                     throw new Error(`Reference.type`);
                 }
 
-                if (!key.value) {
-                    throw new Error(`Reference.value`);
-                }
-
                 return {
                     type: key.type,
-                    value: key.value,
+                    value: key.value != null ? key.value : '',
                 } as aas.Key;
             }),
         };

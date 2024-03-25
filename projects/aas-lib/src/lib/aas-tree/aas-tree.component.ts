@@ -286,55 +286,98 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         this.store.dispatch(AASTreeActions.toggleSelected({ row: node, altKey: this.altKey, shiftKey: this.shiftKey }));
     }
 
-    public open(node: AASTreeRow): void {
-        try {
-            switch (node.element.modelType) {
-                case 'File':
-                    this.openFileAsync(node.element as aas.File);
-                    break;
-                case 'Blob':
-                    this.openBlobAsync(node.element as aas.Blob);
-                    break;
-                case 'Entity':
-                    if (this.state === 'offline') {
-                        this.openEntity(node.element);
-                    } else {
-                        this.notify.info('ToDo...');
-                    }
-                    break;
-                case 'ReferenceElement':
-                    if (this.state === 'offline') {
-                        this.openReference(node.element);
-                    } else {
-                        this.notify.info('ToDo...');
-                    }
-                    break;
-                case 'Operation':
-                    this.callOperationAsync(node.element as aas.Operation);
-                    break;
-                case 'Property': {
-                    const property = node.element as aas.Property;
-                    this.window.open(String(property.value));
-                    break;
-                }
-                case 'Submodel':
-                    this.navigateToView(node.element as aas.Submodel);
-                    break;
-            }
-        } catch (error) {
-            this.notify.error(error);
+    public openEntity(entity: aas.Entity): void {
+        if (this.state === 'online') return;
+
+        if (entity && entity.globalAssetId) {
+            this.clipboard.set('AASQuery', { id: entity.globalAssetId } as AASQuery);
+            this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
         }
     }
 
-    public findNext(): void {
-        this.searching.findNext();
+    public async openFile(file: aas.File | undefined): Promise<void> {
+        if (!file || !file.value || this.state === 'online') return;
+
+        const { name, url } = this.resolveFile(file);
+        if (name && url) {
+            if (file.contentType.startsWith('image/')) {
+                await this.showImageAsync(name, url);
+            } else if (file.contentType.startsWith('video/')) {
+                await this.showVideoAsync(name, url);
+            } else if (file.contentType.endsWith('/pdf')) {
+                const token = await this.api.getTokenAsync(url);
+                this.window.open(url + '?access_token=' + token);
+            } else if (file) {
+                await this.downloadFileAsync(name, url);
+            }
+        }
     }
 
-    public findPrevious(): void {
-        this.searching.findPrevious();
+    public async openBlob(blob: aas.Blob | undefined): Promise<void> {
+        if (!blob?.value || !this.document || !blob.parent || this.state === 'online') return;
+
+        const extension = mimeTypeToExtension(blob.contentType);
+        if (extension) {
+            const name = blob.idShort + extension;
+            if (blob.value) {
+                if (blob.contentType.startsWith('image/')) {
+                    await this.showImageAsync(name, `data:${blob.contentType};base64,${blob.value}`);
+                } else if (blob.contentType.startsWith('video/')) {
+                    await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
+                }
+            } else {
+                const endpoint = encodeBase64Url(this.document.endpoint);
+                const id = encodeBase64Url(this.document.id);
+                const smId = encodeBase64Url(blob.parent.keys[0].value);
+                const path = getIdShortPath(blob);
+                const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
+                if (blob.contentType.startsWith('image/')) {
+                    await this.showImageAsync(name, url);
+                } else if (blob.contentType.startsWith('video/')) {
+                    await this.showVideoAsync(name, url);
+                } else if (blob.contentType.endsWith('/pdf')) {
+                    this.window.open(url);
+                } else if (blob) {
+                    await this.downloadFileAsync(name, url);
+                }
+            }
+        }
     }
 
-    private navigateToView(submodel: aas.Submodel): void {
+    public async openOperation(operation: aas.Operation | undefined): Promise<void> {
+        if (!operation || this.state === 'online') return;
+
+        try {
+            if (operation) {
+                const modalRef = this.modal.open(OperationCallFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.document = this.document;
+                modalRef.componentInstance.operation = operation;
+                await modalRef.result;
+            }
+        } catch (error) {
+            if (error) {
+                this.notify.error(error);
+            }
+        }
+    }
+
+    public openReference(reference: aas.ReferenceElement | undefined): void {
+        if (!reference?.value || this.state === 'online') return;
+
+        this.clipboard.set('AASQuery', { id: reference.value.keys[0].value } as AASQuery);
+        this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
+    }
+
+    public openRelationship(
+        relationship: aas.RelationshipElement | undefined,
+        reference: aas.Reference | undefined,
+    ): void {
+        if (!relationship || !reference || this.state === 'online') return;
+    }
+
+    public openSubmodel(submodel: aas.Submodel | undefined): void {
+        if (!submodel || this.state === 'online') return;
+
         const semanticId = resolveSemanticId(submodel);
         if (semanticId) {
             const template = supportedSubmodelTemplates.get(semanticId);
@@ -356,69 +399,26 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private async openFileAsync(file: aas.File): Promise<void> {
-        if (file.value) {
-            const { name, url } = this.resolveFile(file);
-            if (name && url) {
-                if (file.contentType.startsWith('image/')) {
-                    await this.showImageAsync(name, url);
-                } else if (file.contentType.startsWith('video/')) {
-                    await this.showVideoAsync(name, url);
-                } else if (file.contentType.endsWith('/pdf')) {
-                    const token = await this.api.getTokenAsync(url);
-                    this.window.open(url + '?access_token=' + token);
-                } else if (file) {
-                    await this.downloadFileAsync(name, url);
+    public open(node: AASTreeRow): void {
+        try {
+            switch (node.element.modelType) {
+                case 'Property': {
+                    const property = node.element as aas.Property;
+                    this.window.open(String(property.value));
+                    break;
                 }
             }
+        } catch (error) {
+            this.notify.error(error);
         }
     }
 
-    private async openBlobAsync(blob: aas.Blob): Promise<void> {
-        if (blob.contentType && this.document && blob.parent) {
-            const extension = mimeTypeToExtension(blob.contentType);
-            if (extension) {
-                const name = blob.idShort + extension;
-                if (blob.value) {
-                    if (blob.contentType.startsWith('image/')) {
-                        await this.showImageAsync(name, `data:${blob.contentType};base64,${blob.value}`);
-                    } else if (blob.contentType.startsWith('video/')) {
-                        await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
-                    }
-                } else {
-                    const endpoint = encodeBase64Url(this.document.endpoint);
-                    const id = encodeBase64Url(this.document.id);
-                    const smId = encodeBase64Url(blob.parent.keys[0].value);
-                    const path = getIdShortPath(blob);
-                    const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
-                    if (blob.contentType.startsWith('image/')) {
-                        await this.showImageAsync(name, url);
-                    } else if (blob.contentType.startsWith('video/')) {
-                        await this.showVideoAsync(name, url);
-                    } else if (blob.contentType.endsWith('/pdf')) {
-                        this.window.open(url);
-                    } else if (blob) {
-                        await this.downloadFileAsync(name, url);
-                    }
-                }
-            }
-        }
+    public findNext(): void {
+        this.searching.findNext();
     }
 
-    private openEntity(element: aas.Referable): void {
-        const entity = element as aas.Entity;
-        if (entity && entity.globalAssetId) {
-            this.clipboard.set('AASQuery', { id: entity.globalAssetId } as AASQuery);
-            this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
-        }
-    }
-
-    private openReference(element: aas.Referable): void {
-        const referenceElement = element as aas.ReferenceElement;
-        if (referenceElement && referenceElement.value) {
-            this.clipboard.set('AASQuery', { id: referenceElement.value.keys[0].value } as AASQuery);
-            this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
-        }
+    public findPrevious(): void {
+        this.searching.findPrevious();
     }
 
     private async showImageAsync(name: string, src: string): Promise<void> {
@@ -452,21 +452,6 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
             this.download.downloadFileAsync(url, name);
         } catch (error) {
             this.notify.error(error);
-        }
-    }
-
-    private async callOperationAsync(operation: aas.Operation): Promise<void> {
-        try {
-            if (operation) {
-                const modalRef = this.modal.open(OperationCallFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.document = this.document;
-                modalRef.componentInstance.operation = operation;
-                await modalRef.result;
-            }
-        } catch (error) {
-            if (error) {
-                this.notify.error(error);
-            }
         }
     }
 

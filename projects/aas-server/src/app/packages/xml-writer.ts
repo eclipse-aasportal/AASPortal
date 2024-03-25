@@ -99,10 +99,15 @@ export class XmlWriter extends AASWriter {
     private writeReferable(referable: aas.Referable, node: Node): void {
         this.writeHasExtension(referable, node);
         this.writeTextNode(node, 'idShort', referable.idShort);
-        this.writeTextNode(node, 'modelType', referable.modelType);
         this.writeTextNode(node, 'category', referable.category);
-        this.writeLangStrings(referable.displayName, this.appendChild(node, 'displayName'), 'langStringNameType');
-        this.writeLangStrings(referable.description, this.appendChild(node, 'description'), 'langStringTextType');
+
+        if (referable.displayName) {
+            this.writeLangStrings(referable.displayName, this.appendChild(node, 'displayName'), 'langStringNameType');
+        }
+
+        if (referable.description) {
+            this.writeLangStrings(referable.description, this.appendChild(node, 'description'), 'langStringTextType');
+        }
     }
 
     private writeValueReferencePair(pair: aas.ValueReferencePair, node: Node): void {
@@ -151,8 +156,13 @@ export class XmlWriter extends AASWriter {
             }
         }
 
-        this.writeTextNode(node, 'valueFormat', content.valueFormat);
-        this.writeTextNode(node, 'value', content.value);
+        if (content.valueFormat) {
+            this.writeTextNode(node, 'valueFormat', content.valueFormat);
+        }
+
+        if (content.value) {
+            this.writeTextNode(node, 'value', content.value);
+        }
 
         if (content.levelType) {
             const levelType = this.appendChild(node, 'levelType');
@@ -529,7 +539,7 @@ export class XmlWriter extends AASWriter {
         if (submodel.submodelElements) {
             const elementsNode = this.appendChild(node, 'submodelElements');
             for (const submodelElement of submodel.submodelElements) {
-                const elementNode = this.appendChild(elementsNode, camelCase(submodel.modelType));
+                const elementNode = this.appendChild(elementsNode, camelCase(submodelElement.modelType));
                 this.writeSubmodelElement(submodelElement, elementNode);
             }
         }

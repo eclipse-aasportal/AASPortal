@@ -231,14 +231,13 @@ export class JsonWriter extends AASWriter {
     private writeAnnotatedRelationshipElement(
         source: aas.AnnotatedRelationshipElement,
     ): aas.AnnotatedRelationshipElement {
-        if (!source.annotations) {
-            throw new Error('AnnotatedRelationshipElement.annotation');
-        }
-
         const relationship: aas.AnnotatedRelationshipElement = {
             ...this.writeRelationshipElement(source),
-            annotations: this.writeSubmodelElements(source.annotations),
         };
+
+        if (source.annotations) {
+            relationship.annotations = this.writeSubmodelElements(source.annotations);
+        }
 
         return relationship;
     }

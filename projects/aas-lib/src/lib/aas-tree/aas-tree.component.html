@@ -33,27 +33,27 @@
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
                     @if (node.isLeaf) {
-                        <div class="wh-4"></div>
+                    <div class="wh-4"></div>
                     }@else {
-                       @if (node.expanded) {
-                        <a href="javascript:void(0);" (click)="collapse(node)">
-                            <div class="text-dark">
-                                <i class="bi bi-dash-square"></i>
-                            </div>
-                        </a>
-                        }@else {
-                            @if (node.hasChildren) {
-                            <a (click)="expand(node)" href="javascript:void(0);">
-                                <div class="text-dark">
-                                    <i class="bi bi-plus-square"></i>
-                                </div>
-                            </a>
-                            }@else {
-                            <div class="text-muted">
-                                <i class="bi bi-square"></i>
-                            </div>
-                            }
-                        }
+                    @if (node.expanded) {
+                    <a href="javascript:void(0);" (click)="collapse(node)">
+                        <div class="text-dark">
+                            <i class="bi bi-dash-square"></i>
+                        </div>
+                    </a>
+                    }@else {
+                    @if (node.hasChildren) {
+                    <a (click)="expand(node)" href="javascript:void(0);">
+                        <div class="text-dark">
+                            <i class="bi bi-plus-square"></i>
+                        </div>
+                    </a>
+                    }@else {
+                    <div class="text-muted">
+                        <i class="bi bi-square"></i>
+                    </div>
+                    }
+                    }
                     }
 
                     <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
@@ -61,7 +61,7 @@
 
                     @if (node.hasSemantic) {
                     <div class="ms-1 flex-grow-1 text-nowrap">
-                        <a (click)="open(node)" href="javascript:void(0);">{{node.name}}</a>
+                        <a (click)="openSubmodel(node.submodel)" href="javascript:void(0);">{{node.name}}</a>
                         <span class="text-secondary">&nbsp;[</span>
                         <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
                         <span class="text-secondary">]</span>
@@ -78,16 +78,42 @@
             </td>
             @if (node.isLeaf) {
             <td class="text-end">
-                @switch(node.displayType) {
-                    @case('boolean') {
-                        <input class="form-check-input" [readonly]="true" [checked]="getValue(node)">
-                    }
-                    @case ('url') {
-                    <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.value}}</a>
-                    }
-                    @default {
-                        <div class="text-nowrap me-2">{{getValue(node)}}</div>
-                    }
+                @switch(node.element.modelType) {
+                @case ('AnnotatedRelationshipElement') {}
+                @case ('AssetAdministrationShell') {}
+                @case ('BasicEventElement') {}
+                @case ('Blob') {}
+                @case ('Capability') {}
+                @case ('ConceptDescription') {}
+                @case ('DataSpecificationIec61360') {}
+                @case ('Entity') {}
+                @case ('File') {
+                <a href="javascript:void(0);" class="text-nowrap me-2"
+                    (click)="openFile(node.file)">{{node.file?.value}}</a>
+                }
+                @case ('MultiLanguageProperty') {}
+                @case ('Operation') {}
+                @case ('Property') {
+                <div>{{1}}</div>
+                }
+                @case ('Range') {}
+                @case ('ReferenceElement') {
+                <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.reference?.value}}</a>
+                }
+                @case ('RelationshipElement') {
+                <div class="d-flex">
+                    <a href="javascript:void(0);" class="text-nowrap me-2"
+                        (click)="openRelationship(node.relationship, node.relationship?.first)">first</a>
+                    <a href="javascript:void(0);" class="text-nowrap me-2"
+                        (click)="openRelationship(node.relationship, node.relationship?.second)">seconde</a>
+                </div>
+                }
+                @case ('Submodel') {}
+                @case ('SubmodelElementCollection') {}
+                @case ('SubmodelElementList') {}
+                @default {
+                <div class="text-nowrap me-2">-</div>
+                }
                 }
             </td>
             }
@@ -95,3 +121,12 @@
         }
     </tbody>
 </table>
+
+<!--                    
+
+@case('boolean') {
+    <input class="form-check-input" [readonly]="true" [checked]="getValue(node)">
+}
+@case ('url') {
+<a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.value}}</a>
+} -->
