@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  aasportal-users:
+    image: mongo
+    container_name: aasportal-users
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      #persist db data (users remain after restart)
+      - mongodata:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=aas-server
+      - MONGO_INITDB_ROOT_PASSWORD=aas-server
+      - MONGO_INITDB_DATABASE=aasportal-users
+
+  aas-server:
+    container_name: aas-server
+    build:
+      context: .
+      dockerfile: ./Dockerfile.aas-server
+    environment:
+      - USER_STORAGE=mongodb://aasportal-users:27017/aasportal-users
+  
+  aas-portal:
+    container_name: aas-portal
+    build:
+      context: .
+      dockerfile: ./Dockerfile.aas-portal
+    restart: always
+    ports:
+      - "80:80"
+volumes:
+  mongodata:
