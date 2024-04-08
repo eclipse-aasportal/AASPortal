@@ -13,6 +13,7 @@ export type LowDbElementValueType = 'string' | 'boolean' | 'number' | 'Date' | '
 export interface LowDbElement {
     uuid: string;
     modelType: string;
+    id?: string;
     idShort: string;
     value?: string;
     valueType?: LowDbElementValueType;

@@ -49,6 +49,7 @@ export class AASServerPackage extends AASPackage {
             endpoint: this.server.name,
             address: this.idShort,
             idShort: environment.assetAdministrationShells[0].idShort,
+            assetId: environment.assetAdministrationShells[0].assetInformation.globalAssetId,
             readonly: this.server.readOnly,
             onlineReady: true,
             content: environment,

@@ -12,15 +12,7 @@ import { EMPTY, map, mergeMap, Observable, Subscription, from, of, first, catchE
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
-import {
-    AASQuery,
-    AASQueryParams,
-    AuthService,
-    ClipboardService,
-    DownloadService,
-    NotifyService,
-    OnlineState,
-} from 'aas-lib';
+import { AuthService, ClipboardService, DownloadService, NotifyService, OnlineState } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
@@ -153,27 +145,22 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public ngOnInit(): void {
-        const params = this.route.snapshot.queryParams as AASQueryParams;
-        let query: AASQuery | undefined;
-        if (params.format) {
-            query = this.clipboard.get(params.format);
-        } else if (params.id) {
-            query = {
-                id: params.id,
-            };
-        }
+        this.subscription.add(
+            this.route.queryParams.subscribe(params => {
+                if (params?.search) {
+                    this.store.dispatch(AASActions.setSearch({ search: params.search }));
+                }
 
-        if (query?.search) {
-            this.store.dispatch(AASActions.setSearch({ search: query.search }));
-        }
-
-        if (query) {
-            if (!query.document || !query.document.content) {
-                this.store.dispatch(AASActions.getDocument({ id: query.id, name: query.name }));
-            } else {
-                this.store.dispatch(AASActions.setDocument({ document: query.document }));
-            }
-        }
+                if (params) {
+                    const document: AASDocument = this.clipboard.get('AASDocument');
+                    if (!document || !document.content) {
+                        this.store.dispatch(AASActions.getDocument({ id: params.id, name: params.endpoint }));
+                    } else {
+                        this.store.dispatch(AASActions.setDocument({ document: document }));
+                    }
+                }
+            }),
+        );
 
         this.subscription.add(
             this.dashboard.name.subscribe(name => {
@@ -217,7 +204,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                 );
 
                 this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
-                return from(this.router.navigateByUrl('/dashboard?format=DashboardQuery'));
+                return from(
+                    this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true }),
+                );
             }),
             catchError(error => {
                 this.notify.error(error);

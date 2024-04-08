@@ -79,6 +79,10 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         return this.element.modelType === 'File' ? (this.element as aas.File) : undefined;
     }
 
+    public get operation(): aas.Operation | undefined {
+        return this.element.modelType === 'Operation' ? (this.element as aas.Operation) : undefined;
+    }
+
     public get property(): aas.Property | undefined {
         return this.element.modelType === 'Property' ? (this.element as aas.Property) : undefined;
     }
@@ -266,29 +270,29 @@ class TreeInitialize {
     private getValue(referable: aas.Referable | null, localeId: string): boolean | string | undefined {
         if (referable) {
             switch (referable.modelType) {
+                case 'Blob': {
+                    const blob = referable as aas.Blob;
+                    const extension = mimeTypeToExtension(blob.contentType) ?? '';
+                    return blob.contentType ? `${blob.idShort}${extension}` : '-';
+                }
+                case 'Entity':
+                    return (referable as aas.Entity).globalAssetId ?? '-';
+                case 'File': {
+                    const file = referable as aas.File;
+                    return file.value ? basename(normalize(file.value)) : '-';
+                }
+                case 'MultiLanguageProperty':
+                    return getLocaleValue((referable as aas.MultiLanguageProperty).value, localeId) ?? '-';
+                case 'Operation':
+                    return `${referable.idShort}()`;
                 case 'Property':
                     return this.getPropertyValue(referable as aas.Property, localeId);
                 case 'Range': {
                     const range = referable as aas.Range;
                     return `${convertToString(range.min, localeId)} ... ${convertToString(range.max, localeId)}`;
                 }
-                case 'File': {
-                    const file = referable as aas.File;
-                    return file.value ? basename(normalize(file.value)) : '-';
-                }
-                case 'Blob': {
-                    const blob = referable as aas.Blob;
-                    const extension = mimeTypeToExtension(blob.contentType) ?? '';
-                    return blob.contentType ? `${blob.idShort}${extension}` : '-';
-                }
                 case 'ReferenceElement':
                     return (referable as aas.ReferenceElement).value?.keys.map(item => item.value).join('/');
-                case 'RelationshipElement':
-                    return this.getRelationshipElementValue(referable as aas.RelationshipElement);
-                case 'MultiLanguageProperty':
-                    return getLocaleValue((referable as aas.MultiLanguageProperty).value, localeId) ?? '-';
-                case 'Entity':
-                    return (referable as aas.Entity).globalAssetId ?? '-';
                 default:
                     return '-';
             }
@@ -336,18 +340,33 @@ class TreeInitialize {
         }
     }
 
-    private getRelationshipElementValue(relationship: aas.RelationshipElement): string {
-        const first = relationship.first.keys.map(key => key.value).join('/');
-        const second = relationship.second.keys.map(key => key.value).join('/');
-        return `1. ${first}; 2. ${second}`;
-    }
-
     private getTypeInfo(referable: aas.Referable | null): string {
         let value: string;
         if (referable) {
             switch (referable.modelType) {
+                case 'AnnotatedRelationshipElement':
+                    value = (referable as aas.AnnotatedRelationshipElement).annotations?.length.toString() ?? '-';
+                    break;
                 case 'AssetAdministrationShell':
                     value = (referable as aas.Submodel).id;
+                    break;
+                case 'Blob':
+                    value = (referable as aas.Blob).contentType;
+                    break;
+                case 'File':
+                    value = (referable as aas.File).contentType;
+                    break;
+                case 'Property':
+                    value = (referable as aas.Property).valueType;
+                    break;
+                case 'Range':
+                    value = (referable as aas.Range).valueType;
+                    break;
+                case 'ReferenceElement':
+                    {
+                        const keys = (referable as aas.ReferenceElement).value?.keys;
+                        value = keys && keys.length > 0 ? keys[0].type : '-';
+                    }
                     break;
                 case 'Submodel':
                     value = `Semantic ID: ${this.referenceToString((referable as aas.Submodel).semanticId)}`;
@@ -358,50 +377,42 @@ class TreeInitialize {
                 case 'SubmodelElementList':
                     value = (referable as aas.SubmodelElementList).value?.length.toString() ?? '0';
                     break;
-                case 'Property':
-                    value = (referable as aas.Property).valueType;
-                    break;
-                case 'Range':
-                    value = (referable as aas.Range).valueType;
-                    break;
-                case 'File':
-                    value = (referable as aas.File).contentType;
-                    break;
-                case 'Blob':
-                    value = (referable as aas.Blob).contentType;
-                    break;
-                case 'MultiLanguageProperty': {
-                    const mlp = referable as aas.MultiLanguageProperty;
-                    value = '';
-                    if (mlp && Array.isArray(mlp.value)) {
-                        value += `${mlp.value.map(item => item.language).join(', ')}`;
+                case 'MultiLanguageProperty':
+                    {
+                        const mlp = referable as aas.MultiLanguageProperty;
+                        value = '';
+                        if (mlp && Array.isArray(mlp.value)) {
+                            value += `${mlp.value.map(item => item.language).join(', ')}`;
+                        }
                     }
                     break;
-                }
-                case 'Entity': {
-                    const entity = referable as aas.Entity;
-                    value = '';
-                    if (entity?.globalAssetId) {
-                        value = entity.globalAssetId;
+                case 'Entity':
+                    {
+                        const entity = referable as aas.Entity;
+                        value = entity.entityType;
                     }
                     break;
-                }
-                case 'Operation': {
-                    const operation = referable as aas.Operation;
-                    value = '';
-                    if (operation.inputVariables && operation.inputVariables.length > 0) {
-                        value +=
-                            '(' + operation.inputVariables.map(v => this.variableToString(v.value)).join(', ') + ')';
-                    }
+                case 'Operation':
+                    {
+                        const operation = referable as aas.Operation;
+                        value = '';
+                        if (operation.inputVariables && operation.inputVariables.length > 0) {
+                            value +=
+                                '(' +
+                                operation.inputVariables.map(v => this.variableToString(v.value)).join(', ') +
+                                ')';
+                        }
 
-                    if (operation.outputVariables && operation.outputVariables.length === 1) {
-                        value += `: ${this.variableToString(operation.outputVariables[0].value)}`;
-                    } else if (operation.outputVariables && operation.outputVariables.length > 1) {
-                        value +=
-                            ': {' + operation.outputVariables.map(v => this.variableToString(v.value)).join(', ') + '}';
+                        if (operation.outputVariables && operation.outputVariables.length === 1) {
+                            value += `: ${this.variableToString(operation.outputVariables[0].value)}`;
+                        } else if (operation.outputVariables && operation.outputVariables.length > 1) {
+                            value +=
+                                ': {' +
+                                operation.outputVariables.map(v => this.variableToString(v.value)).join(', ') +
+                                '}';
+                        }
                     }
                     break;
-                }
                 default:
                     value = '-';
                     break;

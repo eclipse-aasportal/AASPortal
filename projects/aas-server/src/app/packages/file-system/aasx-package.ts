@@ -49,6 +49,7 @@ export class AasxPackage extends AASPackage {
                 endpoint: this.source.name,
                 address: this.file,
                 idShort: environment.assetAdministrationShells[0].idShort,
+                assetId: environment.assetAdministrationShells[0].assetInformation.globalAssetId,
                 readonly: this.source.readOnly,
                 onlineReady: this.source.onlineReady,
                 content: environment,

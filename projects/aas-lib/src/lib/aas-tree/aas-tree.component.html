@@ -79,40 +79,45 @@
             @if (node.isLeaf) {
             <td class="text-end">
                 @switch(node.element.modelType) {
-                @case ('AnnotatedRelationshipElement') {}
-                @case ('AssetAdministrationShell') {}
-                @case ('BasicEventElement') {}
-                @case ('Blob') {}
-                @case ('Capability') {}
-                @case ('ConceptDescription') {}
-                @case ('DataSpecificationIec61360') {}
-                @case ('Entity') {}
-                @case ('File') {
+                @case ('AnnotatedRelationshipElement') {
+                <div class="d-flex flex-column ts-x-small me-2">
+                    <a href="javascript:void(0);" class="text-nowrap"
+                        (click)="openReference(node.annotatedRelationship?.first)">{{toString(node.annotatedRelationship?.first)}}</a>
+                    <a href="javascript:void(0);" class="text-nowrap"
+                        (click)="openReference(node.annotatedRelationship?.second)">{{toString(node.annotatedRelationship?.second)}}</a>
+                </div>
+                }
+                @case ('Blob') {
+                <a href="javascript:void(0);" class="text-nowrap me-2" (click)="openBlob(node.blob)">{{node.value}}</a>
+                }
+                @case('Entity') {
                 <a href="javascript:void(0);" class="text-nowrap me-2"
-                    (click)="openFile(node.file)">{{node.file?.value}}</a>
+                    (click)="openReference(node.entity?.globalAssetId)">{{node.value}}</a>
                 }
-                @case ('MultiLanguageProperty') {}
-                @case ('Operation') {}
-                @case ('Property') {
-                <div>{{1}}</div>
+                @case ('File') {
+                <a href="javascript:void(0);" class="text-nowrap me-2" (click)="openFile(node.file)">{{node.value}}</a>
                 }
-                @case ('Range') {}
+                @case ('Operation') {
+                <a href="javascript:void(0);" class="text-nowrap me-2"
+                    (click)="openOperation(node.operation)">{{node.value}}</a>
+                }
                 @case ('ReferenceElement') {
-                <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.reference?.value}}</a>
+                <a href="javascript:void(0);" class="text-nowrap me-2"
+                    (click)="openReference(node.reference?.value)">{{node.value}}</a>
                 }
                 @case ('RelationshipElement') {
-                <div class="d-flex">
-                    <a href="javascript:void(0);" class="text-nowrap me-2"
-                        (click)="openRelationship(node.relationship, node.relationship?.first)">first</a>
-                    <a href="javascript:void(0);" class="text-nowrap me-2"
-                        (click)="openRelationship(node.relationship, node.relationship?.second)">seconde</a>
+                <div class="d-flex flex-column ts-x-small me-2">
+                    <a href="javascript:void(0);" class="text-nowrap"
+                        (click)="openReference(node.relationship?.first)">{{toString(node.relationship?.first)}}</a>
+                    <a href="javascript:void(0);" class="text-nowrap"
+                        (click)="openReference(node.relationship?.second)">{{toString(node.relationship?.second)}}</a>
                 </div>
                 }
                 @case ('Submodel') {}
                 @case ('SubmodelElementCollection') {}
                 @case ('SubmodelElementList') {}
                 @default {
-                <div class="text-nowrap me-2">-</div>
+                <div class="text-nowrap me-2">{{node.value}}</div>
                 }
                 }
             </td>

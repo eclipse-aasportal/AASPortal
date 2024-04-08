@@ -45,6 +45,7 @@ export class OpcuaPackage extends AASPackage {
             endpoint: this.server.name,
             address: this.nodeId,
             idShort: component.browseName,
+            assetId: 'ToDo...',
             readonly: this.server.readOnly,
             onlineReady: this.server.onlineReady,
             content,

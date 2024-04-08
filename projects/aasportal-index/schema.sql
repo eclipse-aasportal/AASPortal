@@ -14,6 +14,7 @@ CREATE TABLE documents (
     endpoint VARCHAR(100), 
     id VARCHAR(255), 
     idShort VARCHAR(100), 
+    assetId VARCHAR(255),
     onlineReady BOOL, 
     readonly BOOL, 
     thumbnail VARCHAR(7167), 
@@ -23,6 +24,7 @@ CREATE TABLE documents (
 CREATE TABLE elements (
     uuid CHAR(36) NOT NULL,
     modelType VARCHAR(5) NOT NULL,
+    id VARCHAR(255),
     idShort VARCHAR(100) NOT NULL,
     stringValue VARCHAR(512),
     numberValue DOUBLE,

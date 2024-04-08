@@ -9,7 +9,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subscription, first, map } from 'rxjs';
-import { ClipboardService, WindowService, AASQuery } from 'aas-lib';
+import { ClipboardService, WindowService } from 'aas-lib';
 import { ToolbarService } from '../toolbar.service';
 import { MainApiService } from './main-api.service';
 
@@ -93,14 +93,16 @@ export class MainComponent implements OnInit, OnDestroy {
                 .pipe(first())
                 .subscribe(document => {
                     if (document) {
-                        this.clipboard.set('AASQuery', { id: document.id } as AASQuery);
-                        this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
+                        this.router.navigate(['/aas'], {
+                            skipLocationChange: true,
+                            queryParams: { id: document.id, endpoint: document.endpoint },
+                        });
                     } else {
-                        this.router.navigateByUrl('/start', { skipLocationChange: true });
+                        this.router.navigate(['/start'], { skipLocationChange: true });
                     }
                 });
         } else {
-            this.router.navigateByUrl('/start', { skipLocationChange: true });
+            this.router.navigate(['/start'], { skipLocationChange: true });
         }
     }
 

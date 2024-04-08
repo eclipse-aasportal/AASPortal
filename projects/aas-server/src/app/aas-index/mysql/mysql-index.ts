@@ -8,7 +8,7 @@
 
 import { v4 } from 'uuid';
 import mysql, { Connection, ResultSetHeader } from 'mysql2/promise';
-import { AASEndpoint, AASCursor, AASPage, AASDocument, flat, aas, AASDocumentId } from 'common';
+import { AASEndpoint, AASCursor, AASPage, AASDocument, flat, aas, AASDocumentId, isIdentifiable } from 'common';
 import { AASIndex } from '../aas-index.js';
 import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
@@ -146,7 +146,7 @@ export class MySqlIndex extends AASIndex {
             await connection.beginTransaction();
             const uuid = v4();
             await connection.query<ResultSetHeader>(
-                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, onlineReady, readonly, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, onlineReady, readonly, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     uuid,
                     document.address,
@@ -154,10 +154,11 @@ export class MySqlIndex extends AASIndex {
                     document.endpoint,
                     document.id,
                     document.idShort,
+                    document.assetId,
                     !!document.onlineReady,
                     document.readonly,
                     document.thumbnail ?? '',
-                    document.timestamp,
+                    BigInt(document.timestamp),
                 ],
             );
 
@@ -195,11 +196,8 @@ export class MySqlIndex extends AASIndex {
             }
 
             const uuid = results[0].uuid;
-
             await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
-
             await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE uuid = ?;', [uuid]);
-
             await connection.commit();
             return true;
         } catch (error) {
@@ -352,7 +350,11 @@ export class MySqlIndex extends AASIndex {
     private async getEndpointDocument(endpoint: string, id: string): Promise<MySqlDocument> {
         const [results] = await (
             await this.connection
-        ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ? AND id = ?', [endpoint, id]);
+        ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)', [
+            endpoint,
+            id,
+            id,
+        ]);
 
         if (results.length === 0) {
             throw new Error(`A document with the id "${id}" does not exist in "${endpoint}".`);
@@ -364,7 +366,7 @@ export class MySqlIndex extends AASIndex {
     private async getDocument(id: string): Promise<MySqlDocument> {
         const [results] = await (
             await this.connection
-        ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE id = ?', [id]);
+        ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)', [id, id]);
 
         if (results.length === 0) {
             throw new Error(`A document with the id "${id}" does not exist.`);
@@ -383,10 +385,11 @@ export class MySqlIndex extends AASIndex {
 
     private async writeElement(connection: Connection, uuid: string, referable: aas.Referable): Promise<void> {
         await connection.query<ResultSetHeader>(
-            'INSERT INTO `elements` (uuid, modelType, idShort, stringValue, numberValue, dateValue, booleanValue, bigintValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+            'INSERT INTO `elements` (uuid, modelType, id, idShort, stringValue, numberValue, dateValue, booleanValue, bigintValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
             [
                 uuid,
                 this.toAbbreviation(referable),
+                isIdentifiable(referable) ? referable.id : undefined,
                 referable.idShort,
                 this.toStringValue(referable),
                 this.toNumberValue(referable),
@@ -404,10 +407,11 @@ export class MySqlIndex extends AASIndex {
             endpoint: result.endpoint,
             id: result.id,
             idShort: result.idShort,
-            readonly: result.readonly,
-            timestamp: result.timestamp,
+            assetId: result.assetId,
+            readonly: result.readonly ? true : false,
+            timestamp: Number(result.timestamp),
             content: null,
-            onlineReady: result.onlineReady,
+            onlineReady: result.onlineReady ? true : false,
             thumbnail: result.thumbnail,
         };
     }

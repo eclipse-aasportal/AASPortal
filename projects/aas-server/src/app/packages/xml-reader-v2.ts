@@ -122,7 +122,7 @@ export class XmlReaderV2 extends AASReader {
     private readSubmodel(node: Node): aas.Submodel {
         const submodel: aas.Submodel = {
             ...this.readIdentifiable(node),
-            ...this.readHaSemantic(node),
+            ...this.readHasSemantics(node),
             ...this.readQualifiable(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
@@ -181,6 +181,9 @@ export class XmlReaderV2 extends AASReader {
             case 'Blob':
                 submodelElement = this.readBlob(node, parent);
                 break;
+            case 'Entity':
+                submodelElement = this.readEntity(node, parent);
+                break;
             case 'File':
                 submodelElement = this.readFile(node, parent);
                 break;
@@ -238,6 +241,86 @@ export class XmlReaderV2 extends AASReader {
         return blob;
     }
 
+    private readEntity(node: Node, parent?: aas.Reference): aas.Entity {
+        const entityType = this.selectNode('./aas:entityType', node)?.textContent as aas.EntityType;
+        if (!entityType) {
+            throw new Error('File.contentType');
+        }
+
+        const entity: aas.Entity = {
+            ...this.readSubmodelElementType(node, parent),
+            entityType,
+        };
+
+        const globalAssetId = this.selectNode('./aas:globalAssetId', node)?.textContent;
+        if (globalAssetId) {
+            entity.globalAssetId = globalAssetId;
+        }
+
+        const specificAssetIds = this.readSpecificAssetIds(this.selectNode('./aas:specificAssetIds', node));
+        if (specificAssetIds) {
+            entity.specificAssetIds = specificAssetIds;
+        }
+
+        const statements = this.readStatements(node, parent ? this.createReference(parent, entity) : undefined);
+        if (statements.length > 0) {
+            entity.statements = statements;
+        }
+
+        return entity;
+    }
+
+    private readStatements(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
+        const statements: aas.SubmodelElement[] = [];
+        for (const child of this.selectNodes('./aas:statements/*', node)) {
+            const se = this.selectNode('./*[1]', child);
+            if (se) {
+                const submodelElement = this.readSubmodelElement(se, parent);
+                if (submodelElement) {
+                    statements.push(submodelElement);
+                }
+            }
+        }
+
+        return statements;
+    }
+
+    private readSpecificAssetIds(node: Node | undefined): aas.SpecificAssetId[] | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const values: aas.SpecificAssetId[] = [];
+        for (const child of this.selectNodes('./aas:specificAssetId', node)) {
+            const value = this.readSpecificAssetId(child);
+            if (value) {
+                values.push(value);
+            }
+        }
+
+        return values;
+    }
+
+    private readSpecificAssetId(node: Node | undefined): aas.SpecificAssetId | undefined {
+        if (!node) {
+            return undefined;
+        }
+
+        const externalSubjectId = this.readReference('./aas:externalSubjectId', node);
+        if (!externalSubjectId) {
+            throw new Error('SpecificAssetId.externalSubjectId');
+        }
+
+        const value: aas.SpecificAssetId = {
+            ...this.readHasSemantics(node),
+            name: this.getTextContent('./aas:name', node),
+            value: this.getTextContent('./aas:value', node),
+            externalSubjectId,
+        };
+
+        return value;
+    }
+
     private readSubmodelElementCollection(node: Node, parent?: aas.Reference): aas.SubmodelElementCollection {
         const base = this.readSubmodelElementType(node, parent);
         const collection: aas.SubmodelElementCollection = {
@@ -275,14 +358,41 @@ export class XmlReaderV2 extends AASReader {
         return property;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readRange(node: Node, parent?: aas.Reference): aas.Range {
-        throw new Error('Method not implemented.');
+        const range: aas.Range = {
+            ...this.readSubmodelElementType(node, parent),
+            valueType: this.getTextContent('./aas:valueType', node) as aas.DataTypeDefXsd,
+        };
+
+        const min = this.selectTextContent('./aas:min', node);
+        if (min) {
+            range.min = min;
+        }
+
+        const max = this.selectTextContent('./aas:max', node);
+        if (max) {
+            range.max = max;
+        }
+
+        return range;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private readRelationshipElement(node: Node, parent?: aas.Reference): aas.RelationshipElement {
-        throw new Error('Method not implemented.');
+        const first = this.readReference('./aas:first', node);
+        if (!first) {
+            throw new Error('RelationshipElement.first');
+        }
+
+        const second = this.readReference('./aas:second', node);
+        if (!second) {
+            throw new Error('RelationshipElement.second');
+        }
+
+        return {
+            ...this.readSubmodelElementType(node, parent),
+            first,
+            second,
+        };
     }
 
     private readFile(node: Node, parent?: aas.Reference): aas.File {
@@ -317,7 +427,7 @@ export class XmlReaderV2 extends AASReader {
     private readSubmodelElementType(node: Node, parent?: aas.Reference): aas.SubmodelElement {
         return {
             ...this.readReferable(node, undefined, parent),
-            ...this.readHaSemantic(node),
+            ...this.readHasSemantics(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
             ...this.readQualifiable(node),
@@ -358,7 +468,7 @@ export class XmlReaderV2 extends AASReader {
         return referable;
     }
 
-    private readHaSemantic(node: Node): aas.HasSemantics {
+    private readHasSemantics(node: Node): aas.HasSemantics {
         const semanticId = this.readReference('./aas:semanticId', node);
         return semanticId ? { semanticId } : {};
     }
@@ -482,7 +592,7 @@ export class XmlReaderV2 extends AASReader {
 
     private readQualifiable(node: Node): aas.Qualifiable {
         const qualifiable: aas.Qualifiable = {};
-        const qualifiers = this.readQualifiers('./aas:qualifier', node);
+        const qualifiers = this.readQualifiers('./aas:qualifier/aas:qualifier', node);
         if (qualifiers) {
             qualifiable.qualifiers = qualifiers;
         }
@@ -491,13 +601,42 @@ export class XmlReaderV2 extends AASReader {
     }
 
     private readQualifiers(path: string, parent: Node): aas.Qualifier[] | undefined {
-        let qualifiers: aas.Qualifier[] | undefined;
-        const node = this.selectNode(path, parent);
-        if (node) {
-            qualifiers = []; // ToDo.
+        const qualifiers: aas.Qualifier[] = [];
+        for (const node of this.selectNodes(path, parent)) {
+            qualifiers.push(this.readQualifier(node));
+        }
+
+        if (qualifiers.length === 0) {
+            return undefined;
         }
 
         return qualifiers;
+    }
+
+    private readQualifier(node: Node): aas.Qualifier {
+        const type = this.getTextContent('./aas:type', node);
+        const valueType = this.getTextContent('./aas:valueType', node) as aas.DataTypeDefXsd;
+        const qualifier: aas.Qualifier = {
+            type,
+            valueType,
+        };
+
+        const kind = this.selectTextContent('./aas:kind', node) as aas.QualifierKind;
+        if (kind) {
+            qualifier.kind = kind;
+        }
+
+        const value = this.selectTextContent('./aas:value', node);
+        if (value != null) {
+            qualifier.value = value;
+        }
+
+        const valueId = this.readReference('./valueId', node);
+        if (valueId) {
+            qualifier.valueId = valueId;
+        }
+
+        return qualifier;
     }
 
     private readReference(path: string, parent: Node): aas.Reference | undefined {
@@ -638,6 +777,23 @@ export class XmlReaderV2 extends AASReader {
         }
 
         return id;
+    }
+
+    private selectTextContent(expression: string, node: Node): string | null | undefined {
+        return (this.select(expression, node, true) as Node)?.textContent;
+    }
+
+    private getTextContent(expression: string, node: Node, defaultValue?: string): string {
+        let value = (this.select(expression, node, true) as Node)?.textContent;
+        if (value == null) {
+            if (defaultValue == null) {
+                throw new Error(`${expression} ToDo.`);
+            }
+
+            value = defaultValue;
+        }
+
+        return value;
     }
 
     private toDataTypeDefXsd(source: string): aas.DataTypeDefXsd {

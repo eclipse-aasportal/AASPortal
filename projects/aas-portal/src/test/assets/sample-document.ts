@@ -17,15 +17,7 @@ const content: object = {
             "id": "http://customer.com/aas/9175_7013_7091_9168",
             "assetInformation": {
                 "assetKind": "Instance",
-                "globalAssetId": {
-                    "type": "ModelReference",
-                    "keys": [
-                        {
-                            "type": "GlobalReference",
-                            "value": "http://customer.com/assets/KHBVZJSQKIY"
-                        }
-                    ]
-                }
+                "globalAssetId": "http://customer.com/assets/KHBVZJSQKIY",
             },
             "submodels": [
                 {
@@ -2972,6 +2964,7 @@ const technicalData: object = {
 export const sampleDocument: AASDocument = {
     id: "http://customer.com/aas/9175_7013_7091_9168",
     idShort: "ExampleMotor",
+    assetId: "http://customer.com/assets/KHBVZJSQKIY",
     endpoint: 'Samples',
     address: "ExampleMotor.aasx",
     modified: false,
@@ -2985,6 +2978,7 @@ export const sampleDocument: AASDocument = {
 export const aasNoTechnicalData: AASDocument = {
     id: "http://customer.com/aas/9175_7013_7091_9168",
     idShort: "ExampleMotor",
+    assetId: "http://customer.com/assets/KHBVZJSQKIY",
     endpoint: 'Samples',
     address: "ExampleMotor.aasx",
     modified: false,

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createReducer, on } from '@ngrx/store';
-import { aas } from 'common';
+import { AASDocument, aas } from 'common';
 
 import { AASTree, AASTreeRow, AASTreeState, SearchTerm } from './aas-tree.state';
 import * as AASTreeActions from './aas-tree.actions';
@@ -30,16 +30,22 @@ export const aasTreeReducer = createReducer(
         toggleSelected(state, row, altKey, shiftKey),
     ),
     on(AASTreeActions.toggleSelections, state => toggleSelections(state)),
-    on(AASTreeActions.updateRows, (state, { document, localeId }) => {
-        try {
-            const tree = AASTree.from(document, localeId);
-            return { ...state, rows: tree.nodes, error: null };
-        } catch (error) {
-            return { ...state, error };
-        }
-    }),
+    on(AASTreeActions.updateRows, (state, { document, localeId }) => updateRows(state, document, localeId)),
     on(AASTreeActions.setSelectedElements, (state, { elements }) => setSelectedElements(state, elements)),
 );
+
+function updateRows(state: AASTreeState, document: AASDocument | null, localeId: string): AASTreeState {
+    try {
+        if (document) {
+            const tree = AASTree.from(document, localeId);
+            return { ...state, rows: tree.nodes, error: null };
+        }
+
+        return { ...state, rows: [], index: -1, error: null };
+    } catch (error) {
+        return { ...state, error };
+    }
+}
 
 function expandRow(state: AASTreeState, arg: number | AASTreeRow): AASTreeState {
     const tree = new AASTree(state.rows);

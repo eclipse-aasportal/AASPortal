@@ -398,10 +398,10 @@ export class JsonReader extends AASReader {
             if (i >= 0) {
                 contentType = extensionToMimeType(value.substring(i));
             }
+        }
 
-            if (!contentType) {
-                throw new Error('File.contentType');
-            }
+        if (contentType == null) {
+            contentType = '';
         }
 
         const file: aas.File = {

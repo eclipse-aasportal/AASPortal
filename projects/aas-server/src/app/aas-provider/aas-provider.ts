@@ -39,6 +39,7 @@ import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
 import { TaskHandler } from './task-handler.js';
+import { HierarchicalStructure } from './hierarchical-structure.js';
 
 @singleton()
 export class AASProvider {
@@ -529,16 +530,24 @@ export class AASProvider {
 
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
         const content = await this.getDocumentContentAsync(parent);
-        for (const reference of this.whereReferenceElement(content.submodels)) {
-            if (reference.value) {
-                const childId = reference.value.keys[0].value;
-                const child =
-                    (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
+        const hierarchicalStructures = content.submodels.filter(sm =>
+            HierarchicalStructure.isHierarchicalStructure(sm),
+        );
 
-                if (child) {
-                    const node: AASDocument = { ...child, parent: { ...parent }, content: null };
-                    nodes.push(node);
-                    await this.collectDescendants(node, nodes);
+        if (hierarchicalStructures.length > 0) {
+        } else {
+            for (const reference of this.whereReferenceElement(content.submodels)) {
+                if (reference.value) {
+                    const childId = reference.value.keys[0].value;
+                    const child =
+                        (await this.index.find(parent.endpoint, childId)) ??
+                        (await this.index.find(undefined, childId));
+
+                    if (child) {
+                        const node: AASDocument = { ...child, parent: { ...parent }, content: null };
+                        nodes.push(node);
+                        await this.collectDescendants(node, nodes);
+                    }
                 }
             }
         }
@@ -569,7 +578,7 @@ export class AASProvider {
         }
     }
 
-    public async getDocumentContentAsync(document: AASDocument): Promise<aas.Environment> {
+    private async getDocumentContentAsync(document: AASDocument): Promise<aas.Environment> {
         const endpoint = await this.index.getEndpoint(document.endpoint);
         const resource = this.resourceFactory.create(endpoint);
         try {

@@ -71,32 +71,39 @@ export class AASTreeSearch {
         this.subscription.unsubscribe();
     }
 
+    public find(referable: aas.Referable): void {
+        const index = this.rows.findIndex(row => row.element === referable);
+        if (index >= 0) {
+            this.store.dispatch(AASTreeActions.setMatchIndex({ index: index }));
+        }
+    }
+
     public start(value: string) {
-        if (value) {
-            const terms: SearchTerm[] = [];
-            for (const expression of this.splitOr(value)) {
-                const term: SearchTerm = {};
-                if (expression.length >= 3) {
-                    if (expression.startsWith('#')) {
-                        const query = this.parseExpression(expression);
-                        if (query) {
-                            term.query = query;
-                        }
-                    } else {
-                        term.text = expression.toLocaleLowerCase(this.translate.currentLang);
+        if (!value) return;
+
+        const terms: SearchTerm[] = [];
+        for (const expression of this.splitOr(value)) {
+            const term: SearchTerm = {};
+            if (expression.length >= 3) {
+                if (expression.startsWith('#')) {
+                    const query = this.parseExpression(expression);
+                    if (query) {
+                        term.query = query;
                     }
-                }
-
-                if (term.text || term.query) {
-                    terms.push(term);
+                } else {
+                    term.text = expression.toLocaleLowerCase(this.translate.currentLang);
                 }
             }
 
-            if (terms.length > 0) {
-                this.store.dispatch(AASTreeActions.setSearchText({ terms }));
-            } else {
-                this.store.dispatch(AASTreeActions.setMatchIndex({ index: -1 }));
+            if (term.text || term.query) {
+                terms.push(term);
             }
+        }
+
+        if (terms.length > 0) {
+            this.store.dispatch(AASTreeActions.setSearchText({ terms }));
+        } else {
+            this.store.dispatch(AASTreeActions.setMatchIndex({ index: -1 }));
         }
     }
 
