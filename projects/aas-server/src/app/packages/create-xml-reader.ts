@@ -10,7 +10,7 @@ import { DOMParser } from '@xmldom/xmldom';
 import { AASReader } from './aas-reader.js';
 import { HTMLDocumentElement } from '../types/html-document-element.js';
 import { XmlReaderV1 } from './xml-reader-v1.js';
-import { XmlReaderV2 } from './xml-reader_v2.js';
+import { XmlReaderV2 } from './xml-reader-v2.js';
 import { XmlReader } from './xml-reader.js';
 
 export function createXmlReader(xml: string): AASReader {

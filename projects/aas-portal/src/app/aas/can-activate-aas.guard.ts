@@ -25,7 +25,7 @@ export class CanActivateAAS {
         route: ActivatedRouteSnapshot,
     ): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
         const params: AASQueryParams = route.queryParams;
-        if (params.id || params.format) {
+        if (params.id) {
             return true;
         }
 

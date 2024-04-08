@@ -744,6 +744,7 @@ export function mimeTypeToExtension(mimeType: string): string | undefined {
 
 /** Returns the MIME type that corresponds ti the specified file extension */
 export function extensionToMimeType(extension: string): string | undefined {
+    extension = extension?.toLowerCase();
     for (const tuple of mimeTypes) {
         if (tuple[1] === extension) {
             return tuple[0];

@@ -18,6 +18,7 @@ import {
     BaseValueType,
     aas,
     flat,
+    isIdentifiable,
 } from 'common';
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
@@ -126,8 +127,10 @@ export class LowDbIndex extends AASIndex {
     public async find(endpointName: string | undefined, id: string): Promise<AASDocument | undefined> {
         await this.promise;
         const document = endpointName
-            ? this.db.data.documents.find(item => item.endpoint === endpointName && item.id === id)
-            : this.db.data.documents.find(item => item.id === id);
+            ? this.db.data.documents.find(
+                  item => item.endpoint === endpointName && (item.id === id || item.assetId === id),
+              )
+            : this.db.data.documents.find(item => item.id === id || item.assetId === id);
 
         if (document) {
             return this.toDocument(document);
@@ -384,6 +387,10 @@ export class LowDbIndex extends AASIndex {
             modelType: this.toAbbreviation(referable),
             idShort: referable.idShort,
         };
+
+        if (isIdentifiable(referable)) {
+            element.id = referable.id;
+        }
 
         let value: BaseValueType | undefined = this.toStringValue(referable);
         if (value) {

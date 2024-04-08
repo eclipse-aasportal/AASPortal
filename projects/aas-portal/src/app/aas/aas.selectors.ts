@@ -51,10 +51,7 @@ export const selectVersion = createSelector(getDocument, document =>
     versionToString(head(document?.content?.assetAdministrationShells)?.administration),
 );
 
-export const selectAssetId = createSelector(
-    getDocument,
-    document => head(document?.content?.assetAdministrationShells)?.assetInformation.globalAssetId ?? '-',
-);
+export const selectAssetId = createSelector(getDocument, document => document?.assetId ?? '-');
 
 export const selectThumbnail = createSelector(getDocument, document => {
     if (document) {

@@ -22,7 +22,7 @@ export class AASApiService {
     /**
      * Gets the AAS document with the specified identifier.
      * @param id The AAS identifier.
-     * @param name The AAS container URL.
+     * @param name The AAS container name.
      * @returns The requested AAS document.
      */
     public getDocument(id: string, name?: string): Observable<AASDocument> {

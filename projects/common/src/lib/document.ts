@@ -379,10 +379,37 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
 
     function equal(a: aas.Referable, b: aas.Referable): boolean {
         switch (a.modelType) {
-            case 'Property':
-                return equalProperty(a as aas.Property, b as aas.Property);
+            case 'AssetAdministrationShell':
+                return equalShell(a as aas.AssetAdministrationShell, b as aas.AssetAdministrationShell);
+            case 'AnnotatedRelationshipElement':
+                return equalAnnotatedRelationshipElement(
+                    a as aas.AnnotatedRelationshipElement,
+                    b as aas.AnnotatedRelationshipElement,
+                );
+            case 'BasicEventElement':
+                return equalBasicEventElement(a as aas.BasicEventElement, b as aas.BasicEventElement);
+            case 'Capability':
+                return equalCapability(a as aas.Capability, b as aas.Capability);
+            case 'Blob':
+                return equalBlob(a as aas.Blob, b as aas.Blob);
+            case 'ConceptDescription':
+                return equalConceptDescription(a as aas.ConceptDescription, b as aas.ConceptDescription);
+            case 'Entity':
+                return equalEntity(a as aas.Entity, b as aas.Entity);
+            case 'File':
+                return equalFile(a as aas.File, b as aas.File);
             case 'MultiLanguageProperty':
                 return equalMultiLanguageProperty(a as aas.MultiLanguageProperty, b as aas.MultiLanguageProperty);
+            case 'Operation':
+                return equalOperation(a as aas.Operation, b as aas.Operation);
+            case 'Property':
+                return equalProperty(a as aas.Property, b as aas.Property);
+            case 'Range':
+                return equalRange(a as aas.Range, b as aas.Range);
+            case 'ReferenceElement':
+                return equalReferenceElement(a as aas.ReferenceElement, b as aas.ReferenceElement);
+            case 'RelationshipElement':
+                return equalRelationshipElement(a as aas.RelationshipElement, b as aas.RelationshipElement);
             case 'Submodel':
                 return equalSubmodel(a as aas.Submodel, b as aas.Submodel);
             case 'SubmodelElementCollection':
@@ -392,18 +419,6 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
                 );
             case 'SubmodelElementList':
                 return equalSubmodelElementList(a as aas.SubmodelElementList, b as aas.SubmodelElementList);
-            case 'AssetAdministrationShell':
-                return equalShell(a as aas.AssetAdministrationShell, b as aas.AssetAdministrationShell);
-            case 'ReferenceElement':
-                return equalReferenceElement(a as aas.ReferenceElement, b as aas.ReferenceElement);
-            case 'Entity':
-                return equalEntity(a as aas.Entity, b as aas.Entity);
-            case 'File':
-                return equalFile(a as aas.File, b as aas.File);
-            case 'Blob':
-                return equalBlob(a as aas.Blob, b as aas.Blob);
-            case 'ConceptDescription':
-                return equalConceptDescription(a as aas.ConceptDescription, b as aas.ConceptDescription);
             default:
                 return true;
         }
@@ -465,13 +480,11 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function equalDataSpecificationContent(a: aas.DataSpecificationContent, b: aas.DataSpecificationContent): boolean {
-        // ToDo:
-        return true;
+        return isEqual(a, b);
     }
 
-    function equalHasSemantic(a: aas.HasSemantics, b: aas.HasSemantics): boolean {
+    function equalHasSemantics(a: aas.HasSemantics, b: aas.HasSemantics): boolean {
         return equalReference(a.semanticId, b.semanticId);
     }
 
@@ -558,7 +571,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         return (
             equalIdentifiable(a, b) &&
             equalHasDataSpecification(a, b) &&
-            equalHasSemantic(a, b) &&
+            equalHasSemantics(a, b) &&
             equalQualifiable(a, b) &&
             equalHasKind(a, b) &&
             queueReferables(a.submodelElements, b.submodelElements)
@@ -577,7 +590,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
 
     function equalSubmodelElement(a: aas.SubmodelElement, b: aas.SubmodelElement): boolean {
         return (
-            equalReferable(a, b) && equalHasDataSpecification(a, b) && equalHasSemantic(a, b) && equalQualifiable(a, b)
+            equalReferable(a, b) && equalHasDataSpecification(a, b) && equalHasSemantics(a, b) && equalQualifiable(a, b)
         );
     }
 
@@ -638,6 +651,81 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
         return false;
     }
 
+    function equalAnnotatedRelationshipElement(
+        a: aas.AnnotatedRelationshipElement,
+        b: aas.AnnotatedRelationshipElement,
+    ): boolean {
+        return (
+            equalSubmodelElement(a, b) &&
+            equalRelationshipElement(a, b) &&
+            queueReferables(a.annotations, b.annotations)
+        );
+    }
+
+    function equalBasicEventElement(a: aas.BasicEventElement, b: aas.BasicEventElement): boolean {
+        return (
+            equalSubmodelElement(a, b) &&
+            a.direction === b.direction &&
+            a.lastUpdate === b.lastUpdate &&
+            a.maxInterval === b.maxInterval &&
+            equalReference(a.messageBroker, b.messageBroker) &&
+            a.messageTopic === b.messageTopic &&
+            a.minInterval === b.minInterval &&
+            equalReference(a.observed, b.observed) &&
+            a.state === b.state
+        );
+    }
+
+    function equalCapability(a: aas.Capability, b: aas.Capability): boolean {
+        return equalSubmodelElement(a, b);
+    }
+
+    function equalOperation(a: aas.Operation, b: aas.Operation): boolean {
+        return (
+            equalSubmodelElement(a, b) &&
+            equalOperationVariables(a.inputVariables, b.inoutputVariables) &&
+            equalOperationVariables(a.inoutputVariables, b.inoutputVariables) &&
+            equalOperationVariables(a.outputVariables, b.outputVariables)
+        );
+    }
+
+    function equalOperationVariables(
+        a: aas.OperationVariable[] | undefined,
+        b: aas.OperationVariable[] | undefined,
+    ): boolean {
+        if (a === b) {
+            return true;
+        }
+
+        if (!a || !b || a.length !== b.length) {
+            return false;
+        }
+
+        for (let i = 0, n = a.length; i < n; i++) {
+            if (!equalOperationVariable(a[i], b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function equalOperationVariable(a: aas.OperationVariable, b: aas.OperationVariable): boolean {
+        if (a === b) {
+            return true;
+        }
+
+        return equal(a.value, b.value);
+    }
+
+    function equalRange(a: aas.Range, b: aas.Range): boolean {
+        return equalSubmodelElement(a, b) && a.max === b.max && a.min === b.min && a.valueType === b.valueType;
+    }
+
+    function equalRelationshipElement(a: aas.RelationshipElement, b: aas.RelationshipElement): boolean {
+        return equalSubmodelElement(a, b) && equalReference(a.first, b.first) && equalReference(a.second, b.second);
+    }
+
     function equalReferenceElement(a: aas.ReferenceElement, b: aas.ReferenceElement): boolean {
         return equalSubmodelElement(a, b) && equalReference(a.value, b.value);
     }
@@ -675,7 +763,7 @@ export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
             a === b ||
             (a != null &&
                 b != null &&
-                equalHasSemantic(a, b) &&
+                equalHasSemantics(a, b) &&
                 a.name === b.name &&
                 a.value === b.value &&
                 equalReference(a.externalSubjectId, b.externalSubjectId))
@@ -763,6 +851,8 @@ export function getAbbreviation(modelType: aas.ModelType): AASAbbreviation | und
             return 'RelA';
         case 'AssetAdministrationShell':
             return 'AAS';
+        case 'BasicEventElement':
+            return 'Evt';
         case 'Capability':
             return 'Cap';
         case 'ConceptDescription':
@@ -775,8 +865,6 @@ export function getAbbreviation(modelType: aas.ModelType): AASAbbreviation | und
             return 'Range';
         case 'Entity':
             return 'Ent';
-        case 'BasicEventElement':
-            return 'Evt';
         case 'File':
             return 'File';
         case 'Blob':
@@ -808,8 +896,14 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
             return 'AssetAdministrationShell';
         case 'blob':
             return 'Blob';
+        case 'cap':
+            return 'Capability';
+        case 'cd':
+            return 'ConceptDescription';
         case 'ent':
             return 'Entity';
+        case 'evt':
+            return 'BasicEventElement';
         case 'file':
             return 'File';
         case 'mlp':
@@ -824,6 +918,8 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
             return 'ReferenceElement';
         case 'rel':
             return 'RelationshipElement';
+        case 'rela':
+            return 'AnnotatedRelationshipElement';
         case 'sm':
             return 'Submodel';
         case 'smc':

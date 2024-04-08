@@ -80,6 +80,8 @@ export interface AASDocument extends AASDocumentId {
     crc32: number;
     /** The name of the AAS. */
     idShort: string;
+    /** The Asset identifier */
+    assetId?: string;
     /** Indicates whether the document is modified. */
     modified?: boolean;
     /** Indicates whether communication can be established with the system represented by the AAS. */

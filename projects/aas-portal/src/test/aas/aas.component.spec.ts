@@ -160,11 +160,8 @@ describe('AASComponent', () => {
     });
 
     it('shows the document assetId', (done: DoneFn) => {
-        const aas = sampleDocument.content!.assetAdministrationShells[0];
-        const assetId = aas.assetInformation.globalAssetId ?? '-';
-
         component.assetId.pipe(first()).subscribe(value => {
-            expect(value).toEqual(assetId);
+            expect(value).toEqual('http://customer.com/assets/KHBVZJSQKIY');
             done();
         });
     });
@@ -176,7 +173,7 @@ describe('AASComponent', () => {
         });
     });
 
-    it('shows the document idShort', (done: DoneFn) => {
+    it('shows the document version', (done: DoneFn) => {
         component.version.pipe(first()).subscribe(value => {
             expect(value).toEqual('-');
             done();

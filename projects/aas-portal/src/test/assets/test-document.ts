@@ -21,6 +21,7 @@ export function createDocument(name: string, endpoint= "http://localhost/contain
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,
+        assetId: 'http://localhost/asset/${name}',
         endpoint: endpoint,
         address: '',
         modified: false,
@@ -38,6 +39,7 @@ export function createDocumentHeader(name: string, endpoint: string): AASDocumen
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,
+        assetId: 'http://localhost/asset/${name}',
         endpoint: endpoint,
         address: '',
         modified: false,

@@ -110,6 +110,7 @@ export class IndexChangeService {
                 this.endpointRemoved();
                 break;
             case 'Reset':
+                this.reset.emit();
                 break;
         }
     }

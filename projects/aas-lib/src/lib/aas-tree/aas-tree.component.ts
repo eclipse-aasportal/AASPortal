@@ -25,6 +25,7 @@ import {
     selectSubmodel,
     getIdShortPath,
     mimeTypeToExtension,
+    selectReferable,
 } from 'common';
 
 import { AASTreeRow, AASTreeFeatureState } from './aas-tree.state';
@@ -34,7 +35,6 @@ import { ShowVideoFormComponent } from './show-video-form/show-video-form.compon
 import { OperationCallFormComponent } from './operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../convert';
-import { AASQuery } from '../types/aas-query-params';
 import { ViewQuery } from '../types/view-query-params';
 import { WindowService } from '../window.service';
 import { DocumentService } from '../document.service';
@@ -68,6 +68,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
+    private searchSubscription?: Subscription;
     private _selected: aas.Referable[] = [];
     private shiftKey = false;
     private altKey = false;
@@ -92,16 +93,6 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         this.nodes = this.store.select(AASTreeSelectors.selectNodes);
         this.someSelected = this.store.select(AASTreeSelectors.selectSomeSelected);
         this.everySelected = this.store.select(AASTreeSelectors.selectEverySelected);
-
-        this.subscription.add(
-            this.store
-                .select(AASTreeSelectors.selectSelectedElements)
-                .pipe()
-                .subscribe(elements => {
-                    this._selected = elements;
-                    this.selectedChange.emit(elements);
-                }),
-        );
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -149,6 +140,16 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     public nodes: Observable<AASTreeRow[]>;
 
     public ngOnInit(): void {
+        this.subscription.add(
+            this.store
+                .select(AASTreeSelectors.selectSelectedElements)
+                .pipe()
+                .subscribe(elements => {
+                    this._selected = elements;
+                    this.selectedChange.emit(elements);
+                }),
+        );
+
         this.subscription.add(
             this.store
                 .select(AASTreeSelectors.selectError)
@@ -207,8 +208,15 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
             );
         }
 
-        if (changes['search'] && this.search) {
-            this.subscription.add(this.search.subscribe(value => this.searching.start(value)));
+        if (changes['search']) {
+            if (this.searchSubscription) {
+                this.searchSubscription.unsubscribe();
+                this.searchSubscription = undefined;
+            }
+
+            if (this.search) {
+                this.searchSubscription = this.search.subscribe(value => this.searching.start(value));
+            }
         }
 
         const stateChange = changes['state'];
@@ -225,6 +233,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+        this.searchSubscription?.unsubscribe();
         this.webSocketSubject?.unsubscribe();
         this.searching?.destroy();
         this.window.removeEventListener('keyup', this.keyup);
@@ -284,15 +293,6 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     public toggleSelection(node: AASTreeRow): void {
         this.store.dispatch(AASTreeActions.toggleSelected({ row: node, altKey: this.altKey, shiftKey: this.shiftKey }));
-    }
-
-    public openEntity(entity: aas.Entity): void {
-        if (this.state === 'online') return;
-
-        if (entity && entity.globalAssetId) {
-            this.clipboard.set('AASQuery', { id: entity.globalAssetId } as AASQuery);
-            this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
-        }
     }
 
     public async openFile(file: aas.File | undefined): Promise<void> {
@@ -361,18 +361,22 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    public openReference(reference: aas.ReferenceElement | undefined): void {
-        if (!reference?.value || this.state === 'online') return;
+    public openReference(reference: aas.Reference | string | undefined): void {
+        if (!reference || this.state === 'online') return;
 
-        this.clipboard.set('AASQuery', { id: reference.value.keys[0].value } as AASQuery);
-        this.router.navigateByUrl('/aas?format=AASQuery', { skipLocationChange: true });
-    }
+        if (typeof reference === 'string') {
+            this.openDocumentByAssetId(reference);
+        } else {
+            if (reference.keys.length === 0) {
+                return;
+            }
 
-    public openRelationship(
-        relationship: aas.RelationshipElement | undefined,
-        reference: aas.Reference | undefined,
-    ): void {
-        if (!relationship || !reference || this.state === 'online') return;
+            if (reference.type === 'ExternalReference') {
+                this.openExternalReference(reference);
+            } else {
+                this.selectModelReference(reference);
+            }
+        }
     }
 
     public openSubmodel(submodel: aas.Submodel | undefined): void {
@@ -399,26 +403,20 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    public open(node: AASTreeRow): void {
-        try {
-            switch (node.element.modelType) {
-                case 'Property': {
-                    const property = node.element as aas.Property;
-                    this.window.open(String(property.value));
-                    break;
-                }
-            }
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
     public findNext(): void {
         this.searching.findNext();
     }
 
     public findPrevious(): void {
         this.searching.findPrevious();
+    }
+
+    public toString(value: aas.Reference | undefined): string {
+        if (!value) {
+            return '-';
+        }
+
+        return value.keys.map(key => key.value).join('.');
     }
 
     private async showImageAsync(name: string, src: string): Promise<void> {
@@ -521,6 +519,44 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                     }
                 }
             }
+        }
+    }
+
+    private openDocumentByAssetId(assetId: string): void {
+        if (assetId) {
+            this.clipboard.clear('AASDocument');
+            this.router.navigate(['/aas'], {
+                skipLocationChange: true,
+                onSameUrlNavigation: 'reload',
+                queryParams: { id: assetId },
+            });
+        }
+    }
+
+    private openExternalReference(reference: aas.Reference): void {
+        this.clipboard.clear('AASDocument');
+        this.router.navigate(['/aas'], {
+            skipLocationChange: true,
+            onSameUrlNavigation: 'reload',
+            queryParams: { id: reference.keys[0].value },
+        });
+    }
+
+    private selectModelReference(reference: aas.Reference): void {
+        if (!this.document?.content) {
+            return;
+        }
+
+        const referable = selectReferable(this.document.content, reference);
+        if (referable) {
+            this.searching.find(referable);
+        } else if (reference.keys[0].type === 'AssetAdministrationShell') {
+            this.clipboard.clear('AASDocument');
+            this.router.navigate(['/aas'], {
+                skipLocationChange: true,
+                onSameUrlNavigation: 'reload',
+                queryParams: { id: reference.keys[0].value },
+            });
         }
     }
 

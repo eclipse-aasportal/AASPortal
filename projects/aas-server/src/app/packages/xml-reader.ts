@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, determineType, toBoolean } from 'common';
+import { aas, determineType, extensionToMimeType, toBoolean } from 'common';
 import { useNamespaces, XPathSelect } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import { AASReader } from './aas-reader.js';
@@ -125,7 +125,7 @@ export class XmlReader extends AASReader {
         }
 
         const value: aas.SpecificAssetId = {
-            ...this.readHasSemantic(node),
+            ...this.readHasSemantics(node),
             name: this.getTextContent('./aas:name', node),
             value: this.getTextContent('./aas:value', node),
             externalSubjectId,
@@ -185,7 +185,7 @@ export class XmlReader extends AASReader {
     private readSubmodel(node: Node): aas.Submodel {
         const submodel: aas.Submodel = {
             ...this.readIdentifiable(node),
-            ...this.readHasSemantic(node),
+            ...this.readHasSemantics(node),
             ...this.readQualifiable(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
@@ -540,7 +540,15 @@ export class XmlReader extends AASReader {
 
     private readFile(node: Node, parent?: aas.Reference): aas.File {
         let contentType = this.selectNode('./aas:mimeType', node)?.textContent;
-        if (!contentType) {
+        const value = this.selectNode('./aas:value', node)?.textContent;
+        if (!contentType && value) {
+            const i = value.lastIndexOf('.');
+            if (i >= 0) {
+                contentType = extensionToMimeType(value.substring(i));
+            }
+        }
+
+        if (contentType == null) {
             contentType = '';
         }
 
@@ -549,7 +557,6 @@ export class XmlReader extends AASReader {
             contentType,
         };
 
-        const value = this.selectNode('./aas:value', node)?.textContent;
         if (value) {
             file.value = value;
         }
@@ -578,7 +585,7 @@ export class XmlReader extends AASReader {
     private readSubmodelElementType(node: Node, parent?: aas.Reference): aas.SubmodelElement {
         return {
             ...this.readReferable(node, undefined, parent),
-            ...this.readHasSemantic(node),
+            ...this.readHasSemantics(node),
             ...this.readHasKind(node),
             ...this.readHasDataSpecification(node),
             ...this.readQualifiable(node),
@@ -637,14 +644,14 @@ export class XmlReader extends AASReader {
 
     private readExtension(node: Node): aas.Extension {
         const extension: aas.Extension = {
-            ...this.readHasSemantic(node),
+            ...this.readHasSemantics(node),
             name: this.getTextContent('./aas:name', node),
         };
 
         return extension;
     }
 
-    private readHasSemantic(node: Node): aas.HasSemantics {
+    private readHasSemantics(node: Node): aas.HasSemantics {
         const semanticId = this.readReference(this.selectNode('./aas:semanticId', node));
         return semanticId ? { semanticId } : {};
     }
@@ -817,7 +824,7 @@ export class XmlReader extends AASReader {
 
     private readQualifiable(node: Node): aas.Qualifiable {
         const qualifiable: aas.Qualifiable = {};
-        const qualifiers = this.readQualifiers('./aas:qualifier', node);
+        const qualifiers = this.readQualifiers('./aas:qualifiers/aas:qualifier', node);
         if (qualifiers) {
             qualifiable.qualifiers = qualifiers;
         }
@@ -826,13 +833,42 @@ export class XmlReader extends AASReader {
     }
 
     private readQualifiers(path: string, parent: Node): aas.Qualifier[] | undefined {
-        let qualifiers: aas.Qualifier[] | undefined;
-        const node = this.selectNode(path, parent);
-        if (node) {
-            qualifiers = []; // ToDo.
+        const qualifiers: aas.Qualifier[] = [];
+        for (const node of this.selectNodes(path, parent)) {
+            qualifiers.push(this.readQualifier(node));
+        }
+
+        if (qualifiers.length === 0) {
+            return undefined;
         }
 
         return qualifiers;
+    }
+
+    private readQualifier(node: Node): aas.Qualifier {
+        const type = this.getTextContent('./aas:type', node);
+        const valueType = this.getTextContent('./aas:valueType', node) as aas.DataTypeDefXsd;
+        const qualifier: aas.Qualifier = {
+            type,
+            valueType,
+        };
+
+        const kind = this.selectTextContent('./aas:kind', node) as aas.QualifierKind;
+        if (kind) {
+            qualifier.kind = kind;
+        }
+
+        const value = this.selectTextContent('./aas:value', node);
+        if (value != null) {
+            qualifier.value = value;
+        }
+
+        const valueId = this.readReference(this.selectNode('./valueId', node));
+        if (valueId) {
+            qualifier.valueId = valueId;
+        }
+
+        return qualifier;
     }
 
     private readReference(node: Node | undefined): aas.Reference | undefined {

@@ -17,7 +17,6 @@ describe('AASApiService', function () {
     let httpTestingController: HttpTestingController;
 
     beforeEach(function () {
-
         TestBed.configureTestingModule({
             declarations: [],
             providers: [],
@@ -63,14 +62,10 @@ describe('AASApiService', function () {
     });
 
     describe('getTemplates', () => {
-        it('ToDo', () => {
-
-        });
+        it('ToDo', () => {});
     });
 
     describe('putDocument', () => {
-        it('ToDo', () => {
-
-        });
+        it('ToDo', () => {});
     });
 });

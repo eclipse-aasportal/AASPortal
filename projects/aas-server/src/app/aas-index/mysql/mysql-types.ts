@@ -18,6 +18,7 @@ export interface MySqlDocument extends AASDocument, RowDataPacket {
 export interface MySqlElement extends RowDataPacket {
     uuid: string;
     modelType: string;
+    id?: string;
     idShort: string;
     stringValue?: string;
     numberValue?: number;
