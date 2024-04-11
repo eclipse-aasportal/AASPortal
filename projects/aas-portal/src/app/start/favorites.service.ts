@@ -15,33 +15,35 @@ import { AuthService } from 'aas-lib';
     providedIn: 'root',
 })
 export class FavoritesService {
-    private _lists: FavoritesList[];
+    private _lists?: FavoritesList[];
 
-    public constructor(private readonly auth: AuthService) {
-        const value = auth.getCookie('.Favorites');
-        this._lists = value ? JSON.parse(value) : [];
-    }
+    public constructor(private readonly auth: AuthService) {}
 
     public get lists(): FavoritesList[] {
+        if (!this._lists) {
+            const value = this.auth.getCookie('.Favorites');
+            this._lists = value ? (JSON.parse(value) as FavoritesList[]) : [];
+        }
+
         return this._lists;
     }
 
     public has(name: string): boolean {
-        return this._lists.some(list => list.name === name);
+        return this.lists.some(list => list.name === name);
     }
 
     public get(name: string): FavoritesList | undefined {
-        return this._lists.find(list => list.name === name);
+        return this.lists.find(list => list.name === name);
     }
 
     public delete(name: string): void {
-        this._lists = this._lists.filter(list => list.name !== name);
+        this._lists = this.lists.filter(list => list.name !== name);
         this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): void {
-        const i = this._lists.findIndex(list => list.name === name);
-        const lists = [...this._lists];
+        const i = this.lists.findIndex(list => list.name === name);
+        const lists = [...this.lists];
         let list: FavoritesList;
         if (i < 0) {
             list = { name, documents: [] };
@@ -66,7 +68,7 @@ export class FavoritesService {
     }
 
     public remove(documents: AASDocument[], name: string): void {
-        const i = this._lists.findIndex(list => list.name === name);
+        const i = this.lists.findIndex(list => list.name === name);
         if (i < 0) return;
 
         const lists = [...this.lists];

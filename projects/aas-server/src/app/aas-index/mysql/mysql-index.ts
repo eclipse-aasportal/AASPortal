@@ -174,12 +174,12 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async find(endpoint: string | undefined, id: string): Promise<AASDocument | undefined> {
-        const document = endpoint ? await this.getEndpointDocument(endpoint, id) : await this.getDocument(id);
-        if (document) {
-            return this.toDocument(document);
+        const document = endpoint ? await this.selectEndpointDocument(endpoint, id) : await this.selectDocument(id);
+        if (!document) {
+            return undefined;
         }
 
-        return undefined;
+        return this.toDocument(document);
     }
 
     public override async remove(endpointName: string, id: string): Promise<boolean> {
@@ -347,7 +347,7 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getEndpointDocument(endpoint: string, id: string): Promise<MySqlDocument> {
+    private async selectEndpointDocument(endpoint: string, id: string): Promise<MySqlDocument | undefined> {
         const [results] = await (
             await this.connection
         ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)', [
@@ -357,19 +357,19 @@ export class MySqlIndex extends AASIndex {
         ]);
 
         if (results.length === 0) {
-            throw new Error(`A document with the id "${id}" does not exist in "${endpoint}".`);
+            return undefined;
         }
 
         return results[0];
     }
 
-    private async getDocument(id: string): Promise<MySqlDocument> {
+    private async selectDocument(id: string): Promise<MySqlDocument | undefined> {
         const [results] = await (
             await this.connection
         ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)', [id, id]);
 
         if (results.length === 0) {
-            throw new Error(`A document with the id "${id}" does not exist.`);
+            return undefined;
         }
 
         return results[0];

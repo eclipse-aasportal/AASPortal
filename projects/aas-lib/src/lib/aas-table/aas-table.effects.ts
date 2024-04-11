@@ -83,7 +83,7 @@ export class AASTableEffects {
     }
 
     private addRoot(nodes: AASDocument[], rows: AASTableRow[]): AASTableRow[] {
-        const root = nodes.find(node => node.parent === null);
+        const root = nodes.find(node => !node.parentId);
         const index = findLastIndex(rows, row => row.level === 0);
         if (root) {
             const children = nodes.filter(node => this.isChild(root, node));
@@ -107,36 +107,43 @@ export class AASTableEffects {
                 rows[index] = previous;
             }
 
-            this.traverse(root, nodes, rows, 1);
+            this.traverse(root, nodes, rows, 0, 1);
         }
 
         return rows;
     }
 
-    private traverse(parent: AASDocument, nodes: AASDocument[], rows: AASTableRow[], level: number): void {
+    private traverse(
+        parent: AASDocument,
+        nodes: AASDocument[],
+        rows: AASTableRow[],
+        parentIndex: number,
+        level: number,
+    ): void {
         let previous: AASTableRow | null = null;
         const children = nodes.filter(node => this.isChild(parent, node));
         for (const child of children) {
             const row = new AASTableRow(
                 child,
-                rows.length - 1,
+                parentIndex,
                 false,
                 false,
                 false,
-                children.length === 0,
+                !nodes.some(node => this.isChild(child, node)),
                 level,
                 -1,
                 -1,
             );
 
+            const index = rows.length;
             rows.push(row);
             if (previous) {
-                previous.nextSibling = rows.length - 1;
+                previous.nextSibling = index;
             }
 
             if (children.length > 0) {
                 row.firstChild = rows.length;
-                this.traverse(child, nodes, rows, level + 1);
+                this.traverse(child, nodes, rows, index, level + 1);
             }
 
             previous = row;
@@ -144,11 +151,11 @@ export class AASTableEffects {
     }
 
     private isChild(parent: AASDocument, node: AASDocument): boolean {
-        if (!node.parent) {
+        if (!node.parentId) {
             return false;
         }
 
-        return node.parent.endpoint === parent.endpoint && node.parent.id === parent.id;
+        return node.parentId === parent.id;
     }
 
     private clone(row: AASTableRow): AASTableRow {

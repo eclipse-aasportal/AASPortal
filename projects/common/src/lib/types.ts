@@ -86,8 +86,8 @@ export interface AASDocument extends AASDocumentId {
     modified?: boolean;
     /** Indicates whether communication can be established with the system represented by the AAS. */
     onlineReady?: boolean;
-    /** The parent AAS in a hierarchy. */
-    parent?: AASDocument | null;
+    /** The identifier of the parent AAS in a hierarchy. */
+    parentId?: string | null;
     /** Indicates whether the document can be edited. */
     readonly: boolean;
     /** A thumbnail. */
