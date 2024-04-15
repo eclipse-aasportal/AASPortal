@@ -27,10 +27,10 @@ describe('AuthService', () => {
     let api: jasmine.SpyObj<AuthApiService>;
     let modal: NgbModal;
 
-    describe('guest', function () {
+    describe('guest', () => {
         let token: string;
 
-        beforeEach(function () {
+        beforeEach(() => {
             token = getGuestToken();
             api = jasmine.createSpyObj<AuthApiService>([
                 'login',
@@ -99,24 +99,24 @@ describe('AuthService', () => {
             });
         });
 
-        describe('isAuthorized', function () {
-            it('indicates that a guest is authorized as guest', function () {
+        describe('isAuthorized', () => {
+            it('indicates that a guest is authorized as guest', () => {
                 expect(service.isAuthorized('guest')).toBeTrue();
             });
 
-            it('indicates that a guest is not authorized as editor', function () {
+            it('indicates that a guest is not authorized as editor', () => {
                 expect(service.isAuthorized('editor')).toBeFalse();
             });
 
-            it('indicates that a guest is not authorized as admin', function () {
+            it('indicates that a guest is not authorized as admin', () => {
                 expect(service.isAuthorized('admin')).toBeFalse();
             });
         });
 
-        describe('login', function () {
+        describe('login', () => {
             let newToken: string;
 
-            beforeEach(function () {
+            beforeEach(() => {
                 newToken = getToken('John');
             });
 
@@ -163,10 +163,10 @@ describe('AuthService', () => {
             });
         });
 
-        describe('register', function () {
+        describe('register', () => {
             let newToken: string;
 
-            beforeEach(function () {
+            beforeEach(() => {
                 newToken = getToken('John');
             });
 
@@ -217,24 +217,24 @@ describe('AuthService', () => {
                     });
             });
 
-            describe('logout', function () {
-                it('throws an error when try to logout', function () {
+            describe('logout', () => {
+                it('throws an error when try to logout', () => {
                     service.logout().subscribe({ error: error => expect(error).toBeTruthy() });
                 });
             });
 
-            describe('updateProfile', function () {
-                it('throw an error for a guest login', async function () {
+            describe('updateProfile', () => {
+                it('throw an error for a guest login', async () => {
                     service.updateUserProfile().subscribe({ error: error => expect(error).toBeTruthy() });
                 });
             });
         });
     });
 
-    describe('authorized user', function () {
+    describe('authorized user', () => {
         let token: string;
 
-        beforeEach(function () {
+        beforeEach(() => {
             token = getToken('John');
             api = jasmine.createSpyObj<AuthApiService>([
                 'login',
@@ -308,24 +308,24 @@ describe('AuthService', () => {
             expect(service).toBeTruthy();
         });
 
-        describe('isAuthorized', function () {
-            it('indicates that the user is authorized as guest', function () {
+        describe('isAuthorized', () => {
+            it('indicates that the user is authorized as guest', () => {
                 expect(service.isAuthorized('guest')).toBeTrue();
             });
 
-            it('indicates that a guest is authorized as editor', function () {
+            it('indicates that a guest is authorized as editor', () => {
                 expect(service.isAuthorized('editor')).toBeTrue();
             });
 
-            it('indicates that a guest is not authorized as admin', function () {
+            it('indicates that a guest is not authorized as admin', () => {
                 expect(service.isAuthorized('admin')).toBeFalse();
             });
         });
 
-        describe('logout', function () {
+        describe('logout', () => {
             let guestToken: string;
 
-            beforeEach(function () {
+            beforeEach(() => {
                 guestToken = getGuestToken();
             });
 
@@ -350,16 +350,16 @@ describe('AuthService', () => {
             });
         });
 
-        describe('updateUserProfileAsync', function () {
+        describe('updateUserProfileAsync', () => {
             let newToken: string;
             let guestToken: string;
 
-            beforeEach(function () {
+            beforeEach(() => {
                 newToken = getToken('John Doe');
                 guestToken = getGuestToken();
             });
 
-            it('updates the user profile via argument', function (done: DoneFn) {
+            it('updates the user profile via argument', (done: DoneFn) => {
                 api.updateProfile.and.returnValue(of({ token: newToken }));
 
                 service
@@ -375,9 +375,8 @@ describe('AuthService', () => {
                     });
             });
 
-            it('updates the user profile via form', function (done: DoneFn) {
+            it('updates the user profile via form', (done: DoneFn) => {
                 api.updateProfile.and.returnValue(of({ token: newToken }));
-
                 spyOn(modal, 'open').and.returnValue(
                     jasmine.createSpyObj<NgbModalRef>(
                         {},
@@ -401,7 +400,7 @@ describe('AuthService', () => {
                     });
             });
 
-            it('deletes a user via form', function (done: DoneFn) {
+            it('deletes a user via form', (done: DoneFn) => {
                 api.delete.and.returnValue(of(void 0));
                 api.guest.and.returnValue(of({ token: guestToken }));
                 window.confirm.and.returnValue(true);
@@ -429,7 +428,7 @@ describe('AuthService', () => {
             });
         });
 
-        describe('getCookie', function () {
+        describe('getCookie', () => {
             it('returns the value of "Cookie1"', (done: DoneFn) => {
                 api.getCookie.and.returnValue(
                     of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
@@ -459,7 +458,6 @@ describe('AuthService', () => {
 
             it('indicates that "Unknown" not exist', (done: DoneFn) => {
                 api.getCookie.and.returnValue(of(undefined));
-
                 service.checkCookie('Unknown').subscribe(value => {
                     expect(value).toBeFalse();
                     done();
@@ -467,18 +465,13 @@ describe('AuthService', () => {
             });
         });
 
-        describe('deleteCookie', function () {
-            it('deletes a cookie', function (done: DoneFn) {
+        describe('deleteCookie', () => {
+            it('deletes a cookie', (done: DoneFn) => {
                 api.deleteCookie.and.returnValue(of(void 0));
-                api.getCookie.and.returnValue(of(undefined));
-
-                service
-                    .deleteCookie('Cookie1')
-                    .pipe(mergeMap(() => service.checkCookie('Cookie1')))
-                    .subscribe(value => {
-                        expect(value).toBeFalse();
-                        done();
-                    });
+                service.deleteCookie('Cookie1').subscribe(() => {
+                    expect(api.deleteCookie).toHaveBeenCalledWith('john.doe@email.com', 'Cookie1');
+                    done();
+                });
             });
         });
     });
