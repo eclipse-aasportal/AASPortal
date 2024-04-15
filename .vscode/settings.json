@@ -40,4 +40,9 @@
         "ZVEI"
     ],
     "files.eol": "\n",
+    "jest.debugMode": true,
+    "jest.virtualFolders": [
+        {"name": "common", "rootPath": "./projects/common", "runMode": "on-demand", "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"},
+        {"name": "aas-server", "rootPath": "./projects/aas-server", "runMode": "on-demand", "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"}
+    ],
 }

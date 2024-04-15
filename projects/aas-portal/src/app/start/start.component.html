@@ -8,7 +8,7 @@
 
 <div id="start-container" class="container-fluid">
     <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"
-        [filter]="filter"></fhg-aas-table>
+        [filter]="filterFavorites" ></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
@@ -16,13 +16,18 @@
         <button class="btn btn-outline-primary" type="button" (click)="addToFavorites()">
             <i class="bi bi-star"></i>
         </button>
-        <select class="form-select" [(ngModel)]="favoritesList">
-            @for (option of favoritesLists; track option) {
-            <option>{{option}}</option>
+        <select [ngClass]="currentFavorites ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [(ngModel)]="currentFavorites">
+            @for (option of favoritesLists; track option; let i = $index) {
+            @if (i === 0) {
+            <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
+            } @else {
+            <option class="fst-normal fw-normal" [value]="option">{{option}}</option>
+            }
             }
         </select>
     </div>
-    @if (favoritesList === '-') {
+    @if (!currentFavorites) {
     <div class="btn-group me-2">
         <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-bar-left"></i>
@@ -42,7 +47,7 @@
             <i class="bi bi-arrow-clockwise"></i>
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
                 {{count | async}}
-              </span>        
+            </span>
         </button>
     </div>
     }

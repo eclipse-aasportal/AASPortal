@@ -17,7 +17,9 @@ const getDocuments = (state: StartFeatureState) => state.start.documents;
 
 export const selectState = createSelector(getState, state => state);
 
-export const selectFilter = createSelector(getState, state => (state.favorites === '-' ? '' : state.filter));
+export const selectFilter = createSelector(getState, state => state.filter);
+
+export const selectFilterFavorites = createSelector(getState, state => (state.favorites ? state.filter : ''));
 
 export const selectViewMode = createSelector(getViewMode, viewMode => viewMode);
 

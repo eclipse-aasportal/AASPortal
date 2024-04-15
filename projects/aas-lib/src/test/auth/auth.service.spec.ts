@@ -32,14 +32,26 @@ describe('AuthService', () => {
 
         beforeEach(function () {
             token = getGuestToken();
-            api = jasmine.createSpyObj<AuthApiService>(
-                ['login', 'guest', 'register', 'getCookies', 'updateProfile']);
+            api = jasmine.createSpyObj<AuthApiService>([
+                'login',
+                'guest',
+                'register',
+                'updateProfile',
+                'getCookies',
+                'getCookie',
+                'setCookie',
+                'deleteCookie',
+            ]);
 
             api.guest.and.returnValue(of({ token }));
             api.getCookies.and.returnValue(EMPTY);
 
-            window = jasmine.createSpyObj<WindowService>(
-                ['getLocalStorageItem', 'setLocalStorageItem', 'removeLocalStorageItem', 'clearLocalStorage']);
+            window = jasmine.createSpyObj<WindowService>([
+                'getLocalStorageItem',
+                'setLocalStorageItem',
+                'removeLocalStorageItem',
+                'clearLocalStorage',
+            ]);
 
             window.getLocalStorageItem.and.returnValue(null);
 
@@ -48,26 +60,26 @@ describe('AuthService', () => {
                 providers: [
                     {
                         provide: WindowService,
-                        useValue: window
+                        useValue: window,
                     },
                     {
                         provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error'])
+                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
                     },
                     {
                         provide: AuthApiService,
-                        useValue: api
-                    }
+                        useValue: api,
+                    },
                 ],
                 imports: [
                     HttpClientTestingModule,
                     TranslateModule.forRoot({
                         loader: {
                             provide: TranslateLoader,
-                            useClass: TranslateFakeLoader
-                        }
-                    })
-                ]
+                            useClass: TranslateFakeLoader,
+                        },
+                    }),
+                ],
             });
 
             service = TestBed.inject(AuthService);
@@ -77,7 +89,7 @@ describe('AuthService', () => {
         it('should be created', (done: DoneFn) => {
             expect(service).toBeTruthy();
 
-            service.payload.pipe(first()).subscribe((value) => {
+            service.payload.pipe(first()).subscribe(value => {
                 expect(value).toBeTruthy();
                 expect(service.userId).toBeUndefined();
                 expect(service.authenticated).toBeFalse();
@@ -110,8 +122,10 @@ describe('AuthService', () => {
 
             it('can login as arguments', function (done: DoneFn) {
                 api.login.and.returnValue(of({ token: newToken }));
-                service.login({ id: 'john.doe@email.com', password: 'password' }).pipe(
-                    mergeMap(() => service.payload)).subscribe((value) => {
+                service
+                    .login({ id: 'john.doe@email.com', password: 'password' })
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.userId).toEqual('john.doe@email.com');
                         expect(service.authenticated).toBeTrue();
@@ -124,18 +138,28 @@ describe('AuthService', () => {
             it('can login via form', function (done: DoneFn) {
                 api.login.and.returnValue(of({ token: newToken }));
 
-                spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
-                    result: new Promise<LoginFormResult>(resolve => resolve({ stayLoggedIn: true, token: newToken }))
-                }));
+                spyOn(modal, 'open').and.returnValue(
+                    jasmine.createSpyObj<NgbModalRef>(
+                        {},
+                        {
+                            result: new Promise<LoginFormResult>(resolve =>
+                                resolve({ stayLoggedIn: true, token: newToken }),
+                            ),
+                        },
+                    ),
+                );
 
-                service.login().pipe(mergeMap(() => service.payload)).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toEqual('john.doe@email.com');
-                    expect(service.authenticated).toBeTrue();
-                    expect(service.name).toEqual('John');
-                    expect(service.role).toEqual('editor');
-                    done();
-                });
+                service
+                    .login()
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toEqual('john.doe@email.com');
+                        expect(service.authenticated).toBeTrue();
+                        expect(service.name).toEqual('John');
+                        expect(service.role).toEqual('editor');
+                        done();
+                    });
             });
         });
 
@@ -149,35 +173,48 @@ describe('AuthService', () => {
             it('allows registering a new user via arguments', function (done: DoneFn) {
                 api.register.and.returnValue(of({ token: newToken }));
 
-                service.register({
-                    id: 'john.doe@email.com',
-                    name: 'John',
-                    password: '1234.xyz'
-                }).pipe(mergeMap(() => service.payload)).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toEqual('john.doe@email.com');
-                    expect(service.authenticated).toBeTrue();
-                    expect(service.name).toEqual('John');
-                    expect(service.role).toEqual('editor');
-                    done();
-                });
+                service
+                    .register({
+                        id: 'john.doe@email.com',
+                        name: 'John',
+                        password: '1234.xyz',
+                    })
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toEqual('john.doe@email.com');
+                        expect(service.authenticated).toBeTrue();
+                        expect(service.name).toEqual('John');
+                        expect(service.role).toEqual('editor');
+                        done();
+                    });
             });
 
             it('allows registering a new user via form', function (done: DoneFn) {
                 api.register.and.returnValue(of({ token: newToken }));
 
-                spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
-                    result: new Promise<RegisterFormResult>(resolve => resolve({ stayLoggedIn: true, token: newToken }))
-                }));
+                spyOn(modal, 'open').and.returnValue(
+                    jasmine.createSpyObj<NgbModalRef>(
+                        {},
+                        {
+                            result: new Promise<RegisterFormResult>(resolve =>
+                                resolve({ stayLoggedIn: true, token: newToken }),
+                            ),
+                        },
+                    ),
+                );
 
-                service.register().pipe(mergeMap(() => service.payload)).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toEqual('john.doe@email.com');
-                    expect(service.authenticated).toBeTrue();
-                    expect(service.name).toEqual('John');
-                    expect(service.role).toEqual('editor');
-                    done();
-                });
+                service
+                    .register()
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toEqual('john.doe@email.com');
+                        expect(service.authenticated).toBeTrue();
+                        expect(service.name).toEqual('John');
+                        expect(service.role).toEqual('editor');
+                        done();
+                    });
             });
 
             describe('logout', function () {
@@ -191,7 +228,6 @@ describe('AuthService', () => {
                     service.updateUserProfile().subscribe({ error: error => expect(error).toBeTruthy() });
                 });
             });
-
         });
     });
 
@@ -200,12 +236,25 @@ describe('AuthService', () => {
 
         beforeEach(function () {
             token = getToken('John');
-            api = jasmine.createSpyObj<AuthApiService>(
-                ['login', 'guest', 'register', 'getCookies', 'updateProfile', 'setCookie', 'deleteCookie', 'delete']);
+            api = jasmine.createSpyObj<AuthApiService>([
+                'login',
+                'guest',
+                'register',
+                'getCookie',
+                'getCookies',
+                'updateProfile',
+                'setCookie',
+                'deleteCookie',
+                'delete',
+            ]);
 
-            api.getCookies.and.returnValue(of([{ name: 'Cookie1', data: 'The quick brown fox jumps over the lazy dog.' }]));
-            window = jasmine.createSpyObj<WindowService>(
-                ['getLocalStorageItem', 'setLocalStorageItem', 'removeLocalStorageItem', 'clearLocalStorage', 'confirm']);
+            window = jasmine.createSpyObj<WindowService>([
+                'getLocalStorageItem',
+                'setLocalStorageItem',
+                'removeLocalStorageItem',
+                'clearLocalStorage',
+                'confirm',
+            ]);
 
             window.getLocalStorageItem.and.callFake(name => {
                 return name === '.StayLoggedIn' ? 'true' : token;
@@ -216,26 +265,26 @@ describe('AuthService', () => {
                 providers: [
                     {
                         provide: WindowService,
-                        useValue: window
+                        useValue: window,
                     },
                     {
                         provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error'])
+                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
                     },
                     {
                         provide: AuthApiService,
-                        useValue: api
-                    }
+                        useValue: api,
+                    },
                 ],
                 imports: [
                     HttpClientTestingModule,
                     TranslateModule.forRoot({
                         loader: {
                             provide: TranslateLoader,
-                            useClass: TranslateFakeLoader
-                        }
-                    })
-                ]
+                            useClass: TranslateFakeLoader,
+                        },
+                    }),
+                ],
             });
 
             service = TestBed.inject(AuthService);
@@ -245,7 +294,7 @@ describe('AuthService', () => {
         it('should be created', (done: DoneFn) => {
             expect(service).toBeTruthy();
 
-            service.payload.pipe(first()).subscribe((value) => {
+            service.payload.pipe(first()).subscribe(value => {
                 expect(value).toBeTruthy();
                 expect(service.userId).toEqual('john.doe@email.com');
                 expect(service.authenticated).toBeTrue();
@@ -283,10 +332,14 @@ describe('AuthService', () => {
             it('logs out the current user', function (done: DoneFn) {
                 api.guest.and.returnValue(of({ token: guestToken }));
 
-                service.logout().pipe(
-                    mergeMap(() => service.payload),
-                    skipWhile(value => value.sub != null),
-                    first()).subscribe((value) => {
+                service
+                    .logout()
+                    .pipe(
+                        mergeMap(() => service.payload),
+                        skipWhile(value => value.sub != null),
+                        first(),
+                    )
+                    .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.userId).toBeUndefined();
                         expect(service.authenticated).toBeFalse();
@@ -309,8 +362,10 @@ describe('AuthService', () => {
             it('updates the user profile via argument', function (done: DoneFn) {
                 api.updateProfile.and.returnValue(of({ token: newToken }));
 
-                service.updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' }).pipe(
-                    mergeMap(() => service.payload)).subscribe((value) => {
+                service
+                    .updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' })
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.userId).toEqual('john.doe@email.com');
                         expect(service.authenticated).toBeTrue();
@@ -323,68 +378,107 @@ describe('AuthService', () => {
             it('updates the user profile via form', function (done: DoneFn) {
                 api.updateProfile.and.returnValue(of({ token: newToken }));
 
-                spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
-                    result: new Promise<ProfileFormResult>(resolve => resolve({ token: newToken })),
-                    componentInstance: { initialize: jasmine.createSpy() }
-                }));
+                spyOn(modal, 'open').and.returnValue(
+                    jasmine.createSpyObj<NgbModalRef>(
+                        {},
+                        {
+                            result: new Promise<ProfileFormResult>(resolve => resolve({ token: newToken })),
+                            componentInstance: { initialize: jasmine.createSpy() },
+                        },
+                    ),
+                );
 
-                service.updateUserProfile().pipe(mergeMap(() => service.payload)).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toEqual('john.doe@email.com');
-                    expect(service.authenticated).toBeTrue();
-                    expect(service.name).toEqual('John Doe');
-                    expect(service.role).toEqual('editor');
-                    done();
-                });
+                service
+                    .updateUserProfile()
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toEqual('john.doe@email.com');
+                        expect(service.authenticated).toBeTrue();
+                        expect(service.name).toEqual('John Doe');
+                        expect(service.role).toEqual('editor');
+                        done();
+                    });
             });
 
             it('deletes a user via form', function (done: DoneFn) {
                 api.delete.and.returnValue(of(void 0));
                 api.guest.and.returnValue(of({ token: guestToken }));
                 window.confirm.and.returnValue(true);
-                spyOn(modal, 'open').and.returnValue(jasmine.createSpyObj<NgbModalRef>({}, {
-                    result: new Promise<ProfileFormResult>(resolve => resolve({ action: 'deleteUser' })),
-                    componentInstance: { initialize: jasmine.createSpy() }
-                }));
+                spyOn(modal, 'open').and.returnValue(
+                    jasmine.createSpyObj<NgbModalRef>(
+                        {},
+                        {
+                            result: new Promise<ProfileFormResult>(resolve => resolve({ action: 'deleteUser' })),
+                            componentInstance: { initialize: jasmine.createSpy() },
+                        },
+                    ),
+                );
 
-                service.updateUserProfile().pipe(mergeMap(() => service.payload)).subscribe((value) => {
-                    expect(value).toBeTruthy();
-                    expect(service.userId).toBeUndefined();
-                    expect(service.authenticated).toBeFalse();
-                    expect(service.name).toEqual('GUEST_USER');
-                    expect(service.role).toEqual('guest');
+                service
+                    .updateUserProfile()
+                    .pipe(mergeMap(() => service.payload))
+                    .subscribe(value => {
+                        expect(value).toBeTruthy();
+                        expect(service.userId).toBeUndefined();
+                        expect(service.authenticated).toBeFalse();
+                        expect(service.name).toEqual('GUEST_USER');
+                        expect(service.role).toEqual('guest');
+                        done();
+                    });
+            });
+        });
+
+        describe('getCookie', function () {
+            it('returns the value of "Cookie1"', (done: DoneFn) => {
+                api.getCookie.and.returnValue(
+                    of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
+                );
+
+                service
+                    .getCookie('Cookie1')
+                    .pipe(first())
+                    .subscribe(value => {
+                        expect(value).toEqual('The quick brown fox jumps over the lazy dog.');
+                        done();
+                    });
+            });
+        });
+
+        describe('checkCookie', () => {
+            it('indicates that "Cookie1" exist', (done: DoneFn) => {
+                api.getCookie.and.returnValue(
+                    of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
+                );
+
+                service.checkCookie('Cookie1').subscribe(value => {
+                    expect(value).toBeTrue();
+                    done();
+                });
+            });
+
+            it('indicates that "Unknown" not exist', (done: DoneFn) => {
+                api.getCookie.and.returnValue(of(undefined));
+
+                service.checkCookie('Unknown').subscribe(value => {
+                    expect(value).toBeFalse();
                     done();
                 });
             });
         });
 
-        describe('getCookie', function () {
-            it('returns the value of "Cookie1"', function () {
-                expect(service.getCookie('Cookie1')).toEqual('The quick brown fox jumps over the lazy dog.');
-            });
-
-        });
-
-        describe('checkCookie', function () {
-            it('indicates that "Cookie1" exist', function () {
-                expect(service.checkCookie('Cookie1')).toBeTrue();
-            });
-
-            it('indicates that "Unknown" not exist', function () {
-                expect(service.checkCookie('Unknown')).toBeFalse();
-            });
-
-        });
-
         describe('deleteCookie', function () {
             it('deletes a cookie', function (done: DoneFn) {
                 api.deleteCookie.and.returnValue(of(void 0));
-                api.getCookies.and.returnValue(of([]));
+                api.getCookie.and.returnValue(of(undefined));
 
-                service.deleteCookie('Cookie1').subscribe(() => {
-                    expect(service.checkCookie('Cookie1')).toBeFalse();
-                    done();
-                })
+                service
+                    .deleteCookie('Cookie1')
+                    .pipe(mergeMap(() => service.checkCookie('Cookie1')))
+                    .subscribe(value => {
+                        expect(value).toBeFalse();
+                        done();
+                    });
             });
         });
     });

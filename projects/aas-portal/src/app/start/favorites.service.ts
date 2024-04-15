@@ -15,35 +15,34 @@ import { AuthService } from 'aas-lib';
     providedIn: 'root',
 })
 export class FavoritesService {
-    private _lists?: FavoritesList[];
+    private _lists: FavoritesList[] = [];
 
-    public constructor(private readonly auth: AuthService) {}
+    public constructor(private readonly auth: AuthService) {
+        this.auth.getCookie('.Favorites').subscribe(value => {
+            this._lists = value ? (JSON.parse(value) as FavoritesList[]) : [];
+        });
+    }
 
     public get lists(): FavoritesList[] {
-        if (!this._lists) {
-            const value = this.auth.getCookie('.Favorites');
-            this._lists = value ? (JSON.parse(value) as FavoritesList[]) : [];
-        }
-
         return this._lists;
     }
 
     public has(name: string): boolean {
-        return this.lists.some(list => list.name === name);
+        return this._lists.some(list => list.name === name);
     }
 
     public get(name: string): FavoritesList | undefined {
-        return this.lists.find(list => list.name === name);
+        return this._lists.find(list => list.name === name);
     }
 
     public delete(name: string): void {
-        this._lists = this.lists.filter(list => list.name !== name);
-        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
+        this._lists = this._lists.filter(list => list.name !== name);
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists)).subscribe();
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): void {
-        const i = this.lists.findIndex(list => list.name === name);
-        const lists = [...this.lists];
+        const i = this._lists.findIndex(list => list.name === name);
+        const lists = [...this._lists];
         let list: FavoritesList;
         if (i < 0) {
             list = { name, documents: [] };
@@ -64,20 +63,20 @@ export class FavoritesService {
         }
 
         this._lists = lists;
-        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists)).subscribe();
     }
 
     public remove(documents: AASDocument[], name: string): void {
-        const i = this.lists.findIndex(list => list.name === name);
+        const i = this._lists.findIndex(list => list.name === name);
         if (i < 0) return;
 
-        const lists = [...this.lists];
+        const lists = [...this._lists];
         const list = { ...lists[i] };
         list.documents = list.documents.filter(favorite =>
             documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id),
         );
 
         this._lists = lists;
-        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists)).subscribe();
     }
 }

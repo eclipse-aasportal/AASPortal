@@ -12,7 +12,7 @@ import { Tree, TreeNode } from '../tree';
 
 export class AASTableRow extends TreeNode<AASDocument> {
     public constructor(
-        public readonly document: AASDocument,
+        document: AASDocument,
         parent: number,
         selected: boolean,
         expanded: boolean,
@@ -26,27 +26,27 @@ export class AASTableRow extends TreeNode<AASDocument> {
     }
 
     public get id(): string {
-        return this.document.id;
+        return this.element.id;
     }
 
     public get name(): string {
-        return this.document.idShort;
+        return this.element.idShort;
     }
 
     public get thumbnail(): string {
-        return this.document.thumbnail ?? '/assets/resources/aas.32.png';
+        return this.element.thumbnail ?? '/assets/resources/aas.32.png';
     }
 
     public get endpoint(): string {
-        return this.document.endpoint;
+        return this.element.endpoint;
     }
 
     public get state(): 'loaded' | 'unloaded' | 'unavailable' {
-        if (this.document.content === null) {
+        if (this.element.content === null) {
             return 'unloaded';
         }
 
-        if (this.document.content) {
+        if (this.element.content) {
             return 'loaded';
         }
 
@@ -77,7 +77,7 @@ export class AASTableTree extends Tree<AASDocument, AASTableRow> {
 
     protected override cloneNode(node: AASTableRow): AASTableRow {
         return new AASTableRow(
-            node.document,
+            node.element,
             node.parent,
             node.selected,
             node.expanded,

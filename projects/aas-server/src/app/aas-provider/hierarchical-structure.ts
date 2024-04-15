@@ -1,5 +1,4 @@
 import { AASDocument, aas, isEntity, isRelationshipElement, selectReferable } from 'common';
-import { AASIndex } from '../aas-index/aas-index.js';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 
@@ -71,24 +70,34 @@ export class HierarchicalStructure extends HierarchicalStructureElement {
         }
 
         const children: string[] = [];
+        const set = new Set<aas.Entity>();
         for (const hasPart of this.getHasParts(this.entryNode)) {
-            const first = selectReferable(this.env, hasPart.first);
-            const second = selectReferable(this.env, hasPart.second);
-            if (isEntity(first) && isEntity(second)) {
-                let globalAssetId: string | undefined;
-                if (this.isNode(first)) {
-                    globalAssetId = first.globalAssetId;
-                } else if (this.isNode(second)) {
-                    globalAssetId = second.globalAssetId;
-                }
-
-                if (globalAssetId) {
-                    children.push(globalAssetId);
+            const child = this.selectChildNode(hasPart);
+            if (child && child.entityType === 'SelfManagedEntity' && child.globalAssetId) {
+                if (!set.has(child)) {
+                    children.push(child.globalAssetId);
+                    set.add(child);
                 }
             }
         }
 
         return children;
+    }
+
+    private selectChildNode(hasPart: aas.RelationshipElement): aas.Entity | undefined {
+        const first = selectReferable(this.env, hasPart.first);
+        const second = selectReferable(this.env, hasPart.second);
+        if (isEntity(first) && isEntity(second)) {
+            if (this.isNode(first)) {
+                return first;
+            }
+
+            if (this.isNode(second)) {
+                return second;
+            }
+        }
+
+        return undefined;
     }
 
     private initArcheType(): ArcheType {

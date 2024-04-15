@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, from, last, map, mergeMap, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import {
     ApplicationError,
@@ -36,7 +36,6 @@ import { WindowService } from '../window.service';
 export class AuthService {
     private readonly payload$ = new BehaviorSubject<JWTPayload>({ role: 'guest' });
     private readonly ready$ = new BehaviorSubject<boolean>(false);
-    private readonly cookies = new Map<string, string>();
 
     public constructor(
         private modal: NgbModal,
@@ -235,12 +234,14 @@ export class AuthService {
      * @param name The cookie name.
      * @returns `true` if the cookie exists; otherwise, `false`.
      */
-    public checkCookie(name: string): boolean {
-        if (this.authenticated) {
-            return this.cookies.has(name);
+    public checkCookie(name: string): Observable<boolean> {
+        const payload = this.payload$.getValue();
+        if (payload && payload.sub) {
+            const id = payload.sub;
+            return this.api.getCookie(id, name).pipe(map(cookie => cookie != null));
+        } else {
+            return of(this.window.getLocalStorageItem(name) != null);
         }
-
-        return this.window.getLocalStorageItem(name) != null;
     }
 
     /**
@@ -248,16 +249,13 @@ export class AuthService {
      * @param name The cookie name.
      * @returns The cookie value.
      */
-    public getCookie(name: string): string | null {
-        let data: string | null;
+    public getCookie(name: string): Observable<string | undefined> {
         const payload = this.payload$.getValue();
-        if (payload) {
-            data = this.cookies.get(name) ?? null;
+        if (payload && payload.sub) {
+            return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
         } else {
-            data = this.window.getLocalStorageItem(name);
+            return of(this.window.getLocalStorageItem(name) ?? undefined);
         }
-
-        return data;
     }
 
     /**
@@ -265,22 +263,14 @@ export class AuthService {
      * @param name The cookie name.
      * @param data The cookie value.
      */
-    public setCookie(name: string, data: string): void {
+    public setCookie(name: string, data: string): Observable<void> {
         const payload = this.payload$.getValue();
         if (payload && payload.sub) {
             const id = payload.sub;
-            this.api
-                .setCookie(id, { name, data })
-                .pipe(
-                    last(),
-                    mergeMap(() => this.api.getCookies(id)),
-                )
-                .subscribe({
-                    next: cookies => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
-                    error: error => this.notify.error(error),
-                });
+            return this.api.setCookie(id, { name, data });
         } else {
             this.window.setLocalStorageItem(name, data);
+            return of(void 0);
         }
     }
 
@@ -292,13 +282,7 @@ export class AuthService {
         const payload = this.payload$.getValue();
         if (payload && payload.sub) {
             const id = payload.sub;
-            return this.api.deleteCookie(id, name).pipe(
-                mergeMap(() => this.api.getCookies(id)),
-                map(cookies => {
-                    this.cookies.clear();
-                    cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data));
-                }),
-            );
+            return this.api.deleteCookie(id, name);
         } else {
             this.window.removeLocalStorageItem(name);
             return of(void 0);
@@ -324,12 +308,5 @@ export class AuthService {
         this.window.setLocalStorageItem('.Token', token);
         const payload = jwtDecode(token) as JWTPayload;
         this.payload$.next(payload);
-        this.cookies.clear();
-        if (payload.sub) {
-            this.api.getCookies(payload.sub).subscribe({
-                next: cookies => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
-                error: error => this.notify.error(error),
-            });
-        }
     }
 }

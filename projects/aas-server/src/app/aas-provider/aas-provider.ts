@@ -531,7 +531,6 @@ export class AASProvider {
 
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
         const content = parent.content ?? (await this.getDocumentContentAsync(parent));
-
         for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
             const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
             for (const assetId of assetIds) {

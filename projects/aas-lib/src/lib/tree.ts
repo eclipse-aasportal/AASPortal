@@ -225,12 +225,13 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
     }
 
     private traverseNodes(node: TNode, expanded: TNode[]): TNode[] {
+        const nodes = this.getNodes();
         if (node.firstChild >= 0 && node.expanded) {
-            let child = this.getNodes()[node.firstChild];
+            let child = nodes[node.firstChild];
             expanded.push(child);
             this.traverseNodes(child, expanded);
             while (child.nextSibling >= 0) {
-                child = this.getNodes()[child.nextSibling];
+                child = nodes[child.nextSibling];
                 expanded.push(child);
                 this.traverseNodes(child, expanded);
             }

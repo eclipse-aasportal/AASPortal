@@ -96,8 +96,8 @@
                     [checked]="row.selected" [name]="row.name" />
                 </td>
                 <td>
-                    <div class="d-flex" style="overflow-x: hidden">
-                        <div [ngStyle]="{'width': (row.level * 16) + 'px'}"></div>
+                    <div class="d-flex align-items-center" style="overflow-x: hidden">
+                        <div [style.width]="(row.level * 16) + 'px'"></div>
                         @if (row.isLeaf) {
                         <div class="wh-4"></div>
                         }@else {

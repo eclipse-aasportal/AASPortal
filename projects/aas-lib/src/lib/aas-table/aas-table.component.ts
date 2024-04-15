@@ -148,7 +148,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public open(row: AASTableRow): void {
-        this.clipboard.set('AASDocument', row.document);
+        this.clipboard.set('AASDocument', row.element);
         this.router.navigate(['/aas'], {
             skipLocationChange: true,
             queryParams: {
@@ -159,7 +159,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public getToolTip(row: AASTableRow): string {
-        return `${row.endpoint}, ${row.document.address}`;
+        return `${row.endpoint}, ${row.element.address}`;
     }
 
     public toggleSelected(row: AASTableRow): void {

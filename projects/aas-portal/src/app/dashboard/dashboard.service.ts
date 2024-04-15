@@ -20,7 +20,7 @@ import {
 } from 'common';
 import { cloneDeep } from 'lodash-es';
 import { ERRORS } from '../types/errors';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import * as DashboardSelectors from './dashboard.selectors';
@@ -51,7 +51,10 @@ export class DashboardService {
     ) {
         this.store = store as Store<State>;
 
-        this.store.dispatch(DashboardActions.setPages({ pages: this.read() }));
+        this.read()
+            .pipe(map(pages => this.store.dispatch(DashboardActions.setPages({ pages }))))
+            .subscribe();
+
         this.pages = this.store.select(DashboardSelectors.selectPages);
         this.name = this.store.select(DashboardSelectors.selectName);
 
@@ -244,8 +247,9 @@ export class DashboardService {
 
     public save(): void {
         if (this.modified) {
-            this.write();
-            this.modified = false;
+            this.write()
+                .pipe(map(() => (this.modified = false)))
+                .subscribe();
         }
     }
 
@@ -406,21 +410,24 @@ export class DashboardService {
         return nodes.some(node => node.nodeId === nodeId);
     }
 
-    private write(): void {
+    private write(): Observable<void> {
         if (this._pages.length > 0) {
-            this.auth.setCookie('.Dashboard', JSON.stringify(this._pages));
-        } else {
-            this.auth.deleteCookie('.Dashboard');
+            return this.auth.setCookie('.Dashboard', JSON.stringify(this._pages));
         }
+
+        return this.auth.deleteCookie('.Dashboard');
     }
 
-    private read(): DashboardPage[] {
-        const value = this.auth.getCookie('.Dashboard');
-        if (value) {
-            return JSON.parse(value);
-        }
+    private read(): Observable<DashboardPage[]> {
+        return this.auth.getCookie('.Dashboard').pipe(
+            map(value => {
+                if (value) {
+                    return JSON.parse(value);
+                }
 
-        return [{ name: createPageName(), items: [], requests: [] }];
+                return [{ name: createPageName(), items: [], requests: [] }];
+            }),
+        );
     }
 
     private createRandomColor(): string {

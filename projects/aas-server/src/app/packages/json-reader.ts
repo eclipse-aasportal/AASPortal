@@ -137,7 +137,7 @@ export class JsonReader extends AASReader {
         }
 
         return {
-            ...this.readHasSemantic,
+            ...this.readHasSemantics,
             name: source.name,
             value: source.value,
             externalSubjectId: this.readReference(source.externalSubjectId),
@@ -184,7 +184,7 @@ export class JsonReader extends AASReader {
     private readSubmodel(source: aas.Submodel): aas.Submodel {
         const submodel: aas.Submodel = {
             ...this.readIdentifiable(source),
-            ...this.readHasSemantic(source),
+            ...this.readHasSemantics(source),
             ...this.readQualifiable(source),
             ...this.readHasKind(source),
             ...this.readHasDataSpecification(source),
@@ -248,7 +248,7 @@ export class JsonReader extends AASReader {
     private readSubmodelElementType(source: aas.SubmodelElement, ancestors?: aas.Referable[]): aas.SubmodelElement {
         return {
             ...this.readReferable(source, ancestors),
-            ...this.readHasSemantic(source),
+            ...this.readHasSemantics(source),
             ...this.readHasDataSpecification(source),
             ...this.readQualifiable(source),
         };
@@ -557,13 +557,13 @@ export class JsonReader extends AASReader {
         return range;
     }
 
-    private readHasSemantic(source: aas.HasSemantics): aas.HasSemantics {
-        const hasSemantic: aas.HasSemantics = {};
+    private readHasSemantics(source: aas.HasSemantics): aas.HasSemantics {
+        const hasSemantics: aas.HasSemantics = {};
         if (source.semanticId && source.semanticId.keys.length > 0) {
-            hasSemantic.semanticId = this.readReference(source.semanticId);
+            hasSemantics.semanticId = this.readReference(source.semanticId);
         }
 
-        return hasSemantic;
+        return hasSemantics;
     }
 
     private readHasKind(source: aas.HasKind): aas.HasKind {
@@ -589,7 +589,7 @@ export class JsonReader extends AASReader {
         }
 
         const qualifier: aas.Qualifier = {
-            ...this.readHasSemantic(source),
+            ...this.readHasSemantics(source),
             type: source.type,
             valueType: source.valueType,
         };
@@ -616,7 +616,7 @@ export class JsonReader extends AASReader {
         modelType?: aas.ModelType,
     ): aas.Referable {
         let idShort = source.idShort;
-        if (!idShort) {
+        if (idShort == null) {
             if (!id) {
                 throw Error(`Referable.idShort`);
             }

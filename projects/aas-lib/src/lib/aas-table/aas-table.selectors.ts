@@ -18,7 +18,7 @@ const getState = (state: AASTableFeatureState) => state.aasTable;
 export const selectState = createSelector(getState, state => state);
 
 export const selectSelectedDocuments = createSelector(getRows, (rows: AASTableRow[]): AASDocument[] => {
-    return rows.filter(row => row.selected).map(row => row.document);
+    return rows.filter(row => row.selected).map(row => row.element);
 });
 
 export const selectSomeSelected = createSelector(getRows, (rows: AASTableRow[]): boolean => {
@@ -34,7 +34,7 @@ export const selectRows = (translate: TranslateService) => {
         if (state.viewMode === 'list') {
             if (state.filter) {
                 const filter = new AASTableFilter(state.filter, translate.currentLang);
-                return state.rows.filter(row => filter.match(row.document));
+                return state.rows.filter(row => filter.match(row.element));
             }
 
             return state.rows;

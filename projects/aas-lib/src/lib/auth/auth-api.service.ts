@@ -46,6 +46,10 @@ export class AuthApiService {
         return this.http.get<Cookie[]>(`/api/v1/users/${encodeBase64Url(id)}/cookies`);
     }
 
+    public getCookie(id: string, name: string): Observable<Cookie | undefined> {
+        return this.http.get<Cookie>(`/api/v1/users/${encodeBase64Url(id)}/cookies/${name}`);
+    }
+
     public setCookie(id: string, cookie: Cookie): Observable<void> {
         return this.http.post<void>(`/api/v1/users/${encodeBase64Url(id)}/cookies/${cookie.name}`, cookie);
     }

@@ -129,7 +129,6 @@ export class MySqlIndex extends AASIndex {
 
             if (document.content) {
                 await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
-
                 await this.traverseEnvironment(connection, uuid, document.content);
             }
 
@@ -378,7 +377,9 @@ export class MySqlIndex extends AASIndex {
     private async traverseEnvironment(connection: Connection, documentId: string, env: aas.Environment): Promise<void> {
         for (const submodel of env.submodels) {
             for (const referable of flat(submodel)) {
-                await this.writeElement(connection, documentId, referable);
+                if (referable.idShort) {
+                    await this.writeElement(connection, documentId, referable);
+                }
             }
         }
     }

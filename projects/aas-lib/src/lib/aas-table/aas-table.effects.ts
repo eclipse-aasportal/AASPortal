@@ -53,7 +53,7 @@ export class AASTableEffects {
         const rows = documents.map(document => {
             const row = map.get(`${document.endpoint}:${document.id}`);
             if (row) {
-                return row.document === document ? row : this.cloneWithNewDocument(row, document);
+                return row.element === document ? row : this.cloneWithNewDocument(row, document);
             }
 
             return new AASTableRow(document, -1, false, false, false, false, -1, -1, -1);
@@ -69,7 +69,7 @@ export class AASTableEffects {
         documents.forEach(document => {
             const row = map.get(`${document.endpoint}:${document.id}`);
             if (row) {
-                rows.push(row.document === document ? row : this.cloneWithNewDocument(row, document));
+                rows.push(row.element === document ? row : this.cloneWithNewDocument(row, document));
             } else {
                 nodes.push(document);
             }
@@ -86,19 +86,20 @@ export class AASTableEffects {
         const root = nodes.find(node => !node.parentId);
         const index = findLastIndex(rows, row => row.level === 0);
         if (root) {
-            const children = nodes.filter(node => this.isChild(root, node));
+            const hasChildren = this.hasChildren(root, nodes);
             const rootRow = new AASTableRow(
                 root,
                 -1,
                 false,
                 false,
                 false,
-                children.length === 0,
+                !hasChildren,
                 0,
-                children.length > 0 ? rows.length + 1 : -1,
+                hasChildren ? rows.length + 1 : -1,
                 -1,
             );
 
+            const parentIndex = rows.length;
             rows.push(rootRow);
 
             if (index >= 0) {
@@ -107,7 +108,7 @@ export class AASTableEffects {
                 rows[index] = previous;
             }
 
-            this.traverse(root, nodes, rows, 0, 1);
+            this.traverse(root, nodes, rows, parentIndex, 1);
         }
 
         return rows;
@@ -121,15 +122,14 @@ export class AASTableEffects {
         level: number,
     ): void {
         let previous: AASTableRow | null = null;
-        const children = nodes.filter(node => this.isChild(parent, node));
-        for (const child of children) {
+        for (const child of this.getChildren(parent, nodes)) {
             const row = new AASTableRow(
                 child,
                 parentIndex,
                 false,
                 false,
                 false,
-                !nodes.some(node => this.isChild(child, node)),
+                !this.hasChildren(child, nodes),
                 level,
                 -1,
                 -1,
@@ -141,26 +141,36 @@ export class AASTableEffects {
                 previous.nextSibling = index;
             }
 
-            if (children.length > 0) {
-                row.firstChild = rows.length;
-                this.traverse(child, nodes, rows, index, level + 1);
-            }
-
+            row.firstChild = rows.length;
+            this.traverse(child, nodes, rows, index, level + 1);
             previous = row;
         }
     }
 
-    private isChild(parent: AASDocument, node: AASDocument): boolean {
-        if (!node.parentId) {
-            return false;
+    private getChildren(parent: AASDocument, nodes: AASDocument[]): AASDocument[] {
+        const children: AASDocument[] = [];
+        for (const node of nodes) {
+            if (node.parentId === parent.id) {
+                children.push(node);
+            }
         }
 
-        return node.parentId === parent.id;
+        return children;
+    }
+
+    private hasChildren(parent: AASDocument, nodes: AASDocument[]): boolean {
+        for (const node of nodes) {
+            if (node.parentId === parent.id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private clone(row: AASTableRow): AASTableRow {
         return new AASTableRow(
-            row.document,
+            row.element,
             row.parent,
             row.selected,
             row.expanded,

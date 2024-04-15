@@ -20,7 +20,7 @@ const initialState: StartState = {
     previous: null,
     next: null,
     totalCount: 0,
-    favorites: '-',
+    favorites: '',
 };
 
 export const startReducer = createReducer(
@@ -46,7 +46,7 @@ function setPage(state: StartState, page: AASPage, limit: number | undefined, fi
     return {
         ...state,
         viewMode: ViewMode.List,
-        favorites: '-',
+        favorites: '',
         limit: limit ?? state.limit,
         filter: filter != null ? filter : state.filter,
         documents: page.documents,
@@ -70,7 +70,7 @@ function setContent(state: StartState, document: AASDocument, content: aas.Envir
 }
 
 function removeFavorites(state: StartState, favorites: AASDocument[]): StartState {
-    if (state.favorites === '-') {
+    if (!state.favorites) {
         return state;
     }
 

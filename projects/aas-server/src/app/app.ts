@@ -14,7 +14,7 @@ import swaggerUi, { JsonObject } from 'swagger-ui-express';
 import { ApplicationError } from 'common';
 import { ValidateError } from 'tsoa';
 
-import swaggerDoc from './swagger.json' assert { type: 'json' };
+import swaggerDoc from './swagger.json' with { type: 'json' };
 import { RegisterRoutes } from './routes/routes.js';
 import { ERRORS } from './errors.js';
 import { Variable } from './variable.js';
