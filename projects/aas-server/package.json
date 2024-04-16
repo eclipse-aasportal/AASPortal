@@ -42,7 +42,7 @@
         "reflect-metadata": "^0.2.2",
         "swagger-ui-express": "^5.0.0",
         "tslib": "^2.6.2",
-        "tsoa": "^6.2.0",
+        "tsoa": "^5.1.1",
         "tsyringe": "^4.8.0",
         "uuid": "^9.0.1",
         "webdav": "^5.5.0",
