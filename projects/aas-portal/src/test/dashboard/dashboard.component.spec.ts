@@ -38,29 +38,27 @@ describe('DashboardComponent', () => {
         webSocketSubject = new Subject<WebSocketData>();
 
         auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], {
-            payload: of({ id: 'john.doe@email.com', role: 'editor', name: 'John' } as JWTPayload)
+            payload: of({ id: 'john.doe@email.com', role: 'editor', name: 'John' } as JWTPayload),
         });
 
-        auth.checkCookie.and.returnValue(true);
-        auth.getCookie.and.returnValue(JSON.stringify(pages));
+        auth.checkCookie.and.returnValue(of(true));
+        auth.getCookie.and.returnValue(of(JSON.stringify(pages)));
 
         TestBed.configureTestingModule({
-            declarations: [
-                DashboardComponent
-            ],
+            declarations: [DashboardComponent],
             providers: [
                 {
                     provide: WebSocketFactoryService,
-                    useValue: new TestWebSocketFactoryService(webSocketSubject)
+                    useValue: new TestWebSocketFactoryService(webSocketSubject),
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error'])
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: AuthService,
-                    useValue: auth
-                }
+                    useValue: auth,
+                },
             ],
             imports: [
                 CommonModule,
@@ -68,18 +66,16 @@ describe('DashboardComponent', () => {
                 HttpClientTestingModule,
                 AASLibModule,
                 EffectsModule.forRoot(),
-                StoreModule.forRoot(
-                    {
-                        dashboard: dashboardReducer
-                    }),
+                StoreModule.forRoot({
+                    dashboard: dashboardReducer,
+                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(DashboardComponent);
@@ -153,21 +149,27 @@ describe('DashboardComponent', () => {
             component.toggleSelection(component.rows[0].columns[1]);
             expect(component.canMoveLeft()).toBeTrue();
             component.moveLeft();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[0].id).toEqual(id);
                 });
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[1].id).toEqual(id);
                 });
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[0].id).toEqual(id);
                     done();
@@ -179,21 +181,27 @@ describe('DashboardComponent', () => {
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.canMoveRight()).toBeTrue();
             component.moveRight();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[1].id).toEqual(id);
                 });
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[0].id).toEqual(id);
                 });
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[1].id).toEqual(id);
                     done();
@@ -205,7 +213,9 @@ describe('DashboardComponent', () => {
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.canMoveUp()).toBeTrue();
             component.moveUp();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows.length).toEqual(3);
                     expect(rows[0].columns[0].id).toEqual(id);
@@ -213,7 +223,9 @@ describe('DashboardComponent', () => {
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows.length).toEqual(2);
                     expect(rows[0].columns[0].id).toEqual(id);
@@ -221,7 +233,9 @@ describe('DashboardComponent', () => {
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows.length).toEqual(3);
                     expect(rows[0].columns[0].id).toEqual(id);
@@ -234,21 +248,27 @@ describe('DashboardComponent', () => {
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.canMoveDown()).toBeTrue();
             component.moveDown();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[1].columns[1].id).toEqual(id);
                 });
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[0].columns[0].id).toEqual(id);
                 });
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect(rows[1].columns[1].id).toEqual(id);
                     done();
@@ -261,21 +281,27 @@ describe('DashboardComponent', () => {
 
         it('sets the color of a chart including undo/redo', function (done: DoneFn) {
             component.changeColor(component.rows[0].columns[0], '#AA55AA');
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
                 });
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
                 });
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
                     done();
@@ -297,21 +323,27 @@ describe('DashboardComponent', () => {
 
         it('can change the min value', function (done: DoneFn) {
             component.changeMin(component.rows[0].columns[0], '0');
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
                 });
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).min).toBeUndefined();
                 });
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
                     done();
@@ -320,21 +352,27 @@ describe('DashboardComponent', () => {
 
         it('can change the max value', function (done: DoneFn) {
             component.changeMax(component.rows[0].columns[0], '5500');
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
                 });
 
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).max).toBeUndefined();
                 });
 
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
+            store
+                .select(state => state.dashboard.rows)
+                .pipe(first())
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
                     done();

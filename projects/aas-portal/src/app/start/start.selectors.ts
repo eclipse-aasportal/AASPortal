@@ -11,14 +11,15 @@ import { StartFeatureState } from './start.state';
 import { ViewMode } from 'aas-lib';
 
 const getState = (state: StartFeatureState) => state.start;
-const getFilter = (state: StartFeatureState) => state.start.filter;
 const getViewMode = (state: StartFeatureState) => state.start.viewMode;
 const getLimit = (state: StartFeatureState) => state.start.limit;
 const getDocuments = (state: StartFeatureState) => state.start.documents;
 
 export const selectState = createSelector(getState, state => state);
 
-export const selectFilter = createSelector(getFilter, filter => filter);
+export const selectFilter = createSelector(getState, state => state.filter);
+
+export const selectFilterFavorites = createSelector(getState, state => (state.favorites ? state.filter : ''));
 
 export const selectViewMode = createSelector(getViewMode, viewMode => viewMode);
 

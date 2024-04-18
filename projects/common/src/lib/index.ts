@@ -10,12 +10,14 @@ import { AASEndpointType } from './types.js';
 import {
     AssetAdministrationShell,
     Blob,
+    Entity,
     Environment,
     Identifiable,
     MultiLanguageProperty,
     Property,
     Referable,
     ReferenceElement,
+    RelationshipElement,
     Submodel,
     SubmodelElement,
     SubmodelElementCollection,
@@ -242,6 +244,24 @@ export function isSubmodelElementCollection(referable: unknown): referable is Su
  */
 export function isSubmodelElementList(referable: unknown): referable is SubmodelElementList {
     return (referable as Referable)?.modelType === 'SubmodelElementList';
+}
+
+/**
+ * Determines whether the specified referable represents a relationship element.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `RelationshipElement`; otherwise, `false`.
+ */
+export function isRelationshipElement(referable: unknown): referable is RelationshipElement {
+    return (referable as Referable)?.modelType === 'RelationshipElement';
+}
+
+/**
+ * Determines whether the specified referable represents an entity.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Entity`; otherwise, `false`.
+ */
+export function isEntity(referable: unknown): referable is Entity {
+    return (referable as Referable)?.modelType === 'Entity';
 }
 
 /**

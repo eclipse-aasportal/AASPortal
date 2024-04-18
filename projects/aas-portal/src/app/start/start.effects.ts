@@ -57,6 +57,26 @@ export class StartEffects {
         );
     });
 
+    public setTreeView = createEffect(() => {
+        return this.actions.pipe(
+            ofType(StartActions.StartActionType.SET_TREE_VIEW),
+            exhaustMap(() =>
+                concat(
+                    of(StartActions.setViewMode({ viewMode: ViewMode.Tree })),
+                    this.store.select(StartSelectors.selectDocuments).pipe(
+                        first(),
+                        mergeMap(documents =>
+                            from(documents).pipe(
+                                mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
+                                mergeMap(nodes => this.addTreeAndLoadContents(nodes)),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        );
+    });
+
     public getFirstPage = createEffect(() => {
         return this.actions.pipe(
             ofType<StartActions.GetFirstPageAction>(StartActions.StartActionType.GET_FIRST_PAGE),
@@ -182,26 +202,6 @@ export class StartEffects {
                             );
                         }),
                         mergeMap(page => this.setPageAndLoadContents(page)),
-                    ),
-                ),
-            ),
-        );
-    });
-
-    public setTreeView = createEffect(() => {
-        return this.actions.pipe(
-            ofType(StartActions.StartActionType.SET_TREE_VIEW),
-            exhaustMap(() =>
-                concat(
-                    of(StartActions.setViewMode({ viewMode: ViewMode.Tree })),
-                    this.store.select(StartSelectors.selectDocuments).pipe(
-                        first(),
-                        mergeMap(documents =>
-                            from(documents).pipe(
-                                mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
-                                mergeMap(nodes => this.addTreeAndLoadContents(nodes)),
-                            ),
-                        ),
                     ),
                 ),
             ),

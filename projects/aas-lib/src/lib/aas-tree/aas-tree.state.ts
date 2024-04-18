@@ -212,6 +212,8 @@ class TreeInitialize {
 
     private getChildren(referable: aas.Referable): aas.Referable[] {
         switch (referable.modelType) {
+            case 'AnnotatedRelationshipElement':
+                return (referable as aas.AnnotatedRelationshipElement).annotations ?? [];
             case 'AssetAdministrationShell': {
                 const shell = referable as aas.AssetAdministrationShell;
                 const children: aas.Referable[] = [];
@@ -226,14 +228,14 @@ class TreeInitialize {
 
                 return children;
             }
+            case 'Entity':
+                return (referable as aas.Entity).statements ?? [];
             case 'Submodel':
                 return (referable as aas.Submodel).submodelElements ?? [];
             case 'SubmodelElementCollection':
                 return (referable as aas.SubmodelElementCollection).value ?? [];
             case 'SubmodelElementList':
                 return (referable as aas.SubmodelElementList).value ?? [];
-            case 'Entity':
-                return (referable as aas.Entity).statements ?? [];
             default:
                 return [];
         }

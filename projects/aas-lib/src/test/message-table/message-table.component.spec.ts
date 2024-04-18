@@ -27,25 +27,21 @@ describe('MessageTableComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                MessageTableComponent,
-                SortableHeaderDirective
-            ],
+            declarations: [MessageTableComponent, SortableHeaderDirective],
             providers: [],
             imports: [
                 CommonModule,
                 NgbModule,
-                StoreModule.forRoot(
-                    {
-                        messageTable: messageTableReducer
-                    }),
+                StoreModule.forRoot({
+                    messageTable: messageTableReducer,
+                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(MessageTableComponent);
@@ -56,17 +52,17 @@ describe('MessageTableComponent', () => {
             collection.push({
                 type: 'Info',
                 timestamp: Date.now(),
-                text: 'Info' + i
+                text: 'Info' + i,
             });
             collection.push({
                 type: 'Warning',
                 timestamp: Date.now(),
-                text: 'Warning' + i
+                text: 'Warning' + i,
             });
             collection.push({
                 type: 'Error',
                 timestamp: Date.now(),
-                text: 'Error' + i
+                text: 'Error' + i,
             });
         }
 
@@ -74,7 +70,7 @@ describe('MessageTableComponent', () => {
         fixture.detectChanges();
 
         component.ngOnChanges({
-            "collection": new SimpleChange([], collection, true)
+            collection: new SimpleChange([], collection, true),
         });
     });
 
@@ -247,86 +243,107 @@ describe('MessageTableComponent', () => {
         });
 
         it('shows the origin order', function (done: DoneFn) {
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('');
-                expect(state.direction).toEqual('');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('');
+                    expect(state.direction).toEqual('');
+                    done();
+                });
         });
 
         it('can sort type column in ascending order', function (done: DoneFn) {
             component.onSort({ column: 'type', direction: 'asc' });
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('type');
-                expect(state.direction).toEqual('asc');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('type');
+                    expect(state.direction).toEqual('asc');
+                    done();
+                });
         });
 
         it('can sort type column in descending order', function (done: DoneFn) {
             component.onSort({ column: 'type', direction: 'desc' });
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('type');
-                expect(state.direction).toEqual('desc');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('type');
+                    expect(state.direction).toEqual('desc');
+                    done();
+                });
         });
 
         it('can sort timestamp column in ascending order', function (done: DoneFn) {
             component.onSort({ column: 'timestamp', direction: 'asc' });
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('timestamp');
-                expect(state.direction).toEqual('asc');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('timestamp');
+                    expect(state.direction).toEqual('asc');
+                    done();
+                });
         });
 
         it('can sort timestamp column in descending order', function (done: DoneFn) {
             component.onSort({ column: 'timestamp', direction: 'desc' });
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('timestamp');
-                expect(state.direction).toEqual('desc');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('timestamp');
+                    expect(state.direction).toEqual('desc');
+                    done();
+                });
         });
 
         it('can sort text column in ascending order', function (done: DoneFn) {
             component.onSort({ column: 'text', direction: 'asc' });
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('text');
-                expect(state.direction).toEqual('asc');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('text');
+                    expect(state.direction).toEqual('asc');
+                    done();
+                });
         });
 
         it('can sort text column in descending order', function (done: DoneFn) {
             component.onSort({ column: 'text', direction: 'desc' });
-            store.select(state => state.messageTable).pipe(first()).subscribe(state => {
-                expect(state.showError).toBeTrue();
-                expect(state.showInfo).toBeTrue();
-                expect(state.showWarning).toBeTrue();
-                expect(state.column).toEqual('text');
-                expect(state.direction).toEqual('desc');
-                done();
-            });
+            store
+                .select(state => state.messageTable)
+                .pipe(first())
+                .subscribe(state => {
+                    expect(state.showError).toBeTrue();
+                    expect(state.showInfo).toBeTrue();
+                    expect(state.showWarning).toBeTrue();
+                    expect(state.column).toEqual('text');
+                    expect(state.direction).toEqual('desc');
+                    done();
+                });
         });
     });
 });

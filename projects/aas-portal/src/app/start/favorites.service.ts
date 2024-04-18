@@ -15,11 +15,12 @@ import { AuthService } from 'aas-lib';
     providedIn: 'root',
 })
 export class FavoritesService {
-    private _lists: FavoritesList[];
+    private _lists: FavoritesList[] = [];
 
     public constructor(private readonly auth: AuthService) {
-        const value = auth.getCookie('.Favorites');
-        this._lists = value ? JSON.parse(value) : [];
+        this.auth.getCookie('.Favorites').subscribe(value => {
+            this._lists = value ? (JSON.parse(value) as FavoritesList[]) : [];
+        });
     }
 
     public get lists(): FavoritesList[] {
@@ -36,7 +37,7 @@ export class FavoritesService {
 
     public delete(name: string): void {
         this._lists = this._lists.filter(list => list.name !== name);
-        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists)).subscribe();
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): void {
@@ -62,20 +63,20 @@ export class FavoritesService {
         }
 
         this._lists = lists;
-        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists)).subscribe();
     }
 
     public remove(documents: AASDocument[], name: string): void {
         const i = this._lists.findIndex(list => list.name === name);
         if (i < 0) return;
 
-        const lists = [...this.lists];
+        const lists = [...this._lists];
         const list = { ...lists[i] };
         list.documents = list.documents.filter(favorite =>
             documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id),
         );
 
         this._lists = lists;
-        this.auth.setCookie('.Favorites', JSON.stringify(this._lists));
+        this.auth.setCookie('.Favorites', JSON.stringify(this._lists)).subscribe();
     }
 }

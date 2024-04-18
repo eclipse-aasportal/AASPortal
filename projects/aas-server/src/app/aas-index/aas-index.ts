@@ -80,34 +80,39 @@ export abstract class AASIndex {
     }
 
     protected toNumberValue(referable: aas.Referable): number | undefined {
-        if (isProperty(referable) && referable.value && baseType(referable.valueType) === 'number') {
-            return parseNumber(referable.value);
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'number') {
+            return undefined;
         }
 
-        return undefined;
+        const value = parseNumber(referable.value);
+        if (Number.isNaN(value)) {
+            return undefined;
+        }
+
+        return value;
     }
 
     protected toDateValue(referable: aas.Referable): Date | undefined {
-        if (isProperty(referable) && referable.value && baseType(referable.valueType) === 'Date') {
-            return parseDate(referable.value);
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'Date') {
+            return undefined;
         }
 
-        return undefined;
+        return parseDate(referable.value);
     }
 
     protected toBooleanValue(referable: aas.Referable): boolean | undefined {
-        if (isProperty(referable) && referable.value && baseType(referable.valueType) === 'boolean') {
-            return toBoolean(referable.value);
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'boolean') {
+            return undefined;
         }
 
-        return undefined;
+        return toBoolean(referable.value);
     }
 
     protected toBigintValue(referable: aas.Referable): bigint | undefined {
-        if (isProperty(referable) && referable.value && baseType(referable.valueType) === 'bigint') {
-            return BigInt(referable.value);
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'bigint') {
+            return undefined;
         }
 
-        return undefined;
+        return BigInt(referable.value);
     }
 }

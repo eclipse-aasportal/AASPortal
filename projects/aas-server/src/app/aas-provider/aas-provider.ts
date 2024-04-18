@@ -22,6 +22,7 @@ import {
     AASEndpoint,
     ApplicationError,
     getChildren,
+    isReferenceElement,
 } from 'common';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -364,7 +365,7 @@ export class AASProvider {
      */
     public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocument[]> {
         const document = await this.index.get(endpoint, id);
-        const root: AASDocument = { ...document, parent: null, content: null };
+        const root: AASDocument = { ...document, parentId: null, content: null };
         const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
         return nodes;
@@ -529,44 +530,49 @@ export class AASProvider {
     }
 
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
-        const content = await this.getDocumentContentAsync(parent);
-        const hierarchicalStructures = content.submodels.filter(sm =>
-            HierarchicalStructure.isHierarchicalStructure(sm),
-        );
-
-        if (hierarchicalStructures.length > 0) {
-        } else {
-            for (const reference of this.whereReferenceElement(content.submodels)) {
-                if (reference.value) {
-                    const childId = reference.value.keys[0].value;
-                    const child =
-                        (await this.index.find(parent.endpoint, childId)) ??
-                        (await this.index.find(undefined, childId));
-
-                    if (child) {
-                        const node: AASDocument = { ...child, parent: { ...parent }, content: null };
-                        nodes.push(node);
-                        await this.collectDescendants(node, nodes);
-                    }
+        const content = parent.content ?? (await this.getDocumentContentAsync(parent));
+        for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
+            const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
+            for (const assetId of assetIds) {
+                const child = await this.index.find(undefined, assetId);
+                if (child) {
+                    const node: AASDocument = { ...child, parentId: parent.id, content: null };
+                    nodes.push(node);
+                    await this.collectDescendants(node, nodes);
                 }
+            }
+        }
+
+        for (const reference of this.whereAASReference(content.submodels)) {
+            const childId = reference.keys[0].value;
+            const child =
+                (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
+
+            if (child) {
+                const node: AASDocument = { ...child, parentId: parent.id, content: null };
+                nodes.push(node);
+                await this.collectDescendants(node, nodes);
             }
         }
     }
 
-    private *whereReferenceElement(elements: aas.Referable[]): Generator<aas.ReferenceElement> {
+    private *whereHierarchicalStructure(submodels: aas.Submodel[]): Generator<aas.Submodel> {
+        for (const submodel of submodels) {
+            if (HierarchicalStructure.isHierarchicalStructure(submodel)) {
+                yield submodel;
+            }
+        }
+    }
+
+    private *whereAASReference(elements: aas.Referable[]): Generator<aas.Reference> {
         const stack: aas.Referable[][] = [];
         stack.push(elements);
         while (stack.length > 0) {
             const children = stack.pop() as aas.Referable[];
             for (const child of children) {
-                if (child.modelType === 'ReferenceElement') {
-                    const value = child as aas.ReferenceElement;
-                    if (
-                        value &&
-                        value.value &&
-                        value.value.keys.some(item => item.type === 'AssetAdministrationShell')
-                    ) {
-                        yield value;
+                if (isReferenceElement(child)) {
+                    if (child.value && child.value.keys.some(item => item.type === 'AssetAdministrationShell')) {
+                        yield child.value;
                     }
                 }
 

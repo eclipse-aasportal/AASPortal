@@ -29,7 +29,8 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     private readonly store: Store<AASTableFeatureState>;
     private readonly subscription: Subscription = new Subscription();
     private _selected: AASDocument[] = [];
-    private _filter: Observable<string> | null = null;
+    private filter$: Observable<string> | null = null;
+    private filterSubscription?: Subscription;
     private shiftKey = false;
     private altKey = false;
 
@@ -72,17 +73,20 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input()
     public get filter(): Observable<string> | null {
-        return this._filter;
+        return this.filter$;
     }
 
     public set filter(value: Observable<string> | null) {
-        if (value !== this._filter) {
-            this._filter = value;
-            if (this._filter) {
-                this.subscription.add(
-                    this._filter.subscribe(value => this.store.dispatch(AASTableActions.setFilter({ filter: value }))),
-                );
-            }
+        if (this.filterSubscription) {
+            this.filterSubscription.unsubscribe();
+            this.filterSubscription = undefined;
+        }
+
+        this.filter$ = value;
+        if (value) {
+            this.filterSubscription = value.subscribe(value =>
+                this.store.dispatch(AASTableActions.setFilter({ filter: value })),
+            );
         }
     }
 
@@ -130,6 +134,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+        this.filterSubscription?.unsubscribe();
         this.window.removeEventListener('keyup', this.keyup);
         this.window.removeEventListener('keydown', this.keydown);
     }
@@ -143,7 +148,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public open(row: AASTableRow): void {
-        this.clipboard.set('AASDocument', row.document);
+        this.clipboard.set('AASDocument', row.element);
         this.router.navigate(['/aas'], {
             skipLocationChange: true,
             queryParams: {
@@ -154,7 +159,7 @@ export class AASTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public getToolTip(row: AASTableRow): string {
-        return `${row.endpoint}, ${row.document.address}`;
+        return `${row.endpoint}, ${row.element.address}`;
     }
 
     public toggleSelected(row: AASTableRow): void {

@@ -24,7 +24,7 @@ import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'common';
 import * as lib from 'aas-lib';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -195,13 +195,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             query = this.clipboard.get(params.format);
         }
 
-        const name = query ? query.page : this.auth.getCookie('.DashboardName');
-        if (name) {
-            const page = this.dashboard.find(name);
-            if (page) {
-                this._page = page;
+        (query ? of(query.page) : this.auth.getCookie('.DashboardName')).subscribe(name => {
+            if (name) {
+                const page = this.dashboard.find(name);
+                if (page) {
+                    this._page = page;
+                }
             }
-        }
+        });
     }
 
     public ngOnDestroy(): void {

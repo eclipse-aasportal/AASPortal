@@ -10,7 +10,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { first } from 'rxjs';
+import { first, of } from 'rxjs';
 
 import { dashboardReducer } from '../../app/dashboard/dashboard.reducer';
 import { rotationSpeed, sampleDocument, torque } from '../../test/assets/sample-document';
@@ -25,29 +25,28 @@ describe('DashboardService', function () {
 
     beforeEach(() => {
         auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie']);
-        auth.checkCookie.and.returnValue(true);
-        auth.getCookie.and.returnValue(JSON.stringify(pages));
+        auth.checkCookie.and.returnValue(of(true));
+        auth.getCookie.and.returnValue(of(JSON.stringify(pages)));
 
         TestBed.configureTestingModule({
             providers: [
                 {
                     provide: AuthService,
-                    useValue: auth
-                }
+                    useValue: auth,
+                },
             ],
             imports: [
                 HttpClientTestingModule,
-                StoreModule.forRoot(
-                    {
-                        dashboard: dashboardReducer
-                    }),
+                StoreModule.forRoot({
+                    dashboard: dashboardReducer,
+                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         service = TestBed.inject(DashboardService);
@@ -119,16 +118,24 @@ describe('DashboardService', function () {
             service.pages.pipe(first()).subscribe(items => {
                 const defaultPage = items[0];
                 expect(defaultPage.items.length).toEqual(2);
-                expect(defaultPage.items.map(item => item as DashboardChart)
-                    .flatMap(item => item.sources)
-                    .map(item => item.label)).toEqual(['RotationSpeed', 'Torque']);
+                expect(
+                    defaultPage.items
+                        .map(item => item as DashboardChart)
+                        .flatMap(item => item.sources)
+                        .map(item => item.label),
+                ).toEqual(['RotationSpeed', 'Torque']);
 
                 done();
             });
         });
 
         it('allows adding RotationSpeed and Torque to the default page as single bar chart', function (done: DoneFn) {
-            service.add(service.defaultPage.name, sampleDocument, [rotationSpeed, torque], DashboardChartType.BarVertical);
+            service.add(
+                service.defaultPage.name,
+                sampleDocument,
+                [rotationSpeed, torque],
+                DashboardChartType.BarVertical,
+            );
             service.pages.pipe(first()).subscribe(items => {
                 const defaultPage = items[0];
                 expect(defaultPage.items.length).toEqual(1);
@@ -139,13 +146,20 @@ describe('DashboardService', function () {
         });
 
         it('throws an error when adding a property to an unknown page', function () {
-            expect(() => service.add('unknown', sampleDocument, [rotationSpeed, torque], DashboardChartType.BarVertical)).toThrowError();
+            expect(() =>
+                service.add('unknown', sampleDocument, [rotationSpeed, torque], DashboardChartType.BarVertical),
+            ).toThrowError();
         });
     });
 
     describe('save', function () {
         it('allows saving the current dashboard state', function () {
-            service.add(service.defaultPage.name, sampleDocument, [rotationSpeed, torque], DashboardChartType.BarVertical);
+            service.add(
+                service.defaultPage.name,
+                sampleDocument,
+                [rotationSpeed, torque],
+                DashboardChartType.BarVertical,
+            );
             service.save();
             expect(auth.setCookie).toHaveBeenCalled();
         });

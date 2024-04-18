@@ -8,7 +8,7 @@
 
 import { createSelector } from '@ngrx/store';
 import { AASDocument } from 'common';
-import { AASTableRow, AASTableFeatureState } from './aas-table.state';
+import { AASTableRow, AASTableFeatureState, AASTableTree } from './aas-table.state';
 import { TranslateService } from '@ngx-translate/core';
 import { AASTableFilter } from './aas-table.filter';
 
@@ -18,7 +18,7 @@ const getState = (state: AASTableFeatureState) => state.aasTable;
 export const selectState = createSelector(getState, state => state);
 
 export const selectSelectedDocuments = createSelector(getRows, (rows: AASTableRow[]): AASDocument[] => {
-    return rows.filter(row => row.selected).map(row => row.document);
+    return rows.filter(row => row.selected).map(row => row.element);
 });
 
 export const selectSomeSelected = createSelector(getRows, (rows: AASTableRow[]): boolean => {
@@ -31,11 +31,15 @@ export const selectEverySelected = createSelector(getRows, (rows: AASTableRow[])
 
 export const selectRows = (translate: TranslateService) => {
     return createSelector(getState, state => {
-        if (state.filter) {
-            const filter = new AASTableFilter(state.filter, translate.currentLang);
-            return state.rows.filter(row => filter.match(row.document));
-        }
+        if (state.viewMode === 'list') {
+            if (state.filter) {
+                const filter = new AASTableFilter(state.filter, translate.currentLang);
+                return state.rows.filter(row => filter.match(row.element));
+            }
 
-        return state.rows;
+            return state.rows;
+        } else {
+            return new AASTableTree(state.rows).expanded;
+        }
     });
 };
