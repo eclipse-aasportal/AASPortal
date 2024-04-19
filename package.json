@@ -6,8 +6,8 @@
     "scripts": {
         "tsoa": "npm run tsoa -w aas-server",
         "start": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
-        "header": "tsx copyright-header.ts",
-        "coverage": "tsx coverage-summary.ts",
+        "header": "node --no-warnings --loader ts-node/esm copyright-header.ts",
+        "coverage": "node --no-warnings --loader ts-node/esm coverage-summary.ts",
         "user-db": "docker run -p 27017:27017 -d --name aasportal-users -e MONGO_INITDB_DATABASE=aasportal-users mongo",
         "lint": "npm run lint -ws",
         "format": "npm run format -ws",
@@ -141,7 +141,6 @@
         "supertest": "^6.3.4",
         "ts-jest": "^29.1.2",
         "ts-node": "^10.9.2",
-        "tsx": "^4.7.2",
         "typescript": "^5.2.2"
     }
 }

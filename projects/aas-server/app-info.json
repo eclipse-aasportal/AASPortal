@@ -1,9 +1,341 @@
 {
-    "name": "aas-portal-project",
-    "version": "3.0.0",
-    "description": "Web-based visualization and control of asset administration shells.",
-    "author": "Fraunhofer IOSB-INA",
-    "homepage": "https://www.iosb-ina.fraunhofer.de/",
-    "license": "Apache-2.0",
-    "libraries": []
+  "name": "aas-portal-project",
+  "version": "3.0.0-development.49",
+  "description": "Web-based visualization and control of asset administration shells.",
+  "author": "Fraunhofer IOSB-INA",
+  "homepage": "https://www.iosb-ina.fraunhofer.de/",
+  "license": "Apache-2.0",
+  "libraries": [
+    {
+      "name": "@angular/animations",
+      "version": "17.3.4",
+      "description": "Angular - animations integration with web-animations",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/common",
+      "version": "17.3.4",
+      "description": "Angular - commonly needed directives and services",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/compiler",
+      "version": "17.3.4",
+      "description": "Angular - the compiler library",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/core",
+      "version": "17.3.4",
+      "description": "Angular - the core framework",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/forms",
+      "version": "17.3.4",
+      "description": "Angular - directives and services for creating forms",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/localize",
+      "version": "17.3.4",
+      "description": "Angular - library for localizing messages",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/platform-browser",
+      "version": "17.3.4",
+      "description": "Angular - library for using Angular in a web browser",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/platform-browser-dynamic",
+      "version": "17.3.4",
+      "description": "Angular - library for using Angular in a web browser with JIT compilation",
+      "license": "MIT"
+    },
+    {
+      "name": "@angular/router",
+      "version": "17.3.4",
+      "description": "Angular - the routing library",
+      "license": "MIT",
+      "homepage": "https://github.com/angular/angular/tree/main/packages/router"
+    },
+    {
+      "name": "@babel/polyfill",
+      "version": "7.12.1",
+      "description": "Provides polyfills necessary for a full ES2015+ environment",
+      "license": "MIT",
+      "homepage": "https://babeljs.io/"
+    },
+    {
+      "name": "@ng-bootstrap/ng-bootstrap",
+      "version": "16.0.0",
+      "description": "Angular powered Bootstrap",
+      "license": "MIT",
+      "homepage": "https://github.com/ng-bootstrap/ng-bootstrap#readme"
+    },
+    {
+      "name": "@ngrx/component-store",
+      "version": "17.2.0",
+      "description": "Reactive store for component state",
+      "license": "MIT",
+      "homepage": "https://github.com/ngrx/platform#readme"
+    },
+    {
+      "name": "@ngrx/effects",
+      "version": "17.2.0",
+      "description": "Side effect model for @ngrx/store",
+      "license": "MIT",
+      "homepage": "https://github.com/ngrx/platform#readme"
+    },
+    {
+      "name": "@ngrx/store",
+      "version": "17.2.0",
+      "description": "RxJS powered Redux for Angular apps",
+      "license": "MIT",
+      "homepage": "https://github.com/ngrx/platform#readme"
+    },
+    {
+      "name": "@ngx-translate/core",
+      "version": "15.0.0",
+      "license": "SEE LICENSE IN LICENSE"
+    },
+    {
+      "name": "@ngx-translate/http-loader",
+      "version": "8.0.0",
+      "license": "SEE LICENSE IN LICENSE"
+    },
+    {
+      "name": "@popperjs/core",
+      "version": "2.11.8",
+      "description": "Tooltip and Popover Positioning Engine",
+      "license": "MIT"
+    },
+    {
+      "name": "@xmldom/xmldom",
+      "version": "0.8.10",
+      "description": "A pure JavaScript W3C standard-based (XML DOM Level 2 Core) DOMParser and XMLSerializer module.",
+      "license": "MIT",
+      "homepage": "https://github.com/xmldom/xmldom"
+    },
+    {
+      "name": "bcryptjs",
+      "version": "2.4.3",
+      "description": "Optimized bcrypt in plain JavaScript with zero dependencies. Compatible to 'bcrypt'.",
+      "license": "MIT"
+    },
+    {
+      "name": "bootstrap",
+      "version": "5.3.3",
+      "description": "The most popular front-end framework for developing responsive, mobile first projects on the web.",
+      "license": "MIT",
+      "homepage": "https://getbootstrap.com/"
+    },
+    {
+      "name": "bootstrap-icons",
+      "version": "1.11.3",
+      "description": "Official open source SVG icon library for Bootstrap",
+      "license": "MIT",
+      "homepage": "https://icons.getbootstrap.com/"
+    },
+    {
+      "name": "chart.js",
+      "version": "4.4.2",
+      "description": "Simple HTML5 charts using the canvas element.",
+      "license": "MIT",
+      "homepage": "https://www.chartjs.org"
+    },
+    {
+      "name": "cors",
+      "version": "2.8.5",
+      "description": "Node.js CORS middleware",
+      "license": "MIT"
+    },
+    {
+      "name": "express",
+      "version": "4.19.2",
+      "description": "Fast, unopinionated, minimalist web framework",
+      "license": "MIT",
+      "homepage": "http://expressjs.com/"
+    },
+    {
+      "name": "form-data",
+      "version": "4.0.0",
+      "description": "A library to create readable \"multipart/form-data\" streams. Can be used to submit forms and file uploads to other web applications.",
+      "license": "MIT"
+    },
+    {
+      "name": "jimp",
+      "version": "0.22.12",
+      "description": "An image processing library written entirely in JavaScript (i.e. zero external or native dependencies)",
+      "license": "MIT"
+    },
+    {
+      "name": "jsonwebtoken",
+      "version": "9.0.2",
+      "description": "JSON Web Token implementation (symmetric and asymmetric)",
+      "license": "MIT"
+    },
+    {
+      "name": "jszip",
+      "version": "3.10.1",
+      "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
+      "license": "(MIT OR GPL-3.0-or-later)"
+    },
+    {
+      "name": "jwt-decode",
+      "version": "4.0.0",
+      "description": "Decode JWT tokens, mostly useful for browser applications.",
+      "license": "MIT",
+      "homepage": "https://github.com/auth0/jwt-decode#readme"
+    },
+    {
+      "name": "lodash-es",
+      "version": "4.17.21",
+      "description": "Lodash exported as ES modules.",
+      "license": "MIT",
+      "homepage": "https://lodash.com/custom-builds"
+    },
+    {
+      "name": "lowdb",
+      "version": "7.0.1",
+      "description": "Tiny local JSON database for Node, Electron and the browser",
+      "license": "MIT",
+      "homepage": "https://github.com/typicode/lowdb#readme"
+    },
+    {
+      "name": "mongoose",
+      "version": "8.3.1",
+      "description": "Mongoose MongoDB ODM",
+      "license": "MIT",
+      "homepage": "https://mongoosejs.com"
+    },
+    {
+      "name": "morgan",
+      "version": "1.10.0",
+      "description": "HTTP request logger middleware for node.js",
+      "license": "MIT"
+    },
+    {
+      "name": "multer",
+      "version": "1.4.5-lts.1",
+      "description": "Middleware for handling `multipart/form-data`.",
+      "license": "MIT"
+    },
+    {
+      "name": "mysql2",
+      "version": "3.9.4",
+      "description": "fast mysql driver. Implements core protocol, prepared statements, ssl and compression in native JS",
+      "license": "MIT",
+      "homepage": "https://sidorares.github.io/node-mysql2/docs"
+    },
+    {
+      "name": "node-opcua",
+      "version": "2.124.0",
+      "description": "pure nodejs OPCUA SDK - module node-opcua",
+      "license": "MIT",
+      "homepage": "http://node-opcua.github.io/"
+    },
+    {
+      "name": "node-opcua-client-crawler",
+      "version": "2.124.0",
+      "description": "pure nodejs OPCUA SDK - module client-crawler",
+      "license": "MIT",
+      "homepage": "http://node-opcua.github.io/"
+    },
+    {
+      "name": "nodemailer",
+      "version": "6.9.13",
+      "description": "Easy as cake e-mail sending from your Node.js applications",
+      "license": "MIT-0",
+      "homepage": "https://nodemailer.com/"
+    },
+    {
+      "name": "reflect-metadata",
+      "version": "0.2.2",
+      "description": "Polyfill for Metadata Reflection API",
+      "license": "Apache-2.0",
+      "homepage": "http://rbuckton.github.io/reflect-metadata"
+    },
+    {
+      "name": "rxjs",
+      "version": "7.8.1",
+      "description": "Reactive Extensions for modern JavaScript",
+      "license": "Apache-2.0",
+      "homepage": "https://rxjs.dev"
+    },
+    {
+      "name": "swagger-ui-express",
+      "version": "5.0.0",
+      "description": "Swagger UI Express",
+      "license": "MIT",
+      "homepage": "https://github.com/scottie1984/swagger-ui-express"
+    },
+    {
+      "name": "tslib",
+      "version": "2.6.2",
+      "description": "Runtime library for TypeScript helper functions",
+      "license": "0BSD",
+      "homepage": "https://www.typescriptlang.org/"
+    },
+    {
+      "name": "tsoa",
+      "version": "5.1.1",
+      "description": "Build swagger-compliant REST APIs using TypeScript and Node",
+      "license": "MIT"
+    },
+    {
+      "name": "tsyringe",
+      "version": "4.8.0",
+      "description": "Lightweight dependency injection container for JavaScript/TypeScript",
+      "license": "MIT",
+      "homepage": "https://github.com/Microsoft/tsyringe#readme"
+    },
+    {
+      "name": "uuid",
+      "version": "9.0.1",
+      "description": "RFC4122 (v1, v4, and v5) UUIDs",
+      "license": "MIT"
+    },
+    {
+      "name": "webdav",
+      "version": "5.5.0",
+      "description": "WebDAV client for NodeJS",
+      "license": "MIT",
+      "homepage": "https://github.com/perry-mitchell/webdav-client#readme"
+    },
+    {
+      "name": "winston",
+      "version": "3.13.0",
+      "description": "A logger for just about everything.",
+      "license": "MIT"
+    },
+    {
+      "name": "winston-daily-rotate-file",
+      "version": "5.0.0",
+      "description": "A transport for winston which logs to a rotating file each day.",
+      "license": "MIT",
+      "homepage": "https://github.com/winstonjs/winston-daily-rotate-file#readme"
+    },
+    {
+      "name": "ws",
+      "version": "8.16.0",
+      "description": "Simple to use, blazing fast and thoroughly tested websocket client and server for Node.js",
+      "license": "MIT",
+      "homepage": "https://github.com/websockets/ws"
+    },
+    {
+      "name": "xpath",
+      "version": "0.0.34",
+      "description": "DOM 3 XPath implemention and helper for node.js and the web",
+      "license": "MIT"
+    },
+    {
+      "name": "zone.js",
+      "version": "0.14.4",
+      "description": "Zones for JavaScript",
+      "license": "MIT"
+    }
+  ]
 }

@@ -16,5 +16,8 @@
         "esModuleInterop": true,
         "moduleResolution": "NodeNext",
         "module": "NodeNext"
-    }
+    },
+    "ts-node": {
+        "esm": true
+      }
 }
