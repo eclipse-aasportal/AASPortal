@@ -40,9 +40,13 @@ export interface GetFavoritesAction extends TypedAction<StartActionType.GET_FIRS
     documents: AASDocument[];
 }
 
+export interface SetTreeViewAction extends TypedAction<StartActionType.SET_TREE_VIEW> {
+    documents: AASDocument[];
+}
+
 export const setListView = createAction(StartActionType.SET_LIST_VIEW);
 
-export const setTreeView = createAction(StartActionType.SET_TREE_VIEW);
+export const setTreeView = createAction(StartActionType.SET_TREE_VIEW, props<{ documents: AASDocument[] }>());
 
 export const setViewMode = createAction(StartActionType.SET_VIEW_MODE, props<{ viewMode: ViewMode }>());
 

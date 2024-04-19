@@ -195,7 +195,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 }
             }
         } else {
-            this.store.dispatch(StartActions.setTreeView());
+            this.store.dispatch(StartActions.setTreeView({ documents: this._selected }));
         }
     }
 

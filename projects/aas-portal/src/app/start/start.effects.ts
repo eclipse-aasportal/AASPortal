@@ -59,18 +59,13 @@ export class StartEffects {
 
     public setTreeView = createEffect(() => {
         return this.actions.pipe(
-            ofType(StartActions.StartActionType.SET_TREE_VIEW),
-            exhaustMap(() =>
+            ofType<StartActions.SetTreeViewAction>(StartActions.StartActionType.SET_TREE_VIEW),
+            exhaustMap(action =>
                 concat(
                     of(StartActions.setViewMode({ viewMode: ViewMode.Tree })),
-                    this.store.select(StartSelectors.selectDocuments).pipe(
-                        first(),
-                        mergeMap(documents =>
-                            from(documents).pipe(
-                                mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
-                                mergeMap(nodes => this.addTreeAndLoadContents(nodes)),
-                            ),
-                        ),
+                    from(action.documents).pipe(
+                        mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
+                        mergeMap(nodes => this.addTreeAndLoadContents(nodes)),
                     ),
                 ),
             ),

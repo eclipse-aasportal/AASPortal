@@ -7,8 +7,6 @@ import { BehaviorSubject, map } from 'rxjs';
 export class BusyIndicatorService {
     private readonly busyCount = new BehaviorSubject(0);
 
-    public constructor() {}
-
     public readonly isBusy = this.busyCount.pipe(map(value => value > 0));
 
     public readonly isIdle = this.busyCount.pipe(map(value => value === 0));
