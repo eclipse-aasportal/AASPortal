@@ -11,6 +11,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { createDocument } from '../assets/test-document';
 import { AASApiService } from '../../app/aas/aas-api.service';
+import { noop } from 'lodash-es';
 
 describe('AASApiService', function () {
     let service: AASApiService;
@@ -62,10 +63,10 @@ describe('AASApiService', function () {
     });
 
     describe('getTemplates', () => {
-        it('ToDo', () => {});
+        it('ToDo', () => noop());
     });
 
     describe('putDocument', () => {
-        it('ToDo', () => {});
+        it('ToDo', () => noop());
     });
 });

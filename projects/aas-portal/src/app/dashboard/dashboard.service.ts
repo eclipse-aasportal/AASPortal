@@ -20,7 +20,7 @@ import {
 } from 'common';
 import { cloneDeep } from 'lodash-es';
 import { ERRORS } from '../types/errors';
-import { map, Observable } from 'rxjs';
+import { map, mergeMap, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import * as DashboardSelectors from './dashboard.selectors';
@@ -245,12 +245,16 @@ export class DashboardService {
         this.modified = true;
     }
 
-    public save(): void {
-        if (this.modified) {
-            this.write()
-                .pipe(map(() => (this.modified = false)))
-                .subscribe();
+    public save(): Observable<void> {
+        if (!this.modified) {
+            return of(void 0);
         }
+
+        return this.write().pipe(
+            map(() => {
+                this.modified = false;
+            }),
+        );
     }
 
     private addLineCharts(

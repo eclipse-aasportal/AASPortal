@@ -19,7 +19,7 @@ import { pages } from './test-pages';
 import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from '../../app/dashboard/dashboard.state';
 import { AuthService } from 'aas-lib';
 
-describe('DashboardService', function () {
+describe('DashboardService', () => {
     let service: DashboardService;
     let auth: jasmine.SpyObj<AuthService>;
 
@@ -27,6 +27,7 @@ describe('DashboardService', function () {
         auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie']);
         auth.checkCookie.and.returnValue(of(true));
         auth.getCookie.and.returnValue(of(JSON.stringify(pages)));
+        auth.setCookie.and.returnValue(of(void 0));
 
         TestBed.configureTestingModule({
             providers: [
@@ -52,11 +53,11 @@ describe('DashboardService', function () {
         service = TestBed.inject(DashboardService);
     });
 
-    it('should be created', function () {
+    it('should be created', () => {
         expect(service).toBeTruthy();
     });
 
-    it('provides always a default page', function () {
+    it('provides always a default page', () => {
         expect(service.defaultPage?.name).toBeDefined();
     });
 
@@ -67,15 +68,15 @@ describe('DashboardService', function () {
         });
     });
 
-    it('allows finding a specific dashboard page', function () {
+    it('allows finding a specific dashboard page', () => {
         expect(service.find('Test')).toEqual(pages[1]);
     });
 
-    it('returns undefined for an unknown dashboard page', function () {
+    it('returns undefined for an unknown dashboard page', () => {
         expect(service.find('unknown')).toBeUndefined();
     });
 
-    it('returns the Test dashboard as a grid with 2 rows and 2/1 column', function () {
+    it('returns the Test dashboard as a grid with 2 rows and 2/1 column', () => {
         const page = service.find('Test')!;
         const grid = service.getGrid(page);
         expect(grid.length).toEqual(2);
@@ -83,7 +84,7 @@ describe('DashboardService', function () {
         expect(grid[1].length).toEqual(1);
     });
 
-    it('returns the Test dashboard as rows', function () {
+    it('returns the Test dashboard as rows', () => {
         const page = service.find('Test')!;
         const rows = service.getRows(page);
         expect(rows.length).toEqual(2);
@@ -98,7 +99,7 @@ describe('DashboardService', function () {
         });
     });
 
-    describe('setPageName', function () {
+    describe('setPageName', () => {
         it('allows setting "Test" as new active dashboard', function (done: DoneFn) {
             service.setPageName('Test');
             service.name.pipe(first()).subscribe(value => {
@@ -107,12 +108,12 @@ describe('DashboardService', function () {
             });
         });
 
-        it('throws an error if a dashboard with the specified does not exist', function () {
+        it('throws an error if a dashboard with the specified does not exist', () => {
             expect(() => service.setPageName('unknown')).toThrowError();
         });
     });
 
-    describe('add', function () {
+    describe('add', () => {
         it('allows adding RotationSpeed and Torque to the default page as separate line charts', function (done: DoneFn) {
             service.add(service.defaultPage.name, sampleDocument, [rotationSpeed, torque], DashboardChartType.Line);
             service.pages.pipe(first()).subscribe(items => {
@@ -145,54 +146,57 @@ describe('DashboardService', function () {
             });
         });
 
-        it('throws an error when adding a property to an unknown page', function () {
+        it('throws an error when adding a property to an unknown page', () => {
             expect(() =>
                 service.add('unknown', sampleDocument, [rotationSpeed, torque], DashboardChartType.BarVertical),
             ).toThrowError();
         });
     });
 
-    describe('save', function () {
-        it('allows saving the current dashboard state', function () {
+    describe('save', () => {
+        it('allows saving the current dashboard state', (done: DoneFn) => {
             service.add(
                 service.defaultPage.name,
                 sampleDocument,
                 [rotationSpeed, torque],
                 DashboardChartType.BarVertical,
             );
-            service.save();
-            expect(auth.setCookie).toHaveBeenCalled();
+
+            service.save().subscribe(() => {
+                expect(auth.setCookie).toHaveBeenCalled();
+                done();
+            });
         });
     });
 
-    describe('canMove...', function () {
+    describe('canMove...', () => {
         let page: DashboardPage;
         let grid: DashboardItem[][];
 
-        beforeEach(function () {
+        beforeEach(() => {
             page = service.find('Test')!;
             grid = service.getGrid(page);
         });
 
-        it('indicates whether a chart can be moved to the left', function () {
+        it('indicates whether a chart can be moved to the left', () => {
             expect(service.canMoveLeft(page, grid[0][0])).toBeFalse();
             expect(service.canMoveLeft(page, grid[0][1])).toBeTrue();
             expect(service.canMoveLeft(page, grid[1][0])).toBeFalse();
         });
 
-        it('indicates whether a chart can be moved to the right', function () {
+        it('indicates whether a chart can be moved to the right', () => {
             expect(service.canMoveRight(page, grid[0][0])).toBeTrue();
             expect(service.canMoveRight(page, grid[0][1])).toBeFalse();
             expect(service.canMoveRight(page, grid[1][0])).toBeFalse();
         });
 
-        it('indicates whether a chart can be moved up', function () {
+        it('indicates whether a chart can be moved up', () => {
             expect(service.canMoveUp(page, grid[0][0])).toBeTrue();
             expect(service.canMoveUp(page, grid[0][1])).toBeTrue();
             expect(service.canMoveUp(page, grid[1][0])).toBeTrue();
         });
 
-        it('indicates whether a chart can be moved down', function () {
+        it('indicates whether a chart can be moved down', () => {
             expect(service.canMoveDown(page, grid[0][0])).toBeTrue();
             expect(service.canMoveDown(page, grid[0][1])).toBeTrue();
             expect(service.canMoveDown(page, grid[1][0])).toBeFalse();

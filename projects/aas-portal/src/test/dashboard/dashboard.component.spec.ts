@@ -43,6 +43,7 @@ describe('DashboardComponent', () => {
 
         auth.checkCookie.and.returnValue(of(true));
         auth.getCookie.and.returnValue(of(JSON.stringify(pages)));
+        auth.setCookie.and.returnValue(of(void 0));
 
         TestBed.configureTestingModule({
             declarations: [DashboardComponent],
@@ -92,25 +93,25 @@ describe('DashboardComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('shows the Test page', function () {
+    it('shows the Test page', () => {
         expect(component.page.name).toEqual('Test');
     });
 
-    it('displays two rows', function () {
+    it('displays two rows', () => {
         expect(component.rows.length).toEqual(2);
     });
 
-    describe('single selection', function () {
-        it('supports single mode selection', function () {
+    describe('single selection', () => {
+        it('supports single mode selection', () => {
             expect(component.selectionMode).toEqual(SelectionMode.Single);
         });
 
-        it('indicates no item selected', function () {
+        it('indicates no item selected', () => {
             expect(component.selectedItem).toBeNull();
             expect(component.selectedItems.length).toEqual(0);
         });
 
-        it('allows to toggle the selection of a chart', function () {
+        it('allows to toggle the selection of a chart', () => {
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.selectedItem).toEqual(component.rows[0].columns[0].item);
             expect(component.selectedItems.length).toEqual(1);
@@ -119,7 +120,7 @@ describe('DashboardComponent', () => {
             expect(component.selectedItems.length).toEqual(0);
         });
 
-        it('ensures that only one item is selected', function () {
+        it('ensures that only one item is selected', () => {
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.selectedItem).toEqual(component.rows[0].columns[0].item);
             expect(component.selectedItems.length).toEqual(1);
@@ -129,22 +130,22 @@ describe('DashboardComponent', () => {
         });
     });
 
-    describe('view mode', function () {
-        it('has a view mode (initial)', function () {
+    describe('view mode', () => {
+        it('has a view mode (initial)', () => {
             expect(component.editMode).toBeFalse();
         });
     });
 
-    describe('edit mode', function () {
-        beforeEach(function () {
+    describe('edit mode', () => {
+        beforeEach(() => {
             component.editMode = true;
         });
 
-        it('has an edit mode', function () {
+        it('has an edit mode', () => {
             expect(component.editMode).toBeTrue();
         });
 
-        it('can move item[0, 1] to the left', function (done: DoneFn) {
+        it('can move item[0, 1] to the left', (done: DoneFn) => {
             const id = component.rows[0].columns[1].id;
             component.toggleSelection(component.rows[0].columns[1]);
             expect(component.canMoveLeft()).toBeTrue();
@@ -176,7 +177,7 @@ describe('DashboardComponent', () => {
                 });
         });
 
-        it('can move item[0, 0] to the right including undo/redo', function (done: DoneFn) {
+        it('can move item[0, 0] to the right including undo/redo', (done: DoneFn) => {
             const id = component.rows[0].columns[0].id;
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.canMoveRight()).toBeTrue();
@@ -208,7 +209,7 @@ describe('DashboardComponent', () => {
                 });
         });
 
-        it('can move item[0, 0] up creating a new row including undo/redo', function (done: DoneFn) {
+        it('can move item[0, 0] up creating a new row including undo/redo', (done: DoneFn) => {
             const id = component.rows[0].columns[0].id;
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.canMoveUp()).toBeTrue();
@@ -243,7 +244,7 @@ describe('DashboardComponent', () => {
                 });
         });
 
-        it('can move item[0, 0] down to [1, 1] including undo/redo', function (done: DoneFn) {
+        it('can move item[0, 0] down to [1, 1] including undo/redo', (done: DoneFn) => {
             const id = component.rows[0].columns[0].id;
             component.toggleSelection(component.rows[0].columns[0]);
             expect(component.canMoveDown()).toBeTrue();
@@ -275,11 +276,11 @@ describe('DashboardComponent', () => {
                 });
         });
 
-        it('gets the color of a chart', function () {
+        it('gets the color of a chart', () => {
             expect(component.getColor(component.rows[0].columns[0])).toEqual('#123456');
         });
 
-        it('sets the color of a chart including undo/redo', function (done: DoneFn) {
+        it('sets the color of a chart including undo/redo', (done: DoneFn) => {
             component.changeColor(component.rows[0].columns[0], '#AA55AA');
             store
                 .select(state => state.dashboard.rows)
@@ -308,11 +309,11 @@ describe('DashboardComponent', () => {
                 });
         });
 
-        it('gets the source labels of a chart', function () {
+        it('gets the source labels of a chart', () => {
             expect(component.getSources(component.rows[0].columns[0])).toEqual(['RotationSpeed']);
         });
 
-        it('can delete the Test page', function (done: DoneFn) {
+        it('can delete the Test page', (done: DoneFn) => {
             const name = component.page.name;
             component.delete();
             service.pages.pipe(first()).subscribe(pages => {
@@ -321,7 +322,7 @@ describe('DashboardComponent', () => {
             });
         });
 
-        it('can change the min value', function (done: DoneFn) {
+        it('can change the min value', (done: DoneFn) => {
             component.changeMin(component.rows[0].columns[0], '0');
             store
                 .select(state => state.dashboard.rows)
@@ -350,7 +351,7 @@ describe('DashboardComponent', () => {
                 });
         });
 
-        it('can change the max value', function (done: DoneFn) {
+        it('can change the max value', (done: DoneFn) => {
             component.changeMax(component.rows[0].columns[0], '5500');
             store
                 .select(state => state.dashboard.rows)

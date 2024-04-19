@@ -1,0 +1,7 @@
+{
+    "spec_dir": "./projects",
+    "spec_files": [
+        "aas-lib/src/**/*[sS]pec.ts",
+        "aas-portal/src/**/*[sS]pec.ts"
+    ]
+}

@@ -212,7 +212,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
             this.auth.deleteCookie('.DashboardName');
         }
 
-        this.dashboard.save();
+        this.dashboard.save().subscribe();
 
         this.toolbar.clear();
         this.closeWebSocket();
