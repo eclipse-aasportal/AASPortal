@@ -8,21 +8,13 @@
 
 import { Injectable } from '@angular/core';
 import { v4 as uuid } from 'uuid';
-import {
-    aas,
-    AASDocument,
-    AASEndpointType,
-    ApplicationError,
-    EndpointType,
-    getIdShortPath,
-    getUnit,
-    LiveNode,
-} from 'common';
 import { cloneDeep } from 'lodash-es';
-import { ERRORS } from '../types/errors';
-import { map, mergeMap, Observable, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { encodeBase64Url, AuthService } from 'aas-lib';
+import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode } from 'common';
+
+import { ERRORS } from '../types/errors';
 import * as DashboardSelectors from './dashboard.selectors';
 import * as DashboardActions from './dashboard.actions';
 import { createPageName } from './dashboard.reducer';
@@ -382,17 +374,6 @@ export class DashboardService {
         }
 
         return nodes;
-    }
-
-    private toEndpointType(type: AASEndpointType): EndpointType {
-        switch (type) {
-            case 'OpcuaServer':
-                return 'opc';
-            case 'FileSystem':
-                return 'file';
-            default:
-                return 'http';
-        }
     }
 
     private getRow(page: DashboardPage, item: DashboardItem): DashboardItem[] {

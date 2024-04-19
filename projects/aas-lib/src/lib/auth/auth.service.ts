@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import {
     ApplicationError,
@@ -50,13 +50,18 @@ export class AuthService {
         const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
         const token = this.window.getLocalStorageItem('.Token');
         if (stayLoggedIn && token && this.isValid(token)) {
-            this.nextPayload(token);
-            this.ready$.next(true);
-            return;
+            const payload = jwtDecode(token) as JWTPayload;
+            if (payload && payload.sub) {
+                this.ensureLoggedInAsUser(token, payload.sub);
+                return;
+            }
         }
 
         this.loginAsGuest().subscribe({
-            error: error => notify.error(error),
+            error: error => {
+                this.notify.error(error);
+                this.ready$.next(true);
+            },
             complete: () => this.ready$.next(true),
         });
     }
@@ -287,6 +292,22 @@ export class AuthService {
             this.window.removeLocalStorageItem(name);
             return of(void 0);
         }
+    }
+
+    private ensureLoggedInAsUser(token: string, id: string): void {
+        this.api
+            .getProfile(id)
+            .pipe(
+                map(() => this.nextPayload(token)),
+                catchError(() => this.loginAsGuest()),
+            )
+            .subscribe({
+                error: error => {
+                    this.notify.error(error);
+                    this.ready$.next(true);
+                },
+                complete: () => this.ready$.next(true),
+            });
     }
 
     private loginAsGuest(): Observable<void> {

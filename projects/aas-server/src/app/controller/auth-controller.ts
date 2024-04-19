@@ -61,6 +61,18 @@ export class AuthController extends AASController {
     }
 
     /**
+     * @summary Gets the profile of the user with the specified ID.
+     * @param id The user ID.
+     * @returns The user profile.
+     */
+    @Get('users/{id}')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('getProfile')
+    public getProfile(@Path() id: string): Promise<UserProfile> {
+        return this.auth.getProfileAsync(decodeBase64Url(id));
+    }
+
+    /**
      * @summary Updates the profile of the user with the specified ID.
      * @param id The user ID.
      * @param profile The updated profile.

@@ -71,6 +71,15 @@ export class AuthService {
         return { token };
     }
 
+    public async getProfileAsync(id: string): Promise<UserProfile> {
+        const data = await this.userStorage.readAsync(id);
+        if (data == null) {
+            throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
+        }
+
+        return { id: data.id, name: data.name } as UserProfile;
+    }
+
     public async updateProfileAsync(id: string, profile: UserProfile): Promise<AuthResult> {
         const data = await this.userStorage.readAsync(id);
         if (data == null) {

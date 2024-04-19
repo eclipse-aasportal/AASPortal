@@ -30,6 +30,10 @@ export class AuthApiService {
         return this.http.post<AuthResult>('/api/v1/login', credentials);
     }
 
+    public getProfile(id: string): Observable<UserProfile> {
+        return this.http.get<UserProfile>(`/api/v1/users/${encodeBase64Url(id)}`);
+    }
+
     public updateProfile(id: string, profile: UserProfile): Observable<AuthResult> {
         return this.http.put<AuthResult>(`/api/v1/users/${encodeBase64Url(id)}`, profile);
     }

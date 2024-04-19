@@ -11,7 +11,7 @@ import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
-import { AuthResult, Cookie, Credentials } from 'common';
+import { ApplicationError, AuthResult, Cookie, Credentials } from 'common';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -22,20 +22,22 @@ import { Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
+import { ERRORS } from '../../app/errors.js';
 
-describe('AuthController', function () {
+describe('AuthController', () => {
     let app: Express;
     let auth: jest.Mocked<AuthService>;
     let logger: Logger;
     let variable: jest.Mocked<Variable>;
     let authentication: jest.Mocked<Authentication>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>([
             'hasUserAsync',
             'loginAsync',
+            'getProfileAsync',
             'getCookieAsync',
             'getCookiesAsync',
             'setCookieAsync',
@@ -60,10 +62,10 @@ describe('AuthController', function () {
         app.use(errorHandler);
     });
 
-    describe('guest', function () {
-        it('creates a guest account', async function () {
+    describe('guest', () => {
+        it('creates a guest account', async () => {
             const token = getToken();
-            auth.loginAsync.mockReturnValue(new Promise<AuthResult>(resolve => resolve({ token })));
+            auth.loginAsync.mockResolvedValue({ token });
 
             const response = await request(app).post('/api/v1/guest');
 
@@ -72,10 +74,10 @@ describe('AuthController', function () {
         });
     });
 
-    describe('login', function () {
-        it('login a registered user', async function () {
+    describe('login', () => {
+        it('login a registered user', async () => {
             const token = getToken('John');
-            auth.loginAsync.mockReturnValue(new Promise<AuthResult>(resolve => resolve({ token })));
+            auth.loginAsync.mockResolvedValue({ token });
 
             const response = await request(app)
                 .post('/api/v1/login')
@@ -86,12 +88,10 @@ describe('AuthController', function () {
         });
     });
 
-    describe('getCookie', function () {
-        it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
-            auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-            auth.getCookieAsync.mockReturnValue(
-                new Promise<Cookie>(resolve => resolve({ name: 'Cookie1', data: 'Hello World!' })),
-            );
+    describe('getCookie', () => {
+        it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+            auth.hasUserAsync.mockResolvedValue(true);
+            auth.getCookieAsync.mockResolvedValue({ name: 'Cookie1', data: 'Hello World!' });
 
             const response = await request(app)
                 .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
@@ -101,26 +101,23 @@ describe('AuthController', function () {
             expect(response.body).toEqual({ name: 'Cookie1', data: 'Hello World!' });
         });
 
-        // it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
-        //     authentication.checkAsync.mockReturnValue(new Promise((_, reject) => reject(
-        //         new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess))));
+        it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+            authentication.checkAsync.mockRejectedValue(
+                new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
+            );
 
-        //     const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1');
-        //     expect(response.statusCode).toBe(401);
-        // });
+            const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1');
+            expect(response.statusCode).toBe(401);
+        });
     });
 
-    describe('getCookies', function () {
-        it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async function () {
-            auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-            auth.getCookiesAsync.mockReturnValue(
-                new Promise<Cookie[]>(resolve =>
-                    resolve([
-                        { name: 'Cookie1', data: 'Hello World!' },
-                        { name: 'Cookie2', data: '42' },
-                    ]),
-                ),
-            );
+    describe('getCookies', () => {
+        it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async () => {
+            auth.hasUserAsync.mockResolvedValue(true);
+            auth.getCookiesAsync.mockResolvedValue([
+                { name: 'Cookie1', data: 'Hello World!' },
+                { name: 'Cookie2', data: '42' },
+            ]);
 
             const response = await request(app)
                 .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies')
@@ -133,18 +130,19 @@ describe('AuthController', function () {
             ]);
         });
 
-        // it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async function () {
-        //     authentication.checkAsync.mockReturnValue(
-        //         Promise.reject(new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess)));
+        it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async () => {
+            authentication.checkAsync.mockRejectedValue(
+                new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
+            );
 
-        //     const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies');
-        //     expect(response.statusCode).toBe(401);
-        // });
+            const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies');
+            expect(response.statusCode).toBe(401);
+        });
     });
 
-    describe('setCookie', function () {
-        it('POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
-            auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+    describe('setCookie', () => {
+        it('POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+            auth.hasUserAsync.mockResolvedValue(true);
             const response = await request(app)
                 .post('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
                 .send({ name: 'Cookie1', data: 'Hello World!' } as Cookie)
@@ -155,22 +153,23 @@ describe('AuthController', function () {
             expect(auth.setCookieAsync).toHaveBeenCalled();
         });
 
-        // it('Unauthenticated user: POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
-        //     authentication.checkAsync.mockReturnValue(
-        //         Promise.reject(new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess)));
+        it('Unauthenticated user: POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+            authentication.checkAsync.mockRejectedValue(
+                new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
+            );
 
-        //     const response = await request(app)
-        //         .post('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
-        //         .send({ name: 'Cookie1', data: 'Hello World!' } as Cookie)
-        //         .set('Accept', 'application/json');
+            const response = await request(app)
+                .post('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
+                .send({ name: 'Cookie1', data: 'Hello World!' } as Cookie)
+                .set('Accept', 'application/json');
 
-        //     expect(response.statusCode).toBe(401);
-        // });
+            expect(response.statusCode).toBe(401);
+        });
     });
 
-    describe('deleteCookie', function () {
-        it('DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
-            auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+    describe('deleteCookie', () => {
+        it('DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+            auth.hasUserAsync.mockResolvedValue(true);
             const response = await request(app)
                 .delete('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
                 .set('Authorization', `Bearer ${getToken('John')}`);
@@ -179,12 +178,34 @@ describe('AuthController', function () {
             expect(auth.deleteCookieAsync).toHaveBeenCalled();
         });
 
-        // it('Unauthenticated user: DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async function () {
-        //     authentication.checkAsync.mockReturnValue(
-        //         Promise.reject(new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess)));
+        it('Unauthenticated user: DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+            authentication.checkAsync.mockRejectedValue(
+                new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
+            );
 
-        //     const response = await request(app).delete('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1');
-        //     expect(response.statusCode).toBe(401);
-        // });
+            const response = await request(app).delete('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1');
+            expect(response.statusCode).toBe(401);
+        });
+    });
+
+    describe('getProfile', () => {
+        it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t', async () => {
+            auth.getProfileAsync.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
+            const response = await request(app)
+                .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t')
+                .set('Authorization', `Bearer ${getToken('John')}`);
+
+            expect(response.statusCode).toBe(200);
+            expect(auth.getProfileAsync).toHaveBeenCalled();
+        });
+
+        it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t', async () => {
+            authentication.checkAsync.mockRejectedValue(
+                new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
+            );
+
+            const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t');
+            expect(response.statusCode).toBe(401);
+        });
     });
 });
