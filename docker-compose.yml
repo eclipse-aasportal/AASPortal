@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   aasportal-users:
     image: mongo
@@ -15,10 +13,22 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=aas-server
       - MONGO_INITDB_DATABASE=aasportal-users
 
-  mysql:
+  aasportal-index:
     image: mariadb:latest
     container_name: aasportal-index
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      interval: 30s
+      retries: 3
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      timeout: 30s
     volumes:
       - ./projects/aasportal-index/schema.sql:/docker-entrypoint-initdb.d/1.sql
       - sqldata:/var/lib/mysql

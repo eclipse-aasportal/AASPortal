@@ -4,8 +4,9 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm install
 RUN npm run aas-portal:build
-
 FROM nginx:latest as aas-portal
+#possibility to check host & port availability of other containers via netcat
+RUN apt-get update -y && apt-get install -y netcat-openbsd
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ /usr/share/nginx/html/
 COPY --from=build /usr/src/app/projects/aas-portal/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
