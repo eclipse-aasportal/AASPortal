@@ -144,6 +144,8 @@
     "ERROR_EMPTY_ENDPOINT_NAME": "Enter a unique AAS endpoint name.",
     "ERROR_NO_ELEMENT_SELECTED": "At least one element must be selected.",
     "ERROR_INVALID_CONTAINER_URL": "'{0}' addresses an invalid or not supported AAS resource.",
+    "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
+    "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name.",
     "FAVORITES": "Favorites",
     "INFO_NEW_PASSWORD_SENT": "A new password was sent to '{0}'.",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} was downloaded successfully.",

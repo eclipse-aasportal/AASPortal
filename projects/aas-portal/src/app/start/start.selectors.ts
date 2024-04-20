@@ -35,4 +35,4 @@ export const selectIsFirstPage = createSelector(getState, state => state.previou
 
 export const selectIsLastPage = createSelector(getState, state => state.next === null);
 
-export const selectFavorites = createSelector(getState, state => state.favorites);
+export const selectCurrentFavorites = createSelector(getState, state => state.favorites);

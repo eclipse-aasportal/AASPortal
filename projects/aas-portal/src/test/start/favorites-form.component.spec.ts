@@ -14,6 +14,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 
 import { FavoritesFormComponent } from '../../app/start/favorites-form/favorites-form.component';
 import { FavoritesService } from '../../app/start/favorites.service';
+import { of } from 'rxjs';
 
 describe('FavoritesFormComponent', () => {
     let component: FavoritesFormComponent;
@@ -21,7 +22,7 @@ describe('FavoritesFormComponent', () => {
     let service: jasmine.SpyObj<FavoritesService>;
 
     beforeEach(() => {
-        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], { lists: [] });
+        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], { lists: of([]) });
 
         TestBed.configureTestingModule({
             declarations: [FavoritesFormComponent],
@@ -29,7 +30,7 @@ describe('FavoritesFormComponent', () => {
                 NgbActiveModal,
                 {
                     provide: FavoritesService,
-                    useValue: service
+                    useValue: service,
                 },
             ],
             imports: [

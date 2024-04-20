@@ -8,83 +8,171 @@
 
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AASDocument } from 'common';
+import { AASDocument, ApplicationError } from 'common';
 import { FavoritesService } from '../favorites.service';
-import { FavoritesFormStore, FavoritesItem } from './favorites-form.store';
-import { Observable, first } from 'rxjs';
+import { first, from, map, mergeMap, of, tap } from 'rxjs';
+import { messageToString } from 'aas-lib';
+import { TranslateService } from '@ngx-translate/core';
+
+interface FavoritesItem {
+    selected: boolean;
+    active: boolean;
+    name: string;
+    id: string;
+    added: boolean;
+    delete: boolean;
+}
 
 @Component({
     selector: 'fhg-favorites-form',
     templateUrl: './favorites-form.component.html',
     styleUrls: ['./favorites-form.component.css'],
-    providers: [FavoritesFormStore],
 })
 export class FavoritesFormComponent {
-    private _documents: AASDocument[] = [];
+    private _items: FavoritesItem[] = [];
 
     public constructor(
         private readonly modal: NgbActiveModal,
         private readonly favorites: FavoritesService,
-        private readonly store: FavoritesFormStore,
+        private readonly translate: TranslateService,
     ) {
-        this.items = this.store.select(state => state.items);
+        this.favorites.lists
+            .pipe(
+                first(),
+                map(lists =>
+                    lists.map(
+                        list =>
+                            ({
+                                name: list.name,
+                                id: list.name,
+                                selected: false,
+                                active: false,
+                                delete: false,
+                            }) as FavoritesItem,
+                    ),
+                ),
+                map(items => {
+                    if (items.length > 0) {
+                        items.sort((a, b) => a.name.localeCompare(b.name));
+                        items[0].selected = true;
+                    } else {
+                        items.push({
+                            name: 'Favorites 1',
+                            id: 'Favorites 1',
+                            selected: true,
+                            active: false,
+                            added: false,
+                            delete: false,
+                        });
+                    }
 
-        const items = favorites.lists.map(list => ({ name: list.name, id: list.name, selected: false, active: false }));
-        items.sort((a, b) => a.name.localeCompare(b.name));
-        items.push({ name: '', id: '', selected: false, active: false });
-        this.store.setState(state => ({ ...state, items }));
+                    return items;
+                }),
+            )
+            .subscribe(items => (this._items = items));
     }
 
     public messages: string[] = [];
 
-    public get documents(): AASDocument[] {
-        return this._documents;
+    public documents: AASDocument[] = [];
+
+    public get items(): FavoritesItem[] {
+        return this._items.filter(item => item.delete === false);
     }
 
-    public set documents(values: AASDocument[]) {
-        this._documents = values;
-        if (values.length > 0) {
-            this.store.ensureItemSelected();
+    public delete(item: FavoritesItem): void {
+        if (item.added) {
+            this._items.splice(this._items.indexOf(item), 1);
+        } else {
+            item.delete = true;
         }
     }
 
-    public readonly items: Observable<FavoritesItem[]>;
-
-    public canDelete(item: FavoritesItem): boolean {
-        return (item.active || item.selected) && this.favorites.has(item.id);
+    public add(sibling: FavoritesItem): void {
+        const name = this.uniqueName();
+        this._items.splice(this.items.indexOf(sibling) + 1, 0, {
+            name: name,
+            id: name,
+            selected: false,
+            active: false,
+            added: true,
+            delete: false,
+        });
     }
 
-    public inputName(item: FavoritesItem, value: string): void {
-        item.name = value;
+    public valueChanged(target: EventTarget | null, item: FavoritesItem): void {
+        item.name = (target as HTMLInputElement).value;
     }
 
-    public selectedChange(item: FavoritesItem, value: boolean): void {
-        this.store.setSelected(item, value);
+    public selected(target: EventTarget | null, item: FavoritesItem): void {
+        if (!item.selected) {
+            this._items.forEach(i => (i.selected = false));
+            item.selected = (target as HTMLInputElement).checked;
+        }
     }
 
     public submit(): void {
         this.clearMessages();
 
-        this.items.pipe(first()).subscribe(items => {
-            const selectedItem = items.find(item => item.selected);
-            if (selectedItem) {
-                if (selectedItem.id || selectedItem.id === selectedItem.name) {
-                    this.favorites.add(this.documents, selectedItem.name);
-                } else {
-                    this.favorites.add(this.documents, selectedItem.id, selectedItem.name);
-                }
+        of(this._items)
+            .pipe(
+                tap(items => this.checkNames(items)),
+                mergeMap(items => from(items)),
+                mergeMap(item => {
+                    if (item.selected) {
+                        if (item.id || item.id === item.name) {
+                            return this.favorites.add(this.documents, item.name);
+                        } else {
+                            return this.favorites.add(this.documents, item.id, item.name);
+                        }
+                    } else if (item.delete) {
+                        return this.favorites.delete(item.name);
+                    }
 
-                this.modal.close();
-            }
-        });
+                    return of(void 0);
+                }),
+            )
+            .subscribe({
+                complete: () => this.modal.close(),
+                error: error => this.messages.push(messageToString(error, this.translate)),
+            });
     }
 
     public cancel(): void {
         this.modal.close();
     }
 
-    public setActive(item: FavoritesItem, value: boolean): void {
-        item.active = value;
+    private uniqueName(): string {
+        const set = new Set(this._items.map(item => item.name));
+        for (let i = 1; i < Number.MAX_SAFE_INTEGER; i++) {
+            const name = 'Favorites ' + i;
+            if (!set.has(name)) {
+                return name;
+            }
+        }
+
+        throw new Error('Invalid operation.');
+    }
+
+    private checkNames(items: FavoritesItem[]): void {
+        const set = new Set<string>();
+        for (const item of items) {
+            item.name = item.name.trim();
+
+            if (!item.name) {
+                throw new ApplicationError(`Invalid empty name.`, 'ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME');
+            }
+
+            if (set.has(item.name)) {
+                throw new ApplicationError(
+                    `"${item.name}" is used several times.`,
+                    'ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES',
+                    item.name,
+                );
+            }
+
+            set.add(item.name);
+        }
     }
 
     private clearMessages(): void {

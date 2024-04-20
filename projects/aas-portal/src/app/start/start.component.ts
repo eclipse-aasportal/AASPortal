@@ -92,7 +92,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
         this.subscription.add(
             this.store
-                .select(StartSelectors.selectFavorites)
+                .select(StartSelectors.selectCurrentFavorites)
                 .pipe()
                 .subscribe(value => (this._currentFavorites = value)),
         );
@@ -121,9 +121,9 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         }
     }
 
-    public get favoritesLists(): string[] {
-        return ['', ...this.favorites.lists.map(item => item.name)];
-    }
+    public readonly favoritesLists: Observable<string[]> = this.favorites.lists.pipe(
+        map(lists => ['', ...lists.map(list => list.name)]),
+    );
 
     public readonly viewMode: Observable<ViewMode>;
 
@@ -398,12 +398,16 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.indexChange.clear();
     }
 
-    public addToFavorites(): void {
-        const modalRef = this.modal.open(FavoritesFormComponent, { backdrop: 'static' });
-        modalRef.componentInstance.documents = [...this._selected];
-        from(modalRef.result).subscribe(() => {
-            this.selected = [];
-        });
+    public addToFavorites(): Observable<void> {
+        return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
+            mergeMap(modalRef => {
+                modalRef.componentInstance.documents = [...this._selected];
+                return from(modalRef.result);
+            }),
+            map(() => {
+                this.selected = [];
+            }),
+        );
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {

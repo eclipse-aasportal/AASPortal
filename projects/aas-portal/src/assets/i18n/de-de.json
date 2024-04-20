@@ -144,6 +144,8 @@
     "ERROR_EMPTY_ENDPOINT_NAME": "Geben Sie einen eindeutigen Namen für den AAS-Endpunkt ein.",
     "ERROR_NO_ELEMENT_SELECTED": "Mindestens ein Element muss ausgewählt sein.",
     "ERROR_INVALID_CONTAINER_URL": "'{0}' adressiert eine ungülig oder nicht unterstützte VWS-Ressoure.",
+    "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
+    "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name.",
     "FAVORITES": "Favoriten",
     "INFO_NEW_PASSWORD_SENT": "Ein neues Passwort wurde an '{0}' gesendet",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} wurde erfolgreich heruntergeladen.",

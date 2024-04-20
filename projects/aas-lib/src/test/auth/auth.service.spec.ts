@@ -36,6 +36,7 @@ describe('AuthService', () => {
                 'login',
                 'guest',
                 'register',
+                'getProfile',
                 'updateProfile',
                 'getCookies',
                 'getCookie',
@@ -242,11 +243,14 @@ describe('AuthService', () => {
                 'register',
                 'getCookie',
                 'getCookies',
+                'getProfile',
                 'updateProfile',
                 'setCookie',
                 'deleteCookie',
                 'delete',
             ]);
+
+            api.getProfile.and.returnValue(of({ id: 'john.doe@email.com', name: 'John Doe' }));
 
             window = jasmine.createSpyObj<WindowService>([
                 'getLocalStorageItem',

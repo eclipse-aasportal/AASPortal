@@ -13,12 +13,12 @@
 
 <ng-template #startToolbar>
     <div class="input-group me-2">
-        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites()">
+        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
             <i class="bi bi-star"></i>
         </button>
         <select [ngClass]="currentFavorites ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
             [(ngModel)]="currentFavorites">
-            @for (option of favoritesLists; track option; let i = $index) {
+            @for (option of (favoritesLists | async); track option; let i = $index) {
             @if (i === 0) {
             <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
             } @else {

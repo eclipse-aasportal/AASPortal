@@ -88,7 +88,10 @@ describe('StartComponent', () => {
             } as aas.Environment),
         );
 
-        favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], { lists: [] });
+        favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+            lists: of([]),
+        });
+
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });
 
         TestBed.configureTestingModule({
