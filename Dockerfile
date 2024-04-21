@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 COPY . .
 # RUN apk add g++ make py3-pip
 RUN npm install
-RUN node create-app-info.js
+RUN node --no-warnings --loader ts-node/esm create-app-info.ts
 RUN npm run build
 
 FROM node:lts-alpine3.19 as aasportal
