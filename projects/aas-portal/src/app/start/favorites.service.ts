@@ -36,17 +36,9 @@ export class FavoritesService {
         return this.lists$.getValue().find(list => list.name === name);
     }
 
-    public delete(name: string): Observable<void> {
-        return this.lists$.pipe(
-            first(),
-            map(lists => lists.filter(list => list.name !== name)),
-            map(lists => this.lists$.next(lists)),
-            mergeMap(lists => this.auth.setCookie('.Favorites', JSON.stringify(lists))),
-        );
-    }
-
     public add(documents: AASDocument[], name: string, newName?: string): Observable<void> {
         return this.lists$.pipe(
+            first(),
             map(lists => [...lists]),
             map(lists => {
                 const i = lists.findIndex(list => list.name === name);
@@ -71,18 +63,21 @@ export class FavoritesService {
 
                 return lists;
             }),
-            map(lists => this.lists$.next(lists)),
-            mergeMap(lists => this.auth.setCookie('.Favorites', JSON.stringify(lists))),
+            mergeMap(lists => {
+                this.lists$.next(lists);
+                return this.auth.setCookie('.Favorites', JSON.stringify(lists));
+            }),
         );
     }
 
     public remove(documents: AASDocument[], name: string): Observable<void> {
         return this.lists$.pipe(
+            first(),
             map(lists => [...lists]),
             map(lists => {
                 const i = lists.findIndex(list => list.name === name);
                 if (i < 0) {
-                    throw new Error(`A favorites list with the name "${name}" does not exists.`);
+                    throw new Error(`A favorites list "${name}" does not exists.`);
                 }
 
                 const list = { ...lists[i] };
@@ -90,10 +85,27 @@ export class FavoritesService {
                     documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id),
                 );
 
+                lists[i] = list;
+
                 return lists;
             }),
-            map(lists => this.lists$.next(lists)),
-            mergeMap(list => this.auth.setCookie('.Favorites', JSON.stringify(list))),
+            mergeMap(lists => {
+                this.lists$.next(lists);
+                return this.auth.setCookie('.Favorites', JSON.stringify(lists));
+            }),
+        );
+    }
+
+    public delete(name: string): Observable<void> {
+        return this.lists$.pipe(
+            first(),
+            map(lists => lists.filter(list => list.name !== name)),
+            mergeMap(lists => {
+                this.lists$.next(lists);
+                return lists.length > 0
+                    ? this.auth.setCookie('.Favorites', JSON.stringify(lists))
+                    : this.auth.deleteCookie('.Favorites');
+            }),
         );
     }
 }

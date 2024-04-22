@@ -58,26 +58,25 @@
     "karmaTestExplorer.projectWorkspaces": [
         {
             "rootPath": "projects/aas-lib",
-            "karmaConfFilePath": "karma.config.cjs",
+            // "karmaConfFilePath": "karma.config.cjs",
             "testFramework": "jasmine",
             "projectType": "angular",
             "testsBasePath": "src/test",
-            "testFiles": [
-                "src/**/*.spec.ts"
-            ],
-            "excludeFiles": ["dist/**/*.*"]
+            // "testFiles": [
+            //     "src/**/*.spec.ts"
+            // ],
+            // "excludeFiles": ["dist/**/*.*"]
         },
         {
             "rootPath": "projects/aas-portal",
             "karmaConfFilePath": "karma.config.cjs",
             "testFramework": "jasmine",
             "projectType": "angular",
-            "testsBasePath": "src/test",
-            "testFiles": [
-                "src/**/*.spec.ts"
-            ],
-            "excludeFiles": ["dist/**/*.*"]
+            // "testsBasePath": "src/test",
+            // "testFiles": [
+            //     "src/**/*.spec.ts"
+            // ],
+            // "excludeFiles": ["dist/**/*.*"]
         }
-    ],
-
+    ]
 }

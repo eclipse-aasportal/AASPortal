@@ -2,7 +2,7 @@ export default {
     clearMocks: true,
     collectCoverage: true,
     collectCoverageFrom: ['<rootDir>/src/lib/**/*.ts'],
-    coverageDirectory: '<rootDir>/../../reports/awp-jest',
+    coverageDirectory: '<rootDir>/../../reports/fhg-jest',
     coverageReporters: ['html', 'json-summary', 'cobertura'],
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
