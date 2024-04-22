@@ -9,7 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { OpcuaClient } from '../../../app/packages/opcua/opcua-client.js';
 import { Logger } from '../../../app/logging/logger.js';
-import { createSpyObj } from '../../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, StatusCodes, Variant } from 'node-opcua';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { LiveRequest, aas } from 'common';

@@ -12,7 +12,7 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 
 import { WebSocketFactoryService } from '../lib/web-socket-factory.service';
 
-describe('WindowService', () => {
+describe('WebSocketFactoryService', () => {
     let service: WebSocketFactoryService;
     let webSocket: WebSocketSubject<WebSocketData>;
 
@@ -21,7 +21,7 @@ describe('WindowService', () => {
         service = TestBed.inject(WebSocketFactoryService);
     });
 
-    afterEach(function(){
+    afterEach(() => {
         webSocket?.unsubscribe();
     });
 
@@ -29,8 +29,8 @@ describe('WindowService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('creates a new WebSocket connection', function () {
-        webSocket = service.create("http://localhost:8888");
+    it('creates a new WebSocket connection', () => {
+        webSocket = service.create('http://localhost:8888');
         expect(webSocket).toBeTruthy();
     });
 });

@@ -42,17 +42,42 @@
     "files.eol": "\n",
     "jest.debugMode": true,
     "jest.virtualFolders": [
-        {"name": "common", "rootPath": "./projects/common", "runMode": "on-demand", "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"},
-        {"name": "aas-server", "rootPath": "./projects/aas-server", "runMode": "on-demand", "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"}
+        {
+            "name": "common",
+            "rootPath": "./projects/common",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
+        },
+        {
+            "name": "aas-server",
+            "rootPath": "./projects/aas-server",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
+        }
     ],
-    "jasmineExplorer.config": "./jasmine.json",
-    "jasmineExplorer.debuggerConfig": "",
-    "jasmineExplorer.nodeArgv": [
-        "--experimental-vm-modules", 
-        "--no-warnings",
-        "-r",
-        "ts-node/register",
+    "karmaTestExplorer.projectWorkspaces": [
+        {
+            "rootPath": "projects/aas-lib",
+            "karmaConfFilePath": "karma.config.cjs",
+            "testFramework": "jasmine",
+            "projectType": "angular",
+            "testsBasePath": "src/test",
+            "testFiles": [
+                "src/**/*.spec.ts"
+            ],
+            "excludeFiles": ["dist/**/*.*"]
+        },
+        {
+            "rootPath": "projects/aas-portal",
+            "karmaConfFilePath": "karma.config.cjs",
+            "testFramework": "jasmine",
+            "projectType": "angular",
+            "testsBasePath": "src/test",
+            "testFiles": [
+                "src/**/*.spec.ts"
+            ],
+            "excludeFiles": ["dist/**/*.*"]
+        }
     ],
-    "jasmineExplorer.nodePath": null,
-    "jasmineExplorer.jasminePath": null,
+
 }

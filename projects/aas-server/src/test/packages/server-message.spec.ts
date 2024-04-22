@@ -10,7 +10,7 @@ import net from 'net';
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { ServerMessage } from '../../app/packages/server-message.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
 describe('ServerMessage', function () {

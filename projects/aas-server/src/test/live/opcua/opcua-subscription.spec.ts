@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { OpcuaSubscription } from '../../../app/live/opcua/opcua-subscription.js';
-import { createSpyObj } from '../../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { OpcuaClient } from '../../../app/packages/opcua/opcua-client.js';

@@ -20,7 +20,7 @@ import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js
 import { AASApiClientV0 } from '../../../app/packages/aas-server/aas-api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import aasEnvironment from '../../assets/aas-environment.js';
-import { createSpyObj } from '../../utils.js';
+import { createSpyObj } from 'fhg-jest';
 
 describe('AASApiClientV0', function () {
     let logger: jest.Mocked<Logger>;

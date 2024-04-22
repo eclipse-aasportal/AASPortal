@@ -18,7 +18,7 @@ import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';

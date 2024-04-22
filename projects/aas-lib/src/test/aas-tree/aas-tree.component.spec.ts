@@ -38,48 +38,43 @@ describe('AASTreeComponent', () => {
         webSocketSubject = new Subject<WebSocketData>();
 
         TestBed.configureTestingModule({
-            declarations: [
-                AASTreeComponent
-            ],
+            declarations: [AASTreeComponent],
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log'])
+                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
                 },
                 {
                     provide: DownloadService,
                     useValue: jasmine.createSpyObj<DownloadService>([
                         'downloadFileAsync',
                         'downloadDocument',
-                        'uploadDocuments'])
+                        'uploadDocuments',
+                    ]),
                 },
                 {
                     provide: WindowService,
-                    useValue: jasmine.createSpyObj<WindowService>([
-                        'addEventListener',
-                        'open',
-                        'removeEventListener']),
+                    useValue: jasmine.createSpyObj<WindowService>(['addEventListener', 'open', 'removeEventListener']),
                 },
                 {
                     provide: WebSocketFactoryService,
-                    useValue: new TestWebSocketFactoryService(webSocketSubject)
-                }
+                    useValue: new TestWebSocketFactoryService(webSocketSubject),
+                },
             ],
             imports: [
                 NgbModule,
                 CommonModule,
                 HttpClientTestingModule,
-                StoreModule.forRoot(
-                    {
-                        tree: aasTreeReducer
-                    }),
+                StoreModule.forRoot({
+                    tree: aasTreeReducer,
+                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(AASTreeComponent);
@@ -90,11 +85,11 @@ describe('AASTreeComponent', () => {
 
         component.document = document;
         component.ngOnChanges({
-            'document': new SimpleChange(null, document, true)
+            document: new SimpleChange(null, document, true),
         });
     });
 
-    afterEach(function () {
+    afterEach(() => {
         webSocketSubject?.unsubscribe();
     });
 
@@ -102,34 +97,34 @@ describe('AASTreeComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('gets the current document', function () {
+    it('gets the current document', () => {
         expect(component.document).toEqual(document);
     });
 
-    it('indicates if document is online-ready', function () {
+    it('indicates if document is online-ready', () => {
         expect(component.onlineReady).toEqual(document.onlineReady ? document.onlineReady : false);
     });
 
-    it('indicates if document is read-only', function () {
+    it('indicates if document is read-only', () => {
         expect(component.readonly).toEqual(document.readonly);
     });
 
-    it('indicates if the document is modified', function () {
+    it('indicates if the document is modified', () => {
         expect(component.modified).toEqual(document.modified ? document.modified : false);
     });
 
-    it('shows the current offline state', function () {
+    it('shows the current offline state', () => {
         expect(component.state).toEqual('offline');
     });
 
-    it('indicates if no node is selected', function (done: DoneFn) {
+    it('indicates if no node is selected', (done: DoneFn) => {
         component.someSelected.pipe(first()).subscribe(value => {
             expect(value).toBeFalse();
             done();
-        })
+        });
     });
 
-    it('shows the first level ExampleMotor', function (done: DoneFn) {
+    it('shows the first level ExampleMotor', (done: DoneFn) => {
         component.nodes.pipe(first()).subscribe(nodes => {
             expect(nodes).toBeTruthy();
             expect(nodes.length).toEqual(5);
@@ -143,25 +138,27 @@ describe('AASTreeComponent', () => {
         });
     });
 
-
-    describe('toggleSelection', function () {
-        it('toggle selection of all rows', function (done: DoneFn) {
+    describe('toggleSelection', () => {
+        it('toggle selection of all rows', (done: DoneFn) => {
             component.toggleSelections();
-            store.select(selectRows).pipe(first()).subscribe(values => {
-                expect(values.every(value => value.selected)).toBeTrue();
-                done();
-            });
+            store
+                .select(selectRows)
+                .pipe(first())
+                .subscribe(values => {
+                    expect(values.every(value => value.selected)).toBeTrue();
+                    done();
+                });
         });
     });
 
-    describe('collapse', function () {
+    describe('collapse', () => {
         let nodes: AASTreeRow[];
 
-        beforeEach(function () {
-            component.nodes.pipe(first()).subscribe(values => nodes = values);
+        beforeEach(() => {
+            component.nodes.pipe(first()).subscribe(values => (nodes = values));
         });
 
-        it('collapse root element', function (done: DoneFn) {
+        it('collapse root element', (done: DoneFn) => {
             component.collapse(nodes[0]);
             component.nodes.pipe(first()).subscribe(values => {
                 expect(values.length).toEqual(1);
@@ -171,7 +168,7 @@ describe('AASTreeComponent', () => {
             });
         });
 
-        it('collapse to initial view', function () {
+        it('collapse to initial view', () => {
             component.collapse();
             component.nodes.pipe(first()).subscribe(values => {
                 expect(values.length).toEqual(5);
@@ -185,14 +182,14 @@ describe('AASTreeComponent', () => {
         });
     });
 
-    describe('expand', function () {
+    describe('expand', () => {
         let nodes: AASTreeRow[];
 
-        beforeEach(function () {
-            component.nodes.pipe(first()).subscribe(values => nodes = values);
+        beforeEach(() => {
+            component.nodes.pipe(first()).subscribe(values => (nodes = values));
         });
 
-        it('expand submodel "Identification"', function (done: DoneFn) {
+        it('expand submodel "Identification"', (done: DoneFn) => {
             component.expand(nodes[1]);
             component.nodes.pipe(first()).subscribe(values => {
                 expect(values.length).toEqual(9);
@@ -203,116 +200,143 @@ describe('AASTreeComponent', () => {
         });
     });
 
-    describe('search text "max"', function () {
+    describe('search text "max"', () => {
         let search: BehaviorSubject<string>;
         let store: Store<AASTreeFeatureState>;
 
-        beforeEach(function () {
+        beforeEach(() => {
             search = new BehaviorSubject<string>('');
             component.search = search.asObservable();
 
             component.ngOnChanges({
-                'search': new SimpleChange(null, search, true)
+                search: new SimpleChange(null, search, true),
             });
 
             store = TestBed.inject(Store);
         });
 
-        it('the search text must be at least three characters long', function (done: DoneFn) {
-            const subscription = store.select(selectMatchRow).pipe().subscribe(row => {
-                if (row) {
-                    expect(row.name).toEqual('MaxRotationSpeed');
-                    subscription.unsubscribe();
-                    done();
-                }
-            });
+        it('the search text must be at least three characters long', (done: DoneFn) => {
+            const subscription = store
+                .select(selectMatchRow)
+                .pipe()
+                .subscribe(row => {
+                    if (row) {
+                        expect(row.name).toEqual('MaxRotationSpeed');
+                        subscription.unsubscribe();
+                        done();
+                    }
+                });
 
             search.next('z');
             search.next('zy');
             search.next('max');
         });
 
-        it('finds the first occurrence of "max" at row 7', function (done: DoneFn) {
+        it('finds the first occurrence of "max" at row 7', (done: DoneFn) => {
             search.next('max');
 
-            store.select(selectMatchIndex).pipe(first()).subscribe(value => {
-                expect(value).toEqual(7);
-                done();
-            });
+            store
+                .select(selectMatchIndex)
+                .pipe(first())
+                .subscribe(value => {
+                    expect(value).toEqual(7);
+                    done();
+                });
         });
 
-        it('finds the next occurrence of "max" at row 8', function (done: DoneFn) {
+        it('finds the next occurrence of "max" at row 8', (done: DoneFn) => {
             search.next('max');
 
-            store.select(selectTerms).pipe(first()).subscribe(() => {
-                component.findNext();
-            });
+            store
+                .select(selectTerms)
+                .pipe(first())
+                .subscribe(() => {
+                    component.findNext();
+                });
 
-            store.select(selectMatchIndex).pipe(first()).subscribe(value => {
-                expect(value).toEqual(8);
-                done();
-            });
+            store
+                .select(selectMatchIndex)
+                .pipe(first())
+                .subscribe(value => {
+                    expect(value).toEqual(8);
+                    done();
+                });
         });
 
-        it('finds the previous occurrence of "max" at row 25', function (done: DoneFn) {
+        it('finds the previous occurrence of "max" at row 25', (done: DoneFn) => {
             search.next('max');
 
-            store.select(selectTerms).pipe(first()).subscribe(() => {
-                component.findPrevious();
-            });
+            store
+                .select(selectTerms)
+                .pipe(first())
+                .subscribe(() => {
+                    component.findPrevious();
+                });
 
-            store.select(selectMatchIndex).pipe(first()).subscribe(value => {
-                expect(value).toEqual(8);
-                done();
-            });
+            store
+                .select(selectMatchIndex)
+                .pipe(first())
+                .subscribe(value => {
+                    expect(value).toEqual(8);
+                    done();
+                });
         });
     });
 
-    describe('search pattern', function () {
+    describe('search pattern', () => {
         let search: BehaviorSubject<string>;
         let store: Store<AASTreeFeatureState>;
 
-        beforeEach(function () {
+        beforeEach(() => {
             search = new BehaviorSubject<string>('');
             component.search = search.asObservable();
 
             component.ngOnChanges({
-                'search': {
+                search: {
                     currentValue: search,
                     previousValue: null,
                     firstChange: true,
-                    isFirstChange: () => true
-                }
+                    isFirstChange: () => true,
+                },
             });
 
             store = TestBed.inject(Store);
         });
 
-        it('finds the first occurrence of "#prop:max" at row 7', function (done: DoneFn) {
+        it('finds the first occurrence of "#prop:max" at row 7', (done: DoneFn) => {
             search.next('#prop:max');
 
-            store.select(selectMatchIndex).pipe(first()).subscribe(value => {
-                expect(value).toEqual(7);
-                done();
-            });
+            store
+                .select(selectMatchIndex)
+                .pipe(first())
+                .subscribe(value => {
+                    expect(value).toEqual(7);
+                    done();
+                });
         });
 
-        it('finds the first occurrence of "#prop:MaxTorque" at row 8', function (done: DoneFn) {
+        it('finds the first occurrence of "#prop:MaxTorque" at row 8', (done: DoneFn) => {
             search.next('#prop:MaxTorque');
 
-            store.select(selectMatchIndex).pipe(first()).subscribe(value => {
-                expect(value).toEqual(8);
-                done();
-            });
+            store
+                .select(selectMatchIndex)
+                .pipe(first())
+                .subscribe(value => {
+                    expect(value).toEqual(8);
+                    done();
+                });
         });
 
-        it('finds the first occurrence of "#prop:serialnumber=P12345678I40" at row 5', function (done: DoneFn) {
+        it('finds the first occurrence of "#prop:serialnumber=P12345678I40" at row 5', (done: DoneFn) => {
             search.next('#prop:serialnumber=P12345678I40');
 
-            store.select(selectMatchIndex).pipe(first()).subscribe(value => {
-                expect(value).toEqual(5);
-                done();
-            });
+            store
+                .select(selectMatchIndex)
+                .pipe(first())
+                .subscribe(value => {
+                    expect(value).toEqual(5);
+                    done();
+                });
         });
     });
 });

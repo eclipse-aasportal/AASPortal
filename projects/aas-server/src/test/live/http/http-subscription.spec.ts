@@ -13,7 +13,7 @@ import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
 import env from '../../assets/aas-environment.js';
-import { createSpyObj, DoneFn } from '../../utils.js';
+import { createSpyObj, DoneFn } from 'fhg-jest'
 
 describe('HttpSubscription', function () {
     let aasxServer: jest.Mocked<AASApiClient>;

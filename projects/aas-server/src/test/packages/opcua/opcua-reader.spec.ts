@@ -11,7 +11,7 @@ import { Logger } from '../../../app/logging/logger.js';
 import { OpcuaReader } from '../../../app/packages/opcua/opcua-reader.js';
 import { OPCUAComponent } from '../../../app/packages/opcua/opcua.js';
 import { OpcuaDataTypeDictionary } from '../../../app/packages/opcua/opcua-data-type-dictionary.js';
-import { createSpyObj } from '../../utils.js';
+import { createSpyObj } from 'fhg-jest';
 
 describe('OpcuaReader', function () {
     let reader: OpcuaReader;

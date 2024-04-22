@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { WebSocket } from 'ws';
 import { SocketClient } from '../../app/live/socket-client.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { SocketSubscription } from '../../app/live/socket-subscription.js';
 
 describe('SocketClient', function () {

@@ -15,7 +15,7 @@ import { Cookie } from 'common';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { LocalUserStorage } from '../../app/auth/local-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Logger } from '../../app/logging/logger.js';
 import { slash } from '../../app/convert.js';
 

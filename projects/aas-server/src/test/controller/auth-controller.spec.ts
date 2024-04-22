@@ -15,7 +15,7 @@ import { ApplicationError, AuthResult, Cookie, Credentials } from 'common';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { AuthService } from '../../app/auth/auth-service.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Logger } from '../../app/logging/logger.js';

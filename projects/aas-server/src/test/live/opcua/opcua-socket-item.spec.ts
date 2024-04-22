@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { ClientMonitoredItem } from 'node-opcua';
 import { OpcuaSocketItem } from '../../../app/live/opcua/opcua-socket-item.js';
 import { Logger } from '../../../app/logging/logger.js';
-import { createSpyObj } from '../../utils.js';
+import { createSpyObj } from 'fhg-jest'
 import { SocketClient } from '../../../app/live/socket-client.js';
 
 describe('OpcuaSocketItem', () => {

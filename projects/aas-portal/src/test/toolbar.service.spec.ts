@@ -23,8 +23,8 @@ describe('ToolbarService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('set', function () {
-        beforeEach(function() {
+    describe('set', () => {
+        beforeEach(() => {
             service.clear();
         });
 
@@ -34,12 +34,12 @@ describe('ToolbarService', () => {
             service.toolbarTemplate.pipe(first(value => value !== null)).subscribe(value => {
                 expect(value).toEqual(template);
                 done();
-            })
+            });
         });
     });
 
-    describe('clear', function () {
-        beforeEach(function () {
+    describe('clear', () => {
+        beforeEach(() => {
             const template = jasmine.createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
             service.set(template);
         });
@@ -49,7 +49,7 @@ describe('ToolbarService', () => {
             service.toolbarTemplate.pipe(first(value => value === null)).subscribe(value => {
                 expect(value).toBeNull();
                 done();
-            })
+            });
         });
     });
 });

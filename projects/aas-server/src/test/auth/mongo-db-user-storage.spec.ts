@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import { MongoDBUserStorage, UserCookies } from '../../app/auth/mongo-db-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
 import { describe, beforeAll, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 import mongoose from 'mongoose';
 

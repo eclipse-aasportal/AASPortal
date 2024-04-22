@@ -38,34 +38,27 @@ describe('AASTableComponent', () => {
         document3 = createDocument('document3');
 
         TestBed.configureTestingModule({
-            declarations: [
-                AASTableComponent,
-                MaxLengthPipe,
-                SortableHeaderDirective
-            ],
+            declarations: [AASTableComponent, MaxLengthPipe, SortableHeaderDirective],
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log'])
-                }
+                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
+                },
             ],
             imports: [
                 CommonModule,
                 NgbModule,
-                StoreModule.forRoot(
-                    {
-                        aasTable: aasTableReducer
-                    }),
-                EffectsModule.forRoot(
-                    AASTableEffects
-                ),
+                StoreModule.forRoot({
+                    aasTable: aasTableReducer,
+                }),
+                EffectsModule.forRoot(AASTableEffects),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(AASTableComponent);

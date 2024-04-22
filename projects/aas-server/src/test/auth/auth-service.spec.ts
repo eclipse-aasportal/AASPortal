@@ -15,7 +15,7 @@ import { ERRORS } from '../../app/errors.js';
 import { Mailer } from '../../app/mailer.js';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 
 describe('AuthService', function () {

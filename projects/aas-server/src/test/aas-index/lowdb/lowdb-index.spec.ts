@@ -11,7 +11,7 @@ import path from 'path/posix';
 import fs from 'fs';
 import { Low } from 'lowdb';
 import { AASCursor, AASDocument, AASDocumentId } from 'common';
-import { createSpyObj } from '../../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-index/lowdb/lowdb-index.js';
 import { LowDbData } from '../../../app/aas-index/lowdb/lowdb-types.js';
