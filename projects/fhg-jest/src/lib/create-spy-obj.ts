@@ -28,7 +28,9 @@ export function createSpyObj<T extends object>(
 
     if (propertyNames) {
         if (Array.isArray(propertyNames)) {
-            throw new Error('Not implemented.');
+            for (const propertyName of propertyNames) {
+                obj[propertyName] = propertyNames[propertyName];
+            }
         } else {
             for (const propertyName in propertyNames) {
                 obj[propertyName] = propertyNames[propertyName];
