@@ -153,10 +153,12 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
                 if (params) {
                     const document: AASDocument = this.clipboard.get('AASDocument');
-                    if (!document || !document.content) {
+                    if (!document) {
                         this.store.dispatch(AASActions.getDocument({ id: params.id, name: params.endpoint }));
+                    } else if (!document.content) {
+                        this.store.dispatch(AASActions.getDocumentContent({ document: document }));
                     } else {
-                        this.store.dispatch(AASActions.setDocument({ document: document }));
+                        this.store.dispatch(AASActions.setDocument({ document }));
                     }
                 }
             }),

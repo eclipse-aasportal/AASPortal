@@ -79,13 +79,13 @@ export class StartApiService {
 
     /**
      * Loads the element structure of the specified document.
-     * @param endpointName The URL of the container.
+     * @param endpoint The endpoint name.
      * @param id The identification of the AAS document.
      * @returns The root of the element structure.
      */
-    public getContent(endpointName: string, id: string): Observable<aas.Environment> {
+    public getContent(endpoint: string, id: string): Observable<aas.Environment> {
         return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/content`,
+            `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`,
         );
     }
 

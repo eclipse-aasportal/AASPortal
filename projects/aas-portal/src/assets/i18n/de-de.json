@@ -51,6 +51,7 @@
     "CMD_DELETE_USER": "Benutzerkonto löschen...",
     "CMD_VIEW_USER_FEEDBACK": "Nutzer-Feedback",
     "CMD_VIEW_NAMEPLATE": "Typenschild",
+    "CMD_ADD_NEW_FAVORITES_LIST": "Neue Favoritenliste",
     "COLUMN_VARIANT": "Variante",
     "COLUMN_NAME": "Name",
     "COLUMN_MODEL_TYPE": "Modeltyp",
@@ -165,6 +166,8 @@
     "OPTION_TIMELINE_CHART": "Zeitdiagramm",
     "OPTION_BAR_VERTICAL_CHART": "Balkendiagramm vertikal",
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
+    "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen",
+    "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen",
     "AASEndpointType": {
         "FileSystem": "Verzeichnis",
         "AASServer": "AAS-Server",

@@ -51,6 +51,7 @@
     "CMD_DELETE_USER": "Delete user account...",
     "CMD_VIEW_USER_FEEDBACK": "User feedback",
     "CMD_VIEW_NAMEPLATE": "Nameplate",
+    "CMD_ADD_NEW_FAVORITES_LIST": "New favorites list",
     "COLUMN_NAME": "Name",
     "COLUMN_MODEL_TYPE": "Model type",
     "COLUMN_SIZE": "Size",
@@ -165,6 +166,8 @@
     "OPTION_TIMELINE_CHART": "Timeline chart",
     "OPTION_BAR_VERTICAL_CHART": "Vertical bar chart",
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
+    "TEXT_ADD_FAVORITE": "Add 1 favorite",
+    "TEXT_ADD_FAVORITES": "Add {0} favorites",
     "AASEndpointType": {
         "FileSystem": "File system",
         "AASServer": "AAS server",

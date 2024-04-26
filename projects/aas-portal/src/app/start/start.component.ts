@@ -50,7 +50,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     private readonly subscription = new Subscription();
     private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
     private _selected: AASDocument[] = [];
-    private _currentFavorites = '';
 
     public constructor(
         store: Store,
@@ -75,6 +74,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.isLastPage = this.store.select(StartSelectors.selectIsLastPage);
         this.documents = this.store.select(StartSelectors.selectDocuments);
         this.viewMode = this.store.select(StartSelectors.selectViewMode);
+        this.currentFavorites = this.store.select(StartSelectors.selectCurrentFavorites);
         this.endpoints = this.api.getEndpoints();
 
         this.store
@@ -89,37 +89,12 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 next: () => this.store.dispatch(StartActions.getFirstPage({})),
                 error: error => this.notify.error(error),
             });
-
-        this.subscription.add(
-            this.store
-                .select(StartSelectors.selectCurrentFavorites)
-                .pipe()
-                .subscribe(value => (this._currentFavorites = value)),
-        );
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
-    public get currentFavorites(): string {
-        return this._currentFavorites;
-    }
-
-    public set currentFavorites(value: string) {
-        if (value !== this._currentFavorites) {
-            const currentFavorites = this.favorites.get(value);
-            if (currentFavorites) {
-                this.store.dispatch(
-                    StartActions.getFavorites({
-                        name: currentFavorites.name,
-                        documents: currentFavorites.documents,
-                    }),
-                );
-            } else {
-                this.store.dispatch(StartActions.getFirstPage({}));
-            }
-        }
-    }
+    public readonly currentFavorites: Observable<string>;
 
     public readonly favoritesLists: Observable<string[]> = this.favorites.lists.pipe(
         map(lists => ['', ...lists.map(list => list.name)]),
@@ -179,24 +154,43 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.subscription.unsubscribe();
     }
 
-    public setViewMode(viewMode: string | ViewMode): void {
-        if (viewMode === ViewMode.List) {
-            if (!this._currentFavorites) {
-                this.store.dispatch(StartActions.setListView());
-            } else {
-                const favoritesList = this.favorites.get(this._currentFavorites);
-                if (favoritesList) {
-                    this.store.dispatch(
-                        StartActions.getFavorites({
-                            name: favoritesList.name,
-                            documents: favoritesList.documents,
-                        }),
-                    );
-                }
-            }
+    public setCurrentFavorites(value: string): void {
+        const currentFavorites = this.favorites.get(value);
+        if (currentFavorites) {
+            this.store.dispatch(
+                StartActions.getFavorites({
+                    name: currentFavorites.name,
+                    documents: currentFavorites.documents,
+                }),
+            );
         } else {
-            this.store.dispatch(StartActions.setTreeView({ documents: this._selected }));
+            this.store.dispatch(StartActions.getFirstPage({}));
         }
+    }
+
+    public setViewMode(viewMode: string | ViewMode): Observable<void> {
+        return this.currentFavorites.pipe(
+            first(),
+            map(currentFavorites => {
+                if (viewMode === ViewMode.List) {
+                    if (!currentFavorites) {
+                        this.store.dispatch(StartActions.setListView());
+                    } else {
+                        const favoritesList = this.favorites.get(currentFavorites);
+                        if (favoritesList) {
+                            this.store.dispatch(
+                                StartActions.getFavorites({
+                                    name: favoritesList.name,
+                                    documents: favoritesList.documents,
+                                }),
+                            );
+                        }
+                    }
+                } else {
+                    this.store.dispatch(StartActions.setTreeView({ documents: this._selected }));
+                }
+            }),
+        );
     }
 
     public addEndpoint(): Observable<void> {
@@ -284,26 +278,28 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             return EMPTY;
         }
 
-        if (!this._currentFavorites) {
-            return this.auth.ensureAuthorized('editor').pipe(
-                map(() =>
-                    this.window.confirm(
-                        stringFormat(
-                            this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                            this._selected.map(item => item.idShort).join(', '),
+        return this.currentFavorites.pipe(
+            first(),
+            mergeMap(currentFavorites => {
+                if (currentFavorites) {
+                    this.favorites.remove(this._selected, currentFavorites);
+                    this.store.dispatch(StartActions.removeFavorites({ favorites: [...this._selected] }));
+                    return of(void 0);
+                } else {
+                    return this.auth.ensureAuthorized('editor').pipe(
+                        map(() =>
+                            this.window.confirm(
+                                stringFormat(
+                                    this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
+                                    this._selected.map(item => item.idShort).join(', '),
+                                ),
+                            ),
                         ),
-                    ),
-                ),
-                mergeMap(result => from(result ? this._selected : [])),
-                mergeMap(document => this.api.delete(document.id, document.endpoint)),
-                catchError(error => this.notify.error(error)),
-            );
-        }
-
-        return of(this._currentFavorites).pipe(
-            map(list => {
-                this.favorites.remove(this._selected, list);
-                this.store.dispatch(StartActions.removeFavorites({ favorites: [...this._selected] }));
+                        mergeMap(result => from(result ? this._selected : [])),
+                        mergeMap(document => this.api.delete(document.id, document.endpoint)),
+                        catchError(error => this.notify.error(error)),
+                    );
+                }
             }),
         );
     }
@@ -373,8 +369,8 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         }
     }
 
-    public setLimit(limit: number): void {
-        this.store.dispatch(StartActions.getFirstPage({ limit }));
+    public setLimit(value: string | number): void {
+        this.store.dispatch(StartActions.getFirstPage({ limit: Number(value) }));
     }
 
     public firstPage(): void {

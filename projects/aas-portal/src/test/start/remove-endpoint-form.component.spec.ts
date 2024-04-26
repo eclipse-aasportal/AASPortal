@@ -14,22 +14,16 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 
 import { RemoveEndpointFormComponent } from '../../app/start/remove-endpoint-form/remove-endpoint-form.component';
 
-
 describe('RemoveEndpointFormComponent', () => {
     let component: RemoveEndpointFormComponent;
     let fixture: ComponentFixture<RemoveEndpointFormComponent>;
-    let submitButton: HTMLButtonElement;
     let modal: NgbActiveModal;
     let form: HTMLFormElement;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                RemoveEndpointFormComponent
-            ],
-            providers: [
-                NgbActiveModal
-            ],
+            declarations: [RemoveEndpointFormComponent],
+            providers: [NgbActiveModal],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -37,11 +31,10 @@ describe('RemoveEndpointFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(RemoveEndpointFormComponent);
@@ -49,14 +42,13 @@ describe('RemoveEndpointFormComponent', () => {
         component.endpoints = [
             { name: 'Samples', url: 'http://localhost:1234', selected: false },
             { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
-            { name: 'AAS Registry', url: 'http://localhost:1236', selected: false }
+            { name: 'AAS Registry', url: 'http://localhost:1236', selected: false },
         ];
 
         fixture.detectChanges();
 
         modal = TestBed.inject(NgbActiveModal);
         form = fixture.debugElement.nativeElement.querySelector('form');
-        submitButton = fixture.debugElement.nativeElement.querySelector('button[type="submit"]');
     });
 
     it('should create', () => {
@@ -78,7 +70,7 @@ describe('RemoveEndpointFormComponent', () => {
         expect(modal.close).toHaveBeenCalled();
     });
 
-    it('allows deleting the "Samples" registry', function () {
+    it('?allows deleting the "Samples" registry', function () {
         spyOn(modal, 'close');
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);

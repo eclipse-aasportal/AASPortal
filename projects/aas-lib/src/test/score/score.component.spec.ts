@@ -10,7 +10,6 @@ import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ScoreComponent } from '../../lib/score/score.component';
 
-
 describe('ScoreComponent', () => {
     let component: ScoreComponent;
     let fixture: ComponentFixture<ScoreComponent>;
@@ -19,7 +18,7 @@ describe('ScoreComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [ScoreComponent]
+            declarations: [ScoreComponent],
         });
 
         fixture = TestBed.createComponent(ScoreComponent);
@@ -48,7 +47,7 @@ describe('ScoreComponent', () => {
         expect(positiveDiv.style.width).toEqual('42%');
         expect(negativeDiv.style.width).toEqual('0%');
     });
-    
+
     it('it shows a negative score', function () {
         component.score = -0.42;
         component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
@@ -79,8 +78,8 @@ describe('ScoreComponent', () => {
         expect(component.positive).toEqual(100);
         expect(component.negative).toEqual(0);
     });
-    
-    it('it shows a negative score', function () {
+
+    it('it shows a 100% negative score', function () {
         component.score = -1234567.89;
         component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
         fixture.detectChanges();

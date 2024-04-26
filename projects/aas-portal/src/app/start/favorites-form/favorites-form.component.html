@@ -29,20 +29,23 @@
                     autocomplete="false" (change)="selected($event.target, item)" [checked]="item.selected">
                 <input class="form-control no-border" type="text" name="item.name"
                     (input)="valueChanged($event.target, item)" [value]="item.name" required>
-                <button class="btn text-success fs-5 p-0 me-2" type="button" [hidden]="!item.active && !item.selected"
-                    (click)="add(item)">
-                    <i class="bi bi-plus-lg"></i>
-                </button>
                 <button class="btn text-danger fs-5 p-0" type="button" [hidden]="!item.active && !item.selected"
                     (click)="delete(item)">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
+            @if(item.selected && text) {
+            <div class="fw-light ts-small">{{text}}</div>
+            }
         </li>
         }
     </ul>
 </div>
 <div class="modal-footer">
+    <div class="position-absolute start-0 ms-3">
+        <a class="link-opacity-50-hover" href="javascript:void(0)" (click)="addNew()"
+            translate>CMD_ADD_NEW_FAVORITES_LIST</a>
+    </div>
     <button type="submit" class="btn btn-primary" (click)="submit()" translate>CMD_OK</button>
     <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
 </div>

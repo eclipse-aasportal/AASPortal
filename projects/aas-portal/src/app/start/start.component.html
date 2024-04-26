@@ -16,8 +16,8 @@
         <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
             <i class="bi bi-star"></i>
         </button>
-        <select [ngClass]="currentFavorites ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
-            [(ngModel)]="currentFavorites">
+        <select #selectFavorites [ngClass]="currentFavorites ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [value]="currentFavorites | async" (change)="setCurrentFavorites(selectFavorites.value)">
             @for (option of (favoritesLists | async); track option; let i = $index) {
             @if (i === 0) {
             <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
@@ -28,13 +28,20 @@
         </select>
     </div>
     @if (!currentFavorites) {
-    <div class="btn-group me-2">
+    <div class="input-group me-2">
         <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-bar-left"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage | async">
             <i class="bi bi-chevron-left"></i>
         </button>
+        <select #selectLimit class="form-select" [value]="limit | async" (change)="setLimit(selectLimit.value)">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+        </select>
         <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage | async">
             <i class="bi bi-chevron-right"></i>
         </button>
@@ -78,12 +85,12 @@
     </div>
     <div class="btn-group me-2" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="(viewMode | async) === 'list'">
+            (change)="setViewMode('list').subscribe()" [checked]="(viewMode | async) === 'list'">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="(viewMode | async) === 'tree'">
+            (change)="setViewMode('tree').subscribe()" [checked]="(viewMode | async) === 'tree'">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>

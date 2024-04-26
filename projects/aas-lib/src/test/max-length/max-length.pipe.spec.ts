@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { MaxLengthPipe } from "../../lib/max-length.pipe";
+import { MaxLengthPipe } from '../../lib/max-length.pipe';
 
 describe('MaxLengthPipe', () => {
     it('create an instance', () => {
@@ -19,7 +19,7 @@ describe('MaxLengthPipe', () => {
         expect(pipe.transform('0123456789', 10)).toEqual('0123456789');
     });
 
-    it('does not transform if text length <= max', function () {
+    it('transform if text length > max', function () {
         const pipe = new MaxLengthPipe();
         expect(pipe.transform('0123456789', 5)).toEqual('0...9');
     });

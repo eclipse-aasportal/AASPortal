@@ -6,6 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
+@if (document?.content) {
 <table class="table table-sm table-hover table-striped align-middle">
     <thead>
         <tr>
@@ -126,3 +127,8 @@
         }
     </tbody>
 </table>
+} @else {
+<div class="position-relative">
+    <div class="position-absolute top-50 start-50 translate-middle">Keinen Kontent</div>
+</div>
+}

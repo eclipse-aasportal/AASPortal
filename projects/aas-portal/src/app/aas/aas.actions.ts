@@ -12,6 +12,7 @@ import { AASDocument } from 'common';
 
 export enum AASActionType {
     GET_DOCUMENT = '[AAS] get document',
+    GET_DOCUMENT_CONTENT = '[AAS] get document content',
     SET_DOCUMENT = '[AAS] set document',
     APPLY_DOCUMENT = '[AAS] apply document',
     RESET_MODIFIED = '[AAS] reset modified',
@@ -25,7 +26,13 @@ export interface GetDocumentAction extends TypedAction<AASActionType.GET_DOCUMEN
     name?: string;
 }
 
+export interface GetDocumentContentAction extends TypedAction<AASActionType.GET_DOCUMENT_CONTENT> {
+    document: AASDocument;
+}
+
 export const getDocument = createAction(AASActionType.GET_DOCUMENT, props<{ id: string; name?: string }>());
+
+export const getDocumentContent = createAction(AASActionType.GET_DOCUMENT_CONTENT, props<{ document: AASDocument }>());
 
 export const setDocument = createAction(AASActionType.SET_DOCUMENT, props<{ document: AASDocument | null }>());
 

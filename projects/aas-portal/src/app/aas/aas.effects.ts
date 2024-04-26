@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { exhaustMap, map } from 'rxjs';
+import { catchError, exhaustMap, map, of } from 'rxjs';
 
 import * as AASActions from './aas.actions';
 import { AASApiService } from './aas-api.service';
@@ -24,9 +24,22 @@ export class AASEffects {
         return this.actions.pipe(
             ofType<AASActions.GetDocumentAction>(AASActions.AASActionType.GET_DOCUMENT),
             exhaustMap(action =>
-                this.api
-                    .getDocument(action.id, action.name)
-                    .pipe(map(document => AASActions.setDocument({ document }))),
+                this.api.getDocument(action.id, action.name).pipe(
+                    map(document => AASActions.setDocument({ document })),
+                    catchError(() => of(AASActions.setDocument({ document: null }))),
+                ),
+            ),
+        );
+    });
+
+    public getDocumentContent = createEffect(() => {
+        return this.actions.pipe(
+            ofType<AASActions.GetDocumentContentAction>(AASActions.AASActionType.GET_DOCUMENT_CONTENT),
+            exhaustMap(action =>
+                this.api.getContent(action.document.id, action.document.endpoint).pipe(
+                    map(content => AASActions.setDocument({ document: { ...action.document, content } })),
+                    catchError(() => of(AASActions.setDocument({ document: action.document }))),
+                ),
             ),
         );
     });
