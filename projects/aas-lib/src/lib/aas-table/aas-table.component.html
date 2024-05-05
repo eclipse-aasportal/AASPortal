@@ -6,137 +6,135 @@
  !
  !---------------------------------------------------------------------------->
 
-@if ((viewMode | async) === 'list') {
-  <table class="table table-sm table-hover table-striped">
+@if (viewMode === 'list') {
+<table class="table table-sm table-hover table-striped">
     <thead>
-      <tr>
-        <th class="th-w-checkbox">
-          <input id="aas-table-checkbox" type="checkbox" class="form-check-input"
-            [indeterminate]="someSelected | async" [checked]="everySelected | async"
-            (change)="toggleSelections()">
-          </th>
-          <th scope="col" class="th-w-icon">
-            <i class="bi bi-tag"></i>
-          </th>
-          <th scope="col">
-            <div class="me-1" translate>COLUMN_NAME</div>
-          </th>
-          <th scope="col">
-            <div class="me-1" translate>COLUMN_ID</div>
-          </th>
+        <tr>
+            <th class="th-w-checkbox">
+                <input id="aas-table-checkbox" type="checkbox" class="form-check-input" [indeterminate]="someSelected"
+                    [checked]="everySelected" (change)="toggleSelections()">
+            </th>
+            <th scope="col" class="th-w-icon">
+                <i class="bi bi-tag"></i>
+            </th>
+            <th scope="col">
+                <div class="me-1" translate>COLUMN_NAME</div>
+            </th>
+            <th scope="col">
+                <div class="me-1" translate>COLUMN_ID</div>
+            </th>
         </tr>
-      </thead>
-      <tbody>
-        @for (row of rows | async; track row) {
-          <tr class="align-middle">
+    </thead>
+    <tbody>
+        @for (row of rows; track row) {
+        <tr class="align-middle">
             <td>
-              <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)" [checked]="row.selected"
-                [name]="row.name" />
-              </td>
-              <td>
+                <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)" [checked]="row.selected"
+                    [name]="row.name" />
+            </td>
+            <td>
                 @switch (row.state) {
-                  @case ('unloaded') {
-                    <div class="position-relative">
-                      <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
-                      <div
+                @case ('unloaded') {
+                <div class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <div
                         class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info">
                         <i class="bi bi-cloud-arrow-down"></i>
-                      </div>
                     </div>
-                  }
-                  @case ('unavailable') {
-                    <div class="position-relative">
-                      <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
-                      <div
+                </div>
+                }
+                @case ('unavailable') {
+                <div class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <div
                         class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger">
                         <i class="bi bi-cone-striped"></i>
-                      </div>
                     </div>
-                  }
-                  @default {
-                    <div>
-                      <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
-                    </div>
-                  }
+                </div>
                 }
-              </td>
-              <td>
+                @default {
+                <div>
+                    <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+                </div>
+                }
+                }
+            </td>
+            <td>
                 <a class="text-nowrap" href="javascript:void(0);" [name]="row.name" (click)="open(row)">{{row.name |
-                max:60}}</a>
-              </td>
-              <td>
+                    max:60}}</a>
+            </td>
+            <td>
                 <div>{{row.endpoint}}</div>
                 <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
 } @else {
-    <table class="table table-sm table-borderless table-hover table-striped">
-        <thead>
+<table class="table table-sm table-borderless table-hover table-striped">
+    <thead>
         <tr>
-        <th class="th-w-checkbox">
-            <input type="checkbox" class="form-check-input" [indeterminate]="someSelected | async"
-            [checked]="everySelected | async" (change)="toggleSelections()">
+            <th class="th-w-checkbox">
+                <input type="checkbox" class="form-check-input" [indeterminate]="someSelected" [checked]="everySelected"
+                    (change)="toggleSelections()">
             </th>
             <th scope="col">
-            <div class="text-center" translate>COLUMN_NAME</div>
+                <div class="text-center" translate>COLUMN_NAME</div>
             </th>
             <th scope="col">
-            <div class="text-center" translate>COLUMN_ID</div>
+                <div class="text-center" translate>COLUMN_ID</div>
             </th>
         </tr>
-        </thead>
-        <tbody>
-        @for (row of rows | async; track row) {
-            <tr class="align-middle">
-                <td>
-                    <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)"
-                    [checked]="row.selected" [name]="row.name" />
-                </td>
-                <td>
-                    <div class="d-flex align-items-center" style="overflow-x: hidden">
-                        <div [style.width]="(row.level * 16) + 'px'"></div>
-                        @if (row.isLeaf) {
-                        <div class="wh-4"></div>
-                        }@else {
-                            @if (row.expanded) {
-                            <a href="javascript:void(0);" (click)="collapse(row)">
-                                <div class="text-dark">
-                                <i class="bi bi-dash-square"></i>
-                                </div>
-                            </a>
-                            }@else {
-                                @if (row.hasChildren) {
-                                <a href="javascript:void(0);"
-                                    (click)="expand(row)">
-                                    <div class="text-dark">
-                                    <i class="bi bi-plus-square"></i>
-                                    </div>
-                                </a>
-                                }@else {
-                                <div class="text-muted">
-                                    <i class="bi bi-square"></i>
-                                </div>
-                                }
-                            }
-                        }
-                        <div class="ms-2">
-                        <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+    </thead>
+    <tbody>
+        @for (row of rows; track row) {
+        <tr class="align-middle">
+            <td>
+                <input type="checkbox" class="form-check-input" (change)="toggleSelected(row)" [checked]="row.selected"
+                    [name]="row.name" />
+            </td>
+            <td>
+                <div class="d-flex align-items-center" style="overflow-x: hidden">
+                    <div [style.width]="(row.level * 16) + 'px'"></div>
+                    @if (row.isLeaf) {
+                    <div class="wh-4"></div>
+                    }@else {
+                    @if (row.expanded) {
+                    <a href="javascript:void(0);" (click)="collapse(row)">
+                        <div class="text-dark">
+                            <i class="bi bi-dash-square"></i>
                         </div>
-                        <div class="ms-2 flex-grow-1">
-                        <a class="text-nowrap" href="javascript:void(0);" (click)="open(row)">{{row.name |
-                        max:60}}</a>
+                    </a>
+                    }@else {
+                    @if (row.hasChildren) {
+                    <a href="javascript:void(0);" (click)="expand(row)">
+                        <div class="text-dark">
+                            <i class="bi bi-plus-square"></i>
                         </div>
+                    </a>
+                    }@else {
+                    <div class="text-muted">
+                        <i class="bi bi-square"></i>
                     </div>
-                </td>
-                <td>
-                    <div>{{row.endpoint}}</div>
-                    <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
-                </td>
-            </tr>
-            }
-        </tbody>
-    </table>
-    }
+                    }
+                    }
+                    }
+                    <div class="ms-2">
+                        <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    </div>
+                    <div class="ms-2 flex-grow-1">
+                        <a class="text-nowrap" href="javascript:void(0);" (click)="open(row)">{{row.name |
+                            max:60}}</a>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div>{{row.endpoint}}</div>
+                <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+}

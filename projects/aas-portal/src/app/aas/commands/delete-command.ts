@@ -18,25 +18,25 @@ import {
 } from 'common';
 
 import { cloneDeep, noop } from 'lodash-es';
-import { Store } from '@ngrx/store';
-import { State } from '../aas.state';
-import * as AASActions from '../aas.actions';
 import { Command } from '../../types/command';
+import { AASStoreService } from '../aas-store.service';
 
 export class DeleteCommand extends Command {
-    private readonly store: Store<State>;
     private readonly elements: aas.Referable[];
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    public constructor(store: Store, document: AASDocument, elements: aas.Referable | aas.Referable[]) {
+    public constructor(
+        private readonly store: AASStoreService,
+        document: AASDocument,
+        elements: aas.Referable | aas.Referable[],
+    ) {
         super('Delete');
 
         if (!document.content) {
             throw new Error('Document content is undefined.');
         }
 
-        this.store = store as Store<State>;
         this.memento = document;
         this.document = {
             ...document,
@@ -84,7 +84,7 @@ export class DeleteCommand extends Command {
             }
         }
 
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     private deleteFromShells(element: aas.Submodel) {
@@ -102,11 +102,11 @@ export class DeleteCommand extends Command {
     }
 
     protected onUndo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.memento }));
+        this.store.applyDocument(this.memento);
     }
 
     protected onRedo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onAbort(): void {

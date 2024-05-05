@@ -6,20 +6,17 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { cloneDeep } from 'lodash-es';
-import { DashboardItem, DashboardPage, DashboardRow } from '../dashboard.state';
-import { DashboardService } from '../dashboard.service';
+import { DashboardItem, DashboardPage, DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
 
 export class MoveDownCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private page: DashboardPage,
         private item: DashboardItem,
     ) {
-        super('Move down', store);
+        super('Move down', dashboard);
     }
 
     protected executing(): void {
@@ -27,7 +24,6 @@ export class MoveDownCommand extends DashboardCommand {
             throw new Error(`Item can not be moved down.`);
         }
 
-        let rows: DashboardRow[] | undefined;
         const page = cloneDeep(this.page);
         const item = page.items[this.page.items.indexOf(this.item)];
         const y = item.positions[0].y;
@@ -41,16 +37,16 @@ export class MoveDownCommand extends DashboardCommand {
                 if (sourceRow.length === 0) {
                     grid.splice(y, 1);
                 }
-            }
 
-            rows = this.getRows(this.validateItems(grid));
+                this.validateItems(grid);
+            }
         } else if (sourceRow.length > 1) {
             sourceRow.splice(item.positions[0].x, 1);
             const targetRow: DashboardItem[] = [item];
             grid.push(targetRow);
-            rows = this.getRows(this.validateItems(grid));
+            this.validateItems(grid);
         }
 
-        this.dashboard.update(page, rows);
+        this.dashboard.update(page);
     }
 }

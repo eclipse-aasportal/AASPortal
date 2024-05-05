@@ -6,22 +6,19 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { cloneDeep } from 'lodash-es';
-import { DashboardItem, DashboardPage } from '../dashboard.state';
-import { DashboardService } from '../dashboard.service';
+import { DashboardItem, DashboardPage, DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
 
 export class SetColorCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private page: DashboardPage,
         private item: DashboardItem,
         private index: number,
         private color: string,
     ) {
-        super('Set color', store);
+        super('Set color', dashboard);
     }
 
     protected executing(): void {

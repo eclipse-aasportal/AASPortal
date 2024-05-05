@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { BehaviorSubject, Subscription, Observable, first } from 'rxjs';
+import { BehaviorSubject, Subscription, Observable } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -26,9 +25,10 @@ import {
     getIdShortPath,
     mimeTypeToExtension,
     selectReferable,
+    stringFormat,
 } from 'common';
 
-import { AASTreeRow, AASTreeFeatureState } from './aas-tree.state';
+import { AASTreeRow } from './aas-tree-row';
 import { OnlineState } from '../types/online-state';
 import { ShowImageFormComponent } from './show-image-form/show-image-form.component';
 import { ShowVideoFormComponent } from './show-video-form/show-video-form.component';
@@ -48,9 +48,8 @@ import {
     supportedSubmodelTemplates,
 } from '../submodel-template/submodel-template';
 
-import * as AASTreeActions from './aas-tree.actions';
-import * as AASTreeSelectors from './aas-tree.selectors';
 import { AASTreeApiService } from './aas-tree-api.service';
+import { AASTreeStore } from './aas-tree.store';
 
 interface PropertyValue {
     property: aas.Property;
@@ -61,10 +60,9 @@ interface PropertyValue {
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    providers: [AASTreeSearch],
+    providers: [AASTreeSearch, AASTreeStore],
 })
 export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
-    private readonly store: Store<AASTreeFeatureState>;
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
@@ -76,8 +74,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor(
+        private readonly store: AASTreeStore,
         private readonly router: Router,
-        store: Store,
         private readonly api: AASTreeApiService,
         private readonly searching: AASTreeSearch,
         private readonly modal: NgbModal,
@@ -89,11 +87,6 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
-        this.store = store as Store<AASTreeFeatureState>;
-        this.nodes = this.store.select(AASTreeSelectors.selectNodes);
-        this.someSelected = this.store.select(AASTreeSelectors.selectSomeSelected);
-        this.everySelected = this.store.select(AASTreeSelectors.selectEverySelected);
-
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
@@ -114,7 +107,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     public set selected(values: aas.Referable[]) {
         if (!isEqual(values, this._selected)) {
-            this.store.dispatch(AASTreeActions.setSelectedElements({ elements: values }));
+            this.store.setSelectedElements(values);
         }
     }
 
@@ -133,79 +126,57 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         return this.document?.modified ?? false;
     }
 
-    public someSelected: Observable<boolean>;
+    public get someSelected(): boolean {
+        const rows = this.store.rows;
+        return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
+    }
 
-    public everySelected: Observable<boolean>;
+    public get everySelected(): boolean {
+        const rows = this.store.rows;
+        return rows.length > 0 && rows.every(row => row.selected);
+    }
 
-    public nodes: Observable<AASTreeRow[]>;
+    public get nodes(): AASTreeRow[] {
+        return this.store.nodes;
+    }
 
     public ngOnInit(): void {
         this.subscription.add(
-            this.store
-                .select(AASTreeSelectors.selectSelectedElements)
-                .pipe()
-                .subscribe(elements => {
-                    this._selected = elements;
-                    this.selectedChange.emit(elements);
-                }),
+            this.store.selectSelectedElements.pipe().subscribe(elements => {
+                this._selected = elements;
+                this.selectedChange.emit(elements);
+            }),
         );
 
         this.subscription.add(
-            this.store
-                .select(AASTreeSelectors.selectError)
-                .pipe()
-                .subscribe(error => {
-                    if (error) {
-                        this.notify.error(error);
-                    }
-                }),
+            this.store.selectMatchIndex.pipe().subscribe(index => {
+                if (index >= 0) {
+                    this.store.expandRow(index);
+                }
+            }),
         );
 
         this.subscription.add(
-            this.store
-                .select(AASTreeSelectors.selectMatchIndex)
-                .pipe()
-                .subscribe(index => {
-                    if (index >= 0) {
-                        this.store.dispatch(AASTreeActions.expandRow({ arg: index }));
-                    }
-                }),
-        );
-
-        this.subscription.add(
-            this.store
-                .select(AASTreeSelectors.selectMatchRow)
-                .pipe()
-                .subscribe(row => {
-                    if (row) {
-                        setTimeout(() => {
-                            const element = this.dom.getElementById(row.id);
-                            element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                        });
-                    }
-                }),
+            this.store.selectMatchRow.pipe().subscribe(row => {
+                if (row) {
+                    setTimeout(() => {
+                        const element = this.dom.getElementById(row.id);
+                        element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    });
+                }
+            }),
         );
 
         this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
-                this.store.dispatch(
-                    AASTreeActions.updateRows({
-                        document: this.document,
-                        localeId: this.translate.currentLang,
-                    }),
-                );
+                this.store.updateRows(this.document);
             }),
         );
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes['document']) {
-            this.store.dispatch(
-                AASTreeActions.updateRows({
-                    document: this.document,
-                    localeId: this.translate.currentLang,
-                }),
-            );
+            this.store.updateRows(this.document);
         }
 
         if (changes['search']) {
@@ -229,6 +200,17 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                 }
             }
         }
+    }
+
+    public get message(): string {
+        if (!this.document || this.document.content) {
+            return '';
+        }
+
+        return stringFormat(
+            this.translate.instant('TEXT_AAS_OFFLINE'),
+            new Date(this.document.timestamp).toLocaleString(this.translate.currentLang),
+        );
     }
 
     public ngOnDestroy(): void {
@@ -273,26 +255,26 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     public expand(node: AASTreeRow): void {
         if (!node.expanded) {
-            this.store.dispatch(AASTreeActions.expandRow({ arg: node }));
+            this.store.expandRow(node);
         }
     }
 
     public collapse(node?: AASTreeRow): void {
         if (node) {
             if (node.expanded) {
-                this.store.dispatch(AASTreeActions.collapseRow({ row: node }));
+                this.store.collapseRow(node);
             }
         } else {
-            this.store.dispatch(AASTreeActions.collapse());
+            this.store.collapse();
         }
     }
 
     public toggleSelections(): void {
-        this.store.dispatch(AASTreeActions.toggleSelections());
+        this.store.toggleSelections();
     }
 
     public toggleSelection(node: AASTreeRow): void {
-        this.store.dispatch(AASTreeActions.toggleSelected({ row: node, altKey: this.altKey, shiftKey: this.shiftKey }));
+        this.store.toggleSelected(node, this.altKey, this.shiftKey);
     }
 
     public async openFile(file: aas.File | undefined): Promise<void> {
@@ -463,16 +445,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     private goOnline(): void {
         try {
-            this.store
-                .select(AASTreeSelectors.selectSelectedRows)
-                .pipe(first())
-                .subscribe({
-                    next: rows => {
-                        this.prepareOnline(rows);
-                        this.play();
-                    },
-                    error: () => this.stop(),
-                });
+            this.prepareOnline(this.store.rows.filter(row => row.selected));
+            this.play();
         } catch (error) {
             this.stop();
         }

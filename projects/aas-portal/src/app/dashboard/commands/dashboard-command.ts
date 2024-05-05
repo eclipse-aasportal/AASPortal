@@ -6,56 +6,45 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
-import { first } from 'rxjs';
 import { Command } from '../../types/command';
-import * as DashboardSelectors from '../dashboard.selectors';
-import * as DashboardActions from '../dashboard.actions';
 import {
+    DashboardService,
     DashboardChart,
     DashboardItem,
     DashboardItemType,
     DashboardRow,
     DashboardState,
-    State,
-} from '../dashboard.state';
+} from '../dashboard.service';
 
 export abstract class DashboardCommand extends Command {
     private preState!: DashboardState;
     private postState!: DashboardState;
 
-    protected constructor(name: string, store: Store) {
+    protected constructor(
+        name: string,
+        protected readonly dashboard: DashboardService,
+    ) {
         super(name);
-
-        this.store = store as Store<State>;
     }
 
-    protected store: Store<State>;
-
     protected onExecute(): void {
-        this.store
-            .select(DashboardSelectors.selectState)
-            .pipe(first())
-            .subscribe(state => (this.preState = state));
+        this.preState = this.dashboard.state;
         this.executing();
-        this.store
-            .select(DashboardSelectors.selectState)
-            .pipe(first())
-            .subscribe(state => (this.postState = state));
+        this.postState = this.dashboard.state;
     }
 
     protected abstract executing(): void;
 
     protected onUndo(): void {
-        this.store.dispatch(DashboardActions.setState({ state: this.preState }));
+        this.dashboard.state = this.preState;
     }
 
     protected onRedo(): void {
-        this.store.dispatch(DashboardActions.setState({ state: this.postState }));
+        this.dashboard.state = this.postState;
     }
 
     protected onAbort(): void {
-        this.store.dispatch(DashboardActions.setState({ state: this.preState }));
+        this.dashboard.state = this.preState;
     }
 
     protected isChart(item: DashboardItem): item is DashboardChart {
@@ -72,12 +61,10 @@ export abstract class DashboardCommand extends Command {
         }));
     }
 
-    protected validateItems(grid: DashboardItem[][]): DashboardItem[][] {
+    protected validateItems(grid: DashboardItem[][]): void {
         grid.forEach((row, y) => {
             row.forEach((item, x) => (item.positions[0].x = x));
             row.forEach(item => (item.positions[0].y = y));
         });
-
-        return grid;
     }
 }

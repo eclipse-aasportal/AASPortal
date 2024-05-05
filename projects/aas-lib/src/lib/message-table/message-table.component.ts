@@ -6,22 +6,26 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Component, Input, OnChanges, OnDestroy, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Message } from 'common';
 import { Subscription } from 'rxjs';
 import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
-import { MessageTableFeatureState, MessageTableState } from './message-table.state';
-import * as MessageTableActions from './message-table.actions';
-import * as MessageTableSelectors from './message-table.selectors';
+
+interface MessageTableState {
+    showInfo: boolean;
+    showWarning: boolean;
+    showError: boolean;
+    column: string;
+    direction: string;
+}
 
 @Component({
     selector: 'fhg-message-table',
     templateUrl: './message-table.component.html',
     styleUrls: ['./message-table.component.scss'],
 })
-export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
+export class MessageTableComponent implements OnChanges, OnDestroy {
     private readonly dateTimeOptions: Intl.DateTimeFormatOptions = {
         year: 'numeric',
         month: 'numeric',
@@ -31,10 +35,9 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
         second: 'numeric',
     };
 
-    private readonly store: Store<MessageTableFeatureState>;
     private readonly subscription = new Subscription();
     private _collection: Message[] = [];
-    private snapshot: MessageTableState = {
+    private state: MessageTableState = {
         showInfo: false,
         showWarning: false,
         showError: true,
@@ -42,12 +45,7 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
         direction: '',
     };
 
-    public constructor(
-        store: Store,
-        private translate: TranslateService,
-    ) {
-        this.store = store as Store<MessageTableFeatureState>;
-    }
+    public constructor(private translate: TranslateService) {}
 
     @ViewChildren(SortableHeaderDirective)
     public headers!: QueryList<SortableHeaderDirective>;
@@ -67,28 +65,15 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public get showInfo(): boolean {
-        return this.snapshot.showInfo;
+        return this.state.showInfo;
     }
 
     public get showWarning(): boolean {
-        return this.snapshot.showWarning;
+        return this.state.showWarning;
     }
 
     public get showError(): boolean {
-        return this.snapshot.showError;
-    }
-
-    public ngOnInit(): void {
-        this.subscription.add(
-            this.store
-                .select(MessageTableSelectors.selectState)
-                .pipe()
-                .subscribe(state => {
-                    this.snapshot = state;
-                    this.filterSort();
-                    this.refreshMessages();
-                }),
-        );
+        return this.state.showError;
     }
 
     public ngOnDestroy(): void {
@@ -108,15 +93,21 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public toggleShowInfo(): void {
-        this.store.dispatch(MessageTableActions.toggleShowInfo());
+        this.state.showInfo = !this.state.showInfo;
+        this.filterSort();
+        this.refreshMessages();
     }
 
     public toggleShowWarning(): void {
-        this.store.dispatch(MessageTableActions.toggleShowWarning());
+        this.state.showWarning = !this.state.showWarning;
+        this.filterSort();
+        this.refreshMessages();
     }
 
     public toggleShowError(): void {
-        this.store.dispatch(MessageTableActions.toggleShowError());
+        this.state.showError = !this.state.showError;
+        this.filterSort();
+        this.refreshMessages();
     }
 
     public onSort({ column, direction }: SortEvent): void {
@@ -126,7 +117,8 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
             }
         });
 
-        this.store.dispatch(MessageTableActions.setSortParameter({ column, direction }));
+        this.state.column = column;
+        this.state.direction = direction;
     }
 
     public refreshMessages(): void {
@@ -146,24 +138,24 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
 
     private filterSort(): void {
         if (
-            (this.snapshot.showError && this.snapshot.showWarning && this.snapshot.showInfo) ||
-            (!this.snapshot.showError && !this.snapshot.showWarning && !this.snapshot.showInfo)
+            (this.state.showError && this.state.showWarning && this.state.showInfo) ||
+            (!this.state.showError && !this.state.showWarning && !this.state.showInfo)
         ) {
             this._collection = this.collection;
         } else {
             this._collection = this.collection.filter(
                 item =>
-                    (item.type === 'Error' && this.snapshot.showError) ||
-                    (item.type === 'Warning' && this.snapshot.showWarning) ||
-                    (item.type === 'Info' && this.snapshot.showInfo),
+                    (item.type === 'Error' && this.state.showError) ||
+                    (item.type === 'Warning' && this.state.showWarning) ||
+                    (item.type === 'Info' && this.state.showInfo),
             );
         }
 
-        if (this.snapshot.column && this.snapshot.direction) {
-            if (this.snapshot.direction === 'asc') {
-                this._collection.sort((a, b) => this.compare(a, b, this.snapshot.column));
+        if (this.state.column && this.state.direction) {
+            if (this.state.direction === 'asc') {
+                this._collection.sort((a, b) => this.compare(a, b, this.state.column));
             } else {
-                this._collection.sort((a, b) => this.compare(b, a, this.snapshot.column));
+                this._collection.sort((a, b) => this.compare(b, a, this.state.column));
             }
         }
     }

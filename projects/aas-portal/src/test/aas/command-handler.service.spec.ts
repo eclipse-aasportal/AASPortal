@@ -13,8 +13,12 @@ import { NotifyService } from 'aas-lib';
 import { CommandHandlerService } from '../../app/aas/command-handler.service';
 
 class TestCommand extends Command {
-    public constructor(private spy?: jasmine.Spy, private undoSpy?: jasmine.Spy, private redoSpy?: jasmine.Spy) {
-        super("TestCommand");
+    public constructor(
+        private spy?: jasmine.Spy,
+        private undoSpy?: jasmine.Spy,
+        private redoSpy?: jasmine.Spy,
+    ) {
+        super('TestCommand');
     }
 
     protected onExecute(): void {
@@ -42,11 +46,11 @@ class TestCommand extends Command {
 
 class FailCommand extends Command {
     public constructor(private abortSpy: jasmine.Spy) {
-        super("TestCommand");
+        super('TestCommand');
     }
 
     protected onExecute(): void {
-        throw new Error("Command throws an error.");
+        throw new Error('Command throws an error.');
     }
 
     protected onUndo(): void {
@@ -71,10 +75,10 @@ describe('CommandHandlerService', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error'])
-                }
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                },
             ],
-            imports: []
+            imports: [],
         });
 
         service = TestBed.inject(CommandHandlerService);
@@ -92,7 +96,7 @@ describe('CommandHandlerService', () => {
         expect(service.canRedo).toBeFalse();
     });
 
-    it("can execute a command", function () {
+    it('can execute a command', function () {
         const spy = jasmine.createSpy('execute');
         service.execute(new TestCommand(spy));
         expect(spy).toHaveBeenCalled();
@@ -110,7 +114,7 @@ describe('CommandHandlerService', () => {
         expect(redoSpy).toHaveBeenCalled();
     });
 
-    it("clears the undo/redo stack", function () {
+    it('clears the undo/redo stack', function () {
         service.execute(new TestCommand());
         service.execute(new TestCommand());
         service.clear();
@@ -118,7 +122,7 @@ describe('CommandHandlerService', () => {
         expect(service.canRedo).toBeFalse();
     });
 
-    it("aborts a failed command", function () {
+    it('aborts a failed command', function () {
         const abortSpy = jasmine.createSpy('abort');
         expect(() => service.execute(new FailCommand(abortSpy))).toThrowError();
         expect(abortSpy).toHaveBeenCalled();

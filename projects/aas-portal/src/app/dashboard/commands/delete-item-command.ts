@@ -6,20 +6,17 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { cloneDeep } from 'lodash-es';
-import { DashboardService } from '../dashboard.service';
+import { DashboardService, DashboardPage, DashboardItem } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
-import { DashboardPage, DashboardItem } from '../dashboard.state';
 
 export class DeleteItemCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private page: DashboardPage,
         private items: DashboardItem[],
     ) {
-        super('Delete item', store);
+        super('Delete item', dashboard);
     }
 
     protected executing(): void {
@@ -27,6 +24,6 @@ export class DeleteItemCommand extends DashboardCommand {
         page.items = page.items.filter(item => this.items.find(i => i.id === item.id) == null);
         const grid = this.dashboard.getGrid(page);
         this.validateItems(grid);
-        this.dashboard.update(page, this.getRows(grid));
+        this.dashboard.update(page);
     }
 }

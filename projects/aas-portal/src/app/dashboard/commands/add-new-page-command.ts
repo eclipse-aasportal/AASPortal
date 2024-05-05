@@ -6,17 +6,15 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
 
 export class AddNewPageCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private pageName?: string,
     ) {
-        super('Add new page', store);
+        super('Add new page', dashboard);
     }
 
     protected executing(): void {

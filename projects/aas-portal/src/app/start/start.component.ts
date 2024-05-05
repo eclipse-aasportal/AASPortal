@@ -9,7 +9,6 @@
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'common';
 import { BehaviorSubject, catchError, EMPTY, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
@@ -31,14 +30,12 @@ import {
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
-import * as StartActions from './start.actions';
-import * as StartSelectors from './start.selectors';
-import { StartFeatureState } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { ToolbarService } from '../toolbar.service';
 import { StartApiService } from './start-api.service';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
+import { StartStore } from './start.store';
 
 @Component({
     selector: 'fhg-start',
@@ -46,13 +43,12 @@ import { FavoritesFormComponent } from './favorites-form/favorites-form.componen
     styleUrls: ['./start.component.scss'],
 })
 export class StartComponent implements OnDestroy, AfterViewInit {
-    private readonly store: Store<StartFeatureState>;
     private readonly subscription = new Subscription();
     private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
     private _selected: AASDocument[] = [];
 
     public constructor(
-        store: Store,
+        private readonly store: StartStore,
         private readonly router: Router,
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
@@ -66,55 +62,61 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         private readonly favorites: FavoritesService,
         private readonly indexChange: IndexChangeService,
     ) {
-        this.store = store as Store<StartFeatureState>;
-        this.filter = this.store.select(StartSelectors.selectFilter);
-        this.filterFavorites = this.store.select(StartSelectors.selectFilterFavorites);
-        this.limit = this.store.select(StartSelectors.selectLimit);
-        this.isFirstPage = this.store.select(StartSelectors.selectIsFirstPage);
-        this.isLastPage = this.store.select(StartSelectors.selectIsLastPage);
-        this.documents = this.store.select(StartSelectors.selectDocuments);
-        this.viewMode = this.store.select(StartSelectors.selectViewMode);
-        this.currentFavorites = this.store.select(StartSelectors.selectCurrentFavorites);
         this.endpoints = this.api.getEndpoints();
 
-        this.store
-            .select(StartSelectors.selectViewMode)
-            .pipe(
-                first(viewMode => viewMode === ViewMode.Undefined),
-                mergeMap(() => this.auth.ready),
-                first(ready => ready),
-                first(),
-            )
-            .subscribe({
-                next: () => this.store.dispatch(StartActions.getFirstPage({})),
-                error: error => this.notify.error(error),
-            });
+        if (this.store.viewMode === ViewMode.Undefined) {
+            this.auth.ready
+                .pipe(
+                    first(ready => ready),
+                    first(),
+                )
+                .subscribe({
+                    next: () => this.store.getFirstPage(),
+                    error: error => this.notify.error(error),
+                });
+        }
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
-    public readonly currentFavorites: Observable<string>;
+    public get activeFavorites(): string {
+        return this.store.activeFavorites;
+    }
 
-    public readonly favoritesLists: Observable<string[]> = this.favorites.lists.pipe(
-        map(lists => ['', ...lists.map(list => list.name)]),
-    );
+    public get favoritesLists(): string[] {
+        return ['', ...this.favorites.lists.map(list => list.name)];
+    }
 
-    public readonly viewMode: Observable<ViewMode>;
+    public get filter(): string {
+        return this.store.activeFavorites ? this.store.filterText : '';
+    }
 
-    public readonly filter: Observable<string>;
+    public get viewMode(): ViewMode {
+        return this.store.viewMode;
+    }
 
-    public readonly filterFavorites: Observable<string>;
+    public get limit(): number {
+        return this.store.limit;
+    }
 
-    public readonly limit: Observable<number>;
+    public get filterText(): string {
+        return this.store.filterText;
+    }
 
-    public readonly isFirstPage: Observable<boolean>;
+    public get isFirstPage(): boolean {
+        return this.store.isFirstPage;
+    }
 
-    public readonly isLastPage: Observable<boolean>;
+    public get isLastPage(): boolean {
+        return this.store.isLastPage;
+    }
 
     public readonly endpoints: Observable<AASEndpoint[]>;
 
-    public readonly documents: Observable<AASDocument[]>;
+    public get documents(): AASDocument[] {
+        return this.store.documents;
+    }
 
     public readonly count = this.indexChange.count;
 
@@ -154,40 +156,29 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.subscription.unsubscribe();
     }
 
-    public setCurrentFavorites(value: string): void {
+    public setActiveFavorites(value: string): void {
         const currentFavorites = this.favorites.get(value);
         if (currentFavorites) {
-            this.store.dispatch(
-                StartActions.getFavorites({
-                    name: currentFavorites.name,
-                    documents: currentFavorites.documents,
-                }),
-            );
+            this.store.getFavorites(currentFavorites.name, currentFavorites.documents);
         } else {
-            this.store.dispatch(StartActions.getFirstPage({}));
+            this.store.getFirstPage();
         }
     }
 
     public setViewMode(viewMode: string | ViewMode): Observable<void> {
-        return this.currentFavorites.pipe(
-            first(),
+        return of(this.activeFavorites).pipe(
             map(currentFavorites => {
                 if (viewMode === ViewMode.List) {
                     if (!currentFavorites) {
-                        this.store.dispatch(StartActions.setListView());
+                        this.store.getFirstPage();
                     } else {
                         const favoritesList = this.favorites.get(currentFavorites);
                         if (favoritesList) {
-                            this.store.dispatch(
-                                StartActions.getFavorites({
-                                    name: favoritesList.name,
-                                    documents: favoritesList.documents,
-                                }),
-                            );
+                            this.store.getFavorites(favoritesList.name, favoritesList.documents);
                         }
                     }
                 } else {
-                    this.store.dispatch(StartActions.setTreeView({ documents: this._selected }));
+                    this.store.setTreeView(this._selected);
                 }
             }),
         );
@@ -278,12 +269,11 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             return EMPTY;
         }
 
-        return this.currentFavorites.pipe(
-            first(),
-            mergeMap(currentFavorites => {
-                if (currentFavorites) {
-                    this.favorites.remove(this._selected, currentFavorites);
-                    this.store.dispatch(StartActions.removeFavorites({ favorites: [...this._selected] }));
+        return of(this.activeFavorites).pipe(
+            mergeMap(activeFavorites => {
+                if (activeFavorites) {
+                    this.favorites.remove(this._selected, activeFavorites);
+                    this.store.removeFavorites([...this._selected]);
                     return of(void 0);
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
@@ -359,10 +349,10 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 filter = '';
             }
 
-            if (!this.currentFavorites) {
-                this.store.dispatch(StartActions.getFirstPage({ filter }));
+            if (!this.activeFavorites) {
+                this.store.getFirstPage(filter);
             } else {
-                this.store.dispatch(StartActions.setFilter({ filter }));
+                this.store.setFilter(filter);
             }
         } catch (error) {
             this.notify.error(error);
@@ -370,27 +360,27 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public setLimit(value: string | number): void {
-        this.store.dispatch(StartActions.getFirstPage({ limit: Number(value) }));
+        this.store.getFirstPage(undefined, Number(value));
     }
 
     public firstPage(): void {
-        this.store.dispatch(StartActions.getFirstPage({}));
+        this.store.getFirstPage();
     }
 
     public previousPage(): void {
-        this.store.dispatch(StartActions.getPreviousPage());
+        this.store.getPreviousPage();
     }
 
     public nextPage(): void {
-        this.store.dispatch(StartActions.getNextPage());
+        this.store.getNextPage();
     }
 
     public lastPage(): void {
-        this.store.dispatch(StartActions.getLastPage());
+        this.store.getLastPage();
     }
 
     public refreshPage(): void {
-        this.store.dispatch(StartActions.refreshPage());
+        this.store.refreshPage();
         this.indexChange.clear();
     }
 

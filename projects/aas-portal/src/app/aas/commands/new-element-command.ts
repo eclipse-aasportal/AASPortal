@@ -8,7 +8,6 @@
 
 import { cloneDeep, noop } from 'lodash-es';
 import { Command } from '../../types/command';
-import { Store } from '@ngrx/store';
 import {
     aas,
     AASDocument,
@@ -21,17 +20,15 @@ import {
     isSubmodelElementList,
 } from 'common';
 
-import { AASState } from '../aas.state';
-import * as AASActions from '../aas.actions';
+import { AASStoreService } from '../aas-store.service';
 
 export class NewElementCommand extends Command {
-    private readonly store: Store<{ aas: AASState }>;
     private readonly memento: AASDocument;
     private document: AASDocument;
     private content: aas.Environment;
 
     public constructor(
-        store: Store,
+        private readonly store: AASStoreService,
         document: AASDocument,
         private readonly parent: aas.Referable,
         private readonly element: aas.Referable | aas.Environment,
@@ -47,7 +44,6 @@ export class NewElementCommand extends Command {
             throw new Error('Argument parent is invalid.');
         }
 
-        this.store = store as Store<{ aas: AASState }>;
         this.memento = document;
         this.content = {
             assetAdministrationShells: [...document.content.assetAdministrationShells],
@@ -76,15 +72,15 @@ export class NewElementCommand extends Command {
             throw new Error('Invalid operation.');
         }
 
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onUndo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.memento }));
+        this.store.applyDocument(this.memento);
     }
 
     protected onRedo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onAbort(): void {

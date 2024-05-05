@@ -8,20 +8,16 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
 import { WindowService, ViewMode, AuthService, NotifyService, DownloadService } from 'aas-lib';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { EffectsModule } from '@ngrx/effects';
 import { Observable, of } from 'rxjs';
 import { AASDocument, aas } from 'common';
 
-import { startReducer } from '../../app/start/start.reducer';
 import { StartComponent } from '../../app/start/start.component';
 import { StartApiService } from '../../app/start/start-api.service';
-import { StartEffects } from '../../app/start/start.effects';
 import { FavoritesService } from '../../app/start/favorites.service';
 import { ToolbarService } from '../../app/toolbar.service';
 
@@ -89,7 +85,7 @@ describe('StartComponent', () => {
         );
 
         favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
-            lists: of([]),
+            lists: [],
         });
 
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });
@@ -130,10 +126,6 @@ describe('StartComponent', () => {
                 NgbModule,
                 RouterModule,
                 HttpClientTestingModule,
-                StoreModule.forRoot({
-                    start: startReducer,
-                }),
-                EffectsModule.forRoot(StartEffects),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

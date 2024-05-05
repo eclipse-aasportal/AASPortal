@@ -6,21 +6,24 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { cloneDeep } from 'lodash-es';
-import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from '../dashboard.state';
-import { DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
+import {
+    DashboardChart,
+    DashboardChartType,
+    DashboardItem,
+    DashboardPage,
+    DashboardService,
+} from '../dashboard.service';
 
 export class SetChartTypeCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private page: DashboardPage,
         private item: DashboardItem,
         private chartType: DashboardChartType,
     ) {
-        super('Set chart type', store);
+        super('Set chart type', dashboard);
     }
 
     protected executing(): void {

@@ -8,9 +8,9 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, map, mergeMap, Observable, Subscription, from, of, first, catchError } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, Subscription, from, of, catchError } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
+import head from 'lodash-es/head';
 import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
 import { AuthService, ClipboardService, DownloadService, NotifyService, OnlineState } from 'aas-lib';
 
@@ -21,13 +21,10 @@ import { DeleteCommand } from './commands/delete-command';
 import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
-import { DashboardService } from '../dashboard/dashboard.service';
-import * as AASActions from './aas.actions';
-import * as AASSelectors from './aas.selectors';
-import { State } from './aas.state';
-import { DashboardChartType } from '../dashboard/dashboard.state';
+import { DashboardChartType, DashboardPage, DashboardService } from '../dashboard/dashboard.service';
 import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
+import { AASStoreService } from './aas-store.service';
 
 @Component({
     selector: 'fhg-aas',
@@ -35,12 +32,11 @@ import { ToolbarService } from '../toolbar.service';
     styleUrls: ['./aas.component.scss'],
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
-    private readonly store: Store<State>;
     private readonly subscription = new Subscription();
-    private _dashboardPage = '';
+    private _dashboardPage!: DashboardPage;
 
     public constructor(
-        store: Store,
+        private readonly store: AASStoreService,
         private readonly router: Router,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
@@ -52,59 +48,64 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
         private readonly clipboard: ClipboardService,
-    ) {
-        this.store = store as Store<State>;
-        this.document = this.store.select(AASSelectors.selectDocument);
-        this.address = this.store.select(AASSelectors.selectAddress);
-        this.idShort = this.store.select(AASSelectors.selectIdShort);
-        this.id = this.store.select(AASSelectors.selectId);
-        this.assetId = this.store.select(AASSelectors.selectAssetId);
-        this.version = this.store.select(AASSelectors.selectVersion);
-        this.thumbnail = this.store.select(AASSelectors.selectThumbnail);
-        this.state = this.store.select(AASSelectors.selectState);
-        this.search = this.store.select(AASSelectors.selectSearch);
-        this.canPlay = this.store.select(AASSelectors.selectCanPlay);
-        this.canStop = this.store.select(AASSelectors.selectCanStop);
-        this.readOnly = this.store.select(AASSelectors.selectReadOnly);
-        this.canSynchronize = this.store.select(AASSelectors.selectCanSynchronize);
-
-        this.dashboardPages = this.dashboard.pages.pipe(map(pages => pages.map(page => page.name)));
-    }
+    ) {}
 
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aasToolbar: TemplateRef<unknown> | null = null;
 
-    public readonly document: Observable<AASDocument | null>;
+    public get document(): AASDocument | null {
+        return this.store.document;
+    }
 
-    public readonly state: Observable<OnlineState>;
+    public get address(): string {
+        return this.store.document?.address ?? '-';
+    }
 
-    public readonly search: Observable<string>;
+    public get idShort(): string {
+        return this.store.document?.idShort ?? '-';
+    }
 
-    public readonly address: Observable<string>;
+    public get id(): string {
+        return this.store.document?.id ?? '-';
+    }
 
-    public readonly idShort: Observable<string>;
+    public get assetId(): string {
+        return this.store.document?.assetId ?? '-';
+    }
 
-    public readonly id: Observable<string>;
+    public get thumbnail(): string {
+        return this.store.document?.thumbnail ?? '';
+    }
 
-    public readonly assetId: Observable<string>;
+    public get readOnly(): boolean {
+        return this.store.document?.readonly ?? false;
+    }
 
-    public readonly thumbnail: Observable<string>;
+    public get version(): string {
+        return this.versionToString(head(this.store.document?.content?.assetAdministrationShells)?.administration);
+    }
 
-    public readonly version: Observable<string>;
+    public get state(): OnlineState {
+        return this.store.state;
+    }
 
-    public readonly dashboardPages: Observable<string[]>;
+    public get search(): Observable<string> {
+        return this.store.search;
+    }
 
-    public get dashboardPage(): string {
+    public get dashboardPages(): DashboardPage[] {
+        return this.dashboard.pages;
+    }
+
+    public get dashboardPage(): DashboardPage {
         return this._dashboardPage;
     }
 
-    public set dashboardPage(value: string) {
-        this.dashboard.setPageName(value);
+    public set dashboardPage(value: DashboardPage) {
+        this.dashboard.setPage(value);
     }
 
     public selectedElements: aas.Referable[] = [];
-
-    public readonly readOnly: Observable<boolean>;
 
     public get canUndo(): boolean {
         return this.commandHandler.canUndo;
@@ -114,11 +115,18 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.commandHandler.canRedo;
     }
 
-    public readonly canPlay: Observable<boolean>;
+    public get canPlay(): boolean {
+        return (this.store.document?.onlineReady ?? false) && this.store.state === 'offline';
+    }
 
-    public readonly canStop: Observable<boolean>;
+    public get canStop(): boolean {
+        return (this.document?.onlineReady ?? false) && this.store.state === 'online';
+    }
 
-    public readonly canSynchronize: Observable<boolean>;
+    public get canSynchronize(): boolean {
+        const document = this.store.document;
+        return document != null && !document.readonly && document.modified ? document.modified : false;
+    }
 
     public get canNewElement(): boolean {
         return this.selectedElements.length === 1;
@@ -148,27 +156,23 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.subscription.add(
             this.route.queryParams.subscribe(params => {
                 if (params?.search) {
-                    this.store.dispatch(AASActions.setSearch({ search: params.search }));
+                    this.store.setSearch(params.search);
                 }
 
                 if (params) {
                     const document: AASDocument = this.clipboard.get('AASDocument');
                     if (!document) {
-                        this.store.dispatch(AASActions.getDocument({ id: params.id, name: params.endpoint }));
+                        this.store.getDocument(params.id, params.endpoint);
                     } else if (!document.content) {
-                        this.store.dispatch(AASActions.getDocumentContent({ document: document }));
+                        this.store.getDocumentContent(document);
                     } else {
-                        this.store.dispatch(AASActions.setDocument({ document }));
+                        this.store.setDocument(document);
                     }
                 }
             }),
         );
 
-        this.subscription.add(
-            this.dashboard.name.subscribe(name => {
-                this._dashboardPage = name;
-            }),
-        );
+        this.subscription.add(this.dashboard.activePage.subscribe(page => (this._dashboardPage = page)));
     }
 
     public ngAfterViewInit(): void {
@@ -183,43 +187,27 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public play(): void {
-        this.store.dispatch(AASActions.setState({ value: 'online' }));
+        this.store.setState('online');
     }
 
     public stop(): void {
-        this.store.dispatch(AASActions.setState({ value: 'offline' }));
+        this.store.setState('offline');
     }
 
-    public addToDashboard(chartType: string): Observable<boolean> {
-        return this.store.select(AASSelectors.selectDocument).pipe(
-            first(),
-            mergeMap(document => {
-                if (!document) {
-                    return EMPTY;
-                }
+    public addToDashboard(chartType: string): void {
+        const document = this.store.document;
+        if (!document) {
+            return;
+        }
 
-                this.dashboard.add(
-                    this.dashboardPage,
-                    document,
-                    this.selectedElements,
-                    chartType as DashboardChartType,
-                );
-
-                this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
-                return from(
-                    this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true }),
-                );
-            }),
-            catchError(error => {
-                this.notify.error(error);
-                return of(false);
-            }),
-        );
+        this.dashboard.add(this.dashboardPage, document, this.selectedElements, chartType as DashboardChartType);
+        this.clipboard.set('DashboardQuery', { page: this.dashboardPage.name } as DashboardQuery);
+        this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
     }
 
     public synchronize(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            map(() => this.store.document),
             mergeMap(document => {
                 if (!document) {
                     return EMPTY;
@@ -231,7 +219,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                             this.notify.info(messages.join('\r\n'));
                         }
 
-                        this.store.dispatch(AASActions.resetModified({ document }));
+                        this.store.resetModified(document);
                     }),
                 );
             }),
@@ -249,7 +237,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public newElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            map(() => this.store.document),
             mergeMap(document => {
                 if (!document || this.selectedElements.length !== 1) {
                     return EMPTY;
@@ -275,7 +263,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public editElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            map(() => this.store.document),
             mergeMap(document => {
                 if (!document || this.selectedElements.length !== 1) {
                     return EMPTY;
@@ -301,7 +289,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public deleteElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.store.select(AASSelectors.selectDocument).pipe(first())),
+            map(() => this.store.document),
             map(document => {
                 if (document && this.selectedElements.length > 0) {
                     this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
@@ -311,23 +299,21 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
-    public downloadDocument(): void {
-        this.store
-            .select(AASSelectors.selectDocument)
-            .pipe(
-                mergeMap(document => {
-                    if (!document) {
-                        return EMPTY;
-                    }
+    public downloadDocument(): Observable<void> {
+        return of(this.store.document).pipe(
+            mergeMap(document => {
+                if (!document) {
+                    return EMPTY;
+                }
 
-                    return this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx');
-                }),
-            )
-            .subscribe({ error: error => this.notify.error(error) });
+                return this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx');
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
     public applySearch(text: string): void {
-        this.store.dispatch(AASActions.setSearch({ search: text }));
+        this.store.setSearch(text);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {
@@ -346,5 +332,23 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             element.idShort === 'TimeSeriesHistory' &&
             element.contentType === 'application/json'
         );
+    }
+
+    private versionToString(administration?: aas.AdministrativeInformation): string {
+        let version: string = administration?.version ?? '';
+        const revision: string = administration?.revision ?? '';
+        if (revision.length > 0) {
+            if (version.length > 0) {
+                version += ' (' + revision + ')';
+            } else {
+                version = revision;
+            }
+        }
+
+        if (version.length === 0) {
+            version = '-';
+        }
+
+        return version;
     }
 }

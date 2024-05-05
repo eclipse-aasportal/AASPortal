@@ -166,8 +166,9 @@
     "OPTION_TIMELINE_CHART": "Timeline chart",
     "OPTION_BAR_VERTICAL_CHART": "Vertical bar chart",
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
-    "TEXT_ADD_FAVORITE": "Add 1 favorite",
-    "TEXT_ADD_FAVORITES": "Add {0} favorites",
+    "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
+    "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
+    "TEXT_AAS_OFFLINE": "The Asset Administration Shell is offline. Last update: {0}",
     "AASEndpointType": {
         "FileSystem": "File system",
         "AASServer": "AAS server",

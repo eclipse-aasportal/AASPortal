@@ -9,21 +9,22 @@
 import { aas, AASDocument, selectReferable } from 'common';
 import { cloneDeep, noop } from 'lodash-es';
 import { Command } from '../../types/command';
-import { Store } from '@ngrx/store';
-import { State } from '../aas.state';
-import * as AASActions from '../aas.actions';
+import { AASStoreService } from '../aas-store.service';
 
 export class UpdateElementCommand extends Command {
-    private readonly store: Store<State>;
     private readonly origin: aas.SubmodelElement;
     private readonly element: aas.SubmodelElement;
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    public constructor(store: Store, document: AASDocument, origin: aas.SubmodelElement, element: aas.SubmodelElement) {
+    public constructor(
+        private readonly store: AASStoreService,
+        document: AASDocument,
+        origin: aas.SubmodelElement,
+        element: aas.SubmodelElement,
+    ) {
         super('SetValue');
 
-        this.store = store as Store<State>;
         this.document = this.memento = document;
         this.origin = origin;
         this.element = element;
@@ -35,15 +36,15 @@ export class UpdateElementCommand extends Command {
         const targetCollection = this.getChildren(this.document, this.origin);
         const index = sourceCollection.indexOf(this.origin);
         targetCollection[index] = this.element;
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onUndo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.memento }));
+        this.store.applyDocument(this.memento);
     }
 
     protected onRedo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onAbort(): void {

@@ -7,11 +7,10 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { first, of } from 'rxjs';
+import { of } from 'rxjs';
 import { AuthService } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { FavoritesService } from '../../app/start/favorites.service';
-import { FavoritesList } from '../../app/start/start.state';
+import { FavoritesList, FavoritesService } from '../../app/start/favorites.service';
 import { AASDocument } from 'projects/common/dist/types';
 
 describe('FavoritesService', () => {
@@ -65,11 +64,8 @@ describe('FavoritesService', () => {
     });
 
     describe('lists', () => {
-        it('provides all favorites lists', (done: DoneFn) => {
-            service.lists.pipe(first()).subscribe(values => {
-                expect(values).toEqual(favorites);
-                done();
-            });
+        it('provides all favorites lists', () => {
+            expect(service.lists).toEqual(favorites);
         });
     });
 

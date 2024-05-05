@@ -19,9 +19,7 @@ describe('SecuredImageComponent', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [SecuredImageComponent],
-            imports: [
-                CommonModule,
-                HttpClientTestingModule]
+            imports: [CommonModule, HttpClientTestingModule],
         });
         fixture = TestBed.createComponent(SecuredImageComponent);
         component = fixture.componentInstance;

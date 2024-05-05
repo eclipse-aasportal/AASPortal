@@ -7,7 +7,9 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Store, StoreModule } from '@ngrx/store';
+import { SimpleChange } from '@angular/core';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { CommonModule } from '@angular/common';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASDocument, WebSocketData } from 'common';
 import { BehaviorSubject, Subject, first } from 'rxjs';
@@ -18,20 +20,15 @@ import { DownloadService } from '../../lib/download.service';
 import { WindowService } from '../../lib/window.service';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../assets/test-web-socket-factory.service';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { CommonModule } from '@angular/common';
-import { aasTreeReducer } from '../../lib/aas-tree/aas-tree.reducer';
-import { AASTreeFeatureState, AASTreeRow } from '../../lib/aas-tree/aas-tree.state';
-import { selectMatchIndex, selectMatchRow, selectRows, selectTerms } from '../../lib/aas-tree/aas-tree.selectors';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { SimpleChange } from '@angular/core';
+import { AASTreeStore } from '../../lib/aas-tree/aas-tree.store';
 
 describe('AASTreeComponent', () => {
     let component: AASTreeComponent;
     let fixture: ComponentFixture<AASTreeComponent>;
     let document: AASDocument;
     let webSocketSubject: Subject<WebSocketData>;
-    let store: Store<AASTreeFeatureState>;
+    let store: AASTreeStore;
 
     beforeEach(() => {
         document = sampleDocument;
@@ -60,14 +57,12 @@ describe('AASTreeComponent', () => {
                     provide: WebSocketFactoryService,
                     useValue: new TestWebSocketFactoryService(webSocketSubject),
                 },
+                AASTreeStore,
             ],
             imports: [
                 NgbModule,
                 CommonModule,
                 HttpClientTestingModule,
-                StoreModule.forRoot({
-                    tree: aasTreeReducer,
-                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -81,8 +76,7 @@ describe('AASTreeComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        store = TestBed.inject(Store);
-
+        store = TestBed.inject(AASTreeStore);
         component.document = document;
         component.ngOnChanges({
             document: new SimpleChange(null, document, true),
@@ -117,92 +111,59 @@ describe('AASTreeComponent', () => {
         expect(component.state).toEqual('offline');
     });
 
-    it('indicates if no node is selected', (done: DoneFn) => {
-        component.someSelected.pipe(first()).subscribe(value => {
-            expect(value).toBeFalse();
-            done();
-        });
+    it('indicates if no node is selected', () => {
+        expect(component.someSelected).toBeFalse();
     });
 
-    it('shows the first level ExampleMotor', (done: DoneFn) => {
-        component.nodes.pipe(first()).subscribe(nodes => {
-            expect(nodes).toBeTruthy();
-            expect(nodes.length).toEqual(5);
-            expect(nodes[0].element.idShort).toEqual('ExampleMotor');
-            expect(nodes[0].expanded).toBeTrue();
-            expect(nodes[1].element.idShort).toEqual('Identification');
-            expect(nodes[2].element.idShort).toEqual('TechnicalData');
-            expect(nodes[3].element.idShort).toEqual('OperationalData');
-            expect(nodes[4].element.idShort).toEqual('Documentation');
-            done();
-        });
+    it('shows the first level ExampleMotor', () => {
+        const nodes = component.nodes;
+        expect(nodes).toBeTruthy();
+        expect(nodes.length).toEqual(5);
+        expect(nodes[0].element.idShort).toEqual('ExampleMotor');
+        expect(nodes[0].expanded).toBeTrue();
+        expect(nodes[1].element.idShort).toEqual('Identification');
+        expect(nodes[2].element.idShort).toEqual('TechnicalData');
+        expect(nodes[3].element.idShort).toEqual('OperationalData');
+        expect(nodes[4].element.idShort).toEqual('Documentation');
     });
 
     describe('toggleSelection', () => {
-        it('toggle selection of all rows', (done: DoneFn) => {
+        it('toggle selection of all rows', () => {
             component.toggleSelections();
-            store
-                .select(selectRows)
-                .pipe(first())
-                .subscribe(values => {
-                    expect(values.every(value => value.selected)).toBeTrue();
-                    done();
-                });
+            expect(store.rows.every(value => value.selected)).toBeTrue();
         });
     });
 
     describe('collapse', () => {
-        let nodes: AASTreeRow[];
-
-        beforeEach(() => {
-            component.nodes.pipe(first()).subscribe(values => (nodes = values));
-        });
-
-        it('collapse root element', (done: DoneFn) => {
-            component.collapse(nodes[0]);
-            component.nodes.pipe(first()).subscribe(values => {
-                expect(values.length).toEqual(1);
-                expect(values[0].element.idShort).toEqual('ExampleMotor');
-                expect(values[0].expanded).toBeFalse();
-                done();
-            });
+        it('collapse root element', () => {
+            expect(component.nodes.length).toEqual(1);
+            expect(component.nodes[0].element.idShort).toEqual('ExampleMotor');
+            expect(component.nodes[0].expanded).toBeFalse();
         });
 
         it('collapse to initial view', () => {
             component.collapse();
-            component.nodes.pipe(first()).subscribe(values => {
-                expect(values.length).toEqual(5);
-                expect(values[0].element.idShort).toEqual('ExampleMotor');
-                expect(values[0].expanded).toBeTrue();
-                expect(values[1].element.idShort).toEqual('Identification');
-                expect(values[2].element.idShort).toEqual('TechnicalData');
-                expect(values[3].element.idShort).toEqual('OperationalData');
-                expect(values[4].element.idShort).toEqual('Documentation');
-            });
+            expect(component.nodes.length).toEqual(5);
+            expect(component.nodes[0].element.idShort).toEqual('ExampleMotor');
+            expect(component.nodes[0].expanded).toBeTrue();
+            expect(component.nodes[1].element.idShort).toEqual('Identification');
+            expect(component.nodes[2].element.idShort).toEqual('TechnicalData');
+            expect(component.nodes[3].element.idShort).toEqual('OperationalData');
+            expect(component.nodes[4].element.idShort).toEqual('Documentation');
         });
     });
 
     describe('expand', () => {
-        let nodes: AASTreeRow[];
-
-        beforeEach(() => {
-            component.nodes.pipe(first()).subscribe(values => (nodes = values));
-        });
-
-        it('expand submodel "Identification"', (done: DoneFn) => {
-            component.expand(nodes[1]);
-            component.nodes.pipe(first()).subscribe(values => {
-                expect(values.length).toEqual(9);
-                expect(values[1].element.idShort).toEqual('Identification');
-                expect(values[0].expanded).toBeTrue();
-                done();
-            });
+        it('expand submodel "Identification"', () => {
+            expect(component.nodes.length).toEqual(9);
+            expect(component.nodes[1].element.idShort).toEqual('Identification');
+            expect(component.nodes[0].expanded).toBeTrue();
         });
     });
 
     describe('search text "max"', () => {
         let search: BehaviorSubject<string>;
-        let store: Store<AASTreeFeatureState>;
+        let store: AASTreeStore;
 
         beforeEach(() => {
             search = new BehaviorSubject<string>('');
@@ -212,20 +173,17 @@ describe('AASTreeComponent', () => {
                 search: new SimpleChange(null, search, true),
             });
 
-            store = TestBed.inject(Store);
+            store = TestBed.inject(AASTreeStore);
         });
 
         it('the search text must be at least three characters long', (done: DoneFn) => {
-            const subscription = store
-                .select(selectMatchRow)
-                .pipe()
-                .subscribe(row => {
-                    if (row) {
-                        expect(row.name).toEqual('MaxRotationSpeed');
-                        subscription.unsubscribe();
-                        done();
-                    }
-                });
+            const subscription = store.selectMatchRow.pipe().subscribe(row => {
+                if (row) {
+                    expect(row.name).toEqual('MaxRotationSpeed');
+                    subscription.unsubscribe();
+                    done();
+                }
+            });
 
             search.next('z');
             search.next('zy');
@@ -233,59 +191,38 @@ describe('AASTreeComponent', () => {
         });
 
         it('finds the first occurrence of "max" at row 7', (done: DoneFn) => {
-            search.next('max');
+            store.selectMatchIndex.pipe(first()).subscribe(value => {
+                expect(value).toEqual(7);
+                done();
+            });
 
-            store
-                .select(selectMatchIndex)
-                .pipe(first())
-                .subscribe(value => {
-                    expect(value).toEqual(7);
-                    done();
-                });
+            search.next('max');
         });
 
         it('finds the next occurrence of "max" at row 8', (done: DoneFn) => {
             search.next('max');
+            component.findNext();
 
-            store
-                .select(selectTerms)
-                .pipe(first())
-                .subscribe(() => {
-                    component.findNext();
-                });
-
-            store
-                .select(selectMatchIndex)
-                .pipe(first())
-                .subscribe(value => {
-                    expect(value).toEqual(8);
-                    done();
-                });
+            store.selectMatchIndex.pipe(first()).subscribe(value => {
+                expect(value).toEqual(8);
+                done();
+            });
         });
 
         it('finds the previous occurrence of "max" at row 25', (done: DoneFn) => {
             search.next('max');
+            component.findPrevious();
 
-            store
-                .select(selectTerms)
-                .pipe(first())
-                .subscribe(() => {
-                    component.findPrevious();
-                });
-
-            store
-                .select(selectMatchIndex)
-                .pipe(first())
-                .subscribe(value => {
-                    expect(value).toEqual(8);
-                    done();
-                });
+            store.selectMatchIndex.pipe(first()).subscribe(value => {
+                expect(value).toEqual(8);
+                done();
+            });
         });
     });
 
     describe('search pattern', () => {
         let search: BehaviorSubject<string>;
-        let store: Store<AASTreeFeatureState>;
+        let store: AASTreeStore;
 
         beforeEach(() => {
             search = new BehaviorSubject<string>('');
@@ -300,43 +237,34 @@ describe('AASTreeComponent', () => {
                 },
             });
 
-            store = TestBed.inject(Store);
+            store = TestBed.inject(AASTreeStore);
         });
 
         it('finds the first occurrence of "#prop:max" at row 7', (done: DoneFn) => {
             search.next('#prop:max');
 
-            store
-                .select(selectMatchIndex)
-                .pipe(first())
-                .subscribe(value => {
-                    expect(value).toEqual(7);
-                    done();
-                });
+            store.selectMatchIndex.pipe(first()).subscribe(value => {
+                expect(value).toEqual(7);
+                done();
+            });
         });
 
         it('finds the first occurrence of "#prop:MaxTorque" at row 8', (done: DoneFn) => {
             search.next('#prop:MaxTorque');
 
-            store
-                .select(selectMatchIndex)
-                .pipe(first())
-                .subscribe(value => {
-                    expect(value).toEqual(8);
-                    done();
-                });
+            store.selectMatchIndex.pipe(first()).subscribe(value => {
+                expect(value).toEqual(8);
+                done();
+            });
         });
 
         it('finds the first occurrence of "#prop:serialnumber=P12345678I40" at row 5', (done: DoneFn) => {
             search.next('#prop:serialnumber=P12345678I40');
 
-            store
-                .select(selectMatchIndex)
-                .pipe(first())
-                .subscribe(value => {
-                    expect(value).toEqual(5);
-                    done();
-                });
+            store.selectMatchIndex.pipe(first()).subscribe(value => {
+                expect(value).toEqual(5);
+                done();
+            });
         });
     });
 });

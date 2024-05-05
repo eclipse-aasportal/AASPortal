@@ -166,8 +166,9 @@
     "OPTION_TIMELINE_CHART": "Zeitdiagramm",
     "OPTION_BAR_VERTICAL_CHART": "Balkendiagramm vertikal",
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
-    "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen",
-    "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen",
+    "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
+    "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
+    "TEXT_AAS_OFFLINE": "Die Verwaltungsschale ist offline. Letzte Aktualisierung: {0}",
     "AASEndpointType": {
         "FileSystem": "Verzeichnis",
         "AASServer": "AAS-Server",

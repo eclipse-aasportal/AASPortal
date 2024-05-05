@@ -7,21 +7,15 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SimpleChange, SimpleChanges } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { StoreModule } from '@ngrx/store';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { first, of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AASDocument } from 'common';
 
 import { AASTableComponent } from '../../lib/aas-table/aas-table.component';
-import { AASTableEffects } from '../../lib/aas-table/aas-table.effects';
 import { MaxLengthPipe } from '../../lib/max-length.pipe';
 import { SortableHeaderDirective } from '../../lib/sortable-header.directive';
 import { NotifyService } from '../../lib/notify/notify.service';
-import { aasTableReducer } from '../../lib/aas-table/aas-table.reducer';
 import { createDocument } from '../assets/test-document';
 import { ViewMode } from '../../lib/types/view-mode';
 
@@ -48,10 +42,6 @@ describe('AASTableComponent', () => {
             imports: [
                 CommonModule,
                 NgbModule,
-                StoreModule.forRoot({
-                    aasTable: aasTableReducer,
-                }),
-                EffectsModule.forRoot(AASTableEffects),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -65,22 +55,15 @@ describe('AASTableComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        component.viewMode = of(ViewMode.List);
-        component.documents = of([document1, document2, document3]);
-        component.ngOnChanges({
-            viewMode: new SimpleChange(null, component.viewMode, true),
-            documents: new SimpleChange(null, component.documents, true),
-        } as SimpleChanges);
+        component.viewMode = ViewMode.List;
+        component.documents = [document1, document2, document3];
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('provides a rows property', function (done: DoneFn) {
-        component.rows.pipe(first()).subscribe(rows => {
-            expect(rows).toBeTruthy();
-            done();
-        });
+    it('provides a rows property', () => {
+        expect(component.rows).toBeTruthy();
     });
 });

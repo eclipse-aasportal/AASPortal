@@ -37,6 +37,9 @@ export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export function noop() {}
+
 /**
  * Determines whether the specified value represents a valid e-mail.
  * @param value The value
@@ -322,4 +325,20 @@ export function getEndpointType(url: string | URL): AASEndpointType {
         default:
             throw new Error(`Protocol "${url.protocol}" is not supported.`);
     }
+}
+
+/**
+ * Creates an immutable object.
+ * @param obj The current object.
+ * @returns The immutable object.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepFreeze(obj: any): any {
+    Object.keys(obj).forEach(property => {
+        if (typeof obj[property] === 'object' && !Object.isFrozen(obj[property])) {
+            deepFreeze(obj[property]);
+        }
+    });
+
+    return Object.freeze(obj);
 }

@@ -7,14 +7,25 @@
  *****************************************************************************/
 
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, getLocaleValue, getPreferredName } from 'common';
 import { Subscription } from 'rxjs';
-import * as CustomerFeedbackActions from './customer-feedback.actions';
-import { CustomerFeedbackFeatureState, FeedbackItem, GeneralItem } from './customer-feedback.state';
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
-import { selectCustomerFeedback } from './customer-feedback.selectors';
+
+export interface GeneralItem {
+    name: string;
+    score: number;
+    sum: number;
+    count: number;
+    like: boolean;
+}
+
+export interface FeedbackItem {
+    stars: string[];
+    createdAt: string;
+    subject: string;
+    message: string;
+}
 
 @Component({
     selector: 'fhg-customer-feedback',
@@ -23,16 +34,10 @@ import { selectCustomerFeedback } from './customer-feedback.selectors';
 })
 export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnChanges, OnDestroy {
     private static readonly maxStars = 5;
-    private readonly store: Store<CustomerFeedbackFeatureState>;
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
 
-    public constructor(
-        store: Store,
-        private readonly translate: TranslateService,
-    ) {
-        this.store = store as Store<CustomerFeedbackFeatureState>;
-    }
+    public constructor(private readonly translate: TranslateService) {}
 
     @Input()
     public submodels: DocumentSubmodelPair[] | null = null;
@@ -69,19 +74,6 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
     public starClassNames: string[] = [];
 
     public ngOnInit(): void {
-        this.subscription.add(
-            this.store
-                .select(selectCustomerFeedback)
-                .pipe()
-                .subscribe(state => {
-                    this.stars = state.stars;
-                    this.count = state.count;
-                    this.starClassNames = state.starClassNames;
-                    this.items = state.items.filter(item => item.count > 0);
-                    this.feedbacks = state.feedbacks;
-                }),
-        );
-
         this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
                 this.init();
@@ -146,15 +138,11 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
             starClassNames = this.initStarClassNames(0);
         }
 
-        this.store.dispatch(
-            CustomerFeedbackActions.initialize({
-                stars,
-                count,
-                starClassNames,
-                items,
-                feedbacks,
-            }),
-        );
+        this.stars = stars;
+        this.count = count;
+        this.starClassNames = starClassNames;
+        this.items = items.filter(item => item.count > 0);
+        this.feedbacks = feedbacks;
     }
 
     private buildItems(general: aas.SubmodelElementCollection, items: GeneralItem[]): void {

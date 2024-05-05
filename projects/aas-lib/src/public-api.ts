@@ -44,18 +44,17 @@ export * from './lib/types/view-query-params';
 export * from './lib/types/environment';
 
 export * from './lib/aas-table/aas-table.component';
-export * from './lib/aas-table/aas-table.state';
+export * from './lib/aas-table/aas-table-row';
 
 export * from './lib/aas-tree/aas-tree.component';
 export * from './lib/aas-tree/aas-tree-api.service';
-export * from './lib/aas-tree/aas-tree.state';
+export * from './lib/aas-tree/aas-tree-row';
 
 export * from './lib/message-table/message-table.component';
 
 export * from './lib/digital-nameplate/digital-nameplate.component';
 
 export * from './lib/customer-feedback/customer-feedback.component';
-export * from './lib/customer-feedback/customer-feedback.state';
 
 export * from './lib/score/score.component';
 

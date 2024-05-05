@@ -22,7 +22,7 @@ class TestSecureImageComponent {
     @Input()
     public src = '';
     @Input()
-    public alt?:string;
+    public alt?: string;
     @Input()
     public classname?: string;
     @Input()
@@ -37,14 +37,8 @@ describe('ShowImageFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                ShowImageFormComponent,
-                TestSecureImageComponent
-            ],
-            providers: [
-                NgbModal,
-                NgbActiveModal
-            ],
+            declarations: [ShowImageFormComponent, TestSecureImageComponent],
+            providers: [NgbModal, NgbActiveModal],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -52,12 +46,12 @@ describe('ShowImageFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
-        
+
         fixture = TestBed.createComponent(ShowImageFormComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

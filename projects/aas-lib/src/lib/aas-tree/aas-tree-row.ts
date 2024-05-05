@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { isEqual } from 'lodash-es';
+import isEqual from 'lodash-es/isEqual';
 import {
     AASDocument,
     aas,
@@ -23,6 +23,7 @@ import {
     toBoolean,
     toLocale,
 } from 'common';
+
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../convert';
@@ -98,31 +99,6 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
     public get submodel(): aas.Submodel | undefined {
         return this.element.modelType === 'Submodel' ? (this.element as aas.Submodel) : undefined;
     }
-}
-
-export interface SearchTerm {
-    text?: string;
-    query?: SearchQuery;
-}
-
-export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
-
-export interface SearchQuery {
-    modelType: aas.ModelType;
-    operator?: Operator;
-    name?: string;
-    value?: string | boolean;
-}
-
-export interface AASTreeState {
-    rows: AASTreeRow[];
-    index: number;
-    terms: SearchTerm[];
-    error: unknown;
-}
-
-export interface AASTreeFeatureState {
-    tree: AASTreeState;
 }
 
 class TreeInitialize {

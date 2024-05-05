@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { AASDocument } from 'common';
-import { ViewMode } from '../types/view-mode';
 import { Tree, TreeNode } from '../tree';
 
 export class AASTableRow extends TreeNode<AASDocument> {
@@ -88,14 +87,4 @@ export class AASTableTree extends Tree<AASDocument, AASTableRow> {
             node.nextSibling,
         );
     }
-}
-
-export interface AASTableState {
-    viewMode: ViewMode;
-    filter?: string;
-    rows: AASTableRow[];
-}
-
-export interface AASTableFeatureState {
-    aasTable: AASTableState;
 }

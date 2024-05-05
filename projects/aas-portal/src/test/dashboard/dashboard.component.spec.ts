@@ -7,32 +7,31 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { JWTPayload, WebSocketData } from 'common';
-import { first, of, Subject } from 'rxjs';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
-import { EffectsModule } from '@ngrx/effects';
-import { Store, StoreModule } from '@ngrx/store';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { first, mergeMap, of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
+import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
+import { JWTPayload, WebSocketData } from 'common';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { TestWebSocketFactoryService } from '../../test/assets/test-web-socket-factory.service';
 import { AppRoutingModule } from '../../app/app-routing.module';
-import { dashboardReducer } from '../../app/dashboard/dashboard.reducer';
 import { pages } from './test-pages';
-import { DashboardService } from '../../app/dashboard/dashboard.service';
+import { DashboardChart, DashboardService } from '../../app/dashboard/dashboard.service';
 import { SelectionMode } from '../../app/types/selection-mode';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import * as DashboardActions from '../../app/dashboard/dashboard.actions';
-import { DashboardChart, State } from '../../app/dashboard/dashboard.state';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
     let webSocketSubject: Subject<WebSocketData>;
-    let store: Store<State>;
     let service: DashboardService;
     let auth: jasmine.SpyObj<AuthService>;
+    const chart1 = '42';
+    const chart2 = '4711';
+    const chart3 = '0815';
 
     beforeEach(() => {
         webSocketSubject = new Subject<WebSocketData>();
@@ -66,10 +65,8 @@ describe('DashboardComponent', () => {
                 AppRoutingModule,
                 HttpClientTestingModule,
                 AASLibModule,
+                StoreModule.forRoot(),
                 EffectsModule.forRoot(),
-                StoreModule.forRoot({
-                    dashboard: dashboardReducer,
-                }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -82,11 +79,9 @@ describe('DashboardComponent', () => {
         fixture = TestBed.createComponent(DashboardComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        store = TestBed.inject(Store);
         service = TestBed.inject(DashboardService);
 
-        store.dispatch(DashboardActions.setPages({ pages }));
-        store.dispatch(DashboardActions.setPageName({ name: 'Test' }));
+        service.state = { pages, index: 1 };
     });
 
     it('should create', () => {
@@ -94,11 +89,14 @@ describe('DashboardComponent', () => {
     });
 
     it('shows the Test page', () => {
-        expect(component.page.name).toEqual('Test');
+        expect(component.activePage.name).toEqual('Test');
     });
 
-    it('displays two rows', () => {
-        expect(component.rows.length).toEqual(2);
+    it('displays two rows', (done: DoneFn) => {
+        component.rows.pipe(first()).subscribe(rows => {
+            expect(rows.length).toEqual(2);
+            done();
+        });
     });
 
     describe('single selection', () => {
@@ -111,22 +109,28 @@ describe('DashboardComponent', () => {
             expect(component.selectedItems.length).toEqual(0);
         });
 
-        it('allows to toggle the selection of a chart', () => {
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.selectedItem).toEqual(component.rows[0].columns[0].item);
-            expect(component.selectedItems.length).toEqual(1);
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.selectedItem).toBeNull();
-            expect(component.selectedItems.length).toEqual(0);
+        it('allows to toggle the selection of a chart', (done: DoneFn) => {
+            component.rows.subscribe(rows => {
+                component.toggleSelection(rows[0].columns[0]);
+                expect(component.selectedItem).toEqual(rows[0].columns[0].item);
+                expect(component.selectedItems.length).toEqual(1);
+                component.toggleSelection(rows[0].columns[0]);
+                expect(component.selectedItem).toBeNull();
+                expect(component.selectedItems.length).toEqual(0);
+                done();
+            });
         });
 
-        it('ensures that only one item is selected', () => {
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.selectedItem).toEqual(component.rows[0].columns[0].item);
-            expect(component.selectedItems.length).toEqual(1);
-            component.toggleSelection(component.rows[0].columns[1]);
-            expect(component.selectedItem).toEqual(component.rows[0].columns[1].item);
-            expect(component.selectedItems.length).toEqual(1);
+        it('ensures that only one item is selected', (done: DoneFn) => {
+            component.rows.subscribe(rows => {
+                component.toggleSelection(rows[0].columns[0]);
+                expect(component.selectedItem).toEqual(rows[0].columns[0].item);
+                expect(component.selectedItems.length).toEqual(1);
+                component.toggleSelection(rows[0].columns[1]);
+                expect(component.selectedItem).toEqual(rows[0].columns[1].item);
+                expect(component.selectedItems.length).toEqual(1);
+                done();
+            });
         });
     });
 
@@ -146,205 +150,204 @@ describe('DashboardComponent', () => {
         });
 
         it('can move item[0, 1] to the left', (done: DoneFn) => {
-            const id = component.rows[0].columns[1].id;
-            component.toggleSelection(component.rows[0].columns[1]);
-            expect(component.canMoveLeft()).toBeTrue();
-            component.moveLeft();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.toggleSelection(rows[0].columns[1]);
+                        expect(component.canMoveLeft()).toBeTrue();
+                        component.moveLeft();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[0].id).toEqual(chart2);
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[1].id).toEqual(chart2);
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
                 .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[1].id).toEqual(id);
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
+                    expect(rows[0].columns[0].id).toEqual(chart2);
                     done();
                 });
         });
 
         it('can move item[0, 0] to the right including undo/redo', (done: DoneFn) => {
-            const id = component.rows[0].columns[0].id;
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.canMoveRight()).toBeTrue();
-            component.moveRight();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.toggleSelection(rows[0].columns[0]);
+                        expect(component.canMoveRight()).toBeTrue();
+                        component.moveRight();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[1].id).toEqual(chart1);
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[0].id).toEqual(chart1);
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
                 .subscribe(rows => {
-                    expect(rows[0].columns[1].id).toEqual(id);
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[1].id).toEqual(id);
+                    expect(rows[0].columns[1].id).toEqual(chart1);
                     done();
                 });
         });
 
         it('can move item[0, 0] up creating a new row including undo/redo', (done: DoneFn) => {
-            const id = component.rows[0].columns[0].id;
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.canMoveUp()).toBeTrue();
-            component.moveUp();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.toggleSelection(rows[0].columns[0]);
+                        expect(component.canMoveUp()).toBeTrue();
+                        component.moveUp();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[0].id).toEqual(chart1);
+                        expect(rows.length).toEqual(3);
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[0].id).toEqual(chart1);
+                        expect(rows.length).toEqual(2);
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
                 .subscribe(rows => {
+                    expect(rows[0].columns[0].id).toEqual(chart1);
                     expect(rows.length).toEqual(3);
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows.length).toEqual(2);
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows.length).toEqual(3);
-                    expect(rows[0].columns[0].id).toEqual(id);
                     done();
                 });
         });
 
         it('can move item[0, 0] down to [1, 1] including undo/redo', (done: DoneFn) => {
-            const id = component.rows[0].columns[0].id;
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.canMoveDown()).toBeTrue();
-            component.moveDown();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.toggleSelection(rows[0].columns[0]);
+                        expect(component.canMoveDown()).toBeTrue();
+                        component.moveDown();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[1].columns[1].id).toEqual(chart1);
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect(rows[0].columns[0].id).toEqual(chart1);
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
                 .subscribe(rows => {
-                    expect(rows[1].columns[1].id).toEqual(id);
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect(rows[1].columns[1].id).toEqual(id);
+                    expect(rows[1].columns[1].id).toEqual(chart1);
                     done();
                 });
         });
 
-        it('gets the color of a chart', () => {
-            expect(component.getColor(component.rows[0].columns[0])).toEqual('#123456');
-        });
-
-        it('sets the color of a chart including undo/redo', (done: DoneFn) => {
-            component.changeColor(component.rows[0].columns[0], '#AA55AA');
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-                    done();
-                });
-        });
-
-        it('gets the source labels of a chart', () => {
-            expect(component.getSources(component.rows[0].columns[0])).toEqual(['RotationSpeed']);
-        });
-
-        it('can delete the Test page', (done: DoneFn) => {
-            const name = component.page.name;
-            component.delete();
-            service.pages.pipe(first()).subscribe(pages => {
-                expect(pages.find(item => item.name === name)).toBeUndefined();
+        it('gets the color of a chart', (done: DoneFn) => {
+            component.rows.pipe(first()).subscribe(rows => {
+                expect(component.getColor(rows[0].columns[0])).toEqual('#123456');
                 done();
             });
         });
 
+        it('sets the color of a chart including undo/redo', (done: DoneFn) => {
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.changeColor(rows[0].columns[0], '#AA55AA');
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
+                .subscribe(rows => {
+                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
+                    done();
+                });
+        });
+
+        it('gets the source labels of a chart', (done: DoneFn) => {
+            component.rows.pipe(first()).subscribe(rows => {
+                expect(component.getSources(rows[0].columns[0])).toEqual(['RotationSpeed']);
+                done();
+            });
+        });
+
+        it('can delete the Test page', () => {
+            const name = component.activePage.name;
+            component.delete();
+            expect(component.pages.find(item => item.name === name)).toBeUndefined();
+        });
+
         it('can change the min value', (done: DoneFn) => {
-            component.changeMin(component.rows[0].columns[0], '0');
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).min).toBeUndefined();
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.changeMin(rows[0].columns[0], '0');
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect((rows[0].columns[0].item as DashboardChart).min).toBeUndefined();
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
                     done();
@@ -352,28 +355,28 @@ describe('DashboardComponent', () => {
         });
 
         it('can change the max value', (done: DoneFn) => {
-            component.changeMax(component.rows[0].columns[0], '5500');
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
-                });
-
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).max).toBeUndefined();
-                });
-
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-            store
-                .select(state => state.dashboard.rows)
-                .pipe(first())
+            component.rows
+                .pipe(
+                    first(),
+                    mergeMap(rows => {
+                        component.changeMax(rows[0].columns[0], '5500');
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
+                        expect(component.canUndo()).toBeTrue();
+                        component.undo();
+                        return component.rows;
+                    }),
+                    first(),
+                    mergeMap(rows => {
+                        expect((rows[0].columns[0].item as DashboardChart).max).toBeUndefined();
+                        expect(component.canRedo()).toBeTrue();
+                        component.redo();
+                        return component.rows;
+                    }),
+                )
                 .subscribe(rows => {
                     expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
                     done();

@@ -6,20 +6,17 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { cloneDeep } from 'lodash-es';
-import { DashboardItem, DashboardPage, DashboardRow } from '../dashboard.state';
-import { DashboardService } from '../dashboard.service';
+import { DashboardItem, DashboardPage, DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
 
 export class MoveLeftCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private page: DashboardPage,
         private item: DashboardItem,
     ) {
-        super('Move left', store);
+        super('Move left', dashboard);
     }
 
     protected executing(): void {
@@ -27,7 +24,6 @@ export class MoveLeftCommand extends DashboardCommand {
             throw new Error(`Item can not be moved to the left.`);
         }
 
-        let rows: DashboardRow[] | undefined;
         const page = cloneDeep(this.page);
         const item = page.items[this.page.items.indexOf(this.item)];
         const grid = this.dashboard.getGrid(page);
@@ -36,9 +32,9 @@ export class MoveLeftCommand extends DashboardCommand {
         if (index > 0) {
             row.splice(index, 1);
             row.splice(index - 1, 0, item);
-            rows = this.getRows(this.validateItems(grid));
+            this.validateItems(grid);
         }
 
-        this.dashboard.update(page, rows);
+        this.dashboard.update(page);
     }
 }

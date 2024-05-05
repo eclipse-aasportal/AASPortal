@@ -9,7 +9,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -23,22 +22,14 @@ import { AboutComponent } from './about/about.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AASComponent } from './aas/aas.component';
 import { StartComponent } from './start/start.component';
-import { startReducer } from './start/start.reducer';
 import { NewElementFormComponent } from './aas/new-element-form/new-element-form.component';
 import { EditElementFormComponent } from './aas/edit-element-form/edit-element-form.component';
-import { aasReducer } from './aas/aas.reducer';
 import { RemoveEndpointFormComponent } from './start/remove-endpoint-form/remove-endpoint-form.component';
-import { dashboardReducer } from './dashboard/dashboard.reducer';
 import { UploadFormComponent } from './start/upload-form/upload-form.component';
 import { ViewComponent } from './view/view.component';
-import { viewReducer } from './view/view.reducer';
 import { AddEndpointFormComponent } from './start/add-endpoint-form/add-endpoint-form.component';
 import { HttpLoaderFactory } from './http-loader-factory';
 import { httpInterceptorProviders } from './index';
-import { EffectsModule } from '@ngrx/effects';
-import { AASEffects } from './aas/aas.effects';
-import { ViewEffects } from './view/view.effects';
-import { StartEffects } from './start/start.effects';
 import { FavoritesFormComponent } from './start/favorites-form/favorites-form.component';
 
 @NgModule({
@@ -64,13 +55,6 @@ import { FavoritesFormComponent } from './start/favorites-form/favorites-form.co
         HttpClientModule,
         FormsModule,
         NgbModule,
-        StoreModule.forRoot({
-            start: startReducer,
-            aas: aasReducer,
-            view: viewReducer,
-            dashboard: dashboardReducer,
-        }),
-        EffectsModule.forRoot([StartEffects, AASEffects, ViewEffects]),
         TranslateModule.forRoot({
             defaultLanguage: 'en-us',
             loader: {

@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+/** Single or multiple selection. */
 export enum SelectionMode {
     Single = 'Single',
     Multiple = 'Multiple',

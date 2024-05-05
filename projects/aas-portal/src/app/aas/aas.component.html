@@ -6,12 +6,11 @@
  !
  !---------------------------------------------------------------------------->
 
-@if((document | async) !== null) {
 <div id="aas-container" class="container-fluid">
     <div class="row mt-1">
         <div class="d-flex flex-row">
             <div class="border border-secondary rounded p-1">
-                <fhg-img [height]="88" [width]="88" [src]="(thumbnail | async)!" alt="assets/resources/aas.svg" />
+                <fhg-img [height]="88" [width]="88" [src]="thumbnail" alt="assets/resources/aas.svg" />
             </div>
             <div class="d-flex flex-row ps-1">
                 <div class="d-flex flex-column">
@@ -22,58 +21,57 @@
                     <div class="fw-bold text-end small text-nowrap" translate>LABEL_ASSET_ID</div>
                 </div>
                 <div class="d-flex flex-column flex-grow-1 ps-1">
-                    <div class="small text-nowrap">{{address | async}}</div>
-                    <div class="small text-nowrap">{{idShort | async}}</div>
-                    <div class="small text-nowrap">{{id | async}}</div>
-                    <div class="small text-nowrap">{{version | async}}</div>
-                    <div class="small text-nowrap">{{assetId | async}}</div>
+                    <div class="small text-nowrap">{{address}}</div>
+                    <div class="small text-nowrap">{{idShort}}</div>
+                    <div class="small text-nowrap">{{id}}</div>
+                    <div class="small text-nowrap">{{version}}</div>
+                    <div class="small text-nowrap">{{assetId}}</div>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <fhg-aas-tree #aasTree [state]="state | async" [search]="search" [document]="document | async"
-            [(selected)]="selectedElements">
+        <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document" [(selected)]="selectedElements">
         </fhg-aas-tree>
     </div>
 </div>
 
 <ng-template #aasToolbar>
     <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="(canPlay | async) === false">
+        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="canPlay === false">
             <i class="bi bi-play-fill"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="(canStop | async) === false">
+        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="canStop === false">
             <i class="bi bi-stop-fill"></i>
         </button>
     </div>
     <div class="input-group me-2">
-        <select #select class="form-select" [(ngModel)]="dashboardPage">
-            @for (option of (dashboardPages | async); track option) {
-            <option [ngValue]="option">{{option}}</option>
+        <select #select class="form-select" [value]="dashboardPage" (change)="dashboardPage = dashboardPages[select.selectedIndex]">
+            @for (page of dashboardPages; track page.name) {
+            <option [ngValue]="page">{{page.name}}</option>
             }
         </select>
-        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line').subscribe()"
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')"
             [disabled]="!canAddToDashboard">
             <i class="bi bi-graph-up"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="addToDashboard('BarVertical').subscribe()"
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('BarVertical')"
             [disabled]="!canAddToDashboard">
             <i class="bi bi-bar-chart-line-fill"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
+    <div class="btn-group me-2" [hidden]="readOnly">
         <button type="button" class="btn btn-primary" (click)="synchronize().subscribe()"
-            [disabled]="(canSynchronize | async) === false">
+            [disabled]="canSynchronize === false">
             <i class="bi bi-arrow-repeat"></i>
         </button>
     </div>
     <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="downloadDocument()">
+        <button type="button" class="btn btn-primary" (click)="downloadDocument().subscribe">
             <i class="bi bi-download"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
+    <div class="btn-group me-2" [hidden]="readOnly">
         <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="canUndo === false">
             <i class="bi bi-arrow-90deg-left"></i>
         </button>
@@ -81,7 +79,7 @@
             <i class="bi bi-arrow-90deg-right"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="(readOnly | async) === true">
+    <div class="btn-group me-2" [hidden]="readOnly">
         <button type="button" class="btn btn-primary" (click)="newElement().subscribe()" [disabled]="!canNewElement">
             <i class="bi bi-plus-lg"></i>
         </button>
@@ -105,6 +103,3 @@
         </button>
     </div>
 </ng-template>
-} @else {
-<div>Kein Document</div>
-}

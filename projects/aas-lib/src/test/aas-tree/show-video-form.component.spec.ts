@@ -18,12 +18,9 @@ describe('ShowVideoFormComponent', () => {
     let fixture: ComponentFixture<ShowVideoFormComponent>;
 
     beforeEach(() => {
-            TestBed.configureTestingModule({
+        TestBed.configureTestingModule({
             declarations: [ShowVideoFormComponent],
-            providers: [
-                NgbModal,
-                NgbActiveModal
-            ],
+            providers: [NgbModal, NgbActiveModal],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -31,10 +28,10 @@ describe('ShowVideoFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(ShowVideoFormComponent);

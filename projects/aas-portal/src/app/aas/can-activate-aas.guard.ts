@@ -8,18 +8,13 @@
 
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, UrlTree } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { AASQueryParams } from 'aas-lib';
-import * as AASSelectors from './aas.selectors';
-import { State } from './aas.state';
+import { AASStoreService } from './aas-store.service';
 
 @Injectable()
 export class CanActivateAAS {
-    private readonly store: Store<State>;
-    public constructor(store: Store) {
-        this.store = store as Store<State>;
-    }
+    public constructor(private readonly store: AASStoreService) {}
 
     public canActivate(
         route: ActivatedRouteSnapshot,
@@ -29,6 +24,6 @@ export class CanActivateAAS {
             return true;
         }
 
-        return this.store.select(AASSelectors.selectHasDocument);
+        return this.store.document != null;
     }
 }

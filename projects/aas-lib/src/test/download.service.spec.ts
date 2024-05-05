@@ -27,11 +27,10 @@ describe('DownloadService', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         service = TestBed.inject(DownloadService);
@@ -49,8 +48,7 @@ describe('DownloadService', () => {
 
     describe('uploadDocuments', function () {
         it('POST: /api/v1/containers/:name/documents/:id', function () {
-            const file = jasmine.createSpyObj<File>(
-                ['arrayBuffer', 'slice', 'stream', 'text']);
+            const file = jasmine.createSpyObj<File>(['arrayBuffer', 'slice', 'stream', 'text']);
 
             service.uploadDocuments('Samples', file).subscribe();
             const req = httpTestingController.expectOne('/api/v1/containers/U2FtcGxlcw/packages');
@@ -65,9 +63,9 @@ describe('DownloadService', () => {
             service.downloadDocument(
                 'Samples',
                 'https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237',
-                'Test.aasx'
+                'Test.aasx',
             );
-            
+
             expect(spy).toHaveBeenCalled();
         });
     });

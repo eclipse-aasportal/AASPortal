@@ -8,7 +8,7 @@
 
 <div id="start-container" class="container-fluid">
     <fhg-aas-table [documents]="documents" [viewMode]="viewMode" [(selected)]="selected"
-        [filter]="filterFavorites" ></fhg-aas-table>
+        [filter]="filter" ></fhg-aas-table>
 </div>
 
 <ng-template #startToolbar>
@@ -16,9 +16,9 @@
         <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
             <i class="bi bi-star"></i>
         </button>
-        <select #selectFavorites [ngClass]="currentFavorites ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
-            [value]="currentFavorites | async" (change)="setCurrentFavorites(selectFavorites.value)">
-            @for (option of (favoritesLists | async); track option; let i = $index) {
+        <select #selectFavorites [ngClass]="activeFavorites !== '' ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [value]="activeFavorites" (change)="setActiveFavorites(selectFavorites.value)">
+            @for (option of favoritesLists; track option; let i = $index) {
             @if (i === 0) {
             <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
             } @else {
@@ -27,25 +27,25 @@
             }
         </select>
     </div>
-    @if (!currentFavorites) {
+    @if (activeFavorites === '') {
     <div class="input-group me-2">
-        <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage | async">
+        <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage">
             <i class="bi bi-chevron-bar-left"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage | async">
+        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <select #selectLimit class="form-select" [value]="limit | async" (change)="setLimit(selectLimit.value)">
+        <select #selectLimit class="form-select" [value]="limit" (change)="setLimit(selectLimit.value)">
             <option value="10">10</option>
             <option value="20">20</option>
             <option value="30">30</option>
             <option value="40">40</option>
             <option value="50">50</option>
         </select>
-        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage | async">
+        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage">
             <i class="bi bi-chevron-right"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage | async">
+        <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage">
             <i class="bi bi-chevron-bar-right"></i>
         </button>
     </div>
@@ -85,12 +85,12 @@
     </div>
     <div class="btn-group me-2" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list').subscribe()" [checked]="(viewMode | async) === 'list'">
+            (change)="setViewMode('list').subscribe()" [checked]="viewMode === 'list'">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree').subscribe()" [checked]="(viewMode | async) === 'tree'">
+            (change)="setViewMode('tree').subscribe()" [checked]="viewMode === 'tree'">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>
@@ -111,7 +111,7 @@
         <div class="input-group-text">
             <i class="bi bi-filter"></i>
         </div>
-        <input #textInput type="text" class="form-control" [value]="filter | async"
+        <input #textInput type="text" class="form-control" [value]="filterText"
             [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
             (keydown.enter)="textInput.blur()">
     </div>

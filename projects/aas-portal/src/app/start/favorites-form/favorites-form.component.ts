@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, ApplicationError, stringFormat } from 'common';
 import { FavoritesService } from '../favorites.service';
-import { first, from, map, mergeMap, of, tap } from 'rxjs';
+import { from, mergeMap, of, tap } from 'rxjs';
 import { messageToString } from 'aas-lib';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -19,6 +19,7 @@ interface FavoritesItem {
     active: boolean;
     name: string;
     id: string;
+    length: number;
     added: boolean;
     delete: boolean;
 }
@@ -36,40 +37,31 @@ export class FavoritesFormComponent {
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
     ) {
-        this.favorites.lists
-            .pipe(
-                first(),
-                map(lists =>
-                    lists.map(
-                        list =>
-                            ({
-                                name: list.name,
-                                id: list.name,
-                                selected: false,
-                                active: false,
-                                delete: false,
-                            }) as FavoritesItem,
-                    ),
-                ),
-                map(items => {
-                    if (items.length > 0) {
-                        items.sort((a, b) => a.name.localeCompare(b.name));
-                        items[0].selected = true;
-                    } else {
-                        items.push({
-                            name: 'Favorites 1',
-                            id: 'Favorites 1',
-                            selected: true,
-                            active: false,
-                            added: false,
-                            delete: false,
-                        });
-                    }
-
-                    return items;
-                }),
+        this._items = this.favorites.lists
+            .map(
+                (list, index) =>
+                    ({
+                        name: list.name,
+                        id: list.name,
+                        length: list.documents.length,
+                        selected: index === 0,
+                        active: false,
+                        delete: false,
+                    }) as FavoritesItem,
             )
-            .subscribe(items => (this._items = items));
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        if (this._items.length === 0) {
+            this._items.push({
+                name: this.uniqueName(),
+                id: '',
+                selected: true,
+                active: false,
+                added: true,
+                delete: false,
+                length: 0,
+            });
+        }
     }
 
     public messages: string[] = [];
@@ -81,15 +73,16 @@ export class FavoritesFormComponent {
     }
 
     public get text(): string {
-        if (this.documents.length === 0) {
+        const selectedItem = this._items.find(item => item.selected);
+        if (!selectedItem || this.documents.length === 0) {
             return '';
         }
 
         if (this.documents.length === 1) {
-            return this.translate.instant('TEXT_ADD_FAVORITE');
+            return this.translate.instant('TEXT_ADD_FAVORITE', selectedItem.length);
         }
 
-        return stringFormat(this.translate.instant('TEXT_ADD_FAVORITES'), this.documents.length);
+        return stringFormat(this.translate.instant('TEXT_ADD_FAVORITES'), this.documents.length, selectedItem.length);
     }
 
     public delete(item: FavoritesItem): void {
@@ -101,15 +94,15 @@ export class FavoritesFormComponent {
     }
 
     public addNew(): void {
-        const name = this.uniqueName();
         this._items.forEach(i => (i.selected = false));
         this._items.push({
-            name: name,
-            id: name,
+            name: this.uniqueName(),
+            id: '',
             selected: true,
             active: false,
             added: true,
             delete: false,
+            length: 0,
         });
     }
 
@@ -133,7 +126,7 @@ export class FavoritesFormComponent {
                 mergeMap(items => from(items)),
                 mergeMap(item => {
                     if (item.selected) {
-                        if (item.id || item.id === item.name) {
+                        if (item.added || item.id === item.name) {
                             return this.favorites.add(this.documents, item.name);
                         } else {
                             return this.favorites.add(this.documents, item.id, item.name);

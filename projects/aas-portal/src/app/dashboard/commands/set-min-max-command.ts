@@ -6,22 +6,19 @@
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
 import { cloneDeep } from 'lodash-es';
-import { DashboardChart, DashboardPage } from '../dashboard.state';
-import { DashboardService } from '../dashboard.service';
+import { DashboardChart, DashboardPage, DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
 
 export class SetMinMaxCommand extends DashboardCommand {
     public constructor(
-        store: Store,
-        private dashboard: DashboardService,
+        dashboard: DashboardService,
         private page: DashboardPage,
         private chart: DashboardChart,
         private min?: number,
         private max?: number,
     ) {
-        super('Set min/max', store);
+        super('Set min/max', dashboard);
     }
 
     protected executing(): void {

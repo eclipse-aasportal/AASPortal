@@ -6,9 +6,18 @@
  *
  *****************************************************************************/
 
-import { TranslateService } from "@ngx-translate/core";
-import { ApplicationError } from "common";
-import { encodeBase64Url, basename, messageToString, normalize, decodeBase64Url, isBase64, extension, convertBlobToBase64Async } from "../lib/convert";
+import { TranslateService } from '@ngx-translate/core';
+import { ApplicationError } from 'common';
+import {
+    encodeBase64Url,
+    basename,
+    messageToString,
+    normalize,
+    decodeBase64Url,
+    isBase64,
+    extension,
+    convertBlobToBase64Async,
+} from '../lib/convert';
 
 describe('convert', function () {
     describe('basename', function () {
@@ -37,7 +46,9 @@ describe('convert', function () {
         let translate: jasmine.SpyObj<TranslateService>;
 
         beforeEach(function () {
-            translate = jasmine.createSpyObj<TranslateService>('TranslateService', ['instant'], { currentLang: 'en-us' });
+            translate = jasmine.createSpyObj<TranslateService>('TranslateService', ['instant'], {
+                currentLang: 'en-us',
+            });
         });
 
         it('converts a message of type string', function () {
@@ -60,11 +71,12 @@ describe('convert', function () {
 
     describe('decodeBase64Url', function () {
         it('converts a Base64Url string to an URL', function () {
-            const url = decodeBase64Url('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw');
+            const url = decodeBase64Url(
+                'aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw',
+            );
             expect(url).toEqual('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
         });
     });
-
 
     describe('isBase64', function () {
         it('indicates that "The quick brown fox jumps over the lazy dog." is not base64 encoded', function () {
