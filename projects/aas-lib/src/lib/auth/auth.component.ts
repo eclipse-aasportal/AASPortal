@@ -9,12 +9,15 @@
 import { Component } from '@angular/core';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-auth',
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
     standalone: true,
+    imports: [NgbModule, TranslateModule],
 })
 export class AuthComponent {
     public constructor(

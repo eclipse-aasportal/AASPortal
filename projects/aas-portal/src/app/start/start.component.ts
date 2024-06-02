@@ -69,15 +69,10 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         this.endpoints = this.api.getEndpoints();
 
         if (this.store.viewMode === ViewMode.Undefined) {
-            this.auth.ready
-                .pipe(
-                    first(ready => ready),
-                    first(),
-                )
-                .subscribe({
-                    next: () => this.store.getFirstPage(),
-                    error: error => this.notify.error(error),
-                });
+            this.auth.ready.pipe(first(ready => ready)).subscribe({
+                next: () => this.store.getFirstPage(),
+                error: error => this.notify.error(error),
+            });
         }
     }
 
