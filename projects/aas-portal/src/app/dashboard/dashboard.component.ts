@@ -55,6 +55,8 @@ import {
     DashboardRow,
     DashboardService,
 } from './dashboard.service';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 interface UpdateTuple {
     item: DashboardChart;
@@ -75,6 +77,8 @@ interface TimeSeries {
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
+    standalone: true,
+    imports: [NgClass, AsyncPipe, FormsModule],
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
     private readonly map = new Map<string, UpdateTuple>();

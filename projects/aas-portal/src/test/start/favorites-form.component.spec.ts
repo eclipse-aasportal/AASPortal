@@ -7,9 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { FavoritesFormComponent } from '../../app/start/favorites-form/favorites-form.component';
@@ -24,18 +22,17 @@ describe('FavoritesFormComponent', () => {
         service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], { lists: [] });
 
         TestBed.configureTestingModule({
-            declarations: [FavoritesFormComponent],
             providers: [
-                NgbActiveModal,
+                {
+                    provide: NgbActiveModal,
+                    useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
+                },
                 {
                     provide: FavoritesService,
                     useValue: service,
                 },
             ],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

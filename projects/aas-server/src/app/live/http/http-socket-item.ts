@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { LiveNode } from 'common';
-import { noop } from 'lodash-es';
+import { noop } from 'common';
 import { SocketItem } from '../socket-item.js';
 
 export class HttpSocketItem implements SocketItem {

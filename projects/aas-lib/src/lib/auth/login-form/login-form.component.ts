@@ -7,10 +7,11 @@
  *****************************************************************************/
 
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'common';
-import { isEmpty } from 'lodash-es';
+import isEmpty from 'lodash-es/isEmpty';
 
 import { messageToString } from '../../convert';
 import { ERRORS } from '../../types/errors';
@@ -28,6 +29,8 @@ export interface LoginFormResult {
     selector: 'fhg-login',
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule],
 })
 export class LoginFormComponent {
     private newPasswordSent = false;

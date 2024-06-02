@@ -11,6 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Message } from 'common';
 import { Subscription } from 'rxjs';
 import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
+import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 
 interface MessageTableState {
     showInfo: boolean;
@@ -24,6 +25,8 @@ interface MessageTableState {
     selector: 'fhg-message-table',
     templateUrl: './message-table.component.html',
     styleUrls: ['./message-table.component.scss'],
+    standalone: true,
+    imports: [SortableHeaderDirective, NgbPagination],
 })
 export class MessageTableComponent implements OnChanges, OnDestroy {
     private readonly dateTimeOptions: Intl.DateTimeFormatOptions = {

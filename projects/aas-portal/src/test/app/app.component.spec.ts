@@ -7,28 +7,27 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from '../../app/app.component';
 import { Component } from '@angular/core';
+import { MainComponent } from '../../app/main/main.component';
 
 @Component({
     selector: 'fhg-main',
     template: '<p></p>',
-    styleUrls: []
+    styleUrls: [],
+    standalone: true,
 })
-class TestMainComponent {
-}
+class TestMainComponent {}
 
 describe('AppComponent', () => {
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                RouterTestingModule
-            ],
-            declarations: [
-                TestMainComponent,
-                AppComponent
-            ],
+        TestBed.overrideComponent(AppComponent, {
+            remove: {
+                imports: [MainComponent],
+            },
+            add: {
+                imports: [TestMainComponent],
+            },
         });
     });
 

@@ -6,14 +6,17 @@
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, Subscription, first, map } from 'rxjs';
-import { ClipboardService, WindowService } from 'aas-lib';
+import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 import { ToolbarService } from '../toolbar.service';
 import { MainApiService } from './main-api.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 
-export enum LinkId {
+export const enum LinkId {
     START = 0,
     AAS = 1,
     VIEW = 2,
@@ -31,6 +34,18 @@ export interface LinkDescriptor {
     selector: 'fhg-main',
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.scss'],
+    standalone: true,
+    imports: [
+        RouterOutlet,
+        RouterLink,
+        AsyncPipe,
+        NotifyComponent,
+        LocalizeComponent,
+        AuthComponent,
+        NgbNavModule,
+        NgTemplateOutlet,
+        TranslateModule,
+    ],
 })
 export class MainComponent implements OnInit, OnDestroy {
     private readonly subscription = new Subscription();
@@ -66,8 +81,6 @@ export class MainComponent implements OnInit, OnDestroy {
         private readonly router: Router,
         private readonly window: WindowService,
         private readonly api: MainApiService,
-        private readonly clipboard: ClipboardService,
-        private readonly viewContainer: ViewContainerRef,
         private readonly toolbar: ToolbarService,
     ) {
         this.toolbarTemplate = this.toolbar.toolbarTemplate.pipe(map(value => this.nextToolbar(value)));

@@ -10,6 +10,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'max',
+    standalone: true,
 })
 export class MaxLengthPipe implements PipeTransform {
     private max = 80;

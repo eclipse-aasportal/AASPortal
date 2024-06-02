@@ -8,53 +8,56 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
-import { CommonModule } from '@angular/common';
 import { AASDocument } from 'common';
+import { WindowService } from 'aas-lib';
 
-import { AppRoutingModule } from '../../app/app-routing.module';
 import { MainComponent } from '../../app/main/main.component';
-import { AASLibModule } from 'aas-lib';
 import { MainApiService } from '../../app/main/main-api.service';
+import { ToolbarService } from '../../app/toolbar.service';
+import { NgModule } from '@angular/core';
 
 describe('MainComponent', () => {
     let component: MainComponent;
     let fixture: ComponentFixture<MainComponent>;
     let documentSubject: Subject<AASDocument | null>;
     let api: jasmine.SpyObj<MainApiService>;
+    let window: jasmine.SpyObj<WindowService>;
+    let toolbar: jasmine.SpyObj<ToolbarService>;
 
     beforeEach(() => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
         api = jasmine.createSpyObj<MainApiService>('ProjectService', ['getDocument']);
+        window = jasmine.createSpyObj<WindowService>(['getQueryParams']);
+        window.getQueryParams.and.returnValue(new URLSearchParams());
+        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear']);
 
         TestBed.configureTestingModule({
-            declarations: [
-                MainComponent
-            ],
             providers: [
                 {
                     provide: MainApiService,
-                    useValue: api
-                }
+                    useValue: api,
+                },
+                {
+                    provide: WindowService,
+                    useValue: window,
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: toolbar,
+                },
+                provideRouter([]),
             ],
             imports: [
-                CommonModule,
-                AppRoutingModule,
-                NgbModule,
-                AASLibModule,
-                EffectsModule.forRoot(),
-                StoreModule.forRoot(),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(MainComponent);

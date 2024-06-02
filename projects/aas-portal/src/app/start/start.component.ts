@@ -8,11 +8,12 @@
 
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'common';
 import { BehaviorSubject, catchError, EMPTY, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
 import {
+    AASTableComponent,
     AuthService,
     ClipboardService,
     CustomerFeedback,
@@ -36,11 +37,14 @@ import { StartApiService } from './start-api.service';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { StartStore } from './start.store';
+import { AsyncPipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
+    standalone: true,
+    imports: [AASTableComponent, NgClass, AsyncPipe, TranslateModule, NgbModule],
 })
 export class StartComponent implements OnDestroy, AfterViewInit {
     private readonly subscription = new Subscription();

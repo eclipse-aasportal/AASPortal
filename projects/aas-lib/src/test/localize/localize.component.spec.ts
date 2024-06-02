@@ -10,8 +10,6 @@ import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { first } from 'rxjs';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { CommonModule } from '@angular/common';
 
 import { CultureInfo } from '../../lib/localize/culture-info';
 import { LocalizeComponent } from '../../lib/localize/localize.component';
@@ -26,24 +24,21 @@ describe('LocalizeComponent', () => {
         window = jasmine.createSpyObj<WindowService>(['getLocalStorageItem', 'setLocalStorageItem']);
 
         TestBed.configureTestingModule({
-            declarations: [LocalizeComponent],
             providers: [
                 {
                     provide: WindowService,
-                    useValue: window
-                }
+                    useValue: window,
+                },
             ],
             imports: [
-                CommonModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     defaultLanguage: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(LocalizeComponent);
@@ -78,7 +73,7 @@ describe('LocalizeComponent', () => {
             component.culture.pipe(first()).subscribe(value => {
                 expect(value?.localeId).toEqual('de-de');
                 done();
-            })
+            });
         });
     });
 });

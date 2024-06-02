@@ -25,26 +25,17 @@ describe('AuthComponent', () => {
         auth = jasmine.createSpyObj<AuthService>(['login']);
 
         TestBed.configureTestingModule({
-            declarations: [AuthComponent],
             providers: [
-                NgbModal,
-                NgbActiveModal,
                 {
                     provide: AuthService,
-                    useValue: auth
+                    useValue: auth,
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info'])
-                }
+                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info']),
+                },
             ],
-            imports: [
-                HttpClientTestingModule,
-                CommonModule,
-                FormsModule,
-                ReactiveFormsModule,
-                NgbModule
-            ]
+            imports: [HttpClientTestingModule, CommonModule, FormsModule, ReactiveFormsModule, NgbModule],
         });
 
         fixture = TestBed.createComponent(AuthComponent);

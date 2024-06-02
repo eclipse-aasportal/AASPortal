@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { RemoveEndpointFormComponent } from '../../app/start/remove-endpoint-form/remove-endpoint-form.component';
@@ -22,12 +20,8 @@ describe('RemoveEndpointFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [RemoveEndpointFormComponent],
             providers: [NgbActiveModal],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

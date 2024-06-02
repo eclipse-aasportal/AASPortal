@@ -6,14 +6,16 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (template === 'Nameplate') {
-  <fhg-digital-nameplate [submodels]="submodels"></fhg-digital-nameplate>
+@switch (template()) {
+@case('Nameplate'){
+<fhg-digital-nameplate [submodels]="submodels()"></fhg-digital-nameplate>
 }
-@if (template === 'CustomerFeedback') {
-  <fhg-customer-feedback [submodels]="submodels"></fhg-customer-feedback>
+@case ('CustomerFeedback') {
+<fhg-customer-feedback [submodels]="submodels()"></fhg-customer-feedback>
 }
-@if (!template) {
-  <div class="alert alert-info" role="alert">No well known submodel selected.</div>
+@default {
+<div class="alert alert-info" role="alert">No well known submodel selected.</div>
+}
 }
 
 <ng-template #viewToolbar></ng-template>

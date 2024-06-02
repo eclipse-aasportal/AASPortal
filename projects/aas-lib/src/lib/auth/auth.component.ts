@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
     selector: 'fhg-auth',
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
+    standalone: true,
 })
 export class AuthComponent {
     public constructor(

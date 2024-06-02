@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { SimpleChange } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { selectElement } from 'common';
@@ -20,19 +19,14 @@ describe('DigitalNameplateComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                DigitalNameplateComponent
-            ],
-            providers: [],
             imports: [
-                CommonModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(DigitalNameplateComponent);
@@ -40,7 +34,7 @@ describe('DigitalNameplateComponent', () => {
         fixture.detectChanges();
 
         component.submodels = [{ document: nameplate, submodel: selectElement(nameplate.content!, 'Nameplate')! }];
-        component.ngOnChanges({ 'submodels': new SimpleChange(null, component.submodels, true) });
+        component.ngOnChanges({ submodels: new SimpleChange(null, component.submodels, true) });
     });
 
     it('should create', () => {

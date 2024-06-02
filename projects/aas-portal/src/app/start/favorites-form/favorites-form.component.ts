@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, ApplicationError, stringFormat } from 'common';
 import { FavoritesService } from '../favorites.service';
 import { from, mergeMap, of, tap } from 'rxjs';
 import { messageToString } from 'aas-lib';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface FavoritesItem {
     selected: boolean;
@@ -28,6 +28,8 @@ interface FavoritesItem {
     selector: 'fhg-favorites-form',
     templateUrl: './favorites-form.component.html',
     styleUrls: ['./favorites-form.component.css'],
+    standalone: true,
+    imports: [NgbToast, TranslateModule],
 })
 export class FavoritesFormComponent {
     private _items: FavoritesItem[] = [];

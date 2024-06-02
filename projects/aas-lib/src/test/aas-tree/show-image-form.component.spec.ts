@@ -6,17 +6,17 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ShowImageFormComponent } from '../../lib/aas-tree/show-image-form/show-image-form.component';
+import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
 
 @Component({
     selector: 'fhg-img',
     template: '<div></div>',
+    standalone: true,
 })
 class TestSecureImageComponent {
     @Input()
@@ -37,12 +37,14 @@ describe('ShowImageFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [ShowImageFormComponent, TestSecureImageComponent],
-            providers: [NgbModal, NgbActiveModal],
+            providers: [
+                {
+                    provide: NgbActiveModal,
+                    useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
+                },
+            ],
+
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -50,6 +52,15 @@ describe('ShowImageFormComponent', () => {
                     },
                 }),
             ],
+        });
+
+        TestBed.overrideComponent(ShowImageFormComponent, {
+            remove: {
+                imports: [SecuredImageComponent],
+            },
+            add: {
+                imports: [TestSecureImageComponent],
+            },
         });
 
         fixture = TestBed.createComponent(ShowImageFormComponent);

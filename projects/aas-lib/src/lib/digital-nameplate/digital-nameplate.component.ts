@@ -33,6 +33,7 @@ export interface DigitalNameplate {
     selector: 'fhg-digital-nameplate',
     templateUrl: './digital-nameplate.component.html',
     styleUrls: ['./digital-nameplate.component.scss'],
+    standalone: true,
 })
 export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
     public constructor(private readonly translate: TranslateService) {}

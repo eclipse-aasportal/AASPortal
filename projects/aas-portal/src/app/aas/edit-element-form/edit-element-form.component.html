@@ -81,7 +81,7 @@
                               @if (!langString.selected) {
                                 <div class="small">{{langString.language}}</div>
                               }
-                              @if (langString.selected) {
+                              @else {
                                 <input #inputLanguage type="text"
                                   class="form-control form-control-sm" [value]="langString.language"
                                   (change)="setLanguage(langString, inputLanguage.value)" />
@@ -91,7 +91,7 @@
                               @if (!langString.selected) {
                                 <div class="small">{{langString.text}}</div>
                               }
-                              @if (langString.selected) {
+                              @else {
                                 <input #inputText type="text"
                                   class="form-control form-control-sm" [value]="langString.text"
                                   (change)="setText(langString, inputText.value)" />
@@ -104,7 +104,7 @@
                                   <i class="bi bi-plus"></i>
                                 </a>
                               }
-                              @if (langString.index >= 0) {
+                              @else {
                                 <a class="text-danger" href="javascript:void(0)"
                                   (click)="removeLangString(langString)">
                                   <i class="bi bi-dash"></i>

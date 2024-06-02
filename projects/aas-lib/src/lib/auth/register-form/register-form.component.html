@@ -36,15 +36,11 @@
                 name="password1" placeholder="password">
             <label for="inputRegisterPassword" translate>LABEL_PASSWORD</label>
         </div>
-        }
-        @if (!passwordAsEMail) {
         <div class="form-floating mb-3">
             <input type="password" class="form-control" id="inputRegisterConfirmPassword" [(ngModel)]="password2"
                 name="password2" placeholder="confirm password">
             <label for="inputRegisterConfirmPassword" translate>LABEL_CONFIRM_PASSWORD</label>
         </div>
-        }
-        @if (!passwordAsEMail) {
         <div class="form-check mb-3">
             <label class="form-check-label" for="stayLoggedIn" translate>LABEL_STAY_LOGGED_IN</label>
             <input class="form-check-input" type="checkbox" id="stayLoggedIn" [(ngModel)]="stayLoggedIn"

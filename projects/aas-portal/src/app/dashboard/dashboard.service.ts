@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { v4 as uuid } from 'uuid';
-import { cloneDeep } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep';
 import { BehaviorSubject, map, mergeMap, Observable, of } from 'rxjs';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'common';
@@ -105,7 +105,6 @@ export class DashboardService {
             .pipe(
                 map(name =>
                     this.auth.getCookie('.DashboardPages').pipe(
-                        mergeMap(() => this.auth.getCookie('.DashboardPages')),
                         map(value => {
                             if (value) {
                                 return JSON.parse(value) as DashboardPage[];

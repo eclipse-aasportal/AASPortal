@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import FormData from 'form-data';
-import { cloneDeep } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep.js';
 import { createReadStream } from 'fs';
 import { encodeBase64Url } from '../../convert.js';
 import { AASApiClient } from './aas-api-client.js';

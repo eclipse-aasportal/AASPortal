@@ -6,11 +6,9 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas, AASDocument, convertToString } from 'common';
 import { cloneDeep } from 'lodash-es';
@@ -28,13 +26,9 @@ describe('OperationCallFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [OperationCallFormComponent],
             providers: [NgbModal, NgbActiveModal],
             imports: [
                 HttpClientTestingModule,
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

@@ -8,8 +8,8 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import { ApplicationError, ErrorData, convertToString, stringFormat } from 'common';
-import { noop, toString } from 'lodash-es';
+import toString from 'lodash-es/toString';
+import { ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'common';
 
 /**
  * Converts a message to a localized text.

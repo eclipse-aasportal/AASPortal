@@ -10,7 +10,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
-import { CommonModule } from '@angular/common';
 
 describe('SecuredImageComponent', () => {
     let component: SecuredImageComponent;
@@ -18,8 +17,7 @@ describe('SecuredImageComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [SecuredImageComponent],
-            imports: [CommonModule, HttpClientTestingModule],
+            imports: [HttpClientTestingModule],
         });
         fixture = TestBed.createComponent(SecuredImageComponent);
         component = fixture.componentInstance;

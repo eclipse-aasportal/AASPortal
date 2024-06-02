@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import isEmpty from 'lodash-es/isEmpty.js';
 import { AASEndpointType } from './types.js';
 import {
     AssetAdministrationShell,
@@ -23,7 +24,6 @@ import {
     SubmodelElementCollection,
     SubmodelElementList,
 } from './aas.js';
-import { isEmpty } from 'lodash-es';
 
 export * from './document.js';
 export * from './types.js';

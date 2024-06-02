@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASEndpoint } from 'common';
 import { AddEndpointFormComponent } from '../../app/start/add-endpoint-form/add-endpoint-form.component';
@@ -24,12 +22,8 @@ describe('AddEndpointFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [AddEndpointFormComponent],
             providers: [NgbActiveModal],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

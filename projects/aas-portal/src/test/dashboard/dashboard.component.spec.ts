@@ -7,21 +7,20 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { first, mergeMap, of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
+import { NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
 import { JWTPayload, WebSocketData } from 'common';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { TestWebSocketFactoryService } from '../../test/assets/test-web-socket-factory.service';
-import { AppRoutingModule } from '../../app/app-routing.module';
 import { pages } from './test-pages';
 import { DashboardChart, DashboardService } from '../../app/dashboard/dashboard.service';
 import { SelectionMode } from '../../app/types/selection-mode';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
+import { provideRouter } from '@angular/router';
+import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -45,7 +44,6 @@ describe('DashboardComponent', () => {
         auth.setCookie.and.returnValue(of(void 0));
 
         TestBed.configureTestingModule({
-            declarations: [DashboardComponent],
             providers: [
                 {
                     provide: WebSocketFactoryService,
@@ -59,14 +57,11 @@ describe('DashboardComponent', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                provideRouter([]),
             ],
             imports: [
-                CommonModule,
-                AppRoutingModule,
-                HttpClientTestingModule,
-                AASLibModule,
-                StoreModule.forRoot(),
-                EffectsModule.forRoot(),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
 import { TemplateService } from 'aas-lib';
@@ -25,12 +23,8 @@ describe('NewElementFormComponent', () => {
         api.getTemplates.and.returnValue(of([]));
 
         TestBed.configureTestingModule({
-            declarations: [NewElementFormComponent],
             providers: [NgbActiveModal, { provide: TemplateService, useValue: api }],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointType, stringFormat } from 'common';
 
 export interface EndpointItem {
@@ -21,6 +22,8 @@ export interface EndpointItem {
     selector: 'fhg-add-endpoint',
     templateUrl: './add-endpoint-form.component.html',
     styleUrls: ['./add-endpoint-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, TranslateModule, FormsModule],
 })
 export class AddEndpointFormComponent {
     public constructor(

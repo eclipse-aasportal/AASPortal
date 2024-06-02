@@ -6,9 +6,10 @@
  *
  *****************************************************************************/
 
-import { cloneDeep } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep';
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { AASTreeApiService } from '../aas-tree-api.service';
 import { messageToString } from '../../convert';
@@ -40,6 +41,8 @@ export interface Bla {
     selector: 'fhg-operation-call',
     templateUrl: './operation-call-form.component.html',
     styleUrls: ['./operation-call-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule],
 })
 export class OperationCallFormComponent {
     private _operation!: aas.Operation;

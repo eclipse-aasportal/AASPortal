@@ -7,9 +7,10 @@
  *****************************************************************************/
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
-import { Library, Message } from 'common';
-import { ServerApiService } from './server-api.service';
 import { TranslateService } from '@ngx-translate/core';
+import { Library, Message } from 'common';
+import { LibraryTableComponent, MessageTableComponent } from 'aas-lib';
+import { ServerApiService } from './server-api.service';
 import { ToolbarService } from '../toolbar.service';
 import { environment } from '../../environments/environment';
 
@@ -17,6 +18,8 @@ import { environment } from '../../environments/environment';
     selector: 'fhg-about',
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
+    standalone: true,
+    imports: [LibraryTableComponent, MessageTableComponent],
 })
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     public constructor(

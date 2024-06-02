@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, convertToString } from 'common';
-import { camelCase } from 'lodash-es';
+import camelCase from 'lodash-es/camelCase.js';
 import { DOMImplementation, XMLSerializer } from '@xmldom/xmldom';
 import { AASWriter } from './aas-writer.js';
 

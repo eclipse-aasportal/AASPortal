@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { v4 } from 'uuid';
+import isEmpty from 'lodash-es/isEmpty.js';
 import mysql, { Connection, ResultSetHeader } from 'mysql2/promise';
 import { AASEndpoint, AASCursor, AASPage, AASDocument, flat, aas, AASDocumentId, isIdentifiable } from 'common';
 import { AASIndex } from '../aas-index.js';
@@ -14,7 +15,6 @@ import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { MySqlQuery } from './mysql-query.js';
 import { MySqlDocument, MySqlEndpoint } from './mysql-types.js';
-import { isEmpty } from 'lodash-es';
 
 export class MySqlIndex extends AASIndex {
     private readonly connection: Promise<Connection>;

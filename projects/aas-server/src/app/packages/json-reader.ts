@@ -8,7 +8,7 @@
 
 import { AASReader } from './aas-reader.js';
 import { aas, determineType, extensionToMimeType, isIdentifiable } from 'common';
-import { cloneDeep } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep.js';
 import { encodeBase64Url } from '../convert.js';
 
 export class JsonReader extends AASReader {

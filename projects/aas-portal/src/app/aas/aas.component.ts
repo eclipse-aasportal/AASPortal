@@ -12,7 +12,15 @@ import { EMPTY, map, mergeMap, Observable, Subscription, from, of, catchError } 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import head from 'lodash-es/head';
 import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
-import { AuthService, ClipboardService, DownloadService, NotifyService, OnlineState } from 'aas-lib';
+import {
+    AASTreeComponent,
+    AuthService,
+    ClipboardService,
+    DownloadService,
+    NotifyService,
+    OnlineState,
+    SecuredImageComponent,
+} from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
@@ -25,11 +33,16 @@ import { DashboardChartType, DashboardPage, DashboardService } from '../dashboar
 import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
 import { AASStoreService } from './aas-store.service';
+import { AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
+    standalone: true,
+    imports: [SecuredImageComponent, AASTreeComponent, AsyncPipe, TranslateModule, FormsModule],
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly subscription = new Subscription();
