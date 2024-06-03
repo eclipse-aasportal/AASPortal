@@ -9,14 +9,37 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { AASDocument } from 'common';
-import { WindowService } from 'aas-lib';
+import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
 import { MainApiService } from '../../app/main/main-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
-import { NgModule } from '@angular/core';
+import { Component, Input } from '@angular/core';
+
+@Component({
+    selector: 'fhg-auth',
+    template: '<div></div>',
+    standalone: true,
+})
+class TestAuthComponent {}
+
+@Component({
+    selector: 'fhg-localize',
+    template: '<div></div>',
+    standalone: true,
+})
+class TestLocalizeComponent {
+    @Input() public languages: string[] = ['en-us'];
+}
+
+@Component({
+    selector: 'fhg-notify',
+    template: '<div></div>',
+    standalone: true,
+})
+class TestNotifyComponent {}
 
 describe('MainComponent', () => {
     let component: MainComponent;
@@ -32,7 +55,7 @@ describe('MainComponent', () => {
         api = jasmine.createSpyObj<MainApiService>('ProjectService', ['getDocument']);
         window = jasmine.createSpyObj<WindowService>(['getQueryParams']);
         window.getQueryParams.and.returnValue(new URLSearchParams());
-        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear']);
+        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: of(null) });
 
         TestBed.configureTestingModule({
             providers: [
@@ -58,6 +81,15 @@ describe('MainComponent', () => {
                     },
                 }),
             ],
+        });
+
+        TestBed.overrideComponent(MainComponent, {
+            remove: {
+                imports: [NotifyComponent, LocalizeComponent, AuthComponent],
+            },
+            add: {
+                imports: [TestNotifyComponent, TestLocalizeComponent, TestAuthComponent],
+            },
         });
 
         fixture = TestBed.createComponent(MainComponent);

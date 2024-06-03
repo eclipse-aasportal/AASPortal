@@ -34,13 +34,14 @@ describe('FavoritesService', () => {
     ];
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie']);
+        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         auth.getCookie.and.returnValue(of(JSON.stringify(favorites)));
         auth.setCookie.and.returnValue(of(void 0));
         auth.deleteCookie.and.returnValue(of(void 0));
 
         TestBed.configureTestingModule({
             providers: [
+                FavoritesService,
                 {
                     provide: AuthService,
                     useValue: auth,

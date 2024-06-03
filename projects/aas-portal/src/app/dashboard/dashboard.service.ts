@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { BehaviorSubject, EMPTY, first, map, mergeMap, Observable, of, takeWhile } from 'rxjs';
+import { BehaviorSubject, catchError, EMPTY, first, map, mergeMap, Observable, of } from 'rxjs';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'common';
 
@@ -107,7 +107,9 @@ export class DashboardService {
                     this.auth.getCookie('.DashboardPage').pipe(
                         map(value =>
                             this.auth.getCookie('.DashboardPages').pipe(
-                                mergeMap(data => (data ? of(JSON.parse(data) as DashboardPage[]) : EMPTY)),
+                                mergeMap(data => {
+                                    return data ? of(JSON.parse(data) as DashboardPage[]) : EMPTY;
+                                }),
                                 map(pages => {
                                     this._pages = pages;
                                     this.index$.next(
@@ -121,6 +123,10 @@ export class DashboardService {
                         ),
                     ),
                 ),
+                catchError(error => {
+                    console.error(error);
+                    return EMPTY;
+                }),
             )
             .subscribe();
     }

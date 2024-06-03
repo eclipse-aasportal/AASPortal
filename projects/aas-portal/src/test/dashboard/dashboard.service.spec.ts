@@ -27,10 +27,16 @@ describe('DashboardService', () => {
     let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie']);
+        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { ready: of(true) });
         auth.checkCookie.and.returnValue(of(true));
-        auth.getCookie.and.returnValue(of(JSON.stringify(pages)));
         auth.setCookie.and.returnValue(of(void 0));
+        auth.getCookie.and.callFake(name => {
+            if (name === '.DashboardPages') {
+                return of(JSON.stringify(pages));
+            }
+
+            return of('Test');
+        });
 
         TestBed.configureTestingModule({
             providers: [

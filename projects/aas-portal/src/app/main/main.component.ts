@@ -39,12 +39,12 @@ export interface LinkDescriptor {
         RouterOutlet,
         RouterLink,
         AsyncPipe,
-        NotifyComponent,
-        LocalizeComponent,
-        AuthComponent,
         NgbNavModule,
         NgTemplateOutlet,
         TranslateModule,
+        NotifyComponent,
+        LocalizeComponent,
+        AuthComponent,
     ],
 })
 export class MainComponent implements OnInit, OnDestroy {
