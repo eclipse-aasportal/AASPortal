@@ -31,7 +31,7 @@ import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData
 import { ClipboardService, LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { MoveLeftCommand } from './commands/move-left-command';
 import { MoveRightCommand } from './commands/move-right-command';
@@ -78,7 +78,7 @@ interface TimeSeries {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     standalone: true,
-    imports: [NgClass, AsyncPipe, FormsModule],
+    imports: [NgClass, AsyncPipe, FormsModule, TranslateModule],
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
     private readonly map = new Map<string, UpdateTuple>();
@@ -120,6 +120,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     @ViewChild('dashboardToolbar', { read: TemplateRef })
     public dashboardToolbar: TemplateRef<unknown> | null = null;
+
+    public get isEmpty(): boolean {
+        return this._activePage.items.length === 0;
+    }
 
     public get activePage(): DashboardPage {
         return this._activePage;

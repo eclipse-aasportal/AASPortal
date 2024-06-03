@@ -10,7 +10,7 @@ import isEmpty from 'lodash-es/isEmpty';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'common';
 import { messageToString } from '../../convert';
 import { ERRORS } from '../../types/errors';
@@ -26,7 +26,7 @@ export interface ProfileFormResult {
     templateUrl: './profile-form.component.html',
     styleUrls: ['./profile-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, FormsModule, NgbCollapse],
+    imports: [NgbToast, FormsModule, NgbCollapse, TranslateModule],
 })
 export class ProfileFormComponent {
     private profile?: UserProfile;

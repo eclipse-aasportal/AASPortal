@@ -9,7 +9,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'common';
 import isEmpty from 'lodash-es/isEmpty';
 
@@ -30,7 +30,7 @@ export interface LoginFormResult {
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, FormsModule],
+    imports: [NgbToast, FormsModule, TranslateModule],
 })
 export class LoginFormComponent {
     private newPasswordSent = false;

@@ -18,6 +18,7 @@ import {
 } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { EMPTY, from, mergeMap, of, Subscription, toArray, zip } from 'rxjs';
 
 import { ToolbarService } from '../toolbar.service';
@@ -37,7 +38,7 @@ import {
     templateUrl: './view.component.html',
     styleUrls: ['./view.component.scss'],
     standalone: true,
-    imports: [DigitalNameplateComponent, CustomerFeedbackComponent],
+    imports: [DigitalNameplateComponent, CustomerFeedbackComponent, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
