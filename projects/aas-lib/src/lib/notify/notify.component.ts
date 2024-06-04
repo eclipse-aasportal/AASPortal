@@ -19,11 +19,13 @@ import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
     imports: [NgbToast],
 })
 export class NotifyComponent implements OnInit {
-    public constructor(notify: NotifyService) {
-        this.notify = notify;
-    }
+    public constructor(private readonly notify: NotifyService) {}
 
-    public readonly notify: NotifyService;
+    public readonly messages = this.notify.messages;
+
+    public remove(message: MessageEntry): void {
+        this.notify.remove(message);
+    }
 
     public close(message: MessageEntry) {
         this.notify.remove(message);

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import isElement from 'lodash-es/isElement';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { resolveError } from '../convert';
 import { MessageEntry } from '../types/message-entry';
@@ -24,9 +24,11 @@ export enum LogType {
     providedIn: 'root',
 })
 export class NotifyService {
+    private readonly _messages = signal<MessageEntry[]>([]);
+
     public constructor(private translate: TranslateService) {}
 
-    public messages: MessageEntry[] = [];
+    public readonly messages = this._messages.asReadonly();
 
     /**
      * Displays an error message.
@@ -35,13 +37,16 @@ export class NotifyService {
     public async error(error: unknown): Promise<void> {
         if (error) {
             const text = await resolveError(error, this.translate);
-            this.messages.push({
-                header: this.translate.instant('CAPTION_ERROR'),
-                text: text,
-                classname: 'bg-danger',
-                autohide: false,
-                delay: 5000,
-            });
+            this._messages.update(values => [
+                ...values,
+                {
+                    header: this.translate.instant('CAPTION_ERROR'),
+                    text: text,
+                    classname: 'bg-danger',
+                    autohide: false,
+                    delay: 5000,
+                },
+            ]);
         }
     }
 
@@ -51,14 +56,16 @@ export class NotifyService {
      */
     public info(message: string, ...args: unknown[]): void {
         if (message && !isElement(message)) {
-            message = stringFormat(this.translate.instant(message), args);
-            this.messages.push({
-                header: this.translate.instant('CAPTION_INFO'),
-                text: message,
-                classname: 'bg-info',
-                autohide: true,
-                delay: 5000,
-            });
+            this._messages.update(values => [
+                ...values,
+                {
+                    header: this.translate.instant('CAPTION_INFO'),
+                    text: stringFormat(this.translate.instant(message), args),
+                    classname: 'bg-info',
+                    autohide: true,
+                    delay: 5000,
+                },
+            ]);
         }
     }
 
@@ -67,14 +74,14 @@ export class NotifyService {
      * @param message The message to remove.
      */
     public remove(message: MessageEntry) {
-        this.messages = this.messages.filter(item => item !== message);
+        this._messages.update(values => values.filter(value => value !== message));
     }
 
     /**
      * Clears all messages.
      */
     public clear(): void {
-        this.messages.splice(0, this.messages.length);
+        this._messages.set([]);
     }
 
     /**

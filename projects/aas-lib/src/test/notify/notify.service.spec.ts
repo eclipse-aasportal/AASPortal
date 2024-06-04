@@ -15,7 +15,6 @@ describe('NotifyService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
@@ -25,6 +24,7 @@ describe('NotifyService', () => {
                 }),
             ],
         });
+
         service = TestBed.inject(NotifyService);
     });
 

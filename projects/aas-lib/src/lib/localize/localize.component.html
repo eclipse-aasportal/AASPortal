@@ -10,11 +10,11 @@
     <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
         <div class="d-inline-flex">
             <div class="px-2"><i class="bi bi-globe"></i></div>
-            <div>{{(culture | async)?.localeId}}</div>
+            <div>{{culture()?.localeId}}</div>
         </div>
     </a>
     <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        @for (culture of cultures | async; track culture) {
+        @for (culture of cultures(); track culture.localeId) {
         <a ngbDropdownItem (click)="setCulture(culture)" (keydown.enter)="setCulture(culture)"
             tabindex="1">{{culture.name}}</a>
         }

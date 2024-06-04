@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-@for (message of notify.messages; track message) {
+@for (message of messages(); track message) {
   <ngb-toast [class]="message.classname" [autohide]="message.autohide"
-  [delay]="message.delay" (hidden)="notify.remove(message)" header="{{message.header}}">{{message.text}}</ngb-toast>
+  [delay]="message.delay" (hidden)="remove(message)" header="{{message.header}}">{{message.text}}</ngb-toast>
 }
