@@ -6,9 +6,8 @@
  *
  *****************************************************************************/
 
-import { aas, convertToString, determineType } from 'common';
+import { aas, convertToString, determineType, noop } from 'common';
 import { ArgumentOptions, LocalizedText } from 'node-opcua';
-import { noop } from 'lodash-es';
 import { Logger } from '../../logging/logger.js';
 import { AASReader } from '../aas-reader.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';

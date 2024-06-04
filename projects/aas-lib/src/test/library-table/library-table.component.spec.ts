@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Library } from 'common';
 
@@ -21,19 +19,15 @@ describe('LibraryTableComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [LibraryTableComponent],
-            providers: [],
             imports: [
-                CommonModule, 
-                NgbModule,
                 TranslateModule.forRoot({
                     defaultLanguage: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(LibraryTableComponent);
@@ -74,7 +68,7 @@ describe('LibraryTableComponent', () => {
             fixture.detectChanges();
 
             component.ngOnChanges({
-                "collection": new SimpleChange([], collection, true)
+                collection: new SimpleChange([], collection, true),
             });
         });
 
@@ -118,8 +112,8 @@ describe('LibraryTableComponent', () => {
             fixture.detectChanges();
 
             component.ngOnChanges({
-                "collection": new SimpleChange([], collection, true)
-            })
+                collection: new SimpleChange([], collection, true),
+            });
         });
 
         it('hides pagination if size <= pageSize', function () {

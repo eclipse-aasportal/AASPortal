@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { isElement } from 'lodash-es';
+import isElement from 'lodash-es/isElement';
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { resolveError } from '../convert';

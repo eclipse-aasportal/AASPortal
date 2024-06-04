@@ -7,66 +7,70 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { first, mergeMap, of, Subject } from 'rxjs';
+import { provideRouter } from '@angular/router';
+import { EMPTY, first, mergeMap, of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'aas-lib';
-import { JWTPayload, WebSocketData } from 'common';
+import { AuthService, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
+import { WebSocketData } from 'common';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
-import { TestWebSocketFactoryService } from '../../test/assets/test-web-socket-factory.service';
-import { AppRoutingModule } from '../../app/app-routing.module';
-import { pages } from './test-pages';
 import { DashboardChart, DashboardService } from '../../app/dashboard/dashboard.service';
+import { pages } from './test-pages';
 import { SelectionMode } from '../../app/types/selection-mode';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
+import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { ToolbarService } from '../../app/toolbar.service';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
-    let webSocketSubject: Subject<WebSocketData>;
+    let webSocketSubject: WebSocketSubject<WebSocketData>;
     let service: DashboardService;
+    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
     let auth: jasmine.SpyObj<AuthService>;
     const chart1 = '42';
     const chart2 = '4711';
-    const chart3 = '0815';
+    // const chart3 = '0815';
 
     beforeEach(() => {
-        webSocketSubject = new Subject<WebSocketData>();
+        webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
+        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
+        webSocketFactory.create.and.returnValue(webSocketSubject);
 
-        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], {
-            payload: of({ id: 'john.doe@email.com', role: 'editor', name: 'John' } as JWTPayload),
-        });
-
+        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { ready: of(true) });
         auth.checkCookie.and.returnValue(of(true));
-        auth.getCookie.and.returnValue(of(JSON.stringify(pages)));
         auth.setCookie.and.returnValue(of(void 0));
+        auth.getCookie.and.returnValue(EMPTY);
 
         TestBed.configureTestingModule({
-            declarations: [DashboardComponent],
             providers: [
                 {
+                    provide: AuthService,
+                    useValue: auth,
+                },
+                {
                     provide: WebSocketFactoryService,
-                    useValue: new TestWebSocketFactoryService(webSocketSubject),
+                    useValue: webSocketFactory,
                 },
                 {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AuthService,
-                    useValue: auth,
+                    provide: DashboardApiService,
+                    useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
                 },
+                {
+                    provide: WindowService,
+                    useValue: jasmine.createSpyObj<WindowService>(['prompt']),
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                },
+                provideRouter([]),
             ],
             imports: [
-                CommonModule,
-                AppRoutingModule,
-                HttpClientTestingModule,
-                AASLibModule,
-                StoreModule.forRoot(),
-                EffectsModule.forRoot(),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -79,9 +83,10 @@ describe('DashboardComponent', () => {
         fixture = TestBed.createComponent(DashboardComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        service = TestBed.inject(DashboardService);
 
-        service.state = { pages, index: 1 };
+        service = TestBed.inject(DashboardService);
+        service.state = { pages: pages, index: 1 };
+        spyOn(service, 'save').and.returnValue(of(void 0));
     });
 
     it('should create', () => {

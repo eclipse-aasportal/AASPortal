@@ -6,8 +6,6 @@
  *
  *****************************************************************************/
 
-export * from './lib/aas-lib.module';
-
 export * from './lib/clipboard.service';
 export * from './lib/document.service';
 export * from './lib/window.service';

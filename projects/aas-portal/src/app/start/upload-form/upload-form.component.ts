@@ -8,7 +8,9 @@
 
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 import { DownloadService } from 'aas-lib';
 import { AASEndpoint } from 'common';
 
@@ -16,6 +18,8 @@ import { AASEndpoint } from 'common';
     selector: 'fhg-upload-form',
     templateUrl: './upload-form.component.html',
     styleUrls: ['./upload-form.component.scss'],
+    standalone: true,
+    imports: [FormsModule, TranslateModule],
 })
 export class UploadFormComponent {
     private uploading = false;

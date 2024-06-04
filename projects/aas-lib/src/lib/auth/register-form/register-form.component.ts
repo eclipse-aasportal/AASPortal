@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
-import { isEmpty } from 'lodash-es';
+import isEmpty from 'lodash-es/isEmpty';
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'common';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthApiService } from '../auth-api.service';
 import { ERRORS } from '../../types/errors';
@@ -25,6 +26,8 @@ export interface RegisterFormResult {
     selector: 'fhg-register',
     templateUrl: './register-form.component.html',
     styleUrls: ['./register-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, TranslateModule],
 })
 export class RegisterFormComponent {
     public constructor(

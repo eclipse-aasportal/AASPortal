@@ -10,6 +10,8 @@ import 'chart.js/auto';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { Observable, Subscription, map } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
     AfterViewInit,
     AfterViewChecked,
@@ -26,10 +28,10 @@ import {
 import isNumber from 'lodash-es/isNumber';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'common';
-import * as lib from 'aas-lib';
+import { ClipboardService, LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { MoveLeftCommand } from './commands/move-left-command';
 import { MoveRightCommand } from './commands/move-right-command';
@@ -75,6 +77,8 @@ interface TimeSeries {
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
+    standalone: true,
+    imports: [NgClass, AsyncPipe, FormsModule, TranslateModule],
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
     private readonly map = new Map<string, UpdateTuple>();
@@ -90,21 +94,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         private readonly api: DashboardApiService,
         private readonly activeRoute: ActivatedRoute,
         private readonly translate: TranslateService,
-        private readonly webServiceFactory: lib.WebSocketFactoryService,
+        private readonly webServiceFactory: WebSocketFactoryService,
         private readonly dashboard: DashboardService,
-        private readonly notify: lib.NotifyService,
+        private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
         private readonly commandHandler: CommandHandlerService,
-        private readonly window: lib.WindowService,
-        private readonly clipboard: lib.ClipboardService,
+        private readonly window: WindowService,
+        private readonly clipboard: ClipboardService,
     ) {
         this.rows = this.dashboard.activePage.pipe(
             map(page =>
-                this.dashboard.getGrid(page).map(row => ({
-                    columns: row.map(item => ({
-                        id: item.id,
-                        item: item,
-                        itemType: item.type,
+                this.dashboard.getGrid(page).map(rows => ({
+                    columns: rows.map(row => ({
+                        id: row.id,
+                        item: row,
+                        itemType: row.type,
                     })),
                 })),
             ),
@@ -116,6 +120,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     @ViewChild('dashboardToolbar', { read: TemplateRef })
     public dashboardToolbar: TemplateRef<unknown> | null = null;
+
+    public get isEmpty(): boolean {
+        return this._activePage.items.length === 0;
+    }
 
     public get activePage(): DashboardPage {
         return this._activePage;
@@ -371,7 +379,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                 }
             }
         } catch (error) {
-            this.notify.log(lib.LogType.Error, error);
+            this.notify.log(LogType.Error, error);
         }
 
         return color ?? '#ffffff';

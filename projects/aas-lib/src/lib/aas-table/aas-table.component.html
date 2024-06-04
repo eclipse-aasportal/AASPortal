@@ -6,6 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
+@if (rows.length > 0) {
 @if (viewMode === 'list') {
 <table class="table table-sm table-hover table-striped">
     <thead>
@@ -137,4 +138,7 @@
         }
     </tbody>
 </table>
+}
+} @else {
+<div class="alert alert-info text-center mt-2" role="alert">{{'INFO_NO_SHELLS_AVAILABLE' | translate}}</div>
 }

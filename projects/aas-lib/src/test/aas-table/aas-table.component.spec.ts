@@ -7,14 +7,10 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
 import { AASDocument } from 'common';
 
 import { AASTableComponent } from '../../lib/aas-table/aas-table.component';
-import { MaxLengthPipe } from '../../lib/max-length.pipe';
-import { SortableHeaderDirective } from '../../lib/sortable-header.directive';
 import { NotifyService } from '../../lib/notify/notify.service';
 import { createDocument } from '../assets/test-document';
 import { ViewMode } from '../../lib/types/view-mode';
@@ -32,7 +28,6 @@ describe('AASTableComponent', () => {
         document3 = createDocument('document3');
 
         TestBed.configureTestingModule({
-            declarations: [AASTableComponent, MaxLengthPipe, SortableHeaderDirective],
             providers: [
                 {
                     provide: NotifyService,
@@ -40,8 +35,6 @@ describe('AASTableComponent', () => {
                 },
             ],
             imports: [
-                CommonModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

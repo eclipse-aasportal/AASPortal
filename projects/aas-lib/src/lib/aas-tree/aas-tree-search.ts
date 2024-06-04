@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { trim } from 'lodash-es';
+import trim from 'lodash-es/trim';
 import { Subscription } from 'rxjs';
 import {
     aas,
@@ -27,7 +27,7 @@ import { AASTreeStore, Operator, SearchQuery, SearchTerm } from './aas-tree.stor
 @Injectable()
 export class AASTreeSearch {
     private readonly loop = true;
-    private subscription = new Subscription();
+    private readonly subscription = new Subscription();
 
     public constructor(
         private readonly store: AASTreeStore,

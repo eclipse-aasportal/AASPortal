@@ -7,16 +7,20 @@
  *****************************************************************************/
 
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, map } from 'rxjs';
 import { TemplateService } from 'aas-lib';
 import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'common';
-import { head } from 'lodash-es';
+import head from 'lodash-es/head';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'fhg-new-element',
     templateUrl: './new-element-form.component.html',
     styleUrls: ['./new-element-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, AsyncPipe],
 })
 export class NewElementFormComponent {
     private env?: aas.Environment;

@@ -6,14 +6,11 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Message } from 'common';
 import { MessageTableComponent } from '../../lib/message-table/message-table.component';
-import { SortableHeaderDirective } from '../../public-api';
 
 describe('MessageTableComponent', () => {
     let component: MessageTableComponent;
@@ -23,11 +20,7 @@ describe('MessageTableComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [MessageTableComponent, SortableHeaderDirective],
-            providers: [],
             imports: [
-                CommonModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

@@ -7,11 +7,14 @@
  *****************************************************************************/
 
 import { Component } from '@angular/core';
+import { MainComponent } from './main/main.component';
 
 @Component({
     selector: 'fhg-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
+    standalone: true,
+    imports: [MainComponent],
 })
 export class AppComponent {
     public title = 'AASPortal';

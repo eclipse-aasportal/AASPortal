@@ -8,6 +8,7 @@
 
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { AsyncPipe } from '@angular/common';
 import { BehaviorSubject, Observable, map, switchMap } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -15,6 +16,8 @@ import { DomSanitizer } from '@angular/platform-browser';
     selector: 'fhg-img',
     templateUrl: './secured-image.component.html',
     styleUrls: ['./secured-image.component.scss'],
+    standalone: true,
+    imports: [AsyncPipe],
 })
 export class SecuredImageComponent implements OnChanges {
     public constructor(

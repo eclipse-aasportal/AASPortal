@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { AASDocument } from 'common';
 import { AuthService } from 'aas-lib';
-import { Observable, map, mergeMap, of } from 'rxjs';
+import { first, Observable, map, mergeMap, of } from 'rxjs';
 
 export interface FavoritesList {
     name: string;
@@ -23,9 +23,14 @@ export class FavoritesService {
     private lists$: FavoritesList[] = [];
 
     public constructor(private readonly auth: AuthService) {
-        this.auth.getCookie('.Favorites').subscribe(value => {
-            this.lists$ = value ? (JSON.parse(value) as FavoritesList[]) : [];
-        });
+        this.auth.ready
+            .pipe(
+                first(ready => ready === true),
+                mergeMap(() => this.auth.getCookie('.Favorites')),
+            )
+            .subscribe(value => {
+                this.lists$ = value ? (JSON.parse(value) as FavoritesList[]) : [];
+            });
     }
 
     public get lists(): FavoritesList[] {

@@ -19,8 +19,6 @@ describe('AASApiService', function () {
 
     beforeEach(function () {
         TestBed.configureTestingModule({
-            declarations: [],
-            providers: [],
             imports: [HttpClientTestingModule],
         });
 

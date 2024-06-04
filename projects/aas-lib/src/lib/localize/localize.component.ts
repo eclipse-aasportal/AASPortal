@@ -11,11 +11,15 @@ import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { CultureInfo } from './culture-info';
 import { WindowService } from '../window.service';
+import { AsyncPipe } from '@angular/common';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-localize',
     templateUrl: './localize.component.html',
     styleUrls: ['./localize.component.scss'],
+    standalone: true,
+    imports: [AsyncPipe, NgbModule],
 })
 export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
     private readonly subscription = new Subscription();

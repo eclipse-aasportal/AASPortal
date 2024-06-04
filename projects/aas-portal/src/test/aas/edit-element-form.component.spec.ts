@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas } from 'common';
 import { EditElementFormComponent } from '../../app/aas/edit-element-form/edit-element-form.component';
@@ -22,7 +20,6 @@ describe('EditElementFormComponent', () => {
     beforeEach(() => {
         activeModal = jasmine.createSpyObj('NgbActiveModal', ['close']);
         TestBed.configureTestingModule({
-            declarations: [EditElementFormComponent],
             providers: [
                 {
                     provide: NgbActiveModal,
@@ -30,9 +27,6 @@ describe('EditElementFormComponent', () => {
                 },
             ],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

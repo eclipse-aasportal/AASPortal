@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { capitalize } from 'lodash-es';
+import capitalize from 'lodash-es/capitalize.js';
 
 export type UserRole = 'guest' | 'editor' | 'admin';
 

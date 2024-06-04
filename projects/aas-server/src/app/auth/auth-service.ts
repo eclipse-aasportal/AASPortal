@@ -10,7 +10,7 @@ import { inject, singleton } from 'tsyringe';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { isEmpty } from 'lodash-es';
+import isEmpty from 'lodash-es/isEmpty.js';
 import { Mailer } from '../mailer.js';
 import { ERRORS } from '../errors.js';
 import { UserData } from './user-data.js';

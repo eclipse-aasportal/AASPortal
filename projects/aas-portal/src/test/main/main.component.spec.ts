@@ -8,53 +8,88 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { Subject } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { provideRouter } from '@angular/router';
+import { Subject, of } from 'rxjs';
 import { AASDocument } from 'common';
+import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 
-import { AppRoutingModule } from '../../app/app-routing.module';
 import { MainComponent } from '../../app/main/main.component';
-import { AASLibModule } from 'aas-lib';
 import { MainApiService } from '../../app/main/main-api.service';
+import { ToolbarService } from '../../app/toolbar.service';
+import { Component, Input } from '@angular/core';
+
+@Component({
+    selector: 'fhg-auth',
+    template: '<div></div>',
+    standalone: true,
+})
+class TestAuthComponent {}
+
+@Component({
+    selector: 'fhg-localize',
+    template: '<div></div>',
+    standalone: true,
+})
+class TestLocalizeComponent {
+    @Input() public languages: string[] = ['en-us'];
+}
+
+@Component({
+    selector: 'fhg-notify',
+    template: '<div></div>',
+    standalone: true,
+})
+class TestNotifyComponent {}
 
 describe('MainComponent', () => {
     let component: MainComponent;
     let fixture: ComponentFixture<MainComponent>;
     let documentSubject: Subject<AASDocument | null>;
     let api: jasmine.SpyObj<MainApiService>;
+    let window: jasmine.SpyObj<WindowService>;
+    let toolbar: jasmine.SpyObj<ToolbarService>;
 
     beforeEach(() => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
         api = jasmine.createSpyObj<MainApiService>('ProjectService', ['getDocument']);
+        window = jasmine.createSpyObj<WindowService>(['getQueryParams']);
+        window.getQueryParams.and.returnValue(new URLSearchParams());
+        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: of(null) });
 
         TestBed.configureTestingModule({
-            declarations: [
-                MainComponent
-            ],
             providers: [
                 {
                     provide: MainApiService,
-                    useValue: api
-                }
+                    useValue: api,
+                },
+                {
+                    provide: WindowService,
+                    useValue: window,
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: toolbar,
+                },
+                provideRouter([]),
             ],
             imports: [
-                CommonModule,
-                AppRoutingModule,
-                NgbModule,
-                AASLibModule,
-                EffectsModule.forRoot(),
-                StoreModule.forRoot(),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
+        });
+
+        TestBed.overrideComponent(MainComponent, {
+            remove: {
+                imports: [NotifyComponent, LocalizeComponent, AuthComponent],
+            },
+            add: {
+                imports: [TestNotifyComponent, TestLocalizeComponent, TestAuthComponent],
+            },
         });
 
         fixture = TestBed.createComponent(MainComponent);

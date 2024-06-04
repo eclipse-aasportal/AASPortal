@@ -12,7 +12,7 @@ import { Cookie } from 'common';
 import { UserData } from './user-data.js';
 import { UserStorage } from './user-storage.js';
 import { Variable } from '../variable.js';
-import { isEmpty } from 'lodash-es';
+import isEmpty from 'lodash-es/isEmpty.js';
 
 export interface UserCookies {
     id: string;

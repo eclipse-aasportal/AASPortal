@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { cloneDeep } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep';
 import { DashboardCommand } from './dashboard-command';
 import {
     DashboardChart,

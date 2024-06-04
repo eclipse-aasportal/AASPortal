@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ShowVideoFormComponent } from '../../lib/aas-tree/show-video-form/show-video-form.component';
 
@@ -19,12 +17,13 @@ describe('ShowVideoFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [ShowVideoFormComponent],
-            providers: [NgbModal, NgbActiveModal],
+            providers: [
+                {
+                    provide: NgbActiveModal,
+                    useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
+                },
+            ],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,

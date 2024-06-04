@@ -8,11 +8,14 @@
 
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 
 @Component({
     selector: 'fhg-show-image',
     templateUrl: './show-image-form.component.html',
     styleUrls: ['./show-image-form.component.scss'],
+    standalone: true,
+    imports: [SecuredImageComponent],
 })
 export class ShowImageFormComponent {
     private readonly _modal: NgbActiveModal;

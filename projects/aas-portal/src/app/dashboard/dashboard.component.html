@@ -7,6 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <div id="fhg-dashboard-container" class="container">
+    @if (!isEmpty) {
     @for (row of rows | async; track row) {
     <div class="row">
         @for (column of row.columns; track column) {
@@ -66,6 +67,9 @@
         }
     </div>
     }
+} @else {
+    <div class="alert alert-info text-center mt-2" role="alert">{{'INFO_EMPTY_DASHBOARD' | translate}}</div>
+}
 </div>
 
 <ng-template #dashboardToolbar>

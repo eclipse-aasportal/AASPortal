@@ -8,20 +8,24 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
-import { AuthService, DownloadService, NotifyService, OnlineState } from 'aas-lib';
-import { CommonModule } from '@angular/common';
+import {
+    AASTreeComponent,
+    AuthService,
+    DownloadService,
+    NotifyService,
+    OnlineState,
+    SecuredImageComponent,
+} from 'aas-lib';
 
 import { AASDocument, aas, noop } from 'common';
 import { AASComponent } from '../../app/aas/aas.component';
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardPage, DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType } from '../../app/dashboard/dashboard.service';
-import { Router } from '@angular/router';
-import { AppRoutingModule } from '../../app/app-routing.module';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router, provideRouter } from '@angular/router';
+import { Component, EventEmitter, Input, NgModule, Output } from '@angular/core';
 import { AASApiService } from '../../app/aas/aas-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { AASStoreService } from '../../app/aas/aas-store.service';
@@ -30,6 +34,7 @@ import { AASStoreService } from '../../app/aas/aas-store.service';
     selector: 'fhg-aas-tree',
     template: '<div></div>',
     styleUrls: [],
+    standalone: true,
 })
 class TestAASTreeComponent {
     @Input()
@@ -56,6 +61,7 @@ class TestAASTreeComponent {
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
+    standalone: true,
 })
 class TestSecureImageComponent {
     @Input()
@@ -91,7 +97,6 @@ describe('AASComponent', () => {
         });
 
         TestBed.configureTestingModule({
-            declarations: [AASComponent, TestAASTreeComponent, TestSecureImageComponent],
             providers: [
                 {
                     provide: AASApiService,
@@ -117,12 +122,10 @@ describe('AASComponent', () => {
                     provide: AuthService,
                     useValue: jasmine.createSpyObj<AuthService>(['ensureAuthorized']),
                 },
+                provideHttpClientTesting(),
+                provideRouter([]),
             ],
             imports: [
-                CommonModule,
-                AppRoutingModule,
-                HttpClientTestingModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -130,6 +133,15 @@ describe('AASComponent', () => {
                     },
                 }),
             ],
+        });
+
+        TestBed.overrideComponent(AASComponent, {
+            remove: {
+                imports: [AASTreeComponent, SecuredImageComponent],
+            },
+            add: {
+                imports: [TestAASTreeComponent, TestSecureImageComponent],
+            },
         });
 
         fixture = TestBed.createComponent(AASComponent);

@@ -15,9 +15,10 @@ import {
     isSubmodel,
     normalize,
     selectSubmodel,
+    noop,
 } from 'common';
 
-import { cloneDeep, noop } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
 import { AASStoreService } from '../aas-store.service';
 

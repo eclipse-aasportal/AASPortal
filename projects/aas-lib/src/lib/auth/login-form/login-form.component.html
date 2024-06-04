@@ -37,7 +37,7 @@
                 name="stayLoggedIn">
         </div>
         }
-        @if (passwordPerEMail) {
+        @else {
         <div class="mb-3">
             <a href="javascript:void(0);" (click)="resetPassword()" translate>CMD_RESET_PASSWORD</a>
         </div>

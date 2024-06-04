@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { noop } from 'lodash-es';
+import { noop } from 'common';
 import { SocketSubscription } from './socket-subscription.js';
 
 /** Provides an empty WebSocket subscription. */

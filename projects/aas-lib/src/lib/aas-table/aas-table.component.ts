@@ -15,13 +15,17 @@ import { AASTableRow } from './aas-table-row';
 import { ClipboardService } from '../clipboard.service';
 import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
-import { TranslateService } from '@ngx-translate/core';
 import { AASTableStore } from './aas-table.store';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { MaxLengthPipe } from '../max-length.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.component.html',
     styleUrls: ['./aas-table.component.scss'],
+    standalone: true,
+    imports: [NgbTooltip, MaxLengthPipe, TranslateModule],
     providers: [AASTableStore],
 })
 export class AASTableComponent implements OnInit, OnDestroy {
@@ -31,7 +35,6 @@ export class AASTableComponent implements OnInit, OnDestroy {
 
     public constructor(
         private readonly router: Router,
-        private readonly translate: TranslateService,
         private readonly store: AASTableStore,
         private readonly clipboard: ClipboardService,
         private readonly window: WindowService,

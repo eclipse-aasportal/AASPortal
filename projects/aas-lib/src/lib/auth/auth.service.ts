@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, catchError, first, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import {
     ApplicationError,
@@ -255,18 +255,12 @@ export class AuthService {
      * @returns The cookie value.
      */
     public getCookie(name: string): Observable<string | undefined> {
-        return this.ready.pipe(
-            first(ready => ready === true),
-            mergeMap(() => this.payload),
-            first(),
-            mergeMap(payload => {
-                if (payload && payload.sub) {
-                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
-                }
+        const payload = this.payload$.getValue();
+        if (payload && payload.sub) {
+            return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
+        }
 
-                return of(this.window.getLocalStorageItem(name) ?? undefined);
-            }),
-        );
+        return of(this.window.getLocalStorageItem(name) ?? undefined);
     }
 
     /**

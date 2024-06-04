@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { isEqual } from 'lodash-es';
+import isEqual from 'lodash-es/isEqual.js';
 import * as aas from './aas.js';
 import { AASDocument, AASAbbreviation } from './types.js';
 

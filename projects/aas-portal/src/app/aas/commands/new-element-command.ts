@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { cloneDeep, noop } from 'lodash-es';
+import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
 import {
     aas,
@@ -18,6 +18,7 @@ import {
     isSubmodelElement,
     isSubmodelElementCollection,
     isSubmodelElementList,
+    noop,
 } from 'common';
 
 import { AASStoreService } from '../aas-store.service';

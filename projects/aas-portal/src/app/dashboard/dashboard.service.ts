@@ -8,8 +8,8 @@
 
 import { Injectable } from '@angular/core';
 import { v4 as uuid } from 'uuid';
-import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, map, mergeMap, Observable, of } from 'rxjs';
+import cloneDeep from 'lodash-es/cloneDeep';
+import { BehaviorSubject, EMPTY, first, map, mergeMap, Observable, of } from 'rxjs';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'common';
 
@@ -94,34 +94,31 @@ export interface DashboardState {
 })
 export class DashboardService {
     private readonly index$ = new BehaviorSubject(0);
-    private _pages: DashboardPage[] = [];
+    private _pages: DashboardPage[] = [{ name: this.createPageName(), items: [], requests: [] }];
     private _editMode = false;
     private _selectionMode: SelectionMode = SelectionMode.Single;
     private modified = false;
 
     public constructor(private auth: AuthService) {
-        this.auth
-            .getCookie('.DashboardPage')
+        this.auth.ready
             .pipe(
-                map(name =>
-                    this.auth.getCookie('.DashboardPages').pipe(
-                        mergeMap(() => this.auth.getCookie('.DashboardPages')),
-                        map(value => {
-                            if (value) {
-                                return JSON.parse(value) as DashboardPage[];
-                            }
-
-                            return [{ name: this.createPageName(), items: [], requests: [] }];
-                        }),
-                        map(pages => {
-                            this._pages = pages;
-                            this.index$.next(
-                                Math.max(
-                                    pages.findIndex(page => page.name === name),
-                                    0,
-                                ),
-                            );
-                        }),
+                first(ready => ready === true),
+                mergeMap(() =>
+                    this.auth.getCookie('.DashboardPage').pipe(
+                        map(value =>
+                            this.auth.getCookie('.DashboardPages').pipe(
+                                mergeMap(data => (data ? of(JSON.parse(data) as DashboardPage[]) : EMPTY)),
+                                map(pages => {
+                                    this._pages = pages;
+                                    this.index$.next(
+                                        Math.max(
+                                            pages.findIndex(page => page.name === value),
+                                            0,
+                                        ),
+                                    );
+                                }),
+                            ),
+                        ),
                     ),
                 ),
             )

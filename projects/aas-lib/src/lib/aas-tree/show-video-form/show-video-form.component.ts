@@ -13,6 +13,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     selector: 'fhg-show-video',
     templateUrl: './show-video-form.component.html',
     styleUrls: ['./show-video-form.component.scss'],
+    standalone: true,
 })
 export class ShowVideoFormComponent {
     private readonly _modal: NgbActiveModal;

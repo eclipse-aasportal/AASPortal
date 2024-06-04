@@ -8,11 +8,9 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { WindowService, ViewMode, AuthService, NotifyService, DownloadService } from 'aas-lib';
-import { RouterModule } from '@angular/router';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { WindowService, ViewMode, AuthService, NotifyService, DownloadService, AASTableComponent } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Observable, of } from 'rxjs';
 import { AASDocument, aas } from 'common';
 
@@ -20,13 +18,15 @@ import { StartComponent } from '../../app/start/start.component';
 import { StartApiService } from '../../app/start/start-api.service';
 import { FavoritesService } from '../../app/start/favorites.service';
 import { ToolbarService } from '../../app/toolbar.service';
+import { provideRouter } from '@angular/router';
 
 @Component({
     selector: 'fhg-aas-table',
     template: '<div></div>',
     styleUrls: [],
+    standalone: true,
 })
-export class TestAASTableComponent {
+class TestAASTableComponent {
     @Input()
     public viewMode: Observable<ViewMode> | null = null;
     @Input()
@@ -91,7 +91,6 @@ describe('StartComponent', () => {
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });
 
         TestBed.configureTestingModule({
-            declarations: [StartComponent, TestAASTableComponent],
             providers: [
                 {
                     provide: StartApiService,
@@ -121,11 +120,10 @@ describe('StartComponent', () => {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: of(null) }),
                 },
+                provideHttpClientTesting(),
+                provideRouter([]),
             ],
             imports: [
-                NgbModule,
-                RouterModule,
-                HttpClientTestingModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -133,6 +131,15 @@ describe('StartComponent', () => {
                     },
                 }),
             ],
+        });
+
+        TestBed.overrideComponent(StartComponent, {
+            remove: {
+                imports: [AASTableComponent],
+            },
+            add: {
+                imports: [TestAASTableComponent],
+            },
         });
 
         fixture = TestBed.createComponent(StartComponent);

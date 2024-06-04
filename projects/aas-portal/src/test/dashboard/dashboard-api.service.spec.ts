@@ -16,10 +16,8 @@ describe('DashboardApiService', () => {
     let httpTestingController: HttpTestingController;
 
     beforeEach(() => {
-
         TestBed.configureTestingModule({
-            providers: [],
-            imports: [HttpClientTestingModule]
+            imports: [HttpClientTestingModule],
         });
 
         service = TestBed.inject(DashboardApiService);
@@ -49,7 +47,7 @@ describe('DashboardApiService', () => {
         const req = httpTestingController.expectOne(url);
         expect(req.request.method).toEqual('GET');
         req.flush(value);
-    })
+    });
 });
 
 function encodeBase64Url(s: string): string {

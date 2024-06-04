@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface EndpointSelect {
     name: string;
@@ -20,6 +21,8 @@ export interface EndpointSelect {
     selector: 'fhg-remove-endpoint',
     templateUrl: './remove-endpoint-form.component.html',
     styleUrls: ['./remove-endpoint-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, TranslateModule],
 })
 export class RemoveEndpointFormComponent {
     public constructor(

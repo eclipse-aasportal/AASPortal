@@ -6,11 +6,9 @@
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 
@@ -27,23 +25,16 @@ describe('LoginFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [LoginFormComponent],
-            providers: [
-                NgbModal,
-                NgbActiveModal
-            ],
+            providers: [NgbModal, NgbActiveModal],
             imports: [
-                CommonModule,
-                FormsModule,
-                NgbModule,
                 HttpClientTestingModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         modal = TestBed.inject(NgbActiveModal);
@@ -136,7 +127,9 @@ describe('LoginFormComponent', () => {
     }));
 
     it('supports navigation to the registration', function () {
-        spyOn(modal, 'close').and.callFake((...args) => expect(args[0]).toEqual({ action: 'register' } as LoginFormResult));
+        spyOn(modal, 'close').and.callFake((...args) =>
+            expect(args[0]).toEqual({ action: 'register' } as LoginFormResult),
+        );
         component.registerUser();
         expect(modal.close).toHaveBeenCalled();
     });

@@ -7,12 +7,13 @@
  *****************************************************************************/
 
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { NgClass, NgStyle } from '@angular/common';
 import { BehaviorSubject, Subscription, Observable } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { isEqual } from 'lodash-es';
+import isEqual from 'lodash-es/isEqual';
 import {
     aas,
     LiveNode,
@@ -60,6 +61,8 @@ interface PropertyValue {
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
+    standalone: true,
+    imports: [NgClass, NgStyle, TranslateModule],
     providers: [AASTreeSearch, AASTreeStore],
 })
 export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
@@ -138,6 +141,14 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     public get nodes(): AASTreeRow[] {
         return this.store.nodes;
+    }
+
+    public readonly selectMatchIndex = this.store.selectMatchIndex;
+
+    public readonly selectMatchRow = this.store.selectMatchRow;
+
+    public get rows(): AASTreeRow[] {
+        return this.store.rows;
     }
 
     public ngOnInit(): void {

@@ -98,7 +98,6 @@
         "@angular/compiler-cli": "^17.3.4",
         "@babel/plugin-syntax-import-attributes": "^7.24.1",
         "@jest/globals": "^29.7.0",
-        "@ngrx/eslint-plugin": "^17.2.0",
         "@semantic-release/git": "^10.0.1",
         "@semantic-release/github": "^10.0.3",
         "@types/bcryptjs": "^2.4.6",

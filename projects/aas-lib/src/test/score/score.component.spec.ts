@@ -17,10 +17,6 @@ describe('ScoreComponent', () => {
     let negativeDiv: HTMLDivElement;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            declarations: [ScoreComponent],
-        });
-
         fixture = TestBed.createComponent(ScoreComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

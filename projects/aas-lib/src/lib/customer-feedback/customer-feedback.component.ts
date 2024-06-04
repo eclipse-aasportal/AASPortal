@@ -7,10 +7,12 @@
  *****************************************************************************/
 
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, getLocaleValue, getPreferredName } from 'common';
 import { Subscription } from 'rxjs';
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
+import { ScoreComponent } from '../score/score.component';
+import { DecimalPipe } from '@angular/common';
 
 export interface GeneralItem {
     name: string;
@@ -31,6 +33,8 @@ export interface FeedbackItem {
     selector: 'fhg-customer-feedback',
     templateUrl: './customer-feedback.component.html',
     styleUrls: ['./customer-feedback.component.scss'],
+    standalone: true,
+    imports: [ScoreComponent, DecimalPipe, TranslateModule],
 })
 export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnChanges, OnDestroy {
     private static readonly maxStars = 5;

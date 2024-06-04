@@ -46,13 +46,13 @@
         </button>
     </div>
     <div class="input-group me-2">
-        <select #select class="form-select" [value]="dashboardPage" (change)="dashboardPage = dashboardPages[select.selectedIndex]">
+        <select #select class="form-select" [value]="dashboardPage"
+            (change)="dashboardPage = dashboardPages[select.selectedIndex]">
             @for (page of dashboardPages; track page.name) {
             <option [ngValue]="page">{{page.name}}</option>
             }
         </select>
-        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')"
-            [disabled]="!canAddToDashboard">
+        <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')" [disabled]="!canAddToDashboard">
             <i class="bi bi-graph-up"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="addToDashboard('BarVertical')"
