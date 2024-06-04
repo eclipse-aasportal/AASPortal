@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     aas,
     convertToString,
@@ -34,6 +34,7 @@ export interface DigitalNameplate {
     templateUrl: './digital-nameplate.component.html',
     styleUrls: ['./digital-nameplate.component.scss'],
     standalone: true,
+    imports: [TranslateModule],
 })
 export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
     public constructor(private readonly translate: TranslateService) {}

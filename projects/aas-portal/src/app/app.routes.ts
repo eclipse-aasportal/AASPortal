@@ -8,7 +8,6 @@
 
 import { Routes } from '@angular/router';
 import { AASComponent } from './aas/aas.component';
-import { CanActivateAAS } from './aas/can-activate-aas.guard';
 import { AboutComponent } from './about/about.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { StartComponent } from './start/start.component';
@@ -16,7 +15,7 @@ import { ViewComponent } from './view/view.component';
 
 export const routes: Routes = [
     { path: 'start', component: StartComponent },
-    { path: 'aas', component: AASComponent, canActivate: [CanActivateAAS] },
+    { path: 'aas', component: AASComponent },
     { path: 'view', component: ViewComponent },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'about', component: AboutComponent },

@@ -14,11 +14,9 @@ import { AuthInterceptor } from 'aas-lib';
 
 import { HttpLoaderFactory } from './http-loader-factory';
 import { routes } from './app.routes';
-import { CanActivateAAS } from './aas/can-activate-aas.guard';
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        CanActivateAAS,
         provideRouter(routes),
         provideHttpClient(withInterceptorsFromDi()),
         importProvidersFrom(
@@ -31,6 +29,6 @@ export const appConfig: ApplicationConfig = {
                 },
             }),
         ),
-        {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     ],
 };

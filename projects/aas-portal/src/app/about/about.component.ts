@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
 import { Library, Message } from 'common';
 import { LibraryTableComponent, MessageTableComponent } from 'aas-lib';
 import { ServerApiService } from './server-api.service';
@@ -24,7 +23,6 @@ import { environment } from '../../environments/environment';
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     public constructor(
         private serverApi: ServerApiService,
-        private translate: TranslateService,
         private toolbar: ToolbarService,
     ) {
         this.author = environment.author;

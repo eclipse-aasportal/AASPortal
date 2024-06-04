@@ -10,7 +10,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, S
 import { NgClass, NgStyle } from '@angular/common';
 import { BehaviorSubject, Subscription, Observable } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import isEqual from 'lodash-es/isEqual';
@@ -62,7 +62,7 @@ interface PropertyValue {
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
     standalone: true,
-    imports: [NgClass, NgStyle],
+    imports: [NgClass, NgStyle, TranslateModule],
     providers: [AASTreeSearch, AASTreeStore],
 })
 export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
