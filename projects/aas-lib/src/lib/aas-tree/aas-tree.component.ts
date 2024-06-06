@@ -214,14 +214,18 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public get message(): string {
-        if (!this.document || this.document.content) {
-            return '';
+        if (this.document) {
+            if (this.document.content) {
+                return '';
+            }
+
+            return stringFormat(
+                this.translate.instant('INFO_AAS_OFFLINE'),
+                new Date(this.document.timestamp).toLocaleString(this.translate.currentLang),
+            );
         }
 
-        return stringFormat(
-            this.translate.instant('TEXT_AAS_OFFLINE'),
-            new Date(this.document.timestamp).toLocaleString(this.translate.currentLang),
-        );
+        return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
     }
 
     public ngOnDestroy(): void {

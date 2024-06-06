@@ -7,6 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <div id="aas-container" class="container-fluid">
+    @if (document) {
     <div class="row mt-1">
         <div class="d-flex flex-row">
             <div class="border border-secondary rounded p-1">
@@ -30,6 +31,7 @@
             </div>
         </div>
     </div>
+    }
     <div class="row">
         <fhg-aas-tree #aasTree [state]="state" [search]="search" [document]="document" [(selected)]="selectedElements">
         </fhg-aas-tree>
