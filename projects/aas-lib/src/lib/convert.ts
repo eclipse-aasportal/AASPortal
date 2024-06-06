@@ -72,7 +72,7 @@ export async function resolveError(error: unknown, translate: TranslateService):
                 }
             }
         } else {
-            message = convertToString(error.error);
+            message = `${error.message}: ${convertToString(error.error)}`;
         }
     }
 

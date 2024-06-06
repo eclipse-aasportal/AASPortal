@@ -69,17 +69,17 @@ export class DownloadService {
     /**
      * Uploads the specified aasx file.
      * @param file A file.
-     * @param name The name of the destination endpoint.
+     * @param endpoint The name of the destination endpoint.
      */
-    public uploadDocuments(name: string, file: File | File[]): Observable<HttpEvent<object>> {
+    public uploadDocuments(endpoint: string, file: File | File[]): Observable<HttpEvent<object>> {
         const data = new FormData();
         if (Array.isArray(file)) {
-            file.forEach(item => data.append('file', item));
+            file.forEach(item => data.append('files', item));
         } else {
-            data.append('file', file);
+            data.append('files', file);
         }
 
-        return this.http.post(`/api/v1/containers/${encodeBase64Url(name)}/packages`, data, {
+        return this.http.post(`/api/v1/containers/${encodeBase64Url(endpoint)}/packages`, data, {
             reportProgress: true,
             observe: 'events',
         });
