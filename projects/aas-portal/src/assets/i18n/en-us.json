@@ -155,6 +155,7 @@
     "INFO_NO_SHELL_AVAILABLE": "No Asset Administration Shell selected.",
     "INFO_NO_SHELLS_AVAILABLE": "No Asset Administration Shells available.",
     "INFO_EMPTY_DISPLAY": "No elements available for display.",
+    "INFO_AAS_OFFLINE": "The Asset Administration Shell is offline. Last update: {0}",
     "CONFIRM_DELETE_FILE": "Permanently delete {0}?",
     "CONFIRM_DELETE_FILES": "Permanently delete {0} files?",
     "CONFIRM_RESET_CONFIGURATION": "Do you want to restore the default AASServer configuration?",
@@ -172,7 +173,6 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
-    "TEXT_AAS_OFFLINE": "The Asset Administration Shell is offline. Last update: {0}",
     "AASEndpointType": {
         "FileSystem": "File system",
         "AASServer": "AAS server",

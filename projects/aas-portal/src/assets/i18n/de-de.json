@@ -156,6 +156,7 @@
     "INFO_NO_SUBMODEL": "Kein Submodel verfügbar.",
     "INFO_NO_SHELLS_AVAILABLE": "Keine Verwaltungsschalen verfügbar.",
     "INFO_EMPTY_DISPLAY": "Keine Elemente zur Anzeige verfügbar.",
+    "INFO_AAS_OFFLINE": "Die Verwaltungsschale ist offline. Letzte Aktualisierung: {0}",
     "CONFIRM_DELETE_FILE": "{0} unwiderruflich löschen?",
     "CONFIRM_DELETE_FILES": "{0} Dateien unwiderruflich löschen?",
     "CONFIRM_RESET_CONFIGURATION": "Möchten Sie die AASServer Standardkonfiguration wiederherstellen?",
@@ -173,7 +174,6 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
-    "TEXT_AAS_OFFLINE": "Die Verwaltungsschale ist offline. Letzte Aktualisierung: {0}",
     "AASEndpointType": {
         "FileSystem": "Verzeichnis",
         "AASServer": "AAS-Server",

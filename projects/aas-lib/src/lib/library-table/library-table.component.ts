@@ -8,6 +8,7 @@
 
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 import { Library } from 'common';
 
 export interface LibraryRow extends Library {
@@ -19,7 +20,7 @@ export interface LibraryRow extends Library {
     templateUrl: './library-table.component.html',
     styleUrls: ['./library-table.component.scss'],
     standalone: true,
-    imports: [NgbPagination],
+    imports: [NgbPagination, TranslateModule],
 })
 export class LibraryTableComponent implements OnChanges {
     @Input()

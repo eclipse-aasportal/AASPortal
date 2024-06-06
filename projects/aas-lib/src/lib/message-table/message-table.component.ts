@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Component, Input, OnChanges, OnDestroy, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Message } from 'common';
 import { Subscription } from 'rxjs';
 import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
@@ -26,7 +26,7 @@ interface MessageTableState {
     templateUrl: './message-table.component.html',
     styleUrls: ['./message-table.component.scss'],
     standalone: true,
-    imports: [SortableHeaderDirective, NgbPagination],
+    imports: [SortableHeaderDirective, NgbPagination, TranslateModule],
 })
 export class MessageTableComponent implements OnChanges, OnDestroy {
     private readonly dateTimeOptions: Intl.DateTimeFormatOptions = {
