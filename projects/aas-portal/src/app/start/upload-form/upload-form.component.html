@@ -17,17 +17,17 @@
   <div class="modal-body">
     <div class="mb-3">
       <input #fileInput type="file" class="form-control" id="input-aasx-file" [multiple]="false"
-        [(ngModel)]="files" name="files" accept=".aasx">
+        (change)="setFiles(fileInput.files)" name="files" accept=".aasx">
       </div>
       <div class="mb-3">
         <label class="form-label" for="upload-container" translate>LABEL_UPLOAD_CONTAINER</label>
         <select id="upload-container" class="form-select" [(ngModel)]="endpoint" name="container">
-          @for (endpoint of endpoints; track endpoint) {
+          @for (endpoint of endpoints(); track endpoint) {
             <option [ngValue]="endpoint">{{endpoint.name}}</option>
           }
         </select>
       </div>
-      @if (progress > 0) {
+      @if (progress() > 0) {
         <div class="progress form-group">
           <div class="progress-bar progress-bar-striped bg-success" role="progressbar" [style.width.%]="progress">
           </div>

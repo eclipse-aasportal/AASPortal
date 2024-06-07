@@ -33,11 +33,11 @@ describe('RemoveEndpointFormComponent', () => {
 
         fixture = TestBed.createComponent(RemoveEndpointFormComponent);
         component = fixture.componentInstance;
-        component.endpoints = [
+        component.endpoints.set([
             { name: 'Samples', url: 'http://localhost:1234', selected: false },
             { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
             { name: 'AAS Registry', url: 'http://localhost:1236', selected: false },
-        ];
+        ]);
 
         fixture.detectChanges();
 
@@ -49,7 +49,7 @@ describe('RemoveEndpointFormComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('allows deleting the "Samples" registry', function () {
+    it('allows deleting the "Samples" registry', () => {
         spyOn(modal, 'close').and.callFake(result => {
             expect(result).toEqual(['Samples']);
         });
@@ -58,16 +58,16 @@ describe('RemoveEndpointFormComponent', () => {
         inputElement.checked = true;
         inputElement.dispatchEvent(new Event('change'));
         // Hack
-        component.endpoints[0].selected = true;
+        component.endpoints()[0].selected = true;
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
     });
 
-    it('?allows deleting the "Samples" registry', function () {
+    it('Display message if no element selected.', () => {
         spyOn(modal, 'close');
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages.length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBeTrue();
     });
 });

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, ApplicationError, stringFormat } from 'common';
 import { FavoritesService } from '../favorites.service';
@@ -30,16 +30,17 @@ interface FavoritesItem {
     styleUrls: ['./favorites-form.component.css'],
     standalone: true,
     imports: [NgbToast, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoritesFormComponent {
-    private _items: FavoritesItem[] = [];
+    private _items = signal<FavoritesItem[]>([]);
 
     public constructor(
         private readonly modal: NgbActiveModal,
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
     ) {
-        this._items = this.favorites.lists
+        const items = this.favorites.lists
             .map(
                 (list, index) =>
                     ({
@@ -53,8 +54,8 @@ export class FavoritesFormComponent {
             )
             .sort((a, b) => a.name.localeCompare(b.name));
 
-        if (this._items.length === 0) {
-            this._items.push({
+        if (items.length === 0) {
+            items.push({
                 name: this.uniqueName(),
                 id: '',
                 selected: true,
@@ -64,18 +65,18 @@ export class FavoritesFormComponent {
                 length: 0,
             });
         }
+
+        this._items.set(items);
     }
 
     public messages: string[] = [];
 
     public documents: AASDocument[] = [];
 
-    public get items(): FavoritesItem[] {
-        return this._items.filter(item => item.delete === false);
-    }
+    public readonly items = computed(() => this._items().filter(item => item.delete === false));
 
     public get text(): string {
-        const selectedItem = this._items.find(item => item.selected);
+        const selectedItem = this._items().find(item => item.selected);
         if (!selectedItem || this.documents.length === 0) {
             return '';
         }
@@ -89,22 +90,27 @@ export class FavoritesFormComponent {
 
     public delete(item: FavoritesItem): void {
         if (item.added) {
-            this._items.splice(this._items.indexOf(item), 1);
+            this._items.update(items => items.filter(value => value !== item));
         } else {
             item.delete = true;
         }
     }
 
     public addNew(): void {
-        this._items.forEach(i => (i.selected = false));
-        this._items.push({
-            name: this.uniqueName(),
-            id: '',
-            selected: true,
-            active: false,
-            added: true,
-            delete: false,
-            length: 0,
+        this._items.update(items => {
+            items.forEach(i => (i.selected = false));
+            return [
+                ...items,
+                {
+                    name: this.uniqueName(),
+                    id: '',
+                    selected: true,
+                    active: false,
+                    added: true,
+                    delete: false,
+                    length: 0,
+                },
+            ];
         });
     }
 
@@ -114,7 +120,7 @@ export class FavoritesFormComponent {
 
     public selected(target: EventTarget | null, item: FavoritesItem): void {
         if (!item.selected) {
-            this._items.forEach(i => (i.selected = false));
+            this._items().forEach(i => (i.selected = false));
             item.selected = (target as HTMLInputElement).checked;
         }
     }
@@ -122,7 +128,7 @@ export class FavoritesFormComponent {
     public submit(): void {
         this.clearMessages();
 
-        of(this._items)
+        of(this._items())
             .pipe(
                 tap(items => this.checkNames(items)),
                 mergeMap(items => from(items)),
@@ -151,7 +157,7 @@ export class FavoritesFormComponent {
     }
 
     private uniqueName(): string {
-        const set = new Set(this._items.map(item => item.name));
+        const set = new Set(this._items().map(item => item.name));
         for (let i = 1; i < Number.MAX_SAFE_INTEGER; i++) {
             const name = 'Favorites ' + i;
             if (!set.has(name)) {

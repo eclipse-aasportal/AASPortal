@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -29,47 +29,43 @@ export class AddEndpointFormComponent {
     public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-    ) {
-        this.items = [
-            {
-                name: this.translate.instant('AASEndpointType.AASServer'),
-                type: 'AASServer',
-                value: 'http://',
-            },
-            {
-                name: this.translate.instant('AASEndpointType.OpcuaServer'),
-                type: 'OpcuaServer',
-                value: 'opc.tcp://',
-            },
-            {
-                name: this.translate.instant('AASEndpointType.WebDAV'),
-                type: 'WebDAV',
-                value: 'http://',
-            },
-            {
-                name: this.translate.instant('AASEndpointType.FileSystem'),
-                type: 'FileSystem',
-                value: 'file:///',
-            },
-        ];
+    ) {}
 
-        this.item = this.items[0];
-    }
+    public readonly endpoints = signal<AASEndpoint[]>([]);
 
-    public endpoints: AASEndpoint[] = [];
+    public readonly messages = signal<string[]>([]);
 
-    public messages: string[] = [];
+    public readonly name = signal('');
 
-    public name = '';
+    public readonly version = signal('v3');
 
-    public version = 'v3';
+    public readonly items = signal<EndpointItem[]>([
+        {
+            name: this.translate.instant('AASEndpointType.AASServer'),
+            type: 'AASServer',
+            value: 'http://',
+        },
+        {
+            name: this.translate.instant('AASEndpointType.OpcuaServer'),
+            type: 'OpcuaServer',
+            value: 'opc.tcp://',
+        },
+        {
+            name: this.translate.instant('AASEndpointType.WebDAV'),
+            type: 'WebDAV',
+            value: 'http://',
+        },
+        {
+            name: this.translate.instant('AASEndpointType.FileSystem'),
+            type: 'FileSystem',
+            value: 'file:///',
+        },
+    ]).asReadonly();
 
-    public readonly items: EndpointItem[];
-
-    public item: EndpointItem;
+    public readonly item = signal(this.items()[0]);
 
     public setItem(value: EndpointItem): void {
-        this.item = value;
+        this.item.set(value);
         this.clearMessages();
     }
 
@@ -80,9 +76,9 @@ export class AddEndpointFormComponent {
     public submit(): void {
         this.clearMessages();
         const name = this.validateName();
-        const url = this.validateUrl(this.item.value.trim());
+        const url = this.validateUrl(this.item().value.trim());
         if (name && url) {
-            const endpoint: AASEndpoint = { url: url.href, name, type: this.item.type, version: this.version };
+            const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type, version: this.version() };
             this.modal.close(endpoint);
         }
     }
@@ -93,19 +89,22 @@ export class AddEndpointFormComponent {
 
     private clearMessages(): void {
         if (this.messages.length > 0) {
-            this.messages = [];
+            this.messages.set([]);
         }
     }
 
     private validateName(): string | undefined {
-        let name: string | undefined = this.name.trim();
+        let name: string | undefined = this.name().trim();
         if (!name) {
-            this.messages.push(this.createMessage('ERROR_EMPTY_ENDPOINT_NAME'));
+            this.messages.update(messages => [...messages, this.createMessage('ERROR_EMPTY_ENDPOINT_NAME')]);
             name = undefined;
         } else {
-            for (const endpoint of this.endpoints) {
+            for (const endpoint of this.endpoints()) {
                 if (endpoint.name.toLocaleLowerCase() === name.toLocaleLowerCase()) {
-                    this.messages.push(this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name));
+                    this.messages.update(messages => [
+                        ...messages,
+                        this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name),
+                    ]);
                     name = undefined;
                     break;
                 }
@@ -118,7 +117,7 @@ export class AddEndpointFormComponent {
     private validateUrl(value: string): URL | undefined {
         try {
             const url = new URL(value);
-            switch (this.item.type) {
+            switch (this.item().type) {
                 case 'AASServer':
                     this.validateAASServerEndpoint(url);
                     break;
@@ -135,7 +134,7 @@ export class AddEndpointFormComponent {
 
             return url;
         } catch (error) {
-            this.messages.push(this.createMessage('ERROR_INVALID_URL', this.item.value));
+            this.messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', this.item().value)]);
             return undefined;
         }
     }

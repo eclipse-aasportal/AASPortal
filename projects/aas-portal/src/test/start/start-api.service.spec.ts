@@ -11,12 +11,11 @@ import { TestBed } from '@angular/core/testing';
 
 import { StartApiService } from '../../app/start/start-api.service';
 
-describe('StartApiService', function () {
+describe('StartApiService', () => {
     let service: StartApiService;
     let httpTestingController: HttpTestingController;
 
-    beforeEach(function () {
-
+    beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [],
             providers: [],
@@ -31,7 +30,7 @@ describe('StartApiService', function () {
         httpTestingController.verify();
     });
 
-    it('should created', function () {
+    it('should created', () => {
         expect(service).toBeTruthy();
     });
 });

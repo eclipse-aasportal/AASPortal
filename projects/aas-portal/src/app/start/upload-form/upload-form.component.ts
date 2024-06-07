@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
@@ -20,39 +20,37 @@ import { AASEndpoint } from 'common';
     styleUrls: ['./upload-form.component.scss'],
     standalone: true,
     imports: [FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadFormComponent {
     private uploading = false;
+    private files: FileList | null = null;
 
     public constructor(
         private readonly modal: NgbActiveModal,
         private readonly download: DownloadService,
     ) {}
 
-    @ViewChild('fileInput')
-    public fileInput: ElementRef<HTMLInputElement> | null = null;
+    public readonly endpoint = signal<AASEndpoint | null>(null);
 
-    public files: string | string[] | null = null;
+    public readonly endpoints = signal<AASEndpoint[]>([]);
 
-    public endpoint: AASEndpoint | null = null;
+    public readonly progress = signal(0);
 
-    public endpoints: AASEndpoint[] = [];
-
-    public progress = 0;
+    public setFiles(files: FileList | null): void {
+        this.files = files;
+    }
 
     public canSubmit(): boolean {
-        return (
-            this.fileInput?.nativeElement?.files != null &&
-            this.fileInput.nativeElement.files.length > 0 &&
-            this.endpoint != null
-        );
+        return this.files != null && this.files.length > 0 && this.endpoint() != null;
     }
 
     public submit(): void {
-        if (!this.uploading && this.endpoint?.url) {
+        const endpoint = this.endpoint();
+        if (!this.uploading && endpoint) {
             this.uploading = true;
-            const file = this.fileInput!.nativeElement!.files![0];
-            this.download.uploadDocuments(this.endpoint.name, [file]).subscribe({
+            const file = this.files![0];
+            this.download.uploadDocuments(endpoint.name, [file]).subscribe({
                 next: (event: HttpEvent<unknown>) => {
                     switch (event.type) {
                         case HttpEventType.Sent:
@@ -60,7 +58,7 @@ export class UploadFormComponent {
                         case HttpEventType.ResponseHeader:
                             break;
                         case HttpEventType.UploadProgress:
-                            this.progress = Math.round((event.loaded / event.total!) * 100);
+                            this.progress.set(Math.round((event.loaded / event.total!) * 100));
                             break;
                         case HttpEventType.Response:
                             break;
