@@ -40,7 +40,8 @@ export class FavoritesFormComponent {
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
     ) {
-        const items = this.favorites.lists
+        const items = this.favorites
+            .lists()
             .map(
                 (list, index) =>
                     ({

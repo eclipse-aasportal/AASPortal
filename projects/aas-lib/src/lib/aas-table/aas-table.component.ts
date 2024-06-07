@@ -6,19 +6,18 @@
  *
  *****************************************************************************/
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 import { AASDocument } from 'common';
-import { Subscription } from 'rxjs';
 
 import { AASTableRow } from './aas-table-row';
 import { ClipboardService } from '../clipboard.service';
 import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
 import { AASTableStore } from './aas-table.store';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { MaxLengthPipe } from '../max-length.pipe';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -28,8 +27,7 @@ import { TranslateModule } from '@ngx-translate/core';
     imports: [NgbTooltip, MaxLengthPipe, TranslateModule],
     providers: [AASTableStore],
 })
-export class AASTableComponent implements OnInit, OnDestroy {
-    private readonly subscription = new Subscription();
+export class AASTableComponent implements OnDestroy {
     private shiftKey = false;
     private altKey = false;
 
@@ -39,22 +37,26 @@ export class AASTableComponent implements OnInit, OnDestroy {
         private readonly clipboard: ClipboardService,
         private readonly window: WindowService,
     ) {
+        effect(() => {
+            this.selectedChange.emit(this.store.selectedDocuments());
+        });
+
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
 
     @Input()
     public get viewMode(): ViewMode {
-        return this.store.viewMode;
+        return this.store.viewMode();
     }
 
     public set viewMode(value: ViewMode) {
-        this.store.setViewMode(value);
+        this.store.viewMode.set(value);
     }
 
     @Input()
     public get documents(): AASDocument[] {
-        return this.store.rows.map(row => row.element);
+        return this.store.rows().map(row => row.element);
     }
 
     public set documents(values: AASDocument[]) {
@@ -66,46 +68,38 @@ export class AASTableComponent implements OnInit, OnDestroy {
 
     @Input()
     public get selected(): AASDocument[] {
-        return this.store.rows.filter(row => row.selected).map(row => row.element);
-    }
-
-    @Input()
-    public get filter(): string {
-        return this.store.filter;
-    }
-
-    public set filter(value: string) {
-        this.store.filter = value;
+        return this.store
+            .rows()
+            .filter(row => row.selected)
+            .map(row => row.element);
     }
 
     public set selected(values: AASDocument[]) {
         this.store.setSelections(values);
     }
 
-    public get someSelected(): boolean {
-        const rows = this.store.rows;
+    @Input()
+    public get filter(): string {
+        return this.store.filterText();
+    }
+
+    public set filter(value: string) {
+        this.store.filterText.set(value);
+    }
+
+    public readonly someSelected = computed(() => {
+        const rows = this.store.rows();
         return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
-    }
+    });
 
-    public get everySelected(): boolean {
-        const rows = this.store.rows;
+    public readonly everySelected = computed(() => {
+        const rows = this.store.rows();
         return rows.length > 0 && rows.every(row => row.selected);
-    }
+    });
 
-    public get rows(): AASTableRow[] {
-        return this.store.rows;
-    }
-
-    public ngOnInit(): void {
-        this.subscription.add(
-            this.store.selectedDocuments.pipe().subscribe(documents => {
-                this.selectedChange.emit(documents);
-            }),
-        );
-    }
+    public readonly rows = this.store.rows;
 
     public ngOnDestroy(): void {
-        this.subscription.unsubscribe();
         this.window.removeEventListener('keyup', this.keyup);
         this.window.removeEventListener('keydown', this.keydown);
     }

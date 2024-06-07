@@ -57,6 +57,6 @@ describe('AASTableComponent', () => {
     });
 
     it('provides a rows property', () => {
-        expect(component.rows).toBeTruthy();
+        expect(component.rows()).toBeTruthy();
     });
 });

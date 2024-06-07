@@ -365,7 +365,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 return from(modalRef.result);
             }),
             map(() => {
-                this.store.updateFavoritesLists();
                 this.selected.set([]);
             }),
         );

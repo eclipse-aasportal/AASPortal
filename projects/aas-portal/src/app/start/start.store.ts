@@ -18,21 +18,19 @@ export class StartStore {
     private _totalCount = 0;
     private readonly _documents = signal<AASDocument[]>([]);
     private readonly _activeFavorites = signal('');
-    private readonly _favoritesLists = signal<string[]>([]);
+    // private readonly _favoritesLists = signal<string[]>([]);
 
     public constructor(
         private readonly api: StartApiService,
         private readonly translate: TranslateService,
         private readonly favorites: FavoritesService,
-    ) {
-        this.updateFavoritesLists();
-    }
+    ) {}
 
     public readonly viewMode = this._viewMode.asReadonly();
 
     public readonly documents = this._documents.asReadonly();
 
-    public readonly favoritesLists = this._favoritesLists.asReadonly();
+    public readonly favoritesLists = computed(() => ['', ...this.favorites.lists().map(list => list.name)]);
 
     public readonly activeFavorites = this._activeFavorites.asReadonly();
 
@@ -195,10 +193,6 @@ export class StartStore {
                 ),
             )
             .subscribe();
-    }
-
-    public updateFavoritesLists(): void {
-        this._favoritesLists.set(['', ...this.favorites.lists.map(list => list.name)]);
     }
 
     private getId(document: AASDocument): AASDocumentId {
