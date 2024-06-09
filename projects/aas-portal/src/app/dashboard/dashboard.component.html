@@ -7,13 +7,13 @@
  !---------------------------------------------------------------------------->
 
 <div id="fhg-dashboard-container" class="container">
-    @if (!isEmpty) {
-    @for (row of rows | async; track row) {
+    @if (!isEmpty()) {
+    @for (row of rows(); track row) {
     <div class="row">
         @for (column of row.columns; track column) {
         <div [ngClass]="'col border border-3 rounded m-1 ' + (selected(column) ? 'border-primary' : 'border-secondary')"
             (click)="toggleSelection(column)" (keydown.enter)="toggleSelection(column)" tabindex="0">
-            @if (!editMode) {
+            @if (!editMode()) {
             <canvas #chart [id]="column.id"></canvas>
             }
             @else {
@@ -74,8 +74,8 @@
 
 <ng-template #dashboardToolbar>
     <div class="input-group me-2">
-        <select #select class="form-select" [value]="activePage" (change)="setPage(pages[select.selectedIndex])">
-            @for (page of pages; track page) {
+        <select #select class="form-select" [value]="activePage()" (change)="setPage(pages()[select.selectedIndex])">
+            @for (page of pages(); track page) {
             <option [ngValue]="page">{{page.name}}</option>
             }
         </select>
@@ -92,7 +92,7 @@
     <div class="input-group me-2">
         <div class="form-check form-switch pt-2">
             <input class="form-check-input" type="checkbox" role="switch" id="toggleEditMode" [(ngModel)]="editMode">
-            <label class="form-check-label" for="toggleEditMode" translate>Edit Mode</label>
+            <label class="form-check-label" for="toggleEditMode" translate>LABEL_EDIT_MODE</label>
         </div>
     </div>
     <div class="btn-group me-2" [hidden]="!editMode">

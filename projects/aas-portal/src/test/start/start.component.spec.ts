@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { WindowService, ViewMode, AuthService, NotifyService, DownloadService, AASTableComponent } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -16,7 +16,7 @@ import { AASDocument, aas } from 'common';
 
 import { StartComponent } from '../../app/start/start.component';
 import { StartApiService } from '../../app/start/start-api.service';
-import { FavoritesService } from '../../app/start/favorites.service';
+import { FavoritesList, FavoritesService } from '../../app/start/favorites.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { provideRouter } from '@angular/router';
 
@@ -85,7 +85,7 @@ describe('StartComponent', () => {
         );
 
         favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
-            lists: [],
+            lists: signal<FavoritesList[]>([]),
         });
 
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });

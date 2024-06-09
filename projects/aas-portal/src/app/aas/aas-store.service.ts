@@ -6,67 +6,47 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
-import { NotifyService, OnlineState } from 'aas-lib';
+import { Injectable, signal } from '@angular/core';
+import { OnlineState } from 'aas-lib';
 import { AASDocument } from 'common';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { AASApiService } from './aas-api.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AASStoreService {
-    private _document: AASDocument | null = null;
-    private _state: OnlineState = 'offline';
-    private readonly search$ = new BehaviorSubject('');
+    private readonly _document = signal<AASDocument | null>(null);
 
-    public constructor(
-        private readonly api: AASApiService,
-        private readonly notify: NotifyService,
-    ) {}
+    public constructor(private readonly api: AASApiService) {}
 
-    public get document(): AASDocument | null {
-        return this._document;
-    }
+    public readonly document = this._document.asReadonly();
 
-    public get state(): OnlineState {
-        return this._state;
-    }
+    public readonly state = signal<OnlineState>('offline');
 
-    public get search(): Observable<string> {
-        return this.search$.asObservable();
-    }
+    public readonly search = signal('');
 
     public getDocumentContent(document: AASDocument): void {
         this.api.getContent(document.id, document.endpoint).subscribe({
-            next: content => (this._document = { ...document, content }),
-            error: () => (this._document = document),
+            next: content => this._document.set({ ...document, content }),
+            error: () => this._document.set(document),
         });
     }
 
     public getDocument(id: string, endpoint: string): void {
         this.api.getDocument(id, endpoint).subscribe({
-            next: document => (this._document = document),
+            next: document => this._document.set(document),
         });
     }
 
     public setDocument(document: AASDocument | null): void {
-        this._document = document;
+        this._document.set(document);
     }
 
     public applyDocument(document: AASDocument): void {
-        this._document = { ...document, modified: true };
+        this._document.set({ ...document, modified: true });
     }
 
     public resetModified(document: AASDocument): void {
-        this._document = { ...document, modified: false };
-    }
-
-    public setSearch(value: string): void {
-        this.search$.next(value);
-    }
-
-    public setState(value: 'offline' | 'online'): void {
-        this._state = value;
+        this._document.set({ ...document, modified: false });
     }
 }

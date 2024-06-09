@@ -6,13 +6,13 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (document?.content) {
+@if (document()?.content) {
 <table class="table table-sm table-hover table-striped align-middle">
     <thead>
         <tr>
             <th class="aas-tree-th-checkbox">
                 <input type="checkbox" class="form-check-input" (change)="toggleSelections()"
-                    [disabled]="state === 'online'" [indeterminate]="someSelected" [checked]="everySelected">
+                    [disabled]="state() === 'online'" [indeterminate]="someSelected()" [checked]="everySelected()">
             </th>
             <th>
                 <a class="link-secondary" href="javascript:void(0);" (click)="collapse()">
@@ -23,11 +23,11 @@
         </tr>
     </thead>
     <tbody>
-        @for (node of nodes; track node) {
+        @for (node of nodes(); track node) {
         <tr [ngClass]="visualState(node)" [id]="node.id">
             <td>
                 <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)"
-                    [checked]="node.selected" [disabled]="state === 'online'" />
+                    [checked]="node.selected" [disabled]="state() === 'online'" />
             </td>
             <td [colSpan]="node.isLeaf ? 1 : 2">
                 <div class="d-flex" style="overflow-x: hidden">

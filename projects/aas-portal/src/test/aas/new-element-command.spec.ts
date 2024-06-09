@@ -48,7 +48,7 @@ describe('NewElementCommand', function () {
     });
 
     it('can be executed', () => {
-        const document = store.document;
+        const document = store.document();
         const element = selectElement(document!.content!, 'TechnicalData');
         expect(element).toBeDefined();
     });
@@ -56,14 +56,14 @@ describe('NewElementCommand', function () {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document;
+            const document = store.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
         }
 
         {
             command.redo();
-            const document = store.document;
+            const document = store.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeDefined();
         }

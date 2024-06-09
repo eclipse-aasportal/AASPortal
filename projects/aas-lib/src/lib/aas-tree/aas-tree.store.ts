@@ -6,10 +6,9 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { AASTree, AASTreeRow } from './aas-tree-row';
 import { AASDocument, aas } from 'common';
-import { BehaviorSubject, Subject, map } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { NotifyService } from '../notify/notify.service';
 
@@ -27,121 +26,128 @@ export interface SearchTerm {
     query?: SearchQuery;
 }
 
+interface AASTreeState {
+    matchIndex: number;
+    rows: AASTreeRow[];
+    nodes: AASTreeRow[];
+}
+
 @Injectable()
 export class AASTreeStore {
-    private readonly terms$ = new BehaviorSubject<SearchTerm[]>([]);
-    private readonly index$ = new BehaviorSubject(-1);
-    private readonly selectedElements = new Subject<aas.Referable[]>();
-    private _rows: AASTreeRow[] = [];
-    private _nodes: AASTreeRow[] = [];
+    private readonly _state = signal<AASTreeState>({ matchIndex: -1, rows: [], nodes: [] });
 
     public constructor(
         private readonly notify: NotifyService,
         private readonly translate: TranslateService,
     ) {}
 
-    public get rows(): AASTreeRow[] {
-        return this._rows;
-    }
+    public readonly rows = computed(() => this._state().rows);
 
-    public get terms(): SearchTerm[] {
-        return this.terms$.getValue();
-    }
+    public readonly matchIndex = computed(() => this._state().matchIndex);
 
-    public get index(): number {
-        return this.index$.getValue();
-    }
+    public readonly nodes = computed(() => this._state().nodes);
 
-    public get nodes(): AASTreeRow[] {
-        return this._nodes;
-    }
+    public readonly selectedRows = computed(() => this._state().rows.filter(row => row.selected));
 
-    public readonly selectTerms = this.terms$.asObservable();
+    public readonly selectedElements = computed(() =>
+        this._state()
+            .rows.filter(row => row.selected)
+            .map(item => item.element),
+    );
 
-    public get selectSelectedRows(): AASTreeRow[] {
-        return this._rows.filter(row => row.selected);
-    }
-
-    public readonly selectSelectedElements = this.selectedElements.asObservable();
-
-    public readonly selectMatchIndex = this.index$.asObservable();
-
-    public readonly selectMatchRow = this.index$
-        .asObservable()
-        .pipe(map(index => (index >= 0 ? this._rows[index] : undefined)));
+    public readonly matchRow = computed(() => {
+        const state = this._state();
+        return state.matchIndex >= 0 ? state.rows[state.matchIndex] : undefined;
+    });
 
     public toggleSelected(row: AASTreeRow, altKey: boolean, shiftKey: boolean): void {
-        const tree = new AASTree(this._rows);
+        const tree = new AASTree(this._state().rows);
         tree.toggleSelected(row, altKey, shiftKey);
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
-        this.selectedElements.next(this._rows.filter(row => row.selected).map(item => item.element));
+        this._state.update(state => ({
+            ...state,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        }));
     }
 
     public toggleSelections(): void {
-        const tree = new AASTree(this._rows);
+        const tree = new AASTree(this._state().rows);
         tree.toggleSelections();
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
-        this.selectedElements.next(this._rows.filter(row => row.selected).map(item => item.element));
+        this._state.update(state => ({
+            ...state,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        }));
     }
 
     public collapse(): void {
-        const tree = new AASTree(this._rows);
+        const tree = new AASTree(this._state().rows);
         tree.collapse();
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
+        this._state.update(state => ({
+            ...state,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        }));
     }
 
     public collapseRow(row: AASTreeRow): void {
-        const tree = new AASTree(this._rows);
+        const tree = new AASTree(this._state().rows);
         tree.collapse(row);
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
+        this._state.update(state => ({
+            ...state,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        }));
     }
 
     public expandRow(arg: AASTreeRow | number): void {
-        const tree = new AASTree(this._rows);
+        const tree = new AASTree(this._state().rows);
         tree.expand(arg);
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
+        this._state.update(state => ({
+            ...state,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        }));
     }
 
     public updateRows(document: AASDocument | null): void {
         try {
             if (document) {
                 const tree = AASTree.from(document, this.translate.currentLang);
-                this._rows = tree.nodes;
-                this._nodes = tree.expanded;
+                this._state.set({
+                    matchIndex: -1,
+                    rows: tree.nodes,
+                    nodes: tree.expanded,
+                });
             } else {
-                this._rows = [];
-                this._nodes = [];
+                this._state.set({
+                    matchIndex: -1,
+                    rows: [],
+                    nodes: [],
+                });
             }
-
-            this.index$.next(-1);
-            this.selectedElements.next([]);
         } catch (error) {
             this.notify.error(error);
         }
     }
 
     public setSelectedElements(elements: aas.Referable[]): void {
-        const tree = new AASTree(this._rows);
+        const tree = new AASTree(this._state().rows);
         tree.selectedElements = elements;
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
-        this.selectedElements.next(this._rows.filter(row => row.selected).map(item => item.element));
+        this._state.update(state => ({
+            ...state,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        }));
     }
 
-    public setSearchText(terms: SearchTerm[]): void {
-        this.terms$.next(terms);
-    }
-
-    public setMatchIndex(index: number): void {
-        const tree = new AASTree(this._rows);
-        tree.highlight(index);
-        this._rows = tree.nodes;
-        this._nodes = tree.expanded;
-        this.index$.next(index);
+    public setMatchIndex(matchIndex: number): void {
+        const tree = new AASTree(this._state().rows);
+        tree.highlight(matchIndex);
+        this._state.set({
+            matchIndex: matchIndex,
+            rows: tree.nodes,
+            nodes: tree.expanded,
+        });
     }
 }

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, map, mergeMap, Observable, Subscription, from, of, catchError } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -18,7 +18,6 @@ import {
     ClipboardService,
     DownloadService,
     NotifyService,
-    OnlineState,
     SecuredImageComponent,
 } from 'aas-lib';
 
@@ -46,7 +45,6 @@ import { FormsModule } from '@angular/forms';
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly subscription = new Subscription();
-    private _dashboardPage!: DashboardPage;
 
     public constructor(
         private readonly store: AASStoreService,
@@ -66,59 +64,33 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aasToolbar: TemplateRef<unknown> | null = null;
 
-    public get document(): AASDocument | null {
-        return this.store.document;
-    }
+    public readonly document = this.store.document;
 
-    public get address(): string {
-        return this.store.document?.address ?? '-';
-    }
+    public readonly address = computed(() => this.store.document()?.address ?? '-');
 
-    public get idShort(): string {
-        return this.store.document?.idShort ?? '-';
-    }
+    public readonly idShort = computed(() => this.store.document()?.idShort ?? '-');
 
-    public get id(): string {
-        return this.store.document?.id ?? '-';
-    }
+    public readonly id = computed(() => this.store.document()?.id ?? '-');
 
-    public get assetId(): string {
-        return this.store.document?.assetId ?? '-';
-    }
+    public readonly assetId = computed(() => this.store.document()?.assetId ?? '-');
 
-    public get thumbnail(): string {
-        return this.store.document?.thumbnail ?? '';
-    }
+    public readonly thumbnail = computed(() => this.store.document()?.thumbnail ?? '-');
 
-    public get readOnly(): boolean {
-        return this.store.document?.readonly ?? false;
-    }
+    public readonly readOnly = computed(() => this.store.document()?.readonly ?? false);
 
-    public get version(): string {
-        return this.versionToString(head(this.store.document?.content?.assetAdministrationShells)?.administration);
-    }
+    public readonly version = computed(() =>
+        this.versionToString(head(this.store.document()?.content?.assetAdministrationShells)?.administration),
+    );
 
-    public get state(): OnlineState {
-        return this.store.state;
-    }
+    public readonly state = this.store.state;
 
-    public get search(): Observable<string> {
-        return this.store.search;
-    }
+    public readonly search = this.store.search;
 
-    public get dashboardPages(): DashboardPage[] {
-        return this.dashboard.pages;
-    }
+    public readonly dashboardPages = this.dashboard.pages;
 
-    public get dashboardPage(): DashboardPage {
-        return this._dashboardPage;
-    }
+    public readonly dashboardPage = this.dashboard.activePage;
 
-    public set dashboardPage(value: DashboardPage) {
-        this.dashboard.setPage(value);
-    }
-
-    public selectedElements: aas.Referable[] = [];
+    public readonly selectedElements = signal<aas.Referable[]>([]);
 
     public get canUndo(): boolean {
         return this.commandHandler.canUndo;
@@ -128,18 +100,20 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.commandHandler.canRedo;
     }
 
-    public get canPlay(): boolean {
-        return (this.store.document?.onlineReady ?? false) && this.store.state === 'offline';
-    }
+    public readonly canPlay = computed(() => {
+        const state = this.store.state();
+        return (this.store.document()?.onlineReady ?? false) && state === 'offline';
+    });
 
-    public get canStop(): boolean {
-        return (this.document?.onlineReady ?? false) && this.store.state === 'online';
-    }
+    public readonly canStop = computed(() => {
+        const state = this.store.state();
+        return (this.store.document()?.onlineReady ?? false) && state === 'online';
+    });
 
-    public get canSynchronize(): boolean {
-        const document = this.store.document;
+    public readonly canSynchronize = computed(() => {
+        const document = this.store.document();
         return document != null && !document.readonly && document.modified ? document.modified : false;
-    }
+    });
 
     public get canNewElement(): boolean {
         return this.selectedElements.length === 1;
@@ -151,8 +125,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public get canDeleteElement(): boolean {
         return (
-            this.selectedElements.length > 0 &&
-            this.selectedElements.every(item => item.modelType !== 'AssetAdministrationShell')
+            this.selectedElements().length > 0 &&
+            this.selectedElements().every(item => item.modelType !== 'AssetAdministrationShell')
         );
     }
 
@@ -160,8 +134,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         const selectedElements = this.selectedElements;
         return (
             this.dashboardPage != null &&
-            selectedElements.length > 0 &&
-            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
+            selectedElements().length > 0 &&
+            selectedElements().every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
         );
     }
 
@@ -169,7 +143,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.subscription.add(
             this.route.queryParams.subscribe(params => {
                 if (params?.search) {
-                    this.store.setSearch(params.search);
+                    this.store.search.set(params.search);
                 }
 
                 if (params) {
@@ -184,8 +158,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }),
         );
-
-        this.subscription.add(this.dashboard.activePage.subscribe(page => (this._dashboardPage = page)));
     }
 
     public ngAfterViewInit(): void {
@@ -200,27 +172,32 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public play(): void {
-        this.store.setState('online');
+        this.store.state.set('online');
     }
 
     public stop(): void {
-        this.store.setState('offline');
+        this.store.state.set('offline');
+    }
+
+    public setDashboardPage(page: DashboardPage): void {
+        this.dashboard.setPage(page);
     }
 
     public addToDashboard(chartType: string): void {
-        const document = this.store.document;
-        if (!document) {
+        const document = this.store.document();
+        const page = this.dashboard.activePage();
+        if (!document || !page) {
             return;
         }
 
-        this.dashboard.add(this.dashboardPage, document, this.selectedElements, chartType as DashboardChartType);
-        this.clipboard.set('DashboardQuery', { page: this.dashboardPage.name } as DashboardQuery);
+        this.dashboard.add(page, document, this.selectedElements(), chartType as DashboardChartType);
+        this.clipboard.set('DashboardQuery', { page: this.dashboardPage().name } as DashboardQuery);
         this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
     }
 
     public synchronize(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.store.document()),
             mergeMap(document => {
                 if (!document) {
                     return EMPTY;
@@ -250,7 +227,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public newElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.store.document()),
             mergeMap(document => {
                 if (!document || this.selectedElements.length !== 1) {
                     return EMPTY;
@@ -258,13 +235,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
                 return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
                     mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(document.content, this.selectedElements[0]);
+                        modalRef.componentInstance.initialize(document.content, this.selectedElements()[0]);
                         return from<Promise<aas.Referable | undefined>>(modalRef.result);
                     }),
                     map(result => {
                         if (result) {
                             this.commandHandler.execute(
-                                new NewElementCommand(this.store, document, this.selectedElements[0], result),
+                                new NewElementCommand(this.store, document, this.selectedElements()[0], result),
                             );
                         }
                     }),
@@ -276,7 +253,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public editElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.store.document()),
             mergeMap(document => {
                 if (!document || this.selectedElements.length !== 1) {
                     return EMPTY;
@@ -284,13 +261,13 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
                 return of(this.modal.open(EditElementFormComponent, { backdrop: 'static' })).pipe(
                     mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(this.selectedElements[0]);
+                        modalRef.componentInstance.initialize(this.selectedElements()[0]);
                         return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
                     }),
                     map(result => {
                         if (result) {
                             this.commandHandler.execute(
-                                new UpdateElementCommand(this.store, document, this.selectedElements[0], result),
+                                new UpdateElementCommand(this.store, document, this.selectedElements()[0], result),
                             );
                         }
                     }),
@@ -302,10 +279,10 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public deleteElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.store.document()),
             map(document => {
                 if (document && this.selectedElements.length > 0) {
-                    this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
+                    this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements()));
                 }
             }),
             catchError(error => this.notify.error(error)),
@@ -313,7 +290,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public downloadDocument(): Observable<void> {
-        return of(this.store.document).pipe(
+        return of(this.store.document()).pipe(
             mergeMap(document => {
                 if (!document) {
                     return EMPTY;
@@ -326,7 +303,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public applySearch(text: string): void {
-        this.store.setSearch(text);
+        this.store.search.set(text);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

@@ -66,7 +66,7 @@ describe('FavoritesService', () => {
 
     describe('lists', () => {
         it('provides all favorites lists', () => {
-            expect(service.lists).toEqual(favorites);
+            expect(service.lists()).toEqual(favorites);
         });
     });
 

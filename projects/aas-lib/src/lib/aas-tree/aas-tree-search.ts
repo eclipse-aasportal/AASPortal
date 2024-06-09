@@ -9,7 +9,6 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import trim from 'lodash-es/trim';
-import { Subscription } from 'rxjs';
 import {
     aas,
     AASAbbreviation,
@@ -27,21 +26,15 @@ import { AASTreeStore, Operator, SearchQuery, SearchTerm } from './aas-tree.stor
 @Injectable()
 export class AASTreeSearch {
     private readonly loop = true;
-    private readonly subscription = new Subscription();
+    private terms: SearchTerm[] = [];
 
     public constructor(
         private readonly store: AASTreeStore,
         private readonly translate: TranslateService,
-    ) {
-        this.subscription.add(this.store.selectTerms.subscribe(() => this.findFirst()));
-    }
-
-    public destroy(): void {
-        this.subscription.unsubscribe();
-    }
+    ) {}
 
     public find(referable: aas.Referable): void {
-        const index = this.store.rows.findIndex(row => row.element === referable);
+        const index = this.store.rows().findIndex(row => row.element === referable);
         if (index >= 0) {
             this.store.setMatchIndex(index);
         }
@@ -70,7 +63,7 @@ export class AASTreeSearch {
         }
 
         if (terms.length > 0) {
-            this.store.setSearchText(terms);
+            this.terms = terms;
         } else {
             this.store.setMatchIndex(-1);
         }
@@ -78,21 +71,21 @@ export class AASTreeSearch {
 
     public findNext(): boolean {
         let completed = false;
-        if (this.store.rows.length > 0 && this.store.terms.length > 0) {
+        if (this.store.rows().length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = this.store.index < 0 ? 0 : this.store.index + 1;
-            if (i >= this.store.rows.length) {
+            let i = this.store.matchIndex() < 0 ? 0 : this.store.matchIndex() + 1;
+            if (i >= this.store.rows().length) {
                 i = 0;
             }
 
             const start = i;
             while (this.loop) {
-                if (this.match(this.store.rows[i])) {
+                if (this.match(this.store.rows()[i])) {
                     match = true;
                     break;
                 }
 
-                if (++i >= this.store.rows.length) {
+                if (++i >= this.store.rows().length) {
                     i = 0;
                     completed = true;
                 }
@@ -110,18 +103,18 @@ export class AASTreeSearch {
 
     public findPrevious(): boolean {
         let completed = false;
-        if (this.store.rows.length > 0 && this.store.terms.length > 0) {
+        if (this.store.rows().length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = this.store.index <= 0 ? this.store.rows.length - 1 : this.store.index - 1;
+            let i = this.store.matchIndex() <= 0 ? this.store.rows().length - 1 : this.store.matchIndex() - 1;
             const start = i;
             while (this.loop) {
-                if (this.match(this.store.rows[i])) {
+                if (this.match(this.store.rows()[i])) {
                     match = true;
                     break;
                 }
 
                 if (--i <= 0) {
-                    i = this.store.rows.length - 1;
+                    i = this.store.rows().length - 1;
                     completed = true;
                 }
 
@@ -141,17 +134,17 @@ export class AASTreeSearch {
     }
 
     private findFirst(): void {
-        if (this.store.rows.length > 0 && this.store.terms.length > 0) {
+        if (this.store.rows().length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = this.store.index < 0 ? 0 : this.store.index;
+            let i = this.store.matchIndex() < 0 ? 0 : this.store.matchIndex();
             const start = i;
             while (this.loop) {
-                if (this.match(this.store.rows[i])) {
+                if (this.match(this.store.rows()[i])) {
                     match = true;
                     break;
                 }
 
-                if (++i >= this.store.rows.length) {
+                if (++i >= this.store.rows().length) {
                     i = 0;
                 }
 
@@ -245,7 +238,7 @@ export class AASTreeSearch {
 
     private match(row: AASTreeRow): boolean {
         let match = false;
-        for (const term of this.store.terms) {
+        for (const term of this.terms) {
             if (term.query) {
                 if (row.element.modelType === term.query.modelType) {
                     if (term.query.name) {

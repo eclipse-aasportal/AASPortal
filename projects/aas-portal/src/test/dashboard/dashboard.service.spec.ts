@@ -9,7 +9,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import { AuthService } from 'aas-lib';
 
 import { rotationSpeed, sampleDocument, torque } from '../../test/assets/sample-document';
@@ -57,11 +57,8 @@ describe('DashboardService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('provides always a default page', (done: DoneFn) => {
-        service.activePage.pipe(first()).subscribe(page => {
-            expect(page).toBeDefined();
-            done();
-        });
+    it('provides always an active page', () => {
+        expect(service.activePage()).toBeDefined();
     });
 
     describe('with pages', () => {
@@ -70,7 +67,7 @@ describe('DashboardService', () => {
         });
 
         it('provides an observable collection of pages', () => {
-            expect(service.pages).toEqual(pages);
+            expect(service.pages()).toEqual(pages);
         });
 
         it('allows finding a specific dashboard page', () => {
@@ -89,20 +86,14 @@ describe('DashboardService', () => {
             expect(grid[1].length).toEqual(1);
         });
 
-        it('provides the name of the current active dashboard', (done: DoneFn) => {
-            service.activePage.pipe(first()).subscribe(page => {
-                expect(page.name).toEqual('Dashboard 1');
-                done();
-            });
+        it('provides the name of the current active dashboard', () => {
+            expect(service.activePage().name).toEqual('Dashboard 1');
         });
 
         describe('setPageName', () => {
-            it('allows setting "Test" as new active dashboard', (done: DoneFn) => {
+            it('allows setting "Test" as new active dashboard', () => {
                 service.setPage('Test');
-                service.activePage.pipe(first()).subscribe(page => {
-                    expect(page.name).toEqual('Test');
-                    done();
-                });
+                expect(service.activePage().name).toEqual('Test');
             });
 
             it('throws an error if a dashboard with the specified does not exist', () => {

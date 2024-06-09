@@ -6,14 +6,26 @@
  *
  *****************************************************************************/
 
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { NgClass, NgStyle } from '@angular/common';
-import { BehaviorSubject, Subscription, Observable } from 'rxjs';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import isEqual from 'lodash-es/isEqual';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    computed,
+    effect,
+    input,
+} from '@angular/core';
+
 import {
     aas,
     LiveNode,
@@ -64,13 +76,12 @@ interface PropertyValue {
     standalone: true,
     imports: [NgClass, NgStyle, TranslateModule],
     providers: [AASTreeSearch, AASTreeStore],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
+export class AASTreeComponent implements OnInit, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
-    private searchSubscription?: Subscription;
-    private _selected: aas.Referable[] = [];
     private shiftKey = false;
     private altKey = false;
 
@@ -90,26 +101,62 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
+        effect(() => {
+            const searchText = this.search();
+            if (searchText) {
+                this.searching.start(searchText);
+            }
+        });
+
+        effect(() => {
+            this.store.updateRows(this.document());
+        });
+
+        effect(() => {
+            if (this.state() === 'online') {
+                this.goOnline();
+            } else {
+                this.goOffline();
+            }
+        });
+
+        effect(() => {
+            this.selectedChange.emit(this.store.selectedElements());
+        });
+
+        effect(() => {
+            const matchIndex = this.store.matchIndex();
+            if (matchIndex >= 0) {
+                this.store.expandRow(matchIndex);
+            }
+        });
+
+        effect(() => {
+            const row = this.store.matchRow();
+            if (!row) return;
+            setTimeout(() => {
+                const element = this.dom.getElementById(row.id);
+                element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            });
+        });
+
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
 
-    @Input()
-    public document: AASDocument | null = null;
+    public readonly document = input<AASDocument | null>(null);
 
-    @Input()
-    public state: OnlineState | null = 'offline';
+    public readonly state = input<OnlineState>('offline');
 
-    @Input()
-    public search: Observable<string> | null = null;
+    public readonly search = input<string>('');
 
     @Input()
     public get selected(): aas.Referable[] {
-        return this._selected;
+        return this.store.selectedElements();
     }
 
     public set selected(values: aas.Referable[]) {
-        if (!isEqual(values, this._selected)) {
+        if (!isEqual(values, this.store.selectedElements())) {
             this.store.setSelectedElements(values);
         }
     }
@@ -117,111 +164,48 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     @Output()
     public selectedChange = new EventEmitter<aas.Referable[]>();
 
-    public get onlineReady(): boolean {
-        return this.document?.onlineReady ?? false;
-    }
+    public readonly onlineReady = computed(() => this.document()?.onlineReady ?? false);
 
-    public get readonly(): boolean {
-        return this.document?.readonly ?? true;
-    }
+    public readonly readonly = computed(() => this.document()?.readonly ?? true);
 
-    public get modified(): boolean {
-        return this.document?.modified ?? false;
-    }
+    public readonly modified = computed(() => this.document()?.modified ?? false);
 
-    public get someSelected(): boolean {
-        const rows = this.store.rows;
+    public readonly someSelected = computed(() => {
+        const rows = this.store.rows();
         return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
-    }
+    });
 
-    public get everySelected(): boolean {
-        const rows = this.store.rows;
+    public readonly everySelected = computed(() => {
+        const rows = this.store.rows();
         return rows.length > 0 && rows.every(row => row.selected);
-    }
+    });
 
-    public get nodes(): AASTreeRow[] {
-        return this.store.nodes;
-    }
+    public readonly nodes = this.store.nodes;
 
-    public readonly selectMatchIndex = this.store.selectMatchIndex;
+    public readonly matchIndex = this.store.matchIndex;
 
-    public readonly selectMatchRow = this.store.selectMatchRow;
+    public readonly matchRow = this.store.matchRow;
 
-    public get rows(): AASTreeRow[] {
-        return this.store.rows;
-    }
+    public readonly rows = this.store.rows;
 
     public ngOnInit(): void {
         this.subscription.add(
-            this.store.selectSelectedElements.pipe().subscribe(elements => {
-                this._selected = elements;
-                this.selectedChange.emit(elements);
-            }),
-        );
-
-        this.subscription.add(
-            this.store.selectMatchIndex.pipe().subscribe(index => {
-                if (index >= 0) {
-                    this.store.expandRow(index);
-                }
-            }),
-        );
-
-        this.subscription.add(
-            this.store.selectMatchRow.pipe().subscribe(row => {
-                if (row) {
-                    setTimeout(() => {
-                        const element = this.dom.getElementById(row.id);
-                        element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    });
-                }
-            }),
-        );
-
-        this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
-                this.store.updateRows(this.document);
+                this.store.updateRows(this.document());
             }),
         );
-    }
-
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['document']) {
-            this.store.updateRows(this.document);
-        }
-
-        if (changes['search']) {
-            if (this.searchSubscription) {
-                this.searchSubscription.unsubscribe();
-                this.searchSubscription = undefined;
-            }
-
-            if (this.search) {
-                this.searchSubscription = this.search.subscribe(value => this.searching.start(value));
-            }
-        }
-
-        const stateChange = changes['state'];
-        if (stateChange) {
-            if (stateChange.previousValue !== stateChange.currentValue) {
-                if (this.state === 'online') {
-                    this.goOnline();
-                } else {
-                    this.goOffline();
-                }
-            }
-        }
     }
 
     public get message(): string {
-        if (this.document) {
-            if (this.document.content) {
+        const document = this.document();
+        if (document) {
+            if (document.content) {
                 return '';
             }
 
             return stringFormat(
                 this.translate.instant('INFO_AAS_OFFLINE'),
-                new Date(this.document.timestamp).toLocaleString(this.translate.currentLang),
+                new Date(document.timestamp).toLocaleString(this.translate.currentLang),
             );
         }
 
@@ -230,9 +214,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
-        this.searchSubscription?.unsubscribe();
         this.webSocketSubject?.unsubscribe();
-        this.searching?.destroy();
         this.window.removeEventListener('keyup', this.keyup);
         this.window.removeEventListener('keydown', this.keydown);
     }
@@ -252,7 +234,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public getValue(node: AASTreeRow): string | boolean | undefined {
-        if (this.state === 'online' && node.element.modelType === 'Property') {
+        if (this.state() === 'online' && node.element.modelType === 'Property') {
             const property = node.element as aas.Property;
             let value: string | boolean;
             const item = property.nodeId && this.map.get(property.nodeId);
@@ -293,7 +275,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public async openFile(file: aas.File | undefined): Promise<void> {
-        if (!file || !file.value || this.state === 'online') return;
+        if (!file || !file.value || this.state() === 'online') return;
 
         const { name, url } = this.resolveFile(file);
         if (name && url) {
@@ -311,7 +293,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public async openBlob(blob: aas.Blob | undefined): Promise<void> {
-        if (!blob?.value || !this.document || !blob.parent || this.state === 'online') return;
+        const document = this.document();
+        if (!blob?.value || !document || !blob.parent || this.state() === 'online') return;
 
         const extension = mimeTypeToExtension(blob.contentType);
         if (extension) {
@@ -323,8 +306,8 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
                     await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
                 }
             } else {
-                const endpoint = encodeBase64Url(this.document.endpoint);
-                const id = encodeBase64Url(this.document.id);
+                const endpoint = encodeBase64Url(document.endpoint);
+                const id = encodeBase64Url(document.id);
                 const smId = encodeBase64Url(blob.parent.keys[0].value);
                 const path = getIdShortPath(blob);
                 const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
@@ -342,7 +325,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public async openOperation(operation: aas.Operation | undefined): Promise<void> {
-        if (!operation || this.state === 'online') return;
+        if (!operation || this.state() === 'online') return;
 
         try {
             if (operation) {
@@ -359,7 +342,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public openReference(reference: aas.Reference | string | undefined): void {
-        if (!reference || this.state === 'online') return;
+        if (!reference || this.state() === 'online') return;
 
         if (typeof reference === 'string') {
             this.openDocumentByAssetId(reference);
@@ -377,18 +360,19 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     public openSubmodel(submodel: aas.Submodel | undefined): void {
-        if (!submodel || this.state === 'online') return;
+        if (!submodel || this.state() === 'online') return;
 
         const semanticId = resolveSemanticId(submodel);
         if (semanticId) {
+            const document = this.document();
             const template = supportedSubmodelTemplates.get(semanticId);
-            if (template && this.document) {
+            if (template && document) {
                 const descriptor: SubmodelViewDescriptor = {
                     template,
                     submodels: [
                         {
-                            id: this.document.id,
-                            endpoint: this.document.endpoint,
+                            id: document.id,
+                            endpoint: document.endpoint,
                             idShort: submodel.idShort,
                         },
                     ],
@@ -460,7 +444,7 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     private goOnline(): void {
         try {
-            this.prepareOnline(this.store.rows.filter(row => row.selected));
+            this.prepareOnline(this.store.rows().filter(row => row.selected));
             this.play();
         } catch (error) {
             this.stop();
@@ -472,14 +456,15 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private play(): void {
-        if (this.document) {
+        const document = this.document();
+        if (document) {
             this.webSocketSubject = this.webSocketFactory.create();
             this.webSocketSubject.subscribe({
                 next: this.onMessage,
                 error: this.onError,
             });
 
-            this.webSocketSubject.next(this.createMessage(this.document));
+            this.webSocketSubject.next(this.createMessage(document));
         }
     }
 
@@ -491,21 +476,19 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private prepareOnline(rows: AASTreeRow[]): void {
-        if (this.document) {
-            this.liveNodes.splice(0, this.liveNodes.length);
-            this.map.clear();
-            for (const row of rows) {
-                if (row.selected) {
-                    const property = row.element as aas.Property;
-                    if (property.nodeId) {
-                        this.liveNodes.push({
-                            nodeId: property.nodeId,
-                            valueType: property.valueType ?? 'undefined',
-                        });
+        this.liveNodes.splice(0, this.liveNodes.length);
+        this.map.clear();
+        for (const row of rows) {
+            if (row.selected) {
+                const property = row.element as aas.Property;
+                if (property.nodeId) {
+                    this.liveNodes.push({
+                        nodeId: property.nodeId,
+                        valueType: property.valueType ?? 'undefined',
+                    });
 
-                        const subject = new BehaviorSubject<string | boolean>(this.getPropertyValue(property));
-                        this.map.set(property.nodeId, { property: property, value: subject });
-                    }
+                    const subject = new BehaviorSubject<string | boolean>(this.getPropertyValue(property));
+                    this.map.set(property.nodeId, { property: property, value: subject });
                 }
             }
         }
@@ -532,11 +515,12 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private selectModelReference(reference: aas.Reference): void {
-        if (!this.document?.content) {
+        const content = this.document()?.content;
+        if (!content) {
             return;
         }
 
-        const referable = selectReferable(this.document.content, reference);
+        const referable = selectReferable(content, reference);
         if (referable) {
             this.searching.find(referable);
         } else if (reference.keys[0].type === 'AssetAdministrationShell') {
@@ -587,14 +571,15 @@ export class AASTreeComponent implements OnInit, OnChanges, OnDestroy {
 
     private resolveFile(file: aas.File): { url?: string; name?: string } {
         const value: { url?: string; name?: string } = {};
-        if (this.document?.content && file.value) {
-            const submodel = selectSubmodel(this.document.content, file);
+        const document = this.document();
+        if (document?.content && file.value) {
+            const submodel = selectSubmodel(document.content, file);
             if (submodel) {
                 const smId = encodeBase64Url(submodel.id);
                 const path = getIdShortPath(file);
                 value.name = basename(file.value);
-                const name = encodeBase64Url(this.document.endpoint);
-                const id = encodeBase64Url(this.document.id);
+                const name = encodeBase64Url(document.endpoint);
+                const id = encodeBase64Url(document.id);
                 value.url = `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }
         }
