@@ -12,14 +12,14 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { NotifyService } from 'aas-lib';
 import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
-import { AASStoreService } from '../../app/aas/aas-store.service';
+import { AASStore } from '../../app/aas/aas.store';
 import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('NewElementCommand', function () {
     let command: NewElementCommand;
     let document: AASDocument;
     let submodel: aas.Submodel;
-    let store: AASStoreService;
+    let store: AASStore;
 
     beforeEach(function () {
         document = cloneDeep(aasNoTechnicalData);
@@ -38,7 +38,7 @@ describe('NewElementCommand', function () {
             ],
         });
 
-        store = TestBed.inject(AASStoreService);
+        store = TestBed.inject(AASStore);
         store.setDocument(document);
     });
 

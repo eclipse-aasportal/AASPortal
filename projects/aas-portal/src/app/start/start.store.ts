@@ -18,7 +18,6 @@ export class StartStore {
     private _totalCount = 0;
     private readonly _documents = signal<AASDocument[]>([]);
     private readonly _activeFavorites = signal('');
-    // private readonly _favoritesLists = signal<string[]>([]);
 
     public constructor(
         private readonly api: StartApiService,

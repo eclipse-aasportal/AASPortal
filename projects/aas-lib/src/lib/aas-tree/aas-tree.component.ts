@@ -12,19 +12,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import isEqual from 'lodash-es/isEqual';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    EventEmitter,
-    Input,
-    OnDestroy,
-    OnInit,
-    Output,
-    computed,
-    effect,
-    input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
 
 import {
     aas,
@@ -101,16 +89,22 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
-        effect(() => {
-            const searchText = this.search();
-            if (searchText) {
-                this.searching.start(searchText);
-            }
-        });
+        effect(
+            () => {
+                const searchText = this.searchExpression();
+                if (searchText) {
+                    this.searching.start(searchText);
+                }
+            },
+            { allowSignalWrites: true },
+        );
 
-        effect(() => {
-            this.store.updateRows(this.document());
-        });
+        effect(
+            () => {
+                this.store.updateRows(this.document());
+            },
+            { allowSignalWrites: true },
+        );
 
         effect(() => {
             if (this.state() === 'online') {
@@ -121,7 +115,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            this.selectedChange.emit(this.store.selectedElements());
+            this.selected.emit(this.store.selectedElements());
         });
 
         effect(() => {
@@ -148,21 +142,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     public readonly state = input<OnlineState>('offline');
 
-    public readonly search = input<string>('');
+    public readonly searchExpression = input<string>('');
 
-    @Input()
-    public get selected(): aas.Referable[] {
-        return this.store.selectedElements();
-    }
-
-    public set selected(values: aas.Referable[]) {
-        if (!isEqual(values, this.store.selectedElements())) {
-            this.store.setSelectedElements(values);
-        }
-    }
-
-    @Output()
-    public selectedChange = new EventEmitter<aas.Referable[]>();
+    public readonly selected = output<aas.Referable[]>();
 
     public readonly onlineReady = computed(() => this.document()?.onlineReady ?? false);
 
@@ -182,19 +164,11 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     public readonly nodes = this.store.nodes;
 
+    public readonly rows = this.store.rows;
+
     public readonly matchIndex = this.store.matchIndex;
 
     public readonly matchRow = this.store.matchRow;
-
-    public readonly rows = this.store.rows;
-
-    public ngOnInit(): void {
-        this.subscription.add(
-            this.translate.onLangChange.subscribe(() => {
-                this.store.updateRows(this.document());
-            }),
-        );
-    }
 
     public get message(): string {
         const document = this.document();
@@ -210,6 +184,14 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
 
         return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
+    }
+
+    public ngOnInit(): void {
+        this.subscription.add(
+            this.translate.onLangChange.subscribe(() => {
+                this.store.updateRows(this.document());
+            }),
+        );
     }
 
     public ngOnDestroy(): void {

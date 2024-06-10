@@ -20,7 +20,7 @@ import {
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
-import { AASStoreService } from '../aas-store.service';
+import { AASStore } from '../aas.store';
 
 export class DeleteCommand extends Command {
     private readonly elements: aas.Referable[];
@@ -28,7 +28,7 @@ export class DeleteCommand extends Command {
     private document: AASDocument;
 
     public constructor(
-        private readonly store: AASStoreService,
+        private readonly store: AASStore,
         document: AASDocument,
         elements: aas.Referable | aas.Referable[],
     ) {

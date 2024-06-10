@@ -9,11 +9,11 @@
 import { TestBed } from '@angular/core/testing';
 import { NotifyService } from 'aas-lib';
 
-import { AASStoreService } from '../../app/aas/aas-store.service';
+import { AASStore } from '../../app/aas/aas.store';
 import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('AASStoreService', () => {
-    let service: AASStoreService;
+    let service: AASStore;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -29,7 +29,7 @@ describe('AASStoreService', () => {
             ],
         });
 
-        service = TestBed.inject(AASStoreService);
+        service = TestBed.inject(AASStore);
     });
 
     it('should be created', () => {

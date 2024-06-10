@@ -41,6 +41,8 @@ export class AASTreeStore {
         private readonly translate: TranslateService,
     ) {}
 
+    public readonly state = this._state.asReadonly();
+
     public readonly rows = computed(() => this._state().rows);
 
     public readonly matchIndex = computed(() => this._state().matchIndex);

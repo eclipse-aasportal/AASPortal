@@ -28,7 +28,7 @@ import { Router, provideRouter } from '@angular/router';
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { AASApiService } from '../../app/aas/aas-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
-import { AASStoreService } from '../../app/aas/aas-store.service';
+import { AASStore } from '../../app/aas/aas.store';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -81,7 +81,7 @@ describe('AASComponent', () => {
     let fixture: ComponentFixture<AASComponent>;
     let dashboard: jasmine.SpyObj<DashboardService>;
     let router: Router;
-    let store: AASStoreService;
+    let store: AASStore;
     let api: jasmine.SpyObj<AASApiService>;
     let download: jasmine.SpyObj<DownloadService>;
     let pages: DashboardPage[];
@@ -146,7 +146,7 @@ describe('AASComponent', () => {
 
         fixture = TestBed.createComponent(AASComponent);
         component = fixture.componentInstance;
-        store = TestBed.inject(AASStoreService);
+        store = TestBed.inject(AASStore);
         router = TestBed.inject(Router);
         store.setDocument(sampleDocument);
         fixture.detectChanges();

@@ -31,7 +31,7 @@ import { NewElementFormComponent } from './new-element-form/new-element-form.com
 import { DashboardChartType, DashboardPage, DashboardService } from '../dashboard/dashboard.service';
 import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
-import { AASStoreService } from './aas-store.service';
+import { AASStore } from './aas.store';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -47,7 +47,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly subscription = new Subscription();
 
     public constructor(
-        private readonly store: AASStoreService,
+        private readonly store: AASStore,
         private readonly router: Router,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
@@ -84,7 +84,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public readonly state = this.store.state;
 
-    public readonly search = this.store.search;
+    public readonly searchExpression = this.store.searchExpression;
 
     public readonly dashboardPages = this.dashboard.pages;
 
@@ -115,35 +115,30 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return document != null && !document.readonly && document.modified ? document.modified : false;
     });
 
-    public get canNewElement(): boolean {
-        return this.selectedElements.length === 1;
-    }
+    public readonly canNewElement = computed(() => this.selectedElements().length === 1);
 
-    public get canEditElement(): boolean {
-        return this.selectedElements.length === 1;
-    }
+    public readonly canEditElement = computed(() => this.selectedElements().length === 1);
 
-    public get canDeleteElement(): boolean {
-        return (
+    public readonly canDeleteElement = computed(
+        () =>
             this.selectedElements().length > 0 &&
-            this.selectedElements().every(item => item.modelType !== 'AssetAdministrationShell')
-        );
-    }
+            this.selectedElements().every(item => item.modelType !== 'AssetAdministrationShell'),
+    );
 
-    public get canAddToDashboard(): boolean {
-        const selectedElements = this.selectedElements;
+    public readonly canAddToDashboard = computed(() => {
+        const selectedElements = this.selectedElements();
         return (
-            this.dashboardPage != null &&
-            selectedElements().length > 0 &&
-            selectedElements().every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
+            this.dashboardPage() != null &&
+            selectedElements.length > 0 &&
+            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
         );
-    }
+    });
 
     public ngOnInit(): void {
         this.subscription.add(
             this.route.queryParams.subscribe(params => {
                 if (params?.search) {
-                    this.store.search.set(params.search);
+                    this.store.searchExpression.set(params.search);
                 }
 
                 if (params) {
@@ -302,8 +297,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
-    public applySearch(text: string): void {
-        this.store.search.set(text);
+    public searchExpressionChange(text: string): void {
+        this.store.searchExpression.set(text);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

@@ -14,7 +14,7 @@ import { AASApiService } from './aas-api.service';
 @Injectable({
     providedIn: 'root',
 })
-export class AASStoreService {
+export class AASStore {
     private readonly _document = signal<AASDocument | null>(null);
 
     public constructor(private readonly api: AASApiService) {}
@@ -23,7 +23,7 @@ export class AASStoreService {
 
     public readonly state = signal<OnlineState>('offline');
 
-    public readonly search = signal('');
+    public readonly searchExpression = signal('');
 
     public getDocumentContent(document: AASDocument): void {
         this.api.getContent(document.id, document.endpoint).subscribe({

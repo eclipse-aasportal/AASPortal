@@ -12,12 +12,12 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { NotifyService } from 'aas-lib';
 import { DeleteCommand } from '../../app/aas/commands/delete-command';
 import { sampleDocument } from '../../test/assets/sample-document';
-import { AASStoreService } from '../../app/aas/aas-store.service';
+import { AASStore } from '../../app/aas/aas.store';
 import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('DeleteCommand', () => {
     let command: DeleteCommand;
-    let store: AASStoreService;
+    let store: AASStore;
     let document: AASDocument;
 
     beforeEach(() => {
@@ -34,7 +34,7 @@ describe('DeleteCommand', () => {
             ],
         });
 
-        store = TestBed.inject(AASStoreService);
+        store = TestBed.inject(AASStore);
         document = cloneDeep(sampleDocument);
         store.setDocument(document);
     });
