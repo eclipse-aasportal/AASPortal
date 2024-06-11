@@ -8,7 +8,7 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, map, mergeMap, Observable, Subscription, from, of, catchError } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import head from 'lodash-es/head';
 import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
@@ -44,8 +44,6 @@ import { FormsModule } from '@angular/forms';
     imports: [SecuredImageComponent, AASTreeComponent, AsyncPipe, TranslateModule, FormsModule],
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
-    private readonly subscription = new Subscription();
-
     public constructor(
         private readonly store: AASStore,
         private readonly router: Router,
@@ -135,24 +133,22 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     public ngOnInit(): void {
-        this.subscription.add(
-            this.route.queryParams.subscribe(params => {
-                if (params?.search) {
-                    this.store.searchExpression.set(params.search);
-                }
+        this.route.queryParams.pipe(first()).subscribe(params => {
+            if (params?.search) {
+                this.store.searchExpression.set(params.search);
+            }
 
-                if (params) {
-                    const document: AASDocument = this.clipboard.get('AASDocument');
-                    if (!document) {
-                        this.store.getDocument(params.id, params.endpoint);
-                    } else if (!document.content) {
-                        this.store.getDocumentContent(document);
-                    } else {
-                        this.store.setDocument(document);
-                    }
+            if (params) {
+                const document: AASDocument = this.clipboard.get('AASDocument');
+                if (!document) {
+                    this.store.getDocument(params.id, params.endpoint);
+                } else if (!document.content) {
+                    this.store.getDocumentContent(document);
+                } else {
+                    this.store.setDocument(document);
                 }
-            }),
-        );
+            }
+        });
     }
 
     public ngAfterViewInit(): void {
@@ -163,7 +159,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-        this.subscription.unsubscribe();
     }
 
     public play(): void {
@@ -297,8 +292,8 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
-    public searchExpressionChange(text: string): void {
-        this.store.searchExpression.set(text);
+    public searchExpressionChange(value: string): void {
+        this.store.searchExpression.set(value);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

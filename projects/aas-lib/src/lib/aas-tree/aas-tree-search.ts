@@ -34,14 +34,14 @@ export class AASTreeSearch {
     ) {}
 
     public find(referable: aas.Referable): void {
-        const state = untracked(this.store.state);
-        const index = state.rows.findIndex(row => row.element === referable);
+        const rows = untracked(this.store.state).rows;
+        const index = rows.findIndex(row => row.element === referable);
         if (index >= 0) {
             this.store.setMatchIndex(index);
         }
     }
 
-    public start(value: string) {
+    public start(value: string): void {
         if (!value) return;
 
         const terms: SearchTerm[] = [];

@@ -8,7 +8,6 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
 import {
     AASTreeComponent,
     AuthService,
@@ -25,7 +24,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardPage, DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType } from '../../app/dashboard/dashboard.service';
 import { Router, provideRouter } from '@angular/router';
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, Input, input, output, signal } from '@angular/core';
 import { AASApiService } from '../../app/aas/aas-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
@@ -37,16 +36,11 @@ import { AASStore } from '../../app/aas/aas.store';
     standalone: true,
 })
 class TestAASTreeComponent {
-    @Input()
-    public document: AASDocument | null = null;
-    @Input()
-    public state: OnlineState | null = 'offline';
-    @Input()
-    public search: Observable<string> | null = null;
-    @Input()
-    public selected: aas.Referable[] = [torque, rotationSpeed];
-    @Output()
-    public selectedChange = new EventEmitter<aas.Referable[]>();
+    public document = input<AASDocument | null>(null);
+    public state = input<OnlineState | null>('offline');
+    public searchExpression = input('');
+    public selected = input<aas.Referable[]>([torque, rotationSpeed]);
+    public selectedChange = output<aas.Referable[]>();
 
     public findNext(): void {
         noop();
@@ -191,7 +185,7 @@ describe('AASComponent', () => {
 
         it('can add the selected properties to the dashboard', () => {
             spyOn(router, 'navigateByUrl').and.resolveTo(true);
-            expect(component.canAddToDashboard).toBeTrue();
+            expect(component.canAddToDashboard()).toBeTrue();
             component.addToDashboard(DashboardChartType.BarVertical);
             expect(dashboard.add).toHaveBeenCalled();
             expect(router.navigateByUrl).toHaveBeenCalled();

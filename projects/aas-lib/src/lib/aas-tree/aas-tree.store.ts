@@ -63,53 +63,63 @@ export class AASTreeStore {
     });
 
     public toggleSelected(row: AASTreeRow, altKey: boolean, shiftKey: boolean): void {
-        const tree = new AASTree(this._state().rows);
-        tree.toggleSelected(row, altKey, shiftKey);
-        this._state.update(state => ({
-            ...state,
-            rows: tree.nodes,
-            nodes: tree.expanded,
-        }));
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.toggleSelected(row, altKey, shiftKey);
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
     }
 
     public toggleSelections(): void {
-        const tree = new AASTree(this._state().rows);
-        tree.toggleSelections();
-        this._state.update(state => ({
-            ...state,
-            rows: tree.nodes,
-            nodes: tree.expanded,
-        }));
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.toggleSelections();
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
     }
 
     public collapse(): void {
-        const tree = new AASTree(this._state().rows);
-        tree.collapse();
-        this._state.update(state => ({
-            ...state,
-            rows: tree.nodes,
-            nodes: tree.expanded,
-        }));
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.collapse();
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
     }
 
     public collapseRow(row: AASTreeRow): void {
-        const tree = new AASTree(this._state().rows);
-        tree.collapse(row);
-        this._state.update(state => ({
-            ...state,
-            rows: tree.nodes,
-            nodes: tree.expanded,
-        }));
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.collapse(row);
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
     }
 
     public expandRow(arg: AASTreeRow | number): void {
-        const tree = new AASTree(this._state().rows);
-        tree.expand(arg);
-        this._state.update(state => ({
-            ...state,
-            rows: tree.nodes,
-            nodes: tree.expanded,
-        }));
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.expand(arg);
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
     }
 
     public updateRows(document: AASDocument | null): void {
@@ -134,22 +144,26 @@ export class AASTreeStore {
     }
 
     public setSelectedElements(elements: aas.Referable[]): void {
-        const tree = new AASTree(this._state().rows);
-        tree.selectedElements = elements;
-        this._state.update(state => ({
-            ...state,
-            rows: tree.nodes,
-            nodes: tree.expanded,
-        }));
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.selectedElements = elements;
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
     }
 
     public setMatchIndex(matchIndex: number): void {
-        const tree = new AASTree(this._state().rows);
-        tree.highlight(matchIndex);
-        this._state.set({
-            matchIndex: matchIndex,
-            rows: tree.nodes,
-            nodes: tree.expanded,
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.highlight(matchIndex);
+            return {
+                matchIndex: matchIndex,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
         });
     }
 }

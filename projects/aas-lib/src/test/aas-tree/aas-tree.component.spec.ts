@@ -151,25 +151,31 @@ describe('AASTreeComponent', () => {
 
     describe('search text "max"', () => {
         it('the search text must be at least three characters long', () => {
-            fixture.componentRef.setInput('search', 'z');
-            fixture.componentRef.setInput('search', 'zy');
-            fixture.componentRef.setInput('search', 'max');
+            fixture.componentRef.setInput('searchExpression', 'z');
+            fixture.detectChanges();
+            fixture.componentRef.setInput('searchExpression', 'zy');
+            fixture.detectChanges();
+            fixture.componentRef.setInput('searchExpression', 'max');
+            fixture.detectChanges();
             expect(component.matchRow()?.name).toEqual('MaxRotationSpeed');
         });
 
         it('finds the first occurrence of "max" at row 7', () => {
-            fixture.componentRef.setInput('search', 'max');
+            fixture.componentRef.setInput('searchExpression', 'max');
+            fixture.detectChanges();
             expect(component.matchIndex()).toEqual(7);
         });
 
         it('finds the next occurrence of "max" at row 8', () => {
-            fixture.componentRef.setInput('search', 'max');
+            fixture.componentRef.setInput('searchExpression', 'max');
+            fixture.detectChanges();
             component.findNext();
             expect(component.matchIndex()).toEqual(8);
         });
 
         it('finds the previous occurrence of "max" at row 25', () => {
-            fixture.componentRef.setInput('search', 'max');
+            fixture.componentRef.setInput('searchExpression', 'max');
+            fixture.detectChanges();
             component.findPrevious();
             expect(component.matchIndex()).toEqual(8);
         });
@@ -177,17 +183,19 @@ describe('AASTreeComponent', () => {
 
     describe('search pattern', () => {
         it('finds the first occurrence of "#prop:max" at row 7', () => {
-            fixture.componentRef.setInput('search', '#prop:max');
+            fixture.componentRef.setInput('searchExpression', '#prop:max');
+            fixture.detectChanges();
             expect(component.matchIndex()).toEqual(7);
         });
 
         it('finds the first occurrence of "#prop:MaxTorque" at row 8', () => {
-            fixture.componentRef.setInput('search', '#prop:MaxTorque');
+            fixture.componentRef.setInput('searchExpression', '#prop:MaxTorque');
+            fixture.detectChanges();
             expect(component.matchIndex()).toEqual(8);
         });
 
         it('finds the first occurrence of "#prop:serialnumber=P12345678I40" at row 5', () => {
-            fixture.componentRef.setInput('search', '#prop:serialnumber=P12345678I40');
+            fixture.componentRef.setInput('searchExpression', '#prop:serialnumber=P12345678I40');
             fixture.detectChanges();
             expect(component.matchIndex()).toEqual(5);
         });

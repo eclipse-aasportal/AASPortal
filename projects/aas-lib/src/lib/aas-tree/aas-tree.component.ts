@@ -89,22 +89,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
-        effect(
-            () => {
-                const searchText = this.searchExpression();
-                if (searchText) {
-                    this.searching.start(searchText);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => this.searching.start(this.searchExpression()), { allowSignalWrites: true });
 
-        effect(
-            () => {
-                this.store.updateRows(this.document());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => this.store.updateRows(this.document()), { allowSignalWrites: true });
 
         effect(() => {
             if (this.state() === 'online') {
@@ -114,25 +101,30 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             }
         });
 
-        effect(() => {
-            this.selected.emit(this.store.selectedElements());
-        });
+        effect(() => this.selected.emit(this.store.selectedElements()));
 
-        effect(() => {
-            const matchIndex = this.store.matchIndex();
-            if (matchIndex >= 0) {
-                this.store.expandRow(matchIndex);
-            }
-        });
+        effect(
+            () => {
+                const matchIndex = this.store.matchIndex();
+                if (matchIndex >= 0) {
+                    this.store.expandRow(matchIndex);
+                }
+            },
+            { allowSignalWrites: true },
+        );
 
-        effect(() => {
-            const row = this.store.matchRow();
-            if (!row) return;
-            setTimeout(() => {
-                const element = this.dom.getElementById(row.id);
-                element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            });
-        });
+        effect(
+            () => {
+                const row = this.store.matchRow();
+                if (!row) return;
+
+                setTimeout(() => {
+                    const element = this.dom.getElementById(row.id);
+                    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                });
+            },
+            { allowSignalWrites: true },
+        );
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -170,7 +162,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     public readonly matchRow = this.store.matchRow;
 
-    public get message(): string {
+    public readonly message = computed(() => {
         const document = this.document();
         if (document) {
             if (document.content) {
@@ -184,7 +176,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
 
         return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
-    }
+    });
 
     public ngOnInit(): void {
         this.subscription.add(
