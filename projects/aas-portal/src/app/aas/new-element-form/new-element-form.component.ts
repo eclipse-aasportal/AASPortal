@@ -14,13 +14,14 @@ import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'common';
 import head from 'lodash-es/head';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-new-element',
     templateUrl: './new-element-form.component.html',
     styleUrls: ['./new-element-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, FormsModule, AsyncPipe],
+    imports: [NgbToast, FormsModule, AsyncPipe, TranslateModule],
 })
 export class NewElementFormComponent {
     private env?: aas.Environment;

@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
@@ -41,8 +40,7 @@ describe('LocalizeComponent', () => {
 
         fixture = TestBed.createComponent(LocalizeComponent);
         component = fixture.componentInstance;
-        component.languages = ['en-us', 'de-de'];
-        component.ngOnChanges({ languages: new SimpleChange(undefined, component.languages, true) });
+        fixture.componentRef.setInput('languages', ['en-us', 'de-de']);
         fixture.detectChanges();
     });
 

@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { AsyncPipe } from '@angular/common';
-import { BehaviorSubject, Observable, map, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, map, skipWhile, switchMap } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -17,47 +17,40 @@ import { DomSanitizer } from '@angular/platform-browser';
     templateUrl: './secured-image.component.html',
     styleUrls: ['./secured-image.component.scss'],
     standalone: true,
-    imports: [AsyncPipe],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SecuredImageComponent implements OnChanges {
+export class SecuredImageComponent {
+    private readonly src$ = new BehaviorSubject('');
+
     public constructor(
         private httpClient: HttpClient,
         private domSanitizer: DomSanitizer,
     ) {
-        this.dataUrl$ = this.src$.pipe(switchMap(url => this.loadImage(url)));
+        effect(() => {
+            this.src$.next(this.src());
+        });
     }
 
-    @Input()
-    public src = '';
-    private src$ = new BehaviorSubject(this.src);
+    public readonly src = input.required<string>();
 
-    @Input()
-    public alt?: string;
+    public readonly alt = input<string | undefined>();
 
-    @Input()
-    public classname?: string;
+    public readonly classname = input<string | undefined>();
 
-    @Input()
-    public width = -1;
+    public readonly width = input<number | undefined>();
 
-    @Input()
-    public height = -1;
+    public readonly height = input<number | undefined>();
 
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['src']) {
-            this.src$.next(this.src);
-        }
-    }
-
-    public readonly dataUrl$: Observable<unknown>;
-
-    public onError(img: HTMLImageElement): void {
-        img.src = img.alt;
-    }
+    public readonly dataUrl = toSignal(
+        this.src$.asObservable().pipe(
+            skipWhile(src => !src),
+            switchMap(src => this.loadImage(src)),
+        ),
+    );
 
     private loadImage(url: string): Observable<unknown> {
         return this.httpClient
             .get(url, { responseType: 'blob' })
-            .pipe(map(e => this.domSanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(e))));
+            .pipe(map(blob => this.domSanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(blob))));
     }
 }

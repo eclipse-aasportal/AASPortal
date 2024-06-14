@@ -9,7 +9,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { convertBlobToBase64Async, extension } from 'aas-lib';
 import { aas, extensionToMimeType, toInvariant, toLocale } from 'common';
 
@@ -23,7 +23,7 @@ export interface LangStringRow extends aas.LangString {
     templateUrl: './edit-element-form.component.html',
     styleUrls: ['./edit-element-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, FormsModule],
+    imports: [NgbToast, FormsModule, TranslateModule],
 })
 export class EditElementFormComponent {
     private element?: aas.Referable;

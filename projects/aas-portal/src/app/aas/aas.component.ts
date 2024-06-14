@@ -219,7 +219,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.auth.ensureAuthorized('editor').pipe(
             map(() => this.store.document()),
             mergeMap(document => {
-                if (!document || this.selectedElements.length !== 1) {
+                if (!document || this.selectedElements().length !== 1) {
                     return EMPTY;
                 }
 
@@ -245,7 +245,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.auth.ensureAuthorized('editor').pipe(
             map(() => this.store.document()),
             mergeMap(document => {
-                if (!document || this.selectedElements.length !== 1) {
+                if (!document || this.selectedElements().length !== 1) {
                     return EMPTY;
                 }
 
@@ -271,7 +271,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.auth.ensureAuthorized('editor').pipe(
             map(() => this.store.document()),
             map(document => {
-                if (document && this.selectedElements.length > 0) {
+                if (document && this.selectedElements().length > 0) {
                     this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements()));
                 }
             }),

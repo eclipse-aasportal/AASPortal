@@ -6,82 +6,58 @@
  *
  *****************************************************************************/
 
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, signal, untracked } from '@angular/core';
 import findLastIndex from 'lodash-es/findLastIndex';
-import { TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'common';
 import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableTree } from './aas-table-row';
-import { AASTableFilter } from './aas-table.filter';
 
 @Injectable()
 export class AASTableStore {
-    private readonly _selectedDocuments = signal<AASDocument[]>([]);
     private readonly _totalRows = signal<AASTableRow[]>([]);
     private readonly _rows = signal<AASTableRow[]>([]);
 
-    public constructor(private readonly translate: TranslateService) {}
+    public readonly rows = this._rows.asReadonly();
 
-    public readonly selectedDocuments = this._selectedDocuments.asReadonly();
-
-    public readonly filterText = signal('');
-
-    public readonly viewMode = signal(ViewMode.List);
-
-    public readonly rows = computed(() => {
-        const rows = this._rows();
-        const filterText = this.filterText();
-        if (this.viewMode() === ViewMode.List && filterText) {
-            const filter = new AASTableFilter(filterText, this.translate.currentLang);
-            return rows.filter(row => filter.match(row.element));
-        }
-
-        return rows;
-    });
-
-    public setSelections(documents: AASDocument[]): void {
-        const tree = new AASTableTree(this._totalRows());
+    public setSelected(documents: AASDocument[], viewMode: ViewMode): void {
+        const tree = new AASTableTree(untracked(this._totalRows));
         tree.selectedElements = documents;
         this._totalRows.set(tree.nodes);
-        if (this.viewMode() === ViewMode.List) {
+        if (viewMode === ViewMode.List) {
             this._rows.set(tree.nodes);
         } else {
             this._rows.set(tree.expanded);
         }
     }
 
-    public toggleSelected(row: AASTableRow, altKey: boolean, shiftKey: boolean): void {
+    public toggleSelected(row: AASTableRow, altKey: boolean, shiftKey: boolean, viewMode: ViewMode): AASDocument[] {
         const tree = new AASTableTree(this._totalRows());
         tree.toggleSelected(row, altKey, shiftKey);
         this._totalRows.set(tree.nodes);
-        if (this.viewMode() === ViewMode.List) {
+        if (viewMode === ViewMode.List) {
             this._rows.set(tree.nodes);
         } else {
             this._rows.set(tree.expanded);
         }
 
-        this._selectedDocuments.set(
-            this._totalRows()
-                .filter(row => row.selected)
-                .map(row => row.element),
-        );
+        return this._totalRows()
+            .filter(row => row.selected)
+            .map(row => row.element);
     }
 
-    public toggleSelections(): void {
+    public toggleSelections(viewMode: ViewMode): AASDocument[] {
         const tree = new AASTableTree(this._totalRows());
         tree.toggleSelections();
         this._totalRows.set(tree.nodes);
-        if (this.viewMode() === ViewMode.List) {
+        if (viewMode === ViewMode.List) {
             this._rows.set(tree.nodes);
         } else {
             this._rows.set(tree.expanded);
         }
 
-        this._selectedDocuments.set(
-            this._totalRows()
-                .filter(row => row.selected)
-                .map(row => row.element),
-        );
+        return this._totalRows()
+            .filter(row => row.selected)
+            .map(row => row.element);
     }
 
     public expandRow(row: AASTableRow): void {
@@ -96,17 +72,19 @@ export class AASTableStore {
         this._rows.set(tree.expanded);
     }
 
-    public initialize(documents: AASDocument[]): void {
-        this._totalRows.set(
-            this.viewMode() === ViewMode.List
-                ? this.createListViewRows(this._totalRows(), documents)
-                : this.createTreeViewRows(this._totalRows(), documents),
-        );
+    public initialize(documents: AASDocument[], viewMode: ViewMode): void {
+        const state = untracked(this._totalRows);
+        const totalRows =
+            viewMode === ViewMode.List
+                ? this.createListViewRows(state, documents)
+                : this.createTreeViewRows(state, documents);
 
-        if (this.viewMode() === ViewMode.List) {
-            this._rows.set(this._totalRows());
+        this._totalRows.set(totalRows);
+
+        if (viewMode === ViewMode.List) {
+            this._rows.set(totalRows);
         } else {
-            this._rows.set(new AASTableTree(this._totalRows()).expanded);
+            this._rows.set(new AASTableTree(totalRows).expanded);
         }
     }
 

@@ -19,12 +19,12 @@
             translate>CMD_LOGIN</a>
         <a type="button" class="dropdown-item" (click)="register()" (keydown.enter)="register()" tabindex="2"
             translate>CMD_REGISTER_USER</a>
-        <a type="button" class="dropdown-item" (click)="updateUserProfile()" (keydown.enter)="updateUserProfile()"
-            tabindex="3" translate>CMD_UPDATE_PROFILE</a>
         }
         @else {
         <a type="button" class="dropdown-item" (click)="logout()" (keydown.enter)="logout()" tabindex="4"
             translate>CMD_LOGOUT</a>
+        <a type="button" class="dropdown-item" (click)="updateUserProfile()" (keydown.enter)="updateUserProfile()"
+            tabindex="3" translate>CMD_UPDATE_PROFILE</a>
         }
     </div>
 </div>

@@ -8,25 +8,23 @@
 
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-show-video',
     templateUrl: './show-video-form.component.html',
     styleUrls: ['./show-video-form.component.scss'],
     standalone: true,
+    imports: [TranslateModule],
 })
 export class ShowVideoFormComponent {
-    private readonly _modal: NgbActiveModal;
-
-    public constructor(modal: NgbActiveModal) {
-        this._modal = modal;
-    }
+    public constructor(private readonly modal: NgbActiveModal) {}
 
     public name!: string;
 
     public video!: string;
 
     public close(): void {
-        this._modal.close();
+        this.modal.close();
     }
 }

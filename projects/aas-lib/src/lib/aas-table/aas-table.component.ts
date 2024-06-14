@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Component, EventEmitter, Input, OnDestroy, Output, computed, effect } from '@angular/core';
+import { Component, OnDestroy, computed, effect, input, model, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'common';
 
 import { AASTableRow } from './aas-table-row';
@@ -18,6 +18,7 @@ import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
 import { AASTableStore } from './aas-table.store';
 import { MaxLengthPipe } from '../max-length.pipe';
+import { AASTableFilter } from './aas-table.filter';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -36,68 +37,54 @@ export class AASTableComponent implements OnDestroy {
         private readonly store: AASTableStore,
         private readonly clipboard: ClipboardService,
         private readonly window: WindowService,
+        private readonly translate: TranslateService,
     ) {
-        effect(() => {
-            this.selectedChange.emit(this.store.selectedDocuments());
-        });
+        effect(
+            () => {
+                this.store.initialize(this.documents(), untracked(this.viewMode));
+            },
+            { allowSignalWrites: true },
+        );
+
+        effect(
+            () => {
+                this.store.setSelected(this.selected(), untracked(this.viewMode));
+            },
+            { allowSignalWrites: true },
+        );
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
 
-    @Input()
-    public get viewMode(): ViewMode {
-        return this.store.viewMode();
-    }
+    public readonly viewMode = input<ViewMode>(ViewMode.List);
 
-    public set viewMode(value: ViewMode) {
-        this.store.viewMode.set(value);
-    }
+    public readonly documents = input<AASDocument[]>([]);
 
-    @Input()
-    public get documents(): AASDocument[] {
-        return this.store.rows().map(row => row.element);
-    }
+    public readonly selected = model<AASDocument[]>([]);
 
-    public set documents(values: AASDocument[]) {
-        this.store.initialize(values);
-    }
+    public readonly filter = input('');
 
-    @Output()
-    public selectedChange = new EventEmitter<AASDocument[]>();
+    public readonly rows = computed(() => {
+        const rows = this.store.rows();
+        const filterText = this.filter();
+        if (this.viewMode() === ViewMode.List && filterText) {
+            const filter = new AASTableFilter(filterText, this.translate.currentLang);
+            return rows.filter(row => filter.match(row.element));
+        }
 
-    @Input()
-    public get selected(): AASDocument[] {
-        return this.store
-            .rows()
-            .filter(row => row.selected)
-            .map(row => row.element);
-    }
-
-    public set selected(values: AASDocument[]) {
-        this.store.setSelections(values);
-    }
-
-    @Input()
-    public get filter(): string {
-        return this.store.filterText();
-    }
-
-    public set filter(value: string) {
-        this.store.filterText.set(value);
-    }
+        return rows;
+    });
 
     public readonly someSelected = computed(() => {
-        const rows = this.store.rows();
+        const rows = this.rows();
         return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
     });
 
     public readonly everySelected = computed(() => {
-        const rows = this.store.rows();
+        const rows = this.rows();
         return rows.length > 0 && rows.every(row => row.selected);
     });
-
-    public readonly rows = this.store.rows;
 
     public ngOnDestroy(): void {
         this.window.removeEventListener('keyup', this.keyup);
@@ -128,11 +115,11 @@ export class AASTableComponent implements OnDestroy {
     }
 
     public toggleSelected(row: AASTableRow): void {
-        this.store.toggleSelected(row, this.altKey, this.shiftKey);
+        this.selected.set(this.store.toggleSelected(row, this.altKey, this.shiftKey, this.viewMode()));
     }
 
     public toggleSelections(): void {
-        this.store.toggleSelections();
+        this.selected.set(this.store.toggleSelections(this.viewMode()));
     }
 
     private keyup = () => {

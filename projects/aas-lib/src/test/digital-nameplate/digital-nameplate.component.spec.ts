@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { selectElement } from 'common';
@@ -31,10 +30,11 @@ describe('DigitalNameplateComponent', () => {
 
         fixture = TestBed.createComponent(DigitalNameplateComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
+        fixture.componentRef.setInput('submodels', [
+            { document: nameplate, submodel: selectElement(nameplate.content!, 'Nameplate')! },
+        ]);
 
-        component.submodels = [{ document: nameplate, submodel: selectElement(nameplate.content!, 'Nameplate')! }];
-        component.ngOnChanges({ submodels: new SimpleChange(null, component.submodels, true) });
+        fixture.detectChanges();
     });
 
     it('should create', () => {
@@ -42,6 +42,6 @@ describe('DigitalNameplateComponent', () => {
     });
 
     it('provides a "ManufacturerName" property', function () {
-        expect(component.nameplates[0].manufacturerName).toEqual('Muster AG');
+        expect(component.nameplates()[0].manufacturerName).toEqual('Muster AG');
     });
 });

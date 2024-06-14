@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnChanges, SimpleChanges, input, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     aas,
@@ -16,6 +16,7 @@ import {
     isProperty,
     isSubmodelElementCollection,
 } from 'common';
+
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
 
 export interface DigitalNameplate {
@@ -35,14 +36,14 @@ export interface DigitalNameplate {
     styleUrls: ['./digital-nameplate.component.scss'],
     standalone: true,
     imports: [TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
     public constructor(private readonly translate: TranslateService) {}
 
-    @Input()
-    public submodels: DocumentSubmodelPair[] | null = null;
+    public readonly submodels = input<DocumentSubmodelPair[] | null>(null);
 
-    public nameplates: DigitalNameplate[] = [];
+    public readonly nameplates = signal<DigitalNameplate[]>([]);
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes['submodels']) {
@@ -51,8 +52,8 @@ export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
     }
 
     private init() {
-        this.nameplates =
-            this.submodels?.map(pair => {
+        this.nameplates.set(
+            this.submodels()?.map(pair => {
                 const submodel = pair.submodel;
                 return {
                     serialNumber: this.getPropertyValue(submodel, ['SerialNumber']),
@@ -64,7 +65,8 @@ export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
                     cityTown: this.getPropertyValue(submodel, ['PhysicalAddress', 'CityTown']),
                     street: this.getPropertyValue(submodel, ['PhysicalAddress', 'Street']),
                 };
-            }) ?? [];
+            }) ?? [],
+        );
     }
 
     private getPropertyValue(submodel: aas.Submodel, path: string[]): string {

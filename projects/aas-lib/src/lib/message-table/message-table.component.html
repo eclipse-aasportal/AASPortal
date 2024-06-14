@@ -7,75 +7,74 @@
  !---------------------------------------------------------------------------->
 
 <table class="table table-sm table-striped table-borderless">
-  <thead>
-    <tr>
-      <th scope="col" sortable="type" (sort)="onSort($event)" [noWrap]="true">
-        <div class="d-inline-flex">
-          <div class="mr-1" translate>COLUMN_MESSAGE_TYPE</div>
-        </div>
-      </th>
-      <th scope="col" sortable="timestamp" (sort)="onSort($event)">
-        <div class="d-inline-flex">
-          <div class="mr-1" translate>COLUMN_TIMESTAMP</div>
-        </div>
-      </th>
-      <th scope="col" sortable="text" (sort)="onSort($event)">
-        <div class="d-inline-flex">
-          <div class="mr-1" translate>COLUMN_MESSAGE_TEXT</div>
-        </div>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (message of messages; track message) {
-      <tr>
-        <td>
-          @if (message.type === 'Info') {
-            <div class="text-info">
-              <i class="bi bi-info"></i>
-            </div>
-          }
-          @if (message.type === 'Warning') {
-            <div class="text-warning">
-              <i class="bi bi-exclamation"></i>
-            </div>
-          }
-          @if (message.type === 'Error') {
-            <div class="text-danger">
-              <i class="bi bi-bug"></i>
-            </div>
-          }
-        </td>
-        <td [noWrap]="true">{{timestampToString(message.timestamp)}}</td>
-        <td [noWrap]="true">{{message.text}}</td>
-      </tr>
-    }
-  </tbody>
-  <tfoot>
-    <td [colSpan]="3">
-      <div class="d-flex align-items-start">
-        <div class="btn-group btn-group-sm me-2" role="group">
-          <input type="checkbox" class="btn-check" id="message-table-show-info" autocomplete="off"
-            [checked]="showInfo" (change)="toggleShowInfo()">
-            <label class="btn btn-outline-primary" for="message-table-show-info"><i
-            class="bi bi-info"></i></label>
+    <thead>
+        <tr>
+            <th scope="col" sortable="type" (sort)="onSort($event)" [noWrap]="true">
+                <div class="d-inline-flex">
+                    <div class="mr-1" translate>COLUMN_MESSAGE_TYPE</div>
+                </div>
+            </th>
+            <th scope="col" sortable="timestamp" (sort)="onSort($event)">
+                <div class="d-inline-flex">
+                    <div class="mr-1" translate>COLUMN_TIMESTAMP</div>
+                </div>
+            </th>
+            <th scope="col" sortable="text" (sort)="onSort($event)">
+                <div class="d-inline-flex">
+                    <div class="mr-1" translate>COLUMN_MESSAGE_TEXT</div>
+                </div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (message of messages(); track message) {
+        <tr>
+            <td>
+                @if (message.type === 'Info') {
+                <div class="text-info">
+                    <i class="bi bi-info"></i>
+                </div>
+                }@else if (message.type === 'Warning') {
+                <div class="text-warning">
+                    <i class="bi bi-exclamation"></i>
+                </div>
+                }
+                @else {
+                <div class="text-danger">
+                    <i class="bi bi-bug"></i>
+                </div>
+                }
+            </td>
+            <td [noWrap]="true">{{timestampToString(message.timestamp)}}</td>
+            <td [noWrap]="true">{{message.text}}</td>
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <td [colSpan]="3">
+            <div class="d-flex align-items-start">
+                <div class="btn-group btn-group-sm me-2" role="group">
+                    <input #info type="checkbox" class="btn-check" id="message-table-show-info" autocomplete="off"
+                        [checked]="showInfo()" (change)="showInfo.set(info.checked)">
+                    <label class="btn btn-outline-primary" for="message-table-show-info"><i
+                            class="bi bi-info"></i></label>
 
-            <input type="checkbox" class="btn-check" id="message-table-show-warn" autocomplete="off"
-              [checked]="showWarning" (change)="toggleShowWarning()">
-              <label class="btn btn-outline-warning" for="message-table-show-warn"><i
-              class="bi bi-exclamation"></i></label>
+                    <input #warning type="checkbox" class="btn-check" id="message-table-show-warn" autocomplete="off"
+                        [checked]="showWarning()" (change)="showWarning.set(warning.checked)">
+                    <label class="btn btn-outline-warning" for="message-table-show-warn"><i
+                            class="bi bi-exclamation"></i></label>
 
-              <input type="checkbox" class="btn-check" id="message-table-show-error" autocomplete="off"
-                [checked]="showError" (change)="toggleShowError()">
-                <label class="btn btn-outline-danger" for="message-table-show-error"><i
-                class="bi bi-bug"></i></label>
-              </div>
-              @if (pageSize > 0 && size > pageSize) {
-                <ngb-pagination class="link-primary" [collectionSize]="size"
-                  [(page)]="page" [pageSize]="pageSize" [maxSize]="5" size="sm" (pageChange)="refreshMessages()">
+                    <input #error type="checkbox" class="btn-check" id="message-table-show-error" autocomplete="off"
+                        [checked]="showError()" (change)="showError.set(error.checked)">
+                    <label class="btn btn-outline-danger" for="message-table-show-error"><i
+                            class="bi bi-bug"></i></label>
+                </div>
+                @if (pageSize() > 0 && size() > pageSize()) {
+                <ngb-pagination class="link-primary" [collectionSize]="size()" [(page)]="page" [pageSize]="pageSize()"
+                    [maxSize]="5" size="sm">
                 </ngb-pagination>
-              }
+                }
             </div>
-          </td>
-        </tfoot>
-      </table>
+        </td>
+    </tfoot>
+</table>

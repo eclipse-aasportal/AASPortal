@@ -6,13 +6,13 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { aas, getLocaleValue, getPreferredName } from 'common';
+import { DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { aas, getLocaleValue, getPreferredName } from 'common';
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
 import { ScoreComponent } from '../score/score.component';
-import { DecimalPipe } from '@angular/common';
 
 export interface GeneralItem {
     name: string;
@@ -35,67 +35,59 @@ export interface FeedbackItem {
     styleUrls: ['./customer-feedback.component.scss'],
     standalone: true,
     imports: [ScoreComponent, DecimalPipe, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnChanges, OnDestroy {
+export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDestroy {
     private static readonly maxStars = 5;
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
 
-    public constructor(private readonly translate: TranslateService) {}
-
-    @Input()
-    public submodels: DocumentSubmodelPair[] | null = null;
-
-    public get name(): string {
-        let value: string | undefined;
-        if (this.submodels) {
-            const names = this.submodels.map(
-                item =>
-                    getLocaleValue(
-                        getPreferredName(item.document.content!, item.submodel),
-                        this.translate.currentLang,
-                    ) ?? item.submodel.idShort,
-            );
-
-            if (names.length <= 2) {
-                value = names.join(', ');
-            } else {
-                value = `${names[0]}, ..., ${names[names.length - 1]} (${names.length})`;
-            }
-        }
-
-        return value ?? '';
+    public constructor(private readonly translate: TranslateService) {
+        effect(() => {
+            this.init(this.submodels());
+        });
     }
 
-    public stars = 0.0;
+    public readonly submodels = input<DocumentSubmodelPair[] | null>(null);
 
-    public count = 0;
+    public readonly name = computed(() => {
+        const submodels = this.submodels();
+        if (!submodels) {
+            return '';
+        }
 
-    public items: GeneralItem[] = [];
+        const names = submodels.map(
+            item =>
+                getLocaleValue(getPreferredName(item.document.content!, item.submodel), this.translate.currentLang) ??
+                item.submodel.idShort,
+        );
 
-    public feedbacks: FeedbackItem[] = [];
+        if (names.length <= 2) {
+            return names.join(', ');
+        }
 
-    public starClassNames: string[] = [];
+        return `${names[0]}, ..., ${names[names.length - 1]} (${names.length})`;
+    });
+
+    public readonly stars = signal(0.0);
+    public readonly count = signal(0);
+    public readonly items = signal<GeneralItem[]>([]);
+    public readonly feedbacks = signal<FeedbackItem[]>([]);
+    public readonly starClassNames = signal<string[]>([]);
 
     public ngOnInit(): void {
         this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
-                this.init();
+                this.init(this.submodels());
             }),
         );
-    }
-
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['submodels']) {
-            this.init();
-        }
     }
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    private init(): void {
+    private init(submodels: DocumentSubmodelPair[] | null): void {
         this.map.clear();
         let count = 0;
         let stars = 0.0;
@@ -103,8 +95,8 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
         const feedbacks: FeedbackItem[] = [];
         let starClassNames: string[] | undefined;
         let sumStars = 0;
-        if (this.submodels) {
-            for (const pair of this.submodels) {
+        if (submodels) {
+            for (const pair of submodels) {
                 if (pair.submodel.submodelElements) {
                     for (const feedback of pair.submodel.submodelElements.filter(
                         item => item.modelType === 'SubmodelElementCollection',
@@ -142,11 +134,11 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
             starClassNames = this.initStarClassNames(0);
         }
 
-        this.stars = stars;
-        this.count = count;
-        this.starClassNames = starClassNames;
-        this.items = items.filter(item => item.count > 0);
-        this.feedbacks = feedbacks;
+        this.stars.set(stars);
+        this.count.set(count);
+        this.starClassNames.set(starClassNames);
+        this.items.set(items.filter(item => item.count > 0));
+        this.feedbacks.set(feedbacks);
     }
 
     private buildItems(general: aas.SubmodelElementCollection, items: GeneralItem[]): void {

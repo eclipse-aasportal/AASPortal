@@ -46,10 +46,9 @@ describe('AASTableComponent', () => {
 
         fixture = TestBed.createComponent(AASTableComponent);
         component = fixture.componentInstance;
+        fixture.componentRef.setInput('viewMode', ViewMode.List);
+        fixture.componentRef.setInput('documents', [document1, document2, document3]);
         fixture.detectChanges();
-
-        component.viewMode = ViewMode.List;
-        component.documents = [document1, document2, document3];
     });
 
     it('should create', () => {

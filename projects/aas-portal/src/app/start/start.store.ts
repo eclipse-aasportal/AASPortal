@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { Observable, catchError, concat, from, map, mergeMap, of } from 'rxjs';
 import { ViewMode } from 'aas-lib';
-import { AASDocument, AASDocumentId, AASPage, aas } from 'common';
+import { AASDocument, AASDocumentId, AASPage, aas, equalArray } from 'common';
 import { StartApiService } from './start-api.service';
 import { TranslateService } from '@ngx-translate/core';
 import { FavoritesService } from './favorites.service';
@@ -16,7 +16,7 @@ export class StartStore {
     private readonly _previous = signal<AASDocumentId | null>(null);
     private readonly _next = signal<AASDocumentId | null>(null);
     private _totalCount = 0;
-    private readonly _documents = signal<AASDocument[]>([]);
+    private readonly _documents = signal<AASDocument[]>([], { equal: (a, b) => equalArray(a, b) });
     private readonly _activeFavorites = signal('');
 
     public constructor(
@@ -37,7 +37,7 @@ export class StartStore {
 
     public readonly filterText = this._filterText.asReadonly();
 
-    public readonly selected = signal<AASDocument[]>([]);
+    public readonly selected = signal<AASDocument[]>([], { equal: (a, b) => equalArray(a, b) });
 
     public readonly filter = computed(() => {
         const filterText = this._filterText();
@@ -98,7 +98,7 @@ export class StartStore {
     }
 
     public getNextPage(): void {
-        if (this._documents.length === 0) {
+        if (this._documents().length === 0) {
             return;
         }
 
@@ -130,7 +130,7 @@ export class StartStore {
     }
 
     public getPreviousPage(): void {
-        if (this._documents.length === 0) {
+        if (this._documents().length === 0) {
             return;
         }
 
@@ -148,7 +148,7 @@ export class StartStore {
     }
 
     public refreshPage(): void {
-        if (this._documents.length === 0) {
+        if (this._documents().length === 0) {
             return;
         }
 

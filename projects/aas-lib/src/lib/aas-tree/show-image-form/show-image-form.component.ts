@@ -9,26 +9,23 @@
 import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-show-image',
     templateUrl: './show-image-form.component.html',
     styleUrls: ['./show-image-form.component.scss'],
     standalone: true,
-    imports: [SecuredImageComponent],
+    imports: [SecuredImageComponent, TranslateModule],
 })
 export class ShowImageFormComponent {
-    private readonly _modal: NgbActiveModal;
-
-    public constructor(modal: NgbActiveModal) {
-        this._modal = modal;
-    }
+    public constructor(private readonly modal: NgbActiveModal) {}
 
     public name!: string;
 
     public image!: string;
 
     public close(): void {
-        this._modal.close();
+        this.modal.close();
     }
 }

@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Message } from 'common';
@@ -52,272 +51,137 @@ describe('MessageTableComponent', () => {
             });
         }
 
-        component.collection = collection;
+        fixture.componentRef.setInput('collection', collection);
         fixture.detectChanges();
-
-        component.ngOnChanges({
-            collection: new SimpleChange([], collection, true),
-        });
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('has an initial page size of 10', function () {
-        expect(component.pageSize).toEqual(10);
+    it('has an initial page size of 10', () => {
+        expect(component.pageSize()).toEqual(10);
     });
 
-    it('shows page 1', function () {
-        expect(component.page).toEqual(1);
+    it('shows page 1', () => {
+        expect(component.page()).toEqual(1);
     });
 
-    it('provides a collection with all messages (5 errors, 5 warnings, 5 info)', function () {
-        expect(component.collection.length).toEqual(3 * sizePerType);
+    it('provides a collection with all messages (5 errors, 5 warnings, 5 info)', () => {
+        expect(component.collection().length).toEqual(3 * sizePerType);
     });
 
-    it('shows initial only errors', function () {
-        expect(component.showError).toBeTrue();
-        expect(component.showInfo).toBeFalse();
-        expect(component.showWarning).toBeFalse();
+    it('shows initial only errors', () => {
+        expect(component.showError()).toBeTrue();
+        expect(component.showInfo()).toBeFalse();
+        expect(component.showWarning()).toBeFalse();
     });
 
-    it('supports 3 sortable headers', function () {
+    it('supports 3 sortable headers', () => {
         expect(component.headers?.length).toEqual(3);
     });
 
-    describe('show only errors', function () {
-        beforeEach(function () {
-            if (!component.showError) {
-                component.toggleShowError();
-            }
-
-            if (component.showInfo) {
-                component.toggleShowInfo();
-            }
-
-            if (component.showWarning) {
-                component.toggleShowWarning();
-            }
-
+    describe('show only errors', () => {
+        beforeEach(() => {
+            component.showInfo.set(false);
+            component.showWarning.set(false);
+            component.showError.set(true);
             fixture.detectChanges();
         });
 
-        it('shows only errors', function () {
-            expect(component.size).toEqual(sizePerType);
-            expect(component.messages.every(message => message.type === 'Error')).toBeTrue();
+        it('shows only errors', () => {
+            expect(component.messages().length).toEqual(sizePerType);
+            expect(component.messages().every(message => message.type === 'Error')).toBeTrue();
         });
 
-        it('hides the pagination', function () {
+        it('hides the pagination', () => {
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const pagination: HTMLElement = element.querySelector('ngb-pagination')!;
             expect(pagination).toBeNull();
         });
     });
 
-    describe('show only warnings', function () {
-        beforeEach(function () {
-            if (component.showError) {
-                component.toggleShowError();
-            }
-
-            if (component.showInfo) {
-                component.toggleShowInfo();
-            }
-
-            if (!component.showWarning) {
-                component.toggleShowWarning();
-            }
-
+    describe('show only warnings', () => {
+        beforeEach(() => {
+            component.showInfo.set(false);
+            component.showWarning.set(true);
+            component.showError.set(false);
             fixture.detectChanges();
         });
 
-        it('shows only warnings', function () {
-            expect(component.size).toEqual(sizePerType);
-            expect(component.messages.every(message => message.type === 'Warning')).toBeTrue();
+        it('shows only warnings', () => {
+            expect(component.size()).toEqual(sizePerType);
+            expect(component.messages().every(message => message.type === 'Warning')).toBeTrue();
         });
 
-        it('hides the pagination', function () {
+        it('hides the pagination', () => {
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const pagination: HTMLElement = element.querySelector('ngb-pagination')!;
             expect(pagination).toBeNull();
         });
     });
 
-    describe('show only info', function () {
-        beforeEach(function () {
-            if (component.showError) {
-                component.toggleShowError();
-            }
-
-            if (!component.showInfo) {
-                component.toggleShowInfo();
-            }
-
-            if (component.showWarning) {
-                component.toggleShowWarning();
-            }
-
+    describe('show only info', () => {
+        beforeEach(() => {
+            component.showInfo.set(true);
+            component.showWarning.set(false);
+            component.showError.set(false);
             fixture.detectChanges();
         });
 
-        it('shows only info', function () {
-            expect(component.size).toEqual(sizePerType);
-            expect(component.messages.every(message => message.type === 'Info')).toBeTrue();
+        it('shows only info', () => {
+            expect(component.size()).toEqual(sizePerType);
+            expect(component.messages().every(message => message.type === 'Info')).toBeTrue();
         });
 
-        it('hides the pagination', function () {
+        it('hides the pagination', () => {
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const pagination: HTMLElement = element.querySelector('ngb-pagination')!;
             expect(pagination).toBeNull();
         });
     });
 
-    describe('show all messages', function () {
-        beforeEach(function () {
-            if (!component.showError) {
-                component.toggleShowError();
-            }
-
-            if (!component.showInfo) {
-                component.toggleShowInfo();
-            }
-
-            if (!component.showWarning) {
-                component.toggleShowWarning();
-            }
+    describe('show all messages', () => {
+        beforeEach(() => {
+            component.showInfo.set(true);
+            component.showWarning.set(true);
+            component.showError.set(true);
+            fixture.detectChanges();
         });
 
-        it('shows all messages', function () {
-            expect(component.size).toEqual(3 * sizePerType);
+        it('shows all messages first page of two', () => {
+            expect(component.size()).toEqual(collection.length);
         });
 
-        it('shows the pagination', function () {
+        it('shows the pagination', () => {
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const pagination: HTMLElement = element.querySelector('ngb-pagination')!;
             expect(pagination).toBeDefined();
         });
 
-        it('provides 2 pages (10, 5)', function () {
-            expect(component.page).toEqual(1);
-            expect(component.messages).toEqual(component.collection.slice(0, 10));
+        it('provides 2 pages (10, 5)', () => {
+            expect(component.page()).toEqual(1);
+            expect(component.messages()).toEqual(component.collection().slice(0, 10));
 
-            component.page = 2;
+            component.page.set(2);
             fixture.detectChanges();
-            component.refreshMessages();
-            expect(component.messages).toEqual(component.collection.slice(-5));
+            expect(component.messages()).toEqual(component.collection().slice(-5));
         });
     });
 
-    describe('sorting', function () {
-        beforeEach(function () {
-            if (!component.showError) {
-                component.toggleShowError();
-            }
-
-            if (!component.showInfo) {
-                component.toggleShowInfo();
-            }
-
-            if (!component.showWarning) {
-                component.toggleShowWarning();
-            }
+    describe('sorting', () => {
+        beforeEach(() => {
+            component.showInfo.set(true);
+            component.showWarning.set(true);
+            component.showError.set(true);
+            fixture.componentRef.setInput('pageSize', collection.length);
+            fixture.detectChanges();
         });
 
-        it('shows the origin order', function () {
-            expect(component.showError).toBeTrue();
-            expect(component.showInfo).toBeTrue();
-            expect(component.showWarning).toBeTrue();
+        it('shows the origin order', () => {
+            component.onSort({ column: '', direction: '' });
+            fixture.detectChanges();
+            expect(component.messages()).toEqual(collection);
         });
-
-        //     it('can sort type column in ascending order', function (done: DoneFn) {
-        //         component.onSort({ column: 'type', direction: 'asc' });
-        //         store
-        //             .select(state => state.messageTable)
-        //             .pipe(first())
-        //             .subscribe(state => {
-        //                 expect(state.showError).toBeTrue();
-        //                 expect(state.showInfo).toBeTrue();
-        //                 expect(state.showWarning).toBeTrue();
-        //                 expect(state.column).toEqual('type');
-        //                 expect(state.direction).toEqual('asc');
-        //                 done();
-        //             });
-        //     });
-
-        //     it('can sort type column in descending order', function (done: DoneFn) {
-        //         component.onSort({ column: 'type', direction: 'desc' });
-        //         store
-        //             .select(state => state.messageTable)
-        //             .pipe(first())
-        //             .subscribe(state => {
-        //                 expect(state.showError).toBeTrue();
-        //                 expect(state.showInfo).toBeTrue();
-        //                 expect(state.showWarning).toBeTrue();
-        //                 expect(state.column).toEqual('type');
-        //                 expect(state.direction).toEqual('desc');
-        //                 done();
-        //             });
-        //     });
-
-        //     it('can sort timestamp column in ascending order', function (done: DoneFn) {
-        //         component.onSort({ column: 'timestamp', direction: 'asc' });
-        //         store
-        //             .select(state => state.messageTable)
-        //             .pipe(first())
-        //             .subscribe(state => {
-        //                 expect(state.showError).toBeTrue();
-        //                 expect(state.showInfo).toBeTrue();
-        //                 expect(state.showWarning).toBeTrue();
-        //                 expect(state.column).toEqual('timestamp');
-        //                 expect(state.direction).toEqual('asc');
-        //                 done();
-        //             });
-        //     });
-
-        //     it('can sort timestamp column in descending order', function (done: DoneFn) {
-        //         component.onSort({ column: 'timestamp', direction: 'desc' });
-        //         store
-        //             .select(state => state.messageTable)
-        //             .pipe(first())
-        //             .subscribe(state => {
-        //                 expect(state.showError).toBeTrue();
-        //                 expect(state.showInfo).toBeTrue();
-        //                 expect(state.showWarning).toBeTrue();
-        //                 expect(state.column).toEqual('timestamp');
-        //                 expect(state.direction).toEqual('desc');
-        //                 done();
-        //             });
-        //     });
-
-        //     it('can sort text column in ascending order', function (done: DoneFn) {
-        //         component.onSort({ column: 'text', direction: 'asc' });
-        //         store
-        //             .select(state => state.messageTable)
-        //             .pipe(first())
-        //             .subscribe(state => {
-        //                 expect(state.showError).toBeTrue();
-        //                 expect(state.showInfo).toBeTrue();
-        //                 expect(state.showWarning).toBeTrue();
-        //                 expect(state.column).toEqual('text');
-        //                 expect(state.direction).toEqual('asc');
-        //                 done();
-        //             });
-        //     });
-
-        //     it('can sort text column in descending order', function (done: DoneFn) {
-        //         component.onSort({ column: 'text', direction: 'desc' });
-        //         store
-        //             .select(state => state.messageTable)
-        //             .pipe(first())
-        //             .subscribe(state => {
-        //                 expect(state.showError).toBeTrue();
-        //                 expect(state.showInfo).toBeTrue();
-        //                 expect(state.showWarning).toBeTrue();
-        //                 expect(state.column).toEqual('text');
-        //                 expect(state.direction).toEqual('desc');
-        //                 done();
-        //             });
-        //     });
     });
 });

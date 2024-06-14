@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -19,16 +19,11 @@ import { SecuredImageComponent } from '../../lib/secured-image/secured-image.com
     standalone: true,
 })
 class TestSecureImageComponent {
-    @Input()
-    public src = '';
-    @Input()
-    public alt?: string;
-    @Input()
-    public classname?: string;
-    @Input()
-    public width = -1;
-    @Input()
-    public height = -1;
+    public readonly src = input.required<string>();
+    public readonly alt = input<string | undefined>();
+    public readonly classname = input<string | undefined>();
+    public readonly width = input<number | undefined>();
+    public readonly height = input<number | undefined>();
 }
 
 describe('ShowImageFormComponent', () => {
