@@ -76,10 +76,10 @@
         </button>
     </div>
     <div class="btn-group me-2" [hidden]="readOnly()">
-        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="canUndo === false">
+        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="canUndo() === false">
             <i class="bi bi-arrow-counterclockwise"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="canRedo === false">
+        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="canRedo() === false">
             <i class="bi bi-arrow-clockwise"></i>
         </button>
     </div>

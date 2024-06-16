@@ -88,41 +88,41 @@ describe('CommandHandlerService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('indicates that undo is not possible', function () {
-        expect(service.canUndo).toBeFalse();
+    it('indicates that undo is not possible', () => {
+        expect(service.canUndo()).toBeFalse();
     });
 
-    it('indicates that redo is not possible', function () {
-        expect(service.canRedo).toBeFalse();
+    it('indicates that redo is not possible', () => {
+        expect(service.canRedo()).toBeFalse();
     });
 
-    it('can execute a command', function () {
+    it('can execute a command', () => {
         const spy = jasmine.createSpy('execute');
         service.execute(new TestCommand(spy));
         expect(spy).toHaveBeenCalled();
     });
 
-    it('can undo/redo a command', function () {
+    it('can undo/redo a command', () => {
         const undoSpy = jasmine.createSpy('undo');
         const redoSpy = jasmine.createSpy('redo');
         service.execute(new TestCommand(undefined, undoSpy, redoSpy));
-        expect(service.canUndo).toBeTrue();
+        expect(service.canUndo()).toBeTrue();
         service.undo();
         expect(undoSpy).toHaveBeenCalled();
-        expect(service.canRedo).toBeTrue();
+        expect(service.canRedo()).toBeTrue();
         service.redo();
         expect(redoSpy).toHaveBeenCalled();
     });
 
-    it('clears the undo/redo stack', function () {
+    it('clears the undo/redo stack', () => {
         service.execute(new TestCommand());
         service.execute(new TestCommand());
         service.clear();
-        expect(service.canUndo).toBeFalse();
-        expect(service.canRedo).toBeFalse();
+        expect(service.canUndo()).toBeFalse();
+        expect(service.canRedo()).toBeFalse();
     });
 
-    it('aborts a failed command', function () {
+    it('aborts a failed command', () => {
         const abortSpy = jasmine.createSpy('abort');
         expect(() => service.execute(new FailCommand(abortSpy))).toThrowError();
         expect(abortSpy).toHaveBeenCalled();

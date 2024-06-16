@@ -175,6 +175,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
     public readonly selectionMode = this.dashboard.selectionMode.asReadonly();
 
+    public readonly canUndo = computed(() => this.editMode() && this.commandHandler.canUndo());
+
+    public readonly canRedo = computed(() => this.editMode() && this.commandHandler.canRedo());
+
     public ngOnInit(): void {
         this.commandHandler.clear();
 
@@ -455,18 +459,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         }
     }
 
-    public canUndo(): boolean {
-        return this.editMode() && this.commandHandler.canUndo;
-    }
-
     public undo(): void {
         if (this.canUndo()) {
             this.commandHandler.undo();
         }
-    }
-
-    public canRedo(): boolean {
-        return this.editMode() && this.commandHandler.canRedo;
     }
 
     public redo(): void {

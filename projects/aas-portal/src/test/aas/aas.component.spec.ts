@@ -24,7 +24,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardPage, DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType } from '../../app/dashboard/dashboard.service';
 import { Router, provideRouter } from '@angular/router';
-import { Component, Input, input, output, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { AASApiService } from '../../app/aas/aas-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
@@ -58,16 +58,11 @@ class TestAASTreeComponent {
     standalone: true,
 })
 class TestSecureImageComponent {
-    @Input()
-    public src = '';
-    @Input()
-    public alt?: string;
-    @Input()
-    public classname?: string;
-    @Input()
-    public width = -1;
-    @Input()
-    public height = -1;
+    public readonly src = input.required<string>();
+    public readonly alt = input<string | undefined>();
+    public readonly classname = input<string | undefined>();
+    public readonly width = input<number | undefined>();
+    public readonly height = input<number | undefined>();
 }
 
 describe('AASComponent', () => {

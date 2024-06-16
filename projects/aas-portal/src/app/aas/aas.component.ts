@@ -90,13 +90,9 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public readonly selectedElements = signal<aas.Referable[]>([]);
 
-    public get canUndo(): boolean {
-        return this.commandHandler.canUndo;
-    }
+    public readonly canUndo = this.commandHandler.canUndo;
 
-    public get canRedo(): boolean {
-        return this.commandHandler.canRedo;
-    }
+    public readonly canRedo = this.commandHandler.canRedo;
 
     public readonly canPlay = computed(() => {
         const state = this.store.state();
