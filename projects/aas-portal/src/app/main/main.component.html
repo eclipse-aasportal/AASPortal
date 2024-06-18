@@ -17,7 +17,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="navbar-nav me-auto">
-          @for (link of links; track link) {
+          @for (link of links(); track link) {
             <li [ngbNavItem]="link.id">
               <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active" skipLocationChange="true">{{link.name | translate}}</a>
             </li>
@@ -33,7 +33,7 @@
   </nav>
   <div class="container-fluid">
     <div class="btn-toolbar" role="toolbar">
-      <ng-container *ngTemplateOutlet="toolbarTemplate | async"></ng-container>
+      <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
     </div>
     <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
   </div>

@@ -9,14 +9,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { AASDocument } from 'common';
 import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
 import { MainApiService } from '../../app/main/main-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
-import { Component, Input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 
 @Component({
     selector: 'fhg-auth',
@@ -31,7 +31,7 @@ class TestAuthComponent {}
     standalone: true,
 })
 class TestLocalizeComponent {
-    @Input() public languages: string[] = ['en-us'];
+    public readonly languages = input(['en-us']);
 }
 
 @Component({
@@ -55,7 +55,7 @@ describe('MainComponent', () => {
         api = jasmine.createSpyObj<MainApiService>('ProjectService', ['getDocument']);
         window = jasmine.createSpyObj<WindowService>(['getQueryParams']);
         window.getQueryParams.and.returnValue(new URLSearchParams());
-        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: of(null) });
+        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
 
         TestBed.configureTestingModule({
             providers: [
@@ -102,7 +102,7 @@ describe('MainComponent', () => {
     });
 
     it('provides a list of route links', function () {
-        expect(component.links).toBeDefined();
-        expect(component.links.map(link => link.url)).toEqual(['/start', '/aas', '/view', '/dashboard', '/about']);
+        expect(component.links()).toBeDefined();
+        expect(component.links().map(link => link.url)).toEqual(['/start', '/aas', '/view', '/dashboard', '/about']);
     });
 });

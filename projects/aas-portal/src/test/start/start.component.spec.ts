@@ -112,7 +112,7 @@ describe('StartComponent', () => {
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: of(null) }),
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
                 provideHttpClientTesting(),
                 provideRouter([]),
