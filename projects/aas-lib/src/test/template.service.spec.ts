@@ -8,12 +8,12 @@
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { TemplateDescriptor, aas } from 'common';
 
 import { TemplateService } from '../lib/template.service';
 import { NotifyService } from '../public-api';
-import { first, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 
 describe('TemplateService', () => {
     let service: TemplateService;
@@ -46,15 +46,9 @@ describe('TemplateService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('getTemplates', () => {
-        it('returns the available templates', (done: DoneFn) => {
-            service
-                .getTemplates()
-                .pipe(first())
-                .subscribe(templates => {
-                    expect(templates).toEqual([template]);
-                    done();
-                });
+    describe('templates', () => {
+        it('returns the available templates', () => {
+            expect(service.templates).toEqual([template]);
         });
     });
 
