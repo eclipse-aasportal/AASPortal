@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -16,13 +16,19 @@ import { TranslateModule } from '@ngx-translate/core';
     styleUrls: ['./show-video-form.component.scss'],
     standalone: true,
     imports: [TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShowVideoFormComponent {
     public constructor(private readonly modal: NgbActiveModal) {}
 
-    public name!: string;
+    public readonly name = signal('');
 
-    public video!: string;
+    public readonly video = signal('');
+
+    public initialize(name: string, video: string): void {
+        this.name.set(name);
+        this.video.set(video);
+    }
 
     public close(): void {
         this.modal.close();

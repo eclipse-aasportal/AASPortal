@@ -388,8 +388,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private async showVideoAsync(name: string, src: string): Promise<void> {
         try {
             const modalRef = this.modal.open(ShowVideoFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.name = name;
-            modalRef.componentInstance.video = src;
+            modalRef.componentInstance.initialize(name, src);
             await modalRef.result;
         } catch (error) {
             if (error) {
