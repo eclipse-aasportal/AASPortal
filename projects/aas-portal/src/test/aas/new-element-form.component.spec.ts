@@ -11,7 +11,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
 import { TemplateService } from 'aas-lib';
-import { of } from 'rxjs';
+import { signal } from '@angular/core';
+import { TemplateDescriptor } from 'projects/common/dist/types';
 
 describe('NewElementFormComponent', () => {
     let component: NewElementFormComponent;
@@ -19,8 +20,7 @@ describe('NewElementFormComponent', () => {
     let api: jasmine.SpyObj<TemplateService>;
 
     beforeEach(() => {
-        api = jasmine.createSpyObj<TemplateService>(['getTemplate', 'getTemplates']);
-        api.getTemplates.and.returnValue(of([]));
+        api = jasmine.createSpyObj<TemplateService>(['getTemplate'], { templates: signal<TemplateDescriptor[]>([]) });
 
         TestBed.configureTestingModule({
             providers: [NgbActiveModal, { provide: TemplateService, useValue: api }],

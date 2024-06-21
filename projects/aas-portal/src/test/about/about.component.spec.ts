@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { PackageInfo } from 'common';
@@ -15,6 +14,7 @@ import { PackageInfo } from 'common';
 import { AboutComponent } from '../../app/about/about.component';
 import { ServerApiService } from '../../app/about/server-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
+import { signal } from '@angular/core';
 
 describe('AboutComponent', () => {
     let component: AboutComponent;
@@ -44,11 +44,10 @@ describe('AboutComponent', () => {
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: of(null) }),
+                    useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
             ],
             imports: [
-                HttpClientTestingModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
