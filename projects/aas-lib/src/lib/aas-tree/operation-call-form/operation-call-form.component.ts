@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import cloneDeep from 'lodash-es/cloneDeep';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
@@ -28,7 +28,7 @@ import {
     toBoolean,
 } from 'common';
 
-export interface Bla {
+export interface VariableItem {
     submodelElement: aas.SubmodelElement;
     name: string;
     description?: string;
@@ -43,9 +43,11 @@ export interface Bla {
     styleUrls: ['./operation-call-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationCallFormComponent {
-    private _operation!: aas.Operation;
+    private operation: aas.Operation | undefined;
+    private document: AASDocument | null = null;
 
     public constructor(
         private modal: NgbActiveModal,
@@ -53,47 +55,44 @@ export class OperationCallFormComponent {
         private api: AASTreeApiService,
     ) {}
 
-    public name = '';
+    public readonly name = signal('');
 
-    public document: AASDocument | null = null;
+    public readonly canCall = signal(true);
+
+    public readonly inputVariables = signal<VariableItem[]>([]);
+
+    public readonly outputVariables = signal<VariableItem[]>([]);
+
+    public readonly messages = signal<string[]>([]);
 
     public result: aas.Operation | null = null;
 
-    public canCall = true;
+    public initialize(document: AASDocument, operation: aas.Operation): void {
+        this.document = document;
+        this.operation = cloneDeep(operation);
 
-    public get operation(): aas.Operation {
-        return this._operation;
-    }
-
-    public set operation(value: aas.Operation) {
-        this._operation = cloneDeep(value);
         try {
-            this.applyToView(this._operation.inputVariables, this.inputVariables);
-            this.applyToView(this._operation.outputVariables, this.outputVariables);
+            this.inputVariables.set(this.applyToView(this.operation.inputVariables));
+            this.outputVariables.set(this.applyToView(this.operation.outputVariables));
         } catch (error) {
-            this.messages.push(messageToString(error, this.translate));
-            this.canCall = false;
+            this.messages.update(values => [...values, messageToString(error, this.translate)]);
+            this.canCall.set(false);
         }
     }
 
-    public readonly inputVariables: Bla[] = [];
-
-    public readonly outputVariables: Bla[] = [];
-
-    public messages: string[] = [];
-
     public async call(): Promise<void> {
-        if (this.document && this.canCall) {
-            this.messages = [];
+        if (this.document && this.operation && this.canCall()) {
+            this.messages.set([]);
 
             try {
-                this.result = await this.api.invoke(this.document, this.applyToModel());
+                this.applyToModel();
+                this.result = await this.api.invoke(this.document, this.operation);
                 if (this.result && Array.isArray(this.result.outputVariables)) {
-                    this.applyToView(this.result.inputVariables, this.inputVariables);
-                    this.applyToView(this.result.outputVariables, this.outputVariables);
+                    this.inputVariables.set(this.applyToView(this.result.inputVariables));
+                    this.outputVariables.set(this.applyToView(this.result.outputVariables));
                 }
             } catch (error) {
-                this.messages.push(messageToString(error, this.translate));
+                this.messages.set([messageToString(error, this.translate)]);
             }
         }
     }
@@ -102,8 +101,8 @@ export class OperationCallFormComponent {
         this.modal.close();
     }
 
-    private applyToModel(): aas.Operation {
-        for (const item of this.inputVariables) {
+    private applyToModel(): void {
+        for (const item of this.inputVariables()) {
             const element = item.submodelElement;
             if (isProperty(element)) {
                 const value =
@@ -126,58 +125,58 @@ export class OperationCallFormComponent {
                 // ToDo:
             }
         }
-
-        return this._operation;
     }
 
-    private applyToView(sources: aas.OperationVariable[] | undefined, targets: Bla[]): void {
-        targets.splice(0, targets.length);
-        if (sources) {
-            for (const sourceVariable of sources) {
-                if (sourceVariable.value.modelType === 'Property') {
-                    const source = sourceVariable.value as aas.Property;
-                    const inputType = isBooleanType(source.valueType) ? 'checkbox' : 'text';
+    private applyToView(sources: aas.OperationVariable[] | undefined): VariableItem[] {
+        const values: VariableItem[] = [];
+        if (!sources) return values;
 
-                    let valueType: aas.DataTypeDefXsd | undefined;
-                    if (source.valueType) {
-                        valueType = source.valueType;
-                    } else if (source.value) {
-                        valueType = determineType(source.value);
-                    }
+        for (const sourceVariable of sources) {
+            if (sourceVariable.value.modelType === 'Property') {
+                const source = sourceVariable.value as aas.Property;
+                const inputType = isBooleanType(source.valueType) ? 'checkbox' : 'text';
 
-                    if (!valueType) {
-                        throw new ApplicationError(
-                            `The data type of the variable "${source.idShort}" is undefined.`,
-                            ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE,
-                            source.idShort,
-                        );
-                    }
-
-                    let value = source.value;
-                    if (!value) {
-                        value = convertToString(getDefaultValue(valueType), this.translate.currentLang);
-                    }
-
-                    targets.push({
-                        submodelElement: source,
-                        name: source.idShort,
-                        description: getLocaleValue(source.description),
-                        type: valueType,
-                        inputType: inputType,
-                        value: inputType === 'checkbox' ? toBoolean(value) : value,
-                    });
-                } else {
-                    const source = sourceVariable.value;
-                    targets.push({
-                        submodelElement: source,
-                        name: source.idShort,
-                        description: getLocaleValue(source.description),
-                        type: 'xs:string',
-                        inputType: 'text',
-                        value: 'not implemented',
-                    });
+                let valueType: aas.DataTypeDefXsd | undefined;
+                if (source.valueType) {
+                    valueType = source.valueType;
+                } else if (source.value) {
+                    valueType = determineType(source.value);
                 }
+
+                if (!valueType) {
+                    throw new ApplicationError(
+                        `The data type of the variable "${source.idShort}" is undefined.`,
+                        ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE,
+                        source.idShort,
+                    );
+                }
+
+                let value = source.value;
+                if (!value) {
+                    value = convertToString(getDefaultValue(valueType), this.translate.currentLang);
+                }
+
+                values.push({
+                    submodelElement: source,
+                    name: source.idShort,
+                    description: getLocaleValue(source.description),
+                    type: valueType,
+                    inputType: inputType,
+                    value: inputType === 'checkbox' ? toBoolean(value) : value,
+                });
+            } else {
+                const source = sourceVariable.value;
+                values.push({
+                    submodelElement: source,
+                    name: source.idShort,
+                    description: getLocaleValue(source.description),
+                    type: 'xs:string',
+                    inputType: 'text',
+                    value: 'not implemented',
+                });
             }
         }
+
+        return values;
     }
 }

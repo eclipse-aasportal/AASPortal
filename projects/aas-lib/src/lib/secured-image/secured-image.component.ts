@@ -31,7 +31,7 @@ export class SecuredImageComponent {
         });
     }
 
-    public readonly src = input.required<string>();
+    public readonly src = input<string>('');
 
     public readonly alt = input<string | undefined>();
 

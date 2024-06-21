@@ -10,12 +10,12 @@
     <div class="modal-header">
         <h4 class="modal-title text-info">
             <i class="bi bi-arrow-clockwise"></i>
-            <span class="ms-2">{{name}}</span>
+            <span class="ms-2">{{name()}}</span>
         </h4>
         <button type="button" class="btn-close" (click)="close()"> </button>
     </div>
     <div class="modal-body">
-        @for (message of messages; track message) {
+        @for (message of messages(); track message) {
         <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
             <div class="d-flex">
                 <div class="flex-grow-1">{{message}}</div>
@@ -35,7 +35,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (variable of inputVariables; track variable) {
+                @for (variable of inputVariables(); track variable) {
                 <tr>
                     <td>{{variable.name}}</td>
                     @if (variable.inputType === 'text') {
@@ -44,7 +44,7 @@
                             name="{{variable.name}}">
                     </td>
                     }
-                    @if (variable.inputType === 'checkbox') {
+                    @else if (variable.inputType === 'checkbox') {
                     <td>
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" [(ngModel)]="variable.value"
@@ -72,7 +72,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (variable of outputVariables; track variable) {
+                @for (variable of outputVariables(); track variable) {
                 <tr>
                     <td>{{variable.name}}</td>
                     @if (variable.inputType === 'text') {
@@ -81,7 +81,7 @@
                             [value]="variable.value">
                     </td>
                     }
-                    @if (variable.inputType === 'checkbox') {
+                    @else if (variable.inputType === 'checkbox') {
                     <td>
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" readonly="true" [checked]="variable.value">
@@ -96,7 +96,7 @@
         </table>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" (click)="call()" [disabled]="!canCall"
+        <button type="submit" class="btn btn-primary" (click)="call()" [disabled]="!canCall()"
             translate>CMD_OPERATION_CALL</button>
         <button type="button" class="btn btn-secondary" (click)="close()" translate>CMD_CLOSE</button>
     </div>

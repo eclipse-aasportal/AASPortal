@@ -304,8 +304,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         try {
             if (operation) {
                 const modalRef = this.modal.open(OperationCallFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.document = this.document;
-                modalRef.componentInstance.operation = operation;
+                modalRef.componentInstance.initialize(this.document, operation);
                 await modalRef.result;
             }
         } catch (error) {

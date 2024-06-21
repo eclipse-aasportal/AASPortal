@@ -70,14 +70,13 @@ describe('OperationCallFormComponent', () => {
         (resultOp.outputVariables![0].value as aas.Property).value = 'Hello World!'.toUpperCase();
 
         spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
-        component.document = document;
-        component.operation = operation;
-        component.inputVariables[0].value = 'Hello World!';
+        component.initialize(document, operation);
+        component.inputVariables()[0].value = 'Hello World!';
 
         await component.call();
 
-        expect(component.inputVariables[0].value).toEqual('Hello World!');
-        expect(component.outputVariables[0].value).toEqual('HELLO WORLD!');
+        expect(component.inputVariables()[0].value).toEqual('Hello World!');
+        expect(component.outputVariables()[0].value).toEqual('HELLO WORLD!');
     });
 
     it('calls an operation like toggle(in: boolean): boolean', async function () {
@@ -89,14 +88,13 @@ describe('OperationCallFormComponent', () => {
         (resultOp.outputVariables![0].value as aas.Property).value = 'true';
 
         spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
-        component.document = document;
-        component.operation = operation;
-        component.inputVariables[0].value = false;
+        component.initialize(document, operation);
+        component.inputVariables()[0].value = false;
 
         await component.call();
 
-        expect(component.inputVariables[0].value).toEqual(false);
-        expect(component.outputVariables[0].value).toEqual(true);
+        expect(component.inputVariables()[0].value).toEqual(false);
+        expect(component.outputVariables()[0].value).toEqual(true);
     });
 
     it('calls an operation like increment(in: number): number', async function () {
@@ -108,35 +106,34 @@ describe('OperationCallFormComponent', () => {
         (resultOp.outputVariables![0].value as aas.Property).value = '43';
 
         spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
-        component.document = document;
-        component.operation = operation;
-        component.inputVariables[0].value = '42';
+        component.initialize(document, operation);
+        component.inputVariables()[0].value = '42';
 
         await component.call();
 
-        expect(component.inputVariables[0].value).toEqual('42');
+        expect(component.inputVariables()[0].value).toEqual('42');
         expect((component.result?.outputVariables![0].value as aas.Property).value).toEqual('43');
-        expect(component.outputVariables[0].value).toEqual('43');
+        expect(component.outputVariables()[0].value).toEqual('43');
     });
 
     it('validates an input variable with undefined value (int => 0)', async function () {
         operation.inputVariables = [createVariable('in', 'xs:int')];
-        component.operation = operation;
-        expect(component.inputVariables[0].value).toEqual('0');
+        component.initialize(document, operation);
+        expect(component.inputVariables()[0].value).toEqual('0');
     });
 
     it('validates an input variable with undefined value type (0 => int)', async function () {
         operation.inputVariables = [createVariable('in', undefined, 0)];
-        component.operation = operation;
-        expect(component.inputVariables[0].type).toEqual('xs:int');
+        component.initialize(document, operation);
+        expect(component.inputVariables()[0].type).toEqual('xs:int');
     });
 
     it('shows the message ERROR_UNKNOWN_VARIABLE_VALUE_TYPE if variable data type is undefined', function () {
         operation.inputVariables = [createVariable('in')];
-        component.operation = operation;
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].startsWith(ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE)).toBeTrue();
-        expect(component.canCall).toBeFalse();
+        component.initialize(document, operation);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].startsWith(ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE)).toBeTrue();
+        expect(component.canCall()).toBeFalse();
     });
 
     it('shows the message ERROR_INVALID_OPERATION_VARIABLE_EXPRESSION if an input variable expression is invalid', async function () {
@@ -146,14 +143,13 @@ describe('OperationCallFormComponent', () => {
         const dummy = cloneDeep(operation);
         spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(dummy)));
 
-        component.document = document;
-        component.operation = operation;
-        component.inputVariables[0].value = 'invalid';
+        component.initialize(document, operation);
+        component.inputVariables()[0].value = 'invalid';
 
         await component.call();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].startsWith(ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION)).toBeTrue();
-        expect(component.canCall).toBeTrue();
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].startsWith(ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION)).toBeTrue();
+        expect(component.canCall()).toBeTrue();
     });
 
     function createVariable(name: string, valueType?: aas.DataTypeDefXsd, value?: unknown): aas.OperationVariable {

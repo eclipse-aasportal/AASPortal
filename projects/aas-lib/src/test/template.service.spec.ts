@@ -48,7 +48,7 @@ describe('TemplateService', () => {
 
     describe('templates', () => {
         it('returns the available templates', () => {
-            expect(service.templates).toEqual([template]);
+            expect(service.templates()).toEqual([template]);
         });
     });
 

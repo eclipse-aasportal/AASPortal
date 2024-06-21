@@ -105,7 +105,7 @@ export class NewElementFormComponent {
     }
 
     private validate(): boolean {
-        if (!this.idShort || !this.parent || !this.env || !this._template?.endpoint) {
+        if (!this.idShort || !this.parent || !this.env || !this.template()?.endpoint) {
             this.pushMessage(`Invalid name.`);
             return false;
         }
@@ -116,8 +116,8 @@ export class NewElementFormComponent {
             return false;
         }
 
-        if (this._template.modelType === 'Submodel') {
-            const id = this._template.id;
+        if (this.template()?.modelType === 'Submodel') {
+            const id = this.template()?.id;
             if (this.env.submodels.some(child => child.id === id)) {
                 this.pushMessage(`A ${this.modelType} with the identification "${id}" already exists.`);
                 return false;

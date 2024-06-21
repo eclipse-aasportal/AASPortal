@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, computed, effect, input, model, untracked } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    computed,
+    effect,
+    input,
+    model,
+    untracked,
+} from '@angular/core';
+
 import { Router } from '@angular/router';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -27,6 +37,7 @@ import { AASTableFilter } from './aas-table.filter';
     standalone: true,
     imports: [NgbTooltip, MaxLengthPipe, TranslateModule],
     providers: [AASTableStore],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTableComponent implements OnDestroy {
     private shiftKey = false;
