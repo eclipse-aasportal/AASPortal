@@ -53,77 +53,77 @@ describe('LoginFormComponent', () => {
         spyOn(modal, 'close').and.callFake((...args) => expect(args[0]).toEqual(result));
         spyOn(api, 'login').and.returnValue(of({ token: 'a_token' }));
 
-        component.userId = 'john.doe@email.com';
-        component.password = '1234.Abcd';
-        component.stayLoggedIn = true;
+        component.userId.set('john.doe@email.com');
+        component.password.set('1234.Abcd');
+        component.stayLoggedIn.set(true);
         await component.submit();
-        expect(component.messages.length).toEqual(0);
+        expect(component.messages().length).toEqual(0);
         expect(modal.close).toHaveBeenCalled();
     }));
 
     it('does not login a user with empty e-mail', fakeAsync(async () => {
-        component.userId = '';
-        component.password = '1234.Abcd';
+        component.userId.set('');
+        component.password.set('1234.Abcd');
         await component.submit();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(ERRORS.EMAIL_REQUIRED);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(ERRORS.EMAIL_REQUIRED);
     }));
 
     it('does not login a user with invalid e-mail', fakeAsync(async () => {
-        component.userId = 'invalidEMail';
-        component.password = '1234.abcd';
+        component.userId.set('invalidEMail');
+        component.password.set('1234.abcd');
         await component.submit();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(ERRORS.INVALID_EMAIL);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(ERRORS.INVALID_EMAIL);
     }));
 
     it('does not login a user with empty password', fakeAsync(async () => {
-        component.userId = 'john.doe@email.com';
-        component.password = '';
+        component.userId.set('john.doe@email.com');
+        component.password.set('');
         await component.submit();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(ERRORS.PASSWORD_REQUIRED);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(ERRORS.PASSWORD_REQUIRED);
     }));
 
     it('does not login a user with invalid password', fakeAsync(async () => {
-        component.userId = 'john.doe@email.com';
-        component.password = '123';
+        component.userId.set('john.doe@email.com');
+        component.password.set('123');
         await component.submit();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(ERRORS.INVALID_PASSWORD);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(ERRORS.INVALID_PASSWORD);
     }));
 
     it('does not login an unknown user', fakeAsync(async () => {
         spyOn(modal, 'close').and.returnValue();
         spyOn(api, 'login').and.returnValue(throwError(() => new Error('Unknown user')));
 
-        component.userId = 'unknown.user@email.com';
-        component.password = '1234.abcd';
+        component.userId.set('unknown.user@email.com');
+        component.password.set('1234.abcd');
         await component.submit();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual('Unknown user');
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual('Unknown user');
     }));
 
     it('supports the reset of a forgotten password', async function () {
         spyOn(api, 'resetPassword').and.returnValue(of(void 0));
-        component.userId = 'john.doe@email.com';
+        component.userId.set('john.doe@email.com');
         await component.resetPassword();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(INFO.NEW_PASSWORD_SENT);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(INFO.NEW_PASSWORD_SENT);
     });
 
     it('can not reset password when e-mail is empty', fakeAsync(async () => {
-        component.userId = '';
+        component.userId.set('');
         await component.resetPassword();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(ERRORS.EMAIL_REQUIRED);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(ERRORS.EMAIL_REQUIRED);
     }));
 
     it('an not reset password when e-mail is invalid', fakeAsync(async () => {
-        component.userId = 'invalidEMail';
+        component.userId.set('invalidEMail');
         await component.resetPassword();
-        expect(component.messages.length).toEqual(1);
-        expect(component.messages[0].text).toEqual(ERRORS.INVALID_EMAIL);
+        expect(component.messages().length).toEqual(1);
+        expect(component.messages()[0].text).toEqual(ERRORS.INVALID_EMAIL);
     }));
 
     it('supports navigation to the registration', function () {

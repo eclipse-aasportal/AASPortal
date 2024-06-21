@@ -15,7 +15,7 @@
         <button type="button" class="btn-close" (click)="cancel()" aria-label="Cancel"></button>
     </div>
     <div class="modal-body">
-        @for (message of messages; track message) {
+        @for (message of messages(); track message) {
         <ngb-toast [class]="message.classname + ' mb-3'" [autohide]="message.autohide" [delay]="message.delay">
             <div class="d-flex">{{message.text}}</div>
         </ngb-toast>

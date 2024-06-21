@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -31,6 +31,7 @@ export interface LoginFormResult {
     styleUrls: ['./login-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginFormComponent {
     private newPasswordSent = false;
@@ -41,22 +42,22 @@ export class LoginFormComponent {
         private api: AuthApiService,
     ) {}
 
-    public passwordPerEMail = false;
+    public readonly passwordPerEMail = signal(false);
 
-    public userId = '';
+    public readonly userId = signal('');
 
-    public password = '';
+    public readonly password = signal('');
 
-    public stayLoggedIn = false;
+    public readonly stayLoggedIn = signal(false);
 
-    public messages: MessageEntry[] = [];
+    public readonly messages = signal<MessageEntry[]>([]);
 
     public async resetPassword(): Promise<void> {
         this.clearMessages();
         if (!this.newPasswordSent) {
-            if (isEmpty(this.userId)) {
+            if (isEmpty(this.userId())) {
                 this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-            } else if (!isValidEMail(this.userId)) {
+            } else if (!isValidEMail(this.userId())) {
                 this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
             } else {
                 try {
@@ -79,20 +80,20 @@ export class LoginFormComponent {
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.userId)) {
+        if (isEmpty(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-        } else if (!isValidEMail(this.userId)) {
+        } else if (!isValidEMail(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (isEmpty(this.password)) {
+        } else if (isEmpty(this.password())) {
             this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-        } else if (!isValidPassword(this.password)) {
+        } else if (!isValidPassword(this.password())) {
             this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
         } else {
-            const credentials: Credentials = { id: this.userId, password: this.password };
+            const credentials: Credentials = { id: this.userId(), password: this.password() };
             this.api.login(credentials).subscribe({
                 next: value => {
                     const result: LoginFormResult = {
-                        stayLoggedIn: this.stayLoggedIn,
+                        stayLoggedIn: this.stayLoggedIn(),
                         token: value.token,
                     };
 
@@ -108,17 +109,17 @@ export class LoginFormComponent {
     }
 
     private pushMessage(text: string, type = 'bg-danger w-100'): void {
-        this.messages = [
+        this.messages.set([
             {
                 text: text,
                 classname: type,
                 autohide: false,
                 delay: 0,
             },
-        ];
+        ]);
     }
 
     private clearMessages(): void {
-        this.messages = [];
+        this.messages.set([]);
     }
 }
