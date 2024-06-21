@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-show-image',
@@ -17,13 +17,19 @@ import { TranslateModule } from '@ngx-translate/core';
     styleUrls: ['./show-image-form.component.scss'],
     standalone: true,
     imports: [SecuredImageComponent, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShowImageFormComponent {
     public constructor(private readonly modal: NgbActiveModal) {}
 
-    public name!: string;
+    public readonly name = signal('');
 
-    public image!: string;
+    public readonly image = signal('');
+
+    public initialize(name: string, image: string): void {
+        this.name.set(name);
+        this.image.set(image);
+    }
 
     public close(): void {
         this.modal.close();

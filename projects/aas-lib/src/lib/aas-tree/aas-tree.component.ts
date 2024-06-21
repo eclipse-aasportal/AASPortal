@@ -376,8 +376,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private async showImageAsync(name: string, src: string): Promise<void> {
         try {
             const modalRef = this.modal.open(ShowImageFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.name = name;
-            modalRef.componentInstance.image = src;
+            modalRef.componentInstance.initialize(name, src);
             await modalRef.result;
         } catch (error) {
             if (error) {
