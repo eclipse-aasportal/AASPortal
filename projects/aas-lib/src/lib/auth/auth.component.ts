@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NotifyService } from '../notify/notify.service';
-import { AuthService } from './auth.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from './auth.service';
 
 @Component({
     selector: 'fhg-auth',
@@ -18,6 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
     styleUrls: ['./auth.component.scss'],
     standalone: true,
     imports: [NgbModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {
     public constructor(
@@ -25,13 +26,9 @@ export class AuthComponent {
         private notify: NotifyService,
     ) {}
 
-    public get userAuthenticated(): boolean {
-        return this.auth.authenticated;
-    }
+    public readonly userAuthenticated = this.auth.authenticated;
 
-    public get userName(): string | undefined {
-        return this.auth.name;
-    }
+    public readonly userName = this.auth.name;
 
     public register(): void {
         this.auth.register().subscribe({ error: error => this.notify.error(error) });

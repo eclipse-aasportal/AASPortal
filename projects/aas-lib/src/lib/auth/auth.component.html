@@ -10,11 +10,11 @@
     <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
         <div class="d-inline-flex">
             <div class="px-2"><i class="bi bi-person-circle"></i></div>
-            <div>{{userName}}</div>
+            <div>{{userName()}}</div>
         </div>
     </a>
     <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        @if (!userAuthenticated) {
+        @if (!userAuthenticated()) {
         <a type="button" class="dropdown-item" (click)="login()" (keydown.enter)="login()" tabindex="1"
             translate>CMD_LOGIN</a>
         <a type="button" class="dropdown-item" (click)="register()" (keydown.enter)="register()" tabindex="2"
