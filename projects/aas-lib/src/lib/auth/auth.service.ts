@@ -98,7 +98,7 @@ export class AuthService {
                 const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
                 const token = this.window.getLocalStorageItem('.Token');
                 if (stayLoggedIn && token) {
-                    modalRef.componentInstance.stayLoggedIn = stayLoggedIn;
+                    modalRef.componentInstance.stayLoggedIn.set(stayLoggedIn);
                 }
 
                 return from<Promise<LoginFormResult | undefined>>(modalRef.result);

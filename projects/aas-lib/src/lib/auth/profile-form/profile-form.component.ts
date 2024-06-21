@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import isEmpty from 'lodash-es/isEmpty';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -27,6 +27,7 @@ export interface ProfileFormResult {
     styleUrls: ['./profile-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule, NgbCollapse, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileFormComponent {
     private profile?: UserProfile;
@@ -37,29 +38,28 @@ export class ProfileFormComponent {
         private api: AuthApiService,
     ) {}
 
-    public id = '';
+    public readonly id = signal('');
 
-    public name = '';
+    public readonly name = signal('');
 
-    public defaultName = 'name';
+    public readonly defaultName = signal('name');
 
-    public password1 = '';
+    public readonly password1 = signal('');
 
-    public password2 = '';
+    public readonly password2 = signal('');
 
-    public isCollapsed = true;
+    public readonly isCollapsed = signal(true);
 
-    public messages: string[] = [];
+    public readonly messages = signal<string[]>([]);
 
     public initialize(profile: UserProfile): void {
         this.profile = profile;
-
-        this.id = profile.id;
-        this.name = profile.name;
+        this.id.set(profile.id);
+        this.name.set(profile.name);
     }
 
     public onInputEMail(): void {
-        this.defaultName = getUserNameFromEMail(this.id);
+        this.defaultName.set(getUserNameFromEMail(this.id()));
     }
 
     public deleteUser(): void {
@@ -69,23 +69,23 @@ export class ProfileFormComponent {
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.id)) {
+        if (isEmpty(this.id())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-        } else if (!isValidEMail(this.id)) {
+        } else if (!isValidEMail(this.id())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (!isEmpty(this.password1)) {
-            if (!isValidPassword(this.password1)) {
+        } else if (!isEmpty(this.password1())) {
+            if (!isValidPassword(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-            } else if (this.password1 !== this.password2) {
+            } else if (this.password1() !== this.password2()) {
                 this.pushMessage(this.translate.instant(ERRORS.PASSWORDS_NOT_EQUAL));
             }
         }
 
         if (this.messages.length === 0 && this.profile) {
             const newProfile: UserProfile = {
-                id: this.id,
-                name: this.name ?? getUserNameFromEMail(this.id),
-                password: this.password1,
+                id: this.id(),
+                name: this.name() ?? getUserNameFromEMail(this.id()),
+                password: this.password1(),
             };
 
             this.api.updateProfile(this.profile.id, newProfile).subscribe({
@@ -105,10 +105,10 @@ export class ProfileFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message];
+        this.messages.set([message]);
     }
 
     private clearMessages(): void {
-        this.messages = [];
+        this.messages.set([]);
     }
 }
