@@ -181,6 +181,7 @@ export class LowDbIndex extends AASIndex {
 
     public async reset(): Promise<void> {
         this.db.data.documents = [];
+        this.db.data.elements = [];
         this.db.data.endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
 
         await this.db.write();
