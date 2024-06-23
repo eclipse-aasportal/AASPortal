@@ -54,6 +54,11 @@ export class LowDbIndex extends AASIndex {
         return endpoint;
     }
 
+    public override async hasEndpoint(name: string): Promise<boolean> {
+        await this.promise;
+        return this.db.data.endpoints.find(endpoint => endpoint.name === name) !== undefined;
+    }
+
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.promise;
         if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
@@ -68,12 +73,13 @@ export class LowDbIndex extends AASIndex {
         await this.db.write();
     }
 
-    public override async removeEndpoint(name: string): Promise<boolean> {
+    public override async removeEndpoint(endpointName: string): Promise<boolean> {
         await this.promise;
-        const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === name);
+        const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === endpointName);
         if (index < 0) return false;
 
         this.db.data.endpoints.splice(index, 1);
+        this.removeDocuments(endpointName);
         await this.db.write();
         return true;
     }
@@ -178,6 +184,14 @@ export class LowDbIndex extends AASIndex {
         this.db.data.endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
 
         await this.db.write();
+    }
+
+    private removeDocuments(endpoint: string) {
+        const documents = this.db.data.documents.filter(document => document.endpoint === endpoint);
+        this.db.data.documents = this.db.data.documents.filter(document => document.endpoint !== endpoint);
+        for (const document of documents) {
+            this.db.data.elements = this.db.data.elements.filter(element => element.uuid !== document.uuid);
+        }
     }
 
     private toDocument(item: LowDbDocument): AASDocument {

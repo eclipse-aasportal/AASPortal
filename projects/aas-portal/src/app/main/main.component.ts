@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, OnInit, TemplateRef, ViewChild, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, model, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs';
@@ -46,6 +46,7 @@ export interface LinkDescriptor {
         LocalizeComponent,
         AuthComponent,
     ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements OnInit {
     public constructor(

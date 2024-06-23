@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TemplateService } from 'aas-lib';
 import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'common';
@@ -21,6 +21,7 @@ import { ModelType } from 'projects/common/dist/types/aas';
     styleUrls: ['./new-element-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule, AsyncPipe, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewElementFormComponent {
     private readonly _messages = signal<string[]>([]);

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MainComponent } from './main/main.component';
 
 @Component({
@@ -15,7 +15,6 @@ import { MainComponent } from './main/main.component';
     styleUrls: ['./app.component.scss'],
     standalone: true,
     imports: [MainComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-    public title = 'AASPortal';
-}
+export class AppComponent {}

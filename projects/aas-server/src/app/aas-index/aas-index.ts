@@ -25,9 +25,11 @@ export abstract class AASIndex {
 
     public abstract getEndpoint(name: string): Promise<AASEndpoint>;
 
+    public abstract hasEndpoint(name: string): Promise<boolean>;
+
     public abstract addEndpoint(endpoint: AASEndpoint): Promise<void>;
 
-    public abstract removeEndpoint(name: string): Promise<boolean>;
+    public abstract removeEndpoint(endpointName: string): Promise<boolean>;
 
     public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage>;
 

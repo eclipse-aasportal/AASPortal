@@ -49,7 +49,6 @@ export class AASProvider {
     private wsServer!: WSServer;
     private shutDown = false;
     private resetRequested = false;
-    private removeEndpointRequests = new Map<string, AASEndpoint>();
 
     public constructor(
         @inject(Variable) variable: Variable,
@@ -207,14 +206,15 @@ export class AASProvider {
     public async removeEndpointAsync(name: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
         if (endpoint) {
-            if (this.removeEndpointRequests.has(endpoint.name)) {
-                return;
-            }
-
-            this.removeEndpointRequests.set(endpoint.name, endpoint);
-            if (this.taskHandler.empty(this, endpoint.name)) {
-                await this.doRemoveEndpointAsync(endpoint);
-            }
+            await this.index.removeEndpoint(endpoint.name);
+            this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
+            this.wsServer.notify('IndexChange', {
+                type: 'AASServerMessage',
+                data: {
+                    type: 'EndpointRemoved',
+                    endpoint: endpoint,
+                } as AASServerMessage,
+            });
         }
     }
 
@@ -382,23 +382,8 @@ export class AASProvider {
         });
 
         this.resetRequested = false;
-        this.removeEndpointRequests.clear();
         this.startScan();
         this.logger.info('AAS Server configuration restored.');
-    }
-
-    private async doRemoveEndpointAsync(endpoint: AASEndpoint): Promise<void> {
-        await this.index.removeEndpoint(endpoint.name);
-        this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
-        this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
-            data: {
-                type: 'EndpointRemoved',
-                endpoint: endpoint,
-            } as AASServerMessage,
-        });
-
-        this.removeEndpointRequests.delete(endpoint.name);
     }
 
     private onClientMessage = async (data: WebSocketData, client: SocketClient): Promise<void> => {
@@ -465,7 +450,7 @@ export class AASProvider {
 
         this.taskHandler.delete(result.taskId);
         const endpoint = await this.index.getEndpoint(task.name);
-        if (endpoint && this.shutDown === false && !this.removeEndpointRequests.has(task.name)) {
+        if (endpoint && this.shutDown === false) {
             setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
         }
 
@@ -478,11 +463,6 @@ export class AASProvider {
         if (this.resetRequested) {
             if (this.taskHandler.empty(this)) {
                 await this.doResetAsync();
-            }
-        } else if (this.removeEndpointRequests.size > 0) {
-            const endpoint = this.removeEndpointRequests.get(task.name);
-            if (endpoint && this.taskHandler.empty(this, endpoint.name)) {
-                await this.doRemoveEndpointAsync(endpoint);
             }
         }
     };
@@ -506,17 +486,23 @@ export class AASProvider {
     };
 
     private async onChanged(result: ScanContainerResult): Promise<void> {
+        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) return;
+
         await this.index.update(result.document);
         this.sendMessage({ type: 'Changed', document: { ...result.document, content: null } });
     }
 
     private async onAdded(result: ScanContainerResult): Promise<void> {
+        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) return;
+
         await this.index.add(result.document);
         this.logger.info(`Added: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
         this.sendMessage({ type: 'Added', document: result.document });
     }
 
     private async onRemoved(result: ScanContainerResult): Promise<void> {
+        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) return;
+
         await this.index.remove(result.container.name, result.document.id);
         this.logger.info(`Removed: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
         this.sendMessage({ type: 'Removed', document: { ...result.document, content: null } });

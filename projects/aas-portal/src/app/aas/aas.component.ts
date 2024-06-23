@@ -6,7 +6,18 @@
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, computed, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    computed,
+    signal,
+} from '@angular/core';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -42,6 +53,7 @@ import { FormsModule } from '@angular/forms';
     styleUrls: ['./aas.component.scss'],
     standalone: true,
     imports: [SecuredImageComponent, AASTreeComponent, AsyncPipe, TranslateModule, FormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
     public constructor(

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -24,16 +24,18 @@ export interface EndpointItem {
     styleUrls: ['./add-endpoint-form.component.scss'],
     standalone: true,
     imports: [NgbToast, TranslateModule, FormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEndpointFormComponent {
+    private readonly endpoints = signal<AASEndpoint[]>([]);
+    public readonly _messages = signal<string[]>([]);
+
     public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
     ) {}
 
-    public readonly endpoints = signal<AASEndpoint[]>([]);
-
-    public readonly messages = signal<string[]>([]);
+    public readonly messages = this._messages.asReadonly();
 
     public readonly name = signal('');
 
@@ -64,6 +66,10 @@ export class AddEndpointFormComponent {
 
     public readonly item = signal(this.items()[0]);
 
+    public initialize(endpoints: AASEndpoint[]): void {
+        this.endpoints.set(endpoints);
+    }
+
     public setItem(value: EndpointItem): void {
         this.item.set(value);
         this.clearMessages();
@@ -88,20 +94,20 @@ export class AddEndpointFormComponent {
     }
 
     private clearMessages(): void {
-        if (this.messages.length > 0) {
-            this.messages.set([]);
+        if (this._messages.length > 0) {
+            this._messages.set([]);
         }
     }
 
     private validateName(): string | undefined {
         let name: string | undefined = this.name().trim();
         if (!name) {
-            this.messages.update(messages => [...messages, this.createMessage('ERROR_EMPTY_ENDPOINT_NAME')]);
+            this._messages.update(messages => [...messages, this.createMessage('ERROR_EMPTY_ENDPOINT_NAME')]);
             name = undefined;
         } else {
             for (const endpoint of this.endpoints()) {
                 if (endpoint.name.toLocaleLowerCase() === name.toLocaleLowerCase()) {
-                    this.messages.update(messages => [
+                    this._messages.update(messages => [
                         ...messages,
                         this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name),
                     ]);
@@ -134,7 +140,11 @@ export class AddEndpointFormComponent {
 
             return url;
         } catch (error) {
-            this.messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', this.item().value)]);
+            this._messages.update(messages => [
+                ...messages,
+                this.createMessage('ERROR_INVALID_URL', this.item().value),
+            ]);
+
             return undefined;
         }
     }
