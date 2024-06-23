@@ -47,7 +47,6 @@ export class AASProvider {
     private readonly timeout: number;
     private readonly file: string | undefined;
     private wsServer!: WSServer;
-    private shutDown = false;
     private resetRequested = false;
 
     public constructor(
@@ -227,13 +226,10 @@ export class AASProvider {
         }
 
         this.resetRequested = true;
-        this.shutDown = true;
 
-        if (!this.taskHandler.empty(this)) {
-            return;
+        if (this.taskHandler.empty(this)) {
+            await this.doResetAsync();
         }
-
-        await this.doResetAsync();
     }
 
     /**
@@ -414,7 +410,6 @@ export class AASProvider {
 
     private startScan = async (): Promise<void> => {
         try {
-            this.shutDown = false;
             for (const endpoint of await this.index.getEndpoints()) {
                 setTimeout(this.scanContainer, 0, this.taskHandler.createTaskId(), endpoint);
             }
@@ -450,9 +445,7 @@ export class AASProvider {
 
         this.taskHandler.delete(result.taskId);
         const endpoint = await this.index.getEndpoint(task.name);
-        if (endpoint && this.shutDown === false) {
-            setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
-        }
+        setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
 
         if (result.messages) {
             this.logger.start(`scan ${task.name ?? 'undefined'}`);
