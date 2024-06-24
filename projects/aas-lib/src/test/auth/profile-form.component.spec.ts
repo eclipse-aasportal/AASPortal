@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -16,6 +16,7 @@ import { of } from 'rxjs';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { ERRORS } from '../../lib/types/errors';
 import { ProfileFormComponent } from '../../lib/auth/profile-form/profile-form.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ProfileFormComponent', () => {
     let component: ProfileFormComponent;
@@ -25,17 +26,14 @@ describe('ProfileFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [NgbModal, NgbActiveModal],
-            imports: [
-                HttpClientTestingModule,
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
-        });
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [NgbModal, NgbActiveModal, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         modal = TestBed.inject(NgbActiveModal);
         api = TestBed.inject(AuthApiService);

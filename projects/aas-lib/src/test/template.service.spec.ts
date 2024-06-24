@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
 import { TemplateDescriptor, aas } from 'common';
 
@@ -23,9 +23,9 @@ describe('TemplateService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [{ provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) }],
-            imports: [HttpClientTestingModule],
-        });
+    imports: [],
+    providers: [{ provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         http = TestBed.inject(HttpClient);
         service = TestBed.inject(TemplateService);

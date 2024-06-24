@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY, first, map, of, skipWhile } from 'rxjs';
@@ -20,6 +20,7 @@ import { getGuestToken, getToken } from '../assets/json-web-token';
 import { LoginFormResult } from '../../lib/auth/login-form/login-form.component';
 import { RegisterFormResult } from '../../lib/auth/register-form/register-form.component';
 import { ProfileFormResult } from '../../lib/auth/profile-form/profile-form.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -57,31 +58,30 @@ describe('AuthService', () => {
             window.getLocalStorageItem.and.returnValue(null);
 
             TestBed.configureTestingModule({
-                declarations: [],
-                providers: [
-                    {
-                        provide: WindowService,
-                        useValue: window,
-                    },
-                    {
-                        provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
-                    },
-                    {
-                        provide: AuthApiService,
-                        useValue: api,
-                    },
-                ],
-                imports: [
-                    HttpClientTestingModule,
-                    TranslateModule.forRoot({
-                        loader: {
-                            provide: TranslateLoader,
-                            useClass: TranslateFakeLoader,
-                        },
-                    }),
-                ],
-            });
+    declarations: [],
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [
+        {
+            provide: WindowService,
+            useValue: window,
+        },
+        {
+            provide: NotifyService,
+            useValue: jasmine.createSpyObj<NotifyService>(['error']),
+        },
+        {
+            provide: AuthApiService,
+            useValue: api,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
             service = TestBed.inject(AuthService);
             modal = TestBed.inject(NgbModal);
@@ -261,31 +261,30 @@ describe('AuthService', () => {
             });
 
             TestBed.configureTestingModule({
-                declarations: [],
-                providers: [
-                    {
-                        provide: WindowService,
-                        useValue: window,
-                    },
-                    {
-                        provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
-                    },
-                    {
-                        provide: AuthApiService,
-                        useValue: api,
-                    },
-                ],
-                imports: [
-                    HttpClientTestingModule,
-                    TranslateModule.forRoot({
-                        loader: {
-                            provide: TranslateLoader,
-                            useClass: TranslateFakeLoader,
-                        },
-                    }),
-                ],
-            });
+    declarations: [],
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [
+        {
+            provide: WindowService,
+            useValue: window,
+        },
+        {
+            provide: NotifyService,
+            useValue: jasmine.createSpyObj<NotifyService>(['error']),
+        },
+        {
+            provide: AuthApiService,
+            useValue: api,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
             service = TestBed.inject(AuthService);
             modal = TestBed.inject(NgbModal);

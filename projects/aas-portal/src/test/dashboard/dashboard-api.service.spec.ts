@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardApiService', () => {
     let service: DashboardApiService;
@@ -17,8 +18,9 @@ describe('DashboardApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-        });
+    imports: [],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         service = TestBed.inject(DashboardApiService);
         httpTestingController = TestBed.inject(HttpTestingController);

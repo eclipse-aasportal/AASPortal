@@ -17,7 +17,8 @@ import { DownloadService } from '../../lib/download.service';
 import { WindowService } from '../../lib/window.service';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../assets/test-web-socket-factory.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AASTreeComponent', () => {
     let component: AASTreeComponent;
@@ -30,38 +31,37 @@ describe('AASTreeComponent', () => {
         webSocketSubject = new Subject<WebSocketData>();
 
         TestBed.configureTestingModule({
-            providers: [
-                {
-                    provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
-                },
-                {
-                    provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>([
-                        'downloadFileAsync',
-                        'downloadDocument',
-                        'uploadDocuments',
-                    ]),
-                },
-                {
-                    provide: WindowService,
-                    useValue: jasmine.createSpyObj<WindowService>(['addEventListener', 'open', 'removeEventListener']),
-                },
-                {
-                    provide: WebSocketFactoryService,
-                    useValue: new TestWebSocketFactoryService(webSocketSubject),
-                },
-            ],
-            imports: [
-                HttpClientTestingModule,
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
-        });
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [
+        {
+            provide: NotifyService,
+            useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
+        },
+        {
+            provide: DownloadService,
+            useValue: jasmine.createSpyObj<DownloadService>([
+                'downloadFileAsync',
+                'downloadDocument',
+                'uploadDocuments',
+            ]),
+        },
+        {
+            provide: WindowService,
+            useValue: jasmine.createSpyObj<WindowService>(['addEventListener', 'open', 'removeEventListener']),
+        },
+        {
+            provide: WebSocketFactoryService,
+            useValue: new TestWebSocketFactoryService(webSocketSubject),
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
         fixture = TestBed.createComponent(AASTreeComponent);
         component = fixture.componentInstance;

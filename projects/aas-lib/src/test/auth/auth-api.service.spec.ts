@@ -6,12 +6,13 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthResult, Cookie } from 'common';
 
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { getGuestToken, getToken } from '../assets/json-web-token';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthApiService', function () {
     let service: AuthApiService;
@@ -20,10 +21,10 @@ describe('AuthApiService', function () {
 
     beforeEach(function () {
         TestBed.configureTestingModule({
-            declarations: [],
-            providers: [AuthApiService],
-            imports: [HttpClientTestingModule],
-        });
+    declarations: [],
+    imports: [],
+    providers: [AuthApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         userId = 'john.doe@email.com';
         service = TestBed.inject(AuthApiService);

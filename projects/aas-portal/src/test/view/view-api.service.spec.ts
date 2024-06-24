@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { createDocument } from '../assets/test-document';
 import { ViewApiService } from '../../app/view/view-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ViewApiService', function () {
     let service: ViewApiService;
@@ -19,10 +20,10 @@ describe('ViewApiService', function () {
     beforeEach(function () {
 
         TestBed.configureTestingModule({
-            declarations: [],
-            providers: [],
-            imports: [HttpClientTestingModule],
-        });
+    declarations: [],
+    imports: [],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         service = TestBed.inject(ViewApiService);
         httpTestingController = TestBed.inject(HttpTestingController);

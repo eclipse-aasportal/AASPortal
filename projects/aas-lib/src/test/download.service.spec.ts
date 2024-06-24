@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
@@ -21,9 +21,7 @@ describe('DownloadService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [],
             imports: [
-                HttpClientTestingModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -31,6 +29,7 @@ describe('DownloadService', () => {
                     },
                 }),
             ],
+            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
         });
 
         service = TestBed.inject(DownloadService);

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY, of } from 'rxjs';
@@ -21,6 +21,7 @@ import {
     DashboardPage,
     DashboardService,
 } from '../../app/dashboard/dashboard.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardService', () => {
     let service: DashboardService;
@@ -33,22 +34,21 @@ describe('DashboardService', () => {
         auth.getCookie.and.returnValue(EMPTY);
 
         TestBed.configureTestingModule({
-            providers: [
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
-            ],
-            imports: [
-                HttpClientTestingModule,
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
-        });
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [
+        {
+            provide: AuthService,
+            useValue: auth,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
         service = TestBed.inject(DashboardService);
     });

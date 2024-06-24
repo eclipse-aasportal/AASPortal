@@ -6,12 +6,13 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { createDocument } from '../assets/test-document';
 import { AASApiService } from '../../app/aas/aas-api.service';
 import { noop } from 'lodash-es';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AASApiService', function () {
     let service: AASApiService;
@@ -19,8 +20,9 @@ describe('AASApiService', function () {
 
     beforeEach(function () {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-        });
+    imports: [],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         service = TestBed.inject(AASApiService);
         httpTestingController = TestBed.inject(HttpTestingController);
