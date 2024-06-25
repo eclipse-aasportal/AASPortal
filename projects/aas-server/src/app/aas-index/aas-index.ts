@@ -52,6 +52,8 @@ export abstract class AASIndex {
 
     public abstract remove(endpoint?: string, id?: string): Promise<boolean>;
 
+    public abstract clear(): Promise<void>;
+
     public abstract reset(): Promise<void>;
 
     protected toAbbreviation(referable: aas.Referable): string {

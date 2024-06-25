@@ -224,13 +224,24 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async reset(): Promise<void> {
+    public override async clear(): Promise<void> {
         const connection = await this.connection;
         try {
             await connection.beginTransaction();
             await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
             await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
             await connection.query<ResultSetHeader>('DELETE FROM `endpoints`;');
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        }
+    }
+
+    public override async reset(): Promise<void> {
+        const connection = await this.connection;
+        try {
+            await connection.beginTransaction();
             await this.addDefaultEndpoints(connection);
             await connection.commit();
         } catch (error) {
@@ -463,7 +474,14 @@ export class MySqlIndex extends AASIndex {
 
         const result = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`');
         if (result[0].length === 0) {
-            await this.addDefaultEndpoints(connection);
+            try {
+                connection.beginTransaction();
+                await this.addDefaultEndpoints(connection);
+                connection.commit();
+            } catch (error) {
+                connection.rollback();
+                throw error;
+            }
         }
 
         return connection;

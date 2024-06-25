@@ -179,11 +179,15 @@ export class LowDbIndex extends AASIndex {
         return true;
     }
 
-    public async reset(): Promise<void> {
+    public override async clear(): Promise<void> {
         this.db.data.documents = [];
         this.db.data.elements = [];
-        this.db.data.endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
+        this.db.data.endpoints = [];
+        await this.db.write();
+    }
 
+    public override async reset(): Promise<void> {
+        this.db.data.endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
         await this.db.write();
     }
 

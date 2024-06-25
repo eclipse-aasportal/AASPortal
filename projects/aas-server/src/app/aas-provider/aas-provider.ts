@@ -226,9 +226,16 @@ export class AASProvider {
         }
 
         this.resetRequested = true;
+        await this.index.clear();
+        this.wsServer.notify('IndexChange', {
+            type: 'AASServerMessage',
+            data: {
+                type: 'Reset',
+            } as AASServerMessage,
+        });
 
         if (this.taskHandler.empty(this)) {
-            await this.doResetAsync();
+            await this.restart();
         }
     }
 
@@ -367,18 +374,10 @@ export class AASProvider {
         return nodes;
     }
 
-    private async doResetAsync(): Promise<void> {
-        await this.index.reset();
-
-        this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
-            data: {
-                type: 'Reset',
-            } as AASServerMessage,
-        });
-
+    private async restart(): Promise<void> {
         this.resetRequested = false;
-        this.startScan();
+        await this.index.reset();
+        await this.startScan();
         this.logger.info('AAS Server configuration restored.');
     }
 
@@ -444,8 +443,10 @@ export class AASProvider {
         }
 
         this.taskHandler.delete(result.taskId);
-        const endpoint = await this.index.getEndpoint(task.name);
-        setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
+        if ((await await this.index.hasEndpoint(task.name)) === true) {
+            const endpoint = await this.index.getEndpoint(task.name);
+            setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
+        }
 
         if (result.messages) {
             this.logger.start(`scan ${task.name ?? 'undefined'}`);
@@ -453,10 +454,8 @@ export class AASProvider {
             this.logger.stop();
         }
 
-        if (this.resetRequested) {
-            if (this.taskHandler.empty(this)) {
-                await this.doResetAsync();
-            }
+        if (this.resetRequested && this.taskHandler.empty(this)) {
+            await this.restart();
         }
     };
 
