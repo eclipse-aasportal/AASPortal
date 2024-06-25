@@ -98,7 +98,7 @@ export class DashboardService {
         pages: [{ name: this.createPageName(), items: [], requests: [] }],
     });
 
-    private modified = false;
+    private readonly modified = signal(false);
 
     public constructor(private auth: AuthService) {
         this.auth.ready
@@ -183,15 +183,15 @@ export class DashboardService {
                     throw new Error(`Not implemented`);
             }
 
-            this.modified = true;
+            this.modified.set(true);
         }
 
         if (blobs.length > 0) {
             this.addScatterChart(document, page, blobs);
-            this.modified = true;
+            this.modified.set(true);
         }
 
-        if (this.modified) {
+        if (this.modified()) {
             this.updatePage(page);
         }
     }
@@ -207,7 +207,7 @@ export class DashboardService {
         }
 
         this.addNewPage(name);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public rename(page: DashboardPage, name: string) {
@@ -225,7 +225,7 @@ export class DashboardService {
         }
 
         this.renamePage(page, name);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public getGrid(page: DashboardPage): DashboardItem[][] {
@@ -296,19 +296,19 @@ export class DashboardService {
 
     public update(page: DashboardPage): void {
         this.updatePage(page);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public delete(page: DashboardPage): void {
         this.deletePage(page);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public save(): Observable<void> {
         return this.saveCurrentPage().pipe(
             mergeMap(() => {
-                if (this.modified) {
-                    this.modified = false;
+                if (this.modified()) {
+                    this.modified.set(false);
                     return this.savePages();
                 }
 
@@ -466,10 +466,10 @@ export class DashboardService {
     private savePages(): Observable<void> {
         const pages = this._state().pages;
         if (pages.length > 0) {
-            return this.auth.setCookie('.Dashboard', JSON.stringify(pages));
+            return this.auth.setCookie('.DashboardPages', JSON.stringify(pages));
         }
 
-        return this.auth.deleteCookie('.Dashboard');
+        return this.auth.deleteCookie('.DashboardPages');
     }
 
     private saveCurrentPage(): Observable<void> {

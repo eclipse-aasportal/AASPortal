@@ -13,7 +13,6 @@ import { AsyncPipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
     AfterViewInit,
-    AfterViewChecked,
     Component,
     ElementRef,
     OnDestroy,
@@ -83,11 +82,11 @@ interface TimeSeries {
     imports: [NgClass, AsyncPipe, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly map = new Map<string, UpdateTuple>();
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
-    private reset = false;
+    // private reset = false;
     private selections = new Set<string>();
     private selectedSources = new Map<string, number>();
 
@@ -105,13 +104,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     ) {
         effect(() => {
             this.dashboard.activePage();
-            if (untracked(this.editMode)) {
-                this.reset = false;
-            } else {
+            if (!untracked(this.editMode)) {
                 this.closeWebSocket();
                 this.charts.forEach(item => item.chart.destroy());
                 this.map.clear();
-                this.reset = true;
             }
 
             this.selections.clear();
@@ -120,11 +116,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
         effect(() => {
             if (this.editMode()) {
-                this.closeWebSocket();
-                this.charts.forEach(item => item.chart.destroy());
-                this.map.clear();
+                this.enterEditMode();
             } else {
-                this.reset = true;
+                this.leafEditMode();
             }
         });
     }
@@ -202,22 +196,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     public ngAfterViewInit(): void {
         if (this.dashboardToolbar) {
             this.toolbar.set(this.dashboardToolbar);
-        }
-    }
-
-    public ngAfterViewChecked(): void {
-        if (this.reset) {
-            try {
-                this.openWebSocket();
-                if (this.chartContainers) {
-                    this.createCharts(this.chartContainers);
-                    this.play();
-                }
-            } catch (error) {
-                this.notify.error(error);
-            } finally {
-                this.reset = false;
-            }
         }
     }
 
@@ -471,6 +449,30 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
         }
     }
 
+    private enterEditMode(): void {
+        this.closeWebSocket();
+        this.charts.forEach(item => item.chart.destroy());
+        this.map.clear();
+    }
+
+    private leafEditMode(): void {
+        setTimeout(() => {
+            try {
+                this.openWebSocket();
+                if (this.chartContainers) {
+                    this.createCharts(this.chartContainers);
+                    if (this.webSocketSubject) {
+                        for (const request of this.activePage().requests) {
+                            this.webSocketSubject.next(this.createMessage(request));
+                        }
+                    }
+                }
+            } catch (error) {
+                this.notify.error(error);
+            }
+        }, 0);
+    }
+
     private findItem(id: string): DashboardItem | undefined {
         return this.activePage().items.find(item => item.id === id);
     }
@@ -503,14 +505,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit, Aft
                 }
             }
         });
-    }
-
-    private play(): void {
-        if (this.webSocketSubject) {
-            for (const request of this.activePage().requests) {
-                this.webSocketSubject.next(this.createMessage(request));
-            }
-        }
     }
 
     private createChart(item: DashboardChart, canvas: HTMLCanvasElement): void {

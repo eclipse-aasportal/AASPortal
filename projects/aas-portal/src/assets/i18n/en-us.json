@@ -108,6 +108,7 @@
     "LABEL_VIEWS": "Views",
     "LABEL_CATEGORY": "Category",
     "LABEL_SEMANTIC_ID": "Semantic ID",
+    "LABEL_EDIT_MODE": "Edit",
     "PLEASE_WAIT": "Please wait...",
     "PLACEHOLDER_EMAIL": "enter email address",
     "PLACEHOLDER_PASSWORD": "enter password",

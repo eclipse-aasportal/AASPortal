@@ -12,6 +12,7 @@
         {
             "name": "Start aas-server",
             "type": "node",
+            "args": ["--security-revert=CVE-2023-46809"],
             "request": "launch",
             "preLaunchTask": "build-aas-server",
             "program": "${workspaceFolder}/projects/aas-server/build/aas-server.js",

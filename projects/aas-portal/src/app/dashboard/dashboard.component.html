@@ -79,13 +79,13 @@
             <option [ngValue]="page">{{page.name}}</option>
             }
         </select>
-        <button type="button" class="btn btn-primary" (click)="addNew()" [disabled]="!editMode">
+        <button type="button" class="btn btn-primary" (click)="addNew()" [disabled]="!editMode()">
             <i class="bi bi-plus"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="rename()" [disabled]="!editMode">
+        <button type="button" class="btn btn-primary" (click)="rename()" [disabled]="!editMode()">
             <i class="bi bi-pen"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="delete()" [disabled]="!editMode">
+        <button type="button" class="btn btn-primary" (click)="delete()" [disabled]="!editMode()">
             <i class="bi bi-trash"></i>
         </button>
     </div>
