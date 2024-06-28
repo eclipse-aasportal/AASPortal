@@ -16,7 +16,7 @@ describe('configuration', function () {
             expect(urlToEndpoint('http://localhost:1234/?name=Test')).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
-                type: 'AASServer',
+                type: 'AAS_API',
                 version: 'v3',
             } as AASEndpoint);
         });
@@ -25,7 +25,7 @@ describe('configuration', function () {
             expect(urlToEndpoint(new URL('http://localhost:1234/?name=Test'))).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
-                type: 'AASServer',
+                type: 'AAS_API',
                 version: 'v3',
             } as AASEndpoint);
         });
@@ -34,7 +34,7 @@ describe('configuration', function () {
             expect(urlToEndpoint('http://localhost:1234/?name=Test&version=v2')).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
-                type: 'AASServer',
+                type: 'AAS_API',
                 version: 'v2',
             } as AASEndpoint);
         });
@@ -43,7 +43,7 @@ describe('configuration', function () {
             expect(urlToEndpoint('http://localhost:1234/')).toEqual({
                 name: 'http://localhost:1234/',
                 url: 'http://localhost:1234/',
-                type: 'AASServer',
+                type: 'AAS_API',
                 version: 'v3',
             } as AASEndpoint);
         });
@@ -61,7 +61,7 @@ describe('configuration', function () {
             expect(urlToEndpoint(new URL('opc.tcp://172.16.160.178:30001/I4AASServer?version=v1'))).toEqual({
                 name: 'I4AASServer',
                 url: 'opc.tcp://172.16.160.178:30001/I4AASServer',
-                type: 'OpcuaServer',
+                type: 'OPC_UA',
                 version: 'v1',
             } as AASEndpoint);
         });

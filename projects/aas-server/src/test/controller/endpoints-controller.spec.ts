@@ -74,7 +74,7 @@ describe('EndpointsController', function () {
         const endpoints: AASEndpoint = {
             name: 'Test',
             url: 'http://localhost:1234',
-            type: 'AASServer',
+            type: 'AAS_API',
         };
 
         aasProvider.getEndpoints.mockResolvedValue([endpoints]);
