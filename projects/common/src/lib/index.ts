@@ -318,10 +318,10 @@ export function getEndpointType(url: string | URL): AASEndpointType {
         case 'http:':
         case 'https:': {
             const pathname = url.pathname;
-            return pathname && pathname !== '/' ? 'WebDAV' : 'AASServer';
+            return pathname && pathname !== '/' ? 'WebDAV' : 'AAS_API';
         }
         case 'opc.tcp:':
-            return 'OpcuaServer';
+            return 'OPC_UA';
         default:
             throw new Error(`Protocol "${url.protocol}" is not supported.`);
     }

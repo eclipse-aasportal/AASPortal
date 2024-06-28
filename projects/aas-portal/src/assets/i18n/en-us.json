@@ -176,9 +176,9 @@
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
     "AASEndpointType": {
         "FileSystem": "File system",
-        "AASServer": "AAS server",
-        "WebDAV": "Cloud server",
-        "OpcuaServer": "OPC UA Server"
+        "AAS_API": "AAS API",
+        "WebDAV": "WebDAV",
+        "OPC_UA": "OPC UA"
     },
     "CustomerFeedback": {
         "OverallRating": "Overall rating",

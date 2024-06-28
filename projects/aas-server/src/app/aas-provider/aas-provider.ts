@@ -185,6 +185,10 @@ export class AASProvider {
      * @param url The endpoint URL.
      */
     public async addEndpointAsync(name: string, endpoint: AASEndpoint): Promise<void> {
+        if (name !== endpoint.name) {
+            throw new Error('Invalid operation.');
+        }
+
         await this.resourceFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {

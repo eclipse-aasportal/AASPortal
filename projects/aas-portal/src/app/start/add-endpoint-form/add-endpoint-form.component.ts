@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointType, stringFormat } from 'common';
 
@@ -23,7 +23,7 @@ export interface EndpointItem {
     templateUrl: './add-endpoint-form.component.html',
     styleUrls: ['./add-endpoint-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, TranslateModule, FormsModule],
+    imports: [NgbToast, NgbDropdownModule, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEndpointFormComponent {
@@ -39,17 +39,15 @@ export class AddEndpointFormComponent {
 
     public readonly name = signal('');
 
-    public readonly version = signal('v3');
-
     public readonly items = signal<EndpointItem[]>([
         {
-            name: this.translate.instant('AASEndpointType.AASServer'),
-            type: 'AASServer',
+            name: this.translate.instant('AASEndpointType.AAS_API'),
+            type: 'AAS_API',
             value: 'http://',
         },
         {
-            name: this.translate.instant('AASEndpointType.OpcuaServer'),
-            type: 'OpcuaServer',
+            name: this.translate.instant('AASEndpointType.OPC_UA'),
+            type: 'OPC_UA',
             value: 'opc.tcp://',
         },
         {
@@ -84,7 +82,15 @@ export class AddEndpointFormComponent {
         const name = this.validateName();
         const url = this.validateUrl(this.item().value.trim());
         if (name && url) {
-            const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type, version: this.version() };
+            let version = url.searchParams.get('version');
+            url.search = '';
+            const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type };
+            if (version) {
+                endpoint.version = version;
+            } else if (this.item().type === 'AAS_API') {
+                version = 'v3';
+            }
+
             this.modal.close(endpoint);
         }
     }
@@ -124,13 +130,13 @@ export class AddEndpointFormComponent {
         try {
             const url = new URL(value);
             switch (this.item().type) {
-                case 'AASServer':
-                    this.validateAASServerEndpoint(url);
+                case 'AAS_API':
+                    this.validateAASApiEndpoint(url);
                     break;
                 case 'FileSystem':
                     this.validateFileSystemEndpoint(url);
                     break;
-                case 'OpcuaServer':
+                case 'OPC_UA':
                     this.validateOpcuaEndpoint(url);
                     break;
                 case 'WebDAV':
@@ -153,13 +159,9 @@ export class AddEndpointFormComponent {
         return stringFormat(this.translate.instant(id), args);
     }
 
-    private validateAASServerEndpoint(url: URL): void {
+    private validateAASApiEndpoint(url: URL): void {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
             throw new Error('Protocol "http:" or "https:" expected.');
-        }
-
-        if (url.pathname !== '/') {
-            throw new Error(`Unexpected pathname "${url.pathname}".`);
         }
     }
 

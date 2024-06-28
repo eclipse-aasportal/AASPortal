@@ -46,7 +46,7 @@ export type AASAbbreviation =
     | 'SML';
 
 /** The kind of AAS container or server. */
-export type AASEndpointType = 'FileSystem' | 'AASServer' | 'OpcuaServer' | 'WebDAV';
+export type AASEndpointType = 'FileSystem' | 'AAS_API' | 'OPC_UA' | 'WebDAV';
 
 /** The endpoint to an AAS container */
 export type AASEndpoint = {

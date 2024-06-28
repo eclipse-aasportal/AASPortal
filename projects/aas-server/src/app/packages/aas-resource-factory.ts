@@ -31,7 +31,7 @@ export class AASResourceFactory {
      */
     public create(endpoint: AASEndpoint): AASResource {
         switch (endpoint.type) {
-            case 'AASServer':
+            case 'AAS_API':
                 switch (endpoint.version) {
                     case 'v3':
                         return new AASApiClientV3(this.logger, endpoint.url, endpoint.name);
@@ -40,7 +40,7 @@ export class AASResourceFactory {
                     default:
                         throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                 }
-            case 'OpcuaServer':
+            case 'OPC_UA':
                 return new OpcuaClient(this.logger, endpoint.url, endpoint.name);
             case 'WebDAV':
             case 'FileSystem': {
@@ -64,7 +64,7 @@ export class AASResourceFactory {
     public async testAsync(endpoint: AASEndpoint): Promise<void> {
         try {
             switch (endpoint.type) {
-                case 'AASServer':
+                case 'AAS_API':
                     switch (endpoint.version) {
                         case 'v3':
                             await new AASApiClientV3(this.logger, endpoint.url, endpoint.name).testAsync();
@@ -76,7 +76,7 @@ export class AASResourceFactory {
                             throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                     }
                     break;
-                case 'OpcuaServer':
+                case 'OPC_UA':
                     await new OpcuaClient(this.logger, endpoint.url, endpoint.name).testAsync();
                     break;
                 case 'WebDAV':
