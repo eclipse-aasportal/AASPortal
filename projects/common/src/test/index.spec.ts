@@ -336,11 +336,11 @@ describe('index', () => {
 
     describe('getEndpointType', () => {
         it('gets the endpoint type from an URL string', () => {
-            expect(getEndpointType('http://localhost:1234/')).toEqual('AASServer');
+            expect(getEndpointType('http://localhost:1234/')).toEqual('AAS_API');
         });
 
         it('gets the endpoint type from a URL', () => {
-            expect(getEndpointType(new URL('opc.tcp://localhost:1234/I4AASServer'))).toEqual('OpcuaServer');
+            expect(getEndpointType(new URL('opc.tcp://localhost:1234/I4AASServer'))).toEqual('OPC_UA');
         });
 
         it('gets "AASServer" as default', () => {
