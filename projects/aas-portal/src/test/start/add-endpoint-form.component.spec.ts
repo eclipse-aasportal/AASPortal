@@ -108,7 +108,7 @@ describe('AddEndpointFormComponent', () => {
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('I4AAS Server');
         expect(endpoint?.url).toEqual('opc.tcp://localhost:30001/I4AASServer');
-        expect(endpoint?.type).toEqual('OpcuaServer');
+        expect(endpoint?.type).toEqual('OPC_UA');
     });
 
     it('ignores AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://"', () => {
@@ -138,7 +138,7 @@ describe('AddEndpointFormComponent', () => {
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('AASX Server');
         expect(endpoint?.url).toEqual('http://localhost:50001/');
-        expect(endpoint?.type).toEqual('AASServer');
+        expect(endpoint?.type).toEqual('AAS_API');
     });
 
     it('submits WebDAV server Name: "WebDAV", URL: "http://localhost:8080/root/folder"', () => {
