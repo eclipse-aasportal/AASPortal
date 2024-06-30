@@ -43,9 +43,12 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
     private readonly subscription = new Subscription();
 
     public constructor(private readonly translate: TranslateService) {
-        effect(() => {
-            this.init(this.submodels());
-        });
+        effect(
+            () => {
+                this.init(this.submodels());
+            },
+            { allowSignalWrites: true },
+        );
     }
 
     public readonly submodels = input<DocumentSubmodelPair[] | null>(null);

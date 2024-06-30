@@ -22,7 +22,7 @@ describe('configuration', () => {
         });
 
         it('gets an endpoint from an URL', () => {
-            expect(urlToEndpoint(new URL('http://localhost:1234/?name=Test'))).toEqual({
+            expect(urlToEndpoint(new URL('http://localhost:1234/?name=Test&type=aas-api'))).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
                 type: 'AAS_API',
@@ -49,7 +49,7 @@ describe('configuration', () => {
         });
 
         it('gets an endpoint of an WebDAV server', () => {
-            expect(urlToEndpoint('http://localhost:1234/endpoints/samples')).toEqual({
+            expect(urlToEndpoint('http://localhost:1234/endpoints/samples?type=webdav')).toEqual({
                 name: 'samples',
                 url: 'http://localhost:1234/endpoints/samples',
                 type: 'WebDAV',
