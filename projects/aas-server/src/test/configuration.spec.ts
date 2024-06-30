@@ -10,9 +10,9 @@ import { describe, it, expect } from '@jest/globals';
 import { AASEndpoint } from 'common';
 import { urlToEndpoint } from '../app/configuration.js';
 
-describe('configuration', function () {
-    describe('urlToEndpoint', function () {
-        it('gets an endpoint from an URL string', function () {
+describe('configuration', () => {
+    describe('urlToEndpoint', () => {
+        it('gets an endpoint from an URL string', () => {
             expect(urlToEndpoint('http://localhost:1234/?name=Test')).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
@@ -21,7 +21,7 @@ describe('configuration', function () {
             } as AASEndpoint);
         });
 
-        it('gets an endpoint from an URL', function () {
+        it('gets an endpoint from an URL', () => {
             expect(urlToEndpoint(new URL('http://localhost:1234/?name=Test'))).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
@@ -30,7 +30,7 @@ describe('configuration', function () {
             } as AASEndpoint);
         });
 
-        it('gets the endpoint name from a URL', function () {
+        it('gets the endpoint name from a URL', () => {
             expect(urlToEndpoint('http://localhost:1234/?name=Test&version=v2')).toEqual({
                 name: 'Test',
                 url: 'http://localhost:1234/',
@@ -39,7 +39,7 @@ describe('configuration', function () {
             } as AASEndpoint);
         });
 
-        it('gets an endpoint of an AASX server', function () {
+        it('gets an endpoint of an AASX server', () => {
             expect(urlToEndpoint('http://localhost:1234/')).toEqual({
                 name: 'http://localhost:1234/',
                 url: 'http://localhost:1234/',
@@ -48,7 +48,7 @@ describe('configuration', function () {
             } as AASEndpoint);
         });
 
-        it('gets an endpoint of an WebDAV server', function () {
+        it('gets an endpoint of an WebDAV server', () => {
             expect(urlToEndpoint('http://localhost:1234/endpoints/samples')).toEqual({
                 name: 'samples',
                 url: 'http://localhost:1234/endpoints/samples',
@@ -57,7 +57,7 @@ describe('configuration', function () {
             } as AASEndpoint);
         });
 
-        it('gets an endpoint of an OPCUA server', function () {
+        it('gets an endpoint of an OPCUA server', () => {
             expect(urlToEndpoint(new URL('opc.tcp://172.16.160.178:30001/I4AASServer?version=v1'))).toEqual({
                 name: 'I4AASServer',
                 url: 'opc.tcp://172.16.160.178:30001/I4AASServer',
@@ -66,7 +66,7 @@ describe('configuration', function () {
             } as AASEndpoint);
         });
 
-        it('gets an endpoint of an local directory', function () {
+        it('gets an endpoint of an local directory', () => {
             expect(urlToEndpoint('file:///endpoints/samples')).toEqual({
                 name: 'samples',
                 url: 'file:///endpoints/samples',

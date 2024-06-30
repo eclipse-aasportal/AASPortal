@@ -27,7 +27,7 @@ import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
 
-describe('ContainersController', function () {
+describe('ContainersController', () => {
     let app: Express;
     let logger: Logger;
     let auth: jest.Mocked<AuthService>;
@@ -35,7 +35,7 @@ describe('ContainersController', function () {
     let variable: jest.Mocked<Variable>;
     let authentication: jest.Mocked<Authentication>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>([
@@ -78,7 +78,7 @@ describe('ContainersController', function () {
         app.use(errorHandler);
     });
 
-    it('getPackage: /api/v1/containers/:endpoint/packages/:id', async function () {
+    it('getPackage: /api/v1/containers/:endpoint/packages/:id', async () => {
         aasProvider.getPackageAsync.mockReturnValue(
             new Promise<NodeJS.ReadableStream>(resolve => {
                 const s = new Readable();
@@ -97,7 +97,7 @@ describe('ContainersController', function () {
         expect(aasProvider.getPackageAsync).toHaveBeenCalled();
     });
 
-    it('addPackage: /api/v1/containers/:endpoint/packages', async function () {
+    it('addPackage: /api/v1/containers/:endpoint/packages', async () => {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .post('/api/v1/containers/U2FtcGxl/packages')
@@ -108,7 +108,7 @@ describe('ContainersController', function () {
         expect(aasProvider.addPackagesAsync).toHaveBeenCalled();
     });
 
-    it('deletePackage: /api/v1/containers/:endpoint/packages/:id', async function () {
+    it('deletePackage: /api/v1/containers/:endpoint/packages/:id', async () => {
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .delete('/api/v1/containers/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
@@ -118,7 +118,7 @@ describe('ContainersController', function () {
         expect(aasProvider.deletePackageAsync).toHaveBeenCalled();
     });
 
-    it('getDocument: /api/v1/containers/:endpoint/documents/:id', async function () {
+    it('getDocument: /api/v1/containers/:endpoint/documents/:id', async () => {
         aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/containers/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
@@ -129,7 +129,7 @@ describe('ContainersController', function () {
         expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
     });
 
-    it('getDocumentContent: /api/v1/containers/:url/documents/:id/content', async function () {
+    it('getDocumentContent: /api/v1/containers/:url/documents/:id/content', async () => {
         aasProvider.getContentAsync.mockReturnValue(
             new Promise<aas.Environment>(resolve => {
                 resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
@@ -144,8 +144,8 @@ describe('ContainersController', function () {
         expect(aasProvider.getContentAsync).toHaveBeenCalled();
     });
 
-    describe('getDataElementValue: /api/v1/containers/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', function () {
-        it('gets the value of a File that represents an image', async function () {
+    describe('getDataElementValue: /api/v1/containers/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', () => {
+        it('gets the value of a File that represents an image', async () => {
             aasProvider.getDataElementValueAsync.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
@@ -165,7 +165,7 @@ describe('ContainersController', function () {
             expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
         });
 
-        it('gets the value of a File', async function () {
+        it('gets the value of a File', async () => {
             aasProvider.getDataElementValueAsync.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
@@ -186,7 +186,7 @@ describe('ContainersController', function () {
             expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
         });
 
-        it('gets the value of a Blob', async function () {
+        it('gets the value of a Blob', async () => {
             aasProvider.getDataElementValueAsync.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
@@ -208,7 +208,7 @@ describe('ContainersController', function () {
         });
     });
 
-    it('updateDocument: /api/v1/containers/:url/documents/:id', async function () {
+    it('updateDocument: /api/v1/containers/:url/documents/:id', async () => {
         aasProvider.updateDocumentAsync.mockReturnValue(Promise.resolve([]));
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
@@ -224,7 +224,7 @@ describe('ContainersController', function () {
         expect(aasProvider.updateDocumentAsync).toHaveBeenCalled();
     });
 
-    it('invokeOperation: /api/v1/containers/:url/documents/:id/invoke', async function () {
+    it('invokeOperation: /api/v1/containers/:url/documents/:id/invoke', async () => {
         const operation: aas.Operation = {
             idShort: 'noop',
             modelType: 'Operation',
