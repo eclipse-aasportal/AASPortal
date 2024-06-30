@@ -23,7 +23,7 @@
         </tr>
     </thead>
     <tbody>
-        @for (node of nodes(); track node) {
+        @for (node of nodes(); track node.id) {
         <tr [ngClass]="visualState(node)" [id]="node.id">
             <td>
                 <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)"

@@ -17,7 +17,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (library of libraries(); track library) {
+    @for (library of libraries(); track library.name) {
       <tr>
         <th scope="row">{{library.id}}</th>
         <td [noWrap]="true">

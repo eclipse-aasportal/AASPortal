@@ -35,7 +35,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (variable of inputVariables(); track variable) {
+                @for (variable of inputVariables(); track variable.name) {
                 <tr>
                     <td>{{variable.name}}</td>
                     @if (variable.inputType === 'text') {
@@ -72,7 +72,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (variable of outputVariables(); track variable) {
+                @for (variable of outputVariables(); track variable.name) {
                 <tr>
                     <td>{{variable.name}}</td>
                     @if (variable.inputType === 'text') {
