@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -23,6 +23,7 @@ export interface EndpointSelect {
     styleUrls: ['./remove-endpoint-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RemoveEndpointFormComponent {
     public constructor(
@@ -30,9 +31,9 @@ export class RemoveEndpointFormComponent {
         private translate: TranslateService,
     ) {}
 
-    public endpoints: EndpointSelect[] = [];
+    public readonly endpoints = signal<EndpointSelect[]>([]);
 
-    public messages: string[] = [];
+    public readonly messages = signal<string[]>([]);
 
     public inputChange() {
         this.clearMessages();
@@ -40,12 +41,14 @@ export class RemoveEndpointFormComponent {
 
     public submit(): void {
         this.clearMessages();
-        const result = this.endpoints.filter(item => item.selected).map(item => item.name);
+        const result = this.endpoints()
+            .filter(item => item.selected)
+            .map(item => item.name);
 
         if (result.length > 0) {
             this.modal.close(result);
         } else {
-            this.messages.push(this.translate.instant('ERROR_NO_ELEMENT_SELECTED'));
+            this.messages.update(messages => [...messages, this.translate.instant('ERROR_NO_ELEMENT_SELECTED')]);
         }
     }
 
@@ -55,7 +58,7 @@ export class RemoveEndpointFormComponent {
 
     private clearMessages(): void {
         if (this.messages.length > 0) {
-            this.messages = [];
+            this.messages.set([]);
         }
     }
 }

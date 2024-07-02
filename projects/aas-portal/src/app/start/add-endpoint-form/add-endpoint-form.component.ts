@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointType, stringFormat } from 'common';
 
@@ -23,53 +23,53 @@ export interface EndpointItem {
     templateUrl: './add-endpoint-form.component.html',
     styleUrls: ['./add-endpoint-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, TranslateModule, FormsModule],
+    imports: [NgbToast, NgbDropdownModule, TranslateModule, FormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEndpointFormComponent {
+    private readonly endpoints = signal<AASEndpoint[]>([]);
+    public readonly _messages = signal<string[]>([]);
+
     public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-    ) {
-        this.items = [
-            {
-                name: this.translate.instant('AASEndpointType.AASServer'),
-                type: 'AASServer',
-                value: 'http://',
-            },
-            {
-                name: this.translate.instant('AASEndpointType.OpcuaServer'),
-                type: 'OpcuaServer',
-                value: 'opc.tcp://',
-            },
-            {
-                name: this.translate.instant('AASEndpointType.WebDAV'),
-                type: 'WebDAV',
-                value: 'http://',
-            },
-            {
-                name: this.translate.instant('AASEndpointType.FileSystem'),
-                type: 'FileSystem',
-                value: 'file:///',
-            },
-        ];
+    ) {}
 
-        this.item = this.items[0];
+    public readonly messages = this._messages.asReadonly();
+
+    public readonly name = signal('');
+
+    public readonly items = signal<EndpointItem[]>([
+        {
+            name: this.translate.instant('AASEndpointType.AAS_API'),
+            type: 'AAS_API',
+            value: 'http://',
+        },
+        {
+            name: this.translate.instant('AASEndpointType.OPC_UA'),
+            type: 'OPC_UA',
+            value: 'opc.tcp://',
+        },
+        {
+            name: this.translate.instant('AASEndpointType.WebDAV'),
+            type: 'WebDAV',
+            value: 'http://',
+        },
+        {
+            name: this.translate.instant('AASEndpointType.FileSystem'),
+            type: 'FileSystem',
+            value: 'file:///',
+        },
+    ]).asReadonly();
+
+    public readonly item = signal(this.items()[0]);
+
+    public initialize(endpoints: AASEndpoint[]): void {
+        this.endpoints.set(endpoints);
     }
 
-    public endpoints: AASEndpoint[] = [];
-
-    public messages: string[] = [];
-
-    public name = '';
-
-    public version = 'v3';
-
-    public readonly items: EndpointItem[];
-
-    public item: EndpointItem;
-
     public setItem(value: EndpointItem): void {
-        this.item = value;
+        this.item.set(value);
         this.clearMessages();
     }
 
@@ -80,9 +80,17 @@ export class AddEndpointFormComponent {
     public submit(): void {
         this.clearMessages();
         const name = this.validateName();
-        const url = this.validateUrl(this.item.value.trim());
+        const url = this.validateUrl(this.item().value.trim());
         if (name && url) {
-            const endpoint: AASEndpoint = { url: url.href, name, type: this.item.type, version: this.version };
+            let version = url.searchParams.get('version');
+            url.search = '';
+            const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type };
+            if (version) {
+                endpoint.version = version;
+            } else if (this.item().type === 'AAS_API') {
+                version = 'v3';
+            }
+
             this.modal.close(endpoint);
         }
     }
@@ -92,20 +100,23 @@ export class AddEndpointFormComponent {
     }
 
     private clearMessages(): void {
-        if (this.messages.length > 0) {
-            this.messages = [];
+        if (this._messages.length > 0) {
+            this._messages.set([]);
         }
     }
 
     private validateName(): string | undefined {
-        let name: string | undefined = this.name.trim();
+        let name: string | undefined = this.name().trim();
         if (!name) {
-            this.messages.push(this.createMessage('ERROR_EMPTY_ENDPOINT_NAME'));
+            this._messages.update(messages => [...messages, this.createMessage('ERROR_EMPTY_ENDPOINT_NAME')]);
             name = undefined;
         } else {
-            for (const endpoint of this.endpoints) {
+            for (const endpoint of this.endpoints()) {
                 if (endpoint.name.toLocaleLowerCase() === name.toLocaleLowerCase()) {
-                    this.messages.push(this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name));
+                    this._messages.update(messages => [
+                        ...messages,
+                        this.createMessage('ERROR_ENDPOINT_ALREADY_EXIST', name),
+                    ]);
                     name = undefined;
                     break;
                 }
@@ -118,14 +129,14 @@ export class AddEndpointFormComponent {
     private validateUrl(value: string): URL | undefined {
         try {
             const url = new URL(value);
-            switch (this.item.type) {
-                case 'AASServer':
-                    this.validateAASServerEndpoint(url);
+            switch (this.item().type) {
+                case 'AAS_API':
+                    this.validateAASApiEndpoint(url);
                     break;
                 case 'FileSystem':
                     this.validateFileSystemEndpoint(url);
                     break;
-                case 'OpcuaServer':
+                case 'OPC_UA':
                     this.validateOpcuaEndpoint(url);
                     break;
                 case 'WebDAV':
@@ -135,7 +146,11 @@ export class AddEndpointFormComponent {
 
             return url;
         } catch (error) {
-            this.messages.push(this.createMessage('ERROR_INVALID_URL', this.item.value));
+            this._messages.update(messages => [
+                ...messages,
+                this.createMessage('ERROR_INVALID_URL', this.item().value),
+            ]);
+
             return undefined;
         }
     }
@@ -144,13 +159,9 @@ export class AddEndpointFormComponent {
         return stringFormat(this.translate.instant(id), args);
     }
 
-    private validateAASServerEndpoint(url: URL): void {
+    private validateAASApiEndpoint(url: URL): void {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
             throw new Error('Protocol "http:" or "https:" expected.');
-        }
-
-        if (url.pathname !== '/') {
-            throw new Error(`Unexpected pathname "${url.pathname}".`);
         }
     }
 

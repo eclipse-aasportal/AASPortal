@@ -9,18 +9,9 @@
 import { AsyncPipe } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    Input,
-    OnChanges,
-    OnDestroy,
-    OnInit,
-    SimpleChanges,
-    signal,
-} from '@angular/core';
-
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
+
 import { CultureInfo } from './culture-info';
 import { WindowService } from '../window.service';
 
@@ -32,20 +23,26 @@ import { WindowService } from '../window.service';
     imports: [AsyncPipe, NgbModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
+export class LocalizeComponent implements OnInit, OnDestroy {
     private readonly subscription = new Subscription();
-    private readonly _cultures = signal<CultureInfo[]>([]);
-    private readonly _culture = signal<CultureInfo | undefined>(undefined);
+    private readonly _culture = signal<CultureInfo | null>(null);
 
     public constructor(
         private readonly translate: TranslateService,
         private readonly window: WindowService,
     ) {}
 
-    @Input()
-    public languages: string[] = ['en-us'];
+    public readonly languages = input<string[]>(['en-us']);
 
-    public readonly cultures = this._cultures.asReadonly();
+    public readonly cultures = computed(() => {
+        return this.languages().map(
+            lang =>
+                ({
+                    localeId: lang,
+                    name: new Intl.DisplayNames([lang], { type: 'language' }).of(lang),
+                }) as CultureInfo,
+        );
+    });
 
     public readonly culture = this._culture.asReadonly();
 
@@ -66,32 +63,12 @@ export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['languages']) {
-            const items = this.languages.map(
-                lang =>
-                    ({
-                        localeId: lang,
-                        name: new Intl.DisplayNames([lang], { type: 'language' }).of(lang),
-                    }) as CultureInfo,
-            );
-
-            const current =
-                this.findCulture(items, this.translate.currentLang) ??
-                this.findCulture(items, this.translate.defaultLang) ??
-                items[0];
-
-            this._cultures.set(items);
-            this._culture.set(current);
-        }
-    }
-
     public ngOnDestroy() {
         this.subscription.unsubscribe();
     }
 
     private onLangChange = (value: LangChangeEvent): void => {
-        const item = this.findCulture(this._cultures(), value.lang);
+        const item = this.findCulture(this.cultures(), value.lang);
         if (item) {
             this._culture.set(item);
         }

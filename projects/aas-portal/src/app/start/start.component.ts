@@ -6,12 +6,21 @@
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    TemplateRef,
+    ViewChild,
+    computed,
+} from '@angular/core';
+
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'common';
-import { BehaviorSubject, catchError, EMPTY, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
+import { catchError, EMPTY, first, from, map, mergeMap, Observable, of } from 'rxjs';
 import {
     AASTableComponent,
     AuthService,
@@ -45,12 +54,9 @@ import { AsyncPipe, NgClass } from '@angular/common';
     styleUrls: ['./start.component.scss'],
     standalone: true,
     imports: [AASTableComponent, NgClass, AsyncPipe, TranslateModule, NgbModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy, AfterViewInit {
-    private readonly subscription = new Subscription();
-    private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
-    private _selected: AASDocument[] = [];
-
     public constructor(
         private readonly store: StartStore,
         private readonly router: Router,
@@ -66,9 +72,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         private readonly favorites: FavoritesService,
         private readonly indexChange: IndexChangeService,
     ) {
-        this.endpoints = this.api.getEndpoints();
-
-        if (this.store.viewMode === ViewMode.Undefined) {
+        if (this.store.viewMode() === ViewMode.Undefined) {
             this.auth.ready.pipe(first(ready => ready)).subscribe({
                 next: () => this.store.getFirstPage(),
                 error: error => this.notify.error(error),
@@ -79,70 +83,41 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
-    public get activeFavorites(): string {
-        return this.store.activeFavorites;
-    }
+    public readonly activeFavorites = this.store.activeFavorites;
 
-    public get favoritesLists(): string[] {
-        return ['', ...this.favorites.lists.map(list => list.name)];
-    }
+    public readonly favoritesLists = this.store.favoritesLists;
 
-    public get filter(): string {
-        return this.store.activeFavorites ? this.store.filterText : '';
-    }
+    public readonly filter = this.store.filter;
 
-    public get viewMode(): ViewMode {
-        return this.store.viewMode;
-    }
+    public readonly viewMode = this.store.viewMode;
 
-    public get limit(): number {
-        return this.store.limit;
-    }
+    public readonly limit = this.store.limit;
 
-    public get filterText(): string {
-        return this.store.filterText;
-    }
+    public readonly filterText = this.store.filterText;
 
-    public get isFirstPage(): boolean {
-        return this.store.isFirstPage;
-    }
+    public readonly isFirstPage = this.store.isFirstPage;
 
-    public get isLastPage(): boolean {
-        return this.store.isLastPage;
-    }
+    public readonly isLastPage = this.store.isLastPage;
 
-    public readonly endpoints: Observable<AASEndpoint[]>;
+    public readonly endpoints = this.api.getEndpoints();
 
-    public get documents(): AASDocument[] {
-        return this.store.documents;
-    }
+    public readonly documents = this.store.documents;
 
     public readonly count = this.indexChange.count;
 
-    public get selected(): AASDocument[] {
-        return this._selected;
-    }
+    public readonly selected = this.store.selected;
 
-    public set selected(values: AASDocument[]) {
-        this._selected = values;
-        this.someSelectedDocuments.next(values.length > 0);
-    }
+    public readonly canDownloadDocument = computed(() => (this.selected().length > 0 ? true : false));
 
-    public get canDownloadDocument(): boolean {
-        return this._selected.length > 0 ? true : false;
-    }
+    public readonly canDeleteDocument = computed(() => this.selected().length > 0);
 
-    public get canDeleteDocument(): boolean {
-        return this._selected.length > 0;
-    }
+    public readonly canViewUserFeedback = computed(() =>
+        this.selected().some(document => this.selectSubmodels(document, CustomerFeedback).length === 1),
+    );
 
-    public get canViewUserFeedback(): boolean {
-        return this._selected.some(document => this.selectSubmodels(document, CustomerFeedback).length === 1);
-    }
-
-    public get canViewNameplate(): boolean {
-        return this._selected.some(document => this.selectSubmodels(document, ZVEINameplate).length === 1);
-    }
+    public readonly canViewNameplate = computed(() =>
+        this.selected().some(document => this.selectSubmodels(document, ZVEINameplate).length === 1),
+    );
 
     public ngAfterViewInit(): void {
         if (this.startToolbar) {
@@ -152,7 +127,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-        this.subscription.unsubscribe();
     }
 
     public setActiveFavorites(value: string): void {
@@ -164,23 +138,20 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         }
     }
 
-    public setViewMode(viewMode: string | ViewMode): Observable<void> {
-        return of(this.activeFavorites).pipe(
-            map(currentFavorites => {
-                if (viewMode === ViewMode.List) {
-                    if (!currentFavorites) {
-                        this.store.getFirstPage();
-                    } else {
-                        const favoritesList = this.favorites.get(currentFavorites);
-                        if (favoritesList) {
-                            this.store.getFavorites(favoritesList.name, favoritesList.documents);
-                        }
-                    }
-                } else {
-                    this.store.setTreeView(this._selected);
+    public setViewMode(viewMode: string | ViewMode): void {
+        const activeFavorites = this.activeFavorites();
+        if (viewMode === ViewMode.List) {
+            if (!activeFavorites) {
+                this.store.getFirstPage();
+            } else {
+                const favoritesList = this.favorites.get(activeFavorites);
+                if (favoritesList) {
+                    this.store.getFavorites(favoritesList.name, favoritesList.documents);
                 }
-            }),
-        );
+            }
+        } else {
+            this.store.setTreeView(this.selected());
+        }
     }
 
     public addEndpoint(): Observable<void> {
@@ -188,7 +159,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             mergeMap(() => this.api.getEndpoints()),
             map(endpoints => {
                 const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints = endpoints;
+                modalRef.componentInstance.initialize(endpoints);
                 return modalRef;
             }),
             mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
@@ -206,16 +177,18 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             mergeMap(() => this.api.getEndpoints()),
             mergeMap(endpoints => {
                 const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints = endpoints
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(
-                        item =>
-                            ({
-                                name: item.name,
-                                url: item.url,
-                                selected: false,
-                            }) as EndpointSelect,
-                    );
+                modalRef.componentInstance.endpoints.set(
+                    endpoints
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map(
+                            item =>
+                                ({
+                                    name: item.name,
+                                    url: item.url,
+                                    selected: false,
+                                }) as EndpointSelect,
+                        ),
+                );
                 return from<Promise<string[] | undefined>>(modalRef.result);
             }),
             mergeMap(endpoints => from(endpoints ?? [])),
@@ -241,8 +214,8 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             mergeMap(() => this.api.getEndpoints()),
             mergeMap(endpoints => {
                 const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints = endpoints.sort((a, b) => a.name.localeCompare(b.name));
-                modalRef.componentInstance.endpoint = endpoints[0];
+                modalRef.componentInstance.endpoints.set(endpoints.sort((a, b) => a.name.localeCompare(b.name)));
+                modalRef.componentInstance.endpoint.set(endpoints[0]);
                 return from<Promise<string | undefined>>(modalRef.result);
             }),
             map(result => {
@@ -255,7 +228,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public downloadDocument(): Observable<void> {
-        return from(this._selected).pipe(
+        return from(this.selected()).pipe(
             mergeMap(document =>
                 this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
@@ -264,15 +237,15 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public deleteDocument(): Observable<void> {
-        if (this._selected.length === 0) {
+        if (this.selected().length === 0) {
             return EMPTY;
         }
 
-        return of(this.activeFavorites).pipe(
+        return of(this.activeFavorites()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this._selected, activeFavorites);
-                    this.store.removeFavorites([...this._selected]);
+                    this.favorites.remove(this.selected(), activeFavorites);
+                    this.store.removeFavorites([...this.selected()]);
                     return of(void 0);
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
@@ -280,11 +253,13 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                             this.window.confirm(
                                 stringFormat(
                                     this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                                    this._selected.map(item => item.idShort).join(', '),
+                                    this.selected()
+                                        .map(item => item.idShort)
+                                        .join(', '),
                                 ),
                             ),
                         ),
-                        mergeMap(result => from(result ? this._selected : [])),
+                        mergeMap(result => from(result ? this.selected() : [])),
                         mergeMap(document => this.api.delete(document.id, document.endpoint)),
                         catchError(error => this.notify.error(error)),
                     );
@@ -299,7 +274,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             submodels: [],
         };
 
-        for (const document of this._selected) {
+        for (const document of this.selected()) {
             const submodels = this.selectSubmodels(document, CustomerFeedback);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
@@ -322,7 +297,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             submodels: [],
         };
 
-        for (const document of this._selected) {
+        for (const document of this.selected()) {
             const submodels = this.selectSubmodels(document, ZVEINameplate);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
@@ -386,11 +361,11 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     public addToFavorites(): Observable<void> {
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this._selected];
+                modalRef.componentInstance.documents = [...this.selected()];
                 return from(modalRef.result);
             }),
             map(() => {
-                this.selected = [];
+                this.selected.set([]);
             }),
         );
     }

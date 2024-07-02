@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AttributeIds, ClientSession, DataType, DataValue, NodeId, VariantArrayType } from 'node-opcua';
-import { NodeCrawler } from 'node-opcua-client-crawler';
+import { NodeCrawler, NodeCrawlerClientSession } from 'node-opcua-client-crawler';
 import { OpaqueStructure } from 'node-opcua-extension-object';
 import { Readable } from 'stream';
 import { OpcuaClient } from './opcua-client.js';
@@ -87,7 +87,7 @@ export class OpcuaPackage extends AASPackage {
     }
 
     private async crawlAsync(): Promise<OPCUAComponent> {
-        const crawler = new NodeCrawler(this.server.getSession());
+        const crawler = new NodeCrawler(this.server.getSession() as unknown as NodeCrawlerClientSession);
         const component = (await crawler.read(NodeId.resolveNodeId(this.nodeId))) as OPCUAComponent;
         await this.resolveAsync(component);
         return component;

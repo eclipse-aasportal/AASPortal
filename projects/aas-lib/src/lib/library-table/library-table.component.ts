@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { Library } from 'common';
@@ -21,35 +21,27 @@ export interface LibraryRow extends Library {
     styleUrls: ['./library-table.component.scss'],
     standalone: true,
     imports: [NgbPagination, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LibraryTableComponent implements OnChanges {
-    @Input()
-    public collection: Library[] = [];
+export class LibraryTableComponent {
+    public readonly collection = input<Library[]>([]);
 
-    @Input()
-    public pageSize = 10;
+    public readonly pageSize = input(10);
 
-    public libraries: LibraryRow[] = [];
+    public readonly size = computed(() => this.collection().length);
 
-    public get size(): number {
-        return this.collection.length;
-    }
+    public readonly page = signal(1);
 
-    public page = 1;
-
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['collection'] || changes['pageSize']) {
-            this.refreshLibraries();
-        }
-    }
-
-    public refreshLibraries(): void {
-        if (this.pageSize > 0 && this.size > this.pageSize) {
-            this.libraries = this.collection
+    public readonly libraries = computed(() => {
+        const collection = this.collection();
+        const pageSize = this.pageSize();
+        const page = this.page();
+        if (pageSize > 0 && collection.length > pageSize) {
+            return collection
                 .map((library, i) => ({ id: i + 1, ...library }))
-                .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
-        } else {
-            this.libraries = this.collection.map((library, i) => ({ id: i + 1, ...library }));
+                .slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
         }
-    }
+
+        return this.collection().map((library, i) => ({ id: i + 1, ...library }));
+    });
 }

@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, mergeMap, of, skipWhile } from 'rxjs';
+import { EMPTY, first, map, of, skipWhile } from 'rxjs';
 
 import { WindowService } from '../../lib/window.service';
 import { NotifyService } from '../../lib/notify/notify.service';
@@ -20,6 +20,7 @@ import { getGuestToken, getToken } from '../assets/json-web-token';
 import { LoginFormResult } from '../../lib/auth/login-form/login-form.component';
 import { RegisterFormResult } from '../../lib/auth/register-form/register-form.component';
 import { ProfileFormResult } from '../../lib/auth/profile-form/profile-form.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -57,47 +58,42 @@ describe('AuthService', () => {
             window.getLocalStorageItem.and.returnValue(null);
 
             TestBed.configureTestingModule({
-                declarations: [],
-                providers: [
-                    {
-                        provide: WindowService,
-                        useValue: window,
-                    },
-                    {
-                        provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
-                    },
-                    {
-                        provide: AuthApiService,
-                        useValue: api,
-                    },
-                ],
-                imports: [
-                    HttpClientTestingModule,
-                    TranslateModule.forRoot({
-                        loader: {
-                            provide: TranslateLoader,
-                            useClass: TranslateFakeLoader,
-                        },
-                    }),
-                ],
-            });
+    declarations: [],
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [
+        {
+            provide: WindowService,
+            useValue: window,
+        },
+        {
+            provide: NotifyService,
+            useValue: jasmine.createSpyObj<NotifyService>(['error']),
+        },
+        {
+            provide: AuthApiService,
+            useValue: api,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
             service = TestBed.inject(AuthService);
             modal = TestBed.inject(NgbModal);
         });
 
-        it('should be created', (done: DoneFn) => {
+        it('should be created', () => {
             expect(service).toBeTruthy();
-
-            service.payload.pipe(first()).subscribe(value => {
-                expect(value).toBeTruthy();
-                expect(service.userId).toBeUndefined();
-                expect(service.authenticated).toBeFalse();
-                expect(service.name).toEqual('GUEST_USER');
-                expect(service.role).toEqual('guest');
-                done();
-            });
+            expect(service.payload()).toBeTruthy();
+            expect(service.userId()).toBeUndefined();
+            expect(service.authenticated()).toBeFalse();
+            expect(service.name()).toEqual('GUEST_USER');
+            expect(service.role()).toEqual('guest');
         });
 
         describe('isAuthorized', () => {
@@ -125,13 +121,13 @@ describe('AuthService', () => {
                 api.login.and.returnValue(of({ token: newToken }));
                 service
                     .login({ id: 'john.doe@email.com', password: 'password' })
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toEqual('john.doe@email.com');
-                        expect(service.authenticated).toBeTrue();
-                        expect(service.name).toEqual('John');
-                        expect(service.role).toEqual('editor');
+                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.authenticated()).toBeTrue();
+                        expect(service.name()).toEqual('John');
+                        expect(service.role()).toEqual('editor');
                         done();
                     });
             });
@@ -152,13 +148,13 @@ describe('AuthService', () => {
 
                 service
                     .login()
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toEqual('john.doe@email.com');
-                        expect(service.authenticated).toBeTrue();
-                        expect(service.name).toEqual('John');
-                        expect(service.role).toEqual('editor');
+                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.authenticated()).toBeTrue();
+                        expect(service.name()).toEqual('John');
+                        expect(service.role()).toEqual('editor');
                         done();
                     });
             });
@@ -180,13 +176,13 @@ describe('AuthService', () => {
                         name: 'John',
                         password: '1234.xyz',
                     })
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toEqual('john.doe@email.com');
-                        expect(service.authenticated).toBeTrue();
-                        expect(service.name).toEqual('John');
-                        expect(service.role).toEqual('editor');
+                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.authenticated()).toBeTrue();
+                        expect(service.name()).toEqual('John');
+                        expect(service.role()).toEqual('editor');
                         done();
                     });
             });
@@ -207,13 +203,13 @@ describe('AuthService', () => {
 
                 service
                     .register()
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toEqual('john.doe@email.com');
-                        expect(service.authenticated).toBeTrue();
-                        expect(service.name).toEqual('John');
-                        expect(service.role).toEqual('editor');
+                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.authenticated()).toBeTrue();
+                        expect(service.name()).toEqual('John');
+                        expect(service.role()).toEqual('editor');
                         done();
                     });
             });
@@ -265,47 +261,42 @@ describe('AuthService', () => {
             });
 
             TestBed.configureTestingModule({
-                declarations: [],
-                providers: [
-                    {
-                        provide: WindowService,
-                        useValue: window,
-                    },
-                    {
-                        provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
-                    },
-                    {
-                        provide: AuthApiService,
-                        useValue: api,
-                    },
-                ],
-                imports: [
-                    HttpClientTestingModule,
-                    TranslateModule.forRoot({
-                        loader: {
-                            provide: TranslateLoader,
-                            useClass: TranslateFakeLoader,
-                        },
-                    }),
-                ],
-            });
+    declarations: [],
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useClass: TranslateFakeLoader,
+            },
+        })],
+    providers: [
+        {
+            provide: WindowService,
+            useValue: window,
+        },
+        {
+            provide: NotifyService,
+            useValue: jasmine.createSpyObj<NotifyService>(['error']),
+        },
+        {
+            provide: AuthApiService,
+            useValue: api,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
             service = TestBed.inject(AuthService);
             modal = TestBed.inject(NgbModal);
         });
 
-        it('should be created', (done: DoneFn) => {
+        it('should be created', () => {
             expect(service).toBeTruthy();
-
-            service.payload.pipe(first()).subscribe(value => {
-                expect(value).toBeTruthy();
-                expect(service.userId).toEqual('john.doe@email.com');
-                expect(service.authenticated).toBeTrue();
-                expect(service.name).toEqual('John');
-                expect(service.role).toEqual('editor');
-                done();
-            });
+            expect(service.payload()).toBeTruthy();
+            expect(service.userId()).toEqual('john.doe@email.com');
+            expect(service.authenticated()).toBeTrue();
+            expect(service.name()).toEqual('John');
+            expect(service.role()).toEqual('editor');
         });
 
         it('provides a valid user token', () => {
@@ -339,16 +330,16 @@ describe('AuthService', () => {
                 service
                     .logout()
                     .pipe(
-                        mergeMap(() => service.payload),
+                        map(() => service.payload()),
                         skipWhile(value => value.sub != null),
                         first(),
                     )
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toBeUndefined();
-                        expect(service.authenticated).toBeFalse();
-                        expect(service.name).toEqual('GUEST_USER');
-                        expect(service.role).toEqual('guest');
+                        expect(service.userId()).toBeUndefined();
+                        expect(service.authenticated()).toBeFalse();
+                        expect(service.name()).toEqual('GUEST_USER');
+                        expect(service.role()).toEqual('guest');
                         done();
                     });
             });
@@ -368,13 +359,13 @@ describe('AuthService', () => {
 
                 service
                     .updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' })
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toEqual('john.doe@email.com');
-                        expect(service.authenticated).toBeTrue();
-                        expect(service.name).toEqual('John Doe');
-                        expect(service.role).toEqual('editor');
+                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.authenticated()).toBeTrue();
+                        expect(service.name()).toEqual('John Doe');
+                        expect(service.role()).toEqual('editor');
                         done();
                     });
             });
@@ -393,13 +384,13 @@ describe('AuthService', () => {
 
                 service
                     .updateUserProfile()
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toEqual('john.doe@email.com');
-                        expect(service.authenticated).toBeTrue();
-                        expect(service.name).toEqual('John Doe');
-                        expect(service.role).toEqual('editor');
+                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.authenticated()).toBeTrue();
+                        expect(service.name()).toEqual('John Doe');
+                        expect(service.role()).toEqual('editor');
                         done();
                     });
             });
@@ -420,13 +411,13 @@ describe('AuthService', () => {
 
                 service
                     .updateUserProfile()
-                    .pipe(mergeMap(() => service.payload))
+                    .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId).toBeUndefined();
-                        expect(service.authenticated).toBeFalse();
-                        expect(service.name).toEqual('GUEST_USER');
-                        expect(service.role).toEqual('guest');
+                        expect(service.userId()).toBeUndefined();
+                        expect(service.authenticated()).toBeFalse();
+                        expect(service.name()).toEqual('GUEST_USER');
+                        expect(service.role()).toEqual('guest');
                         done();
                     });
             });

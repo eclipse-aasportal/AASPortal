@@ -9,7 +9,7 @@
 import { aas, AASDocument, selectReferable, noop } from 'common';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
-import { AASStoreService } from '../aas-store.service';
+import { AASStore } from '../aas.store';
 
 export class UpdateElementCommand extends Command {
     private readonly origin: aas.SubmodelElement;
@@ -18,7 +18,7 @@ export class UpdateElementCommand extends Command {
     private document: AASDocument;
 
     public constructor(
-        private readonly store: AASStoreService,
+        private readonly store: AASStore,
         document: AASDocument,
         origin: aas.SubmodelElement,
         element: aas.SubmodelElement,

@@ -51,6 +51,14 @@ export class MySqlIndex extends AASIndex {
         return { name: endpoint.name, url: endpoint.url, type: endpoint.type, version: endpoint.version };
     }
 
+    public override async hasEndpoint(name: string): Promise<boolean> {
+        const [results] = await (
+            await this.connection
+        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?', [name]);
+
+        return results.length > 0;
+    }
+
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await (
             await this.connection
@@ -62,12 +70,23 @@ export class MySqlIndex extends AASIndex {
         ]);
     }
 
-    public override async removeEndpoint(name: string): Promise<boolean> {
-        const result = await (
-            await this.connection
-        ).query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?', [name]);
+    public override async removeEndpoint(endpointName: string): Promise<boolean> {
+        const connection = await this.connection;
+        try {
+            await connection.beginTransaction();
 
-        return result[0].affectedRows > 0;
+            const result = await (
+                await this.connection
+            ).query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?', [endpointName]);
+
+            this.removeDocuments(endpointName);
+
+            await connection.commit();
+            return result[0].affectedRows > 0;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        }
     }
 
     public override getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage> {
@@ -205,18 +224,42 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async reset(): Promise<void> {
+    public override async clear(): Promise<void> {
         const connection = await this.connection;
         try {
             await connection.beginTransaction();
             await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
             await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
             await connection.query<ResultSetHeader>('DELETE FROM `endpoints`;');
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        }
+    }
+
+    public override async reset(): Promise<void> {
+        const connection = await this.connection;
+        try {
+            await connection.beginTransaction();
             await this.addDefaultEndpoints(connection);
             await connection.commit();
         } catch (error) {
             await connection.rollback();
             throw error;
+        }
+    }
+
+    private async removeDocuments(endpointName: string): Promise<void> {
+        const connection = await this.connection;
+        const documents = (
+            await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?', [endpointName])
+        )[0];
+
+        await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?', [endpointName]);
+
+        for (const document of documents) {
+            await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
         }
     }
 
@@ -431,7 +474,14 @@ export class MySqlIndex extends AASIndex {
 
         const result = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`');
         if (result[0].length === 0) {
-            await this.addDefaultEndpoints(connection);
+            try {
+                connection.beginTransaction();
+                await this.addDefaultEndpoints(connection);
+                connection.commit();
+            } catch (error) {
+                connection.rollback();
+                throw error;
+            }
         }
 
         return connection;

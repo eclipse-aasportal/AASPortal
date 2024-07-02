@@ -6,5 +6,5 @@
  !
  !---------------------------------------------------------------------------->
 
-<img #image [src]="dataUrl$ | async" [alt]="alt" [class]="classname" [width]="width" [height]="height"
+<img #image [src]="dataUrl()" [alt]="alt()" [class]="classname()" [width]="width()" [height]="height()"
     onerror="this.src='assets/resources/aas.svg';" />

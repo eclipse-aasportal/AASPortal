@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { BehaviorSubject, EMPTY, first, map, mergeMap, Observable, of } from 'rxjs';
+import { EMPTY, first, map, mergeMap, Observable, of } from 'rxjs';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'common';
 
@@ -93,11 +93,12 @@ export interface DashboardState {
     providedIn: 'root',
 })
 export class DashboardService {
-    private readonly index$ = new BehaviorSubject(0);
-    private _pages: DashboardPage[] = [{ name: this.createPageName(), items: [], requests: [] }];
-    private _editMode = false;
-    private _selectionMode: SelectionMode = SelectionMode.Single;
-    private modified = false;
+    private readonly _state = signal<DashboardState>({
+        index: 0,
+        pages: [{ name: this.createPageName(), items: [], requests: [] }],
+    });
+
+    private readonly modified = signal(false);
 
     public constructor(private auth: AuthService) {
         this.auth.ready
@@ -109,13 +110,13 @@ export class DashboardService {
                             this.auth.getCookie('.DashboardPages').pipe(
                                 mergeMap(data => (data ? of(JSON.parse(data) as DashboardPage[]) : EMPTY)),
                                 map(pages => {
-                                    this._pages = pages;
-                                    this.index$.next(
-                                        Math.max(
+                                    this._state.set({
+                                        pages,
+                                        index: Math.max(
                                             pages.findIndex(page => page.name === value),
                                             0,
                                         ),
-                                    );
+                                    });
                                 }),
                             ),
                         ),
@@ -125,52 +126,37 @@ export class DashboardService {
             .subscribe();
     }
 
-    public readonly activePage: Observable<DashboardPage> = this.index$
-        .asObservable()
-        .pipe(map(index => this._pages[index]));
+    public readonly activePage = computed(() => this._state().pages[this._state().index]);
 
-    public get pages(): DashboardPage[] {
-        return this._pages;
-    }
+    public readonly pages = computed(() => this._state().pages);
 
-    public get editMode(): boolean {
-        return this._editMode;
-    }
+    public editMode = signal(false);
 
-    public set editMode(value: boolean) {
-        this._editMode = value;
-    }
-
-    public get selectionMode(): SelectionMode {
-        return this._selectionMode;
-    }
-
-    public set selectionMode(value: SelectionMode) {
-        this._selectionMode = value;
-    }
+    public selectionMode = signal(SelectionMode.Single);
 
     public get state(): DashboardState {
-        return { pages: this._pages, index: this.index$.getValue() };
+        return { ...this._state() };
     }
 
     public set state(value: DashboardState) {
-        this._pages = value.pages;
-        this.index$.next(value.index);
+        this._state.set({ ...value });
     }
 
     public getPage(name: string): DashboardPage | undefined {
-        return this._pages.find(item => item.name === name);
+        return this._state().pages.find(item => item.name === name);
     }
 
     public setPage(arg: string | DashboardPage): void {
         const index =
-            typeof arg === 'string' ? this._pages.findIndex(page => page.name === arg) : this._pages.indexOf(arg);
+            typeof arg === 'string'
+                ? this._state().pages.findIndex(page => page.name === arg)
+                : this._state().pages.indexOf(arg);
 
         if (index < 0) {
             throw new Error('Invalid operation.');
         }
 
-        this.index$.next(index);
+        this._state.update(state => ({ ...state, index }));
     }
 
     public add(
@@ -197,22 +183,22 @@ export class DashboardService {
                     throw new Error(`Not implemented`);
             }
 
-            this.modified = true;
+            this.modified.set(true);
         }
 
         if (blobs.length > 0) {
             this.addScatterChart(document, page, blobs);
-            this.modified = true;
+            this.modified.set(true);
         }
 
-        if (this.modified) {
+        if (this.modified()) {
             this.updatePage(page);
         }
     }
 
     public addNew(name?: string): void {
         name = name?.trim();
-        if (!name && this._pages.some(item => item.name === name)) {
+        if (!name && this._state().pages.some(item => item.name === name)) {
             throw new ApplicationError(
                 `A page withe name "${name}" already exists.`,
                 ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
@@ -221,7 +207,7 @@ export class DashboardService {
         }
 
         this.addNewPage(name);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public rename(page: DashboardPage, name: string) {
@@ -230,7 +216,7 @@ export class DashboardService {
             throw new Error('Valid page name expected.');
         }
 
-        if (this._pages.some(item => item.name === name)) {
+        if (this._state().pages.some(item => item.name === name)) {
             throw new ApplicationError(
                 `A page withe name "${name}" already exists.`,
                 ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
@@ -239,7 +225,7 @@ export class DashboardService {
         }
 
         this.renamePage(page, name);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public getGrid(page: DashboardPage): DashboardItem[][] {
@@ -310,19 +296,19 @@ export class DashboardService {
 
     public update(page: DashboardPage): void {
         this.updatePage(page);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public delete(page: DashboardPage): void {
         this.deletePage(page);
-        this.modified = true;
+        this.modified.set(true);
     }
 
     public save(): Observable<void> {
         return this.saveCurrentPage().pipe(
             mergeMap(() => {
-                if (this.modified) {
-                    this.modified = false;
+                if (this.modified()) {
+                    this.modified.set(false);
                     return this.savePages();
                 }
 
@@ -478,15 +464,16 @@ export class DashboardService {
     }
 
     private savePages(): Observable<void> {
-        if (this._pages.length > 0) {
-            return this.auth.setCookie('.Dashboard', JSON.stringify(this._pages));
+        const pages = this._state().pages;
+        if (pages.length > 0) {
+            return this.auth.setCookie('.DashboardPages', JSON.stringify(pages));
         }
 
-        return this.auth.deleteCookie('.Dashboard');
+        return this.auth.deleteCookie('.DashboardPages');
     }
 
     private saveCurrentPage(): Observable<void> {
-        return this.auth.setCookie('.DashboardPage', this._pages[this.index$.getValue()].name);
+        return this.auth.setCookie('.DashboardPage', this._state().pages[this._state().index].name);
     }
 
     private createRandomColor(): string {
@@ -497,21 +484,21 @@ export class DashboardService {
     }
 
     private updatePage(page: DashboardPage): void {
-        const pages = [...this._pages];
+        const pages = [...this._state().pages];
         const index = pages.findIndex(item => item.name === page.name);
         pages[index] = page;
-        this._pages = pages;
+        this._state.update(state => ({ ...state, pages }));
     }
 
     private addNewPage(name?: string): void {
-        name = name?.trim() ?? this.createPageName(this._pages);
+        name = name?.trim() ?? this.createPageName(this._state().pages);
         const page: DashboardPage = {
             name: name,
             items: [],
             requests: [],
         };
 
-        this._pages = [...this.pages, page];
+        this._state.update(state => ({ ...state, pages: [...state.pages, page] }));
     }
 
     private createPageName(pages: DashboardPage[] = []): string {
@@ -527,7 +514,7 @@ export class DashboardService {
     }
 
     private deletePage(page: DashboardPage): void {
-        const pages = [...this._pages];
+        const pages = [...this._state().pages];
         const index = pages.indexOf(page);
         if (index < 0) {
             return;
@@ -538,25 +525,24 @@ export class DashboardService {
             pages.push({ name: this.createPageName(pages), items: [], requests: [] });
         }
 
-        let selectedIndex = this.index$.getValue();
+        let selectedIndex = this._state().index;
         if (index === selectedIndex) {
             selectedIndex = Math.min(pages.length - 1, index);
         } else if (index < selectedIndex) {
             --selectedIndex;
         }
 
-        this._pages = pages;
-        this.index$.next(selectedIndex);
+        this._state.set({ pages, index: selectedIndex });
     }
 
     private renamePage(page: DashboardPage, name: string): void {
-        const index = this._pages.indexOf(page);
+        const index = this._state().pages.indexOf(page);
         if (index < 0) {
             return;
         }
 
-        const pages = [...this._pages];
+        const pages = [...this._state().pages];
         pages[index] = { ...page, name };
-        this._pages = pages;
+        this._state.update(state => ({ ...state, pages }));
     }
 }

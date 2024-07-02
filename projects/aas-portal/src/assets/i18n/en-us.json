@@ -108,6 +108,7 @@
     "LABEL_VIEWS": "Views",
     "LABEL_CATEGORY": "Category",
     "LABEL_SEMANTIC_ID": "Semantic ID",
+    "LABEL_EDIT_MODE": "Edit",
     "PLEASE_WAIT": "Please wait...",
     "PLACEHOLDER_EMAIL": "enter email address",
     "PLACEHOLDER_PASSWORD": "enter password",
@@ -175,9 +176,9 @@
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
     "AASEndpointType": {
         "FileSystem": "File system",
-        "AASServer": "AAS server",
-        "WebDAV": "Cloud server",
-        "OpcuaServer": "OPC UA Server"
+        "AAS_API": "AAS API",
+        "WebDAV": "WebDAV",
+        "OPC_UA": "OPC UA"
     },
     "CustomerFeedback": {
         "OverallRating": "Overall rating",

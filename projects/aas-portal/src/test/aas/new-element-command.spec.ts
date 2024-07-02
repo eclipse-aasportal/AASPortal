@@ -12,14 +12,14 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { NotifyService } from 'aas-lib';
 import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
-import { AASStoreService } from '../../app/aas/aas-store.service';
+import { AASStore } from '../../app/aas/aas.store';
 import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('NewElementCommand', function () {
     let command: NewElementCommand;
     let document: AASDocument;
     let submodel: aas.Submodel;
-    let store: AASStoreService;
+    let store: AASStore;
 
     beforeEach(function () {
         document = cloneDeep(aasNoTechnicalData);
@@ -38,7 +38,7 @@ describe('NewElementCommand', function () {
             ],
         });
 
-        store = TestBed.inject(AASStoreService);
+        store = TestBed.inject(AASStore);
         store.setDocument(document);
     });
 
@@ -48,7 +48,7 @@ describe('NewElementCommand', function () {
     });
 
     it('can be executed', () => {
-        const document = store.document;
+        const document = store.document();
         const element = selectElement(document!.content!, 'TechnicalData');
         expect(element).toBeDefined();
     });
@@ -56,14 +56,14 @@ describe('NewElementCommand', function () {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document;
+            const document = store.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
         }
 
         {
             command.redo();
-            const document = store.document;
+            const document = store.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeDefined();
         }

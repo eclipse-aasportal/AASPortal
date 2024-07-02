@@ -24,6 +24,10 @@ export class AASTableRow extends TreeNode<AASDocument> {
         super(document, parent, level, expanded, selected, highlighted, firstChild, nextSibling);
     }
 
+    public get trackId(): string {
+        return this.element.endpoint + '.' + this.element.id;
+    }
+
     public get id(): string {
         return this.element.id;
     }

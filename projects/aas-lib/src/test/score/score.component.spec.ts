@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ScoreComponent } from '../../lib/score/score.component';
 
@@ -32,55 +31,50 @@ describe('ScoreComponent', () => {
         expect(negativeDiv).toBeTruthy();
     });
 
-    it('it shows a positive score', function () {
-        component.score = 0.42;
-        component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
+    it('it shows a positive score', () => {
+        fixture.componentRef.setInput('score', 0.42);
         fixture.detectChanges();
 
-        expect(component.positive).toEqual(42);
-        expect(component.negative).toEqual(0);
+        expect(component.positive()).toEqual(42);
+        expect(component.negative()).toEqual(0);
 
         expect(positiveDiv.style.width).toEqual('42%');
         expect(negativeDiv.style.width).toEqual('0%');
     });
 
-    it('it shows a negative score', function () {
-        component.score = -0.42;
-        component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
+    it('it shows a negative score', () => {
+        fixture.componentRef.setInput('score', -0.42);
         fixture.detectChanges();
 
-        expect(component.negative).toEqual(42);
-        expect(component.positive).toEqual(0);
+        expect(component.negative()).toEqual(42);
+        expect(component.positive()).toEqual(0);
         expect(positiveDiv.style.width).toEqual('0%');
         expect(negativeDiv.style.width).toEqual('42%');
     });
 
-    it('it shows an undefined score', function () {
-        component.score = 0.0;
-        component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
+    it('it shows an undefined score', () => {
+        fixture.componentRef.setInput('score', 0.0);
         fixture.detectChanges();
 
-        expect(component.negative).toEqual(0);
-        expect(component.positive).toEqual(0);
+        expect(component.negative()).toEqual(0);
+        expect(component.positive()).toEqual(0);
         expect(positiveDiv.style.width).toEqual('0%');
         expect(negativeDiv.style.width).toEqual('0%');
     });
 
-    it('it limits the positive score to 100%', function () {
-        component.score = 1234567.89;
-        component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
+    it('it limits the positive score to 100%', () => {
+        fixture.componentRef.setInput('score', 1234567.89);
         fixture.detectChanges();
 
-        expect(component.positive).toEqual(100);
-        expect(component.negative).toEqual(0);
+        expect(component.positive()).toEqual(100);
+        expect(component.negative()).toEqual(0);
     });
 
-    it('it shows a 100% negative score', function () {
-        component.score = -1234567.89;
-        component.ngOnChanges({ score: new SimpleChange(0, component.score, true) });
+    it('it shows a 100% negative score', () => {
+        fixture.componentRef.setInput('score', -1234567.89);
         fixture.detectChanges();
 
-        expect(component.negative).toEqual(100);
-        expect(component.positive).toEqual(0);
+        expect(component.negative()).toEqual(100);
+        expect(component.positive()).toEqual(0);
     });
 });

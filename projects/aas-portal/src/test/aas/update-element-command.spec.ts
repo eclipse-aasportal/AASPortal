@@ -11,13 +11,13 @@ import { aas, AASDocument, selectElement } from 'common';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { UpdateElementCommand } from '../../app/aas/commands/update-element-command';
 import { sampleDocument } from '../../test/assets/sample-document';
-import { AASStoreService } from '../../app/aas/aas-store.service';
+import { AASStore } from '../../app/aas/aas.store';
 import { NotifyService } from 'aas-lib';
 import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('SetValueCommand', function () {
     let command: UpdateElementCommand;
-    let store: AASStoreService;
+    let store: AASStore;
     let document: AASDocument;
     let property: aas.Property;
     let element: aas.Property;
@@ -41,7 +41,7 @@ describe('SetValueCommand', function () {
             ],
         });
 
-        store = TestBed.inject(AASStoreService);
+        store = TestBed.inject(AASStore);
         store.setDocument(document);
     });
 
@@ -51,7 +51,7 @@ describe('SetValueCommand', function () {
     });
 
     it('can be executed', () => {
-        const document = store.document;
+        const document = store.document();
         const value: aas.Property = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed')!;
         expect(value.value).toEqual('42');
     });
@@ -59,14 +59,14 @@ describe('SetValueCommand', function () {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document;
+            const document = store.document();
             const value: aas.Property = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed')!;
             expect(value.value).toEqual('5000');
         }
 
         {
             command.redo();
-            const document = store.document;
+            const document = store.document();
             store;
             const value: aas.Property = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed')!;
             expect(value.value).toEqual('42');

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import isEmpty from 'lodash-es/isEmpty';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'common';
@@ -28,6 +28,7 @@ export interface RegisterFormResult {
     styleUrls: ['./register-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {
     public constructor(
@@ -36,55 +37,55 @@ export class RegisterFormComponent {
         private api: AuthApiService,
     ) {}
 
-    public userId = '';
+    public readonly userId = signal('');
 
-    public name = '';
+    public readonly name = signal('');
 
-    public defaultName = 'name';
+    public readonly defaultName = signal('name');
 
-    public password1 = '';
+    public readonly password1 = signal('');
 
-    public password2 = '';
+    public readonly password2 = signal('');
 
-    public stayLoggedIn = false;
+    public readonly stayLoggedIn = signal(false);
 
-    public passwordAsEMail = false;
+    public readonly passwordAsEMail = signal(false);
 
-    public messages: string[] = [];
+    public readonly messages = signal<string[]>([]);
 
     public onInputEMail(): void {
-        this.defaultName = getUserNameFromEMail(this.userId);
+        this.defaultName.set(getUserNameFromEMail(this.userId()));
     }
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.userId)) {
+        if (isEmpty(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-        } else if (!isValidEMail(this.userId)) {
+        } else if (!isValidEMail(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (!this.passwordAsEMail) {
-            if (isEmpty(this.password1)) {
+        } else if (!this.passwordAsEMail()) {
+            if (isEmpty(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-            } else if (!isValidPassword(this.password1)) {
+            } else if (!isValidPassword(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-            } else if (this.password1 !== this.password2) {
+            } else if (this.password1() !== this.password2()) {
                 this.pushMessage(this.translate.instant(ERRORS.PASSWORDS_NOT_EQUAL));
             }
         }
 
-        if (this.messages.length === 0) {
+        if (this.messages().length === 0) {
             const profile: UserProfile = {
-                id: this.userId,
-                name: this.name ?? getUserNameFromEMail(this.userId),
-                password: this.password1,
+                id: this.userId(),
+                name: this.name() ?? getUserNameFromEMail(this.userId()),
+                password: this.password1(),
             };
 
             let result: RegisterFormResult | undefined;
             this.api.register(profile).subscribe({
                 next: value => {
-                    if (!this.passwordAsEMail) {
+                    if (!this.passwordAsEMail()) {
                         result = {
-                            stayLoggedIn: this.stayLoggedIn,
+                            stayLoggedIn: this.stayLoggedIn(),
                             token: value.token,
                         };
 
@@ -101,10 +102,10 @@ export class RegisterFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message];
+        this.messages.set([message]);
     }
 
     private clearMessages(): void {
-        this.messages = [];
+        this.messages.set([]);
     }
 }

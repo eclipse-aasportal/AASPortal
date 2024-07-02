@@ -6,22 +6,22 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { StartApiService } from '../../app/start/start-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
-describe('StartApiService', function () {
+describe('StartApiService', () => {
     let service: StartApiService;
     let httpTestingController: HttpTestingController;
 
-    beforeEach(function () {
-
+    beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [],
-            providers: [],
-            imports: [HttpClientTestingModule],
-        });
+    declarations: [],
+    imports: [],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         service = TestBed.inject(StartApiService);
         httpTestingController = TestBed.inject(HttpTestingController);
@@ -31,7 +31,7 @@ describe('StartApiService', function () {
         httpTestingController.verify();
     });
 
-    it('should created', function () {
+    it('should created', () => {
         expect(service).toBeTruthy();
     });
 });

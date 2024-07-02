@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { Signal } from '@angular/core';
 import { aas, AASDocument } from 'common';
 
 export interface DocumentSubmodelPair {
@@ -25,7 +26,7 @@ export interface SubmodelReference {
 }
 
 export interface SubmodelTemplate {
-    submodels: DocumentSubmodelPair[] | null;
+    submodels: Signal<DocumentSubmodelPair[] | null>;
 }
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';

@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { FavoritesFormComponent } from '../../app/start/favorites-form/favorites-form.component';
-import { FavoritesService } from '../../app/start/favorites.service';
+import { FavoritesList, FavoritesService } from '../../app/start/favorites.service';
 
 describe('FavoritesFormComponent', () => {
     let component: FavoritesFormComponent;
@@ -19,7 +20,9 @@ describe('FavoritesFormComponent', () => {
     let service: jasmine.SpyObj<FavoritesService>;
 
     beforeEach(() => {
-        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], { lists: [] });
+        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+            lists: signal<FavoritesList[]>([]),
+        });
 
         TestBed.configureTestingModule({
             providers: [

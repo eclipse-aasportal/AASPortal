@@ -9,19 +9,19 @@
 <div class="container border rounded">
   <div class="row">
     <div class="col fs-3 text-start">
-      <span translate>CustomerFeedback.OverallRating</span><span>&nbsp;</span><span>({{count | number}})</span>
+      <span translate>CustomerFeedback.OverallRating</span><span>&nbsp;</span><span>({{count() | number}})</span>
     </div>
     <div class="col fs-3 text-warning text-end">
-      @for (starClassName of starClassNames; track starClassName) {
+      @for (starClassName of starClassNames(); track starClassName) {
         <i [class]="starClassName"></i><span>&nbsp;</span>
       }
-      <span class="text-body">{{stars | number: '1.1-1'}}</span>
+      <span class="text-body">{{stars() | number: '1.1-1'}}</span>
     </div>
   </div>
   <div class="row">
-    <div class="col fw-light fst-italic">{{name}}</div>
+    <div class="col fw-light fst-italic">{{name()}}</div>
   </div>
-  @for (item of items; track item) {
+  @for (item of items(); track item) {
     <div class="row">
       <div class="col-5">{{item.name}}</div>
       <div class="col-7">
@@ -31,7 +31,7 @@
   }
 </div>
 <div class="container mt-3">
-  @for (feedback of feedbacks; track feedback; let i = $index) {
+  @for (feedback of feedbacks(); track feedback; let i = $index) {
     <div [class]="i % 2 === 0 ? 'd-flex flex-column mb-3' : 'd-flex flex-column mb-3 bg-secondary bg-opacity-10'">
       <div class="d-flex">
         <div class="text-warning">

@@ -6,119 +6,86 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, signal, untracked } from '@angular/core';
 import findLastIndex from 'lodash-es/findLastIndex';
-import { Subject } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'common';
 import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableTree } from './aas-table-row';
-import { AASTableFilter } from './aas-table.filter';
 
 @Injectable()
 export class AASTableStore {
-    private readonly selectedDocuments$ = new Subject<AASDocument[]>();
-    private _totalRows: AASTableRow[] = [];
-    private _rows: AASTableRow[] = [];
-    private _viewMode = ViewMode.List;
-    private _filter = '';
+    private readonly _totalRows = signal<AASTableRow[]>([]);
+    private readonly _rows = signal<AASTableRow[]>([]);
 
-    public constructor(private readonly translate: TranslateService) {}
+    public readonly rows = this._rows.asReadonly();
 
-    public readonly selectedDocuments = this.selectedDocuments$.asObservable();
-
-    public get filter(): string {
-        return this._filter;
-    }
-
-    public set filter(value: string) {
-        if (this._filter !== value) {
-            this._filter = value;
-            this._rows = this.getVisibleRows();
-        }
-    }
-
-    public get viewMode(): ViewMode {
-        return this._viewMode;
-    }
-
-    public get rows(): AASTableRow[] {
-        return this._rows;
-    }
-
-    public setViewMode(viewMode: ViewMode): void {
-        this._viewMode = viewMode;
-    }
-
-    public setSelections(documents: AASDocument[]): void {
-        const tree = new AASTableTree(this._totalRows);
+    public setSelected(documents: AASDocument[], viewMode: ViewMode): void {
+        const tree = new AASTableTree(untracked(this._totalRows));
         tree.selectedElements = documents;
-        this._totalRows = tree.nodes;
-        if (this._viewMode === ViewMode.List) {
-            this._rows = this.getVisibleRows();
+        this._totalRows.set(tree.nodes);
+        if (viewMode === ViewMode.List) {
+            this._rows.set(tree.nodes);
         } else {
-            this._rows = tree.expanded;
+            this._rows.set(tree.expanded);
         }
     }
 
-    public toggleSelected(row: AASTableRow, altKey: boolean, shiftKey: boolean): void {
-        const tree = new AASTableTree(this._totalRows);
+    public toggleSelected(row: AASTableRow, altKey: boolean, shiftKey: boolean, viewMode: ViewMode): AASDocument[] {
+        const tree = new AASTableTree(this._totalRows());
         tree.toggleSelected(row, altKey, shiftKey);
-        this._totalRows = tree.nodes;
-        if (this._viewMode === ViewMode.List) {
-            this._rows = this.getVisibleRows();
+        this._totalRows.set(tree.nodes);
+        if (viewMode === ViewMode.List) {
+            this._rows.set(tree.nodes);
         } else {
-            this._rows = tree.expanded;
+            this._rows.set(tree.expanded);
         }
 
-        this.selectedDocuments$.next(this._totalRows.filter(row => row.selected).map(row => row.element));
+        return this._totalRows()
+            .filter(row => row.selected)
+            .map(row => row.element);
     }
 
-    public toggleSelections(): void {
-        const tree = new AASTableTree(this._totalRows);
+    public toggleSelections(viewMode: ViewMode): AASDocument[] {
+        const tree = new AASTableTree(this._totalRows());
         tree.toggleSelections();
-        this._totalRows = tree.nodes;
-        if (this._viewMode === ViewMode.List) {
-            this._rows = this.getVisibleRows();
+        this._totalRows.set(tree.nodes);
+        if (viewMode === ViewMode.List) {
+            this._rows.set(tree.nodes);
         } else {
-            this._rows = tree.expanded;
+            this._rows.set(tree.expanded);
         }
 
-        this.selectedDocuments$.next(this._totalRows.filter(row => row.selected).map(row => row.element));
+        return this._totalRows()
+            .filter(row => row.selected)
+            .map(row => row.element);
     }
 
     public expandRow(row: AASTableRow): void {
-        const tree = new AASTableTree(this._totalRows);
+        const tree = new AASTableTree(this._totalRows());
         tree.expand(row);
-        this._rows = tree.expanded;
+        this._rows.set(tree.expanded);
     }
 
     public collapseRow(row: AASTableRow): void {
-        const tree = new AASTableTree(this._totalRows);
+        const tree = new AASTableTree(this._totalRows());
         tree.collapse(row);
-        this._rows = tree.expanded;
+        this._rows.set(tree.expanded);
     }
 
-    public initialize(documents: AASDocument[]): void {
-        this._totalRows =
-            this._viewMode === ViewMode.List
-                ? this.createListViewRows(this._totalRows, documents)
-                : this.createTreeViewRows(this._totalRows, documents);
+    public initialize(documents: AASDocument[], viewMode: ViewMode): void {
+        const state = untracked(this._totalRows);
+        const totalRows =
+            viewMode === ViewMode.List
+                ? this.createListViewRows(state, documents)
+                : this.createTreeViewRows(state, documents);
 
-        if (this._viewMode === ViewMode.List) {
-            this._rows = this.getVisibleRows();
+        this._totalRows.set(totalRows);
+
+        if (viewMode === ViewMode.List) {
+            this._rows.set(totalRows);
         } else {
-            this._rows = new AASTableTree(this._totalRows).expanded;
+            this._rows.set(new AASTableTree(totalRows).expanded);
         }
-    }
-
-    private getVisibleRows(): AASTableRow[] {
-        if (this._filter) {
-            const filter = new AASTableFilter(this._filter, this.translate.currentLang);
-            return this._totalRows.filter(row => filter.match(row.element));
-        }
-
-        return this._totalRows;
     }
 
     private createListViewRows(state: AASTableRow[], documents: AASDocument[]): AASTableRow[] {

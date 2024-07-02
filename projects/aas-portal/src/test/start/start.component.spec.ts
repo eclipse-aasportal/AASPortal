@@ -7,16 +7,16 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, model, signal } from '@angular/core';
 import { WindowService, ViewMode, AuthService, NotifyService, DownloadService, AASTableComponent } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { AASDocument, aas } from 'common';
 
 import { StartComponent } from '../../app/start/start.component';
 import { StartApiService } from '../../app/start/start-api.service';
-import { FavoritesService } from '../../app/start/favorites.service';
+import { FavoritesList, FavoritesService } from '../../app/start/favorites.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { provideRouter } from '@angular/router';
 
@@ -27,16 +27,10 @@ import { provideRouter } from '@angular/router';
     standalone: true,
 })
 class TestAASTableComponent {
-    @Input()
-    public viewMode: Observable<ViewMode> | null = null;
-    @Input()
-    public documents: Observable<AASDocument[]> | null = null;
-    @Output()
-    public selectedChange = new EventEmitter<AASDocument[]>();
-    @Input()
-    public selected: AASDocument[] = [];
-    @Input()
-    public filter: Observable<string> | null = null;
+    public readonly viewMode = input<ViewMode>(ViewMode.List);
+    public readonly documents = input<AASDocument[]>([]);
+    public readonly selected = model<AASDocument[]>([]);
+    public readonly filter = input('');
 }
 
 describe('StartComponent', () => {
@@ -85,7 +79,7 @@ describe('StartComponent', () => {
         );
 
         favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
-            lists: [],
+            lists: signal<FavoritesList[]>([]),
         });
 
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });
@@ -118,7 +112,7 @@ describe('StartComponent', () => {
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: of(null) }),
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
                 provideHttpClientTesting(),
                 provideRouter([]),

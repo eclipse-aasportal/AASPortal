@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Injectable, computed } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { aas, Endpoint, TemplateDescriptor } from 'common';
 import { encodeBase64Url } from './convert';
 
@@ -21,22 +22,17 @@ interface TemplateServiceState {
     providedIn: 'root',
 })
 export class TemplateService {
-    private readonly state = new BehaviorSubject<TemplateServiceState>({ templates: [], timestamp: 0 });
-
-    public constructor(private readonly http: HttpClient) {
+    private readonly state = toSignal(
         this.http
             .get<TemplateDescriptor[]>('/api/v1/templates')
-            .pipe(map(values => this.state.next({ templates: values, timestamp: Date.now() })))
-            .subscribe();
-    }
+            .pipe(map(values => ({ templates: values, timestamp: Date.now() }) as TemplateServiceState)),
+        { initialValue: { templates: [], timestamp: 0 } as TemplateServiceState },
+    );
 
-    /**
-     * Gets the list of available templates.
-     * @returns An array of `TemplateDescriptor` items.
-     */
-    public getTemplates(): Observable<TemplateDescriptor[]> {
-        return this.state.asObservable().pipe(map(state => state.templates));
-    }
+    public constructor(private readonly http: HttpClient) {}
+
+    /** Gets the list of available templates. */
+    public readonly templates = computed(() => this.state().templates);
 
     /**
      * Gets the template from the specified endpoint.

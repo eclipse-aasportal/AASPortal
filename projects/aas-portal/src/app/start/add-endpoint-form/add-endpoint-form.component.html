@@ -7,44 +7,40 @@
  !---------------------------------------------------------------------------->
 
 <form (ngSubmit)="submit()">
-  <div class="modal-header text-info">
-    <h4 class="modal-title">
-      <i class="bi bi-plus-circle"></i>
-      <span class="ms-2" translate>CAPTION_ADD_ENDPOINT</span>
-    </h4>
-    <button type="button" class="btn-close" (click)="cancel()"> </button>
-  </div>
-  <div class="modal-body">
-    @for (message of messages; track message) {
-      <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
-        <div class="d-flex">
-          <div class="flex-grow-1">{{ message }}</div>
-        </div>
-      </ngb-toast>
-    }
-    <label class="form-lable" for="input-endpoint-name" translate>LABEL_ENDPOINT_NAME</label>
-    <input id="input-endpoint-name" type="text" class="form-control mb-3"
-      placeholder="{{'PLACEHOLDER_ENDPOINT_NAME' | translate}}" [(ngModel)]="name" name="name"
-      (input)="inputValue()">
-      <label class="form-lable" for="input-endpoint-version" translate>LABEL_ENDPOINT_VERSION</label>
-      <input id="input-endpoint-version" type="text" class="form-control mb-3"
-        placeholder="{{'PLACEHOLDER_ENDPOINT_VERSION' | translate}}" [(ngModel)]="version" name="version">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-plus-circle"></i>
+            <span class="ms-2" translate>CAPTION_ADD_ENDPOINT</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="cancel()"> </button>
+    </div>
+    <div class="modal-body">
+        @for (message of messages(); track message) {
+        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
+            <div class="d-flex">
+                <div class="flex-grow-1">{{ message }}</div>
+            </div>
+        </ngb-toast>
+        }
+        <label class="form-lable" for="input-endpoint-name" translate>LABEL_ENDPOINT_NAME</label>
+        <input id="input-endpoint-name" type="text" class="form-control mb-3"
+            placeholder="{{'PLACEHOLDER_ENDPOINT_NAME' | translate}}" [(ngModel)]="name" name="name"
+            (input)="inputValue()">
         <label class="form-lable" for="div-endpoint-url" translate>LABEL_ENDPOINT_URL</label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
-          <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item.name}}</button>
-          <div class="dropdown-menu" ngbDropdownMenu>
-            @for (item of items; track item) {
-              <button type="button" (click)="setItem(item)"
-              ngbDropdownItem>{{item.name}}</button>
-            }
-          </div>
-          <input id="input-endpoint-url" type="text" class="form-control"
-            placeholder="{{'PLACEHOLDER_ENDPOINT_URL' | translate}}" [(ngModel)]="item.value" name="value"
-            (input)="inputValue()">
-          </div>
+            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item().name}}</button>
+            <div class="dropdown-menu" ngbDropdownMenu>
+                @for (item of items(); track item) {
+                <button type="button" (click)="setItem(item)" ngbDropdownItem>{{item.name}}</button>
+                }
+            </div>
+            <input id="input-endpoint-url" type="text" class="form-control"
+                placeholder="{{'PLACEHOLDER_ENDPOINT_URL' | translate}}" [(ngModel)]="item().value" name="value"
+                (input)="inputValue()">
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
-          <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
-        </div>
-      </form>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
+    </div>
+</form>

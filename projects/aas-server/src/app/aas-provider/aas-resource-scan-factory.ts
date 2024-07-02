@@ -29,7 +29,7 @@ export class AASResourceScanFactory {
 
     public create(endpoint: AASEndpoint): AASResourceScan {
         switch (endpoint.type) {
-            case 'AASServer': {
+            case 'AAS_API': {
                 let source: AASApiClient;
                 switch (endpoint.version) {
                     case 'v0':
@@ -44,7 +44,7 @@ export class AASResourceScanFactory {
 
                 return new AASServerScan(this.logger, source);
             }
-            case 'OpcuaServer':
+            case 'OPC_UA':
                 return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint.url, endpoint.name));
             case 'WebDAV':
             case 'FileSystem':

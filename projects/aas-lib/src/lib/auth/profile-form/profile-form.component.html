@@ -15,7 +15,7 @@
         <button type="button" class="btn-close" (click)="cancel()" aria-label="Cancel"></button>
     </div>
     <div class="modal-body">
-        @for (message of messages; track message) {
+        @for (message of messages(); track message) {
         <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
             <div class="d-flex">{{message}}</div>
         </ngb-toast>
@@ -27,7 +27,7 @@
         </div>
         <div class="form-floating mb-3">
             <input type="text" class="form-control" id="intputProfileName" [(ngModel)]="name" name="name"
-                [placeholder]="defaultName" aria-hidden="true">
+                [placeholder]="defaultName()" aria-hidden="true">
             <label for="intputProfileName" translate>LABEL_NAME</label>
         </div>
         <button type="button" class="btn btn-outline-primary mb-1" (click)="collapse.toggle()"

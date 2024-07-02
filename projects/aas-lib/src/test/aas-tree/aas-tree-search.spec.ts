@@ -42,10 +42,6 @@ describe('AASTreeSearch', function () {
         store.updateRows(sampleDocument);
     });
 
-    afterEach(function () {
-        search.destroy();
-    });
-
     it('should create', () => {
         expect(search).toBeTruthy();
     });

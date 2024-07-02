@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AASDocument, aas } from 'common';
 import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AASTreeApiService', function () {
     let service: AASTreeApiService;
@@ -20,15 +21,17 @@ describe('AASTreeApiService', function () {
     beforeEach(function () {
         auth = jasmine.createSpyObj<AuthService>(['login']);
         TestBed.configureTestingModule({
-            declarations: [],
-            providers: [
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
-            ],
-            imports: [HttpClientTestingModule],
-        });
+    declarations: [],
+    imports: [],
+    providers: [
+        {
+            provide: AuthService,
+            useValue: auth,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+});
 
         service = TestBed.inject(AASTreeApiService);
         httpTestingController = TestBed.inject(HttpTestingController);

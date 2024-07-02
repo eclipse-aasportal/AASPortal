@@ -17,7 +17,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (library of libraries; track library) {
+    @for (library of libraries(); track library.name) {
       <tr>
         <th scope="row">{{library.id}}</th>
         <td [noWrap]="true">
@@ -36,10 +36,9 @@
   </tbody>
   <tbody>
     <td [colSpan]="5">
-      @if (pageSize > 0 && size > pageSize) {
+      @if (pageSize() > 0 && size > pageSize) {
         <div class="d-flex align-items-start">
-          <ngb-pagination [collectionSize]="size" [(page)]="page" [pageSize]="pageSize" size="sm"
-            (pageChange)="refreshLibraries()">
+          <ngb-pagination [collectionSize]="size()" [(page)]="page" [pageSize]="pageSize()" size="sm">
           </ngb-pagination>
         </div>
       }

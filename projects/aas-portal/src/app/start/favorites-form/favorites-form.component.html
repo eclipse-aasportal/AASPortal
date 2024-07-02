@@ -22,7 +22,7 @@
     </ngb-toast>
     }
     <ul class="list-group overflow-y-auto">
-        @for (item of items; track item.id) {
+        @for (item of items(); track item.id) {
         <li class="list-group-item" (mouseenter)="(item.active = true)" (mouseleave)="(item.active = false)">
             <div class="d-flex flex-row align-items-center">
                 <input class="form-check-input me-1" type="radio" name="item.selected" [disabled]="!item.name"

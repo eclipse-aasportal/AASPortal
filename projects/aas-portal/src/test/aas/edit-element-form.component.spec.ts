@@ -45,10 +45,10 @@ describe('EditElementFormComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('Property', function () {
+    describe('Property', () => {
         let property: aas.Property;
 
-        beforeEach(function () {
+        beforeEach(() => {
             property = {
                 idShort: 'Text',
                 modelType: 'Property',
@@ -60,7 +60,7 @@ describe('EditElementFormComponent', () => {
             fixture.detectChanges();
         });
 
-        it('allows editing a string Property', function (done: DoneFn) {
+        it('allows editing a string Property', (done: DoneFn) => {
             activeModal.close.and.callFake(result => {
                 expect((result as aas.Property).value).toEqual('Hello World!');
                 done();
@@ -73,11 +73,11 @@ describe('EditElementFormComponent', () => {
             inputElement.dispatchEvent(new Event('input'));
             fixture.detectChanges();
 
-            component.value = inputElement.value;
+            component.value.set(inputElement.value);
             component.submit();
         });
 
-        it('allows changing the category to PARAMETER', function (done: DoneFn) {
+        it('allows changing the category to PARAMETER', (done: DoneFn) => {
             activeModal.close.and.callFake(result => {
                 expect((result as aas.Property).category).toEqual('PARAMETER');
                 done();
@@ -85,16 +85,16 @@ describe('EditElementFormComponent', () => {
 
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const selectElement: HTMLSelectElement = element.querySelector('#selectCategory')!;
-            selectElement.options[component.categories.indexOf('PARAMETER')].defaultSelected = true;
+            selectElement.options[component.categories().indexOf('PARAMETER')].defaultSelected = true;
             selectElement.dispatchEvent(new Event('change'));
             fixture.detectChanges();
 
             // hack
-            component.category = selectElement.options[selectElement.selectedIndex].label;
+            component.category.set(selectElement.options[selectElement.selectedIndex].label);
             component.submit();
         });
 
-        it('allows changing the value type to "double"', function (done: DoneFn) {
+        it('allows changing the value type to "double"', (done: DoneFn) => {
             activeModal.close.and.callFake(result => {
                 expect((result as aas.Property).valueType).toEqual('xs:double');
                 done();
@@ -102,20 +102,20 @@ describe('EditElementFormComponent', () => {
 
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const selectElement: HTMLSelectElement = element.querySelector('#selectValueType')!;
-            selectElement.options[component.valueTypes.indexOf('xs:double')].defaultSelected = true;
+            selectElement.options[component.valueTypes().indexOf('xs:double')].defaultSelected = true;
             selectElement.dispatchEvent(new Event('change'));
             fixture.detectChanges();
 
             // hack
-            component.valueType = selectElement.options[selectElement.selectedIndex].label as aas.DataTypeDefXsd;
+            component.valueType.set(selectElement.options[selectElement.selectedIndex].label as aas.DataTypeDefXsd);
             component.submit();
         });
     });
 
-    describe('MultiLanguageProperty', function () {
+    describe('MultiLanguageProperty', () => {
         let property: aas.MultiLanguageProperty;
 
-        beforeEach(function () {
+        beforeEach(() => {
             property = {
                 idShort: 'A multi language property',
                 modelType: 'MultiLanguageProperty',
@@ -127,29 +127,29 @@ describe('EditElementFormComponent', () => {
             fixture.detectChanges();
         });
 
-        it('allows editing an existing locale text', function (done: DoneFn) {
+        it('allows editing an existing locale text', (done: DoneFn) => {
             activeModal.close.and.callFake(result => {
                 const expected: aas.LangString[] = [{ language: 'de', text: 'Hallo Mond!' }];
                 expect((result as aas.MultiLanguageProperty).value).toEqual(expected);
                 done();
             });
 
-            component.setText(component.langStrings[0], 'Hallo Mond!');
+            component.setText(component.langStrings()[0], 'Hallo Mond!');
             component.submit();
         });
 
-        it('allows removing an existing locale text', function (done: DoneFn) {
+        it('allows removing an existing locale text', (done: DoneFn) => {
             activeModal.close.and.callFake(result => {
                 const expected: aas.LangString[] = [];
                 expect((result as aas.MultiLanguageProperty).value).toEqual(expected);
                 done();
             });
 
-            component.removeLangString(component.langStrings[0]);
+            component.removeLangString(component.langStrings()[0]);
             component.submit();
         });
 
-        it('allows adding a new locale text', function (done: DoneFn) {
+        it('allows adding a new locale text', (done: DoneFn) => {
             activeModal.close.and.callFake(result => {
                 const expected: aas.LangString[] = [
                     { language: 'de', text: 'Hallo Welt!' },
@@ -160,7 +160,7 @@ describe('EditElementFormComponent', () => {
                 done();
             });
 
-            const langString = component.langStrings[component.langStrings.length - 1];
+            const langString = component.langStrings()[component.langStrings().length - 1];
             component.addLangString();
             component.setLanguage(langString, 'en');
             component.setText(langString, 'Hello World!');

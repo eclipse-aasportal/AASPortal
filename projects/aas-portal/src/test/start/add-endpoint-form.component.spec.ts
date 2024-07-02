@@ -47,13 +47,12 @@ describe('AddEndpointFormComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('submits endpoint Name: "My endpoint", URL: "file:///my-endpoint"', function () {
+    it('submits endpoint Name: "My endpoint", URL: "file:///my-endpoint"', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[3];
-        component.name = 'My endpoint';
-        component.item.value = 'file:///my-endpoint';
+        component.item.set({ ...component.items()[3], value: 'file:///my-endpoint' });
+        component.name.set('My endpoint');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
@@ -62,13 +61,12 @@ describe('AddEndpointFormComponent', () => {
         expect(endpoint?.type).toEqual('FileSystem');
     });
 
-    it('submits AAS endpoint Name: "My endpoint", URL: "file:///a\\b\\my-endpoint"', function () {
+    it('submits AAS endpoint Name: "My endpoint", URL: "file:///a\\b\\my-endpoint"', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[3];
-        component.name = 'My endpoint';
-        component.item.value = 'file:///a\\b\\my-endpoint';
+        component.item.set({ ...component.items()[3], value: 'file:///a\\b\\my-endpoint' });
+        component.name.set('My endpoint');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
@@ -77,49 +75,46 @@ describe('AddEndpointFormComponent', () => {
         expect(endpoint?.type).toEqual('FileSystem');
     });
 
-    it('ignores AAS endpoint: Name: "", URL: "file:///my-endpoint"', function () {
+    it('ignores AAS endpoint: Name: "", URL: "file:///my-endpoint"', () => {
         spyOn(modal, 'close');
 
-        component.item = component.items[3];
-        component.name = '';
-        component.item.value = 'file:///my-endpoint';
+        component.item.set({ ...component.items()[3], value: 'file:///my-endpoint' });
+        component.name.set('');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages.length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBeTrue();
     });
 
-    it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', function () {
+    it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', () => {
         spyOn(modal, 'close');
 
-        component.item = component.items[3];
-        component.name = 'My endpoint';
-        component.item.value = 'file:///';
+        component.item.set({ ...component.items()[3], value: 'file:///' });
+        component.name.set('My endpoint');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages.length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBeTrue();
     });
 
-    it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://localhost:30001/I4AASServer"', function () {
+    it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://localhost:30001/I4AASServer"', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[1];
-        component.name = 'I4AAS Server';
-        component.item.value = 'opc.tcp://localhost:30001/I4AASServer';
+        component.item.set({ ...component.items()[1], value: 'opc.tcp://localhost:30001/I4AASServer' });
+        component.name.set('I4AAS Server');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('I4AAS Server');
         expect(endpoint?.url).toEqual('opc.tcp://localhost:30001/I4AASServer');
-        expect(endpoint?.type).toEqual('OpcuaServer');
+        expect(endpoint?.type).toEqual('OPC_UA');
     });
 
-    it('ignores AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://"', function () {
+    it('ignores AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://"', () => {
         spyOn(modal, 'close');
 
-        component.item = component.items[1];
+        component.item.set(component.items()[1]);
         fixture.detectChanges();
 
         inputNameElement.value = 'I4AAS Server';
@@ -129,31 +124,29 @@ describe('AddEndpointFormComponent', () => {
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages.length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBeTrue();
     });
 
-    it('submits AASX server Name: "AASX Server", URL: "http://localhost:50001/"', function () {
+    it('submits AASX server Name: "AASX Server", URL: "http://localhost:50001/"', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[0];
-        component.name = 'AASX Server';
-        component.item.value = 'http://localhost:50001/';
+        component.item.set({ ...component.items()[0], value: 'http://localhost:50001/' });
+        component.name.set('AASX Server');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();
         expect(endpoint?.name).toEqual('AASX Server');
         expect(endpoint?.url).toEqual('http://localhost:50001/');
-        expect(endpoint?.type).toEqual('AASServer');
+        expect(endpoint?.type).toEqual('AAS_API');
     });
 
-    it('submits WebDAV server Name: "WebDAV", URL: "http://localhost:8080/root/folder"', function () {
+    it('submits WebDAV server Name: "WebDAV", URL: "http://localhost:8080/root/folder"', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item = component.items[2];
-        component.name = 'WebDAV Server';
-        component.item.value = 'http://localhost:8080/root/folder';
+        component.item.set({ ...component.items()[2], value: 'http://localhost:8080/root/folder' });
+        component.name.set('WebDAV Server');
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalled();

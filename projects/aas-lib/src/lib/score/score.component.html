@@ -10,12 +10,12 @@
     <div class="row">
         <div class="col-6 m-0 p-0">
             <div class="d-flex flex-row-reverse m-0 p-0">
-                <div class="score-neg bg-danger rounded-start m-0 border-start border-2" [style.width.%]="negative"></div>
+                <div class="score-neg bg-danger rounded-start m-0 border-start border-2" [style.width.%]="negative()"></div>
             </div>
         </div>
         <div class="col-6 m-0 p-0">
             <div class="d-flex flex-row m-0 p-0">
-                <div class="score-pos bg-primary rounded-end m-0 border-end border-2" [style.width.%]="positive"></div>
+                <div class="score-pos bg-primary rounded-end m-0 border-end border-2" [style.width.%]="positive()"></div>
             </div>
         </div>
     </div>

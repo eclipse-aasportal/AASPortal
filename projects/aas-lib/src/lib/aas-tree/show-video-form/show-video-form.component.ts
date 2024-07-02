@@ -6,27 +6,31 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-show-video',
     templateUrl: './show-video-form.component.html',
     styleUrls: ['./show-video-form.component.scss'],
     standalone: true,
+    imports: [TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShowVideoFormComponent {
-    private readonly _modal: NgbActiveModal;
+    public constructor(private readonly modal: NgbActiveModal) {}
 
-    public constructor(modal: NgbActiveModal) {
-        this._modal = modal;
+    public readonly name = signal('');
+
+    public readonly video = signal('');
+
+    public initialize(name: string, video: string): void {
+        this.name.set(name);
+        this.video.set(video);
     }
 
-    public name!: string;
-
-    public video!: string;
-
     public close(): void {
-        this._modal.close();
+        this.modal.close();
     }
 }

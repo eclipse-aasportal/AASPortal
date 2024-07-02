@@ -15,7 +15,7 @@
     <button type="button" class="btn-close" (click)="cancel()"> </button>
   </div>
   <div class="modal-body">
-    @for (message of messages; track message) {
+    @for (message of messages(); track message) {
       <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
         <div class="d-flex">
           <div class="flex-grow-1">{{ message }}</div>
@@ -24,7 +24,7 @@
     }
     <div class="form-floating mb-3">
       <select class="form-select" id="selectModelType" [(ngModel)]="modelType" name="modelType">
-        @for (item of modelTypes; track item) {
+        @for (item of modelTypes(); track item) {
           <option [ngValue]="item">{{item}}</option>
         }
       </select>
@@ -32,7 +32,7 @@
     </div>
     <div class="form-floating mb-3">
       <select class="form-select" id="selectTemplate" [(ngModel)]="template" name="template">
-        @for (item of templates | async; track item) {
+        @for (item of templates(); track item) {
           <option [ngValue]="item">{{item.endpoint?.address}}</option>
         }
       </select>

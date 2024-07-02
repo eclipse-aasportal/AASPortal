@@ -21,7 +21,7 @@ import {
     noop,
 } from 'common';
 
-import { AASStoreService } from '../aas-store.service';
+import { AASStore } from '../aas.store';
 
 export class NewElementCommand extends Command {
     private readonly memento: AASDocument;
@@ -29,7 +29,7 @@ export class NewElementCommand extends Command {
     private content: aas.Environment;
 
     public constructor(
-        private readonly store: AASStoreService,
+        private readonly store: AASStore,
         document: AASDocument,
         private readonly parent: aas.Referable,
         private readonly element: aas.Referable | aas.Environment,

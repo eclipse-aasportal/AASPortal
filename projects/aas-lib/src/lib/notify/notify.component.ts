@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { MessageEntry } from '../types/message-entry';
 import { NotifyService } from './notify.service';
 import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
@@ -17,6 +17,7 @@ import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
     styleUrls: ['./notify.component.scss'],
     standalone: true,
     imports: [NgbToast],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotifyComponent implements OnInit {
     public constructor(private readonly notify: NotifyService) {}

@@ -1,73 +1,70 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { Observable, catchError, concat, from, map, mergeMap, of } from 'rxjs';
 import { ViewMode } from 'aas-lib';
-import { AASDocument, AASDocumentId, AASPage, aas } from 'common';
+import { AASDocument, AASDocumentId, AASPage, aas, equalArray } from 'common';
 import { StartApiService } from './start-api.service';
 import { TranslateService } from '@ngx-translate/core';
+import { FavoritesService } from './favorites.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class StartStore {
-    private _viewMode = ViewMode.Undefined;
-    private _filterText = '';
-    private _limit = 10;
-    private _previous: AASDocumentId | null = null;
-    private _next: AASDocumentId | null = null;
+    private readonly _viewMode = signal(ViewMode.Undefined);
+    private readonly _filterText = signal('');
+    private readonly _limit = signal(10);
+    private readonly _previous = signal<AASDocumentId | null>(null);
+    private readonly _next = signal<AASDocumentId | null>(null);
     private _totalCount = 0;
-    private _documents: AASDocument[] = [];
-    private _activeFavorites = '';
+    private readonly _documents = signal<AASDocument[]>([], { equal: (a, b) => equalArray(a, b) });
+    private readonly _activeFavorites = signal('');
 
     public constructor(
         private readonly api: StartApiService,
         private readonly translate: TranslateService,
+        private readonly favorites: FavoritesService,
     ) {}
 
-    public get viewMode(): ViewMode {
-        return this._viewMode;
-    }
+    public readonly viewMode = this._viewMode.asReadonly();
 
-    public get documents(): AASDocument[] {
-        return this._documents;
-    }
+    public readonly documents = this._documents.asReadonly();
 
-    public get activeFavorites(): string {
-        return this._activeFavorites;
-    }
+    public readonly favoritesLists = computed(() => ['', ...this.favorites.lists().map(list => list.name)]);
 
-    public get limit(): number {
-        return this._limit;
-    }
+    public readonly activeFavorites = this._activeFavorites.asReadonly();
 
-    public get filterText(): string {
-        return this._filterText;
-    }
+    public readonly limit = this._limit.asReadonly();
 
-    public get isFirstPage(): boolean {
-        return this._previous === null;
-    }
+    public readonly filterText = this._filterText.asReadonly();
 
-    public get isLastPage(): boolean {
-        return this._next === null;
-    }
+    public readonly selected = signal<AASDocument[]>([], { equal: (a, b) => equalArray(a, b) });
+
+    public readonly filter = computed(() => {
+        const filterText = this._filterText();
+        return this._activeFavorites() ? filterText : '';
+    });
+
+    public readonly isFirstPage = computed(() => this._previous() === null);
+
+    public readonly isLastPage = computed(() => this._next() === null);
 
     public setViewMode(viewMode: ViewMode): void {
-        this._viewMode = viewMode;
-        this._documents = [];
+        this._viewMode.set(viewMode);
+        this._documents.set([]);
     }
 
     public addTree(nodes: AASDocument[]): void {
-        this._documents = [...this._documents, ...nodes];
+        this._documents.update(values => [...values, ...nodes]);
     }
 
     public setContent(document: AASDocument, content: aas.Environment | null | undefined): void {
-        const documents = [...this._documents];
+        const documents = [...this._documents()];
         const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
         if (index >= 0) {
             documents[index] = { ...document, content };
         }
 
-        this._documents = documents;
+        this._documents.set(documents);
     }
 
     public removeFavorites(favorites: AASDocument[]): void {
@@ -75,15 +72,15 @@ export class StartStore {
             return;
         }
 
-        const documents = this._documents.filter(document =>
+        const documents = this._documents().filter(document =>
             favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
         );
 
-        this._documents = documents;
+        this._documents.set(documents);
     }
 
     public setFilter(filter: string): void {
-        this._filterText = filter;
+        this._filterText.set(filter);
     }
 
     public getFirstPage(filter?: string, limit?: number): void {
@@ -91,9 +88,9 @@ export class StartStore {
             .getPage(
                 {
                     previous: null,
-                    limit: limit ?? this._limit,
+                    limit: limit ?? this._limit(),
                 },
-                filter ?? this._filterText,
+                filter ?? this._filterText(),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page, limit, filter)))
@@ -101,17 +98,17 @@ export class StartStore {
     }
 
     public getNextPage(): void {
-        if (this._documents.length === 0) {
+        if (this._documents().length === 0) {
             return;
         }
 
         this.api
             .getPage(
                 {
-                    next: this.getId(this._documents[this._documents.length - 1]),
-                    limit: this._limit,
+                    next: this.getId(this._documents()[this._documents().length - 1]),
+                    limit: this._limit(),
                 },
-                this._filterText,
+                this._filterText(),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
@@ -123,9 +120,9 @@ export class StartStore {
             .getPage(
                 {
                     next: null,
-                    limit: this._limit,
+                    limit: this._limit(),
                 },
-                this._filterText,
+                this._filterText(),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
@@ -133,17 +130,17 @@ export class StartStore {
     }
 
     public getPreviousPage(): void {
-        if (this._documents.length === 0) {
+        if (this._documents().length === 0) {
             return;
         }
 
         this.api
             .getPage(
                 {
-                    previous: this.getId(this._documents[0]),
-                    limit: this._limit,
+                    previous: this.getId(this._documents()[0]),
+                    limit: this._limit(),
                 },
-                this._filterText,
+                this._filterText(),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
@@ -151,17 +148,17 @@ export class StartStore {
     }
 
     public refreshPage(): void {
-        if (this._documents.length === 0) {
+        if (this._documents().length === 0) {
             return;
         }
 
         this.api
             .getPage(
                 {
-                    previous: this._previous,
-                    limit: this._limit,
+                    previous: this._previous(),
+                    limit: this._limit(),
                 },
-                this._filterText,
+                this._filterText(),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
@@ -182,9 +179,9 @@ export class StartStore {
     }
 
     public getFavorites(activeFavorites: string, documents: AASDocument[]): void {
-        this._activeFavorites = activeFavorites;
-        this._documents = documents;
-        this._viewMode = ViewMode.List;
+        this._activeFavorites.set(activeFavorites);
+        this._documents.set(documents);
+        this._viewMode.set(ViewMode.List);
         from(documents)
             .pipe(
                 mergeMap(document =>
@@ -216,17 +213,17 @@ export class StartStore {
     }
 
     private setPage(page: AASPage, limit: number | undefined, filter: string | undefined): void {
-        this._viewMode = ViewMode.List;
-        this._activeFavorites = '';
-        this._documents = page.documents;
-        this._previous = page.previous;
-        this._next = page.next;
+        this._viewMode.set(ViewMode.List);
+        this._activeFavorites.set('');
+        this._documents.set(page.documents);
+        this._previous.set(page.previous);
+        this._next.set(page.next);
         if (limit) {
-            this._limit = limit;
+            this._limit.set(limit);
         }
 
         if (filter) {
-            this._filterText = filter;
+            this._filterText.set(filter);
         }
     }
 

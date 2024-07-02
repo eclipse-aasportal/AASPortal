@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Library } from 'common';
@@ -39,21 +38,21 @@ describe('LibraryTableComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('has an initial page size of 10', function () {
-        expect(component.pageSize).toEqual(10);
+    it('has an initial page size of 10', () => {
+        expect(component.pageSize()).toEqual(10);
     });
 
-    it('shows page 1', function () {
-        expect(component.page).toEqual(1);
+    it('shows page 1', () => {
+        expect(component.page()).toEqual(1);
     });
 
-    describe('with pagination', function () {
+    describe('with pagination', () => {
         let size: number;
 
-        beforeEach(function () {
+        beforeEach(() => {
             const collection: Library[] = [];
 
-            size = component.pageSize + 1;
+            size = component.pageSize() + 1;
             for (let i = 1; i <= size; i++) {
                 collection.push({
                     name: 'Library ' + i,
@@ -64,37 +63,32 @@ describe('LibraryTableComponent', () => {
                 });
             }
 
-            component.collection = collection;
+            fixture.componentRef.setInput('collection', collection);
             fixture.detectChanges();
-
-            component.ngOnChanges({
-                collection: new SimpleChange([], collection, true),
-            });
         });
 
-        it('has 11 libraries', function () {
-            expect(component.size).toEqual(size);
+        it('has 11 libraries', () => {
+            expect(component.size()).toEqual(size);
         });
 
-        it('displays the first page with 10 entries', function () {
-            expect(component.libraries.length).toEqual(component.pageSize);
+        it('displays the first page with 10 entries', () => {
+            expect(component.libraries().length).toEqual(component.pageSize());
         });
 
-        it('provides 2 pages', function () {
-            expect(component.page).toEqual(1);
-            expect(component.libraries.length).toEqual(10);
+        it('provides 2 pages', () => {
+            expect(component.page()).toEqual(1);
+            expect(component.libraries().length).toEqual(10);
 
-            component.page = 2;
+            component.page.set(2);
             fixture.detectChanges();
-            component.refreshLibraries();
-            expect(component.libraries.length).toEqual(1);
+            expect(component.libraries().length).toEqual(1);
         });
     });
 
-    describe('show/hide pagination', function () {
+    describe('show/hide pagination', () => {
         let size: number;
 
-        beforeEach(function () {
+        beforeEach(() => {
             const collection: Library[] = [];
 
             size = 10;
@@ -108,24 +102,20 @@ describe('LibraryTableComponent', () => {
                 });
             }
 
-            component.collection = collection;
+            fixture.componentRef.setInput('collection', collection);
             fixture.detectChanges();
-
-            component.ngOnChanges({
-                collection: new SimpleChange([], collection, true),
-            });
         });
 
-        it('hides pagination if size <= pageSize', function () {
-            component.pageSize = component.size;
+        it('hides pagination if size <= pageSize', () => {
+            fixture.componentRef.setInput('pageSize', component.size);
             fixture.detectChanges();
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const pagination: HTMLElement | null = element.querySelector('ngb-pagination');
             expect(pagination).toBeNull();
         });
 
-        it('shows pagination if size > pageSize', function () {
-            component.pageSize = component.size - 1;
+        it('shows pagination if size > pageSize', () => {
+            fixture.componentRef.setInput('pageSize', component.size() - 1);
             fixture.detectChanges();
             const element: HTMLElement = fixture.debugElement.nativeElement;
             const pagination: HTMLElement | null = element.querySelector('ngb-pagination');

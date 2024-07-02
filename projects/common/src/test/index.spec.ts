@@ -335,19 +335,23 @@ describe('index', () => {
     });
 
     describe('getEndpointType', () => {
-        it('gets the endpoint type from an URL string', () => {
-            expect(getEndpointType('http://localhost:1234/')).toEqual('AASServer');
+        it('gets = from http://localhost:1234/', () => {
+            expect(getEndpointType('http://localhost:1234/')).toEqual('AAS_API');
         });
 
-        it('gets the endpoint type from a URL', () => {
-            expect(getEndpointType(new URL('opc.tcp://localhost:1234/I4AASServer'))).toEqual('OpcuaServer');
+        it('gets "AAS_API" from http://localhost:1234/?type=aas-api', () => {
+            expect(getEndpointType('http://localhost:1234/?type=aas-api')).toEqual('AAS_API');
         });
 
-        it('gets "AASServer" as default', () => {
-            expect(getEndpointType('http://localhost:1234/endpoints/sample')).toEqual('WebDAV');
+        it('gets "OPC_UA" from opc.tcp://localhost:1234/I4AASServer', () => {
+            expect(getEndpointType(new URL('opc.tcp://localhost:1234/I4AASServer'))).toEqual('OPC_UA');
         });
 
-        it('gets "WebDAV" as default', () => {
+        it('gets "WebDAV" from http://localhost:1234/endpoints/sample?type=webdav', () => {
+            expect(getEndpointType('http://localhost:1234/endpoints/sample?type=webdav')).toEqual('WebDAV');
+        });
+
+        it('gets "FileSystem" from file:///endpoints/samples', () => {
             expect(getEndpointType('file:///endpoints/samples')).toEqual('FileSystem');
         });
     });

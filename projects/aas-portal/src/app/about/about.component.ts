@@ -6,7 +6,16 @@
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import {
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    AfterViewInit,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Library, Message } from 'common';
 import { LibraryTableComponent, MessageTableComponent } from 'aas-lib';
 import { ServerApiService } from './server-api.service';
@@ -19,39 +28,40 @@ import { environment } from '../../environments/environment';
     styleUrls: ['./about.component.scss'],
     standalone: true,
     imports: [LibraryTableComponent, MessageTableComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
+    private readonly _serverVersion = signal('');
+    private readonly _libraries = signal<Library[]>([]);
+    private readonly _messages = signal<Message[]>([]);
+
     public constructor(
         private serverApi: ServerApiService,
         private toolbar: ToolbarService,
-    ) {
-        this.author = environment.author;
-        this.version = environment.version;
-        this.homepage = environment.homepage;
-    }
+    ) {}
 
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aboutToolbar: TemplateRef<unknown> | null = null;
 
-    public version = '';
+    public readonly version = signal(environment.author).asReadonly();
 
-    public serverVersion = '';
+    public readonly serverVersion = this._serverVersion.asReadonly();
 
-    public author = '';
+    public readonly author = signal(environment.author).asReadonly();
 
-    public homepage = '';
+    public readonly homepage = signal(environment.homepage).asReadonly();
 
-    public libraries: Library[] = [];
+    public readonly libraries = this._libraries.asReadonly();
 
-    public messages: Message[] = [];
+    public readonly messages = this._messages.asReadonly();
 
     public ngOnInit(): void {
         this.serverApi.getInfo().subscribe(info => {
-            this.serverVersion = info.version;
-            this.libraries = info.libraries ?? [];
+            this._serverVersion.set(info.version);
+            this._libraries.set(info.libraries ?? []);
         });
 
-        this.serverApi.getMessages().subscribe(messages => (this.messages = messages));
+        this.serverApi.getMessages().subscribe(messages => this._messages.set(messages));
     }
 
     public ngAfterViewInit(): void {

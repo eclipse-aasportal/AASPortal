@@ -6,7 +6,8 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 
@@ -15,20 +16,22 @@ import { SecuredImageComponent } from '../../secured-image/secured-image.compone
     templateUrl: './show-image-form.component.html',
     styleUrls: ['./show-image-form.component.scss'],
     standalone: true,
-    imports: [SecuredImageComponent],
+    imports: [SecuredImageComponent, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShowImageFormComponent {
-    private readonly _modal: NgbActiveModal;
+    public constructor(private readonly modal: NgbActiveModal) {}
 
-    public constructor(modal: NgbActiveModal) {
-        this._modal = modal;
+    public readonly name = signal('');
+
+    public readonly image = signal('');
+
+    public initialize(name: string, image: string): void {
+        this.name.set(name);
+        this.image.set(image);
     }
 
-    public name!: string;
-
-    public image!: string;
-
     public close(): void {
-        this._modal.close();
+        this.modal.close();
     }
 }

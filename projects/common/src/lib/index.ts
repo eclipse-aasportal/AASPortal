@@ -317,11 +317,27 @@ export function getEndpointType(url: string | URL): AASEndpointType {
             return 'FileSystem';
         case 'http:':
         case 'https:': {
-            const pathname = url.pathname;
-            return pathname && pathname !== '/' ? 'WebDAV' : 'AASServer';
+            const param = url.searchParams.get('type');
+            if (!param) {
+                return 'AAS_API';
+            }
+
+            switch (param.toLowerCase()) {
+                case 'aas_api':
+                case 'aas-api':
+                    return 'AAS_API';
+                case 'webdav':
+                    return 'WebDAV';
+                case 'opc-ua':
+                case 'opcua':
+                case 'opc_ua':
+                    return 'OPC_UA';
+            }
+
+            throw new Error(`Endpoint type "${param}" is not supported.`);
         }
         case 'opc.tcp:':
-            return 'OpcuaServer';
+            return 'OPC_UA';
         default:
             throw new Error(`Protocol "${url.protocol}" is not supported.`);
     }

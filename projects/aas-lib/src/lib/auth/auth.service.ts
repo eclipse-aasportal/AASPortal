@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
@@ -34,7 +34,7 @@ import { WindowService } from '../window.service';
     providedIn: 'root',
 })
 export class AuthService {
-    private readonly payload$ = new BehaviorSubject<JWTPayload>({ role: 'guest' });
+    private readonly payload$ = signal<JWTPayload>({ role: 'guest' });
     private readonly ready$ = new BehaviorSubject<boolean>(false);
 
     public constructor(
@@ -44,9 +44,6 @@ export class AuthService {
         private notify: NotifyService,
         private window: WindowService,
     ) {
-        this.payload = this.payload$.asObservable();
-        this.ready = this.ready$.asObservable();
-
         const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
         const token = this.window.getLocalStorageItem('.Token');
         if (stayLoggedIn && token && this.isValid(token)) {
@@ -67,31 +64,25 @@ export class AuthService {
     }
 
     /** Signals that an authentication was performed. */
-    public readonly ready: Observable<boolean>;
+    public readonly ready = this.ready$.asObservable();
 
     /** The e-mail of the current user. */
-    public get userId(): string | undefined {
-        return this.payload$.getValue()?.sub;
-    }
+    public readonly userId = computed(() => this.payload$()?.sub);
 
     /** The name or alias of the current user. */
-    public get name(): string | undefined {
-        return this.payload$.getValue()?.name ?? this.translate.instant('GUEST_USER');
-    }
+    public readonly name = computed(() => this.payload$()?.name ?? (this.translate.instant('GUEST_USER') as string));
 
     /** The current user role. */
-    public get role(): UserRole {
-        return this.payload$.getValue()?.role ?? 'guest';
-    }
+    public readonly role = computed(() => this.payload$()?.role ?? 'guest');
 
     /** Indicates whether the current user is authenticated. */
-    public get authenticated(): boolean {
-        const payload = this.payload$.getValue();
+    public readonly authenticated = computed(() => {
+        const payload = this.payload$();
         return payload.sub != null && (payload.role === 'editor' || payload.role === 'admin');
-    }
+    });
 
     /** The current active JSON web token. */
-    public readonly payload: Observable<JWTPayload>;
+    public readonly payload = this.payload$.asReadonly();
 
     /**
      * User login.
@@ -107,7 +98,7 @@ export class AuthService {
                 const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
                 const token = this.window.getLocalStorageItem('.Token');
                 if (stayLoggedIn && token) {
-                    modalRef.componentInstance.stayLoggedIn = stayLoggedIn;
+                    modalRef.componentInstance.stayLoggedIn.set(stayLoggedIn);
                 }
 
                 return from<Promise<LoginFormResult | undefined>>(modalRef.result);
@@ -185,7 +176,7 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public updateUserProfile(profile?: UserProfile): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this.payload$();
         if (!payload || !payload.sub || !payload.name) {
             return throwError(() => new Error('Invalid operation.'));
         }
@@ -218,7 +209,7 @@ export class AuthService {
      * Deletes the account of the current authenticated user.
      */
     public deleteUser(): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this.payload$();
         if (!payload || !payload.sub || !payload.name) {
             throw new Error('Invalid operation');
         }
@@ -231,7 +222,7 @@ export class AuthService {
      * @param expected The expected role, the current user must have.
      */
     public isAuthorized(expected: UserRole): boolean {
-        return isUserAuthorized(this.role, expected);
+        return isUserAuthorized(this.role(), expected);
     }
 
     /**
@@ -240,7 +231,7 @@ export class AuthService {
      * @returns `true` if the cookie exists; otherwise, `false`.
      */
     public checkCookie(name: string): Observable<boolean> {
-        const payload = this.payload$.getValue();
+        const payload = this.payload$();
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.getCookie(id, name).pipe(map(cookie => cookie != null));
@@ -255,7 +246,7 @@ export class AuthService {
      * @returns The cookie value.
      */
     public getCookie(name: string): Observable<string | undefined> {
-        const payload = this.payload$.getValue();
+        const payload = this.payload$();
         if (payload && payload.sub) {
             return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
         }
@@ -269,7 +260,7 @@ export class AuthService {
      * @param data The cookie value.
      */
     public setCookie(name: string, data: string): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this.payload$();
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.setCookie(id, { name, data });
@@ -284,7 +275,7 @@ export class AuthService {
      * @param name The cookie name.
      */
     public deleteCookie(name: string): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this.payload$();
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.deleteCookie(id, name);
@@ -328,6 +319,6 @@ export class AuthService {
     private nextPayload(token: string): void {
         this.window.setLocalStorageItem('.Token', token);
         const payload = jwtDecode(token) as JWTPayload;
-        this.payload$.next(payload);
+        this.payload$.set(payload);
     }
 }

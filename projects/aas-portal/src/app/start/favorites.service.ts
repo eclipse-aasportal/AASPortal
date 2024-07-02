@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { AASDocument } from 'common';
 import { AuthService } from 'aas-lib';
 import { first, Observable, map, mergeMap, of } from 'rxjs';
@@ -20,7 +20,7 @@ export interface FavoritesList {
     providedIn: 'root',
 })
 export class FavoritesService {
-    private lists$: FavoritesList[] = [];
+    private readonly _lists = signal<FavoritesList[]>([]);
 
     public constructor(private readonly auth: AuthService) {
         this.auth.ready
@@ -29,25 +29,23 @@ export class FavoritesService {
                 mergeMap(() => this.auth.getCookie('.Favorites')),
             )
             .subscribe(value => {
-                this.lists$ = value ? (JSON.parse(value) as FavoritesList[]) : [];
+                this._lists.set(value ? (JSON.parse(value) as FavoritesList[]) : []);
             });
     }
 
-    public get lists(): FavoritesList[] {
-        return this.lists$;
-    }
+    public readonly lists = this._lists.asReadonly();
 
     public has(name: string): boolean {
-        return this.lists$.some(list => list.name === name);
+        return this._lists().some(list => list.name === name);
     }
 
     public get(name: string): FavoritesList | undefined {
-        return this.lists$.find(list => list.name === name);
+        return this._lists().find(list => list.name === name);
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): Observable<void> {
-        return of(this.lists$).pipe(
-            map(lists => [...lists]),
+        return of(this._lists).pipe(
+            map(lists => [...lists()]),
             map(lists => {
                 const i = lists.findIndex(list => list.name === name);
                 let list: FavoritesList;
@@ -74,7 +72,7 @@ export class FavoritesService {
             mergeMap(lists => {
                 return this.auth.setCookie('.Favorites', JSON.stringify(lists)).pipe(
                     map(() => {
-                        this.lists$ = lists;
+                        this._lists.set(lists);
                     }),
                 );
             }),
@@ -82,8 +80,8 @@ export class FavoritesService {
     }
 
     public remove(documents: AASDocument[], name: string): Observable<void> {
-        return of(this.lists$).pipe(
-            map(lists => [...lists]),
+        return of(this._lists).pipe(
+            map(lists => [...lists()]),
             map(lists => {
                 const i = lists.findIndex(list => list.name === name);
                 if (i < 0) {
@@ -102,7 +100,7 @@ export class FavoritesService {
             mergeMap(lists => {
                 return this.auth.setCookie('.Favorites', JSON.stringify(lists)).pipe(
                     map(() => {
-                        this.lists$ = lists;
+                        this._lists.set(lists);
                     }),
                 );
             }),
@@ -110,8 +108,8 @@ export class FavoritesService {
     }
 
     public delete(name: string): Observable<void> {
-        return of(this.lists$).pipe(
-            map(lists => lists.filter(list => list.name !== name)),
+        return of(this._lists).pipe(
+            map(lists => lists().filter(list => list.name !== name)),
             mergeMap(lists => {
                 return (
                     lists.length > 0
@@ -119,7 +117,7 @@ export class FavoritesService {
                         : this.auth.deleteCookie('.Favorites')
                 ).pipe(
                     map(() => {
-                        this.lists$ = lists;
+                        this._lists.set(lists);
                     }),
                 );
             }),

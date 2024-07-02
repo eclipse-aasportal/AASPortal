@@ -6,26 +6,21 @@
  *
  *****************************************************************************/
 
-import { Injectable, TemplateRef } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, TemplateRef, signal } from '@angular/core';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ToolbarService {
-    private readonly toolbarTemplate$ = new BehaviorSubject<TemplateRef<unknown> | null>(null);
+    private _toolbarTemplate = signal<TemplateRef<unknown> | null>(null);
 
-    public constructor() {
-        this.toolbarTemplate = this.toolbarTemplate$.asObservable();
+    public readonly toolbarTemplate = this._toolbarTemplate.asReadonly();
+
+    public set(value: TemplateRef<unknown>): Promise<void> {
+        return Promise.resolve().then(() => this._toolbarTemplate.set(value));
     }
 
-    public readonly toolbarTemplate: Observable<TemplateRef<unknown> | null>;
-
-    public set(value: TemplateRef<unknown>): void {
-        Promise.resolve().then(() => this.toolbarTemplate$.next(value));
-    }
-
-    public clear(): void {
-        Promise.resolve().then(() => this.toolbarTemplate$.next(null));
+    public clear(): Promise<void> {
+        return Promise.resolve().then(() => this._toolbarTemplate.set(null));
     }
 }

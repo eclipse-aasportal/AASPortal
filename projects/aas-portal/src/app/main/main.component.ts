@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, model, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { Observable, Subscription, first, map } from 'rxjs';
+import { first } from 'rxjs';
 import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 import { ToolbarService } from '../toolbar.service';
 import { MainApiService } from './main-api.service';
@@ -46,10 +46,24 @@ export interface LinkDescriptor {
         LocalizeComponent,
         AuthComponent,
     ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainComponent implements OnInit, OnDestroy {
-    private readonly subscription = new Subscription();
-    private readonly _links: LinkDescriptor[] = [
+export class MainComponent implements OnInit {
+    public constructor(
+        private readonly router: Router,
+        private readonly window: WindowService,
+        private readonly api: MainApiService,
+        private readonly toolbar: ToolbarService,
+    ) {}
+
+    @ViewChild('emptyToolbar', { read: TemplateRef })
+    public emptyToolbar!: TemplateRef<unknown>;
+
+    public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
+
+    public readonly activeId = model(LinkId.START);
+
+    public readonly links = signal<LinkDescriptor[]>([
         {
             id: LinkId.START,
             name: 'CAPTION_START',
@@ -75,27 +89,7 @@ export class MainComponent implements OnInit, OnDestroy {
             name: 'CAPTION_ABOUT',
             url: '/about',
         },
-    ];
-
-    public constructor(
-        private readonly router: Router,
-        private readonly window: WindowService,
-        private readonly api: MainApiService,
-        private readonly toolbar: ToolbarService,
-    ) {
-        this.toolbarTemplate = this.toolbar.toolbarTemplate.pipe(map(value => this.nextToolbar(value)));
-    }
-
-    @ViewChild('emptyToolbar', { read: TemplateRef })
-    public emptyToolbar!: TemplateRef<unknown>;
-
-    public toolbarTemplate: Observable<TemplateRef<unknown> | null>;
-
-    public activeId = LinkId.START;
-
-    public get links(): LinkDescriptor[] {
-        return this._links;
-    }
+    ]).asReadonly();
 
     public ngOnInit(): void {
         const params = this.window.getQueryParams();
@@ -117,13 +111,5 @@ export class MainComponent implements OnInit, OnDestroy {
         } else {
             this.router.navigate(['/start'], { skipLocationChange: true });
         }
-    }
-
-    public ngOnDestroy(): void {
-        this.subscription.unsubscribe();
-    }
-
-    private nextToolbar(value: TemplateRef<unknown> | null): TemplateRef<unknown> {
-        return value ?? this.emptyToolbar;
     }
 }
