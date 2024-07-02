@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { LiveNode } from 'common';
+import { LiveNode } from 'aas-core';
 
 export interface SocketItem {
     node: LiveNode;

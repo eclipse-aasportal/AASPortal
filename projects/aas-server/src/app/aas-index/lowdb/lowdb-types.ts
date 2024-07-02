@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASEndpoint } from 'common';
+import { AASDocument, AASEndpoint } from 'aas-core';
 
 export type LowDbElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
 

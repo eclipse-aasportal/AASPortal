@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Pojo } from 'node-opcua-client-crawler';
-import { aas, AASDocument, LiveValue } from 'common';
+import { aas, AASDocument, LiveValue } from 'aas-core';
 import {
     NodeIdLike,
     DataValueOptions,

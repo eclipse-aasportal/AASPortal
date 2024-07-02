@@ -12,7 +12,7 @@ import jszip from 'jszip';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import { AasxDirectory } from './aasx-directory.js';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';

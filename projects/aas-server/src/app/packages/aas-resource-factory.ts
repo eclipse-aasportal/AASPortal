@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { AASEndpoint, ApplicationError } from 'common';
+import { AASEndpoint, ApplicationError } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { AASResource } from './aas-resource.js';
 import { AasxDirectory } from './file-system/aasx-directory.js';

@@ -17,7 +17,7 @@ import {
     signal,
 } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Message } from 'common';
+import { Message } from 'aas-core';
 import { Subscription } from 'rxjs';
 import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';

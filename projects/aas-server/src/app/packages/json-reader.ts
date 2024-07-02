@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AASReader } from './aas-reader.js';
-import { aas, determineType, extensionToMimeType, isIdentifiable } from 'common';
+import { aas, determineType, extensionToMimeType, isIdentifiable } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { encodeBase64Url } from '../convert.js';
 

@@ -12,7 +12,7 @@ import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { AASDocument, AASPage } from 'common';
+import { AASDocument, AASPage } from 'aas-core';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
 

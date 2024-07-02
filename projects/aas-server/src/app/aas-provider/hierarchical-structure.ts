@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, aas, isEntity, isRelationshipElement, selectReferable } from 'common';
+import { AASDocument, aas, isEntity, isRelationshipElement, selectReferable } from 'aas-core';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 

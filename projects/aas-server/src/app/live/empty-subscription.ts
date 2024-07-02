@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { noop } from 'common';
+import { noop } from 'aas-core';
 import { SocketSubscription } from './socket-subscription.js';
 
 /** Provides an empty WebSocket subscription. */

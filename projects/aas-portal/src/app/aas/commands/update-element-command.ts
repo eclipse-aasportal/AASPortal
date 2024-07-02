@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASDocument, selectReferable, noop } from 'common';
+import { aas, AASDocument, selectReferable, noop } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
 import { AASStore } from '../aas.store';

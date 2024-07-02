@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, isIdentifiable } from 'common';
+import { aas, isIdentifiable } from 'aas-core';
 
 enum CommandState {
     Idle,

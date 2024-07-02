@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { ApplicationError, UserProfile } from 'common';
+import { ApplicationError, UserProfile } from 'aas-core';
 
 import { AuthService } from '../../app/auth/auth-service.js';
 import { ERRORS } from '../../app/errors.js';

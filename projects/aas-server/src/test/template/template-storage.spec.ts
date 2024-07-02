@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { TemplateDescriptor, aas } from 'common';
+import { TemplateDescriptor, aas } from 'aas-core';
 import { TemplateStorage } from '../../app/template/template-storage.js';
 import { createSpyObj } from 'fhg-jest';
 import { Logger } from '../../app/logging/logger.js';

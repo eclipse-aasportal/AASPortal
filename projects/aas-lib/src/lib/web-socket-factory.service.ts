@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 @Injectable({

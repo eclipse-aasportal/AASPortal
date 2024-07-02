@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { PackageInfo } from 'common';
+import { PackageInfo } from 'aas-core';
 
 import { AboutComponent } from '../../app/about/about.component';
 import { ServerApiService } from '../../app/about/server-api.service';

@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AASEndpoint } from 'common';
+import { AASEndpoint } from 'aas-core';
 import { AddEndpointFormComponent } from '../../app/start/add-endpoint-form/add-endpoint-form.component';
 
 describe('AddEndpointFormComponent', () => {

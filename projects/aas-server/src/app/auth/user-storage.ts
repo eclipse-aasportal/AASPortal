@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Cookie } from 'common';
+import { Cookie } from 'aas-core';
 import { UserData } from './user-data.js';
 
 /** Defines user storage. */

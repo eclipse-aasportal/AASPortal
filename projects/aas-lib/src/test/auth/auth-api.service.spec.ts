@@ -8,7 +8,7 @@
 
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AuthResult, Cookie } from 'common';
+import { AuthResult, Cookie } from 'aas-core';
 
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { getGuestToken, getToken } from '../assets/json-web-token';

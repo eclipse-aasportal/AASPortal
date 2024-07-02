@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { RowDataPacket } from 'mysql2/promise';
-import { AASEndpoint, AASDocument } from 'common';
+import { AASEndpoint, AASDocument } from 'aas-core';
 
 export interface MySqlEndpoint extends AASEndpoint, RowDataPacket {}
 

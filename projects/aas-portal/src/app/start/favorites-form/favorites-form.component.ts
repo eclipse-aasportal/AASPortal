@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { AASDocument, ApplicationError, stringFormat } from 'common';
+import { AASDocument, ApplicationError, stringFormat } from 'aas-core';
 import { FavoritesService } from '../favorites.service';
 import { from, mergeMap, of, tap } from 'rxjs';
 import { messageToString } from 'aas-lib';

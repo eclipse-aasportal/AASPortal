@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { Observable, catchError, concat, from, map, mergeMap, of } from 'rxjs';
 import { ViewMode } from 'aas-lib';
-import { AASDocument, AASDocumentId, AASPage, aas, equalArray } from 'common';
+import { AASDocument, AASDocumentId, AASPage, aas, equalArray } from 'aas-core';
 import { StartApiService } from './start-api.service';
 import { TranslateService } from '@ngx-translate/core';
 import { FavoritesService } from './favorites.service';

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Message, MessageType } from 'common';
+import { Message, MessageType } from 'aas-core';
 import { singleton } from 'tsyringe';
 
 /**

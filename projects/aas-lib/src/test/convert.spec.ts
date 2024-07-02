@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { TranslateService } from '@ngx-translate/core';
-import { ApplicationError } from 'common';
+import { ApplicationError } from 'aas-core';
 import {
     encodeBase64Url,
     basename,

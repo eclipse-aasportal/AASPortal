@@ -11,7 +11,7 @@ import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
-import { ApplicationError, AuthResult, Cookie, Credentials } from 'common';
+import { ApplicationError, AuthResult, Cookie, Credentials } from 'aas-core';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { AuthService } from '../../app/auth/auth-service.js';

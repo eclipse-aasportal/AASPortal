@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { Tree, TreeNode } from '../tree';
 
 export class AASTableRow extends TreeNode<AASDocument> {

@@ -11,7 +11,7 @@ import fs from 'fs';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { isMainThread } from 'worker_threads';
-import { noop } from 'common';
+import { noop } from 'aas-core';
 
 /* istanbul ignore next */
 export class LoggerFactory {

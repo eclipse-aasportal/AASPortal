@@ -17,7 +17,7 @@ import {
     getModelTypeFromAbbreviation,
     parseDate,
     parseNumber,
-} from 'common';
+} from 'aas-core';
 
 import { normalize } from '../convert';
 import { AASTreeRow } from './aas-tree-row';

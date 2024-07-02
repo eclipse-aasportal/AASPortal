@@ -12,7 +12,7 @@ import { resolve } from 'path/posix';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { readFile } from 'fs/promises';
-import { PackageInfo } from 'common';
+import { PackageInfo } from 'aas-core';
 import { createSpyObj } from 'fhg-jest';
 
 describe('Application Info service', () => {

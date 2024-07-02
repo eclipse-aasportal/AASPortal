@@ -10,7 +10,7 @@ import { inject, singleton } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import EventEmitter from 'events';
 import fs from 'fs';
 

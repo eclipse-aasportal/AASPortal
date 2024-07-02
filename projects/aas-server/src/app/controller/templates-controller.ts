@@ -12,7 +12,7 @@ import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { aas, TemplateDescriptor } from 'common';
+import { aas, TemplateDescriptor } from 'aas-core';
 import { TemplateStorage } from '../template/template-storage.js';
 import { decodeBase64Url } from '../convert.js';
 

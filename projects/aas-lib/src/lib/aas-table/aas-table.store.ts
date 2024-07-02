@@ -8,7 +8,7 @@
 
 import { Injectable, signal, untracked } from '@angular/core';
 import findLastIndex from 'lodash-es/findLastIndex';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableTree } from './aas-table-row';
 

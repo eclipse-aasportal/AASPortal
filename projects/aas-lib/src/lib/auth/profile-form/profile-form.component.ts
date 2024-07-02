@@ -11,7 +11,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'common';
+import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'aas-core';
 import { messageToString } from '../../convert';
 import { ERRORS } from '../../types/errors';
 import { AuthApiService } from '../auth-api.service';

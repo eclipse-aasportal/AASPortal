@@ -11,7 +11,7 @@ import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { EMPTY, first, map, mergeMap, Observable, of } from 'rxjs';
 import { encodeBase64Url, AuthService } from 'aas-lib';
-import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'common';
+import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'aas-core';
 
 import { ERRORS } from '../types/errors';
 import { SelectionMode } from '../types/selection-mode';

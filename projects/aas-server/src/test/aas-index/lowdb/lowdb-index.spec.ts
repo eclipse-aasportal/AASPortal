@@ -10,7 +10,7 @@ import { beforeAll, beforeEach, describe, it, expect, jest } from '@jest/globals
 import path from 'path/posix';
 import fs from 'fs';
 import { Low } from 'lowdb';
-import { AASCursor, AASDocument, AASDocumentId } from 'common';
+import { AASCursor, AASDocument, AASDocumentId } from 'aas-core';
 import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-index/lowdb/lowdb-index.js';

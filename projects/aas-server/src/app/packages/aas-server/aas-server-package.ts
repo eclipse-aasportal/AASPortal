@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, diffAsync, aas } from 'common';
+import { AASDocument, diffAsync, aas } from 'aas-core';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { Logger } from '../../logging/logger.js';

@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
 import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
-import { noop } from 'common';
+import { noop } from 'aas-core';
 
 import { ScanResultType, ScanResult } from './scan-result.js';
 import { WorkerData } from './worker-data.js';

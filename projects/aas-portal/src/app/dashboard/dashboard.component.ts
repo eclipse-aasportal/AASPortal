@@ -29,7 +29,7 @@ import {
 
 import isNumber from 'lodash-es/isNumber';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
-import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'common';
+import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
 import { ClipboardService, LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';

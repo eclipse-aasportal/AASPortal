@@ -13,7 +13,7 @@ import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { Message, PackageInfo } from 'common';
+import { Message, PackageInfo } from 'aas-core';
 
 @injectable()
 @Route('/api/v1/app')

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASQuery, OrExpression, QueryParser } from 'common';
+import { AASQuery, OrExpression, QueryParser } from 'aas-core';
 
 export abstract class AASIndexQuery {
     protected constructor(

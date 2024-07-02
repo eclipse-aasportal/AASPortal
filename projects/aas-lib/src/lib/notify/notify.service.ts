@@ -11,7 +11,7 @@ import { Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { resolveError } from '../convert';
 import { MessageEntry } from '../types/message-entry';
-import { stringFormat } from 'common';
+import { stringFormat } from 'aas-core';
 
 export enum LogType {
     Error,

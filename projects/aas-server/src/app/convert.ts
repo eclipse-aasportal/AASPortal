@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationError } from 'common';
+import { ApplicationError } from 'aas-core';
 import { ERRORS } from './errors.js';
 
 export function decodeBase64Url(data: string): string {

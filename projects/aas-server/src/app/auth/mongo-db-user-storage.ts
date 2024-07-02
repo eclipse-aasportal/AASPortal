@@ -8,7 +8,7 @@
 
 import { inject, injectable } from 'tsyringe';
 import mongoose, { Mongoose, Schema, model } from 'mongoose';
-import { Cookie } from 'common';
+import { Cookie } from 'aas-core';
 import { UserData } from './user-data.js';
 import { UserStorage } from './user-storage.js';
 import { Variable } from '../variable.js';

@@ -8,7 +8,7 @@
 
 import EventEmitter from 'events';
 import WebSocket from 'ws';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { SocketSubscription } from './socket-subscription.js';
 
 export class SocketClient extends EventEmitter {

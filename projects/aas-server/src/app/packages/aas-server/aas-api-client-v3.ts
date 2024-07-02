@@ -24,7 +24,7 @@ import {
     isSubmodel,
     isSubmodelElement,
     selectSubmodel,
-} from 'common';
+} from 'aas-core';
 
 interface PackageDescriptor {
     aasIds: string[];

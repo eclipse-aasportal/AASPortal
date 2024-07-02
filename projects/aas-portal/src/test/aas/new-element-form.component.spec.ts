@@ -12,7 +12,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
 import { TemplateService } from 'aas-lib';
 import { signal } from '@angular/core';
-import { TemplateDescriptor } from 'projects/common/dist/types';
+import { TemplateDescriptor } from 'aas-core';
 
 describe('NewElementFormComponent', () => {
     let component: NewElementFormComponent;

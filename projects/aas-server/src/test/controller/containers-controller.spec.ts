@@ -14,7 +14,7 @@ import morgan from 'morgan';
 import request from 'supertest';
 import { Readable } from 'stream';
 import { resolve } from 'path/posix';
-import { aas } from 'common';
+import { aas } from 'aas-core';
 
 import { sampleDocument } from '../assets/sample-document.js';
 import { Logger } from '../../app/logging/logger.js';

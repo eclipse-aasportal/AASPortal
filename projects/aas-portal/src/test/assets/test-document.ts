@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, aas } from 'common';
+import { AASDocument, AASContainer, aas } from 'aas-core';
 
 export function createContainer(url: string, documents: AASDocument[]): AASContainer {
     return {

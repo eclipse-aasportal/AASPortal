@@ -18,7 +18,7 @@ import {
     parseDate,
     parseNumber,
     toBoolean,
-} from 'common';
+} from 'aas-core';
 
 export abstract class AASIndex {
     public abstract getEndpoints(): Promise<AASEndpoint[]>;

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, ApplicationError } from 'common';
+import { aas, ApplicationError } from 'aas-core';
 import { basename, extname, join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';

@@ -9,7 +9,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
-import { Library } from 'common';
+import { Library } from 'aas-core';
 
 export interface LibraryRow extends Library {
     id: number;

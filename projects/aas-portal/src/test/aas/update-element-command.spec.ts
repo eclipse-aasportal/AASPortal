@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { aas, AASDocument, selectElement } from 'common';
+import { aas, AASDocument, selectElement } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { UpdateElementCommand } from '../../app/aas/commands/update-element-command';
 import { sampleDocument } from '../../test/assets/sample-document';

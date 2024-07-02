@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescription } from 'node-opcua';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../packages/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../packages/opcua/opcua-client.js';

@@ -9,7 +9,7 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { ScanContainerData } from './aas-provider/worker-data.js';
 import { ScanContainerResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';

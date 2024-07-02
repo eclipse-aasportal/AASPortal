@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas } from 'common';
+import { aas } from 'aas-core';
 import { AASReader } from './aas-reader.js';
 import { JsonReaderV2 } from './json-reader-v2.js';
 import { JsonReader } from './json-reader.js';

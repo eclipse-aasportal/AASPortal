@@ -43,8 +43,8 @@
     "jest.debugMode": true,
     "jest.virtualFolders": [
         {
-            "name": "common",
-            "rootPath": "./projects/common",
+            "name": "aas-core",
+            "rootPath": "./projects/aas-core",
             "runMode": "on-demand",
             "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
         },

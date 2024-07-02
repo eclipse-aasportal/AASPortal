@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASContainer } from 'common';
+import { AASContainer } from 'aas-core';
 
 export interface WorkerData {
     taskId: number;

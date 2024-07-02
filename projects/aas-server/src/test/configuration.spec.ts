@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, it, expect } from '@jest/globals';
-import { AASEndpoint } from 'common';
+import { AASEndpoint } from 'aas-core';
 import { urlToEndpoint } from '../app/configuration.js';
 
 describe('configuration', () => {

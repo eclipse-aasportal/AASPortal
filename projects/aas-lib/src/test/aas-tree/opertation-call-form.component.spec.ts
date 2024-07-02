@@ -10,7 +10,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { aas, AASDocument, convertToString } from 'common';
+import { aas, AASDocument, convertToString } from 'aas-core';
 import { cloneDeep } from 'lodash-es';
 import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
 import { OperationCallFormComponent } from '../../lib/aas-tree/operation-call-form/operation-call-form.component';

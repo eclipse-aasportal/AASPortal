@@ -15,12 +15,12 @@
         "tsc": "npm run tsc -ws",
         "build": "npm run build -ws",
         "build:debug": "npm run build:debug -ws",
-        "lib:build": "npm run build -w common -w aas-lib",
-        "lib:build:debug": "npm run build:debug -w common -w aas-lib",
-        "aas-portal:build": "npm run build -w common -w aas-lib -w aas-portal",
-        "aas-portal:build:debug": "npm run build:build -w common -w aas-lib -w aas-portal",
-        "aas-server:build": "npm run build -w common -w aas-server",
-        "aas-server:build:debug": "npm run build:debug -w common -w aas-server",
+        "lib:build": "npm run build -w aas-core -w aas-lib",
+        "lib:build:debug": "npm run build:debug -w aas-core -w aas-lib",
+        "aas-portal:build": "npm run build -w aas-core -w aas-lib -w aas-portal",
+        "aas-portal:build:debug": "npm run build:build -w aas-core -w aas-lib -w aas-portal",
+        "aas-server:build": "npm run build -w aas-core -w aas-server",
+        "aas-server:build:debug": "npm run build:debug -w aas-core -w aas-server",
         "serve": "npm run build && node --env-file projects/aas-server/.env projects/aas-server/dist/aas-server.js"
     },
     "repository": {
@@ -32,7 +32,7 @@
     "license": "Apache-2.0",
     "workspaces": [
         "projects/fhg-jest",
-        "projects/common",
+        "projects/aas-core",
         "projects/aas-server",
         "projects/aas-lib",
         "projects/aas-portal"

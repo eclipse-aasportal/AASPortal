@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AASWriter } from './aas-writer.js';
-import { aas, isSubmodelElement } from 'common';
+import { aas, isSubmodelElement } from 'aas-core';
 import * as aasv2 from '../types/aas-v2.js';
 
 export class JsonWriterV2 extends AASWriter {

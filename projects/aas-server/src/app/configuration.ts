@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASEndpoint, getEndpointName, getEndpointType } from 'common';
+import { AASEndpoint, getEndpointName, getEndpointType } from 'aas-core';
 
 /** The AAS Server configuration. */
 export interface AASServerConfiguration {

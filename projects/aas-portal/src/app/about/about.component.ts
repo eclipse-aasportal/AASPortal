@@ -16,7 +16,7 @@ import {
     signal,
     ChangeDetectionStrategy,
 } from '@angular/core';
-import { Library, Message } from 'common';
+import { Library, Message } from 'aas-core';
 import { LibraryTableComponent, MessageTableComponent } from 'aas-lib';
 import { ServerApiService } from './server-api.service';
 import { ToolbarService } from '../toolbar.service';

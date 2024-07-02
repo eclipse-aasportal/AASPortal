@@ -20,7 +20,7 @@ import {
     UserRole,
     JWTPayload,
     toBoolean,
-} from 'common';
+} from 'aas-core';
 
 import { NotifyService } from '../notify/notify.service';
 import { ERRORS } from '../types/errors';

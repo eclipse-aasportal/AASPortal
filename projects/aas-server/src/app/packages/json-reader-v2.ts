@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AASReader } from './aas-reader.js';
-import { determineType, aas, isSubmodelElement, isIdentifiable } from 'common';
+import { determineType, aas, isSubmodelElement, isIdentifiable } from 'aas-core';
 import { encodeBase64Url } from '../convert.js';
 import * as aasv2 from '../types/aas-v2.js';
 

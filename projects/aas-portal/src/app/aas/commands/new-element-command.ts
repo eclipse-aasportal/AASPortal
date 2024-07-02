@@ -19,7 +19,7 @@ import {
     isSubmodelElementCollection,
     isSubmodelElementList,
     noop,
-} from 'common';
+} from 'aas-core';
 
 import { AASStore } from '../aas.store';
 

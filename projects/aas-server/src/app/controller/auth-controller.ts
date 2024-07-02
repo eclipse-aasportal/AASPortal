@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { AuthResult, Cookie, Credentials, UserProfile } from 'common';
+import { AuthResult, Cookie, Credentials, UserProfile } from 'aas-core';
 import { Body, Delete, Get, Hidden, OperationId, Path, Post, Put, Route, Security, Tags } from 'tsoa';
 
 import { AuthService } from '../auth/auth-service.js';

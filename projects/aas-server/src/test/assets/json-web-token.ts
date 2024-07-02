@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { JWTPayload } from 'common';
+import { JWTPayload } from 'aas-core';
 import jwt from 'jsonwebtoken';
 
 export const guestPayload: JWTPayload = { role: 'guest' };

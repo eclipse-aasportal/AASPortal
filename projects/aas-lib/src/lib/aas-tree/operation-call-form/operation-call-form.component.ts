@@ -26,7 +26,7 @@ import {
     toInvariant,
     convertToString,
     toBoolean,
-} from 'common';
+} from 'aas-core';
 
 export interface VariableItem {
     submodelElement: aas.SubmodelElement;

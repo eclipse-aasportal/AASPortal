@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { aas, AASDocument, AuthResult } from 'common';
+import { aas, AASDocument, AuthResult } from 'aas-core';
 import { encodeBase64Url } from '../convert';
 
 /** The client side AAS provider service. */

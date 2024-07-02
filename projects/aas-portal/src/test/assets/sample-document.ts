@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASDocument, selectElement } from "common"
+import { aas, AASDocument, selectElement } from 'aas-core'
 
 const content: object = {
     "assetAdministrationShells": [

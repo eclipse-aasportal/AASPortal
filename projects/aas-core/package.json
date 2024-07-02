@@ -1,9 +1,9 @@
 {
-    "name": "common",
+    "name": "aas-core",
     "version": "3.0.0",
     "description": "Common types and utilities for the Web-AAS project",
     "module": "./dist/lib/index.js",
-    "main": "./dist/common.js",
+    "main": "./dist/aas-core.js",
     "types": "./dist/types/index.d.ts",
     "author": "Fraunhofer IOSB-INA",
     "license": "Apache-2.0",

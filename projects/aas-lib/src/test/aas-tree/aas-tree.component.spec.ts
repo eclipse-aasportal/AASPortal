@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AASDocument, WebSocketData } from 'common';
+import { AASDocument, WebSocketData } from 'aas-core';
 import { Subject } from 'rxjs';
 import { AASTreeComponent } from '../../lib/aas-tree/aas-tree.component';
 import { sampleDocument } from '../assets/sample-document';

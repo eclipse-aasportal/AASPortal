@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { EventEmitter, Injectable } from '@angular/core';
-import { WebSocketData, AASServerMessage } from 'common';
+import { WebSocketData, AASServerMessage } from 'aas-core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from './web-socket-factory.service';

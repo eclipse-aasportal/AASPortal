@@ -10,7 +10,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
-import { TemplateDescriptor, aas } from 'common';
+import { TemplateDescriptor, aas } from 'aas-core';
 
 import { TemplateService } from '../lib/template.service';
 import { NotifyService } from '../public-api';

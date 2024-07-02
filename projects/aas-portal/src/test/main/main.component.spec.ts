@@ -10,7 +10,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';

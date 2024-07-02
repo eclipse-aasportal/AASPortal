@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 import { Observable } from 'rxjs';
 import { encodeBase64Url } from 'aas-lib';
 

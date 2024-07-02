@@ -8,7 +8,7 @@
 
 import { Injectable, signal } from '@angular/core';
 import { OnlineState } from 'aas-lib';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { AASApiService } from './aas-api.service';
 
 @Injectable({

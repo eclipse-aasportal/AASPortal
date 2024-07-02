@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { AasxPackage } from '../packages/file-system/aasx-package.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
