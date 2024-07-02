@@ -11,55 +11,55 @@ import { readFileSync } from 'fs';
 main();
 
 function main() {
-    const commonSummary = read('./reports/common/coverage-summary.json');
+    const aasCoreSummary = read('./reports/aas-core/coverage-summary.json');
     const aasServerSummary = read('./reports/aas-server/coverage-summary.json');
     const aasLibSummary = read('./reports/aas-lib/coverage-summary.json');
     const aasPortalSummary = read('./reports/aas-portal/coverage-summary.json');
 
     const statementsTotal =
-        commonSummary.total.statements.total +
+        aasCoreSummary.total.statements.total +
         aasServerSummary.total.statements.total +
         aasLibSummary.total.statements.total +
         aasPortalSummary.total.statements.total;
 
     const statementsCovered =
-        commonSummary.total.statements.covered +
+        aasCoreSummary.total.statements.covered +
         aasServerSummary.total.statements.covered +
         aasLibSummary.total.statements.covered +
         aasPortalSummary.total.statements.covered;
 
     const branchesTotal =
-        commonSummary.total.branches.total +
+        aasCoreSummary.total.branches.total +
         aasServerSummary.total.branches.total +
         aasLibSummary.total.branches.total +
         aasPortalSummary.total.branches.total;
 
     const branchesCovered =
-        commonSummary.total.branches.covered +
+        aasCoreSummary.total.branches.covered +
         aasServerSummary.total.branches.covered +
         aasLibSummary.total.branches.covered +
         aasPortalSummary.total.branches.covered;
 
     const functionsTotal =
-        commonSummary.total.functions.total +
+        aasCoreSummary.total.functions.total +
         aasServerSummary.total.functions.total +
         aasLibSummary.total.functions.total +
         aasPortalSummary.total.functions.total;
 
     const functionsCovered =
-        commonSummary.total.functions.covered +
+        aasCoreSummary.total.functions.covered +
         aasServerSummary.total.functions.covered +
         aasLibSummary.total.functions.covered +
         aasPortalSummary.total.functions.covered;
 
     const total =
-        commonSummary.total.lines.total +
+        aasCoreSummary.total.lines.total +
         aasServerSummary.total.lines.total +
         aasLibSummary.total.lines.total +
         aasPortalSummary.total.lines.total;
 
     const covered =
-        commonSummary.total.lines.covered +
+        aasCoreSummary.total.lines.covered +
         aasServerSummary.total.lines.covered +
         aasLibSummary.total.lines.covered +
         aasPortalSummary.total.lines.covered;
