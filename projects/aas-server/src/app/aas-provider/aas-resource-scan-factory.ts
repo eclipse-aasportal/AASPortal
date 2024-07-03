@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { AASEndpoint } from 'common';
+import { AASEndpoint } from 'aas-core';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';

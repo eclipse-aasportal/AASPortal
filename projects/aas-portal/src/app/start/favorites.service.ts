@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable, signal } from '@angular/core';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { AuthService } from 'aas-lib';
 import { first, Observable, map, mergeMap, of } from 'rxjs';
 

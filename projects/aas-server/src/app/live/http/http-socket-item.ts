@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-import { LiveNode } from 'common';
-import { noop } from 'common';
+import { LiveNode, noop } from 'aas-core';
 import { SocketItem } from '../socket-item.js';
 
 export class HttpSocketItem implements SocketItem {

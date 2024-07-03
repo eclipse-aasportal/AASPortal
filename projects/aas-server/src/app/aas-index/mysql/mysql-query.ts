@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASQuery, AASQueryOperator, OrExpression } from 'common';
+import { AASQuery, AASQueryOperator, OrExpression } from 'aas-core';
 import { AASIndexQuery } from '../aas-index-query.js';
 
 export class MySqlQuery extends AASIndexQuery {

@@ -11,7 +11,7 @@ import { createSpyObj } from 'fhg-jest';
 import env from '../../assets/aas-environment.js';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { AASApiClientV3, OperationResult } from '../../../app/packages/aas-server/aas-api-client-v3.js';
-import { aas, DifferenceItem } from 'common';
+import { aas, DifferenceItem } from 'aas-core';
 import { Socket } from 'net';
 import { Logger } from '../../../app/logging/logger.js';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';

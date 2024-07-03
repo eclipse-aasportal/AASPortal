@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
-import { aas, selectElement } from 'common';
+import { aas, selectElement } from 'aas-core';
 import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';

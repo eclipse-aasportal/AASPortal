@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas } from 'common';
+import { aas } from 'aas-core';
 
 export default {
     "assetAdministrationShells": [

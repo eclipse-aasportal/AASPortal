@@ -12,7 +12,7 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import { Logger } from '../../app/logging/logger.js';
-import { Message, PackageInfo } from 'common';
+import { Message, PackageInfo } from 'aas-core';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { ApplicationInfo } from '../../app/application-info.js';

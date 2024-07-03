@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import { AuthService } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { FavoritesList, FavoritesService } from '../../app/start/favorites.service';
-import { AASDocument } from 'projects/common/dist/types';
+import { AASDocument } from 'projects/aas-core/dist/types';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;

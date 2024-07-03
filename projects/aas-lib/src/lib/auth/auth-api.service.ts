@@ -9,7 +9,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Credentials, UserProfile, Cookie, AuthResult } from 'common';
+import { Credentials, UserProfile, Cookie, AuthResult } from 'aas-core';
 import { encodeBase64Url } from '../convert';
 
 @Injectable({

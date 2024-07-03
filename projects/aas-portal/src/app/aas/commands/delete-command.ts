@@ -16,7 +16,7 @@ import {
     normalize,
     selectSubmodel,
     noop,
-} from 'common';
+} from 'aas-core';
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';

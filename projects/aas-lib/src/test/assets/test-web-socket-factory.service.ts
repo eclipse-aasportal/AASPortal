@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { Subject } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';

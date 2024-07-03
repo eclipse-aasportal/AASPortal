@@ -9,7 +9,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import toString from 'lodash-es/toString';
-import { ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'common';
+import { ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'aas-core';
 
 /**
  * Converts a message to a localized text.

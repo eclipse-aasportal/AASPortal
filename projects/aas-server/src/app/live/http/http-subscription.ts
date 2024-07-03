@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, changeType, LiveNode, LiveRequest, noop } from 'common';
+import { aas, changeType, LiveNode, LiveRequest, noop } from 'aas-core';
 import { HttpSocketItem } from './http-socket-item.js';
 import { Logger } from '../../logging/logger.js';
 import { SocketClient } from '../socket-client.js';

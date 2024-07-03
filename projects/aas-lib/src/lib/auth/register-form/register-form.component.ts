@@ -10,7 +10,7 @@ import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'common';
+import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'aas-core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthApiService } from '../auth-api.service';

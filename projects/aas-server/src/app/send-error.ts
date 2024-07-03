@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Response, Request } from 'express';
-import { ErrorData, ApplicationError } from 'common';
+import { ErrorData, ApplicationError } from 'aas-core';
 import { ERRORS } from './errors.js';
 import { Logger } from './logging/logger.js';
 

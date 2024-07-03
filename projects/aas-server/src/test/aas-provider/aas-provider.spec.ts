@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { AASEndpoint } from 'common';
+import { AASEndpoint } from 'aas-core';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';

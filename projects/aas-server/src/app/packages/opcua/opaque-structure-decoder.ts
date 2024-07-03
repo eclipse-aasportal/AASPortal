@@ -8,7 +8,7 @@
 
 import { BinaryStream, DataValueOptions } from 'node-opcua';
 import { OpaqueStructure } from 'node-opcua-extension-object';
-import { aas } from 'common';
+import { aas } from 'aas-core';
 import { UAKeyElements } from './opcua.js';
 
 export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string): DataValueOptions {

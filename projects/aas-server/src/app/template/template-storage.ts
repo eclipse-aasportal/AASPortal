@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { extname, join } from 'path/posix';
-import { TemplateDescriptor, aas } from 'common';
+import { TemplateDescriptor, aas } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';

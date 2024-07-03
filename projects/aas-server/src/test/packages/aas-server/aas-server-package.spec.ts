@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { aas } from 'common';
+import { aas } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
 import { AASServerPackage } from '../../../app/packages/aas-server/aas-server-package.js';

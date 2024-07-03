@@ -27,7 +27,7 @@ import {
     Cookie,
     JWTPayload,
     AuthResult,
-} from 'common';
+} from 'aas-core';
 
 @singleton()
 export class AuthService {

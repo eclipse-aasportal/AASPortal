@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { selectElement } from 'common';
+import { selectElement } from 'aas-core';
 import { nameplate } from './digital-nameplate-document';
 import { DigitalNameplateComponent } from '../../lib/digital-nameplate/digital-nameplate.component';
 

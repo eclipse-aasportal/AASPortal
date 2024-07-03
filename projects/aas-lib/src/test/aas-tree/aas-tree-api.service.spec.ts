@@ -8,7 +8,7 @@
 
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

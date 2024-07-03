@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationError } from "common";
+import { ApplicationError } from 'aas-core';
 import { NextFunction, Request, Response } from "express";
 import { ValidateError } from "tsoa";
 import { ERRORS } from "../../app/errors.js";

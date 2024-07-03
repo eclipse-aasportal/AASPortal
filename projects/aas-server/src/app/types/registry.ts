@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Endpoint } from 'common';
+import { Endpoint } from 'aas-core';
 import * as aasv2 from './aas-v2.js';
 
 export interface AASRegistryModelType {

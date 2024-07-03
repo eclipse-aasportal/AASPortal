@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { aas } from 'common';
+import { aas } from 'aas-core';
 import { EditElementFormComponent } from '../../app/aas/edit-element-form/edit-element-form.component';
 
 describe('EditElementFormComponent', () => {

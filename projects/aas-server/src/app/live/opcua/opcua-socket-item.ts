@@ -8,7 +8,7 @@
 
 import { ClientMonitoredItem, DataValue } from 'node-opcua';
 import { Logger } from '../../logging/logger.js';
-import { LiveNode } from 'common';
+import { LiveNode } from 'aas-core';
 import { SocketItem } from '../socket-item.js';
 import { SocketClient } from '../socket-client.js';
 

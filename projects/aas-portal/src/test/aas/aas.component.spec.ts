@@ -17,7 +17,7 @@ import {
     SecuredImageComponent,
 } from 'aas-lib';
 
-import { AASDocument, aas, noop } from 'common';
+import { AASDocument, aas, noop } from 'aas-core';
 import { AASComponent } from '../../app/aas/aas.component';
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 import { provideHttpClientTesting } from '@angular/common/http/testing';

@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import winston from 'winston';
-import { stringFormat, Message } from 'common';
+import { stringFormat, Message } from 'aas-core';
 import { createMessage, Logger } from './logger.js';
 
 interface Record {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, LiveRequest } from 'common';
+import { aas, LiveRequest } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { SocketClient } from '../live/socket-client.js';
 import { AASPackage } from './aas-package.js';

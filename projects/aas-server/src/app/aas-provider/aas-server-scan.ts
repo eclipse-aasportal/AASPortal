@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
 import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';

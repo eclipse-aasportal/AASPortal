@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { LiveRequest, aas } from 'common';
+import { LiveRequest, aas } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { OpcuaSubscription } from '../../live/opcua/opcua-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';

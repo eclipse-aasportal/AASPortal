@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { isAbsolute, resolve } from 'path/posix';
-import { Message, PackageInfo } from 'common';
+import { Message, PackageInfo } from 'aas-core';
 import { Logger } from './logging/logger.js';
 import { readFile } from 'fs/promises';
 import { inject, singleton } from 'tsyringe';

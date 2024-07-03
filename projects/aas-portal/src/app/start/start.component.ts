@@ -19,7 +19,7 @@ import {
 
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'common';
+import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
 import { catchError, EMPTY, first, from, map, mergeMap, Observable, of } from 'rxjs';
 import {
     AASTableComponent,

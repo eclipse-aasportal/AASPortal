@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'common';
+import { aas, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'aas-core';
 import { ServerMessage } from '../server-message.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';

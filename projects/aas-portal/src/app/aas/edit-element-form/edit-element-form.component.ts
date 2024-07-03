@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { convertBlobToBase64Async, extension } from 'aas-lib';
-import { aas, extensionToMimeType, toInvariant, toLocale } from 'common';
+import { aas, extensionToMimeType, toInvariant, toLocale } from 'aas-core';
 
 export interface LangStringRow extends aas.LangString {
     index: number;

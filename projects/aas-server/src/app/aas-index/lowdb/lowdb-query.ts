@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { normalize } from 'path/posix';
-import { AASDocument, BaseValueType, AASQuery, AASQueryOperator, AASQueryValueType, OrExpression } from 'common';
+import { AASDocument, BaseValueType, AASQuery, AASQueryOperator, AASQueryValueType, OrExpression } from 'aas-core';
 
 import { LowDbDocument, LowDbElement, LowDbElementValueType } from './lowdb-types.js';
 import { AASIndexQuery } from '../aas-index-query.js';

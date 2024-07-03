@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, DifferenceItem, selectSubmodel } from 'common';
+import { aas, DifferenceItem, selectSubmodel } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { AASApiClient } from './aas-api-client.js';

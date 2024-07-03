@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASEndpoint, AASEndpointType, stringFormat } from 'common';
+import { AASEndpoint, AASEndpointType, stringFormat } from 'aas-core';
 
 export interface EndpointItem {
     name: string;

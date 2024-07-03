@@ -9,11 +9,10 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TemplateService } from 'aas-lib';
-import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'common';
+import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'aas-core';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { ModelType } from 'projects/common/dist/types/aas';
 
 @Component({
     selector: 'fhg-new-element',
@@ -25,7 +24,7 @@ import { ModelType } from 'projects/common/dist/types/aas';
 })
 export class NewElementFormComponent {
     private readonly _messages = signal<string[]>([]);
-    private readonly _modelTypes = signal<ModelType[]>([]);
+    private readonly _modelTypes = signal<aas.ModelType[]>([]);
     private env?: aas.Environment;
     private parent?: aas.Referable;
 

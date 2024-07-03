@@ -4,7 +4,7 @@ const config: Config = {
     clearMocks: true,
     collectCoverage: true,
     collectCoverageFrom: ['<rootDir>/src/lib/**/*.ts'],
-    coverageDirectory: '<rootDir>/../../reports/common',
+    coverageDirectory: '<rootDir>/../../reports/aas-core',
     coverageReporters: ['html', 'json-summary', 'cobertura'],
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {

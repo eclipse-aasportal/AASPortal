@@ -8,7 +8,7 @@
 
 import { container, inject, singleton } from 'tsyringe';
 import { Request } from 'express';
-import { UserRole, ApplicationError, isUserAuthorized, JWTPayload } from 'common';
+import { UserRole, ApplicationError, isUserAuthorized, JWTPayload } from 'aas-core';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 

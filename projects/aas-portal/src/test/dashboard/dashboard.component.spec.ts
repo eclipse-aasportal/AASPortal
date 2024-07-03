@@ -11,7 +11,7 @@ import { provideRouter } from '@angular/router';
 import { EMPTY, of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthService, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { DashboardChart, DashboardService } from '../../app/dashboard/dashboard.service';

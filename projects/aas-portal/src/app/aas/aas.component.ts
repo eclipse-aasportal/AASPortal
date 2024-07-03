@@ -22,7 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import head from 'lodash-es/head';
-import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'common';
+import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,

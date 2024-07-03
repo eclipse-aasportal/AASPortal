@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { Message, stringFormat } from 'common';
+import { Message, stringFormat } from 'aas-core';
 import { createMessage, DebugConsole, Logger } from './logger.js';
 
 export enum MemoryLoggerLevel {

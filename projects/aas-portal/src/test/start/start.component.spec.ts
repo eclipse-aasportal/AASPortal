@@ -12,7 +12,7 @@ import { WindowService, ViewMode, AuthService, NotifyService, DownloadService, A
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 
 import { StartComponent } from '../../app/start/start.component';
 import { StartApiService } from '../../app/start/start-api.service';

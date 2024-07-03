@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 
 const data: object = {
     id: 'AssetAdministrationShell---2CEBD072',

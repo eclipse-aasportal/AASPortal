@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { LiveNode } from 'common';
+import { LiveNode } from 'aas-core';
 import { OpcuaSocketItem } from './opcua-socket-item.js';
 import { OpcuaClient } from '../../packages/opcua/opcua-client.js';
 import { Logger } from '../../logging/logger.js';

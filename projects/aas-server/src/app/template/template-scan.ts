@@ -8,7 +8,7 @@
 
 import { parentPort } from 'worker_threads';
 import { extname, join } from 'path/posix';
-import { TemplateDescriptor, isSubmodel } from 'common';
+import { TemplateDescriptor, isSubmodel } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';

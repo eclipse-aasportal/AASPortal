@@ -27,7 +27,7 @@ import {
     mimeTypeToExtension,
     selectReferable,
     stringFormat,
-} from 'common';
+} from 'aas-core';
 
 import { AASTreeRow } from './aas-tree-row';
 import { OnlineState } from '../types/online-state';

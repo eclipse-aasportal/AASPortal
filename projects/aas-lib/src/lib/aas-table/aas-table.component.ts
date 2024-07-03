@@ -20,7 +20,7 @@ import {
 import { Router } from '@angular/router';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 
 import { AASTableRow } from './aas-table-row';
 import { ClipboardService } from '../clipboard.service';

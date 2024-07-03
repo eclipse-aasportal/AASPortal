@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, Crc32, aas, flat } from 'common';
+import { AASDocument, Crc32, aas, flat } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 
 /**

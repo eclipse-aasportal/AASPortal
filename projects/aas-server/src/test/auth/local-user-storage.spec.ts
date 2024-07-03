@@ -11,7 +11,7 @@ import { describe, afterEach, beforeEach, it, expect, jest } from '@jest/globals
 import fs from 'fs';
 import os from 'os';
 import path from 'path/posix';
-import { Cookie } from 'common';
+import { Cookie } from 'aas-core';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { LocalUserStorage } from '../../app/auth/local-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';

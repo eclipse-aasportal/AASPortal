@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { aas, getLocaleValue, getPreferredName } from 'common';
+import { aas, getLocaleValue, getPreferredName } from 'aas-core';
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
 import { ScoreComponent } from '../score/score.component';
 

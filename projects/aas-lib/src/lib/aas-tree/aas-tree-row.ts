@@ -22,7 +22,7 @@ import {
     selectReferable,
     toBoolean,
     toLocale,
-} from 'common';
+} from 'aas-core';
 
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, convertToString, determineType, noop } from 'common';
+import { aas, convertToString, determineType, noop } from 'aas-core';
 import { ArgumentOptions, LocalizedText } from 'node-opcua';
 import { Logger } from '../../logging/logger.js';
 import { AASReader } from '../aas-reader.js';

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { aas, AASDocument, selectElement } from 'common';
+import { aas, AASDocument, selectElement } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { NotifyService } from 'aas-lib';
 import { DeleteCommand } from '../../app/aas/commands/delete-command';

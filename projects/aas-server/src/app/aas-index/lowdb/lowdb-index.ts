@@ -19,7 +19,7 @@ import {
     aas,
     flat,
     isIdentifiable,
-} from 'common';
+} from 'aas-core';
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
 import { Variable } from '../../variable.js';

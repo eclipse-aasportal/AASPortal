@@ -22,7 +22,7 @@ import {
     parseDate,
     toBoolean,
     flat,
-} from 'common';
+} from 'aas-core';
 
 export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
 

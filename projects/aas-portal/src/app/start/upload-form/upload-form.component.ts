@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { DownloadService } from 'aas-lib';
-import { AASEndpoint } from 'common';
+import { AASEndpoint } from 'aas-core';
 
 @Component({
     selector: 'fhg-upload-form',

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message, TemplateDescriptor } from 'common';
+import { AASDocument, AASContainer, Message, TemplateDescriptor } from 'aas-core';
 
 export enum ScanResultType {
     Added,

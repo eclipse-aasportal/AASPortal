@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { Library } from 'common';
+import { Library } from 'aas-core';
 
 import { LibraryTableComponent } from '../../lib/library-table/library-table.component';
 

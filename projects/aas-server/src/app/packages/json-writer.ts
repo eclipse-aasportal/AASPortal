@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import path from 'path/posix';
-import { aas, extensionToMimeType } from 'common';
+import { aas, extensionToMimeType } from 'aas-core';
 import { AASWriter } from './aas-writer.js';
 
 /** */

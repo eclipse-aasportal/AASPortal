@@ -8,7 +8,7 @@
 
 import { Injectable, computed, signal } from '@angular/core';
 import { AASTree, AASTreeRow } from './aas-tree-row';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 import { TranslateService } from '@ngx-translate/core';
 import { NotifyService } from '../notify/notify.service';
 

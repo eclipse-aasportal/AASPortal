@@ -23,7 +23,7 @@ import {
     ApplicationError,
     getChildren,
     isReferenceElement,
-} from 'common';
+} from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from '../aas-index/aas-index.js';

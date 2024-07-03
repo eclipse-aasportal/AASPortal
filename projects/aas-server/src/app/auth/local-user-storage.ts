@@ -10,7 +10,7 @@ import { inject, injectable } from 'tsyringe';
 import { join } from 'path/posix';
 import { resolve } from 'path';
 import fs from 'fs';
-import { Cookie } from 'common';
+import { Cookie } from 'aas-core';
 import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
 import { Logger } from '../logging/logger.js';

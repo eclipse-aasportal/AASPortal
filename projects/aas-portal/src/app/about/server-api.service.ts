@@ -8,7 +8,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { PackageInfo, Message } from 'common';
+import { PackageInfo, Message } from 'aas-core';
 import { Observable } from 'rxjs';
 
 /** Realizes the IServer service. */

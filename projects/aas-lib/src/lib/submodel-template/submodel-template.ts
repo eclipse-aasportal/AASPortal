@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Signal } from '@angular/core';
-import { aas, AASDocument } from 'common';
+import { aas, AASDocument } from 'aas-core';
 
 export interface DocumentSubmodelPair {
     document: AASDocument;

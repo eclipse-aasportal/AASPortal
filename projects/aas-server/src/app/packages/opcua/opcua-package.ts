@@ -17,7 +17,7 @@ import { Logger } from '../../logging/logger.js';
 import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 import { OpcuaReader } from './opcua-reader.js';
 
 export class OpcuaPackage extends AASPackage {

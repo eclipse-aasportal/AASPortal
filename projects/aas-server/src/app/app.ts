@@ -11,7 +11,7 @@ import express, { Express, NextFunction, Request, Response, json, urlencoded } f
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
-import { ApplicationError } from 'common';
+import { ApplicationError } from 'aas-core';
 import { ValidateError } from 'tsoa';
 
 import swaggerDoc from './swagger.json' with { type: 'json' };

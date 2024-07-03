@@ -12,7 +12,7 @@ import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from 'fhg-jest';
 import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, StatusCodes, Variant } from 'node-opcua';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { LiveRequest, aas } from 'common';
+import { LiveRequest, aas } from 'aas-core';
 import env from '../../assets/aas-environment.js';
 
 type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodResult>;

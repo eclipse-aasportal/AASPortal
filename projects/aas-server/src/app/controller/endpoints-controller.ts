@@ -8,7 +8,7 @@
 
 import { inject, injectable } from 'tsyringe';
 import { Body, Delete, Get, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
-import { AASEndpoint } from 'common';
+import { AASEndpoint } from 'aas-core';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';

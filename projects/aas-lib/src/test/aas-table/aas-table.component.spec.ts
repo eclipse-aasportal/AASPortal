@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AASDocument } from 'common';
+import { AASDocument } from 'aas-core';
 
 import { AASTableComponent } from '../../lib/aas-table/aas-table.component';
 import { NotifyService } from '../../lib/notify/notify.service';

@@ -105,7 +105,7 @@
                 "run-script",
                 "test",
                 "-w",
-                "common"
+                "aas-core"
             ]
         },
         {
@@ -118,7 +118,7 @@
                 "run-script",
                 "test",
                 "-w",
-                "common",
+                "aas-core",
                 "--testPathPattern",
                 "${fileBasename}"
             ]

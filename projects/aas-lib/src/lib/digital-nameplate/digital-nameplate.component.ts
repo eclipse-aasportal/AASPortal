@@ -15,7 +15,7 @@ import {
     isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
-} from 'common';
+} from 'aas-core';
 
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
 

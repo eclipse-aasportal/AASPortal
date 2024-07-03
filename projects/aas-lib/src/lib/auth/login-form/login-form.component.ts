@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'common';
+import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'aas-core';
 import isEmpty from 'lodash-es/isEmpty';
 
 import { messageToString } from '../../convert';

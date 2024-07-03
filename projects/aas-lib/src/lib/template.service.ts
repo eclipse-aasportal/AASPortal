@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Injectable, computed } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { aas, Endpoint, TemplateDescriptor } from 'common';
+import { aas, Endpoint, TemplateDescriptor } from 'aas-core';
 import { encodeBase64Url } from './convert';
 
 interface TemplateServiceState {

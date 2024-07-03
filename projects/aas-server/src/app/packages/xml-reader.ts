@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, determineType, extensionToMimeType, toBoolean } from 'common';
+import { aas, determineType, extensionToMimeType, toBoolean } from 'aas-core';
 import { useNamespaces, XPathSelect } from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import { AASReader } from './aas-reader.js';
