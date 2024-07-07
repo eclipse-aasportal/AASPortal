@@ -28,6 +28,7 @@ export class Variable {
         this.SCAN_CONTAINER_TIMEOUT = process.env.SCAN_CONTAINER_TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
+        this.HTTPS_PFX_FILE = process.env.HTTPS_PFX_FILE;
         this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
         this.AAS_INDEX = process.env.AAS_INDEX;
         this.AAS_SERVER_USERNAME = process.env.AAS_SERVER_USERNAME ?? 'aas-server';
@@ -73,10 +74,10 @@ export class Variable {
     /** The URLs of the initial AAS container endpoints. */
     public readonly ENDPOINTS: string[];
 
-    /** */
+    /** The time before a new endpoint scan starts.*/
     public readonly SCAN_CONTAINER_TIMEOUT: number;
 
-    /** */
+    /** The time before a new template scan starts. */
     public readonly SCAN_TEMPLATES_TIMEOUT: number;
 
     /** The key file if AASServer supports HTTPS. */
@@ -85,15 +86,18 @@ export class Variable {
     /** The certificate file if AASServer supports HTTPS. */
     public readonly HTTPS_CERT_FILE?: string;
 
+    /** The pfx file if AASServer supports HTTPS. */
+    public readonly HTTPS_PFX_FILE?: string;
+
     /** The validity period of an AAS in milliseconds. */
     public readonly AAS_EXPIRES_IN: number;
 
     /** The AASIndex realization. */
     public readonly AAS_INDEX?: string;
 
-    /** ToDo */
+    /** The user name of AASServer (default: aas-server) */
     public readonly AAS_SERVER_USERNAME: string;
 
-    /** ToDo */
+    /** The root password. */
     public readonly AAS_SERVER_PASSWORD: string;
 }

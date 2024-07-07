@@ -38,6 +38,11 @@ export class WSServer extends EventEmitter {
                 key: fs.readFileSync(this.variable.HTTPS_KEY_FILE),
                 cert: fs.readFileSync(this.variable.HTTPS_CERT_FILE),
             });
+        } else if (this.variable.HTTPS_PFX_FILE) {
+            this.server = https.createServer({
+                pfx: fs.readFileSync(this.variable.HTTPS_PFX_FILE),
+                passphrase: this.variable.AAS_SERVER_PASSWORD,
+            });
         } else {
             this.server = http.createServer();
         }
