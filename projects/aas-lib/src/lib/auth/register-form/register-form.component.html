@@ -30,7 +30,7 @@
                 [placeholder]="defaultName()">
             <label for="intputRegisterName" translate>LABEL_NAME</label>
         </div>
-        @if (!passwordAsEMail) {
+        @if (!passwordAsEMail()) {
         <div class="form-floating mb-3">
             <input type="password" class="form-control" id="inputRegisterPassword" [(ngModel)]="password1"
                 name="password1" placeholder="password">

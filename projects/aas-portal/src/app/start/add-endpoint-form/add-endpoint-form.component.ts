@@ -82,13 +82,13 @@ export class AddEndpointFormComponent {
         const name = this.validateName();
         const url = this.validateUrl(this.item().value.trim());
         if (name && url) {
-            let version = url.searchParams.get('version');
+            const version = url.searchParams.get('version');
             url.search = '';
             const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type };
             if (version) {
                 endpoint.version = version;
             } else if (this.item().type === 'AAS_API') {
-                version = 'v3';
+                endpoint.version = 'v3';
             }
 
             this.modal.close(endpoint);
