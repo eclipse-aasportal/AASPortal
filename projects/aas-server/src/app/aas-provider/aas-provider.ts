@@ -86,6 +86,10 @@ export class AASProvider {
         return this.index.getDocuments(cursor);
     }
 
+    public async getDocumentCountAsync(filter?: string): Promise<number> {
+        return this.index.getCount(filter);
+    }
+
     public async getDocumentAsync(id: string, name?: string): Promise<AASDocument> {
         const document = await this.index.get(name, id);
         const endpoint = await this.index.getEndpoint(document.endpoint);

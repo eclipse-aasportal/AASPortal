@@ -21,6 +21,8 @@ import {
 } from 'aas-core';
 
 export abstract class AASIndex {
+    public abstract getCount(query?: string): Promise<number>;
+
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
 
     public abstract getEndpoint(name: string): Promise<AASEndpoint>;

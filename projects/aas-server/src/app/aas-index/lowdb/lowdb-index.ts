@@ -39,6 +39,10 @@ export class LowDbIndex extends AASIndex {
         this.promise = this.initialize();
     }
 
+    public override getCount(): Promise<number> {
+        return Promise.resolve(this.db.data.documents.length);
+    }
+
     public override async getEndpoints(): Promise<AASEndpoint[]> {
         await this.promise;
         return this.db.data.endpoints;

@@ -100,4 +100,9 @@ export class StartApiService {
             `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`,
         );
     }
+
+    /** Gets the total amount of documents. */
+    public getDocumentCount(): Observable<number> {
+        return this.http.get<number>('/api/v1/documents/count');
+    }
 }

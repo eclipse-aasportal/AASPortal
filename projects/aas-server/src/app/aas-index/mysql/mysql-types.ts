@@ -25,3 +25,7 @@ export interface MySqlElement extends RowDataPacket {
     dateValue?: Date;
     booleanValue?: boolean;
 }
+
+export interface DocumentCount extends RowDataPacket {
+    count: number;
+}

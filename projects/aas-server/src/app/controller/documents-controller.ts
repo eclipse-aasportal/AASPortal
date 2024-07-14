@@ -55,6 +55,22 @@ export class DocumentsController extends AASController {
         }
     }
 
+    @Get('count')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getDocumentCount')
+    public async getDocumentCount(@Query() filter?: string): Promise<AASPage> {
+        try {
+            this.logger.start('getDocuments');
+            if (filter) {
+                filter = decodeBase64Url(filter);
+            }
+
+            return await this.aasProvider.getDocumentCountAsync(filter);
+        } finally {
+            this.logger.stop();
+        }
+    }
+
     /**
      * Gets the first occurrence of an AAS document with the specified identifier.
      * @param id The AAS identifier.

@@ -14,7 +14,7 @@ import { AASIndex } from '../aas-index.js';
 import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { MySqlQuery } from './mysql-query.js';
-import { MySqlDocument, MySqlEndpoint } from './mysql-types.js';
+import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
 
 export class MySqlIndex extends AASIndex {
     private readonly connection: Promise<Connection>;
@@ -23,6 +23,11 @@ export class MySqlIndex extends AASIndex {
         super();
 
         this.connection = this.initialize();
+    }
+
+    public override async getCount(): Promise<number> {
+        return (await (await this.connection).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count'))[0][0]
+            .count;
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {
