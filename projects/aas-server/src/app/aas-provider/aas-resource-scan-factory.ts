@@ -17,6 +17,7 @@ import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
 import { AASApiClientV3 } from '../packages/aas-server/aas-api-client-v3.js';
+import { AASApiClientV1 } from '../packages/aas-server/aas-api-client-v1.js';
 import { AASApiClientV0 } from '../packages/aas-server/aas-api-client-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 
@@ -34,6 +35,9 @@ export class AASResourceScanFactory {
                 switch (endpoint.version) {
                     case 'v0':
                         source = new AASApiClientV0(this.logger, endpoint.url, endpoint.name);
+                        break;
+                    case 'v1':
+                        source = new AASApiClientV1(this.logger, endpoint.url, endpoint.name);
                         break;
                     case 'v3':
                         source = new AASApiClientV3(this.logger, endpoint.url, endpoint.name);

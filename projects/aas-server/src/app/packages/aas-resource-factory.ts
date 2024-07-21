@@ -16,6 +16,7 @@ import { AASApiClientV3 } from './aas-server/aas-api-client-v3.js';
 import { OpcuaClient } from './opcua/opcua-client.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
+import { AASApiClientV1 } from './aas-server/aas-api-client-v1.js';
 
 @singleton()
 export class AASResourceFactory {
@@ -35,6 +36,8 @@ export class AASResourceFactory {
                 switch (endpoint.version) {
                     case 'v3':
                         return new AASApiClientV3(this.logger, endpoint.url, endpoint.name);
+                    case 'v1':
+                        return new AASApiClientV1(this.logger, endpoint.url, endpoint.name);
                     case 'v0':
                         return new AASApiClientV0(this.logger, endpoint.url, endpoint.name);
                     default:
@@ -68,6 +71,9 @@ export class AASResourceFactory {
                     switch (endpoint.version) {
                         case 'v3':
                             await new AASApiClientV3(this.logger, endpoint.url, endpoint.name).testAsync();
+                            break;
+                        case 'v1':
+                            await new AASApiClientV1(this.logger, endpoint.url, endpoint.name).testAsync();
                             break;
                         case 'v0':
                             await new AASApiClientV0(this.logger, endpoint.url, endpoint.name).testAsync();
