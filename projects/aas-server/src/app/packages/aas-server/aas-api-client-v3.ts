@@ -74,21 +74,20 @@ export class AASApiClientV3 extends AASApiClient {
     public readonly onlineReady = true;
 
     public async getShellsAsync(): Promise<string[]> {
-        const pagedResult = await this.message.get<PagedResult<aas.AssetAdministrationShell>>(this.resolve('/shells'));
-
-        return pagedResult.result.map(shell => shell.id);
+        const result = await this.message.get<PagedResult<aas.AssetAdministrationShell>>(this.resolve('shells'));
+        return result.result.map(shell => shell.id);
     }
 
     public async readEnvironmentAsync(id: string): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id);
-        const shell = await this.message.get<aas.AssetAdministrationShell>(this.resolve(`/shells/${aasId}`));
+        const shell = await this.message.get<aas.AssetAdministrationShell>(this.resolve(`shells/${aasId}`));
 
         const submodels: aas.Submodel[] = [];
         if (shell.submodels) {
             for (const reference of shell.submodels) {
                 const submodelId = encodeBase64Url(reference.keys[0].value);
                 try {
-                    submodels.push(await this.message.get<aas.Submodel>(this.resolve(`/submodels/${submodelId}`)));
+                    submodels.push(await this.message.get<aas.Submodel>(this.resolve(`submodels/${submodelId}`)));
                 } catch (error) {
                     this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
                 }
@@ -96,7 +95,7 @@ export class AASApiClientV3 extends AASApiClient {
         }
 
         const pagedResult = await this.message.get<PagedResult<aas.ConceptDescription>>(
-            this.resolve(`/concept-descriptions`),
+            this.resolve(`concept-descriptions`),
         );
 
         const sourceEnv: aas.Environment = {
@@ -109,7 +108,7 @@ export class AASApiClientV3 extends AASApiClient {
     }
 
     public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
-        return this.message.getResponse(this.resolve(`/shells/${encodeBase64Url(id)}/asset-information/thumbnail`));
+        return this.message.getResponse(this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`));
     }
 
     public async commitAsync(
@@ -160,7 +159,7 @@ export class AASApiClientV3 extends AASApiClient {
     public async openFileAsync(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);
-        const url = this.resolve(`/submodels/${smId}/submodel-elements/${path}/attachment`);
+        const url = this.resolve(`submodels/${smId}/submodel-elements/${path}/attachment`);
         return await this.message.getResponse(url);
     }
 
@@ -168,28 +167,28 @@ export class AASApiClientV3 extends AASApiClient {
         const aasId = encodeBase64Url(shell.id);
         const items = nodeId.split('.');
         const path = items[1].split('/').slice(1).join('.');
-        return this.resolve(`/shells/${aasId}/submodels/${items[0]}/submodel-elements/${path}`).href;
+        return this.resolve(`shells/${aasId}/submodels/${items[0]}/submodel-elements/${path}`).href;
     }
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`/packages?aasId=${aasId}`));
+        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`packages?aasId=${aasId}`));
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        return await this.message.getResponse(this.resolve(`/packages/${packageId}`));
+        return await this.message.getResponse(this.resolve(`packages/${packageId}`));
     }
 
     public postPackageAsync(file: Express.Multer.File): Promise<string> {
         const formData = new FormData();
         formData.append('file', createReadStream(file.path));
         formData.append('fileName', file.filename);
-        return this.message.post(this.resolve(`/packages`), formData);
+        return this.message.post(this.resolve(`packages`), formData);
     }
 
     public async deletePackageAsync(aasIdentifier: string): Promise<string> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`/packages?aasId=${aasId}`));
+        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`packages?aasId=${aasId}`));
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        return await this.message.delete(this.resolve(`/packages/${packageId}`));
+        return await this.message.delete(this.resolve(`packages/${packageId}`));
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
@@ -207,7 +206,7 @@ export class AASApiClientV3 extends AASApiClient {
 
         const result: OperationResult = JSON.parse(
             await this.message.post(
-                this.resolve(`/shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
+                this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
                 request,
             ),
         );
@@ -229,7 +228,7 @@ export class AASApiClientV3 extends AASApiClient {
         idShortPath: string,
     ): Promise<string | undefined> {
         const blob = await this.message.get<aas.Blob>(
-            this.resolve(`/submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
+            this.resolve(`submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
         );
 
         if (!blob) {
@@ -241,26 +240,26 @@ export class AASApiClientV3 extends AASApiClient {
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
         const aasId = encodeBase64Url(shell.id);
-        return await this.message.put(this.resolve(`/shells/${aasId}`), new JsonWriter().convert(shell));
+        return await this.message.put(this.resolve(`shells/${aasId}`), new JsonWriter().convert(shell));
     }
 
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.message.put(
-            this.resolve(`/shells/${aasId}/submodels/${smId}`),
+            this.resolve(`shells/${aasId}/submodels/${smId}`),
             new JsonWriter().convert(submodel),
         );
     }
 
     private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         return await this.message.post(
-            this.resolve(`/submodels?aasIdentifier=${aasId}`),
+            this.resolve(`submodels?aasIdentifier=${aasId}`),
             new JsonWriter().convert(submodel),
         );
     }
 
     private async deleteSubmodelAsync(smId: string): Promise<string> {
-        return await this.message.delete(this.resolve(`/submodels/${encodeBase64Url(smId)}`));
+        return await this.message.delete(this.resolve(`submodels/${encodeBase64Url(smId)}`));
     }
 
     private async putSubmodelElementAsync(
@@ -270,7 +269,7 @@ export class AASApiClientV3 extends AASApiClient {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.put(
-            this.resolve(`/submodels/${smId}/submodel-elements/${path}`),
+            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
             new JsonWriter().convert(submodelElement),
         );
     }
@@ -282,7 +281,7 @@ export class AASApiClientV3 extends AASApiClient {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.post(
-            this.resolve(`/submodels/${smId}/submodel-elements/${path}`),
+            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
             new JsonWriter().convert(submodelElement),
         );
     }
@@ -293,7 +292,7 @@ export class AASApiClientV3 extends AASApiClient {
     ): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
-        return await this.message.delete(this.resolve(`/submodels/${smId}/submodel-elements/${path}`));
+        return await this.message.delete(this.resolve(`submodels/${smId}/submodel-elements/${path}`));
     }
 
     private getSubmodel(env: aas.Environment, referable?: aas.Referable): aas.Submodel {

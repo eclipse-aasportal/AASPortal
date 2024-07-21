@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, model, signal } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs';
 import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
@@ -50,6 +50,7 @@ export interface LinkDescriptor {
 })
 export class MainComponent implements OnInit {
     public constructor(
+        public readonly route: ActivatedRoute,
         private readonly router: Router,
         private readonly window: WindowService,
         private readonly api: MainApiService,
@@ -60,8 +61,6 @@ export class MainComponent implements OnInit {
     public emptyToolbar!: TemplateRef<unknown>;
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
-
-    public readonly activeId = model(LinkId.START);
 
     public readonly links = signal<LinkDescriptor[]>([
         {

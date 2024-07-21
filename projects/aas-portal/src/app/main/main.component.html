@@ -16,7 +16,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="navbar-nav me-auto">
+        <ul ngbNav #nav="ngbNav" [activeId]="route.fragment | async" class="navbar-nav me-auto">
           @for (link of links(); track link) {
             <li [ngbNavItem]="link.id">
               <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active" skipLocationChange="true">{{link.name | translate}}</a>

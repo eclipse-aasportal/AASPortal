@@ -58,7 +58,7 @@ export class DocumentsController extends AASController {
     @Get('count')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentCount')
-    public async getDocumentCount(@Query() filter?: string): Promise<AASPage> {
+    public async getDocumentCount(@Query() filter?: string): Promise<number> {
         try {
             this.logger.start('getDocuments');
             if (filter) {

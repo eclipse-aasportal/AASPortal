@@ -86,7 +86,7 @@ export class AASProvider {
         return this.index.getDocuments(cursor);
     }
 
-    public async getDocumentCountAsync(filter?: string): Promise<number> {
+    public getDocumentCountAsync(filter?: string): Promise<number> {
         return this.index.getCount(filter);
     }
 

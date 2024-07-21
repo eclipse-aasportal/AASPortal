@@ -20,7 +20,39 @@ export class ServerMessage {
      * @returns The requested object.
      */
     public get<T extends object>(url: URL): Promise<T> {
-        return url.protocol === 'http:' ? this.getHttp(url) : this.getHttps(url);
+        return new Promise((result, reject) => {
+            const options: http.RequestOptions = {
+                host: url.hostname,
+                port: url.port,
+                path: url.pathname + url.search,
+                method: 'GET',
+                timeout: 3000,
+            };
+
+            const requester = url.protocol === 'https:' ? https.request : http.request;
+            const request = requester(options, response => {
+                let data = '';
+                response.on('data', (chunk: string) => {
+                    data += chunk;
+                });
+
+                response.on('end', () => {
+                    try {
+                        ServerMessage.checkStatusCode(response, data);
+                        result(JSON.parse(data));
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+
+                response.on('error', error => reject(error));
+            });
+
+            request
+                .on('timeout', () => request.destroy())
+                .on('error', error => reject(error))
+                .end();
+        });
     }
 
     /**
@@ -29,7 +61,22 @@ export class ServerMessage {
      * @returns The request.
      */
     public getResponse(url: URL): Promise<http.IncomingMessage> {
-        return url.protocol === 'http:' ? this.getResponseHttp(url) : this.getResponseHttps(url);
+        return new Promise((result, reject) => {
+            const options: http.RequestOptions = {
+                host: url.hostname,
+                port: url.port,
+                path: url.pathname + url.search,
+                method: 'GET',
+                timeout: 3000,
+            };
+
+            const requester = url.protocol === 'https:' ? https.request : http.request;
+            const request = requester(options, response => result(response));
+            request
+                .on('timeout', () => request.destroy())
+                .on('error', error => reject(error))
+                .end();
+        });
     }
 
     /**
@@ -38,7 +85,41 @@ export class ServerMessage {
      * @param obj The object to send.
      */
     public put(url: URL, obj: object): Promise<string> {
-        return url.protocol === 'http:' ? this.putHttp(url, obj) : this.putHttps(url, obj);
+        return new Promise((result, reject) => {
+            const data = JSON.stringify(obj);
+            const options: http.RequestOptions = {
+                hostname: url.hostname,
+                port: url.port,
+                path: url.pathname + url.search,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(data),
+                },
+            };
+
+            const requester = url.protocol === 'https:' ? https.request : http.request;
+            const request = requester(options, response => {
+                let responseData = '';
+                response.on('data', (chunk: string) => {
+                    responseData += chunk;
+                });
+
+                response.on('end', () => {
+                    try {
+                        ServerMessage.checkStatusCode(response, responseData);
+                        result(responseData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+
+                response.on('error', error => reject(error));
+            }).on('error', error => reject(error));
+
+            request.write(data);
+            request.end();
+        });
     }
 
     /**
@@ -55,308 +136,8 @@ export class ServerMessage {
      * @param url The URL of the object to delete.
      */
     public delete(url: URL): Promise<string> {
-        return url.protocol === 'http:' ? this.deleteHttp(url) : this.deleteHttps(url);
-    }
-
-    /**
-     * Checks the connection to resource with the specified URL.
-     * @param url The current URL.
-     */
-    public async checkUrlExist(url: string): Promise<void> {
-        const temp = parseUrl(url);
-        const exist = await new Promise<boolean>(resolve => {
-            const socket = net.createConnection(Number(temp.port), temp.hostname);
-            socket.setTimeout(3000);
-            socket.on('connect', () => {
-                socket.end();
-                resolve(true);
-            });
-
-            socket.on('timeout', () => {
-                socket.destroy();
-                resolve(false);
-            });
-
-            socket.on('error', () => {
-                socket.destroy();
-                resolve(false);
-            });
-        });
-
-        if (!exist) {
-            throw new Error(`${url} does not exist.`);
-        }
-    }
-
-    private getHttp<T extends object>(url: URL): Promise<T> {
-        return new Promise((result, reject) => {
-            const options: http.RequestOptions = {
-                host: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'GET',
-                timeout: 3000,
-            };
-
-            const request = http.request(options, response => {
-                let data = '';
-                response.on('data', (chunk: string) => {
-                    data += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        ServerMessage.checkStatusCode(response, data);
-                        result(JSON.parse(data));
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            });
-
-            request
-                .on('timeout', () => request.destroy())
-                .on('error', error => reject(error))
-                .end();
-        });
-    }
-
-    private getHttps<T extends object>(url: URL): Promise<T> {
         return new Promise((result, reject) => {
             const options: https.RequestOptions = {
-                host: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'GET',
-                timeout: 3000,
-            };
-
-            const request = http.request(options, response => {
-                let data = '';
-                response.on('data', (chunk: string) => {
-                    data += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        ServerMessage.checkStatusCode(response, data);
-                        result(JSON.parse(data));
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            });
-
-            request
-                .on('timeout', () => request.destroy())
-                .on('error', error => reject(error))
-                .end();
-        });
-    }
-
-    private getResponseHttp(url: URL): Promise<http.IncomingMessage> {
-        return new Promise((result, reject) => {
-            const options: http.RequestOptions = {
-                host: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'GET',
-                timeout: 3000,
-            };
-
-            const request = http.request(options, response => result(response));
-            request
-                .on('timeout', () => request.destroy())
-                .on('error', error => reject(error))
-                .end();
-        });
-    }
-
-    private getResponseHttps(url: URL): Promise<http.IncomingMessage> {
-        return new Promise((result, reject) => {
-            const options: https.RequestOptions = {
-                host: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'GET',
-                timeout: 3000,
-            };
-
-            const request = https.request(options, response => result(response));
-            request
-                .on('timeout', () => request.destroy())
-                .on('error', error => reject(error))
-                .end();
-        });
-    }
-
-    private putHttp(url: URL, obj: object): Promise<string> {
-        return new Promise((result, reject) => {
-            const data = JSON.stringify(obj);
-            const options: http.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data),
-                },
-            };
-
-            const request = http
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
-
-                    response.on('end', () => {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
-
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error));
-
-            request.write(data);
-            request.end();
-        });
-    }
-
-    private putHttps(url: URL, obj: object): Promise<string> {
-        return new Promise((result, reject) => {
-            const data = JSON.stringify(obj);
-            const options: https.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data),
-                },
-            };
-
-            const request = https
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
-
-                    response.on('end', () => {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
-
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error));
-
-            request.write(data);
-            request.end();
-        });
-    }
-
-    private postObject(url: URL, obj: object): Promise<string> {
-        return url.protocol === 'http:' ? this.postObjectHttp(url, obj) : this.postObjectHttps(url, obj);
-    }
-
-    private postObjectHttp(url: URL, obj: object): Promise<string> {
-        return new Promise((result, reject) => {
-            const data = JSON.stringify(obj);
-            const options: http.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data),
-                },
-            };
-
-            const request = http
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
-
-                    response.on('end', () => {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
-
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error));
-
-            request.write(data);
-            request.end();
-        });
-    }
-
-    private postObjectHttps(url: URL, obj: object): Promise<string> {
-        return new Promise((result, reject) => {
-            const data = JSON.stringify(obj);
-            const options: https.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data),
-                },
-            };
-
-            const request = https
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
-
-                    response.on('end', () => {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
-
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error));
-
-            request.write(data);
-            request.end();
-        });
-    }
-
-    private deleteHttp(url: URL): Promise<string> {
-        return new Promise((result, reject) => {
-            const options: http.RequestOptions = {
                 hostname: url.hostname,
                 port: url.port,
                 path: url.pathname + url.search,
@@ -366,7 +147,8 @@ export class ServerMessage {
                 },
             };
 
-            http.request(options, response => {
+            const requester = url.protocol === 'https:' ? https.request : http.request;
+            requester(options, response => {
                 let responseData = '';
                 response.on('data', (chunk: string) => {
                     responseData += chunk;
@@ -388,46 +170,76 @@ export class ServerMessage {
         });
     }
 
-    private deleteHttps(url: URL): Promise<string> {
+    /**
+     * Checks the connection to resource with the specified URL.
+     * @param url The current URL.
+     */
+    public checkUrlExist(url: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const temp = parseUrl(url);
+            const port = Number(temp.port ? temp.port : temp.protocol === 'http:' ? 80 : 443);
+            const socket = net.createConnection(port, temp.hostname);
+            socket.setTimeout(3000);
+            socket.on('connect', () => {
+                socket.end();
+            });
+
+            socket.on('end', () => {
+                socket.destroy();
+                resolve();
+            });
+
+            socket.on('timeout', () => {
+                socket.destroy();
+                reject(new Error(`${url} does not exist.`));
+            });
+
+            socket.on('error', () => {
+                socket.destroy();
+                reject(new Error(`${url} does not exist.`));
+            });
+        });
+    }
+
+    private postObject(url: URL, obj: object): Promise<string> {
         return new Promise((result, reject) => {
-            const options: https.RequestOptions = {
+            const data = JSON.stringify(obj);
+            const options: http.RequestOptions = {
                 hostname: url.hostname,
                 port: url.port,
                 path: url.pathname + url.search,
-                method: 'DELETE',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(data),
                 },
             };
 
-            https
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
+            const requester = url.protocol === 'https:' ? https.request : http.request;
+            const request = requester(options, response => {
+                let responseData = '';
+                response.on('data', (chunk: string) => {
+                    responseData += chunk;
+                });
 
-                    response.on('end', function () {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
+                response.on('end', () => {
+                    try {
+                        ServerMessage.checkStatusCode(response, responseData);
+                        result(responseData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
 
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error))
-                .end();
+                response.on('error', error => reject(error));
+            }).on('error', error => reject(error));
+
+            request.write(data);
+            request.end();
         });
     }
 
     private postFormData(url: URL, formData: FormData): Promise<string> {
-        return url.protocol === 'http:' ? this.postFormDataHttp(url, formData) : this.postFormDataHttps(url, formData);
-    }
-
-    private postFormDataHttp(url: URL, formData: FormData): Promise<string> {
         return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 hostname: url.hostname,
@@ -437,59 +249,24 @@ export class ServerMessage {
                 headers: formData.getHeaders(),
             };
 
-            const request = http
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
+            const requester = url.protocol === 'https:' ? https.request : http.request;
+            const request = requester(options, response => {
+                let responseData = '';
+                response.on('data', (chunk: string) => {
+                    responseData += chunk;
+                });
 
-                    response.on('end', function () {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
+                response.on('end', function () {
+                    try {
+                        ServerMessage.checkStatusCode(response, responseData);
+                        result(responseData);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
 
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error));
-
-            formData.pipe(request);
-        });
-    }
-
-    private postFormDataHttps(url: URL, formData: FormData): Promise<string> {
-        return new Promise((result, reject) => {
-            const options: https.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'POST',
-                headers: formData.getHeaders(),
-            };
-
-            const request = https
-                .request(options, response => {
-                    let responseData = '';
-                    response.on('data', (chunk: string) => {
-                        responseData += chunk;
-                    });
-
-                    response.on('end', function () {
-                        try {
-                            ServerMessage.checkStatusCode(response, responseData);
-                            result(responseData);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    });
-
-                    response.on('error', error => reject(error));
-                })
-                .on('error', error => reject(error));
+                response.on('error', error => reject(error));
+            }).on('error', error => reject(error));
 
             formData.pipe(request);
         });

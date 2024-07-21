@@ -86,7 +86,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly map = new Map<string, UpdateTuple>();
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
-    // private reset = false;
     private selections = new Set<string>();
     private selectedSources = new Map<string, number>();
 

@@ -39,11 +39,7 @@ export abstract class AASApiClient extends AASResource {
 
     public async testAsync(): Promise<void> {
         if (this.reentry === 0) {
-            try {
-                await this.openAsync();
-            } finally {
-                await this.closeAsync();
-            }
+            await this.message.checkUrlExist(this.url);
         }
     }
 
@@ -59,12 +55,9 @@ export abstract class AASApiClient extends AASResource {
      */
     public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
 
-    public async openAsync(): Promise<void> {
-        if (this.reentry === 0) {
-            await this.message.checkUrlExist(this.url);
-        }
-
+    public openAsync(): Promise<void> {
         ++this.reentry;
+        return Promise.resolve();
     }
 
     public closeAsync(): Promise<void> {
