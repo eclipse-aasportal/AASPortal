@@ -11,7 +11,7 @@ import { AASReader } from './aas-reader.js';
 import { HTMLDocumentElement } from '../types/html-document-element.js';
 import { XmlReaderV1 } from './xml-reader-v1.js';
 import { XmlReaderV2 } from './xml-reader-v2.js';
-import { XmlReader } from './xml-reader.js';
+import { XmlReaderV3 } from './xml-reader-v3.js';
 
 export function createXmlReader(xml: string): AASReader {
     const document = new DOMParser().parseFromString(xml);
@@ -27,7 +27,7 @@ export function createXmlReader(xml: string): AASReader {
         }
 
         if (uri === 'https://admin-shell.io/aas/3/0') {
-            return new XmlReader(document);
+            return new XmlReaderV3(document);
         }
     }
 

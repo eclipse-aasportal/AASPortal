@@ -11,7 +11,7 @@ import camelCase from 'lodash-es/camelCase.js';
 import { DOMImplementation, XMLSerializer } from '@xmldom/xmldom';
 import { AASWriter } from './aas-writer.js';
 
-export class XmlWriter extends AASWriter {
+export class XmlWriterV3 extends AASWriter {
     private readonly document: Document;
 
     public constructor() {

@@ -21,7 +21,7 @@ import { AASReader } from '../aas-reader.js';
 import { ImageProcessing } from '../../image-processing.js';
 import { createXmlReader } from '../create-xml-reader.js';
 import { createJsonReader } from '../create-json-reader.js';
-import { XmlWriter } from '../xml-writer.js';
+import { XmlWriterV3 } from '../xml-writer-v3.js';
 
 export class AasxPackage extends AASPackage {
     private readonly file: string;
@@ -73,7 +73,7 @@ export class AasxPackage extends AASPackage {
     }
 
     public override async setEnvironmentAsync(env: aas.Environment): Promise<string[]> {
-        const writer = new XmlWriter();
+        const writer = new XmlWriterV3();
         const xml = writer.write(env);
         const path = await this.getOriginNameAsync();
         (await this.zip).file(path, xml, { compression: 'DEFLATE' });

@@ -8,13 +8,13 @@
 
 import { describe, beforeEach, it, expect } from '@jest/globals';
 import env from '../assets/aas-environment.js';
-import { XmlWriter } from '../../app/packages/xml-writer.js';
+import { XmlWriterV3 } from '../../app/packages/xml-writer-v3.js';
 
-describe('XmlWriter', () => {
-    let writer: XmlWriter;
+describe('XmlWriterV3', () => {
+    let writer: XmlWriterV3;
 
     beforeEach(() => {
-        writer = new XmlWriter();
+        writer = new XmlWriterV3();
     });
 
     describe('writeEnvironment', () => {

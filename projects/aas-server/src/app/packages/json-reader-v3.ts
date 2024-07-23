@@ -11,7 +11,7 @@ import { aas, determineType, extensionToMimeType, isIdentifiable } from 'aas-cor
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { encodeBase64Url } from '../convert.js';
 
-export class JsonReader extends AASReader {
+export class JsonReaderV3 extends AASReader {
     private readonly origin: aas.Environment;
 
     public constructor(origin?: aas.Environment | string) {

@@ -9,10 +9,10 @@
 import { describe, beforeAll, beforeEach, it, expect } from '@jest/globals';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path/posix';
-import { XmlReader } from '../../app/packages/xml-reader.js';
+import { XmlReaderV3 } from '../../app/packages/xml-reader-v3.js';
 
-describe('XmlReader', function () {
-    let reader: XmlReader;
+describe('XmlReaderV3', function () {
+    let reader: XmlReaderV3;
     let xml: string;
     let path: string;
 
@@ -22,7 +22,7 @@ describe('XmlReader', function () {
     });
 
     beforeEach(function () {
-        reader = new XmlReader(xml);
+        reader = new XmlReaderV3(xml);
     });
 
     it('should be created', function () {

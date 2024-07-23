@@ -12,7 +12,7 @@ import { DOMParser } from '@xmldom/xmldom';
 import { AASReader } from './aas-reader.js';
 import { HTMLDocumentElement } from '../types/html-document-element.js';
 
-export class XmlReader extends AASReader {
+export class XmlReaderV3 extends AASReader {
     private readonly select: XPathSelect;
     private readonly document: Document;
 

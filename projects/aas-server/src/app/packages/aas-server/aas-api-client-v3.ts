@@ -12,8 +12,8 @@ import { createReadStream } from 'fs';
 import { encodeBase64Url } from '../../convert.js';
 import { AASApiClient } from './aas-api-client.js';
 import { Logger } from '../../logging/logger.js';
-import { JsonReader } from '../json-reader.js';
-import { JsonWriter } from '../json-writer.js';
+import { JsonReaderV3 } from '../json-reader-v3.js';
+import { JsonWriterV3 } from '../json-writer-v3.js';
 import { ERRORS } from '../../errors.js';
 import {
     aas,
@@ -104,7 +104,7 @@ export class AASApiClientV3 extends AASApiClient {
             conceptDescriptions: pagedResult.result,
         };
 
-        return new JsonReader(sourceEnv).readEnvironment();
+        return new JsonReaderV3(sourceEnv).readEnvironment();
     }
 
     public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
@@ -240,21 +240,21 @@ export class AASApiClientV3 extends AASApiClient {
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
         const aasId = encodeBase64Url(shell.id);
-        return await this.message.put(this.resolve(`shells/${aasId}`), new JsonWriter().convert(shell));
+        return await this.message.put(this.resolve(`shells/${aasId}`), new JsonWriterV3().convert(shell));
     }
 
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.message.put(
             this.resolve(`shells/${aasId}/submodels/${smId}`),
-            new JsonWriter().convert(submodel),
+            new JsonWriterV3().convert(submodel),
         );
     }
 
     private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         return await this.message.post(
             this.resolve(`submodels?aasIdentifier=${aasId}`),
-            new JsonWriter().convert(submodel),
+            new JsonWriterV3().convert(submodel),
         );
     }
 
@@ -270,7 +270,7 @@ export class AASApiClientV3 extends AASApiClient {
         const path = getIdShortPath(submodelElement);
         return await this.message.put(
             this.resolve(`submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriter().convert(submodelElement),
+            new JsonWriterV3().convert(submodelElement),
         );
     }
 
@@ -282,7 +282,7 @@ export class AASApiClientV3 extends AASApiClient {
         const path = getIdShortPath(submodelElement);
         return await this.message.post(
             this.resolve(`submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriter().convert(submodelElement),
+            new JsonWriterV3().convert(submodelElement),
         );
     }
 
