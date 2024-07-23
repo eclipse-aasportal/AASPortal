@@ -6,16 +6,16 @@
  *
  *****************************************************************************/
 
-import { JsonWriter } from '../../app/packages/json-writer.js';
+import { JsonWriterV3 } from '../../app/packages/json-writer-v3.js';
 import env from '../assets/aas-environment.js';
 import { describe, beforeEach, it, expect } from '@jest/globals';
 
 describe('JsonWriter', function () {
     describe('writeEnvironment', function () {
-        let writer: JsonWriter;
+        let writer: JsonWriterV3;
 
         beforeEach(() => {
-            writer = new JsonWriter();
+            writer = new JsonWriterV3();
         });
 
         it('writes an AAS environment', () => {
@@ -24,10 +24,10 @@ describe('JsonWriter', function () {
     });
 
     describe('write', () => {
-        let writer: JsonWriter;
+        let writer: JsonWriterV3;
 
         beforeEach(() => {
-            writer = new JsonWriter();
+            writer = new JsonWriterV3();
         });
 
         it('does not support writing an AAS', () => {

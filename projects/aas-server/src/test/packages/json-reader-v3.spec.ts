@@ -7,17 +7,17 @@
  *****************************************************************************/
 
 import { readFile } from 'fs/promises';
-import { JsonReader } from '../../app/packages/json-reader.js';
+import { JsonReaderV3 } from '../../app/packages/json-reader-v3.js';
 import { resolve } from 'path/posix';
 import { describe, beforeEach, it, expect } from '@jest/globals';
 
-describe('JsonReader', function () {
-    let reader: JsonReader;
+describe('JsonReaderV3', function () {
+    let reader: JsonReaderV3;
     let json: string;
 
     beforeEach(async function () {
         json = (await readFile(resolve('./src/test/assets/aas-example.json'))).toString();
-        reader = new JsonReader(json);
+        reader = new JsonReaderV3(json);
     });
 
     it('should be created', function () {

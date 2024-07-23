@@ -9,7 +9,7 @@
 import { aas } from 'aas-core';
 import { AASReader } from './aas-reader.js';
 import { JsonReaderV2 } from './json-reader-v2.js';
-import { JsonReader } from './json-reader.js';
+import { JsonReaderV3 } from './json-reader-v3.js';
 import * as aasV2 from '../types/aas-v2.js';
 
 export function createJsonReader(data: object): AASReader {
@@ -18,11 +18,11 @@ export function createJsonReader(data: object): AASReader {
     }
 
     if (isEnvironment(data)) {
-        return new JsonReader(data);
+        return new JsonReaderV3(data);
     }
 
     if (isSubmodelElement(data)) {
-        return new JsonReader();
+        return new JsonReaderV3();
     }
 
     if (isSubmodelElementV2(data)) {

@@ -11,7 +11,7 @@ import { aas, extensionToMimeType } from 'aas-core';
 import { AASWriter } from './aas-writer.js';
 
 /** */
-export class JsonWriter extends AASWriter {
+export class JsonWriterV3 extends AASWriter {
     public override write(env: aas.Environment): string {
         const data: aas.Environment = {
             assetAdministrationShells: this.writeAssetAdministrationShells(env),
