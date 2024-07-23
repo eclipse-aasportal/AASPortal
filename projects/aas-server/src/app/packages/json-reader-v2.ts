@@ -571,8 +571,8 @@ export class JsonReaderV2 extends AASReader {
     }
 
     private readIdentifier(source: aasv2.Identifier): string {
-        if (!source.id) {
-            throw new Error('Identifier.id');
+        if (typeof source.id !== 'string') {
+            return '';
         }
 
         return source.id;
