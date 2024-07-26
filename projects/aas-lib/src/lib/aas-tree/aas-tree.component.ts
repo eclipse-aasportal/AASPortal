@@ -268,32 +268,34 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     public async openBlob(blob: aas.Blob | undefined): Promise<void> {
         const document = this.document();
-        if (!blob?.value || !document || !blob.parent || this.state() === 'online') return;
+        if (!blob || !document || !blob.parent || this.state() === 'online') return;
 
+        let name = blob.idShort;
         const extension = mimeTypeToExtension(blob.contentType);
         if (extension) {
-            const name = blob.idShort + extension;
-            if (blob.value) {
-                if (blob.contentType.startsWith('image/')) {
-                    await this.showImageAsync(name, `data:${blob.contentType};base64,${blob.value}`);
-                } else if (blob.contentType.startsWith('video/')) {
-                    await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
-                }
-            } else {
-                const endpoint = encodeBase64Url(document.endpoint);
-                const id = encodeBase64Url(document.id);
-                const smId = encodeBase64Url(blob.parent.keys[0].value);
-                const path = getIdShortPath(blob);
-                const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
-                if (blob.contentType.startsWith('image/')) {
-                    await this.showImageAsync(name, url);
-                } else if (blob.contentType.startsWith('video/')) {
-                    await this.showVideoAsync(name, url);
-                } else if (blob.contentType.endsWith('/pdf')) {
-                    this.window.open(url);
-                } else if (blob) {
-                    await this.downloadFileAsync(name, url);
-                }
+            name += extension;
+        }
+
+        if (blob.value) {
+            if (blob.contentType.startsWith('image/')) {
+                await this.showImageAsync(name, `data:${blob.contentType};base64,${blob.value}`);
+            } else if (blob.contentType.startsWith('video/')) {
+                await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
+            }
+        } else {
+            const endpoint = encodeBase64Url(document.endpoint);
+            const id = encodeBase64Url(document.id);
+            const smId = encodeBase64Url(blob.parent.keys[0].value);
+            const path = getIdShortPath(blob);
+            const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+            if (blob.contentType.startsWith('image/')) {
+                await this.showImageAsync(name, url);
+            } else if (blob.contentType.startsWith('video/')) {
+                await this.showVideoAsync(name, url);
+            } else if (blob.contentType.endsWith('/pdf')) {
+                this.window.open(url);
+            } else if (blob) {
+                await this.downloadFileAsync(name, url);
             }
         }
     }

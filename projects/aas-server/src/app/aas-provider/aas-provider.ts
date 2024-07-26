@@ -41,11 +41,13 @@ import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
 import { TaskHandler } from './task-handler.js';
 import { HierarchicalStructure } from './hierarchical-structure.js';
+import { AASCache } from './aas-cache.js';
 
 @singleton()
 export class AASProvider {
     private readonly timeout: number;
     private readonly file: string | undefined;
+    private readonly cache = new AASCache();
     private wsServer!: WSServer;
     private resetRequested = false;
 
@@ -72,12 +74,21 @@ export class AASProvider {
         setTimeout(this.startScan, 100);
     }
 
-    /** Gets all registered AAS container endpoints. */
+    /**
+     * Gets all registered AAS container endpoints.
+     */
     public getEndpoints(): Promise<AASEndpoint[]> {
         return this.index.getEndpoints();
     }
 
-    public async getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
+    /**
+     * Gets a page of documents from the specified cursor.
+     * @param cursor The cursor.
+     * @param filter A filter expression.
+     * @param language The current language.
+     * @returns A page of documents.
+     */
+    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
             return this.index.getDocuments(cursor, filter, language ?? 'en');
@@ -86,41 +97,41 @@ export class AASProvider {
         return this.index.getDocuments(cursor);
     }
 
+    /**
+     * The total count of AAS documents.
+     * @param filter A filter expression.
+     * @returns The total count of documents.
+     */
     public getDocumentCountAsync(filter?: string): Promise<number> {
         return this.index.getCount(filter);
     }
 
-    public async getDocumentAsync(id: string, name?: string): Promise<AASDocument> {
-        const document = await this.index.get(name, id);
-        const endpoint = await this.index.getEndpoint(document.endpoint);
-        const resource = this.resourceFactory.create(endpoint);
-        try {
-            await resource.openAsync();
-            if (!document.content) {
-                document.content = await resource.createPackage(document.address).getEnvironmentAsync();
-            }
-
-            return document;
-        } finally {
-            await resource.closeAsync();
-        }
+    /**
+     * Gets the AAS document with the specified identifier.
+     * @param id The AAS identifier.
+     * @param endpointName The endpoint name.
+     * @returns The AAS document with the specified identifier.
+     */
+    public async getDocumentAsync(id: string, endpointName?: string): Promise<AASDocument> {
+        const document = await this.index.get(endpointName, id);
+        document.content = await this.getDocumentContentAsync(document);
+        return document;
     }
 
-    public async getContentAsync(name: string, id: string): Promise<aas.Environment> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
-        const resource = this.resourceFactory.create(endpoint);
-        try {
-            await resource.openAsync();
-            return await resource.createPackage(document.address).getEnvironmentAsync();
-        } finally {
-            await resource.closeAsync();
-        }
+    /**
+     * Gets the AAS environment for the specified AAS document.
+     * @param endpointName
+     * @param id
+     * @returns
+     */
+    public async getContentAsync(endpointName: string, id: string): Promise<aas.Environment> {
+        const document = await this.index.get(endpointName, id);
+        return this.getDocumentContentAsync(document);
     }
 
-    public async getThumbnailAsync(name: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
+    public async getThumbnailAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const document = await this.index.get(endpointName, id);
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
@@ -131,21 +142,25 @@ export class AASProvider {
     }
 
     public async getDataElementValueAsync(
-        name: string,
+        endpointName: string,
         id: string,
         smId: string,
         path: string,
         options?: object,
     ): Promise<NodeJS.ReadableStream> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const document = await this.index.get(endpointName, id);
         let stream: NodeJS.ReadableStream;
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address);
             if (!document.content) {
-                document.content = await pkg.getEnvironmentAsync();
+                document.content = this.cache.get(document.endpoint, document.id);
+                if (!document.content) {
+                    document.content = await pkg.getEnvironmentAsync();
+                    this.cache.set(document.endpoint, document.id, document.content);
+                }
             }
 
             const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, path);
@@ -185,11 +200,11 @@ export class AASProvider {
 
     /**
      * Adds a new endpoint.
-     * @param name The endpoint name.
+     * @param endpointName The endpoint name.
      * @param url The endpoint URL.
      */
-    public async addEndpointAsync(name: string, endpoint: AASEndpoint): Promise<void> {
-        if (name !== endpoint.name) {
+    public async addEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
+        if (endpointName !== endpoint.name) {
             throw new Error('Invalid operation.');
         }
 
@@ -208,10 +223,10 @@ export class AASProvider {
 
     /**
      * Removes the endpoint with the specified name.
-     * @param name The name of the registry to remove.
+     * @param endpointName The name of the registry to remove.
      */
-    public async removeEndpointAsync(name: string): Promise<void> {
-        const endpoint = await this.index.getEndpoint(name);
+    public async removeEndpointAsync(endpointName: string): Promise<void> {
+        const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
             await this.index.removeEndpoint(endpoint.name);
             this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
@@ -235,6 +250,7 @@ export class AASProvider {
 
         this.resetRequested = true;
         await this.index.clear();
+        this.cache.clear();
         this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: {
@@ -249,14 +265,14 @@ export class AASProvider {
 
     /**
      * Updates an Asset Administration Shell.
-     * @param name The endpoint name.
+     * @param endpointName The endpoint name.
      * @param id The AAS document ID.
      * @param content The new document content.
      * @returns
      */
-    public async updateDocumentAsync(name: string, id: string, content: aas.Environment): Promise<string[]> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
+    public async updateDocumentAsync(endpointName: string, id: string, content: aas.Environment): Promise<string[]> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const document = await this.index.get(endpointName, id);
         if (!document) {
             throw new Error(`The destination document ${id} is not available.`);
         }
@@ -267,6 +283,9 @@ export class AASProvider {
             const pkg = resource.createPackage(document.address);
             if (!document.content) {
                 document.content = await pkg.getEnvironmentAsync();
+                if (this.cache.has(document.endpoint, document.id)) {
+                    this.cache.set(document.endpoint, document.id, document.content);
+                }
             }
 
             return await pkg.setEnvironmentAsync(content, document.content);
@@ -277,13 +296,13 @@ export class AASProvider {
 
     /**
      * Downloads an AASX package.
-     * @param name The endpoint name.
+     * @param endpointName The endpoint name.
      * @param id The AAS identifier.
      * @returns A readable stream.
      */
-    public async getPackageAsync(name: string, id: string): Promise<NodeJS.ReadableStream> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
+    public async getPackageAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const document = await this.index.get(endpointName, id);
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
@@ -295,16 +314,16 @@ export class AASProvider {
 
     /**
      * Uploads one or more AASX packages.
-     * @param name The name of the destination endpoint.
+     * @param endpointName The name of the destination endpoint.
      * @param files A list of AASX package files.
      */
-    public async addPackagesAsync(name: string, files: Express.Multer.File[]): Promise<void> {
-        const endpoint = await this.index.getEndpoint(name);
+    public async addPackagesAsync(endpointName: string, files: Express.Multer.File[]): Promise<void> {
+        const endpoint = await this.index.getEndpoint(endpointName);
         if (!endpoint) {
             throw new ApplicationError(
-                `An AAS container with the name "${name}" does not exist.`,
+                `An AAS container with the name "${endpointName}" does not exist.`,
                 ERRORS.ContainerDoesNotExist,
-                name,
+                endpointName,
             );
         }
 
@@ -321,17 +340,17 @@ export class AASProvider {
 
     /**
      * Deletes an AASX package from an endpoint.
-     * @param name The endpoint name.
+     * @param endpointName The endpoint name.
      * @param id The AAS identification.
      */
-    public async deletePackageAsync(name: string, id: string): Promise<void> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
+    public async deletePackageAsync(endpointName: string, id: string): Promise<void> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const document = await this.index.get(endpointName, id);
         if (document) {
             const resource = this.resourceFactory.create(endpoint);
             try {
                 await resource.deletePackageAsync(document.id, document.address);
-                await this.index.remove(name, id);
+                await this.index.remove(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
                 await resource.closeAsync();
@@ -351,14 +370,14 @@ export class AASProvider {
 
     /**
      * Invokes an operation synchronous.
-     * @param name The endpoint name.
+     * @param endpointName The endpoint name.
      * @param id The AAS identifier.
      * @param operation The Operation element.
      * @returns ToDo.
      */
-    public async invoke(name: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
-        const endpoint = await this.index.getEndpoint(name);
-        const document = await this.index.get(name, id);
+    public async invoke(endpointName: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const document = await this.index.get(endpointName, id);
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
@@ -370,12 +389,12 @@ export class AASProvider {
 
     /**
      *
-     * @param endpoint The endpoint name.
+     * @param endpointName The endpoint name.
      * @param id The AAS identifier.
      * @returns
      */
-    public async getHierarchyAsync(endpoint: string, id: string): Promise<AASDocument[]> {
-        const document = await this.index.get(endpoint, id);
+    public async getHierarchyAsync(endpointName: string, id: string): Promise<AASDocument[]> {
+        const document = await this.index.get(endpointName, id);
         const root: AASDocument = { ...document, parentId: null, content: null };
         const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
@@ -385,6 +404,7 @@ export class AASProvider {
     private async restart(): Promise<void> {
         this.resetRequested = false;
         await this.index.reset();
+        this.cache.clear();
         await this.startScan();
         this.logger.info('AAS Server configuration restored.');
     }
@@ -411,7 +431,12 @@ export class AASProvider {
         const document = await this.index.get(message.endpoint, message.id);
         const resource = this.resourceFactory.create(endpoint);
         await resource.openAsync();
-        const env = await resource.createPackage(document.address).getEnvironmentAsync();
+        let env = this.cache.get(document.endpoint, document.id);
+        if (!env) {
+            env = await resource.createPackage(document.address).getEnvironmentAsync();
+            this.cache.set(document.endpoint, document.id, env);
+        }
+
         return resource.createSubscription(client, message, env);
     }
 
@@ -486,10 +511,15 @@ export class AASProvider {
     };
 
     private async onChanged(result: ScanContainerResult): Promise<void> {
-        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) return;
+        const document = result.document;
+        if ((await this.index.hasEndpoint(document.endpoint)) === false) return;
 
-        await this.index.update(result.document);
-        this.sendMessage({ type: 'Changed', document: { ...result.document, content: null } });
+        await this.index.update(document);
+        if (document.content && this.cache.has(document.endpoint, document.id)) {
+            this.cache.set(document.endpoint, document.id, document.content);
+        }
+
+        this.sendMessage({ type: 'Changed', document: { ...document, content: null } });
     }
 
     private async onAdded(result: ScanContainerResult): Promise<void> {
@@ -501,11 +531,13 @@ export class AASProvider {
     }
 
     private async onRemoved(result: ScanContainerResult): Promise<void> {
-        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) return;
+        const document = result.document;
+        if ((await this.index.hasEndpoint(document.endpoint)) === false) return;
 
-        await this.index.remove(result.container.name, result.document.id);
-        this.logger.info(`Removed: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
-        this.sendMessage({ type: 'Removed', document: { ...result.document, content: null } });
+        await this.index.remove(result.container.name, document.id);
+        this.cache.remove(document.endpoint, document.id);
+        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.container.url}`);
+        this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
     }
 
     private sendMessage(data: AASServerMessage) {
@@ -571,11 +603,18 @@ export class AASProvider {
     }
 
     private async getDocumentContentAsync(document: AASDocument): Promise<aas.Environment> {
+        let env = this.cache.get(document.endpoint, document.id);
+        if (env) {
+            return env;
+        }
+
         const endpoint = await this.index.getEndpoint(document.endpoint);
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            return await resource.createPackage(document.address).getEnvironmentAsync();
+            env = await resource.createPackage(document.address).getEnvironmentAsync();
+            this.cache.set(document.endpoint, document.id, env);
+            return env;
         } finally {
             await resource.closeAsync();
         }

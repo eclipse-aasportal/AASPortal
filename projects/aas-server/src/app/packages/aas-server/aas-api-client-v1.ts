@@ -70,7 +70,9 @@ export class AASApiClientV1 extends AASApiClient {
             for (const reference of shell.submodels) {
                 const submodelId = encodeBase64Url(reference.keys[0].value);
                 try {
-                    submodels.push(await this.message.get<aasv2.Submodel>(this.resolve(`submodels/${submodelId}`)));
+                    submodels.push(
+                        await this.message.get<aasv2.Submodel>(this.resolve(`submodels/${submodelId}/submodel`)),
+                    );
                 } catch (error) {
                     this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
                 }
@@ -147,7 +149,7 @@ export class AASApiClientV1 extends AASApiClient {
     public async openFileAsync(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);
-        const url = this.resolve(`submodels/${smId}/submodel-elements/${path}/attachment`);
+        const url = this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}/attachment`);
         return await this.message.getResponse(url);
     }
 
@@ -155,7 +157,7 @@ export class AASApiClientV1 extends AASApiClient {
         const aasId = encodeBase64Url(shell.id);
         const items = nodeId.split('.');
         const path = items[1].split('/').slice(1).join('.');
-        return this.resolve(`shells/${aasId}/submodels/${items[0]}/submodel-elements/${path}`).href;
+        return this.resolve(`shells/${aasId}/submodels/${items[0]}/submodel/submodel-elements/${path}`).href;
     }
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
@@ -188,8 +190,9 @@ export class AASApiClientV1 extends AASApiClient {
         submodelId: string,
         idShortPath: string,
     ): Promise<string | undefined> {
+        const smId = encodeBase64Url(submodelId);
         const blob = await this.message.get<aas.Blob>(
-            this.resolve(`submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
+            this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
         );
 
         if (!blob) {

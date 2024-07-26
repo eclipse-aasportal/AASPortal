@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AASReader } from './aas-reader.js';
-import { determineType, aas, isSubmodelElement, isIdentifiable } from 'aas-core';
+import { determineType, aas, isIdentifiable } from 'aas-core';
 import { encodeBase64Url } from '../convert.js';
 import * as aasv2 from '../types/aas-v2.js';
 
@@ -387,11 +387,11 @@ export class JsonReaderV2 extends AASReader {
 
     private readOperationVariable(source: aasv2.OperationVariable): aas.OperationVariable {
         let value: aas.SubmodelElement | undefined;
-        if (isSubmodelElement(source.value)) {
+        if (this.isSubmodelElement(source.value)) {
             value = this.readSubmodelElementType(source.value);
         } else if ('submodelElement' in source.value) {
             const submodelElement = (source.value as { submodelElement: aasv2.SubmodelElement }).submodelElement;
-            if (isSubmodelElement(submodelElement)) {
+            if (this.isSubmodelElement(submodelElement)) {
                 value = this.readSubmodelElementType(submodelElement);
             }
         }
@@ -404,7 +404,7 @@ export class JsonReaderV2 extends AASReader {
     }
 
     private readEntity(source: aasv2.Entity, ancestors?: aas.Referable[]): aas.Entity {
-        if (!source.entityType) {
+        if (source.entityType == null) {
             throw new Error('Entity.entityType');
         }
 
@@ -425,7 +425,7 @@ export class JsonReaderV2 extends AASReader {
     }
 
     private readRange(source: aasv2.Range, ancestors?: aas.Referable[]): aas.Range {
-        if (!source.valueType) {
+        if (source.valueType == null) {
             throw new Error('Range.valueType');
         }
 
@@ -476,7 +476,7 @@ export class JsonReaderV2 extends AASReader {
         let qualifier: aas.Qualifier;
         if (source.modelType.name === 'Qualifier') {
             const sourceQualifier = source as aasv2.Qualifier;
-            if (!sourceQualifier.valueType) {
+            if (sourceQualifier.valueType == null) {
                 throw new Error('Qualifier.valueType');
             }
 
@@ -582,11 +582,11 @@ export class JsonReaderV2 extends AASReader {
         return {
             type: this.determineReferenceType(source),
             keys: source.keys.map(key => {
-                if (!key.type) {
+                if (key.type == null) {
                     throw new Error(`Reference.type`);
                 }
 
-                if (!key.value) {
+                if (key.value == null) {
                     throw new Error(`Reference.value`);
                 }
 
@@ -839,5 +839,29 @@ export class JsonReaderV2 extends AASReader {
             default:
                 return source as aas.DataTypeIec61360;
         }
+    }
+
+    private isSubmodelElement(value: unknown): value is aasv2.SubmodelElement {
+        if (value && (value as aasv2.Referable)?.modelType?.name) {
+            switch ((value as aasv2.Referable).modelType.name) {
+                case 'ReferenceElement':
+                case 'Property':
+                case 'MultiLanguageProperty':
+                case 'Range':
+                case 'Blob':
+                case 'File':
+                case 'RelationshipElement':
+                case 'Capability':
+                case 'SubmodelElementCollection':
+                case 'Operation':
+                case 'Entity':
+                case 'AnnotatedRelationshipElement':
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        return false;
     }
 }

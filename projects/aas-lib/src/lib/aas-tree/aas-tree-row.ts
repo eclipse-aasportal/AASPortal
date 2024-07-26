@@ -250,8 +250,8 @@ class TreeInitialize {
             switch (referable.modelType) {
                 case 'Blob': {
                     const blob = referable as aas.Blob;
-                    const extension = mimeTypeToExtension(blob.contentType) ?? '';
-                    return blob.contentType ? `${blob.idShort}${extension}` : '-';
+                    const extension = mimeTypeToExtension(blob.contentType);
+                    return blob.contentType ? `${blob.idShort}${extension}` : this.getSemanticId(blob);
                 }
                 case 'Entity':
                     return (referable as aas.Entity).globalAssetId ?? '-';
@@ -277,6 +277,15 @@ class TreeInitialize {
         }
 
         return '';
+    }
+
+    private getSemanticId(hasSemantics: aas.HasSemantics): string {
+        const keys = hasSemantics.semanticId?.keys;
+        if (keys && keys.length > 0) {
+            return keys[0].value;
+        }
+
+        return '-';
     }
 
     private hasChildren(referable: aas.Referable): boolean {
