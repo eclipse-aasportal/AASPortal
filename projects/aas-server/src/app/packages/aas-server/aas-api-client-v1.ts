@@ -21,9 +21,9 @@ import {
 import { encodeBase64Url } from '../../convert.js';
 import { AASApiClient } from './aas-api-client.js';
 import { Logger } from '../../logging/logger.js';
-import { JsonWriterV3 } from '../json-writer-v3.js';
 import * as aasv2 from '../../types/aas-v2.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
+import { JsonWriterV2 } from '../json-writer-v2.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -51,7 +51,7 @@ export class AASApiClientV1 extends AASApiClient {
         super(logger, url, name);
     }
 
-    public override readonly version = 'v3';
+    public override readonly version = 'v1';
 
     public readonly readOnly = false;
 
@@ -79,7 +79,10 @@ export class AASApiClientV1 extends AASApiClient {
             }
         }
 
-        const result = await this.message.get<aasv2.ConceptDescription[]>(this.resolve(`concept-descriptions`));
+        const conceptDescriptions = await this.message.get<aasv2.ConceptDescription[]>(
+            this.resolve(`concept-descriptions`),
+        );
+
         const asset: aasv2.Asset = {
             kind: 'Instance',
             identification: { idType: shell.asset.keys[0].idType, id: shell.asset.keys[0].value },
@@ -91,7 +94,7 @@ export class AASApiClientV1 extends AASApiClient {
             assetAdministrationShells: [shell],
             assets: [asset],
             submodels,
-            conceptDescriptions: result,
+            conceptDescriptions,
         };
 
         return new JsonReaderV2(sourceEnv).readEnvironment();
@@ -204,21 +207,21 @@ export class AASApiClientV1 extends AASApiClient {
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
         const aasId = encodeBase64Url(shell.id);
-        return await this.message.put(this.resolve(`shells/${aasId}`), new JsonWriterV3().convert(shell));
+        return await this.message.put(this.resolve(`shells/${aasId}`), new JsonWriterV2().convert(shell));
     }
 
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.message.put(
-            this.resolve(`shells/${aasId}/submodels/${smId}`),
-            new JsonWriterV3().convert(submodel),
+            this.resolve(`shells/${aasId}/submodels/${smId}/submodel`),
+            new JsonWriterV2().convert(submodel),
         );
     }
 
     private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         return await this.message.post(
             this.resolve(`submodels?aasIdentifier=${aasId}`),
-            new JsonWriterV3().convert(submodel),
+            new JsonWriterV2().convert(submodel),
         );
     }
 
@@ -233,8 +236,8 @@ export class AASApiClientV1 extends AASApiClient {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.put(
-            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriterV3().convert(submodelElement),
+            this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}`),
+            new JsonWriterV2().convert(submodelElement),
         );
     }
 
@@ -245,8 +248,8 @@ export class AASApiClientV1 extends AASApiClient {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.message.post(
-            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
-            new JsonWriterV3().convert(submodelElement),
+            this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}`),
+            new JsonWriterV2().convert(submodelElement),
         );
     }
 

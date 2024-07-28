@@ -59,21 +59,16 @@
                     <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
                         {{node.abbreviation}}</div>
 
-                    @if (node.hasSemantic) {
                     <div class="ms-1 flex-grow-1 text-nowrap">
+                        @if (node.hasSemantic) {
                         <a (click)="openSubmodel(node.submodel)" href="javascript:void(0);">{{node.name}}</a>
-                        <span class="text-secondary">&nbsp;[</span>
-                        <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
-                        <span class="text-secondary">]</span>
-                    </div>
-                    }@else {
-                    <div class="ms-1 flex-grow-1 text-nowrap">
+                        }@else {
                         <b>{{node.name}}</b>
+                        }
                         <span class="text-secondary">&nbsp;[</span>
                         <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
                         <span class="text-secondary">]</span>
                     </div>
-                    }
                 </div>
             </td>
             @if (node.isLeaf) {

@@ -10,7 +10,7 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASTreeApiService } from '../aas-tree-api.service';
 import { messageToString } from '../../convert';
 import { ERRORS } from '../../types/errors';
@@ -42,7 +42,7 @@ export interface VariableItem {
     templateUrl: './operation-call-form.component.html',
     styleUrls: ['./operation-call-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, FormsModule],
+    imports: [NgbToast, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationCallFormComponent {
