@@ -276,32 +276,31 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             name += extension;
         }
 
-        if (blob.value) {
-            if (blob.contentType.startsWith('image/')) {
-                await this.showImageAsync(name, `data:${blob.contentType};base64,${blob.value}`);
-            } else if (blob.contentType.startsWith('video/')) {
-                await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
+        if (!blob.value) {
+            try {
+                blob.value = await this.api.getValueAsync(
+                    document.endpoint,
+                    document.id,
+                    blob.parent.keys[0].value,
+                    getIdShortPath(blob),
+                );
+            } catch (error) {
+                this.notify.error(error);
+                return;
             }
-        } else {
-            const endpoint = encodeBase64Url(document.endpoint);
-            const id = encodeBase64Url(document.id);
-            const smId = encodeBase64Url(blob.parent.keys[0].value);
-            const path = getIdShortPath(blob);
-            const url = `/api/v1/containers/${endpoint}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
-            if (blob.contentType.startsWith('image/')) {
-                await this.showImageAsync(name, url);
-            } else if (blob.contentType.startsWith('video/')) {
-                await this.showVideoAsync(name, url);
-            } else if (blob.contentType.endsWith('/pdf')) {
-                this.window.open(url);
-            } else if (blob) {
-                await this.downloadFileAsync(name, url);
-            }
+        }
+
+        if (blob.contentType.startsWith('image/')) {
+            await this.showImageAsync(name, `data:${blob.contentType};base64,${blob.value}`);
+        } else if (blob.contentType.startsWith('video/')) {
+            await this.showVideoAsync(name, `data:${blob.contentType};base64,${blob.value}`);
         }
     }
 
     public async openOperation(operation: aas.Operation | undefined): Promise<void> {
-        if (!operation || this.state() === 'online') return;
+        if (!operation || this.state() === 'online') {
+            return;
+        }
 
         try {
             if (operation) {

@@ -185,7 +185,7 @@ export class AASProvider {
             } else if (dataElement.modelType === 'Blob') {
                 const value = await resource.getBlobValueAsync(document.content, smId, path);
                 const readable = new Readable();
-                readable.push(value);
+                readable.push(JSON.stringify({ value }));
                 readable.push(null);
                 stream = readable;
             } else {
