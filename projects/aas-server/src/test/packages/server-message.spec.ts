@@ -133,7 +133,7 @@ describe('ServerMessage', function () {
 
         it('validates a connection', async function () {
             socket.on.mockImplementation((event, listener) => {
-                if (event === 'connect') {
+                if (event === 'end') {
                     setTimeout(() => (listener as () => void)());
                 }
 

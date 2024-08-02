@@ -197,7 +197,7 @@ export class JsonReaderV3 extends AASReader {
         return submodel;
     }
 
-    private readSubmodelElements(sources: aas.SubmodelElement[], ancestors?: aas.Referable[]): aas.SubmodelElement[] {
+    private readSubmodelElements(sources: aas.SubmodelElement[], ancestors: aas.Referable[]): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const source of sources) {
             const submodelElement = this.readSubmodelElement(source, ancestors);
@@ -211,7 +211,7 @@ export class JsonReaderV3 extends AASReader {
 
     private readSubmodelElement(
         source: aas.SubmodelElement,
-        ancestors?: aas.Referable[],
+        ancestors: aas.Referable[],
     ): aas.SubmodelElement | undefined {
         switch (source.modelType) {
             case 'AnnotatedRelationshipElement':
@@ -245,7 +245,7 @@ export class JsonReaderV3 extends AASReader {
         }
     }
 
-    private readSubmodelElementType(source: aas.SubmodelElement, ancestors?: aas.Referable[]): aas.SubmodelElement {
+    private readSubmodelElementType(source: aas.SubmodelElement, ancestors: aas.Referable[]): aas.SubmodelElement {
         return {
             ...this.readReferable(source, ancestors),
             ...this.readHasSemantics(source),
@@ -256,27 +256,24 @@ export class JsonReaderV3 extends AASReader {
 
     private readAnnotatedRelationshipElement(
         source: aas.AnnotatedRelationshipElement,
-        ancestors?: aas.Referable[],
+        ancestors: aas.Referable[],
     ): aas.AnnotatedRelationshipElement {
         const relationship: aas.AnnotatedRelationshipElement = {
             ...this.readRelationshipElement(source, ancestors),
         };
 
         if (source.annotations) {
-            relationship.annotations = this.readSubmodelElements(
-                source.annotations,
-                ancestors ? [...ancestors, relationship] : undefined,
-            );
+            relationship.annotations = this.readSubmodelElements(source.annotations, [...ancestors, relationship]);
         }
 
         return relationship;
     }
 
-    private readEventElement(source: aas.EventElement, ancestor?: aas.Referable[]): aas.EventElement {
+    private readEventElement(source: aas.EventElement, ancestor: aas.Referable[]): aas.EventElement {
         return { ...this.readSubmodelElementType(source, ancestor) };
     }
 
-    private readBasicEventElement(source: aas.BasicEventElement, ancestors?: aas.Referable[]): aas.BasicEventElement {
+    private readBasicEventElement(source: aas.BasicEventElement, ancestors: aas.Referable[]): aas.BasicEventElement {
         if (!source.observed) {
             throw new Error('BasicEventElement.observed');
         }
@@ -319,7 +316,7 @@ export class JsonReaderV3 extends AASReader {
         return eventElement;
     }
 
-    private readProperty(source: aas.Property, ancestors?: aas.Referable[]): aas.Property {
+    private readProperty(source: aas.Property, ancestors: aas.Referable[]): aas.Property {
         let valueType: aas.DataTypeDefXsd | undefined = source.valueType;
         if (!valueType && source.value) {
             valueType = determineType(source.value);
@@ -348,7 +345,7 @@ export class JsonReaderV3 extends AASReader {
 
     private readMultiLanguageProperty(
         source: aas.MultiLanguageProperty,
-        ancestors?: aas.Referable[],
+        ancestors: aas.Referable[],
     ): aas.MultiLanguageProperty {
         let value: aas.LangString[] | undefined;
         if (Array.isArray(source.value)) {
@@ -362,35 +359,41 @@ export class JsonReaderV3 extends AASReader {
         return { ...this.readSubmodelElementType(source, ancestors), value };
     }
 
-    private readOperation(source: aas.Operation, ancestors: aas.Referable[] | undefined): aas.Operation {
+    private readOperation(source: aas.Operation, ancestors: aas.Referable[]): aas.Operation {
         const operation: aas.Operation = {
             ...this.readSubmodelElementType(source, ancestors),
         };
 
         if (source.inputVariables) {
-            operation.inputVariables = source.inputVariables.map(item => this.readOperationVariable(item));
+            operation.inputVariables = source.inputVariables.map(item =>
+                this.readOperationVariable(item, [...ancestors, operation]),
+            );
         }
 
         if (source.inoutputVariables) {
-            operation.inoutputVariables = source.inoutputVariables.map(item => this.readOperationVariable(item));
+            operation.inoutputVariables = source.inoutputVariables.map(item =>
+                this.readOperationVariable(item, [...ancestors, operation]),
+            );
         }
 
         if (source.outputVariables) {
-            operation.outputVariables = source.outputVariables.map(item => this.readOperationVariable(item));
+            operation.outputVariables = source.outputVariables.map(item =>
+                this.readOperationVariable(item, [...ancestors, operation]),
+            );
         }
 
         return operation;
     }
 
-    private readOperationVariable(source: aas.OperationVariable): aas.OperationVariable {
+    private readOperationVariable(source: aas.OperationVariable, ancestors: aas.Referable[]): aas.OperationVariable {
         if (!source.value) {
             throw new Error('OperationVariable.value');
         }
 
-        return { value: this.readSubmodelElementType(source.value) };
+        return { value: this.readSubmodelElementType(source.value, ancestors) };
     }
 
-    private readFile(source: aas.File, ancestors?: aas.Referable[]): aas.File {
+    private readFile(source: aas.File, ancestors: aas.Referable[]): aas.File {
         const value = source.value?.trim();
         let contentType: string | undefined = source.contentType?.trim();
         if (!contentType && value) {
@@ -416,7 +419,7 @@ export class JsonReaderV3 extends AASReader {
         return file;
     }
 
-    private readBlob(source: aas.Blob, ancestors?: aas.Referable[]): aas.Blob {
+    private readBlob(source: aas.Blob, ancestors: aas.Referable[]): aas.Blob {
         const blob: aas.Blob = {
             ...this.readSubmodelElementType(source, ancestors),
             contentType: source.contentType ?? '',
@@ -429,7 +432,7 @@ export class JsonReaderV3 extends AASReader {
         return blob;
     }
 
-    private readEntity(source: aas.Entity, ancestors: aas.Referable[] | undefined): aas.Entity {
+    private readEntity(source: aas.Entity, ancestors: aas.Referable[]): aas.Entity {
         if (!source.entityType) {
             throw new Error('Entity.entityType');
         }
@@ -440,9 +443,7 @@ export class JsonReaderV3 extends AASReader {
         };
 
         if (source.statements) {
-            entity.statements = source.statements.map(
-                item => this.readSubmodelElement(item, ancestors ? [...ancestors, entity] : undefined)!,
-            );
+            entity.statements = source.statements.map(item => this.readSubmodelElement(item, [...ancestors, entity])!);
         }
 
         if (source.globalAssetId) {
@@ -458,17 +459,14 @@ export class JsonReaderV3 extends AASReader {
 
     private readSubmodelElementCollection(
         source: aas.SubmodelElementCollection,
-        ancestors?: aas.Referable[],
+        ancestors: aas.Referable[],
     ): aas.SubmodelElementCollection {
         const collection: aas.SubmodelElementCollection = {
             ...this.readSubmodelElementType(source, ancestors),
         };
 
         if (source.value) {
-            collection.value = this.readSubmodelElements(
-                source.value,
-                ancestors ? [...ancestors, collection] : undefined,
-            );
+            collection.value = this.readSubmodelElements(source.value, [...ancestors, collection]);
         }
 
         return collection;
@@ -476,7 +474,7 @@ export class JsonReaderV3 extends AASReader {
 
     private readSubmodelElementList(
         source: aas.SubmodelElementList,
-        ancestors?: aas.Referable[],
+        ancestors: aas.Referable[],
     ): aas.SubmodelElementCollection {
         if (!source.typeValueListElement) {
             throw new Error('SubmodelElement.typeValueListElement');
@@ -497,13 +495,13 @@ export class JsonReaderV3 extends AASReader {
         }
 
         if (source.value) {
-            list.value = this.readSubmodelElements(source.value, ancestors ? [...ancestors, list] : undefined);
+            list.value = this.readSubmodelElements(source.value, [...ancestors, list]);
         }
 
         return list;
     }
 
-    private readReferenceElement(source: aas.ReferenceElement, ancestors?: aas.Referable[]): aas.ReferenceElement {
+    private readReferenceElement(source: aas.ReferenceElement, ancestors: aas.Referable[]): aas.ReferenceElement {
         const reference: aas.ReferenceElement = {
             ...this.readSubmodelElementType(source, ancestors),
         };
@@ -517,7 +515,7 @@ export class JsonReaderV3 extends AASReader {
 
     private readRelationshipElement(
         source: aas.RelationshipElement,
-        ancestors?: aas.Referable[],
+        ancestors: aas.Referable[],
     ): aas.RelationshipElement {
         if (!source.first) {
             throw new Error('RelationshipElement.first');
@@ -536,7 +534,7 @@ export class JsonReaderV3 extends AASReader {
         return relationship;
     }
 
-    private readRange(source: aas.Range, ancestors?: aas.Referable[]): aas.Range {
+    private readRange(source: aas.Range, ancestors: aas.Referable[]): aas.Range {
         if (!source.valueType) {
             throw new Error('Range.valueType');
         }

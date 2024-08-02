@@ -75,7 +75,7 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run-script",
-                "test:debug",
+                "test",
                 "-w",
                 "aas-server"
             ],
@@ -88,7 +88,7 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run-script",
-                "test:debug",
+                "test",
                 "-w",
                 "aas-server",
                 "--testPathPattern",
@@ -96,7 +96,7 @@
             ],
         },
         {
-            "name": "Test common",
+            "name": "Test aas-core",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -109,7 +109,7 @@
             ]
         },
         {
-            "name": "Debug common test",
+            "name": "Debug aas-core test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",

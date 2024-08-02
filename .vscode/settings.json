@@ -46,7 +46,7 @@
             "name": "aas-core",
             "rootPath": "./projects/aas-core",
             "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js",
         },
         {
             "name": "aas-server",

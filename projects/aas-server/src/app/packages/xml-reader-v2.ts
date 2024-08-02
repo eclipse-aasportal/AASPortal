@@ -144,7 +144,7 @@ export class XmlReaderV2 extends AASReader {
         return submodel;
     }
 
-    private readSubmodelElements(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
+    private readSubmodelElements(node: Node, parent: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const child of this.selectNodes('./aas:submodelElements/aas:submodelElement/*[1]', node)) {
             const submodelElement = this.readSubmodelElement(child, parent);
@@ -156,7 +156,7 @@ export class XmlReaderV2 extends AASReader {
         return submodelElements;
     }
 
-    private readCollectionValue(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
+    private readCollectionValue(node: Node, parent: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const child of this.selectNodes('./aas:value/aas:submodelElement/*[1]', node)) {
             const submodelElement = this.readSubmodelElement(child, parent);
@@ -168,7 +168,7 @@ export class XmlReaderV2 extends AASReader {
         return submodelElements;
     }
 
-    private readSubmodelElement(node: Node, parent?: aas.Reference): aas.SubmodelElement | undefined {
+    private readSubmodelElement(node: Node, parent: aas.Reference): aas.SubmodelElement | undefined {
         let submodelElement: aas.SubmodelElement | undefined;
         const modelType = this.getModelTypeFromLocalName(node);
         switch (modelType) {
@@ -213,7 +213,7 @@ export class XmlReaderV2 extends AASReader {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    private readAnnotatedRelationshipElement(node: Node, parent?: aas.Reference): aas.AnnotatedRelationshipElement {
+    private readAnnotatedRelationshipElement(node: Node, parent: aas.Reference): aas.AnnotatedRelationshipElement {
         throw new Error('Method not implemented.');
     }
 
@@ -222,7 +222,7 @@ export class XmlReaderV2 extends AASReader {
         throw new Error('Method not implemented.');
     }
 
-    private readBlob(node: Node, parent?: aas.Reference): aas.Blob {
+    private readBlob(node: Node, parent: aas.Reference): aas.Blob {
         const contentType = this.selectNode('./aas:mimeType', node)?.textContent;
         if (!contentType) {
             throw new Error('File.mimetype');
@@ -241,7 +241,7 @@ export class XmlReaderV2 extends AASReader {
         return blob;
     }
 
-    private readEntity(node: Node, parent?: aas.Reference): aas.Entity {
+    private readEntity(node: Node, parent: aas.Reference): aas.Entity {
         const entityType = this.selectNode('./aas:entityType', node)?.textContent as aas.EntityType;
         if (!entityType) {
             throw new Error('File.contentType');
@@ -262,7 +262,7 @@ export class XmlReaderV2 extends AASReader {
             entity.specificAssetIds = specificAssetIds;
         }
 
-        const statements = this.readStatements(node, parent ? this.createReference(parent, entity) : undefined);
+        const statements = this.readStatements(node, this.createReference(parent, entity));
         if (statements.length > 0) {
             entity.statements = statements;
         }
@@ -270,7 +270,7 @@ export class XmlReaderV2 extends AASReader {
         return entity;
     }
 
-    private readStatements(node: Node, parent?: aas.Reference): aas.SubmodelElement[] {
+    private readStatements(node: Node, parent: aas.Reference): aas.SubmodelElement[] {
         const statements: aas.SubmodelElement[] = [];
         for (const child of this.selectNodes('./aas:statements/*', node)) {
             const se = this.selectNode('./*[1]', child);
@@ -321,17 +321,17 @@ export class XmlReaderV2 extends AASReader {
         return value;
     }
 
-    private readSubmodelElementCollection(node: Node, parent?: aas.Reference): aas.SubmodelElementCollection {
+    private readSubmodelElementCollection(node: Node, parent: aas.Reference): aas.SubmodelElementCollection {
         const base = this.readSubmodelElementType(node, parent);
         const collection: aas.SubmodelElementCollection = {
             ...base,
-            value: this.readCollectionValue(node, parent ? this.createReference(parent, base) : undefined),
+            value: this.readCollectionValue(node, this.createReference(parent, base)),
         };
 
         return collection;
     }
 
-    private readProperty(node: Node, parent?: aas.Reference): aas.Property {
+    private readProperty(node: Node, parent: aas.Reference): aas.Property {
         const valueNode = this.selectNode('./aas:value', node);
         let value = valueNode?.textContent;
 
@@ -358,7 +358,7 @@ export class XmlReaderV2 extends AASReader {
         return property;
     }
 
-    private readRange(node: Node, parent?: aas.Reference): aas.Range {
+    private readRange(node: Node, parent: aas.Reference): aas.Range {
         const range: aas.Range = {
             ...this.readSubmodelElementType(node, parent),
             valueType: this.getTextContent('./aas:valueType', node) as aas.DataTypeDefXsd,
@@ -377,7 +377,7 @@ export class XmlReaderV2 extends AASReader {
         return range;
     }
 
-    private readRelationshipElement(node: Node, parent?: aas.Reference): aas.RelationshipElement {
+    private readRelationshipElement(node: Node, parent: aas.Reference): aas.RelationshipElement {
         const first = this.readReference('./aas:first', node);
         if (!first) {
             throw new Error('RelationshipElement.first');
@@ -395,7 +395,7 @@ export class XmlReaderV2 extends AASReader {
         };
     }
 
-    private readFile(node: Node, parent?: aas.Reference): aas.File {
+    private readFile(node: Node, parent: aas.Reference): aas.File {
         let contentType = this.selectNode('./aas:mimeType', node)?.textContent;
         if (!contentType) {
             contentType = '';
@@ -414,17 +414,17 @@ export class XmlReaderV2 extends AASReader {
         return file;
     }
 
-    private readMultiLanguageProperty(node: Node, parent?: aas.Reference): aas.MultiLanguageProperty {
+    private readMultiLanguageProperty(node: Node, parent: aas.Reference): aas.MultiLanguageProperty {
         const langString = this.readLangString('./aas:value', node) ?? [];
         return { ...this.readSubmodelElementType(node, parent), value: langString };
     }
 
-    private readReferenceElement(node: Node, parent?: aas.Reference): aas.ReferenceElement {
+    private readReferenceElement(node: Node, parent: aas.Reference): aas.ReferenceElement {
         const value = this.getReference(node);
         return { ...this.readSubmodelElementType(node, parent), value };
     }
 
-    private readSubmodelElementType(node: Node, parent?: aas.Reference): aas.SubmodelElement {
+    private readSubmodelElementType(node: Node, parent: aas.Reference): aas.SubmodelElement {
         return {
             ...this.readReferable(node, undefined, parent),
             ...this.readHasSemantics(node),
@@ -436,7 +436,7 @@ export class XmlReaderV2 extends AASReader {
 
     private readIdentifiable(node: Node): aas.Identifiable {
         const id = this.readIdentifier(node);
-        const identifiable: aas.Identifiable = { ...this.readReferable(node, id), id };
+        const identifiable: aas.Identifiable = { ...this.readReferable(node, id, undefined), id };
         const administration = this.readAdministrativeInformation(node);
         if (administration) {
             identifiable.administration = administration;
@@ -445,7 +445,7 @@ export class XmlReaderV2 extends AASReader {
         return identifiable;
     }
 
-    private readReferable(node: Node, id?: string, parent?: aas.Reference): aas.Referable {
+    private readReferable(node: Node, id: string | undefined, parent: aas.Reference | undefined): aas.Referable {
         let idShort = this.selectNode('./aas:idShort', node)?.textContent;
         if (!idShort) {
             idShort = id ? this.createIdShort(id) : '';
