@@ -15,8 +15,10 @@ import {
     getEndpointType,
     isAssetAdministrationShell,
     isBlob,
+    isHasSemantics,
     isMultiLanguageProperty,
     isProperty,
+    isReference,
     isReferenceElement,
     isSubmodel,
     isSubmodelElement,
@@ -27,6 +29,7 @@ import {
     isValidPassword,
     stringFormat,
 } from '../lib/index.js';
+import { HasSemantics, Reference } from '../lib/aas.js';
 
 describe('index', () => {
     describe('isSubmodelElement', () => {
@@ -353,6 +356,54 @@ describe('index', () => {
 
         it('gets "FileSystem" from file:///endpoints/samples', () => {
             expect(getEndpointType('file:///endpoints/samples')).toEqual('FileSystem');
+        });
+    });
+
+    describe('isReference', () => {
+        it('indicates that value is of type reference', () => {
+            const value: Reference = {
+                keys: [],
+                type: 'ExternalReference',
+            };
+
+            expect(isReference(value)).toBeTruthy();
+        });
+
+        it('indicates that "{}" is not of type Reference', () => {
+            expect(isReference({})).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not of type Reference', () => {
+            expect(isReference(undefined)).toBeFalsy();
+        });
+
+        it('indicates that "null" is not of type Reference', () => {
+            expect(isReference(null)).toBeFalsy();
+        });
+    });
+
+    describe('isHasSemantics', () => {
+        it('indicates that value is of type HasSemantics', () => {
+            const value: HasSemantics = {
+                semanticId: {
+                    keys: [],
+                    type: 'ExternalReference',
+                },
+            };
+
+            expect(isHasSemantics(value)).toBeTruthy();
+        });
+
+        it('indicates that "{}" is not of type HasSemantics', () => {
+            expect(isHasSemantics({})).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not of type HasSemantics', () => {
+            expect(isHasSemantics(undefined)).toBeFalsy();
+        });
+
+        it('indicates that "null" is not of type HasSemantics', () => {
+            expect(isHasSemantics(null)).toBeFalsy();
         });
     });
 });

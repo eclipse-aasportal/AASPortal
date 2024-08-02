@@ -36,10 +36,7 @@
                             "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
                             "projects/aas-portal/src/styles.scss"
                         ],
-                        "scripts": [],
-                        "allowedCommonJsDependencies": [
-                            "lodash-es"
-                        ]
+                        "scripts": []
                     },
                     "configurations": {
                         "production": {

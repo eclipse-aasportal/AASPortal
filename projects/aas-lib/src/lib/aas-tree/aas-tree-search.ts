@@ -21,7 +21,7 @@ import {
 
 import { normalize } from '../convert';
 import { AASTreeRow } from './aas-tree-row';
-import { AASTreeStore, Operator, SearchQuery, SearchTerm } from './aas-tree.store';
+import { AASTreeService, Operator, SearchQuery, SearchTerm } from './aas-tree.service';
 
 @Injectable()
 export class AASTreeSearch {
@@ -29,7 +29,7 @@ export class AASTreeSearch {
     private terms: SearchTerm[] = [];
 
     public constructor(
-        private readonly store: AASTreeStore,
+        private readonly store: AASTreeService,
         private readonly translate: TranslateService,
     ) {}
 
@@ -337,7 +337,7 @@ export class AASTreeSearch {
                     return typeof min === 'number' && typeof max === 'number' && a >= min && a <= max;
                 } else {
                     const d = isDate
-                        ? parseDate(b, this.translate.currentLang)?.getTime() ?? 0
+                        ? (parseDate(b, this.translate.currentLang)?.getTime() ?? 0)
                         : parseNumber(b, this.translate.currentLang);
 
                     if (typeof d !== 'number') {
