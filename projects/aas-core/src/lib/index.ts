@@ -13,10 +13,12 @@ import {
     Blob,
     Entity,
     Environment,
+    HasSemantics,
     Identifiable,
     MultiLanguageProperty,
     Property,
     Referable,
+    Reference,
     ReferenceElement,
     RelationshipElement,
     Submodel,
@@ -119,6 +121,35 @@ export function equalArray<T>(a: T[], b: T[]): boolean {
     if (a === b) return true;
     if (a.length !== b.length) return false;
     return a.every((_, i) => a[i] === b[i]);
+}
+
+/**
+ * Determines whether the specified value is of type `HasSemantics`.
+ * @param value The current value.
+ * @returns `true` if the specified value is of type `HasSemantics`; otherwise, `false`.
+ */
+export function isReference(value: unknown): value is Reference {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    return typeof (value as Reference).type === 'string' && Array.isArray((value as Reference).keys);
+}
+
+/**
+ * Determines whether the specified value is of type `HasSemantics`.
+ * @param value The current value.
+ * @returns `true` if the specified value is of type `HasSemantics`; otherwise, `false`.
+ */
+export function isHasSemantics(value: unknown): value is HasSemantics {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    return (
+        isReference((value as HasSemantics).semanticId) ||
+        Array.isArray((value as HasSemantics).supplementalSemanticIds)
+    );
 }
 
 /**

@@ -33,7 +33,7 @@ interface AASTreeState {
 }
 
 @Injectable()
-export class AASTreeStore {
+export class AASTreeService {
     private readonly _state = signal<AASTreeState>({ matchIndex: -1, rows: [], nodes: [] });
 
     public constructor(

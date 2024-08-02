@@ -50,7 +50,7 @@ import {
 } from '../submodel-template/submodel-template';
 
 import { AASTreeApiService } from './aas-tree-api.service';
-import { AASTreeStore } from './aas-tree.store';
+import { AASTreeService } from './aas-tree.service';
 
 interface PropertyValue {
     property: aas.Property;
@@ -63,7 +63,7 @@ interface PropertyValue {
     styleUrls: ['./aas-tree.component.scss'],
     standalone: true,
     imports: [NgClass, NgStyle, TranslateModule],
-    providers: [AASTreeSearch, AASTreeStore],
+    providers: [AASTreeSearch, AASTreeService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTreeComponent implements OnInit, OnDestroy {
@@ -76,7 +76,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor(
-        private readonly store: AASTreeStore,
+        private readonly store: AASTreeService,
         private readonly router: Router,
         private readonly api: AASTreeApiService,
         private readonly searching: AASTreeSearch,
