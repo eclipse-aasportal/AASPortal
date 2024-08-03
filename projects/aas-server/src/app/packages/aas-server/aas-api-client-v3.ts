@@ -94,14 +94,21 @@ export class AASApiClientV3 extends AASApiClient {
             }
         }
 
-        const pagedResult = await this.message.get<PagedResult<aas.ConceptDescription>>(
-            this.resolve(`concept-descriptions`),
-        );
+        let conceptDescriptions: aas.ConceptDescription[];
+        try {
+            const pagedResult = await this.message.get<PagedResult<aas.ConceptDescription>>(
+                this.resolve(`concept-descriptions`),
+            );
+
+            conceptDescriptions = pagedResult.result;
+        } catch {
+            conceptDescriptions = [];
+        }
 
         const sourceEnv: aas.Environment = {
             assetAdministrationShells: [shell],
             submodels,
-            conceptDescriptions: pagedResult.result,
+            conceptDescriptions,
         };
 
         return new JsonReaderV3(sourceEnv).readEnvironment();

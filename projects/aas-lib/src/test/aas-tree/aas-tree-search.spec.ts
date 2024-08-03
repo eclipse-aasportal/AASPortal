@@ -10,7 +10,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../lib/aas-tree/aas-tree-search';
 import { sampleDocument } from '../assets/sample-document';
-import { AASTreeService } from '../../lib/aas-tree/aas-tree.store';
+import { AASTreeService } from '../../lib/aas-tree/aas-tree.service';
 import { NotifyService } from 'projects/aas-lib/dist';
 
 describe('AASTreeSearch', function () {

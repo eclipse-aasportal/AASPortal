@@ -17,20 +17,20 @@ describe('XmlReaderV3', () => {
     let xml: string;
     let path: string;
 
-    // beforeEach(async () => {
-    //     path = resolve('./src/test/assets/aas-example-v3.xml');
-    //     xml = (await readFile(path)).toString();
-    //     reader = new XmlReaderV3(xml);
-    // });
+    beforeEach(async () => {
+        path = resolve('./src/test/assets/aas-example-v3.xml');
+        xml = (await readFile(path)).toString();
+        reader = new XmlReaderV3(xml);
+    });
 
-    // it('should be created', function () {
-    //     expect(reader).toBeTruthy();
-    // });
+    it('should be created', function () {
+        expect(reader).toBeTruthy();
+    });
 
-    // it('reads the AAS environment from a xml source', function () {
-    //     const environment = reader.readEnvironment();
-    //     expect(environment).toBeDefined();
-    // });
+    it('reads the AAS environment from a xml source', function () {
+        const environment = reader.readEnvironment();
+        expect(environment).toBeDefined();
+    });
 
     describe('read Operation', () => {
         beforeEach(async () => {
