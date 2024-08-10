@@ -39,9 +39,9 @@ test:
     paths:
       - reports/aas-portal.xml
       - reports/aas-server.xml
-      - reports/common.xml
+      - reports/aas-core.xml
     reports:
-      junit: [reports/aas-portal.xml, reports/aas-server.xml, reports/common.xml]
+      junit: [reports/aas-portal.xml, reports/aas-server.xml, reports/aas-core.xml]
       coverage_report:
         coverage_format: cobertura
         path: reports/**/cobertura-coverage.xml

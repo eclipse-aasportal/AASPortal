@@ -12,6 +12,7 @@ import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { isMainThread } from 'worker_threads';
 import { noop } from 'aas-core';
+import { ConsoleTransport } from './console-transport.js';
 
 /* istanbul ignore next */
 export class LoggerFactory {
@@ -24,6 +25,7 @@ export class LoggerFactory {
         return winston.createLogger({
             level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
             transports: [
+                new ConsoleTransport(),
                 new DailyRotateFile({
                     filename: filename,
                     datePattern: 'YYYY-MM-DD',
@@ -31,9 +33,6 @@ export class LoggerFactory {
                     maxSize: '20m',
                     maxFiles: '2d',
                     format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-                }),
-                new winston.transports.Console({
-                    format: winston.format.simple(),
                 }),
             ],
         });

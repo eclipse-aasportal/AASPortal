@@ -39,23 +39,27 @@ export abstract class UserStorage {
     public abstract deleteAsync(userId: string): Promise<boolean>;
 
     /**
+     * Determines whether a cookie with the specified name exists.
      * @param userId The user identification.
      * @param name The cookie name.
      */
     public abstract checkCookieAsync(userId: string, name: string): Promise<boolean>;
 
     /**
+     * Gets the value of a cookie.
      * @param userId The user identification.
      * @param name The cookie name.
      */
     public abstract getCookieAsync(userId: string, name: string): Promise<Cookie | undefined>;
 
     /**
+     * Gets all cookies for the user with the specified ID.
      * @param userId The user identification.
      */
     public abstract getCookiesAsync(userId: string): Promise<Cookie[]>;
 
     /**
+     * Sets a new cookie value.
      * @param userId The user identification.
      * @param name The cookie name.
      * @param data
@@ -63,6 +67,7 @@ export abstract class UserStorage {
     public abstract setCookieAsync(userId: string, name: string, data: string): Promise<void>;
 
     /**
+     * Deletes a cookie.
      * @param userId The user identification.
      * @param name The cookie name.
      */
