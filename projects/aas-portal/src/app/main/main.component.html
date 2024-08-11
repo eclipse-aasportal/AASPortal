@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <div class="fhg-main-page bg-body-secondary">
-    <div class="p-2 overflow-hidden">
+    <div class="fhg-main-navbar">
         <nav class="navbar navbar-expand-sm bg-white">
             <div class="container-fluid">
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
@@ -34,17 +34,17 @@
             </div>
         </nav>
     </div>
-    <div class="p-2 overflow-hidden">
+    <div class="fhg-main-toolbar">
         <div class="btn-toolbar mx-2" role="toolbar">
             <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
         </div>
         <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
     </div>
-    <div class="p-2 flex-grow-1 overflow-auto">
+    <div class="fhg-main-content">
         <router-outlet></router-outlet>
     </div>
-    <div class="p-2 overflow-hidden">
-        <div>Hallo Statusbar</div>
+    <div class="fhg-main-statusbar d-flex flex-row-reverse p-2">
+        <div class="ts-x-small">AASPortal v{{version()}} © 2024 Fraunhofer IOSB-INA</div>
     </div>
 </div>
 

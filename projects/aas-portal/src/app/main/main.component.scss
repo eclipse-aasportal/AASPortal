@@ -7,13 +7,15 @@
  *****************************************************************************/
 
  .fhg-main-page {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     position: absolute !important;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
+    grid-template-columns: auto;
+    grid-template-rows: auto min-content 1fr min-content;
+    grid-template-areas: "navbar" "toolbar" "content" "statusbar";
  }
  
 .fhg-main-navbar {
@@ -24,11 +26,12 @@
 .fhg-main-toolbar {
     grid-area: toolbar;
     overflow: hidden;
+    height: 100%;
 }
 
 .fhg-main-content {
     grid-area: content;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .fhg-main-statusbar {

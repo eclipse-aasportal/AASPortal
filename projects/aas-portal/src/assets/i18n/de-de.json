@@ -79,7 +79,7 @@
     "LABEL_AAS_ID_SHORT": "ID-Short:",
     "LABEL_ASSET_ID_SHORT": "Asset ID-Short:",
     "LABEL_VERSION": "Version:",
-    "LABEL_ENDPOINT": "Endpunkt:",
+    "LABEL_ADDRESS": "Adresse:",
     "LABEL_DEFINITION": "Definition:",
     "LABEL_DESCRIPTION": "Beschreibung:",
     "LABEL_SELECT_WORKSPACE": "Gruppe",

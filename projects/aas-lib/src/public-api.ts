@@ -48,6 +48,8 @@ export * from './lib/aas-tree/aas-tree.component';
 export * from './lib/aas-tree/aas-tree-api.service';
 export * from './lib/aas-tree/aas-tree-row';
 
+export * from './lib/aas-property-grid/aas-property-grid.component';
+
 export * from './lib/message-table/message-table.component';
 
 export * from './lib/digital-nameplate/digital-nameplate.component';

@@ -24,6 +24,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import head from 'lodash-es/head';
 import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
 import {
+    AASPropertyGridComponent,
     AASTreeComponent,
     AuthService,
     ClipboardService,
@@ -52,7 +53,14 @@ import { FormsModule } from '@angular/forms';
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
     standalone: true,
-    imports: [SecuredImageComponent, AASTreeComponent, AsyncPipe, TranslateModule, FormsModule],
+    imports: [
+        SecuredImageComponent,
+        AASTreeComponent,
+        AASPropertyGridComponent,
+        AsyncPipe,
+        TranslateModule,
+        FormsModule,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {

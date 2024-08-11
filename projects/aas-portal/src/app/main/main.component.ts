@@ -11,10 +11,11 @@ import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/route
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs';
 import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
-import { ToolbarService } from '../toolbar.service';
-import { MainApiService } from './main-api.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { ToolbarService } from '../toolbar.service';
+import { MainApiService } from './main-api.service';
+import { environment } from '../../environments/environment';
 
 export const enum LinkId {
     START = 0,
@@ -89,6 +90,8 @@ export class MainComponent implements OnInit {
             url: '/about',
         },
     ]).asReadonly();
+
+    public readonly version = signal(environment.version).asReadonly();
 
     public ngOnInit(): void {
         const params = this.window.getQueryParams();

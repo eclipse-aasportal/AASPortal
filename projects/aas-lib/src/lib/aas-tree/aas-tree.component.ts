@@ -240,6 +240,10 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
+    public highlight(node: AASTreeRow): void {
+        this.store.highlight(node);
+    }
+
     public toggleSelections(): void {
         this.store.toggleSelections();
     }

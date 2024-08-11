@@ -62,6 +62,18 @@ export class AASTreeService {
         return state.matchIndex >= 0 ? state.rows[state.matchIndex] : undefined;
     });
 
+    public highlight(node: AASTreeRow): void {
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.highlight(node);
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
+    }
+
     public toggleSelected(row: AASTreeRow, altKey: boolean, shiftKey: boolean): void {
         this._state.update(state => {
             const tree = new AASTree(state.rows);
