@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { aas } from 'aas-core';
 
 export interface PropertyValueItem {
@@ -20,7 +21,7 @@ export interface PropertyValueItem {
     templateUrl: './aas-property-grid.component.html',
     styleUrl: './aas-property-grid.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [],
+    imports: [TranslateModule],
 })
 export class AASPropertyGridComponent {
     public readonly referable = input<aas.Referable>();
@@ -36,6 +37,8 @@ export class AASPropertyGridComponent {
             const value = (referable as unknown as { [key: string]: unknown })[name];
             if (typeof value === 'string') {
                 items.push({ name, value });
+            } else if (typeof value === 'object') {
+                items.push({ name, value: 'ToDo...' });
             }
         }
 

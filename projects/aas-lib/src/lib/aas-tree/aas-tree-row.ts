@@ -10,25 +10,15 @@ import isEqual from 'lodash-es/isEqual';
 import {
     AASDocument,
     aas,
-    convertToString,
     getAbbreviation,
-    getLocaleValue,
-    isAssetAdministrationShell,
-    isBooleanType,
-    isHasSemantics,
     isIdentifiable,
-    isMultiLanguageProperty,
     isSubmodel,
     isSubmodelElement,
-    mimeTypeToExtension,
     selectReferable,
-    toBoolean,
-    toLocale,
 } from 'aas-core';
 
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';
-import { basename, normalize } from '../convert';
 
 export class AASTreeRow extends TreeNode<aas.Referable> {
     public constructor(
@@ -40,8 +30,6 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         level: number,
         public readonly abbreviation: string,
         public readonly name: string,
-        public readonly typeInfo: string,
-        public readonly value: string | boolean | undefined,
         public readonly isLeaf: boolean,
         parent: number,
         firstChild: number,
@@ -62,44 +50,6 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         }
 
         return false;
-    }
-
-    public get annotatedRelationship(): aas.AnnotatedRelationshipElement | undefined {
-        return this.element.modelType === 'AnnotatedRelationshipElement'
-            ? (this.element as aas.AnnotatedRelationshipElement)
-            : undefined;
-    }
-
-    public get blob(): aas.Blob | undefined {
-        return this.element.modelType === 'Blob' ? (this.element as aas.Blob) : undefined;
-    }
-
-    public get entity(): aas.Entity | undefined {
-        return this.element.modelType === 'Entity' ? (this.element as aas.Entity) : undefined;
-    }
-
-    public get file(): aas.File | undefined {
-        return this.element.modelType === 'File' ? (this.element as aas.File) : undefined;
-    }
-
-    public get operation(): aas.Operation | undefined {
-        return this.element.modelType === 'Operation' ? (this.element as aas.Operation) : undefined;
-    }
-
-    public get property(): aas.Property | undefined {
-        return this.element.modelType === 'Property' ? (this.element as aas.Property) : undefined;
-    }
-
-    public get reference(): aas.ReferenceElement | undefined {
-        return this.element.modelType === 'ReferenceElement' ? (this.element as aas.ReferenceElement) : undefined;
-    }
-
-    public get relationship(): aas.RelationshipElement | undefined {
-        return this.element.modelType === 'RelationshipElement' ? (this.element as aas.RelationshipElement) : undefined;
-    }
-
-    public get submodel(): aas.Submodel | undefined {
-        return this.element.modelType === 'Submodel' ? (this.element as aas.Submodel) : undefined;
     }
 }
 
@@ -153,8 +103,6 @@ class TreeInitialize {
             level,
             getAbbreviation(element.modelType) ?? '',
             element.idShort,
-            this.getTypeInfo(element),
-            this.getValue(element, this.language),
             isLeaf,
             parent,
             -1,
@@ -257,44 +205,6 @@ class TreeInitialize {
         return { type: 'ModelReference', keys };
     }
 
-    private getValue(referable: aas.Referable | null, localeId: string): boolean | string | undefined {
-        if (!referable) {
-            return '';
-        }
-
-        switch (referable.modelType) {
-            case 'Blob': {
-                const blob = referable as aas.Blob;
-                const extension = mimeTypeToExtension(blob.contentType);
-                return `${blob.idShort}${extension}`;
-            }
-            case 'Entity':
-                return (referable as aas.Entity).globalAssetId ?? '-';
-            case 'File': {
-                const file = referable as aas.File;
-                return file.value ? basename(normalize(file.value)) : '-';
-            }
-            case 'MultiLanguageProperty':
-                return getLocaleValue((referable as aas.MultiLanguageProperty).value, localeId) ?? '-';
-            case 'Operation':
-                return `${referable.idShort}()`;
-            case 'Property':
-                return this.getPropertyValue(referable as aas.Property, localeId);
-            case 'Range': {
-                const range = referable as aas.Range;
-                return `${convertToString(range.min, localeId)} ... ${convertToString(range.max, localeId)}`;
-            }
-            case 'ReferenceElement':
-                return this.referenceToString((referable as aas.ReferenceElement).value);
-            case 'SubmodelElementCollection':
-                return (referable as aas.SubmodelElementCollection).value?.length.toString() ?? '0';
-            case 'SubmodelElementList':
-                return (referable as aas.SubmodelElementList).value?.length.toString() ?? '0';
-            default:
-                return '';
-        }
-    }
-
     private hasChildren(referable: aas.Referable): boolean {
         switch (referable.modelType) {
             case 'AssetAdministrationShell': {
@@ -341,87 +251,6 @@ class TreeInitialize {
                 return false;
         }
     }
-
-    private getPropertyValue(property: aas.Property, localeId: string): string | boolean | undefined {
-        if (isBooleanType(property.valueType)) {
-            return toBoolean(property.value);
-        } else {
-            return toLocale(property.value, property.valueType, localeId);
-        }
-    }
-
-    private getTypeInfo(referable: aas.Referable | null): string {
-        if (!referable) {
-            return '-';
-        }
-
-        if (isAssetAdministrationShell(referable)) {
-            return referable.id;
-        }
-
-        if (isMultiLanguageProperty(referable)) {
-            let value = '';
-            if (referable && Array.isArray(referable.value)) {
-                value += `${referable.value.map(item => item.language).join(', ')}`;
-            }
-
-            return value;
-        }
-
-        let value = '';
-        if (isHasSemantics(referable)) {
-            const a = this.getSemanticId(referable);
-            value = `Semantic ID: ${a}`;
-        }
-
-        switch (referable.modelType) {
-            case 'AnnotatedRelationshipElement':
-                value = (referable as aas.AnnotatedRelationshipElement).annotations?.length.toString() ?? '-';
-                break;
-            case 'Blob': {
-                const contentType = (referable as aas.Blob).contentType;
-                if (contentType) {
-                    value += ', ' + contentType;
-                }
-
-                break;
-            }
-            case 'File': {
-                const contentType = (referable as aas.File).contentType;
-                if (contentType) {
-                    value += ', ' + contentType;
-                }
-
-                break;
-            }
-            case 'Property': {
-                const valueType = (referable as aas.Property).valueType;
-                if (valueType) {
-                    value += ', ' + (valueType.startsWith('xs:') ? valueType.substring(3) : valueType);
-                }
-
-                break;
-            }
-            case 'Range': {
-                const valueType = (referable as aas.Range).valueType;
-                if (valueType) {
-                    value += ', ' + (valueType.startsWith('xs:') ? valueType.substring(3) : valueType);
-                }
-
-                break;
-            }
-        }
-
-        return value;
-    }
-
-    private getSemanticId(hasSematics: aas.HasSemantics): string {
-        return this.referenceToString(hasSematics?.semanticId);
-    }
-
-    private referenceToString(reference: aas.Reference | undefined): string {
-        return reference?.keys.map(key => key.value).join('/') ?? '-';
-    }
 }
 
 export class AASTree extends Tree<aas.Referable, AASTreeRow> {
@@ -463,8 +292,6 @@ export class AASTree extends Tree<aas.Referable, AASTreeRow> {
             node.level,
             node.abbreviation,
             node.name,
-            node.typeInfo,
-            node.value,
             node.isLeaf,
             node.parent,
             node.firstChild,

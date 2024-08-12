@@ -154,8 +154,10 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         return rows.length > 0 && rows.every(row => row.selected);
     });
 
+    /** The expanded and visible rows. */
     public readonly nodes = this.store.nodes;
 
+    /** All rows of the AAS document. */
     public readonly rows = this.store.rows;
 
     public readonly matchIndex = this.store.matchIndex;
@@ -176,6 +178,10 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
 
         return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
+    });
+
+    public readonly highlighted = computed(() => {
+        return this.store.nodes().find(node => node.highlighted)?.element;
     });
 
     public ngOnInit(): void {
@@ -219,9 +225,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             }
 
             return value;
-        } else {
-            return node.value;
         }
+
+        return undefined;
     }
 
     public expand(node: AASTreeRow): void {
