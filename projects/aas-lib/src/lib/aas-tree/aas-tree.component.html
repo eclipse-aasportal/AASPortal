@@ -19,24 +19,49 @@
                     <i class="bi bi-dash-square-dotted"></i>
                 </a>
             </th>
-            @if (state() === 'online') {
             <th></th>
-            }
         </tr>
     </thead>
     <tbody>
         @for (node of nodes(); track node.id) {
-        <tr [ngClass]="visualState(node)" [id]="node.id" (click)="highlight(node)">
+        <tr [ngClass]="visualState(node)" [id]="node.id">
             <td>
                 <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)"
                     [checked]="node.selected" [disabled]="state() === 'online'" />
             </td>
-            <td>
+            @if (node.isLeaf) {
+                <td>
+                    <div class="d-flex" style="overflow-x: hidden">
+                        <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
+                        <div class="wh-4"></div>
+                        <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
+                            {{node.abbreviation}}</div>
+                        <div class="ms-1 flex-grow-1 text-nowrap">
+                            <b>{{node.name}}</b>
+                            <span class="text-secondary">&nbsp;[</span>
+                            <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
+                            <span class="text-secondary">]</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-end">
+                    @if (node.canOpen) {
+                    <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.value}}</a>
+                    } @else if (node.element.modelType === 'RelationshipElement') {
+                    <div class="d-flex flex-column ts-x-small me-2">
+                        <a href="javascript:void(0);" class="text-nowrap"
+                            (click)="openReference(node.relationship?.first)">{{toString(node.relationship?.first)}}</a>
+                        <a href="javascript:void(0);" class="text-nowrap"
+                            (click)="openReference(node.relationship?.second)">{{toString(node.relationship?.second)}}</a>
+                    </div>
+                    } @else {
+                    <div class="text-nowrap me-2">{{node.value}}</div>
+                    }
+                </td>
+            } @else {
+            <td [colSpan]="2">
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
-                    @if (node.isLeaf) {
-                    <div class="wh-4"></div>
-                    }@else {
                     @if (node.expanded) {
                     <a href="javascript:void(0);" (click)="collapse(node)">
                         <div class="text-dark">
@@ -56,18 +81,20 @@
                     </div>
                     }
                     }
-                    }
-
                     <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
                         {{node.abbreviation}}</div>
-
                     <div class="ms-1 flex-grow-1 text-nowrap">
+                        @if (node.canOpen) {
+                        <a (click)="open(node)" href="javascript:void(0);">{{node.name}}</a>
+                        }@else {
                         <b>{{node.name}}</b>
+                        }
+                        <span class="text-secondary">&nbsp;[</span>
+                        <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
+                        <span class="text-secondary">]</span>
                     </div>
                 </div>
             </td>
-            @if (state() === 'online') {
-            <td>{{getValue(node)}}</td>
             }
         </tr>
         }

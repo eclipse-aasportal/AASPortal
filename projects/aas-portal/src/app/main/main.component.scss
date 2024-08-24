@@ -20,12 +20,12 @@
  
 .fhg-main-navbar {
     grid-area: navbar;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .fhg-main-toolbar {
     grid-area: toolbar;
-    overflow: hidden;
+    overflow: visible;
     height: 100%;
 }
 

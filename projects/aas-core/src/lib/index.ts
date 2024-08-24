@@ -9,14 +9,19 @@
 import isEmpty from 'lodash-es/isEmpty.js';
 import { AASEndpointType } from './types.js';
 import {
+    AnnotatedRelationshipElement,
     AssetAdministrationShell,
     Blob,
+    DataElement,
     Entity,
     Environment,
+    File,
     HasSemantics,
     Identifiable,
     MultiLanguageProperty,
+    Operation,
     Property,
+    Range,
     Referable,
     Reference,
     ReferenceElement,
@@ -39,8 +44,8 @@ export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export function noop() {}
+// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+export function noop(...args: unknown[]) {}
 
 /**
  * Determines whether the specified value represents a valid e-mail.
@@ -124,6 +129,16 @@ export function equalArray<T>(a: T[], b: T[]): boolean {
 }
 
 /**
+ * Determines whether the specified value is of type `Referable`.
+ * @param value The current value.
+ * @returns `true` if the specified value is of type `Referable`; otherwise, `false`.
+ */
+export function isReferable(value: unknown): value is Referable {
+    const referable = value as Referable;
+    return typeof referable.modelType === 'string' && typeof referable.idShort === 'string';
+}
+
+/**
  * Determines whether the specified value is of type `HasSemantics`.
  * @param value The current value.
  * @returns `true` if the specified value is of type `HasSemantics`; otherwise, `false`.
@@ -160,20 +175,20 @@ export function isHasSemantics(value: unknown): value is HasSemantics {
 export function isSubmodelElement(value: unknown): value is SubmodelElement {
     if (value && (value as Referable).modelType) {
         switch ((value as Referable).modelType) {
-            case 'ReferenceElement':
-            case 'Property':
-            case 'MultiLanguageProperty':
-            case 'Range':
+            case 'AnnotatedRelationshipElement':
+            case 'BasicEventElement':
             case 'Blob':
-            case 'File':
-            case 'RelationshipElement':
             case 'Capability':
+            case 'Entity':
+            case 'File':
+            case 'MultiLanguageProperty':
+            case 'Operation':
+            case 'Property':
+            case 'Range':
+            case 'ReferenceElement':
+            case 'RelationshipElement':
             case 'SubmodelElementCollection':
             case 'SubmodelElementList':
-            case 'Operation':
-            case 'BasicEventElement':
-            case 'Entity':
-            case 'AnnotatedRelationshipElement':
                 return true;
             default:
                 return false;
@@ -197,11 +212,30 @@ export function isEnvironment(value: unknown): value is Environment {
  * @param referable The referable.
  * @returns `true` if the specified referable is of type Identifiable.
  */
-export function isIdentifiable(referable?: Referable | null): referable is Identifiable {
+export function isIdentifiable(referable: Referable | undefined | null): referable is Identifiable {
     switch (referable?.modelType) {
         case 'AssetAdministrationShell':
         case 'Submodel':
         case 'ConceptDescription':
+            return true;
+        default:
+            return false;
+    }
+}
+
+/**
+ * Indicates whether the specified referable if of type `DataElement`.
+ * @param referable The referable.
+ * @returns `true` if the specified referable is of type `DataElement`.
+ */
+export function isDataElement(referable: Referable | undefined): referable is DataElement {
+    switch (referable?.modelType) {
+        case 'Blob':
+        case 'File':
+        case 'MultiLanguageProperty':
+        case 'Property':
+        case 'Range':
+        case 'ReferenceElement':
             return true;
         default:
             return false;
@@ -233,6 +267,15 @@ export function isSubmodel(referable: unknown): referable is Submodel {
  */
 export function isProperty(referable: unknown): referable is Property {
     return (referable as Referable)?.modelType === 'Property';
+}
+
+/**
+ * Determines whether the specified referable represents a `File`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `File`; otherwise, `false`.
+ */
+export function isFile(referable: unknown): referable is File {
+    return (referable as Referable)?.modelType === 'File';
 }
 
 /**
@@ -281,6 +324,15 @@ export function isSubmodelElementList(referable: unknown): referable is Submodel
 }
 
 /**
+ * Determines whether the specified referable represents an annotated relationship element.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `AnnotatedRelationshipElement`; otherwise, `false`.
+ */
+export function isAnnotatedRelationshipElement(referable: unknown): referable is AnnotatedRelationshipElement {
+    return (referable as AnnotatedRelationshipElement)?.modelType === 'AnnotatedRelationshipElement';
+}
+
+/**
  * Determines whether the specified referable represents a relationship element.
  * @param value The current referable.
  * @returns `true` if the specified referable represents a `RelationshipElement`; otherwise, `false`.
@@ -296,6 +348,24 @@ export function isRelationshipElement(referable: unknown): referable is Relation
  */
 export function isEntity(referable: unknown): referable is Entity {
     return (referable as Referable)?.modelType === 'Entity';
+}
+
+/**
+ * Determines whether the specified referable represents an operation.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents an `Operation`; otherwise, `false`.
+ */
+export function isOperation(referable: unknown): referable is Operation {
+    return (referable as Referable)?.modelType === 'Operation';
+}
+
+/**
+ * Determines whether the specified referable represents a range.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Range`; otherwise, `false`.
+ */
+export function isRange(referable: unknown): referable is Range {
+    return (referable as Range)?.modelType === 'Range';
 }
 
 /**

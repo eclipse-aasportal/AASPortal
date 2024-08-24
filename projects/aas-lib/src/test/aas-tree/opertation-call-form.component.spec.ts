@@ -6,37 +6,52 @@
  *
  *****************************************************************************/
 
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas, AASDocument, convertToString } from 'aas-core';
 import { cloneDeep } from 'lodash-es';
-import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
-import { OperationCallFormComponent } from '../../lib/aas-tree/operation-call-form/operation-call-form.component';
+import { OperationCallFormComponent } from '../../lib/operation-call-form/operation-call-form.component';
 import { sampleDocument } from '../assets/sample-document';
 import { ERRORS } from '../../lib/types/errors';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { OperationCallFormApiService } from '../../lib/operation-call-form/operation-call-form-api.service';
 
 describe('OperationCallFormComponent', () => {
     let component: OperationCallFormComponent;
     let fixture: ComponentFixture<OperationCallFormComponent>;
     let operation: aas.Operation;
-    let api: AASTreeApiService;
+    let api: jasmine.SpyObj<OperationCallFormApiService>;
     let document: AASDocument;
 
     beforeEach(() => {
+        api = jasmine.createSpyObj<OperationCallFormApiService>(['invoke']);
         TestBed.configureTestingModule({
-    imports: [TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useClass: TranslateFakeLoader,
-            },
-        })],
-    providers: [NgbModal, NgbActiveModal, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
+            providers: [NgbModal, NgbActiveModal],
+        });
 
-        api = TestBed.inject(AASTreeApiService);
+        TestBed.overrideComponent(OperationCallFormComponent, {
+            remove: {
+                providers: [OperationCallFormApiService],
+            },
+            add: {
+                providers: [
+                    {
+                        provide: OperationCallFormApiService,
+                        useValue: api,
+                    },
+                ],
+            },
+        });
+
         fixture = TestBed.createComponent(OperationCallFormComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -59,74 +74,73 @@ describe('OperationCallFormComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('calls an operation like toUpperCase(input: string): string', async function () {
+    it('calls an operation like toUpperCase(input: string): string', (done: DoneFn) => {
         operation.inputVariables = [createVariable('inString', 'xs:string', '')];
         operation.outputVariables = [createVariable('outString', 'xs:string', '')];
 
         const resultOp = cloneDeep(operation);
         (resultOp.inputVariables![0].value as aas.Property).value = 'Hello World!';
         (resultOp.outputVariables![0].value as aas.Property).value = 'Hello World!'.toUpperCase();
-
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
+        api.invoke.and.returnValue(of(resultOp));
         component.initialize(document, operation);
         component.inputVariables()[0].value = 'Hello World!';
 
-        await component.call();
-
-        expect(component.inputVariables()[0].value).toEqual('Hello World!');
-        expect(component.outputVariables()[0].value).toEqual('HELLO WORLD!');
+        component.call().subscribe(() => {
+            expect(component.inputVariables()[0].value).toEqual('Hello World!');
+            expect(component.outputVariables()[0].value).toEqual('HELLO WORLD!');
+            done();
+        });
     });
 
-    it('calls an operation like toggle(in: boolean): boolean', async function () {
+    it('calls an operation like toggle(in: boolean): boolean', (done: DoneFn) => {
         operation.inputVariables = [createVariable('in', 'xs:boolean', false)];
         operation.outputVariables = [createVariable('out', 'xs:boolean', false)];
 
         const resultOp = cloneDeep(operation);
         (resultOp.inputVariables![0].value as aas.Property).value = 'false';
         (resultOp.outputVariables![0].value as aas.Property).value = 'true';
-
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
+        api.invoke.and.returnValue(of(resultOp));
         component.initialize(document, operation);
         component.inputVariables()[0].value = false;
 
-        await component.call();
-
-        expect(component.inputVariables()[0].value).toEqual(false);
-        expect(component.outputVariables()[0].value).toEqual(true);
+        component.call().subscribe(() => {
+            expect(component.inputVariables()[0].value).toEqual(false);
+            expect(component.outputVariables()[0].value).toEqual(true);
+            done();
+        });
     });
 
-    it('calls an operation like increment(in: number): number', async function () {
+    it('calls an operation like increment(in: number): number', (done: DoneFn) => {
         operation.inputVariables = [createVariable('in', 'xs:int', 0)];
         operation.outputVariables = [createVariable('out', 'xs:int', 0)];
 
         const resultOp = cloneDeep(operation);
         (resultOp.inputVariables![0].value as aas.Property).value = '42';
         (resultOp.outputVariables![0].value as aas.Property).value = '43';
-
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(resultOp)));
+        api.invoke.and.returnValue(of(resultOp));
         component.initialize(document, operation);
         component.inputVariables()[0].value = '42';
 
-        await component.call();
-
-        expect(component.inputVariables()[0].value).toEqual('42');
-        expect((component.result?.outputVariables![0].value as aas.Property).value).toEqual('43');
-        expect(component.outputVariables()[0].value).toEqual('43');
+        component.call().subscribe(() => {
+            expect(component.inputVariables()[0].value).toEqual('42');
+            expect(component.outputVariables()[0].value).toEqual('43');
+            done();
+        });
     });
 
-    it('validates an input variable with undefined value (int => 0)', async function () {
+    it('validates an input variable with undefined value (int => 0)', () => {
         operation.inputVariables = [createVariable('in', 'xs:int')];
         component.initialize(document, operation);
         expect(component.inputVariables()[0].value).toEqual('0');
     });
 
-    it('validates an input variable with undefined value type (0 => int)', async function () {
+    it('validates an input variable with undefined value type (0 => int)', () => {
         operation.inputVariables = [createVariable('in', undefined, 0)];
         component.initialize(document, operation);
         expect(component.inputVariables()[0].type).toEqual('xs:int');
     });
 
-    it('shows the message ERROR_UNKNOWN_VARIABLE_VALUE_TYPE if variable data type is undefined', function () {
+    it('shows the message ERROR_UNKNOWN_VARIABLE_VALUE_TYPE if variable data type is undefined', () => {
         operation.inputVariables = [createVariable('in')];
         component.initialize(document, operation);
         expect(component.messages().length).toEqual(1);
@@ -134,20 +148,19 @@ describe('OperationCallFormComponent', () => {
         expect(component.canCall()).toBeFalse();
     });
 
-    it('shows the message ERROR_INVALID_OPERATION_VARIABLE_EXPRESSION if an input variable expression is invalid', async function () {
+    it('shows the message ERROR_INVALID_OPERATION_VARIABLE_EXPRESSION if an input variable expression is invalid', (done: DoneFn) => {
         operation.inputVariables = [createVariable('in', 'xs:int', 0)];
         operation.outputVariables = [createVariable('out', 'xs:int', 0)];
-
-        const dummy = cloneDeep(operation);
-        spyOn(api, 'invoke').and.returnValue(new Promise<aas.Operation>(result => result(dummy)));
-
+        api.invoke.and.returnValue(of(cloneDeep(operation)));
         component.initialize(document, operation);
         component.inputVariables()[0].value = 'invalid';
 
-        await component.call();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].startsWith(ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION)).toBeTrue();
-        expect(component.canCall()).toBeTrue();
+        component.call().subscribe(() => {
+            expect(component.messages().length).toEqual(1);
+            expect(component.messages()[0].startsWith(ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION)).toBeTrue();
+            expect(component.canCall()).toBeTrue();
+            done();
+        });
     });
 
     function createVariable(name: string, valueType?: aas.DataTypeDefXsd, value?: unknown): aas.OperationVariable {

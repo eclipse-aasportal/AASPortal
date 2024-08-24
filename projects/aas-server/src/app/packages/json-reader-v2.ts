@@ -396,11 +396,11 @@ export class JsonReaderV2 extends AASReader {
     private readOperationVariable(source: aasv2.OperationVariable, ancestors: aas.Referable[]): aas.OperationVariable {
         let value: aas.SubmodelElement | undefined;
         if (this.isSubmodelElement(source.value)) {
-            value = this.readSubmodelElementType(source.value, ancestors);
+            value = this.readSubmodelElement(source.value, ancestors);
         } else if ('submodelElement' in source.value) {
             const submodelElement = (source.value as { submodelElement: aasv2.SubmodelElement }).submodelElement;
             if (this.isSubmodelElement(submodelElement)) {
-                value = this.readSubmodelElementType(submodelElement, ancestors);
+                value = this.readSubmodelElement(submodelElement, ancestors);
             }
         }
 

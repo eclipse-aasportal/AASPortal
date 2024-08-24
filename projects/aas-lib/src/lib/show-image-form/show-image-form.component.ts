@@ -9,7 +9,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { SecuredImageComponent } from '../../secured-image/secured-image.component';
+import { SecuredImageComponent } from '../secured-image/secured-image.component';
 
 @Component({
     selector: 'fhg-show-image',

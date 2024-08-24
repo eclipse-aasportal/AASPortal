@@ -27,13 +27,18 @@ import {
     mimeTypeToExtension,
     selectReferable,
     stringFormat,
+    isFile,
+    isBlob,
+    isReferenceElement,
+    isOperation,
+    isSubmodel,
 } from 'aas-core';
 
 import { AASTreeRow } from './aas-tree-row';
 import { OnlineState } from '../types/online-state';
-import { ShowImageFormComponent } from './show-image-form/show-image-form.component';
-import { ShowVideoFormComponent } from './show-video-form/show-video-form.component';
-import { OperationCallFormComponent } from './operation-call-form/operation-call-form.component';
+import { ShowImageFormComponent } from '../show-image-form/show-image-form.component';
+import { ShowVideoFormComponent } from '../show-video-form/show-video-form.component';
+import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../convert';
 import { ViewQuery } from '../types/view-query-params';
@@ -63,7 +68,7 @@ interface PropertyValue {
     styleUrls: ['./aas-tree.component.scss'],
     standalone: true,
     imports: [NgClass, NgStyle, TranslateModule],
-    providers: [AASTreeSearch, AASTreeService],
+    providers: [AASTreeSearch, AASTreeService, AASTreeApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTreeComponent implements OnInit, OnDestroy {
@@ -154,10 +159,8 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         return rows.length > 0 && rows.every(row => row.selected);
     });
 
-    /** The expanded and visible rows. */
     public readonly nodes = this.store.nodes;
 
-    /** All rows of the AAS document. */
     public readonly rows = this.store.rows;
 
     public readonly matchIndex = this.store.matchIndex;
@@ -178,10 +181,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
 
         return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
-    });
-
-    public readonly highlighted = computed(() => {
-        return this.store.nodes().find(node => node.highlighted)?.element;
     });
 
     public ngOnInit(): void {
@@ -225,9 +224,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             }
 
             return value;
+        } else {
+            return node.value;
         }
-
-        return undefined;
     }
 
     public expand(node: AASTreeRow): void {
@@ -246,10 +245,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    public highlight(node: AASTreeRow): void {
-        this.store.highlight(node);
-    }
-
     public toggleSelections(): void {
         this.store.toggleSelections();
     }
@@ -258,8 +253,56 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         this.store.toggleSelected(node, this.altKey, this.shiftKey);
     }
 
-    public async openFile(file: aas.File | undefined): Promise<void> {
-        if (!file || !file.value || this.state() === 'online') return;
+    public openReference(reference: aas.Reference | string | undefined): void {
+        if (!reference || this.state() === 'online') return;
+
+        if (typeof reference === 'string') {
+            this.openDocumentByAssetId(reference);
+        } else {
+            if (reference.keys.length === 0) {
+                return;
+            }
+
+            if (reference.type === 'ExternalReference') {
+                this.openExternalReference(reference);
+            } else {
+                this.selectModelReference(reference);
+            }
+        }
+    }
+
+    public open(node: AASTreeRow): void {
+        if (isFile(node.element)) {
+            this.openFile(node.element);
+        } else if (isBlob(node.element)) {
+            this.openBlob(node.element);
+        } else if (isReferenceElement(node.element)) {
+            this.openReference(node.element.value);
+        } else if (isOperation(node.element)) {
+            this.openOperation(node.element);
+        } else if (isSubmodel(node.element)) {
+            this.openSubmodel(node.element);
+        }
+    }
+
+    public findNext(): void {
+        this.searching.findNext();
+    }
+
+    public findPrevious(): void {
+        this.searching.findPrevious();
+    }
+
+    public toString(value: aas.Reference | undefined): string {
+        if (!value) {
+            return '-';
+        }
+
+        return value.keys.map(key => key.value).join('.');
+    }
+
+    private async openFile(file: aas.File): Promise<void> {
+        if (!file.value || this.state() === 'online') return;
 
         const { name, url } = this.resolveFile(file);
         if (name && url) {
@@ -276,9 +319,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    public async openBlob(blob: aas.Blob | undefined): Promise<void> {
+    private async openBlob(blob: aas.Blob): Promise<void> {
         const document = this.document();
-        if (!blob || !document || !blob.parent || this.state() === 'online') return;
+        if (!document || !blob.parent || this.state() === 'online') return;
 
         let name = blob.idShort;
         const extension = mimeTypeToExtension(blob.contentType);
@@ -307,7 +350,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    public async openOperation(operation: aas.Operation | undefined): Promise<void> {
+    private async openOperation(operation: aas.Operation): Promise<void> {
         if (!operation || this.state() === 'online') {
             return;
         }
@@ -315,7 +358,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         try {
             if (operation) {
                 const modalRef = this.modal.open(OperationCallFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.initialize(this.document, operation);
+                modalRef.componentInstance.initialize(this.document(), operation);
                 await modalRef.result;
             }
         } catch (error) {
@@ -325,25 +368,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    public openReference(reference: aas.Reference | string | undefined): void {
-        if (!reference || this.state() === 'online') return;
-
-        if (typeof reference === 'string') {
-            this.openDocumentByAssetId(reference);
-        } else {
-            if (reference.keys.length === 0) {
-                return;
-            }
-
-            if (reference.type === 'ExternalReference') {
-                this.openExternalReference(reference);
-            } else {
-                this.selectModelReference(reference);
-            }
-        }
-    }
-
-    public openSubmodel(submodel: aas.Submodel | undefined): void {
+    private openSubmodel(submodel: aas.Submodel | undefined): void {
         if (!submodel || this.state() === 'online') return;
 
         const semanticId = resolveSemanticId(submodel);
@@ -366,22 +391,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                 this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
             }
         }
-    }
-
-    public findNext(): void {
-        this.searching.findNext();
-    }
-
-    public findPrevious(): void {
-        this.searching.findPrevious();
-    }
-
-    public toString(value: aas.Reference | undefined): string {
-        if (!value) {
-            return '-';
-        }
-
-        return value.keys.map(key => key.value).join('.');
     }
 
     private async showImageAsync(name: string, src: string): Promise<void> {

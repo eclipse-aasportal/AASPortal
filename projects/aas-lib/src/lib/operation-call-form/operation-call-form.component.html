@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<form (ngSubmit)="call()">
+<form (ngSubmit)="call().subscribe()">
     <div class="modal-header">
         <h4 class="modal-title text-info">
             <i class="bi bi-arrow-clockwise"></i>
@@ -16,14 +16,15 @@
     </div>
     <div class="modal-body">
         @for (message of messages(); track message) {
-        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
+        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3 overflow-hidden">
             <div class="d-flex">
                 <div class="flex-grow-1">{{message}}</div>
             </div>
         </ngb-toast>
         }
+        @if (inputVariables().length > 0) {
         <table class="table table-sm table-borderless table-condensed">
-            <caption class="top">
+            <caption class="caption-top">
                 <div class="bg-secondary text-white ti-1" translate translate>CAPTION_INPUT_ARGUMENTS</div>
             </caption>
             <thead>
@@ -41,7 +42,7 @@
                     @if (variable.inputType === 'text') {
                     <td>
                         <input type="text" class="form-control form-control-sm" [(ngModel)]="variable.value"
-                            name="{{variable.name}}">
+                            name="{{variable.name}}" [readOnly]="variable.type === '-'">
                     </td>
                     }
                     @else if (variable.inputType === 'checkbox') {
@@ -58,9 +59,10 @@
                 }
             </tbody>
         </table>
-        <!--Output Section-->
+        }
+        @if (outputVariables().length > 0) {
         <table class="table table-sm table-borderless table-condensed">
-            <caption class="top">
+            <caption class="caption-top">
                 <div class="bg-secondary text-white ti-1" translate>CAPTION_OUTPUT_ARGUMENTS</div>
             </caption>
             <thead>
@@ -94,10 +96,10 @@
                 }
             </tbody>
         </table>
+        }
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" (click)="call()" [disabled]="!canCall()"
-            translate>CMD_OPERATION_CALL</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!canCall()" translate>CMD_OPERATION_CALL</button>
         <button type="button" class="btn btn-secondary" (click)="close()" translate>CMD_CLOSE</button>
     </div>
 </form>

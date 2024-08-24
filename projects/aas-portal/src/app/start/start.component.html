@@ -30,7 +30,7 @@
     </div>
     @if (activeFavorites() === '') {
     <div class="input-group me-2 my-1">
-        <button type="button" class="btn btn-primary" (click)="firstPage()" [disabled]="isFirstPage()">
+        <button type="button" class="btn btn-primary" (click)="firstPage()">
             <i class="bi bi-chevron-bar-left"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
@@ -46,16 +46,8 @@
         <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage()">
             <i class="bi bi-chevron-right"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="lastPage()" [disabled]="isLastPage()">
+        <button type="button" class="btn btn-primary" (click)="lastPage()">
             <i class="bi bi-chevron-bar-right"></i>
-        </button>
-    </div>
-    <div class="btn-group me-2 my-1">
-        <button type="button" class="btn btn-primary position-relative" (click)="refreshPage()">
-            <i class="bi bi-arrow-clockwise"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
-                {{count | async}}
-            </span>
         </button>
     </div>
     }

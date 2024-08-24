@@ -10,6 +10,7 @@ import FormData from 'form-data';
 import { createReadStream } from 'fs';
 import {
     aas,
+    ApplicationError,
     DifferenceItem,
     getIdShortPath,
     isAssetAdministrationShell,
@@ -24,26 +25,37 @@ import { Logger } from '../../logging/logger.js';
 import * as aasv2 from '../../types/aas-v2.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
+import { ERRORS } from '../../errors.js';
+import { JsonReaderV3 } from '../json-reader-v3.js';
 
 interface PackageDescriptor {
     aasIds: string[];
     packageId: string;
 }
 
-export interface Message {
-    code?: string;
-    correlationId?: string;
-    messageType: 'Undefined' | 'Info' | 'Warning' | 'Error' | 'Exception';
-    text: string;
-    timeStamp?: string;
+interface OperationRequest {
+    inputArguments?: aasv2.OperationVariable[];
+    inoutputArguments?: aasv2.OperationVariable[];
+    requestId?: string;
+    timeout?: number;
 }
 
-export interface OperationResult {
-    messages?: Message[];
-    executionState: 'Initiated' | 'Running' | 'Completed' | 'Canceled' | 'Failed' | 'Timeout';
-    success: boolean;
-    outputVariables?: aasv2.OperationVariable[];
-    inoutputVariables?: aasv2.OperationVariable[];
+interface OperationResult {
+    executionResult: {
+        messages: [
+            {
+                code: string;
+                messageType: number;
+                text: string;
+                timestamp: string;
+            },
+        ];
+        success: boolean;
+    };
+    executionState: number;
+    inoutputArguments: aasv2.OperationVariable[];
+    outputArguments: aasv2.OperationVariable[];
+    requestId: string;
 }
 
 export class AASApiClientV1 extends AASApiClient {
@@ -184,8 +196,44 @@ export class AASApiClientV1 extends AASApiClient {
         return await this.message.delete(this.resolve(`packages/${packageId}`));
     }
 
-    public async invoke(): Promise<aas.Operation> {
-        throw new Error('Not implemented.');
+    public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+        if (!operation.parent) {
+            throw new Error('Invalid operation.');
+        }
+
+        const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
+        const smId = encodeBase64Url(selectSubmodel(env, operation)!.id);
+        const path = getIdShortPath(operation);
+        const writer = new JsonWriterV2();
+        const opr: aasv2.Operation = writer.convert(operation);
+        const request: OperationRequest = {
+            inputArguments: opr.inputVariable,
+            inoutputArguments: opr.inoutputVariable,
+            requestId: '1',
+            timeout: 0,
+        };
+
+        const result: OperationResult = JSON.parse(
+            await this.message.post(
+                this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${path}/invoke`),
+                request,
+            ),
+        );
+
+        if (!result.executionResult.success) {
+            throw new ApplicationError(
+                `Invoking the operation ${operation.idShort} failed: {0}`,
+                ERRORS.InvokeOperationFailed,
+                result.executionResult.messages?.map(message => message.text).join(' ') ?? 'No messages.',
+            );
+        }
+
+        const reader = new JsonReaderV3();
+        return reader.read({
+            ...opr,
+            outputVariable: result.outputArguments,
+            inoutputVariable: result.inoutputArguments,
+        } as aasv2.Operation);
     }
 
     public async getBlobValueAsync(

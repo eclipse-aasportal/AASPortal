@@ -6,9 +6,8 @@
  *
  *****************************************************************************/
 
-import { EventEmitter, Injectable } from '@angular/core';
+import { computed, EventEmitter, Injectable, signal } from '@angular/core';
 import { WebSocketData, AASServerMessage } from 'aas-core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from './web-socket-factory.service';
 import { NotifyService } from '../public-api';
@@ -26,8 +25,7 @@ interface State {
 })
 export class IndexChangeService {
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
-    private readonly _reset = new EventEmitter<void>();
-    private readonly state$ = new BehaviorSubject<State>({
+    private readonly state = signal<State>({
         addedDocuments: 0,
         changedDocuments: 0,
         removedDocuments: 0,
@@ -40,27 +38,34 @@ export class IndexChangeService {
         private readonly notify: NotifyService,
     ) {
         this.subscribeIndexChanged();
-
-        this.count = this.state$
-            .asObservable()
-            .pipe(
-                map(
-                    state =>
-                        state.addedDocuments +
-                        state.changedDocuments +
-                        state.removedDocuments +
-                        state.addedEndpoints +
-                        state.removedEndpoints,
-                ),
-            );
     }
 
     public readonly reset = new EventEmitter();
 
-    public count: Observable<number>;
+    public readonly count = computed(() => {
+        const state = this.state();
+        return (
+            state.addedDocuments +
+            state.addedEndpoints +
+            state.changedDocuments +
+            state.removedDocuments +
+            state.removedEndpoints
+        );
+    });
+
+    public readonly summary = computed(() => {
+        const state = this.state();
+        return `+${state.addedDocuments}/${state.changedDocuments}/-${state.removedDocuments}; +${state.addedEndpoints}/-${state.removedEndpoints}`;
+    });
+
+    public readonly addedDocuments = computed(() => this.state().addedDocuments);
+    public readonly addedEndpoints = computed(() => this.state().addedEndpoints);
+    public readonly changedDocuments = computed(() => this.state().changedDocuments);
+    public readonly removedDocuments = computed(() => this.state().removedDocuments);
+    public readonly removedEndpoints = computed(() => this.state().removedEndpoints);
 
     public clear(): void {
-        this.state$.next({
+        this.state.set({
             addedDocuments: 0,
             changedDocuments: 0,
             removedDocuments: 0,
@@ -116,27 +121,22 @@ export class IndexChangeService {
     }
 
     private documentAdded(): void {
-        const state = this.state$.getValue();
-        this.state$.next({ ...state, addedDocuments: state.addedDocuments + 1 });
+        this.state.update(state => ({ ...state, addedDocuments: state.addedDocuments + 1 }));
     }
 
     private documentRemoved(): void {
-        const state = this.state$.getValue();
-        this.state$.next({ ...state, removedDocuments: state.removedDocuments + 1 });
+        this.state.update(state => ({ ...state, removedDocuments: state.removedDocuments + 1 }));
     }
 
     private documentChanged(): void {
-        const state = this.state$.getValue();
-        this.state$.next({ ...state, changedDocuments: state.changedDocuments + 1 });
+        this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + 1 }));
     }
 
     private endpointAdded(): void {
-        const state = this.state$.getValue();
-        this.state$.next({ ...state, addedEndpoints: state.addedEndpoints + 1 });
+        this.state.update(state => ({ ...state, addedEndpoints: state.addedEndpoints + 1 }));
     }
 
     private endpointRemoved(): void {
-        const state = this.state$.getValue();
-        this.state$.next({ ...state, removedEndpoints: state.removedEndpoints + 1 });
+        this.state.update(state => ({ ...state, removedEndpoints: state.removedEndpoints + 1 }));
     }
 }

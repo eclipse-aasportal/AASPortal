@@ -23,8 +23,8 @@ import {
     UploadedFile,
     UploadedFiles,
 } from 'tsoa';
-import { AASDocument, aas } from 'aas-core';
 
+import { AASDocument, aas } from 'aas-core';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';

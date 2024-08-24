@@ -8,13 +8,11 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { aas, AASDocument, AuthResult } from 'aas-core';
+import { AuthResult } from 'aas-core';
 import { encodeBase64Url } from '../convert';
 
 /** The client side AAS provider service. */
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable()
 export class AASTreeApiService {
     public constructor(private readonly http: HttpClient) {}
 
@@ -26,30 +24,6 @@ export class AASTreeApiService {
                 complete: () => result(data.token),
                 error: error => reject(error),
             });
-        });
-    }
-
-    /**
-     * Calls an operation.
-     * @param document The document to which the operation belongs.
-     * @param operation The operation to call.
-     * @returns The result of the operation call.
-     */
-    public invoke(document: AASDocument, operation: aas.Operation): Promise<aas.Operation> {
-        return new Promise<aas.Operation>((result, reject) => {
-            let data: aas.Operation;
-            this.http
-                .post<aas.Operation>(
-                    `/api/v1/containers/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(
-                        document.id,
-                    )}`,
-                    operation,
-                )
-                .subscribe({
-                    next: value => (data = value),
-                    complete: () => result(data),
-                    error: error => reject(error),
-                });
         });
     }
 

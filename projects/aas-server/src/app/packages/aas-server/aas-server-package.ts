@@ -65,8 +65,8 @@ export class AASServerPackage extends AASPackage {
         return document;
     }
 
-    public override async getEnvironmentAsync(): Promise<aas.Environment> {
-        return await this.server.readEnvironmentAsync(this.idShort);
+    public override getEnvironmentAsync(): Promise<aas.Environment> {
+        return this.server.readEnvironmentAsync(this.idShort);
     }
 
     public async setEnvironmentAsync(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {
