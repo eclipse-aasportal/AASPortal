@@ -27,7 +27,6 @@ import {
     ClipboardService,
     CustomerFeedback,
     DownloadService,
-    IndexChangeService,
     NotifyService,
     SubmodelViewDescriptor,
     ViewMode,
@@ -70,7 +69,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         private readonly download: DownloadService,
         private readonly clipboard: ClipboardService,
         private readonly favorites: FavoritesService,
-        private readonly indexChange: IndexChangeService,
     ) {
         if (this.store.viewMode() === ViewMode.Undefined) {
             this.auth.ready.pipe(first(ready => ready)).subscribe({
@@ -102,8 +100,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     public readonly endpoints = this.api.getEndpoints();
 
     public readonly documents = this.store.documents;
-
-    public readonly count = this.indexChange.count;
 
     public readonly selected = this.store.selected;
 
@@ -351,11 +347,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
     public lastPage(): void {
         this.store.getLastPage();
-    }
-
-    public refreshPage(): void {
-        this.store.refreshPage();
-        this.indexChange.clear();
     }
 
     public addToFavorites(): Observable<void> {

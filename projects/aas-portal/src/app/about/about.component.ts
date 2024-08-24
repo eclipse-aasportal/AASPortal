@@ -43,10 +43,6 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aboutToolbar: TemplateRef<unknown> | null = null;
 
-    public readonly version = signal(environment.author).asReadonly();
-
-    public readonly serverVersion = this._serverVersion.asReadonly();
-
     public readonly author = signal(environment.author).asReadonly();
 
     public readonly homepage = signal(environment.homepage).asReadonly();

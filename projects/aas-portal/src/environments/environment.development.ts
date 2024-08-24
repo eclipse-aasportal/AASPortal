@@ -11,7 +11,7 @@ import { Environment } from 'aas-lib';
 export const environment: Environment = {
     production: false,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    version: (require('../../../../package.json') as { version: string }).version + '-dev',
+    version: (require('../../../../package.json') as { version: string }).version,
     homepage: 'https://www.iosb-ina.fraunhofer.de/',
     author: 'Fraunhofer IOSB-INA',
 };

@@ -7,19 +7,29 @@
  *****************************************************************************/
 
 import isEqual from 'lodash-es/isEqual';
+import isEmpty from 'lodash-es/isEmpty';
 import {
     AASDocument,
     aas,
     convertToString,
     getAbbreviation,
     getLocaleValue,
+    isAnnotatedRelationshipElement,
     isAssetAdministrationShell,
+    isBlob,
     isBooleanType,
-    isHasSemantics,
+    isEntity,
+    isFile,
     isIdentifiable,
     isMultiLanguageProperty,
+    isOperation,
+    isProperty,
+    isRange,
+    isReferenceElement,
     isSubmodel,
     isSubmodelElement,
+    isSubmodelElementCollection,
+    isSubmodelElementList,
     mimeTypeToExtension,
     selectReferable,
     toBoolean,
@@ -43,6 +53,7 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         public readonly typeInfo: string,
         public readonly value: string | boolean | undefined,
         public readonly isLeaf: boolean,
+        public readonly canOpen: boolean,
         parent: number,
         firstChild: number,
         nextSibling: number,
@@ -52,16 +63,6 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
 
     public override get hasChildren(): boolean {
         return this.firstChild >= 0;
-    }
-
-    public get hasSemantic(): boolean {
-        const referable = this.element;
-        if (isSubmodel(referable)) {
-            const sematicId = resolveSemanticId(referable);
-            return sematicId != null && supportedSubmodelTemplates.has(sematicId);
-        }
-
-        return false;
     }
 
     public get annotatedRelationship(): aas.AnnotatedRelationshipElement | undefined {
@@ -144,6 +145,28 @@ class TreeInitialize {
                 break;
         }
 
+        let canOpen = false;
+        switch (element.modelType) {
+            case 'Blob':
+                canOpen = true;
+                break;
+            case 'File':
+                canOpen = !isEmpty(element as aas.File);
+                break;
+            case 'Submodel':
+                canOpen = this.hasSpecificSemantic(element as aas.Submodel);
+                break;
+            case 'Entity':
+                canOpen = !isEmpty((element as aas.Entity).globalAssetId);
+                break;
+            case 'Operation':
+                canOpen = true;
+                break;
+            case 'ReferenceElement':
+                canOpen = !isEmpty((element as aas.ReferenceElement).value);
+                break;
+        }
+
         return new AASTreeRow(
             `row_${this.rows.length + 1}`,
             element,
@@ -156,6 +179,7 @@ class TreeInitialize {
             this.getTypeInfo(element),
             this.getValue(element, this.language),
             isLeaf,
+            canOpen,
             parent,
             -1,
             -1,
@@ -178,6 +202,62 @@ class TreeInitialize {
             }
 
             previous = row;
+        }
+    }
+
+    private hasChildren(referable: aas.Referable): boolean {
+        switch (referable.modelType) {
+            case 'AssetAdministrationShell': {
+                const shell = referable as aas.AssetAdministrationShell;
+                return shell.submodels != null && shell.submodels.length > 0;
+            }
+            case 'Submodel': {
+                const submodel = referable as aas.Submodel;
+                return submodel.submodelElements != null && submodel.submodelElements.length > 0;
+            }
+            case 'SubmodelElementCollection': {
+                const collection = referable as aas.SubmodelElementCollection;
+                return collection.value != null && collection.value.length > 0;
+            }
+            case 'SubmodelElementList': {
+                const list = referable as aas.SubmodelElementList;
+                return list.value != null && list.value.length > 0;
+            }
+            case 'Entity': {
+                const entity = referable as aas.Entity;
+                return entity.statements != null && entity.statements.length > 0;
+            }
+            case 'AnnotatedRelationshipElement': {
+                const relationship = referable as aas.AnnotatedRelationshipElement;
+                return relationship.annotations != null && relationship.annotations.length > 0;
+            }
+            case 'Operation': {
+                const operation = referable as aas.Operation;
+                if (
+                    operation.inputVariables &&
+                    operation.inputVariables.some(variable => isSubmodelElement(variable.value))
+                ) {
+                    return true;
+                }
+
+                if (
+                    operation.inoutputVariables &&
+                    operation.inoutputVariables.some(variable => isSubmodelElement(variable.value))
+                ) {
+                    return true;
+                }
+
+                if (
+                    operation.outputVariables &&
+                    operation.outputVariables.some(variable => isSubmodelElement(variable.value))
+                ) {
+                    return true;
+                }
+
+                return false;
+            }
+            default:
+                return false;
         }
     }
 
@@ -211,15 +291,27 @@ class TreeInitialize {
                 const operation = referable as aas.Operation;
                 const children: aas.Referable[] = [];
                 if (operation.inputVariables) {
-                    children.push(...operation.inputVariables.filter(variable => isSubmodelElement(variable)));
+                    children.push(
+                        ...operation.inputVariables
+                            .map(variable => variable.value)
+                            .filter(value => isSubmodelElement(value)),
+                    );
                 }
 
                 if (operation.inoutputVariables) {
-                    children.push(...operation.inoutputVariables.filter(variable => isSubmodelElement(variable)));
+                    children.push(
+                        ...operation.inoutputVariables
+                            .map(variable => variable.value)
+                            .filter(value => isSubmodelElement(value)),
+                    );
                 }
 
                 if (operation.outputVariables) {
-                    children.push(...operation.outputVariables.filter(variable => isSubmodelElement(variable)));
+                    children.push(
+                        ...operation.outputVariables
+                            .map(variable => variable.value)
+                            .filter(value => isSubmodelElement(value)),
+                    );
                 }
 
                 return children;
@@ -262,84 +354,31 @@ class TreeInitialize {
             return '';
         }
 
-        switch (referable.modelType) {
-            case 'Blob': {
-                const blob = referable as aas.Blob;
-                const extension = mimeTypeToExtension(blob.contentType);
-                return `${blob.idShort}${extension}`;
-            }
-            case 'Entity':
-                return (referable as aas.Entity).globalAssetId ?? '-';
-            case 'File': {
-                const file = referable as aas.File;
-                return file.value ? basename(normalize(file.value)) : '-';
-            }
-            case 'MultiLanguageProperty':
-                return getLocaleValue((referable as aas.MultiLanguageProperty).value, localeId) ?? '-';
-            case 'Operation':
-                return `${referable.idShort}()`;
-            case 'Property':
-                return this.getPropertyValue(referable as aas.Property, localeId);
-            case 'Range': {
-                const range = referable as aas.Range;
-                return `${convertToString(range.min, localeId)} ... ${convertToString(range.max, localeId)}`;
-            }
-            case 'ReferenceElement':
-                return this.referenceToString((referable as aas.ReferenceElement).value);
-            case 'SubmodelElementCollection':
-                return (referable as aas.SubmodelElementCollection).value?.length.toString() ?? '0';
-            case 'SubmodelElementList':
-                return (referable as aas.SubmodelElementList).value?.length.toString() ?? '0';
-            default:
-                return '';
+        if (isBlob(referable)) {
+            return `${referable.idShort}${mimeTypeToExtension(referable.contentType)}`;
         }
-    }
 
-    private hasChildren(referable: aas.Referable): boolean {
-        switch (referable.modelType) {
-            case 'AssetAdministrationShell': {
-                const shell = referable as aas.AssetAdministrationShell;
-                return shell.submodels != null && shell.submodels.length > 0;
-            }
-            case 'Submodel': {
-                const submodel = referable as aas.Submodel;
-                return submodel.submodelElements != null && submodel.submodelElements.length > 0;
-            }
-            case 'SubmodelElementCollection': {
-                const collection = referable as aas.SubmodelElementCollection;
-                return collection.value != null && collection.value.length > 0;
-            }
-            case 'SubmodelElementList': {
-                const list = referable as aas.SubmodelElementList;
-                return list.value != null && list.value.length > 0;
-            }
-            case 'Entity': {
-                const entity = referable as aas.Entity;
-                return entity.statements != null && entity.statements.length > 0;
-            }
-            case 'AnnotatedRelationshipElement': {
-                const relationship = referable as aas.AnnotatedRelationshipElement;
-                return relationship.annotations != null && relationship.annotations.length > 0;
-            }
-            case 'Operation': {
-                const operation = referable as aas.Operation;
-                if (operation.inputVariables) {
-                    return operation.inputVariables.some(variable => isSubmodelElement(variable.value));
-                }
-
-                if (operation.inoutputVariables) {
-                    return operation.inoutputVariables.some(variable => isSubmodelElement(variable.value));
-                }
-
-                if (operation.outputVariables) {
-                    return operation.outputVariables.some(variable => isSubmodelElement(variable.value));
-                }
-
-                return false;
-            }
-            default:
-                return false;
+        if (isFile(referable)) {
+            return referable.value ? basename(normalize(referable.value)) : '-';
         }
+
+        if (isMultiLanguageProperty(referable)) {
+            return getLocaleValue(referable.value, localeId) ?? '-';
+        }
+
+        if (isProperty(referable)) {
+            return this.getPropertyValue(referable, localeId);
+        }
+
+        if (isRange(referable)) {
+            return `${convertToString(referable.min, localeId)} ... ${convertToString(referable.max, localeId)}`;
+        }
+
+        if (isReferenceElement(referable)) {
+            return this.referenceToString(referable.value);
+        }
+
+        return '';
     }
 
     private getPropertyValue(property: aas.Property, localeId: string): string | boolean | undefined {
@@ -368,51 +407,54 @@ class TreeInitialize {
             return value;
         }
 
-        let value = '';
-        if (isHasSemantics(referable)) {
-            const a = this.getSemanticId(referable);
-            value = `Semantic ID: ${a}`;
+        if (isSubmodel(referable)) {
+            const sid = this.getSemanticId(referable);
+            return sid ? `Semantic ID: ${sid}` : '-';
         }
 
-        switch (referable.modelType) {
-            case 'AnnotatedRelationshipElement':
-                value = (referable as aas.AnnotatedRelationshipElement).annotations?.length.toString() ?? '-';
-                break;
-            case 'Blob': {
-                const contentType = (referable as aas.Blob).contentType;
-                if (contentType) {
-                    value += ', ' + contentType;
-                }
-
-                break;
-            }
-            case 'File': {
-                const contentType = (referable as aas.File).contentType;
-                if (contentType) {
-                    value += ', ' + contentType;
-                }
-
-                break;
-            }
-            case 'Property': {
-                const valueType = (referable as aas.Property).valueType;
-                if (valueType) {
-                    value += ', ' + (valueType.startsWith('xs:') ? valueType.substring(3) : valueType);
-                }
-
-                break;
-            }
-            case 'Range': {
-                const valueType = (referable as aas.Range).valueType;
-                if (valueType) {
-                    value += ', ' + (valueType.startsWith('xs:') ? valueType.substring(3) : valueType);
-                }
-
-                break;
-            }
+        if (isProperty(referable)) {
+            const valueType = (referable as aas.Property).valueType;
+            return valueType ? (valueType.startsWith('xs:') ? valueType.substring(3) : valueType) : '-';
         }
 
-        return value;
+        if (isBlob(referable)) {
+            return referable.contentType ?? '-';
+        }
+
+        if (isFile(referable)) {
+            return referable.contentType ?? '-';
+        }
+
+        if (isRange(referable)) {
+            const valueType = (referable as aas.Property).valueType;
+            return valueType ? (valueType.startsWith('xs:') ? valueType.substring(3) : valueType) : '-';
+        }
+
+        if (isSubmodelElementCollection(referable)) {
+            return referable.value ? `${referable.value.length}` : '0';
+        }
+
+        if (isSubmodelElementList(referable)) {
+            return referable.value ? `${referable.value.length}` : '0';
+        }
+
+        if (isAnnotatedRelationshipElement(referable)) {
+            return referable.annotations ? `${referable.annotations.length}` : '0';
+        }
+
+        if (isEntity(referable)) {
+            return referable.statements ? `${referable.statements.length}` : '0';
+        }
+
+        if (isOperation(referable)) {
+            return (
+                (referable.inputVariables?.length ?? 0) +
+                (referable.inoutputVariables?.length ?? 0) +
+                (referable.outputVariables?.length ?? 0)
+            ).toString();
+        }
+
+        return '-';
     }
 
     private getSemanticId(hasSematics: aas.HasSemantics): string {
@@ -421,6 +463,11 @@ class TreeInitialize {
 
     private referenceToString(reference: aas.Reference | undefined): string {
         return reference?.keys.map(key => key.value).join('/') ?? '-';
+    }
+
+    private hasSpecificSemantic(submodel: aas.Submodel): boolean {
+        const sematicId = resolveSemanticId(submodel);
+        return sematicId != null && supportedSubmodelTemplates.has(sematicId);
     }
 }
 
@@ -466,6 +513,7 @@ export class AASTree extends Tree<aas.Referable, AASTreeRow> {
             node.typeInfo,
             node.value,
             node.isLeaf,
+            node.canOpen,
             node.parent,
             node.firstChild,
             node.nextSibling,

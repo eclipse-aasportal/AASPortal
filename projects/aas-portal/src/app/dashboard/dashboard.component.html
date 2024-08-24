@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="fhg-dashboard-container" class="container-fluid">
+<div id="fhg-dashboard-container" class="overflow-auto h-100">
     @if (!isEmpty()) {
     @for (row of rows(); track row) {
     <div class="row">
@@ -73,7 +73,7 @@
 </div>
 
 <ng-template #dashboardToolbar>
-    <div class="input-group me-2">
+    <div class="input-group me-2 my-1">
         <select #select class="form-select" [value]="activePage()" (change)="setPage(pages()[select.selectedIndex])">
             @for (page of pages(); track page) {
             <option [ngValue]="page">{{page.name}}</option>
@@ -89,7 +89,7 @@
             <i class="bi bi-trash"></i>
         </button>
     </div>
-    <div class="input-group me-2">
+    <div class="input-group me-2 my-1">
         <div class="form-check form-switch pt-2">
             <input class="form-check-input" type="checkbox" role="switch" id="toggleEditMode" [(ngModel)]="editMode">
             <label class="form-check-label" for="toggleEditMode" translate>LABEL_EDIT_MODE</label>
@@ -103,7 +103,7 @@
             <i class="bi bi-arrow-90deg-right"></i>
         </button>
     </div>
-    <div class="btn-group me-2" [hidden]="!editMode">
+    <div class="btn-group me-2 my-1" [hidden]="!editMode">
         <button type="button" class="btn btn-primary" (click)="moveLeft()" [disabled]="!canMoveLeft()">
             <i class="bi bi-box-arrow-left"></i>
         </button>

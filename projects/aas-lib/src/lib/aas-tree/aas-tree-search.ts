@@ -263,9 +263,7 @@ export class AASTreeSearch {
             } else if (term.text) {
                 match =
                     row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
-                    row.typeInfo.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
-                    (typeof row.value === 'string' &&
-                        row.value.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0);
+                    this.contains(row.element, term.text);
             }
 
             if (match) {
@@ -274,6 +272,33 @@ export class AASTreeSearch {
         }
 
         return match;
+    }
+
+    private contains(referable: aas.Referable, text: string): boolean {
+        const stack = [referable as unknown as { [key: string]: unknown }];
+        while (stack.length > 0) {
+            const obj = stack.pop();
+            if (!obj) {
+                break;
+            }
+
+            for (const name in obj) {
+                if (name.indexOf(text) >= 0) {
+                    return true;
+                }
+
+                const value = obj[name];
+                if (typeof value === 'string') {
+                    if (value.indexOf(text) >= 0) {
+                        return true;
+                    }
+                } else if (typeof value === 'object') {
+                    stack.push(value as { [key: string]: unknown });
+                }
+            }
+        }
+
+        return false;
     }
 
     private containsString(a: string, b?: string): boolean {

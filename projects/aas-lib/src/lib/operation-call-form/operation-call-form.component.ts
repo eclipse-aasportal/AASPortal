@@ -7,13 +7,11 @@
  *****************************************************************************/
 
 import cloneDeep from 'lodash-es/cloneDeep';
+import { catchError, EMPTY, map, mergeMap, Observable, of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASTreeApiService } from '../aas-tree-api.service';
-import { messageToString } from '../../convert';
-import { ERRORS } from '../../types/errors';
 import {
     AASDocument,
     getLocaleValue,
@@ -26,13 +24,18 @@ import {
     toInvariant,
     convertToString,
     toBoolean,
+    isReferenceElement,
 } from 'aas-core';
+
+import { messageToString } from '../convert';
+import { ERRORS } from '../types/errors';
+import { OperationCallFormApiService } from './operation-call-form-api.service';
 
 export interface VariableItem {
     submodelElement: aas.SubmodelElement;
     name: string;
     description?: string;
-    type: aas.DataTypeDefXsd;
+    type: aas.DataTypeDefXsd | '-';
     value: string | boolean;
     inputType: 'text' | 'checkbox';
 }
@@ -43,6 +46,7 @@ export interface VariableItem {
     styleUrls: ['./operation-call-form.component.scss'],
     standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
+    providers: [OperationCallFormApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationCallFormComponent {
@@ -52,7 +56,7 @@ export class OperationCallFormComponent {
     public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AASTreeApiService,
+        private api: OperationCallFormApiService,
     ) {}
 
     public readonly name = signal('');
@@ -64,8 +68,6 @@ export class OperationCallFormComponent {
     public readonly outputVariables = signal<VariableItem[]>([]);
 
     public readonly messages = signal<string[]>([]);
-
-    public result: aas.Operation | null = null;
 
     public initialize(document: AASDocument, operation: aas.Operation): void {
         this.document = document;
@@ -80,21 +82,28 @@ export class OperationCallFormComponent {
         }
     }
 
-    public async call(): Promise<void> {
-        if (this.document && this.operation && this.canCall()) {
-            this.messages.set([]);
-
-            try {
-                this.applyToModel();
-                this.result = await this.api.invoke(this.document, this.operation);
-                if (this.result && Array.isArray(this.result.outputVariables)) {
-                    this.inputVariables.set(this.applyToView(this.result.inputVariables));
-                    this.outputVariables.set(this.applyToView(this.result.outputVariables));
+    public call(): Observable<void> {
+        return of(void 0).pipe(
+            mergeMap(() => {
+                if (!this.document || !this.operation || !this.canCall()) {
+                    return EMPTY;
                 }
-            } catch (error) {
+
+                this.messages.set([]);
+                this.applyToModel();
+                return this.api.invoke(this.document, this.operation);
+            }),
+            map(result => {
+                if (result && Array.isArray(result.outputVariables)) {
+                    this.inputVariables.set(this.applyToView(result.inputVariables));
+                    this.outputVariables.set(this.applyToView(result.outputVariables));
+                }
+            }),
+            catchError(error => {
                 this.messages.set([messageToString(error, this.translate)]);
-            }
-        }
+                return of(void 0);
+            }),
+        );
     }
 
     public close(): void {
@@ -108,7 +117,7 @@ export class OperationCallFormComponent {
                 const value =
                     typeof item.value === 'boolean'
                         ? item.value.toString()
-                        : toInvariant(item.value, item.type, this.translate.currentLang);
+                        : toInvariant(item.value, item.type as aas.DataTypeDefXsd, this.translate.currentLang);
 
                 if (value == null) {
                     throw new ApplicationError(
@@ -121,8 +130,6 @@ export class OperationCallFormComponent {
                 }
 
                 element.value = value;
-            } else {
-                // ToDo:
             }
         }
     }
@@ -132,8 +139,8 @@ export class OperationCallFormComponent {
         if (!sources) return values;
 
         for (const sourceVariable of sources) {
-            if (sourceVariable.value.modelType === 'Property') {
-                const source = sourceVariable.value as aas.Property;
+            const source = sourceVariable.value;
+            if (isProperty(source)) {
                 const inputType = isBooleanType(source.valueType) ? 'checkbox' : 'text';
 
                 let valueType: aas.DataTypeDefXsd | undefined;
@@ -164,15 +171,24 @@ export class OperationCallFormComponent {
                     inputType: inputType,
                     value: inputType === 'checkbox' ? toBoolean(value) : value,
                 });
+            } else if (isReferenceElement(source) && source.value) {
+                values.push({
+                    submodelElement: source,
+                    name: source.idShort,
+                    description: getLocaleValue(source.description),
+                    type: '-',
+                    inputType: 'text',
+                    value: source.value.keys.map(key => key.value).join('.'),
+                });
             } else {
                 const source = sourceVariable.value;
                 values.push({
                     submodelElement: source,
                     name: source.idShort,
                     description: getLocaleValue(source.description),
-                    type: 'xs:string',
+                    type: '-',
                     inputType: 'text',
-                    value: 'not implemented',
+                    value: source.modelType,
                 });
             }
         }

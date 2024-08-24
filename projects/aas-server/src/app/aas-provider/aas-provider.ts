@@ -381,7 +381,13 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            return await resource.invoke(document.content!, operation);
+            let env = document.content;
+            if (!env) {
+                env = await resource.createPackage(document.address).getEnvironmentAsync();
+                this.cache.set(document.endpoint, document.id, env);
+            }
+
+            return await resource.invoke(env, operation);
         } finally {
             await resource.closeAsync();
         }

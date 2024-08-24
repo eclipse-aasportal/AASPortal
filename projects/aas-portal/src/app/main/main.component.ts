@@ -10,11 +10,13 @@ import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, sig
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs';
-import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
-import { ToolbarService } from '../toolbar.service';
-import { MainApiService } from './main-api.service';
+import { noop } from 'aas-core';
+import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { ToolbarService } from '../toolbar.service';
+import { MainApiService } from './main-api.service';
+import { environment } from '../../environments/environment';
 
 export const enum LinkId {
     START = 0,
@@ -55,6 +57,7 @@ export class MainComponent implements OnInit {
         private readonly window: WindowService,
         private readonly api: MainApiService,
         private readonly toolbar: ToolbarService,
+        private readonly indexChange: IndexChangeService,
     ) {}
 
     @ViewChild('emptyToolbar', { read: TemplateRef })
@@ -90,6 +93,12 @@ export class MainComponent implements OnInit {
         },
     ]).asReadonly();
 
+    public readonly version = signal(environment.version).asReadonly();
+
+    public readonly count = this.indexChange.count;
+
+    public readonly summary = this.indexChange.summary;
+
     public ngOnInit(): void {
         const params = this.window.getQueryParams();
         const id = params.get('id');
@@ -110,5 +119,13 @@ export class MainComponent implements OnInit {
         } else {
             this.router.navigate(['/start'], { skipLocationChange: true });
         }
+    }
+
+    public clear(): void {
+        this.indexChange.clear();
+    }
+
+    public onKeyDown($event: KeyboardEvent): void {
+        noop($event);
     }
 }

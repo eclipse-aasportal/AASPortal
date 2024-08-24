@@ -6,38 +6,50 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="bg-white sticky-top pb-2">
-  <nav class="navbar navbar-expand-sm bg-white">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
-        <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="">
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbar">
-        <ul ngbNav #nav="ngbNav" [activeId]="route.fragment | async" class="navbar-nav me-auto">
-          @for (link of links(); track link) {
-            <li [ngbNavItem]="link.id">
-              <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active" skipLocationChange="true">{{link.name | translate}}</a>
-            </li>
-          }
-        </ul>
-        <fhg-localize class="text-primary" [languages]="['en-us', 'de-de']"></fhg-localize>
-        <fhg-auth class="text-primary me-2"></fhg-auth>
-        <div class="bg-light">
-          <img class="img-thumbnail" src="/assets/i40-spec-logo.png" width="320" alt="">
+<div class="fhg-main-page bg-body-secondary">
+    <div class="fhg-main-navbar">
+        <nav class="navbar navbar-expand-sm bg-white">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
+                    <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbar">
+                    <ul ngbNav #nav="ngbNav" [activeId]="route.fragment | async" class="navbar-nav me-auto">
+                        @for (link of links(); track link) {
+                        <li [ngbNavItem]="link.id">
+                            <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active"
+                                skipLocationChange="true">{{link.name | translate}}</a>
+                        </li>
+                        }
+                    </ul>
+                    <fhg-localize class="text-primary" [languages]="['en-us', 'de-de']"></fhg-localize>
+                    <fhg-auth class="text-primary me-2"></fhg-auth>
+                    <div class="bg-light">
+                        <img class="img-thumbnail" src="/assets/i40-spec-logo.png" width="320" alt="">
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="fhg-main-toolbar">
+        <div class="btn-toolbar mx-2" role="toolbar">
+            <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
         </div>
-      </div>
+        <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
     </div>
-  </nav>
-  <div class="container-fluid">
-    <div class="btn-toolbar" role="toolbar">
-      <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
+    <div class="fhg-main-content">
+        <router-outlet></router-outlet>
     </div>
-    <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
-  </div>
+    <div class="fhg-main-statusbar d-flex flex-row-reverse p-2">
+        <div class="ts-x-small">© 2024 Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
+        @if (count() > 0) {
+        <span class="badge rounded-pill text-bg-info mx-2" (click)="clear()" tabindex="-1"
+            (keydown)="onKeyDown($event)">{{summary()}}</span>
+        }
+    </div>
 </div>
-<router-outlet></router-outlet>
 
 <ng-template #emptyToolbar></ng-template>
