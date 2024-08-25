@@ -66,10 +66,8 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         return this.firstChild >= 0;
     }
 
-    public get relatioshipElement(): aas.RelationshipElement | undefined {
-        return this.element.modelType === 'RelationshipElement'
-            ? (this.element as aas.RelationshipElement)
-            : undefined;
+    public get relationship(): aas.RelationshipElement | undefined {
+        return this.element.modelType === 'RelationshipElement' ? (this.element as aas.RelationshipElement) : undefined;
     }
 }
 
