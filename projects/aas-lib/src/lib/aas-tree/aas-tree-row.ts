@@ -12,6 +12,7 @@ import {
     AASDocument,
     aas,
     convertToString,
+    extensionToMimeType,
     getAbbreviation,
     getLocaleValue,
     isAnnotatedRelationshipElement,
@@ -30,7 +31,7 @@ import {
     isSubmodelElement,
     isSubmodelElementCollection,
     isSubmodelElementList,
-    mimeTypeToExtension,
+    noop,
     selectReferable,
     toBoolean,
     toLocale,
@@ -69,38 +70,6 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         return this.element.modelType === 'AnnotatedRelationshipElement'
             ? (this.element as aas.AnnotatedRelationshipElement)
             : undefined;
-    }
-
-    public get blob(): aas.Blob | undefined {
-        return this.element.modelType === 'Blob' ? (this.element as aas.Blob) : undefined;
-    }
-
-    public get entity(): aas.Entity | undefined {
-        return this.element.modelType === 'Entity' ? (this.element as aas.Entity) : undefined;
-    }
-
-    public get file(): aas.File | undefined {
-        return this.element.modelType === 'File' ? (this.element as aas.File) : undefined;
-    }
-
-    public get operation(): aas.Operation | undefined {
-        return this.element.modelType === 'Operation' ? (this.element as aas.Operation) : undefined;
-    }
-
-    public get property(): aas.Property | undefined {
-        return this.element.modelType === 'Property' ? (this.element as aas.Property) : undefined;
-    }
-
-    public get reference(): aas.ReferenceElement | undefined {
-        return this.element.modelType === 'ReferenceElement' ? (this.element as aas.ReferenceElement) : undefined;
-    }
-
-    public get relationship(): aas.RelationshipElement | undefined {
-        return this.element.modelType === 'RelationshipElement' ? (this.element as aas.RelationshipElement) : undefined;
-    }
-
-    public get submodel(): aas.Submodel | undefined {
-        return this.element.modelType === 'Submodel' ? (this.element as aas.Submodel) : undefined;
     }
 }
 
@@ -355,7 +324,7 @@ class TreeInitialize {
         }
 
         if (isBlob(referable)) {
-            return `${referable.idShort}${mimeTypeToExtension(referable.contentType)}`;
+            return referable.value ? `${referable.value.length}` : '...';
         }
 
         if (isFile(referable)) {
@@ -418,11 +387,19 @@ class TreeInitialize {
         }
 
         if (isBlob(referable)) {
-            return referable.contentType ?? '-';
+            return referable.contentType || '-';
         }
 
         if (isFile(referable)) {
-            return referable.contentType ?? '-';
+            if (referable.contentType) {
+                return referable.contentType;
+            }
+
+            if (referable.value) {
+                return extensionToMimeType(referable.value) ?? '-';
+            }
+
+            return '-';
         }
 
         if (isRange(referable)) {
@@ -490,6 +467,10 @@ export class AASTree extends Tree<aas.Referable, AASTreeRow> {
         }
 
         return new AASTree(new TreeInitialize(document.content, language).get());
+    }
+
+    public update(referable: aas.Referable): void {
+        noop(referable);
     }
 
     protected override getNodes(): AASTreeRow[] {

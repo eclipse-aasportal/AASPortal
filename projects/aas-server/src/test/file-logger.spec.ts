@@ -12,7 +12,7 @@ import { FileLogger } from '../app/logging/file-logger.js';
 import { createSpyObj } from 'fhg-jest';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
-describe('WinstonLogger', () => {
+describe('FileLogger', () => {
     describe('log level Info', () => {
         let logger: FileLogger;
         let winstonLogger: jest.Mocked<winston.Logger>;

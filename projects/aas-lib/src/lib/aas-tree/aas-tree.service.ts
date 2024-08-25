@@ -178,4 +178,13 @@ export class AASTreeService {
             };
         });
     }
+
+    public update(blob: aas.Blob, value: string): void {
+        this._state.update(state => {
+            blob.value = value;
+            const tree = new AASTree(state.rows);
+            tree.update(blob);
+            return { ...state, rows: tree.nodes, nodes: tree.expanded };
+        });
+    }
 }

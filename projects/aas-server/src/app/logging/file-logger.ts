@@ -50,7 +50,7 @@ export class FileLogger extends Logger {
 
             if (text) {
                 if (!this.record.errors.has(text)) {
-                    this.logger.log('error', text);
+                    this.logger.error(text);
                 }
 
                 this.record.errors.set(text, Date.now());
@@ -67,7 +67,7 @@ export class FileLogger extends Logger {
 
             if (text) {
                 if (!this.record.warnings.has(text)) {
-                    this.logger.log('warn', text);
+                    this.logger.warn(text);
                 }
 
                 this.record.warnings.set(text, Date.now());
@@ -84,7 +84,7 @@ export class FileLogger extends Logger {
 
             if (text) {
                 if (!this.record.messages.has(text)) {
-                    this.logger.log('info', text);
+                    this.logger.info(text);
                 }
 
                 this.record.messages.set(text, Date.now());
@@ -104,7 +104,7 @@ export class FileLogger extends Logger {
             }
 
             if (text) {
-                this.logger.log('debug', text);
+                this.logger.debug(text);
             }
         }
     }
