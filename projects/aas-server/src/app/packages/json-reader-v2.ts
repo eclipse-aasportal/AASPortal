@@ -40,7 +40,7 @@ export class JsonReaderV2 extends AASReader {
             case 'Submodel':
                 return this.readSubmodel(source as aasv2.Submodel);
             default:
-                return this.readSubmodelElement(source as aasv2.SubmodelElement, [])!;
+                return this.readSubmodelElement(source as aasv2.SubmodelElement, []);
         }
     }
 
@@ -157,19 +157,13 @@ export class JsonReaderV2 extends AASReader {
     private readSubmodelElements(sources: aasv2.SubmodelElement[], ancestors: aas.Referable[]): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const source of sources) {
-            const submodelElement = this.readSubmodelElement(source, ancestors);
-            if (submodelElement) {
-                submodelElements.push(submodelElement);
-            }
+            submodelElements.push(this.readSubmodelElement(source, ancestors));
         }
 
         return submodelElements;
     }
 
-    private readSubmodelElement(
-        source: aasv2.SubmodelElement,
-        ancestors: aas.Referable[],
-    ): aas.SubmodelElement | undefined {
+    private readSubmodelElement(source: aasv2.SubmodelElement, ancestors: aas.Referable[]): aas.SubmodelElement {
         switch (source.modelType.name) {
             case 'AnnotatedRelationshipElement':
                 return this.readAnnotatedRelationshipElement(source as aasv2.AnnotatedRelationshipElement, ancestors);
@@ -196,7 +190,7 @@ export class JsonReaderV2 extends AASReader {
             case 'SubmodelElementCollection':
                 return this.readSubmodelElementCollection(source as aasv2.SubmodelElementCollection, ancestors);
             default:
-                return undefined;
+                return this.readSubmodelElementType(source, ancestors);
         }
     }
 

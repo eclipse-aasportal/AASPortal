@@ -9,7 +9,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { v4 as uuid } from 'uuid';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { EMPTY, first, map, mergeMap, Observable, of } from 'rxjs';
+import { first, map, mergeMap, Observable, of, zip } from 'rxjs';
 import { encodeBase64Url, AuthService } from 'aas-lib';
 import { aas, AASDocument, ApplicationError, getIdShortPath, getUnit, LiveNode, LiveRequest } from 'aas-core';
 
@@ -105,21 +105,17 @@ export class DashboardService {
             .pipe(
                 first(ready => ready === true),
                 mergeMap(() =>
-                    this.auth.getCookie('.DashboardPage').pipe(
-                        map(value =>
-                            this.auth.getCookie('.DashboardPages').pipe(
-                                mergeMap(data => (data ? of(JSON.parse(data) as DashboardPage[]) : EMPTY)),
-                                map(pages => {
-                                    this._state.set({
-                                        pages,
-                                        index: Math.max(
-                                            pages.findIndex(page => page.name === value),
-                                            0,
-                                        ),
-                                    });
-                                }),
-                            ),
-                        ),
+                    zip(this.auth.getCookie('.DashboardPage'), this.auth.getCookie('.DashboardPages')).pipe(
+                        map(([value, data]) => {
+                            const pages: DashboardPage[] = data ? JSON.parse(data) : [];
+                            this._state.set({
+                                pages,
+                                index: Math.max(
+                                    pages.findIndex(page => page.name === value),
+                                    0,
+                                ),
+                            });
+                        }),
                     ),
                 ),
             )

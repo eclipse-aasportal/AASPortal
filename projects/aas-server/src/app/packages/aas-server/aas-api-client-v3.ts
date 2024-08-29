@@ -37,7 +37,7 @@ interface OperationRequest {
     clientTimeoutDuration?: string;
 }
 
-export interface Message {
+interface Message {
     code?: string;
     correlationId?: string;
     messageType: 'Undefined' | 'Info' | 'Warning' | 'Error' | 'Exception';
@@ -45,7 +45,7 @@ export interface Message {
     timeStamp?: string;
 }
 
-export interface OperationResult {
+interface OperationResult {
     messages?: Message[];
     executionState: 'Initiated' | 'Running' | 'Completed' | 'Canceled' | 'Failed' | 'Timeout';
     success: boolean;
@@ -206,10 +206,15 @@ export class AASApiClientV3 extends AASApiClient {
         const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
         const smId = encodeBase64Url(selectSubmodel(env, operation)!.id);
         const path = getIdShortPath(operation);
-        const request: OperationRequest = {
-            inputVariables: cloneDeep(operation.inputVariables),
-            inoutputVariables: cloneDeep(operation.inoutputVariables),
-        };
+        const request: OperationRequest = {};
+
+        if (operation.inputVariables) {
+            request.inputVariables = cloneDeep(operation.inputVariables);
+        }
+
+        if (operation.inoutputVariables) {
+            request.inoutputVariables = cloneDeep(operation.inoutputVariables);
+        }
 
         const result: OperationResult = JSON.parse(
             await this.message.post(

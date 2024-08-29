@@ -25,7 +25,7 @@
         @if (inputVariables().length > 0) {
         <table class="table table-sm table-borderless table-condensed">
             <caption class="caption-top">
-                <div class="bg-secondary text-white ti-1" translate translate>CAPTION_INPUT_ARGUMENTS</div>
+                <div class="bg-secondary text-white ti-1" translate>CAPTION_INPUT_ARGUMENTS</div>
             </caption>
             <thead>
                 <tr>
@@ -37,6 +37,44 @@
             </thead>
             <tbody>
                 @for (variable of inputVariables(); track variable.name) {
+                <tr>
+                    <td>{{variable.name}}</td>
+                    @if (variable.inputType === 'text') {
+                    <td>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="variable.value"
+                            name="{{variable.name}}" [readOnly]="variable.type === '-'">
+                    </td>
+                    }
+                    @else if (variable.inputType === 'checkbox') {
+                    <td>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="variable.value"
+                                name="{{variable.name}}">
+                        </div>
+                    </td>
+                    }
+                    <td>{{variable.type}}</td>
+                    <td>{{variable.description}}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+        @if (inoutputVariables().length > 0) {
+        <table class="table table-sm table-borderless table-condensed">
+            <caption class="caption-top">
+                <div class="bg-secondary text-white ti-1" translate>CAPTION_INOUTPUT_ARGUMENTS</div>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col" translate>COLUMN_NAME</th>
+                    <th scope="col" translate>COLUMN_VALUE</th>
+                    <th scope="col" translate>COLUMN_DATA_TYPE</th>
+                    <th scope="col" translate>COLUMN_DESCRIPTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (variable of inoutputVariables(); track variable.name) {
                 <tr>
                     <td>{{variable.name}}</td>
                     @if (variable.inputType === 'text') {

@@ -73,6 +73,7 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
 
 class TreeInitialize {
     private readonly rows: AASTreeRow[] = [];
+
     public constructor(
         private readonly env: aas.Environment,
         private readonly language: string,
@@ -437,7 +438,7 @@ class TreeInitialize {
     }
 
     private referenceToString(reference: aas.Reference | undefined): string {
-        return reference?.keys.map(key => key.value).join('/') ?? '-';
+        return reference?.keys.map(key => key.value).join('.') ?? '-';
     }
 
     private hasSpecificSemantic(submodel: aas.Submodel): boolean {

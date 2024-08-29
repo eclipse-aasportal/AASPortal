@@ -34,7 +34,7 @@ import { WindowService } from '../window.service';
     providedIn: 'root',
 })
 export class AuthService {
-    private readonly payload$ = signal<JWTPayload>({ role: 'guest' });
+    private readonly _payload = signal<JWTPayload>({ role: 'guest' });
     private readonly ready$ = new BehaviorSubject<boolean>(false);
 
     public constructor(
@@ -67,22 +67,22 @@ export class AuthService {
     public readonly ready = this.ready$.asObservable();
 
     /** The e-mail of the current user. */
-    public readonly userId = computed(() => this.payload$()?.sub);
+    public readonly userId = computed(() => this._payload()?.sub);
 
     /** The name or alias of the current user. */
-    public readonly name = computed(() => this.payload$()?.name ?? (this.translate.instant('GUEST_USER') as string));
+    public readonly name = computed(() => this._payload()?.name ?? (this.translate.instant('GUEST_USER') as string));
 
     /** The current user role. */
-    public readonly role = computed(() => this.payload$()?.role ?? 'guest');
+    public readonly role = computed(() => this._payload()?.role ?? 'guest');
 
     /** Indicates whether the current user is authenticated. */
     public readonly authenticated = computed(() => {
-        const payload = this.payload$();
+        const payload = this._payload();
         return payload.sub != null && (payload.role === 'editor' || payload.role === 'admin');
     });
 
     /** The current active JSON web token. */
-    public readonly payload = this.payload$.asReadonly();
+    public readonly payload = this._payload.asReadonly();
 
     /**
      * User login.
@@ -176,7 +176,7 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public updateUserProfile(profile?: UserProfile): Observable<void> {
-        const payload = this.payload$();
+        const payload = this._payload();
         if (!payload || !payload.sub || !payload.name) {
             return throwError(() => new Error('Invalid operation.'));
         }
@@ -209,7 +209,7 @@ export class AuthService {
      * Deletes the account of the current authenticated user.
      */
     public deleteUser(): Observable<void> {
-        const payload = this.payload$();
+        const payload = this._payload();
         if (!payload || !payload.sub || !payload.name) {
             throw new Error('Invalid operation');
         }
@@ -231,13 +231,15 @@ export class AuthService {
      * @returns `true` if the cookie exists; otherwise, `false`.
      */
     public checkCookie(name: string): Observable<boolean> {
-        const payload = this.payload$();
-        if (payload && payload.sub) {
-            const id = payload.sub;
-            return this.api.getCookie(id, name).pipe(map(cookie => cookie != null));
-        } else {
-            return of(this.window.getLocalStorageItem(name) != null);
-        }
+        return of(this._payload()).pipe(
+            mergeMap(payload => {
+                if (payload && payload.sub) {
+                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie != null));
+                }
+
+                return of(this.window.getLocalStorageItem(name) != null);
+            }),
+        );
     }
 
     /**
@@ -246,12 +248,15 @@ export class AuthService {
      * @returns The cookie value.
      */
     public getCookie(name: string): Observable<string | undefined> {
-        const payload = this.payload$();
-        if (payload && payload.sub) {
-            return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
-        }
+        return of(this._payload()).pipe(
+            mergeMap(payload => {
+                if (payload && payload.sub) {
+                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
+                }
 
-        return of(this.window.getLocalStorageItem(name) ?? undefined);
+                return of(this.window.getLocalStorageItem(name) ?? undefined);
+            }),
+        );
     }
 
     /**
@@ -260,7 +265,7 @@ export class AuthService {
      * @param data The cookie value.
      */
     public setCookie(name: string, data: string): Observable<void> {
-        const payload = this.payload$();
+        const payload = this._payload();
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.setCookie(id, { name, data });
@@ -275,7 +280,7 @@ export class AuthService {
      * @param name The cookie name.
      */
     public deleteCookie(name: string): Observable<void> {
-        const payload = this.payload$();
+        const payload = this._payload();
         if (payload && payload.sub) {
             const id = payload.sub;
             return this.api.deleteCookie(id, name);
@@ -319,6 +324,6 @@ export class AuthService {
     private nextPayload(token: string): void {
         this.window.setLocalStorageItem('.Token', token);
         const payload = jwtDecode(token) as JWTPayload;
-        this.payload$.set(payload);
+        this._payload.set(payload);
     }
 }

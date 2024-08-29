@@ -10,6 +10,7 @@
     "CAPTION_DASHBOARD": "Dashboard",
     "CAPTION_INPUT_ARGUMENTS": "Eingangsargumente",
     "CAPTION_OUTPUT_ARGUMENTS": "Ausgangsargumente",
+    "CAPTION_INOUTPUT_ARGUMENTS": "Ein/Ausgangsargumente",
     "CAPTION_CREATE_WORKSPACE": "Gruppieren",
     "CAPTION_EDIT_WORKSPACE": "Gruppe bearbeiten",
     "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",

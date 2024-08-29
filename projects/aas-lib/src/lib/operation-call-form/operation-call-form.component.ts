@@ -65,6 +65,8 @@ export class OperationCallFormComponent {
 
     public readonly inputVariables = signal<VariableItem[]>([]);
 
+    public readonly inoutputVariables = signal<VariableItem[]>([]);
+
     public readonly outputVariables = signal<VariableItem[]>([]);
 
     public readonly messages = signal<string[]>([]);
@@ -72,9 +74,12 @@ export class OperationCallFormComponent {
     public initialize(document: AASDocument, operation: aas.Operation): void {
         this.document = document;
         this.operation = cloneDeep(operation);
+        delete this.operation.parent;
 
         try {
+            this.name.set(this.operation.idShort);
             this.inputVariables.set(this.applyToView(this.operation.inputVariables));
+            this.inoutputVariables.set(this.applyToView(this.operation.inoutputVariables));
             this.outputVariables.set(this.applyToView(this.operation.outputVariables));
         } catch (error) {
             this.messages.update(values => [...values, messageToString(error, this.translate)]);
@@ -96,6 +101,7 @@ export class OperationCallFormComponent {
             map(result => {
                 if (result && Array.isArray(result.outputVariables)) {
                     this.inputVariables.set(this.applyToView(result.inputVariables));
+                    this.inoutputVariables.set(this.applyToView(result.inoutputVariables));
                     this.outputVariables.set(this.applyToView(result.outputVariables));
                 }
             }),
@@ -111,7 +117,7 @@ export class OperationCallFormComponent {
     }
 
     private applyToModel(): void {
-        for (const item of this.inputVariables()) {
+        for (const item of [...this.inputVariables(), ...this.inoutputVariables()]) {
             const element = item.submodelElement;
             if (isProperty(element)) {
                 const value =
@@ -140,7 +146,9 @@ export class OperationCallFormComponent {
 
         for (const sourceVariable of sources) {
             const source = sourceVariable.value;
+            delete source.parent;
             if (isProperty(source)) {
+                delete source.nodeId;
                 const inputType = isBooleanType(source.valueType) ? 'checkbox' : 'text';
 
                 let valueType: aas.DataTypeDefXsd | undefined;
