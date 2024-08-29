@@ -37,7 +37,7 @@ interface OperationRequest {
     clientTimeoutDuration?: string;
 }
 
-interface Message {
+export interface Message {
     code?: string;
     correlationId?: string;
     messageType: 'Undefined' | 'Info' | 'Warning' | 'Error' | 'Exception';
@@ -45,7 +45,7 @@ interface Message {
     timeStamp?: string;
 }
 
-interface OperationResult {
+export interface OperationResult {
     messages?: Message[];
     executionState: 'Initiated' | 'Running' | 'Completed' | 'Canceled' | 'Failed' | 'Timeout';
     success: boolean;
