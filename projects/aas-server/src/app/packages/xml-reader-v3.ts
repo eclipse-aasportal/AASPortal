@@ -211,17 +211,14 @@ export class XmlReaderV3 extends AASReader {
     private readSubmodelElements(node: Node, parent: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const child of this.selectNodes('./aas:submodelElements/*', node)) {
-            const submodelElement = this.readSubmodelElement(child, parent);
-            if (submodelElement) {
-                submodelElements.push(submodelElement);
-            }
+            submodelElements.push(this.readSubmodelElement(child, parent));
         }
 
         return submodelElements;
     }
 
-    private readSubmodelElement(node: Node, parent: aas.Reference): aas.SubmodelElement | undefined {
-        let submodelElement: aas.SubmodelElement | undefined;
+    private readSubmodelElement(node: Node, parent: aas.Reference): aas.SubmodelElement {
+        let submodelElement: aas.SubmodelElement;
         const modelType = this.getModelTypeFromLocalName(node);
         switch (modelType) {
             case 'AnnotatedRelationshipElement':
@@ -264,6 +261,7 @@ export class XmlReaderV3 extends AASReader {
                 submodelElement = this.readSubmodelElementList(node, parent);
                 break;
             default:
+                submodelElement = this.readSubmodelElementType(node, parent);
                 break;
         }
 
@@ -416,10 +414,7 @@ export class XmlReaderV3 extends AASReader {
     private readStatements(node: Node, parent: aas.Reference): aas.SubmodelElement[] {
         const statements: aas.SubmodelElement[] = [];
         for (const child of this.selectNodes('./aas:statements/*', node)) {
-            const submodelElement = this.readSubmodelElement(child, parent);
-            if (submodelElement) {
-                statements.push(submodelElement);
-            }
+            statements.push(this.readSubmodelElement(child, parent));
         }
 
         return statements;
@@ -468,10 +463,7 @@ export class XmlReaderV3 extends AASReader {
     private readCollectionValue(node: Node, parent: aas.Reference): aas.SubmodelElement[] {
         const submodelElements: aas.SubmodelElement[] = [];
         for (const child of this.selectNodes('./aas:value/*', node)) {
-            const submodelElement = this.readSubmodelElement(child, parent);
-            if (submodelElement) {
-                submodelElements.push(submodelElement);
-            }
+            submodelElements.push(this.readSubmodelElement(child, parent));
         }
 
         return submodelElements;
@@ -630,10 +622,7 @@ export class XmlReaderV3 extends AASReader {
 
     private readOperationVariable(node: Node, parent: aas.Reference): aas.OperationVariable | undefined {
         for (const element of this.selectNodes('./aas:value/*', node)) {
-            const value = this.readSubmodelElement(element, parent);
-            if (value) {
-                return { value };
-            }
+            return { value: this.readSubmodelElement(element, parent) };
         }
 
         return undefined;

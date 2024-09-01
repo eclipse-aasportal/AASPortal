@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TemplateService } from 'aas-lib';
 import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'aas-core';
@@ -31,7 +31,12 @@ export class NewElementFormComponent {
     public constructor(
         private readonly modal: NgbActiveModal,
         private readonly api: TemplateService,
-    ) {}
+    ) {
+        effect(() => {
+            const template = this.template();
+            this.idShort = template?.idShort || '';
+        });
+    }
 
     public readonly modelTypes = this._modelTypes.asReadonly();
 
@@ -44,7 +49,7 @@ export class NewElementFormComponent {
 
     public readonly template = signal<TemplateDescriptor | undefined>(undefined);
 
-    public readonly idShort = computed(() => this.template()?.idShort ?? '');
+    public idShort = '';
 
     public readonly messages = this._messages.asReadonly();
 
@@ -95,9 +100,9 @@ export class NewElementFormComponent {
         if (this.validate()) {
             this.api.getTemplate(this.template()!.endpoint!).subscribe(template => {
                 if (isEnvironment(template)) {
-                    template.submodels[0].idShort = this.idShort();
+                    template.submodels[0].idShort = this.idShort;
                 } else {
-                    template.idShort = this.idShort();
+                    template.idShort = this.idShort;
                 }
                 return this.modal.close(template);
             });
@@ -111,7 +116,7 @@ export class NewElementFormComponent {
         }
 
         const children = getChildren(this.parent, this.env);
-        if (children.some(child => child.idShort === this.idShort())) {
+        if (children.some(child => child.idShort === this.idShort)) {
             this.pushMessage(`A ${this.modelType} with the name "${this.idShort}" already exists.`);
             return false;
         }
