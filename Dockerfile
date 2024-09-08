@@ -1,5 +1,5 @@
 # Dockerfile to build server and client parts
-FROM node:lts-alpine3.19 as build
+FROM node:lts-alpine3.19 AS build
 WORKDIR /usr/src/app
 COPY . .
 # RUN apk add g++ make py3-pip
@@ -7,7 +7,7 @@ RUN npm install
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
 RUN npm run build
 
-FROM node:lts-alpine3.19 as aasportal
+FROM node:lts-alpine3.19 AS aasportal
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY package.json package.json

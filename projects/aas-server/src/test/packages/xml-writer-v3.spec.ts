@@ -20,7 +20,6 @@ describe('XmlWriterV3', () => {
     describe('writeEnvironment', () => {
         it('writes an AAS environment', () => {
             const xml = writer.write(env);
-            console.log(xml);
             expect(xml).toBeDefined();
         });
     });

@@ -57,7 +57,7 @@ interface PagedResultPagingMetadata {
     cursor?: string;
 }
 
-interface PagedResult<T extends aas.Identifiable> {
+interface PagedResult<T> {
     result: T[];
     paging_metadata: PagedResultPagingMetadata;
 }
@@ -179,8 +179,8 @@ export class AASApiClientV3 extends AASApiClient {
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.message.get(this.resolve(`packages?aasId=${aasId}`));
-        const packageId = encodeBase64Url(descriptors[0].packageId);
+        const result: PagedResult<PackageDescriptor> = await this.message.get(this.resolve(`packages?aasId=${aasId}`));
+        const packageId = encodeBase64Url(result.result[0].packageId);
         return await this.message.getResponse(this.resolve(`packages/${packageId}`));
     }
 

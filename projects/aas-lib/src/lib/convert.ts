@@ -8,7 +8,6 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import toString from 'lodash-es/toString';
 import { ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'aas-core';
 
 /**
@@ -34,14 +33,14 @@ export function messageToString(message: unknown, translate: TranslateService): 
     } else if (isErrorData(message)) {
         text = format(message.message, message.name, message.args);
     } else {
-        text = toString(message);
+        text = convertToString(message);
     }
 
     return text;
 
     function isErrorData(value: unknown): value is ErrorData {
         const errorData = value as ErrorData;
-        return errorData.message != null && errorData.name != null && errorData.type != null;
+        return errorData.message !== undefined && errorData.name !== undefined && errorData.type !== undefined;
     }
 
     function format(message: string, name: string, args: unknown[]): string {

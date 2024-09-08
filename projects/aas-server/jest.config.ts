@@ -6,6 +6,7 @@ const config: Config = {
     collectCoverageFrom: ['<rootDir>/src/app/**/*.ts'],
     coverageDirectory: '<rootDir>/../../reports/aas-server',
     coverageReporters: ['html', 'json-summary', 'cobertura'],
+    coverageProvider: 'v8',
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
