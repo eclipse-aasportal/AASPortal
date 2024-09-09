@@ -10,7 +10,6 @@ RUN npm run build
 FROM node:lts-alpine3.19 AS aasportal
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
-COPY package.json package.json
 COPY projects/aas-server/package.json package.json
 COPY projects/aas-server/src/assets assets/
 RUN npm install --omit=dev
