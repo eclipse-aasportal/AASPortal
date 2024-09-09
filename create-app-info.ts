@@ -1,4 +1,5 @@
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile, readdir } from 'fs/promises';
+import path from 'path';
 import { existsSync } from 'fs';
 import { dirname, resolve, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -28,6 +29,7 @@ interface Library {
     version: string;
     description: string;
     license: string;
+    licenseText: string;
     homepage: string;
 }
 
@@ -46,6 +48,7 @@ async function main(): Promise<void> {
     appInfo.author = project.author;
     appInfo.homepage = project.homepage;
     appInfo.license = project.license;
+
     appInfo.libraries = await readLibrariesAsync(project);
 
     await write(file, appInfo);
@@ -73,6 +76,7 @@ async function readLibrariesAsync(project: Package): Promise<Library[]> {
                         version: pkg.version,
                         description: pkg.description,
                         license: pkg.license,
+                        licenseText: await loadLicenseText(nodeModulesFolder, name),
                         homepage: pkg.homepage,
                     });
                 } catch (error) {
@@ -83,4 +87,18 @@ async function readLibrariesAsync(project: Package): Promise<Library[]> {
     }
 
     return libraries;
+}
+
+async function loadLicenseText(nodeModulesFolder: string, packageName: string): Promise<string> {
+    packageName = packageName.split('/')[0];
+    const folder = join(nodeModulesFolder, packageName);
+    for (const file of await readdir(folder, { withFileTypes: true, recursive: true })) {
+        if (file.isFile()) {
+            if (path.basename(file.name, path.extname(file.name)).toLowerCase() === 'license') {
+                return (await readFile(join(file.parentPath, file.name))).toString();
+            }
+        }
+    }
+
+    return '';
 }

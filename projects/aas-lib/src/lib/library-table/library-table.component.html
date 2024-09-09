@@ -23,8 +23,7 @@
         <td [noWrap]="true">
           @if (library.homepage) {
             <a target="_blank" [href]="library.homepage">{{library.name}}</a>
-          }
-          @if (!library.homepage) {
+          } @else {
             <div class="text-nowrap">{{library.name}}</div>
           }
         </td>
