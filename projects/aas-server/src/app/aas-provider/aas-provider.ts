@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import { extname } from 'path/posix';
-import Jimp from 'jimp';
+import { Jimp } from 'jimp';
 import { Readable } from 'stream';
 import {
     AASDocument,
@@ -179,7 +179,7 @@ export class AASProvider {
                     }
 
                     if (extension === '.tiff' || extension === '.tif') {
-                        stream = await ImageProcessing.convertAsync(stream, Jimp.MIME_PNG);
+                        stream = await ImageProcessing.convertAsync(stream);
                     }
                 }
             } else if (dataElement.modelType === 'Blob') {

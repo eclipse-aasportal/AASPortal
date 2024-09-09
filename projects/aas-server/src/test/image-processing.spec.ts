@@ -8,7 +8,6 @@
 
 import { describe, it, expect } from '@jest/globals';
 import fs from 'fs';
-import Jimp from 'jimp';
 import { ImageProcessing } from '../app/image-processing.js';
 
 describe('image processing', function () {
@@ -20,7 +19,7 @@ describe('image processing', function () {
 
     it('converts a tiff-image to a png-image', async () => {
         const source = fs.createReadStream('./src/test/assets/image.tiff');
-        const stream = await ImageProcessing.convertAsync(source, Jimp.MIME_PNG);
+        const stream = await ImageProcessing.convertAsync(source);
         expect(stream).toBeTruthy();
     });
 });
