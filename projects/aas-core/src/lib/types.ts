@@ -138,7 +138,8 @@ export interface LiveRequest {
     nodes: LiveNode[];
 }
 
-export interface PackageInfo {
+/** Provides information about the current application. */
+export interface AppInfo {
     name: string;
     version: string;
     author: string;
@@ -146,6 +147,16 @@ export interface PackageInfo {
     license: string;
     homepage: string;
     libraries: Library[];
+}
+
+/** Provides information about a 3rd-party package. */
+export interface Library {
+    name: string;
+    version: string;
+    description: string;
+    license: string;
+    licenseText: string;
+    homepage?: string;
 }
 
 export type DirEntry = {
@@ -164,16 +175,6 @@ export interface ErrorData {
     name: string;
     message: string;
     args: unknown[];
-}
-
-/** Provides information about a 3rd-party package. */
-export interface Library {
-    name: string;
-    version: string;
-    description: string;
-    license: string;
-    licenseText: string;
-    homepage?: string;
 }
 
 /** Defines the message types. */

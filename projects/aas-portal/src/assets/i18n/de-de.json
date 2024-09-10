@@ -53,6 +53,8 @@
     "CMD_VIEW_USER_FEEDBACK": "Nutzer-Feedback",
     "CMD_VIEW_NAMEPLATE": "Typenschild",
     "CMD_ADD_NEW_FAVORITES_LIST": "Neue Favoritenliste",
+    "CMD_SHOW_LICENSE_TEXT": "Lizenztext anzeigen",
+    "CMD_HIDE_LICENSE_TEXT": "Lizenztext verbergen",
     "COLUMN_VARIANT": "Variante",
     "COLUMN_NAME": "Name",
     "COLUMN_MODEL_TYPE": "Modeltyp",

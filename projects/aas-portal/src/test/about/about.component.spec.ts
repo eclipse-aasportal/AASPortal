@@ -9,20 +9,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { PackageInfo } from 'aas-core';
+import { AppInfo } from 'aas-core';
 
 import { AboutComponent } from '../../app/about/about.component';
-import { ServerApiService } from '../../app/about/server-api.service';
+import { AboutApiService } from '../../app/about/about-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { signal } from '@angular/core';
 
 describe('AboutComponent', () => {
     let component: AboutComponent;
     let fixture: ComponentFixture<AboutComponent>;
-    let api: jasmine.SpyObj<ServerApiService>;
+    let api: jasmine.SpyObj<AboutApiService>;
 
     beforeEach(() => {
-        const info: PackageInfo = {
+        const info: AppInfo = {
             name: 'Test',
             version: '1.0',
             author: 'FHG',
@@ -32,14 +32,14 @@ describe('AboutComponent', () => {
             libraries: [],
         };
 
-        api = jasmine.createSpyObj<ServerApiService>(['getInfo', 'getMessages']);
+        api = jasmine.createSpyObj<AboutApiService>(['getInfo', 'getMessages']);
         api.getInfo.and.returnValue(of(info));
         api.getMessages.and.returnValue(of([]));
 
         TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: ServerApiService,
+                    provide: AboutApiService,
                     useValue: api,
                 },
                 {

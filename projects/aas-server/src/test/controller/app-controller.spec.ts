@@ -12,7 +12,7 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import { Logger } from '../../app/logging/logger.js';
-import { Message, PackageInfo } from 'aas-core';
+import { Message, AppInfo } from 'aas-core';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { ApplicationInfo } from '../../app/application-info.js';
@@ -66,7 +66,7 @@ describe('AppController', function () {
     });
 
     it('getInfo: /api/v1/app/info', async function () {
-        const data: PackageInfo = {
+        const data: AppInfo = {
             name: 'aas-portal-project',
             version: '2.0.0',
             description: 'Web-based visualization and control of asset administration shells.',
@@ -79,12 +79,13 @@ describe('AppController', function () {
                     version: '1.0',
                     description: 'A library.',
                     license: 'MIT',
+                    licenseText: 'License text...',
                     homepage: 'https://www.iosb-ina.fraunhofer.de/',
                 },
             ],
         };
 
-        applicationInfo.getAsync.mockReturnValue(new Promise<PackageInfo>(resolve => resolve(data)));
+        applicationInfo.getAsync.mockReturnValue(new Promise<AppInfo>(resolve => resolve(data)));
         const response = await request(app).get('/api/v1/app/info').set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);

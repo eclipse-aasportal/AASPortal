@@ -66,16 +66,17 @@ await main();
 
 async function main(): Promise<void> {
     const project: Package = await read(resolve(__dirname, 'package.json'));
-    const file = resolve(__dirname, 'projects/aas-server/src/assets/app-info.json');
-    const appInfo = await read<ApplicationInfo>(file);
-    appInfo.name = project.name;
-    appInfo.version = project.version;
-    appInfo.description = project.description;
-    appInfo.author = project.author;
-    appInfo.homepage = project.homepage;
-    appInfo.license = project.license;
-    appInfo.libraries = await readLibrariesAsync(project);
+    const appInfo: ApplicationInfo = {
+        name: project.name,
+        version: project.version,
+        description: project.description,
+        author: project.author,
+        homepage: project.homepage,
+        license: project.license,
+        libraries: await readLibrariesAsync(project),
+    };
 
+    const file = resolve(__dirname, 'projects/aas-server/src/assets/app-info.json');
     await write(file, appInfo);
 }
 

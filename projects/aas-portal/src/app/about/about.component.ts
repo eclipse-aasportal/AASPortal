@@ -17,8 +17,8 @@ import {
     ChangeDetectionStrategy,
 } from '@angular/core';
 import { Library, Message } from 'aas-core';
-import { LibraryTableComponent, MessageTableComponent } from 'aas-lib';
-import { ServerApiService } from './server-api.service';
+import { LicenseInfoComponent, MessageTableComponent } from 'aas-lib';
+import { AboutApiService } from './about-api.service';
 import { ToolbarService } from '../toolbar.service';
 import { environment } from '../../environments/environment';
 
@@ -27,7 +27,7 @@ import { environment } from '../../environments/environment';
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
     standalone: true,
-    imports: [LibraryTableComponent, MessageTableComponent],
+    imports: [LicenseInfoComponent, MessageTableComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -36,7 +36,7 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _messages = signal<Message[]>([]);
 
     public constructor(
-        private serverApi: ServerApiService,
+        private api: AboutApiService,
         private toolbar: ToolbarService,
     ) {}
 
@@ -52,12 +52,12 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     public readonly messages = this._messages.asReadonly();
 
     public ngOnInit(): void {
-        this.serverApi.getInfo().subscribe(info => {
+        this.api.getInfo().subscribe(info => {
             this._serverVersion.set(info.version);
             this._libraries.set(info.libraries ?? []);
         });
 
-        this.serverApi.getMessages().subscribe(messages => this._messages.set(messages));
+        this.api.getMessages().subscribe(messages => this._messages.set(messages));
     }
 
     public ngAfterViewInit(): void {

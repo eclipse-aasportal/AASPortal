@@ -53,6 +53,8 @@
     "CMD_VIEW_USER_FEEDBACK": "User feedback",
     "CMD_VIEW_NAMEPLATE": "Nameplate",
     "CMD_ADD_NEW_FAVORITES_LIST": "New favorites list",
+    "CMD_SHOW_LICENSE_TEXT": "Show license text",
+    "CMD_HIDE_LICENSE_TEXT": "Hide license text",
     "COLUMN_NAME": "Name",
     "COLUMN_MODEL_TYPE": "Model type",
     "COLUMN_SIZE": "Size",

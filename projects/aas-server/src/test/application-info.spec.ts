@@ -7,27 +7,27 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect } from '@jest/globals';
-import { resolve } from 'path/posix';
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { AppInfo } from 'aas-core';
+import { createSpyObj } from 'fhg-jest';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
-import { readFile } from 'fs/promises';
-import { PackageInfo } from 'aas-core';
-import { createSpyObj } from 'fhg-jest';
+import { Variable } from '../app/variable.js';
+
+import appInfo from '../assets/app-info.json' with { type: 'json ' };
 
 describe('Application Info service', () => {
-    let logger: Logger;
+    let logger: jest.Mocked<Logger>;
+    let variable: jest.Mocked<Variable>;
     let applicationInfo: ApplicationInfo;
-    let file: string;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        file = resolve('.', 'src/test/assets/app-info.json');
-        applicationInfo = new ApplicationInfo(logger);
+        variable = createSpyObj<Variable>({}, { ASSETS: './' });
+        applicationInfo = new ApplicationInfo(logger, variable, appInfo as AppInfo);
     });
 
     it('gets the AASServer package info', async () => {
-        const expected: PackageInfo = JSON.parse((await readFile(file)).toString());
-        await expect(applicationInfo.getAsync(file)).resolves.toEqual(expected);
+        await expect(applicationInfo.getAsync()).resolves.toEqual(appInfo);
     });
 });

@@ -6,9 +6,8 @@
  !
  !---------------------------------------------------------------------------->
 
-<div>
-    @for (library of libraries(); track library.name) {
-        <h3>{{library.name}}</h3>
-        <pre>{{library.licenseText}}</pre>
-    }
+<button type="button" class="btn btn-primary mb-2" (click)="collapse.toggle()">{{isCollapsed() ?
+    ('CMD_SHOW_LICENSE_TEXT' | translate) : ('CMD_HIDE_LICENSE_TEXT' | translate)}}</button>
+<div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+    <pre class="font-monospace" style="white-space: pre-line;">{{text()}}</pre>
 </div>

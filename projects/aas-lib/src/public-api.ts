@@ -30,7 +30,7 @@ export * from './lib/auth/login-form/login-form.component';
 export * from './lib/auth/profile-form/profile-form.component';
 export * from './lib/auth/register-form/register-form.component';
 
-export * from './lib/library-table/library-table.component';
+export * from './lib/license-info/license-info.component';
 
 export * from './lib/submodel-template/submodel-template';
 

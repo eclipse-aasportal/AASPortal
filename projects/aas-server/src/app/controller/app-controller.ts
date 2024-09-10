@@ -13,7 +13,7 @@ import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
 import { Variable } from '../variable.js';
-import { Message, PackageInfo } from 'aas-core';
+import { Message, AppInfo } from 'aas-core';
 
 @injectable()
 @Route('/api/v1/app')
@@ -29,13 +29,13 @@ export class AppController extends AASController {
     }
 
     /**
-     * @summary Gets the license info.
-     * @returns ToDo
+     * @summary Gets the application info.
+     * @returns The application info.
      */
     @Get('info')
     @Security('bearerAuth', ['guest'])
     @OperationId('getInfo')
-    public async getInfo(): Promise<PackageInfo> {
+    public async getInfo(): Promise<AppInfo> {
         try {
             this.logger.start('getInfo');
             return await this.applicationInfo.getAsync();

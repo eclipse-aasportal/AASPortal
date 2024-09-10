@@ -8,18 +8,18 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { PackageInfo, Message } from 'aas-core';
+import { AppInfo, Message } from 'aas-core';
 import { Observable } from 'rxjs';
 
 /** Realizes the IServer service. */
 @Injectable({
     providedIn: 'root',
 })
-export class ServerApiService {
+export class AboutApiService {
     public constructor(private readonly http: HttpClient) {}
 
-    public getInfo(): Observable<PackageInfo> {
-        return this.http.get<PackageInfo>('/api/v1/app/info');
+    public getInfo(): Observable<AppInfo> {
+        return this.http.get<AppInfo>('/api/v1/app/info');
     }
 
     public getMessages(): Observable<Message[]> {
