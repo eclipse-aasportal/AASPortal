@@ -1,11 +1,11 @@
 {
     "name": "aas-portal-project",
     "version": "3.0.0-development.89",
-    "description": "Web-based visualization and control of asset administration shells.",
+    "description": "Web-based visualization and control of aaset administration shells.",
     "type": "module",
     "scripts": {
         "create-app-info": "node --no-warnings --loader ts-node/esm create-app-info.ts",
-        "tsoa": "npm run tsoa -w=ass-server",
+        "tsoa": "npm run tsoa -w aas-server",
         "start": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
         "header": "node --no-warnings --loader ts-node/esm copyright-header.ts",
         "coverage": "node --no-warnings --loader ts-node/esm coverage-summary.ts",
@@ -16,12 +16,12 @@
         "tsc": "npm run tsc -ws",
         "build": "npm run build -ws",
         "build:debug": "npm run build:debug -ws",
-        "lib:build": "npm run build -w=ass-core -w=ass-lib",
-        "lib:build:debug": "npm run build:debug -w=ass-core -w=ass-lib",
-        "aas-portal:build": "npm run build -w=ass-core -w=ass-lib -w=ass-portal",
-        "aas-portal:build:debug": "npm run build:build -w=ass-core -w=ass-lib -w=ass-portal",
-        "aas-server:build": "npm run build -w=ass-core -w=ass-server",
-        "aas-server:build:debug": "npm run build:debug -w=ass-core -w=ass-server",
+        "lib:build": "npm run build -w aas-core -w aas-lib",
+        "lib:build:debug": "npm run build:debug -w aas-core -w aas-lib",
+        "aas-portal:build": "npm run build -w aas-core -w aas-lib -w aas-portal",
+        "aas-portal:build:debug": "npm run build:debug -w aas-core -w aas-lib -w aas-portal",
+        "aas-server:build": "npm run build -w aas-core -w aas-server",
+        "aas-server:build:debug": "npm run build:debug -w aas-core -w aas-server",
         "serve": "npm run build && node --env-file projects/aas-server/.env projects/aas-server/dist/aas-server.js"
     },
     "repository": {
