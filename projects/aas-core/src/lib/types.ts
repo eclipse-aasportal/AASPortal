@@ -169,9 +169,10 @@ export interface ErrorData {
 /** Provides information about a 3rd-party package. */
 export interface Library {
     name: string;
-    version?: string;
-    description?: string;
-    license?: string;
+    version: string;
+    description: string;
+    license: string;
+    licenseText: string;
     homepage?: string;
 }
 

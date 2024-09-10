@@ -11,12 +11,16 @@ import { Message, PackageInfo } from 'aas-core';
 import { Logger } from './logging/logger.js';
 import { readFile } from 'fs/promises';
 import { inject, singleton } from 'tsyringe';
+import { Variable } from './variable.js';
 
 @singleton()
 export class ApplicationInfo {
     private data?: PackageInfo;
 
-    public constructor(@inject('Logger') private readonly logger: Logger) {}
+    public constructor(
+        @inject('Logger') private readonly logger: Logger,
+        @inject(Variable) private readonly variable: Variable,
+    ) {}
 
     public async getAsync(file?: string): Promise<PackageInfo> {
         if (!this.data) {
@@ -37,10 +41,10 @@ export class ApplicationInfo {
                 if (isAbsolute(file)) {
                     path = file;
                 } else {
-                    path = resolve('.', file);
+                    path = resolve(this.variable.ASSETS, file);
                 }
             } else {
-                path = resolve('.', 'app-info.json');
+                path = resolve(this.variable.ASSETS, 'app-info.json');
             }
 
             return JSON.parse((await readFile(path)).toString());

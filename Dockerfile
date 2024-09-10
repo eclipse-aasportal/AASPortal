@@ -14,7 +14,6 @@ COPY projects/aas-server/package.json package.json
 COPY projects/aas-server/src/assets assets/
 RUN npm install --omit=dev
 COPY --from=build /usr/src/app/projects/aas-server/dist/ /usr/src/app/
-COPY --from=build /usr/src/app/projects/aas-server/app-info.json /usr/src/app/app-info.json
 COPY --from=build /usr/src/app/projects/aas-core/dist/ /usr/src/app/node_modules/aas-core/dist/
 COPY --from=build /usr/src/app/projects/aas-core/package.json /usr/src/app/node_modules/aas-core/package.json
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ /usr/src/app/wwwroot/

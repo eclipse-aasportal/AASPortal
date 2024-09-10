@@ -6,14 +6,10 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { Library } from 'aas-core';
-
-export interface LibraryRow extends Library {
-    id: number;
-}
 
 @Component({
     selector: 'fhg-library-table',
@@ -24,24 +20,5 @@ export interface LibraryRow extends Library {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryTableComponent {
-    public readonly collection = input<Library[]>([]);
-
-    public readonly pageSize = input(10);
-
-    public readonly size = computed(() => this.collection().length);
-
-    public readonly page = signal(1);
-
-    public readonly libraries = computed(() => {
-        const collection = this.collection();
-        const pageSize = this.pageSize();
-        const page = this.page();
-        if (pageSize > 0 && collection.length > pageSize) {
-            return collection
-                .map((library, i) => ({ id: i + 1, ...library }))
-                .slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
-        }
-
-        return this.collection().map((library, i) => ({ id: i + 1, ...library }));
-    });
+    public readonly libraries = input<Library[]>([]);
 }

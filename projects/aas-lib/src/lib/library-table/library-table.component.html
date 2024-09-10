@@ -6,41 +6,9 @@
  !
  !---------------------------------------------------------------------------->
 
-<table class="table table-sm table-striped table-borderless">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col" translate>COLUMN_PACKAGE</th>
-      <th scope="col" translate>COLUMN_VERSION</th>
-      <th scope="col" translate>COLUMN_LICENSE</th>
-      <th scope="col" translate>COLUMN_DESCRIPTION</th>
-    </tr>
-  </thead>
-  <tbody>
+<div>
     @for (library of libraries(); track library.name) {
-      <tr>
-        <th scope="row">{{library.id}}</th>
-        <td [noWrap]="true">
-          @if (library.homepage) {
-            <a target="_blank" [href]="library.homepage">{{library.name}}</a>
-          } @else {
-            <div class="text-nowrap">{{library.name}}</div>
-          }
-        </td>
-        <td [noWrap]="true">{{library.version}}</td>
-        <td [noWrap]="true">{{library.license}}</td>
-        <td [noWrap]="true">{{library.description}}</td>
-      </tr>
+        <h3>{{library.name}}</h3>
+        <pre>{{library.licenseText}}</pre>
     }
-  </tbody>
-  <tbody>
-    <td [colSpan]="5">
-      @if (pageSize() > 0 && size > pageSize) {
-        <div class="d-flex align-items-start">
-          <ngb-pagination [collectionSize]="size()" [(page)]="page" [pageSize]="pageSize()" size="sm">
-          </ngb-pagination>
-        </div>
-      }
-    </td>
-  </tbody>
-</table>
+</div>
