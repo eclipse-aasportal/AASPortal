@@ -8,7 +8,6 @@
 
 import { inject, singleton } from 'tsyringe';
 import { extname } from 'path/posix';
-import { Jimp } from 'jimp';
 import { Readable } from 'stream';
 import {
     AASDocument,
@@ -120,15 +119,21 @@ export class AASProvider {
 
     /**
      * Gets the AAS environment for the specified AAS document.
-     * @param endpointName
-     * @param id
-     * @returns
+     * @param endpointName The endpoint name.
+     * @param id The AAS identifier.
+     * @returns The AAS environment.
      */
     public async getContentAsync(endpointName: string, id: string): Promise<aas.Environment> {
         const document = await this.index.get(endpointName, id);
         return this.getDocumentContentAsync(document);
     }
 
+    /**
+     * Gets the thumbnail of the specified AAS.
+     * @param endpointName The endpoint name.
+     * @param id The AAS identifier.
+     * @returns A readable stream.
+     */
     public async getThumbnailAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
@@ -141,6 +146,15 @@ export class AASProvider {
         }
     }
 
+    /**
+     * Gets the value of the specified DataElement.
+     * @param endpointName The endpoint name.
+     * @param id The AAS identifier.
+     * @param smId The Submodel identifier.
+     * @param path The idShort path.
+     * @param options Additional options.
+     * @returns A readable stream.
+     */
     public async getDataElementValueAsync(
         endpointName: string,
         id: string,

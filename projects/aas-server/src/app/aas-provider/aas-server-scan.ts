@@ -27,7 +27,7 @@ export class AASServerScan extends AASResourceScan {
         try {
             await this.server.openAsync();
             const documents: AASDocument[] = [];
-            const ids = await this.server.getShellsAsync();
+            const ids = new Set(await this.server.getShellsAsync());
             for (const id of ids) {
                 try {
                     const aasPackage = new AASServerPackage(this.logger, this.server, id);
