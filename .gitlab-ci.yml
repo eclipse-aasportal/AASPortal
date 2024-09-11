@@ -1,3 +1,6 @@
+variables:
+  NODE_IMAGE: node:20.11.1-alpine
+
 stages:
   - tag
   - build
@@ -5,7 +8,7 @@ stages:
   - deploy
 
 tag:
-  image: node:alpine3.19
+  image: $NODE_IMAGE
   stage: tag
   rules:
     - if: '$CI_COMMIT_MESSAGE !~ /(Release)/'
@@ -15,7 +18,7 @@ tag:
     - npx semantic-release
 
 build:
-  image: node:alpine3.19
+  image: $NODE_IMAGE
   stage: build
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /(Release)/'
@@ -24,7 +27,7 @@ build:
     - npm run build -ws
 
 test:
-  image: node:alpine3.19
+  image: $NODE_IMAGE
   stage: test
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /(Release)/'

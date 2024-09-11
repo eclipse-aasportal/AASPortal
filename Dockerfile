@@ -1,5 +1,5 @@
 # Dockerfile to build server and client parts
-FROM node:alpine3.19 AS build
+FROM node:20.11.1-alpine AS build
 WORKDIR /usr/src/app
 COPY . .
 # RUN apk add g++ make py3-pip
@@ -7,7 +7,7 @@ RUN npm install
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
 RUN npm run build
 
-FROM node:alpine3.19 AS aasportal
+FROM node:20.11.1-alpine AS aasportal
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY projects/aas-server/package.json package.json
