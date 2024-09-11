@@ -1,5 +1,5 @@
 # Dockerfile to build server and client parts
-FROM node:alpine3.19 AS build
+FROM node:20.11.1-alpine AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN npm install

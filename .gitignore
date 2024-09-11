@@ -17,8 +17,6 @@
 
 **/bin
 **/obj
-./aas-server/users
-./aas-server/test/users
 nginx
 *.user
 *.log
@@ -45,7 +43,7 @@ temp
 swagger.json
 swagger.yaml
 projects/aas-server/src/app/routes
-projects/ass-server/src/assets/app-info.json
+./projects/ass-server/src/assets/app-info.json
 
 # System files
 .DS_Store
