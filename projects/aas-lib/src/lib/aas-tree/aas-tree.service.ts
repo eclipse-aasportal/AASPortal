@@ -110,6 +110,18 @@ export class AASTreeService {
         });
     }
 
+    public expand(): void {
+        this._state.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.expand();
+            return {
+                ...state,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
+    }
+
     public collapseRow(row: AASTreeRow): void {
         this._state.update(state => {
             const tree = new AASTree(state.rows);

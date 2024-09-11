@@ -12,7 +12,17 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+    computed,
+    effect,
+    input,
+    output,
+    signal,
+} from '@angular/core';
 
 import {
     aas,
@@ -75,6 +85,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, PropertyValue>();
     private readonly subscription = new Subscription();
+    private readonly _expanded = signal(false);
     private shiftKey = false;
     private altKey = false;
 
@@ -163,6 +174,8 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     public readonly rows = this.service.rows;
 
+    public readonly expanded = this._expanded.asReadonly();
+
     public readonly matchIndex = this.service.matchIndex;
 
     public readonly matchRow = this.service.matchRow;
@@ -229,9 +242,14 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    public expand(node: AASTreeRow): void {
-        if (!node.expanded) {
-            this.service.expandRow(node);
+    public expand(node?: AASTreeRow): void {
+        if (node) {
+            if (!node.expanded) {
+                this.service.expandRow(node);
+            }
+        } else {
+            this.service.expand();
+            this._expanded.set(true);
         }
     }
 
@@ -242,6 +260,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             }
         } else {
             this.service.collapse();
+            this._expanded.set(false);
         }
     }
 

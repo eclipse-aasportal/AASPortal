@@ -77,32 +77,36 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
         return [];
     }
 
-    public expand(arg: number | TNode): void {
+    public expand(arg?: number | TNode): void {
         const nodes = [...this.getNodes()];
-        const ancestors: TNode[] = [];
-        let node = typeof arg === 'number' ? nodes[arg] : arg;
-        if (!node.expanded) {
-            this.expandNode(node, nodes);
-        }
-
-        let parentRow = node.parent >= 0 ? nodes[node.parent] : null;
-        while (parentRow) {
-            if (parentRow.expanded) {
-                break;
+        if (arg === undefined) {
+            nodes.filter(node => !node.isLeaf && !node.expanded).forEach(node => this.expandNode(node, nodes));
+        } else {
+            const ancestors: TNode[] = [];
+            let node = typeof arg === 'number' ? nodes[arg] : arg;
+            if (!node.expanded) {
+                this.expandNode(node, nodes);
             }
 
-            ancestors.push(parentRow);
-            node = parentRow;
-            parentRow = node.parent >= 0 ? nodes[node.parent] : null;
-        }
+            let parentRow = node.parent >= 0 ? nodes[node.parent] : null;
+            while (parentRow) {
+                if (parentRow.expanded) {
+                    break;
+                }
 
-        while (ancestors.length > 0) {
-            const ancestor = ancestors.pop();
-            if (!ancestor) {
-                break;
+                ancestors.push(parentRow);
+                node = parentRow;
+                parentRow = node.parent >= 0 ? nodes[node.parent] : null;
             }
 
-            this.expandNode(ancestor, nodes);
+            while (ancestors.length > 0) {
+                const ancestor = ancestors.pop();
+                if (!ancestor) {
+                    break;
+                }
+
+                this.expandNode(ancestor, nodes);
+            }
         }
 
         this.setNodes(nodes);

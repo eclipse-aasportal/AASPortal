@@ -15,9 +15,15 @@
                     [disabled]="state() === 'online'" [indeterminate]="someSelected()" [checked]="everySelected()">
             </th>
             <th>
+                @if (expanded()) {
                 <a class="link-secondary" href="javascript:void(0);" (click)="collapse()">
                     <i class="bi bi-dash-square-dotted"></i>
                 </a>
+            } @else {
+                <a class="link-secondary" href="javascript:void(0);" (click)="expand()">
+                    <i class="bi bi-plus-square-dotted"></i>
+                </a>
+            }
             </th>
             <th></th>
         </tr>

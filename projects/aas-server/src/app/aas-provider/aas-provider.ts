@@ -280,7 +280,7 @@ export class AASProvider {
     /**
      * Updates an Asset Administration Shell.
      * @param endpointName The endpoint name.
-     * @param id The AAS document ID.
+     * @param id The AAS identifier.
      * @param content The new document content.
      * @returns
      */
@@ -532,7 +532,9 @@ export class AASProvider {
 
     private async onChanged(result: ScanContainerResult): Promise<void> {
         const document = result.document;
-        if ((await this.index.hasEndpoint(document.endpoint)) === false) return;
+        if ((await this.index.hasEndpoint(document.endpoint)) === false) {
+            return;
+        }
 
         await this.index.update(document);
         if (document.content && this.cache.has(document.endpoint, document.id)) {
@@ -543,7 +545,9 @@ export class AASProvider {
     }
 
     private async onAdded(result: ScanContainerResult): Promise<void> {
-        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) return;
+        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) {
+            return;
+        }
 
         await this.index.add(result.document);
         this.logger.info(`Added: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
@@ -552,7 +556,9 @@ export class AASProvider {
 
     private async onRemoved(result: ScanContainerResult): Promise<void> {
         const document = result.document;
-        if ((await this.index.hasEndpoint(document.endpoint)) === false) return;
+        if ((await this.index.hasEndpoint(document.endpoint)) === false) {
+            return;
+        }
 
         await this.index.remove(result.container.name, document.id);
         this.cache.remove(document.endpoint, document.id);

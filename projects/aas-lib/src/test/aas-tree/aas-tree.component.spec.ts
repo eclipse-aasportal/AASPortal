@@ -31,37 +31,39 @@ describe('AASTreeComponent', () => {
         webSocketSubject = new Subject<WebSocketData>();
 
         TestBed.configureTestingModule({
-    imports: [TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useClass: TranslateFakeLoader,
-            },
-        })],
-    providers: [
-        {
-            provide: NotifyService,
-            useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
-        },
-        {
-            provide: DownloadService,
-            useValue: jasmine.createSpyObj<DownloadService>([
-                'downloadFileAsync',
-                'downloadDocument',
-                'uploadDocuments',
-            ]),
-        },
-        {
-            provide: WindowService,
-            useValue: jasmine.createSpyObj<WindowService>(['addEventListener', 'open', 'removeEventListener']),
-        },
-        {
-            provide: WebSocketFactoryService,
-            useValue: new TestWebSocketFactoryService(webSocketSubject),
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-});
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
+            providers: [
+                {
+                    provide: NotifyService,
+                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
+                },
+                {
+                    provide: DownloadService,
+                    useValue: jasmine.createSpyObj<DownloadService>([
+                        'downloadFileAsync',
+                        'downloadDocument',
+                        'uploadDocuments',
+                    ]),
+                },
+                {
+                    provide: WindowService,
+                    useValue: jasmine.createSpyObj<WindowService>(['addEventListener', 'open', 'removeEventListener']),
+                },
+                {
+                    provide: WebSocketFactoryService,
+                    useValue: new TestWebSocketFactoryService(webSocketSubject),
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
 
         fixture = TestBed.createComponent(AASTreeComponent);
         component = fixture.componentInstance;
@@ -146,6 +148,13 @@ describe('AASTreeComponent', () => {
             expect(component.nodes().length).toEqual(9);
             expect(component.nodes()[1].element.idShort).toEqual('Identification');
             expect(component.nodes()[0].expanded).toBeTrue();
+        });
+
+        it('expands all', () => {
+            expect(component.expanded()).toEqual(false);
+            component.expand();
+            expect(component.nodes()).toEqual(component.rows());
+            expect(component.expanded()).toEqual(true);
         });
     });
 
