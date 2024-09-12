@@ -137,7 +137,7 @@ async function loadLicenseText(nodeModulesFolder: string, packageName: string): 
         for (const file of await readdir(folder, { withFileTypes: true, recursive: true })) {
             if (file.isFile()) {
                 if (path.basename(file.name, path.extname(file.name)).toLowerCase() === 'license') {
-                    return (await readFile(join(file.parentPath, file.name))).toString();
+                    return (await readFile(join(file.path, file.name))).toString();
                 }
             }
         }
