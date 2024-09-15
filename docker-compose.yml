@@ -6,15 +6,14 @@ services:
     ports:
       - 27017:27017
     volumes:
-      #persist db data (users remain after restart)
       - mongodata:/data/db
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=aas-server
-      - MONGO_INITDB_ROOT_PASSWORD=aas-server
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_DATABASE=aasportal-users
 
   aasportal-index:
-    image: mariadb:latest
+    image: mariadb
     container_name: aasportal-index
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
@@ -34,12 +33,44 @@ services:
       - sqldata:/var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: db>D6~M$4§Y:sChh
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: aas-index
-      MYSQL_USER: aas-server
-      MYSQL_PASSWORD: aas-server
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - 3306:3306
+
+  aasportal-cloud-db:
+    image: mariadb
+    container_name: aasportal-cloud-db
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - nextcloud_db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${NEXTCLOUD_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  aasportal-cloud:
+    image: nextcloud
+    container_name: aasportal-cloud
+    restart: always
+    ports:
+      - 8080:80
+    links:
+      - aasportal-cloud-db
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=aasportal-cloud-db
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
 
   aas-server:
     container_name: aas-server
@@ -47,7 +78,11 @@ services:
       context: .
       dockerfile: ./Dockerfile.aas-server
     environment:
-      - USER_STORAGE=mongodb://aasportal-users:27017/aasportal-users
+      - USER_STORAGE=${USER_STORAGE}
+      - AAS_INDEX=${AAS_INDEX}
+      - TEMPLATE_STORAGE=${TEMPLATE_STORAGE}
+    ports:
+      - 1337:1337
   
   aas-portal:
     container_name: aas-portal
@@ -57,6 +92,9 @@ services:
     restart: always
     ports:
       - 80:80
+
 volumes:
   mongodata:
   sqldata:
+  nextcloud_db:
+  nextcloud:

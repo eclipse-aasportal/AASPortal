@@ -11,7 +11,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService
 import { AASTreeSearch } from '../../lib/aas-tree/aas-tree-search';
 import { sampleDocument } from '../assets/sample-document';
 import { AASTreeService } from '../../lib/aas-tree/aas-tree.service';
-import { NotifyService } from 'projects/aas-lib/dist';
+import { NotifyService } from '../../lib/notify/notify.service';
 
 describe('AASTreeSearch', function () {
     let search: AASTreeSearch;

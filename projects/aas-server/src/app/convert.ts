@@ -30,6 +30,13 @@ export function parseUrl(url: string): URL {
     }
 }
 
+export function urlToString(url: URL | string): string {
+    const temp = new URL(url);
+    temp.password = '';
+    temp.username = '';
+    return temp.toString();
+}
+
 export function toUint8Array<T extends object>(data: T): Uint8Array {
     return Uint8Array.from(Buffer.from(JSON.stringify(data)));
 }

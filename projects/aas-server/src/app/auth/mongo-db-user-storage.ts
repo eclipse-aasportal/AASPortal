@@ -21,7 +21,7 @@ export interface UserCookies {
 
 @injectable()
 export class MongoDBUserStorage extends UserStorage {
-    private connected?: Mongoose;
+    private connected: Promise<Mongoose>;
 
     private readonly userDataSchema = new Schema<UserData>({
         id: { type: String, required: true },
@@ -48,20 +48,22 @@ export class MongoDBUserStorage extends UserStorage {
 
     public constructor(@inject(Variable) private readonly variable: Variable) {
         super();
+
+        this.connected = this.connect();
     }
 
     public async existAsync(userId: string): Promise<boolean> {
-        await this.ensureConnected();
+        await this.connected;
         return (await this.userModel.findOne({ id: userId }).exec()) != null;
     }
 
     public async readAsync(userId: string): Promise<UserData | undefined> {
-        await this.ensureConnected();
+        await this.connected;
         return (await this.userModel.findOne({ id: userId }).exec()) ?? undefined;
     }
 
     public async writeAsync(userId: string, data: UserData): Promise<void> {
-        await this.ensureConnected();
+        await this.connected;
         let instance = await this.userModel.findOne({ id: userId }).exec();
         if (instance) {
             instance.name = data.name;
@@ -75,12 +77,12 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async deleteAsync(userId: string): Promise<boolean> {
-        await this.ensureConnected();
+        await this.connected;
         return (await this.userModel.findOneAndDelete({ id: userId }).exec()) != null;
     }
 
     public async checkCookieAsync(userId: string, name: string): Promise<boolean> {
-        await this.ensureConnected();
+        await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user != null) {
             return user.cookies.some(cookie => cookie.name === name);
@@ -90,7 +92,7 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async getCookieAsync(userId: string, name: string): Promise<Cookie | undefined> {
-        await this.ensureConnected();
+        await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user != null) {
             return user.cookies.find(cookie => cookie.name === name);
@@ -100,7 +102,7 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async getCookiesAsync(userId: string): Promise<Cookie[]> {
-        await this.ensureConnected();
+        await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user != null) {
             return user.cookies;
@@ -110,7 +112,7 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async setCookieAsync(userId: string, name: string, data: string): Promise<void> {
-        await this.ensureConnected();
+        await this.connected;
         let user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user) {
             const index = user.cookies.findIndex(cookie => cookie.name === name);
@@ -127,7 +129,7 @@ export class MongoDBUserStorage extends UserStorage {
     }
 
     public async deleteCookieAsync(userId: string, name: string): Promise<void> {
-        await this.ensureConnected();
+        await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user) {
             const index = user.cookies.findIndex(cookie => cookie.name === name);
@@ -142,20 +144,18 @@ export class MongoDBUserStorage extends UserStorage {
         }
     }
 
-    private async ensureConnected(): Promise<void> {
-        if (!this.connected) {
-            const url = new URL(this.variable.USER_STORAGE!);
-            const username = isEmpty(url.username) ? this.variable.AAS_SERVER_USERNAME : url.username;
-            const password = isEmpty(url.password) ? this.variable.AAS_SERVER_PASSWORD : url.pathname;
-            const dbName = isEmpty(url.pathname) ? 'aasportal-users' : url.pathname.substring(1);
-            url.username = '';
-            url.password = '';
-            url.pathname = '';
-            this.connected = await mongoose.connect(url.href, {
-                dbName: dbName,
-                user: username,
-                pass: password,
-            });
-        }
+    private connect(): Promise<Mongoose> {
+        const url = new URL(this.variable.USER_STORAGE!);
+        const username = isEmpty(url.username) ? this.variable.AAS_SERVER_USERNAME : url.username;
+        const password = isEmpty(url.password) ? this.variable.AAS_SERVER_PASSWORD : url.password;
+        const dbName = isEmpty(url.pathname) ? 'aasportal-users' : url.pathname.substring(1);
+        url.username = '';
+        url.password = '';
+        url.pathname = '';
+        return mongoose.connect(url.href, {
+            dbName: dbName,
+            user: username,
+            pass: password,
+        });
     }
 }

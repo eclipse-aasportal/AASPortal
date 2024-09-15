@@ -11,14 +11,14 @@ import { dirname, join, normalize, relative, sep } from 'path/posix';
 import { FileStorage, FileStorageEntry } from './file-storage.js';
 
 export class WebDAVStorage extends FileStorage {
-    public constructor(
-        url: string | URL,
-        private _client?: WebDAVClient,
-    ) {
+    private client: WebDAVClient;
+
+    public constructor(url: string | URL, client?: WebDAVClient) {
         url = typeof url === 'string' ? new URL(url) : url;
         super(sep);
 
         this.url = typeof url === 'string' ? url : url.href;
+        this.client = client || this.createClient();
     }
 
     public override readonly url: string;
@@ -66,22 +66,18 @@ export class WebDAVStorage extends FileStorage {
         return this.client.createReadStream(this.resolve(path));
     }
 
-    private get client(): WebDAVClient {
-        if (!this._client) {
-            const url = new URL(this.url);
-            url.pathname = '/remote.php/webdav';
-            const username = url.username;
-            const password = url.password;
-            url.username = '';
-            url.password = '';
+    private createClient(): WebDAVClient {
+        const url = new URL(this.url);
+        url.pathname = '/remote.php/webdav';
+        const username = url.username;
+        const password = url.password;
+        url.username = '';
+        url.password = '';
 
-            this._client = createClient(url.href, {
-                username: username,
-                password: password,
-            });
-        }
-
-        return this._client;
+        return createClient(url.href, {
+            username: username,
+            password: password,
+        });
     }
 
     private resolve(path: string): string {

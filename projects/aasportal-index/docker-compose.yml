@@ -1,18 +1,20 @@
-version: "3.9"
 services:
-  mysql:
-    image: mariadb:latest
+  aasportal-index:
+    image: mariadb
     container_name: aasportal-index
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/1.sql
-      - /var/lib/mysql
+      - sqldata:/var/lib/mysql
 
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DATABASE: aas-index
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - 3306:3306
+
+volumes:
+  sqldata:

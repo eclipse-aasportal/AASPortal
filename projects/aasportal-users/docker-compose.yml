@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   mongo:
     image: mongo
@@ -8,7 +6,11 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - /data/db
+      - mongodata:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=aasportal-users
+
+volumes:
+  mongodata:

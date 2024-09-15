@@ -1,9 +1,10 @@
-# Dockerfile to build server and client parts
+# Dockerfile to build client app
 FROM node:20.11.1-alpine AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN npm install
 RUN npm run aas-portal:build
+
 FROM nginx:latest AS aas-portal
 #possibility to check host & port availability of other containers via netcat
 RUN apt-get update -y && apt-get install -y netcat-openbsd

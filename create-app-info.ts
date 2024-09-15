@@ -9,7 +9,7 @@
 import { readFile, writeFile, readdir } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
-import { dirname, resolve, join } from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 interface Package {
@@ -65,7 +65,16 @@ const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-server', 'fhg
 await main();
 
 async function main(): Promise<void> {
-    const project: Package = await read(resolve(__dirname, 'package.json'));
+    const packageFile = join(__dirname, 'package.json');
+    let project: Package;
+    try {
+        project = await JSON.parse((await readFile(packageFile)).toString());
+        console.info(`File ${packageFile} read.`);
+    } catch (error) {
+        console.error(error);
+        return;
+    }
+
     const appInfo: ApplicationInfo = {
         name: project.name,
         version: project.version,
@@ -76,16 +85,13 @@ async function main(): Promise<void> {
         libraries: await readLibrariesAsync(project),
     };
 
-    const file = resolve(__dirname, 'projects/aas-server/src/assets/app-info.json');
-    await write(file, appInfo);
-}
-
-async function read<T>(file: string): Promise<T> {
-    return JSON.parse((await readFile(file)).toString());
-}
-
-function write(file: string, data: object): Promise<void> {
-    return writeFile(file, JSON.stringify(data, undefined, 2));
+    const file = join(__dirname, 'projects/aas-server/src/assets/app-info.json');
+    try {
+        await writeFile(file, JSON.stringify(appInfo, undefined, 2));
+        console.info(`File ${file} read.`);
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 async function readLibrariesAsync(project: Package): Promise<Library[]> {
