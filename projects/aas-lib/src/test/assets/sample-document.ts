@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, AASDocument, selectElement } from "common"
+import { aas, AASDocument, selectElement } from 'aas-core'
 
 const content: object = {
     "assetAdministrationShells": [
@@ -17,15 +17,7 @@ const content: object = {
             "id": "http://customer.com/aas/9175_7013_7091_9168",
             "assetInformation": {
                 "assetKind": "Instance",
-                "globalAssetId": {
-                    "type": "ModelReference",
-                    "keys": [
-                        {
-                            "type": "GlobalReference",
-                            "value": "http://customer.com/assets/KHBVZJSQKIY"
-                        }
-                    ]
-                }
+                "globalAssetId": "http://customer.com/assets/KHBVZJSQKIY"
             },
             "submodels": [
                 {
@@ -701,7 +693,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "ENTITY",
                         "definition": [
@@ -738,7 +730,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -773,7 +765,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -808,7 +800,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING_TRANSLATABLE",
                         "definition": [
@@ -843,7 +835,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -887,7 +879,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -931,7 +923,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -986,7 +978,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -1025,7 +1017,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1069,7 +1061,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1113,7 +1105,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "DATE",
                         "definition": [
@@ -1148,7 +1140,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -1183,7 +1175,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "FILE",
                         "definition": [
@@ -1218,7 +1210,7 @@ const content: object = {
                         "keys": []
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "de",
@@ -1273,7 +1265,7 @@ const content: object = {
                         "keys": []
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1323,7 +1315,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -1378,7 +1370,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "REAL_MEASURE",
                         "definition": [
@@ -1423,7 +1415,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -1467,7 +1459,7 @@ const content: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1497,15 +1489,7 @@ const sampleNoTechnicalData: object = {
             "id": "http://customer.com/aas/9175_7013_7091_9168",
             "assetInformation": {
                 "assetKind": "Instance",
-                "globalAssetId": {
-                    "type": "ModelReference",
-                    "keys": [
-                        {
-                            "type": "GlobalReference",
-                            "value": "http://customer.com/assets/KHBVZJSQKIY"
-                        }
-                    ]
-                }
+                "globalAssetId": "http://customer.com/assets/KHBVZJSQKIY"
             },
             "submodels": [
                 {
@@ -2078,7 +2062,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "ENTITY",
                         "definition": [
@@ -2115,7 +2099,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -2150,7 +2134,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -2185,7 +2169,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING_TRANSLATABLE",
                         "definition": [
@@ -2220,7 +2204,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -2264,7 +2248,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -2308,7 +2292,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -2363,7 +2347,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -2402,7 +2386,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -2446,7 +2430,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -2490,7 +2474,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "DATE",
                         "definition": [
@@ -2525,7 +2509,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -2560,7 +2544,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "FILE",
                         "definition": [
@@ -2595,7 +2579,7 @@ const sampleNoTechnicalData: object = {
                         "keys": []
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "de",
@@ -2650,7 +2634,7 @@ const sampleNoTechnicalData: object = {
                         "keys": []
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -2700,7 +2684,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -2755,7 +2739,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "REAL_MEASURE",
                         "definition": [
@@ -2800,7 +2784,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -2844,7 +2828,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -2970,33 +2954,31 @@ const technicalData: object = {
 };
 
 export const sampleDocument: AASDocument = {
-    "id": "http://customer.com/aas/9175_7013_7091_9168",
-    "idShort": "ExampleMotor",
-    "container": "file:///samples?name=Samples&type=AasxDirectory",
-    "endpoint": {
-        "type": "file",
-        "address": "ExampleMotor.aasx"
-    },
-    "timeStamp": 1675961220599,
-    "modified": false,
-    "readonly": false,
-    "onlineReady": false,
-    "content": content as aas.Environment
+    id: "http://customer.com/aas/9175_7013_7091_9168",
+    idShort: "ExampleMotor",
+    assetId: 'http://customer.com/assets/KHBVZJSQKIY',
+    endpoint: 'Samples',
+    address: "ExampleMotor.aasx",
+    modified: false,
+    readonly: false,
+    onlineReady: false,
+    content: content as aas.Environment,
+    crc32: 0,
+    timestamp: 0,
 };
 
 export const aasNoTechnicalData: AASDocument = {
-    "id": "http://customer.com/aas/9175_7013_7091_9168",
-    "idShort": "ExampleMotor",
-    "container": "file:///endpoints/samples?name=Samples&type=AasxDirectory",
-    "endpoint": {
-        "type": "file",
-        "address": "ExampleMotor.aasx"
-    },
-    "timeStamp": 1675961220599,
-    "modified": false,
-    "readonly": false,
-    "onlineReady": false,
-    "content": sampleNoTechnicalData as aas.Environment
+    id: "http://customer.com/aas/9175_7013_7091_9168",
+    idShort: "ExampleMotor",
+    assetId: 'http://customer.com/assets/KHBVZJSQKIY',
+    endpoint: 'Samples',
+    address: "ExampleMotor.aasx",
+    modified: false,
+    readonly: false,
+    onlineReady: false,
+    content: sampleNoTechnicalData as aas.Environment,
+    crc32: 0,
+    timestamp: 0,
 };
 
 export const submodelTechnicalData: aas.Submodel = technicalData as aas.Submodel;

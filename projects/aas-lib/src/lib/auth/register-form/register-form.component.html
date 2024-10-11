@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -15,9 +15,11 @@
         <button type="button" class="btn-close" (click)="cancel()" aria-label="Cancel"></button>
     </div>
     <div class="modal-body">
-        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+        @for (message of messages(); track message) {
+        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
             <div class="d-flex">{{message}}</div>
         </ngb-toast>
+        }
         <div class="form-floating mb-3">
             <input #inputEMail type="email" class="form-control" id="intputRegisterEMail" [(ngModel)]="userId"
                 name="userId" placeholder="example@email.com" (input)="onInputEMail()">
@@ -25,24 +27,26 @@
         </div>
         <div class="form-floating mb-3">
             <input type="text" class="form-control" id="intputRegisterName" [(ngModel)]="name" name="name"
-                [placeholder]="defaultName">
+                [placeholder]="defaultName()">
             <label for="intputRegisterName" translate>LABEL_NAME</label>
         </div>
-        <div *ngIf="!passwordAsEMail" class="form-floating mb-3">
+        @if (!passwordAsEMail()) {
+        <div class="form-floating mb-3">
             <input type="password" class="form-control" id="inputRegisterPassword" [(ngModel)]="password1"
                 name="password1" placeholder="password">
             <label for="inputRegisterPassword" translate>LABEL_PASSWORD</label>
         </div>
-        <div *ngIf="!passwordAsEMail" class="form-floating mb-3">
+        <div class="form-floating mb-3">
             <input type="password" class="form-control" id="inputRegisterConfirmPassword" [(ngModel)]="password2"
                 name="password2" placeholder="confirm password">
             <label for="inputRegisterConfirmPassword" translate>LABEL_CONFIRM_PASSWORD</label>
         </div>
-        <div *ngIf="!passwordAsEMail" class="form-check mb-3">
+        <div class="form-check mb-3">
             <label class="form-check-label" for="stayLoggedIn" translate>LABEL_STAY_LOGGED_IN</label>
             <input class="form-check-input" type="checkbox" id="stayLoggedIn" [(ngModel)]="stayLoggedIn"
                 name="stayLoggedIn">
         </div>
+        }
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary" translate>CMD_OK</button>

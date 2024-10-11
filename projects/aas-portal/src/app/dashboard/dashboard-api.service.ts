@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -11,12 +11,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class DashboardApiService {
-    constructor(
-        private readonly http: HttpClient
-    ) { }
+    public constructor(private readonly http: HttpClient) {}
 
     public getBlobValue(url: string): Observable<string> {
         return this.http.get<string>(url);

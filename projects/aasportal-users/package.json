@@ -1,0 +1,11 @@
+{
+    "name": "aasportal-users",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "docker-compose -f docker-compose.yml up"
+    },
+    "author": "Fraunhofer IOSB-INA",
+    "license": "ISC"
+}

@@ -15,8 +15,14 @@
         ],
         "types": [
             "@angular/localize",
-            "jasmine"
-        ]
+            "jasmine",
+            "node"
+        ],
+        "paths": {
+            "aas-lib": [
+                "projects/aas-lib/src/public-api"
+            ]
+        }
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

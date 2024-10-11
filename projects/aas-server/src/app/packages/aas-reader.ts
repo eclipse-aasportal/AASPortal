@@ -1,15 +1,14 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas } from 'common';
+import { aas } from 'aas-core';
 
 export abstract class AASReader {
-
     public abstract readEnvironment(): aas.Environment;
 
     public abstract read(data: string | object): aas.Referable;
@@ -34,7 +33,7 @@ export abstract class AASReader {
 
         return path;
     }
-    
+
     protected createReference(parent: aas.Reference, child: aas.Referable): aas.Reference {
         return {
             type: 'ModelReference',
@@ -43,7 +42,8 @@ export abstract class AASReader {
                 {
                     type: child.modelType as aas.KeyTypes,
                     value: child.idShort,
-                }]
+                },
+            ],
         };
     }
 }

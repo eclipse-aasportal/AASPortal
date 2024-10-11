@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -17,4 +17,4 @@ export const ERRORS = {
     PASSWORDS_NOT_EQUAL: 'ERROR_PASSWORDS_NOT_EQUAL',
     DASHBOARD_PAGE_ALREADY_EXISTS: 'ERROR_DASHBOARD_PAGE_ALREADY_EXISTS',
     UNAUTHORIZED_ACCESS: 'ERROR_UNAUTHORIZED_ACCESS',
-}
+};

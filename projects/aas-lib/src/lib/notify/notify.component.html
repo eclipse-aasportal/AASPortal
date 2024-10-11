@@ -1,10 +1,12 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
-<ngb-toast *ngFor="let message of notify.messages" [class]="message.classname" [autohide]="message.autohide"
-    [delay]="message.delay" (hidden)="notify.remove(message)" header="{{message.header}}">{{message.text}}</ngb-toast>
+@for (message of messages(); track message) {
+  <ngb-toast [class]="message.classname" [autohide]="message.autohide"
+  [delay]="message.delay" (hidden)="remove(message)" header="{{message.header}}">{{message.text}}</ngb-toast>
+}

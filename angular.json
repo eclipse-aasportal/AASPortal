@@ -16,13 +16,14 @@
             "prefix": "fhg",
             "architect": {
                 "build": {
-                    "builder": "@angular-devkit/build-angular:browser",
+                    "builder": "@angular-devkit/build-angular:application",
                     "options": {
                         "outputPath": "projects/aas-portal/dist",
                         "index": "projects/aas-portal/src/index.html",
-                        "main": "projects/aas-portal/src/main.ts",
+                        "browser": "projects/aas-portal/src/main.ts",
                         "polyfills": [
-                            "zone.js"
+                            "zone.js",
+                            "@angular/localize/init"
                         ],
                         "tsConfig": "projects/aas-portal/tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
@@ -31,14 +32,11 @@
                             "projects/aas-portal/src/assets"
                         ],
                         "styles": [
+                            "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                            "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
                             "projects/aas-portal/src/styles.scss"
                         ],
-                        "scripts": [
-                            "node_modules/bootstrap/dist/js/bootstrap.min.js"
-                        ],
-                        "allowedCommonJsDependencies": [
-                            "lodash-es"
-                        ]
+                        "scripts": []
                     },
                     "configurations": {
                         "production": {
@@ -54,21 +52,19 @@
                                     "maximumError": "4kb"
                                 }
                             ],
-                            "fileReplacements": [
-                                {
-                                    "replace": "projects/aas-portal/src/environments/environment.ts",
-                                    "with": "projects/aas-portal/src/environments/environment.prod.ts"
-                                }
-                            ],
                             "outputHashing": "all"
                         },
                         "development": {
-                            "buildOptimizer": false,
                             "optimization": false,
-                            "vendorChunk": true,
                             "extractLicenses": false,
                             "sourceMap": true,
-                            "namedChunks": true
+                            "namedChunks": true,
+                            "fileReplacements": [
+                                {
+                                    "replace": "projects/aas-portal/src/environments/environment.ts",
+                                    "with": "projects/aas-portal/src/environments/environment.development.ts"
+                                }
+                            ]
                         }
                     },
                     "defaultConfiguration": "production"
@@ -77,11 +73,11 @@
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
-                            "browserTarget": "aas-portal:build:production",
+                            "buildTarget": "aas-portal:build:production",
                             "proxyConfig": "projects/aas-portal/proxy.conf.json"
                         },
                         "development": {
-                            "browserTarget": "aas-portal:build:development",
+                            "buildTarget": "aas-portal:build:development",
                             "proxyConfig": "projects/aas-portal/proxy.conf.json"
                         }
                     },
@@ -90,7 +86,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "aas-portal:build"
+                        "buildTarget": "aas-portal:build"
                     }
                 },
                 "test": {
@@ -98,7 +94,8 @@
                     "options": {
                         "polyfills": [
                             "zone.js",
-                            "zone.js/testing"
+                            "zone.js/testing",
+                            "@angular/localize/init"
                         ],
                         "tsConfig": "projects/aas-portal/tsconfig.spec.json",
                         "karmaConfig": "projects/aas-portal/karma.conf.cjs",

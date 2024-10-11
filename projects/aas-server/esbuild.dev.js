@@ -16,7 +16,8 @@ await esbuild.build({
     format: 'esm',
     target: 'es2022',
     tsconfig: 'tsconfig.app.json',
-    packages: 'external'
+    packages: 'external',
+    minify: false,
 });
 
 await esbuild.build({
@@ -27,5 +28,6 @@ await esbuild.build({
     format: 'esm',
     target: 'es2022',
     tsconfig: 'tsconfig.app.json',
-    packages: 'external'
+    packages: 'external',
+    minify: false,
 });

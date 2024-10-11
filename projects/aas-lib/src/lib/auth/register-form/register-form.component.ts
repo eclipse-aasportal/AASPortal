@@ -1,16 +1,17 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { isEmpty } from 'lodash-es';
-import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'common';
-import { TranslateService } from '@ngx-translate/core';
+import isEmpty from 'lodash-es/isEmpty';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'aas-core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthApiService } from '../auth-api.service';
 import { ERRORS } from '../../types/errors';
@@ -25,69 +26,73 @@ export interface RegisterFormResult {
     selector: 'fhg-register',
     templateUrl: './register-form.component.html',
     styleUrls: ['./register-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AuthApiService) { }
+        private api: AuthApiService,
+    ) {}
 
-    public userId = '';
+    public readonly userId = signal('');
 
-    public name = '';
+    public readonly name = signal('');
 
-    public defaultName = 'name';
+    public readonly defaultName = signal('name');
 
-    public password1 = '';
+    public readonly password1 = signal('');
 
-    public password2 = '';
+    public readonly password2 = signal('');
 
-    public stayLoggedIn = false;
+    public readonly stayLoggedIn = signal(false);
 
-    public passwordAsEMail = false;
+    public readonly passwordAsEMail = signal(false);
 
-    public messages: string[] = [];
+    public readonly messages = signal<string[]>([]);
 
     public onInputEMail(): void {
-        this.defaultName = getUserNameFromEMail(this.userId);
+        this.defaultName.set(getUserNameFromEMail(this.userId()));
     }
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.userId)) {
+        if (isEmpty(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-        } else if (!isValidEMail(this.userId)) {
+        } else if (!isValidEMail(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (!this.passwordAsEMail) {
-            if (isEmpty(this.password1)) {
+        } else if (!this.passwordAsEMail()) {
+            if (isEmpty(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-            } else if (!isValidPassword(this.password1)) {
+            } else if (!isValidPassword(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-            } else if (this.password1 !== this.password2) {
+            } else if (this.password1() !== this.password2()) {
                 this.pushMessage(this.translate.instant(ERRORS.PASSWORDS_NOT_EQUAL));
             }
         }
 
-        if (this.messages.length === 0) {
+        if (this.messages().length === 0) {
             const profile: UserProfile = {
-                id: this.userId,
-                name: this.name ?? getUserNameFromEMail(this.userId),
-                password: this.password1
+                id: this.userId(),
+                name: this.name() ?? getUserNameFromEMail(this.userId()),
+                password: this.password1(),
             };
 
             let result: RegisterFormResult | undefined;
             this.api.register(profile).subscribe({
                 next: value => {
-                    if (!this.passwordAsEMail) {
+                    if (!this.passwordAsEMail()) {
                         result = {
-                            stayLoggedIn: this.stayLoggedIn,
-                            token: value.token
+                            stayLoggedIn: this.stayLoggedIn(),
+                            token: value.token,
                         };
 
                         this.modal.close(result);
                     }
                 },
-                error: error => this.pushMessage(messageToString(error, this.translate))
+                error: error => this.pushMessage(messageToString(error, this.translate)),
             });
         }
     }
@@ -97,10 +102,10 @@ export class RegisterFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message]
+        this.messages.set([message]);
     }
 
     private clearMessages(): void {
-        this.messages = [];
+        this.messages.set([]);
     }
 }

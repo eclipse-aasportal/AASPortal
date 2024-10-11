@@ -1,0 +1,13 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<button type="button" class="btn btn-primary mb-2" (click)="collapse.toggle()">{{isCollapsed() ?
+    ('CMD_SHOW_LICENSE_TEXT' | translate) : ('CMD_HIDE_LICENSE_TEXT' | translate)}}</button>
+<div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+    <pre class="font-monospace" style="white-space: pre-line;">{{text()}}</pre>
+</div>

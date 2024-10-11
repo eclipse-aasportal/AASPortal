@@ -1,15 +1,15 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { LiveNode } from "common";
+import { LiveNode } from 'aas-core';
 
 export interface SocketItem {
     node: LiveNode;
-    subscribe(item: any): void;
+    subscribe(item: unknown): void;
     unsubscribe(): void;
 }

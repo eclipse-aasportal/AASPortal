@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,16 +9,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Credentials, UserProfile, Cookie, AuthResult } from 'common';
+import { Credentials, UserProfile, Cookie, AuthResult } from 'aas-core';
 import { encodeBase64Url } from '../convert';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthApiService {
-    constructor(
-        private readonly http: HttpClient
-    ) { }
+    public constructor(private readonly http: HttpClient) {}
 
     public register(profile: UserProfile): Observable<AuthResult> {
         return this.http.post<AuthResult>('/api/v1/register', profile);
@@ -30,6 +28,10 @@ export class AuthApiService {
 
     public login(credentials: Credentials): Observable<AuthResult> {
         return this.http.post<AuthResult>('/api/v1/login', credentials);
+    }
+
+    public getProfile(id: string): Observable<UserProfile> {
+        return this.http.get<UserProfile>(`/api/v1/users/${encodeBase64Url(id)}`);
     }
 
     public updateProfile(id: string, profile: UserProfile): Observable<AuthResult> {
@@ -48,10 +50,12 @@ export class AuthApiService {
         return this.http.get<Cookie[]>(`/api/v1/users/${encodeBase64Url(id)}/cookies`);
     }
 
+    public getCookie(id: string, name: string): Observable<Cookie | undefined> {
+        return this.http.get<Cookie>(`/api/v1/users/${encodeBase64Url(id)}/cookies/${name}`);
+    }
+
     public setCookie(id: string, cookie: Cookie): Observable<void> {
-        return this.http.post<void>(
-            `/api/v1/users/${encodeBase64Url(id)}/cookies/${cookie.name}`,
-            cookie);
+        return this.http.post<void>(`/api/v1/users/${encodeBase64Url(id)}/cookies/${cookie.name}`, cookie);
     }
 
     public deleteCookie(id: string, name: string): Observable<void> {

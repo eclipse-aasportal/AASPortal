@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,14 +8,14 @@
 
 import EventEmitter from 'events';
 import WebSocket from 'ws';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { SocketSubscription } from './socket-subscription.js';
 
 export class SocketClient extends EventEmitter {
     private readonly ws: WebSocket;
     private readonly subscriptions = new Map<string, SocketSubscription>();
 
-    constructor(ws: WebSocket) {
+    public constructor(ws: WebSocket) {
         super();
 
         this.ws = ws;
@@ -50,7 +50,7 @@ export class SocketClient extends EventEmitter {
             data = JSON.parse(rawData.toString());
             this.emit('message', data, this);
         }
-    }
+    };
 
     private onClose = (code: number, reason: string): void => {
         this.ws.removeAllListeners();
@@ -62,9 +62,9 @@ export class SocketClient extends EventEmitter {
         this.subscriptions.clear();
 
         this.emit('close', code, reason, this);
-    }
+    };
 
     private onError = (error: Error): void => {
         this.emit('error', error, this);
-    }
+    };
 }

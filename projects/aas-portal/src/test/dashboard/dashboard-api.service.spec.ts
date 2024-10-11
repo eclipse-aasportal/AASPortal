@@ -1,26 +1,26 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardApiService', () => {
     let service: DashboardApiService;
     let httpTestingController: HttpTestingController;
 
     beforeEach(() => {
-
         TestBed.configureTestingModule({
-            providers: [],
-            imports: [HttpClientTestingModule]
-        });
+    imports: [],
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
 
         service = TestBed.inject(DashboardApiService);
         httpTestingController = TestBed.inject(HttpTestingController);
@@ -49,7 +49,7 @@ describe('DashboardApiService', () => {
         const req = httpTestingController.expectOne(url);
         expect(req.request.method).toEqual('GET');
         req.flush(value);
-    })
+    });
 });
 
 function encodeBase64Url(s: string): string {

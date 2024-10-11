@@ -1,12 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, AASDocument } from 'common';
+import { Signal } from '@angular/core';
+import { aas, AASDocument } from 'aas-core';
 
 export interface DocumentSubmodelPair {
     document: AASDocument;
@@ -20,12 +21,12 @@ export interface SubmodelViewDescriptor {
 
 export interface SubmodelReference {
     id: string;
-    url: string;
+    endpoint: string;
     idShort: string;
 }
 
 export interface SubmodelTemplate {
-    submodels: DocumentSubmodelPair[] | null;
+    submodels: Signal<DocumentSubmodelPair[] | null>;
 }
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
@@ -36,7 +37,7 @@ export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Su
 
 export const supportedSubmodelTemplates = new Map<string, string>([
     [ZVEINameplate, 'Nameplate'],
-    [CustomerFeedback, 'CustomerFeedback']
+    [CustomerFeedback, 'CustomerFeedback'],
 ]);
 
 const semanticIdMap = new Map<string, string>([
@@ -44,10 +45,10 @@ const semanticIdMap = new Map<string, string>([
     [ZVEINameplate, ZVEINameplate],
     ['urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate', ZVEINameplate],
     ['https://admin-shell.io/zvei/nameplate/2/0/Nameplate', ZVEINameplate],
-    [CustomerFeedback, CustomerFeedback]
+    [CustomerFeedback, CustomerFeedback],
 ]);
 
-export function resolveSemanticId(value: aas.HasSemantic | aas.Reference | string): string | undefined {
+export function resolveSemanticId(value: aas.HasSemantics | aas.Reference | string): string | undefined {
     let semanticId: string | undefined;
     if (value) {
         if (typeof value === 'string') {
@@ -65,7 +66,7 @@ export function resolveSemanticId(value: aas.HasSemantic | aas.Reference | strin
 
     return semanticId;
 
-    function isReference(value: any): value is aas.Reference {
+    function isReference(value: unknown): value is aas.Reference {
         return Array.isArray((value as aas.Reference).keys);
     }
 }

@@ -1,80 +1,92 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { EMPTY, from, mergeMap, of, Subscription, toArray, zip } from 'rxjs';
-import * as lib from 'projects/aas-lib/src/public-api';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    signal,
+} from '@angular/core';
 
-import { State } from './view.state';
-import * as ViewActions from './view.actions';
-import * as ViewSelectors from './view.selectors';
-import { ProjectService } from '../project/project.service';
+import { ActivatedRoute } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
+import { EMPTY, from, mergeMap, of, Subscription, toArray, zip } from 'rxjs';
+
 import { ToolbarService } from '../toolbar.service';
+import { ViewApiService } from './view-api.service';
+import {
+    ClipboardService,
+    CustomerFeedbackComponent,
+    DigitalNameplateComponent,
+    DocumentSubmodelPair,
+    SubmodelViewDescriptor,
+    ViewQuery,
+    ViewQueryParams,
+} from 'aas-lib';
 
 @Component({
     selector: 'fhg-view',
     templateUrl: './view.component.html',
-    styleUrls: ['./view.component.scss']
+    styleUrls: ['./view.component.scss'],
+    standalone: true,
+    imports: [DigitalNameplateComponent, CustomerFeedbackComponent, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
-    private readonly store: Store<State>;
     private readonly subscription = new Subscription();
+    private _template = signal<string | undefined>(undefined);
+    private _submodels = signal<DocumentSubmodelPair[]>([]);
 
-    constructor(
-        store: Store,
+    public constructor(
         private readonly route: ActivatedRoute,
-        private readonly project: ProjectService,
-        private readonly clipboard: lib.ClipboardService,
-        private readonly toolbar: ToolbarService
-    ) {
-        this.store = store as Store<State>;
-        this.subscription.add(this.store.select(ViewSelectors.selectSubmodels)
-            .pipe().subscribe(submodels => {
-                this.submodels = submodels;
-            }));
-
-        this.subscription.add(this.store.select(ViewSelectors.selectTemplate)
-            .pipe().subscribe(template => {
-                this.template = template;
-            }));
-    }
+        private readonly api: ViewApiService,
+        private readonly clipboard: ClipboardService,
+        private readonly toolbar: ToolbarService,
+    ) {}
 
     @ViewChild('viewToolbar', { read: TemplateRef })
     public viewToolbar: TemplateRef<unknown> | null = null;
 
-    public template?: string;
+    public readonly template = this._template.asReadonly();
 
-    public submodels: lib.DocumentSubmodelPair[] = [];
+    public readonly submodels = this._submodels.asReadonly();
 
     public ngOnInit(): void {
-        let query: lib.ViewQuery | undefined;
-        const params = this.route.snapshot.queryParams as lib.ViewQueryParams;
+        let query: ViewQuery | undefined;
+        const params = this.route.snapshot.queryParams as ViewQueryParams;
         if (params.format) {
             query = this.clipboard.get(params.format);
         }
 
         if (query?.descriptor) {
-            const descriptor: lib.SubmodelViewDescriptor = query.descriptor;
-            zip(of(descriptor.template), from(descriptor.submodels).pipe(
-                mergeMap(item => zip(this.project.getDocument(item.id, item.url), of(item.idShort))),
-                mergeMap(tuple => {
-                    const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
-                    if (submodel?.modelType === 'Submodel') {
-                        return of({ document: tuple[0], submodel } as lib.DocumentSubmodelPair);
-                    }
+            const descriptor: SubmodelViewDescriptor = query.descriptor;
+            zip(
+                of(descriptor.template),
+                from(descriptor.submodels).pipe(
+                    mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
+                    mergeMap(tuple => {
+                        const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
+                        if (submodel?.modelType === 'Submodel') {
+                            return of({ document: tuple[0], submodel } as DocumentSubmodelPair);
+                        }
 
-                    return EMPTY;
-                }),
-                toArray()
-            )).subscribe(tuple => this.store.dispatch(
-                ViewActions.initView({ submodels: tuple[1], template: tuple[0] })));
+                        return EMPTY;
+                    }),
+                    toArray(),
+                ),
+            ).subscribe(tuple => {
+                this._submodels.set(tuple[1]);
+                this._template.set(tuple[0]);
+            });
         }
     }
 

@@ -17,8 +17,6 @@
 
 **/bin
 **/obj
-./aas-server/users
-./aas-server/test/users
 nginx
 *.user
 *.log
@@ -38,17 +36,16 @@ coverage
 libpeerconnection.log
 testem.log
 typings
-./aas-server-config.json
 reports
 .nyc_output
 temp
 *-audit.json
 swagger.json
 swagger.yaml
-projects/aas-server/src/app/routes
+/projects/aas-server/src/app/routes
+/projects/ass-server/src/assets/app-info.json
 
 # System files
 .DS_Store
 Thumbs.db
 .VSCodeCounter
-aas-server-config.json

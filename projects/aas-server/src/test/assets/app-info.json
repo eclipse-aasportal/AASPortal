@@ -11,6 +11,7 @@
             "version": "1.0",
             "description": "A library.",
             "license": "MIT",
+            "licenseText": "License text...",
             "homepage": "https://www.iosb-ina.fraunhofer.de/"
         }
     ]

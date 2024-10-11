@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,27 +10,24 @@ import { inject, singleton } from 'tsyringe';
 import express, { Express, NextFunction, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import mongoose from 'mongoose';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
-import { ApplicationError } from 'common';
+import { ApplicationError } from 'aas-core';
 import { ValidateError } from 'tsoa';
 
-import swaggerDoc from './swagger.json' assert {type: 'json'};
+import swaggerDoc from './swagger.json' with { type: 'json' };
 import { RegisterRoutes } from './routes/routes.js';
 import { ERRORS } from './errors.js';
 import { Variable } from './variable.js';
 import { Logger } from './logging/logger.js';
-import { parseUrl } from './convert.js';
 
 @singleton()
 export class App {
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         this.app = express();
         this.setup();
-        this.connectUserStorage();
     }
 
     public readonly app: Express;
@@ -44,10 +41,12 @@ export class App {
             this.logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
         });
 
-        this.app.use(cors({
-            origin: this.variable.CORS_ORIGIN,
-            credentials: true
-        }));
+        this.app.use(
+            cors({
+                origin: this.variable.CORS_ORIGIN,
+                credentials: true,
+            }),
+        );
 
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
@@ -63,26 +62,10 @@ export class App {
         this.app.use(this.errorHandler);
     }
 
-    private async connectUserStorage(): Promise<void> {
-        const url = this.variable.USER_STORAGE;
-        if (url) {
-            try {
-                const protocol = parseUrl(url).protocol;
-                if (protocol === 'mongodb:') {
-                    await mongoose.connect(url);
-                } else {
-                    throw new Error(`${protocol} is not supported.`);
-                }
-            } catch (error) {
-                this.logger.error(`The connection to the user database cannot be established: ${error?.message}`);
-            }
-        }
-    }
-
     private errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction): Response | void => {
         if (err instanceof ValidateError) {
             return res.status(422).json({
-                message: "Validation Failed",
+                message: 'Validation Failed',
                 details: err?.fields,
             });
         }
@@ -90,18 +73,18 @@ export class App {
         if (err instanceof ApplicationError) {
             if (err.name === ERRORS.UnauthorizedAccess) {
                 return res.status(401).json({
-                    message: 'Unauthorized'
+                    message: 'Unauthorized',
                 });
             }
 
             return res.status(500).json({
-                message: err.message
+                message: err.message,
             });
         }
 
         if (err instanceof Error) {
             return res.status(500).json({
-                message: err.message
+                message: err.message,
             });
         }
 
@@ -110,7 +93,7 @@ export class App {
 
     private notFoundHandler = (_req: Request, res: Response) => {
         res.status(404).send({
-            message: "Not Found"
+            message: 'Not Found',
         });
     };
 
@@ -118,9 +101,9 @@ export class App {
         (swaggerDoc as { host?: string }).host = req.get('host');
         (req as Request & { swaggerDoc: JsonObject }).swaggerDoc = swaggerDoc;
         next();
-    }
+    };
 
     private getIndex = (req: Request, res: Response) => {
         res.sendFile(this.variable.WEB_ROOT + '/index.html');
-    }
+    };
 }

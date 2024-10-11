@@ -1,19 +1,36 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { head } from 'lodash-es';
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    computed,
+    signal,
+} from '@angular/core';
+
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, map, mergeMap, Observable, Subscription, first, from } from 'rxjs';
-import * as lib from 'projects/aas-lib/src/public-api';
+import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
-import { ProjectService } from '../project/project.service';
+import head from 'lodash-es/head';
+import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
+import {
+    AASTreeComponent,
+    AuthService,
+    ClipboardService,
+    DownloadService,
+    NotifyService,
+    SecuredImageComponent,
+} from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
@@ -21,192 +38,128 @@ import { UpdateElementCommand } from './commands/update-element-command';
 import { DeleteCommand } from './commands/delete-command';
 import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
-import { NewElementFormComponent, NewElementResult } from './new-element-form/new-element-form.component';
-import { DashboardService } from '../dashboard/dashboard.service';
-import * as AASActions from './aas.actions';
-import * as AASSelectors from './aas.selectors';
-import { State } from './aas.state';
-import { DashboardChartType } from '../dashboard/dashboard.state';
+import { NewElementFormComponent } from './new-element-form/new-element-form.component';
+import { DashboardChartType, DashboardPage, DashboardService } from '../dashboard/dashboard.service';
 import { DashboardQuery } from '../types/dashboard-query-params';
-import { getEndpointType } from '../configuration';
 import { ToolbarService } from '../toolbar.service';
-import {
-    AASDocument,
-    equalDocument,
-    TemplateDescriptor,
-    aas, isProperty,
-    isNumberType,
-    isBlob,
-    AASEndpointType
-} from 'common';
+import { AASStore } from './aas.store';
+import { AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
-    styleUrls: ['./aas.component.scss']
+    styleUrls: ['./aas.component.scss'],
+    standalone: true,
+    imports: [SecuredImageComponent, AASTreeComponent, AsyncPipe, TranslateModule, FormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
-    private readonly store: Store<State>;
-    private readonly subscription = new Subscription();
-    private _dashboardPage = '';
-    private templates: TemplateDescriptor[] = [];
-    private selectedElements: aas.Referable[] = [];
-
-    constructor(
-        store: Store,
+    public constructor(
+        private readonly store: AASStore,
         private readonly router: Router,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
-        private readonly project: ProjectService,
-        private readonly notify: lib.NotifyService,
+        private readonly notify: NotifyService,
         private readonly dashboard: DashboardService,
         private readonly api: AASApiService,
-        private readonly download: lib.DownloadService,
+        private readonly download: DownloadService,
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,
-        private readonly auth: lib.AuthService,
-        private readonly clipboard: lib.ClipboardService
-    ) {
-        this.store = store as Store<State>;
-        this.state = this.store.select(AASSelectors.selectState);
-        this.search = this.store.select(AASSelectors.selectSearch);
-        this.canPlay = this.store.select(AASSelectors.selectCanPlay);
-        this.canStop = this.store.select(AASSelectors.selectCanStop);
-
-        this.dashboardPages = this.dashboard.pages.pipe((map(pages => pages.map(page => page.name))));
-        this.readOnly = this.store.select(AASSelectors.selectReadOnly);
-    }
-
-    @ViewChild('aasTree')
-    public aasTree: lib.AASTree | null = null;
+        private readonly auth: AuthService,
+        private readonly clipboard: ClipboardService,
+    ) {}
 
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aasToolbar: TemplateRef<unknown> | null = null;
 
-    public document: AASDocument | null = null;
+    public readonly document = this.store.document;
 
-    public readonly state: Observable<lib.OnlineState>;
+    public readonly address = computed(() => this.store.document()?.address ?? '-');
 
-    public readonly search: Observable<string>;
+    public readonly idShort = computed(() => this.store.document()?.idShort ?? '-');
 
-    public get endpoint(): string {
-        return this.document?.endpoint.address ?? '';
-    }
+    public readonly id = computed(() => this.store.document()?.id ?? '-');
 
-    public get idShort(): string {
-        return this.document?.idShort ?? '';
-    }
+    public readonly assetId = computed(() => this.store.document()?.assetId ?? '-');
 
-    public get id(): string {
-        return this.document?.id ?? '-'
-    }
+    public readonly thumbnail = computed(() => this.store.document()?.thumbnail ?? '-');
 
-    public get assetId(): string {
-        return head(this.document?.content?.assetAdministrationShells)?.assetInformation.globalAssetId ?? '-';
-    }
+    public readonly readOnly = computed(() => this.store.document()?.readonly ?? false);
 
-    public get thumbnail(): string {
-        if (this.document) {
-            const url = lib.encodeBase64Url(this.document?.container);
-            const id = lib.encodeBase64Url(this.document?.id);
-            return `/api/v1/containers/${url}/documents/${id}/thumbnail`;
-        }
+    public readonly version = computed(() =>
+        this.versionToString(head(this.store.document()?.content?.assetAdministrationShells)?.administration),
+    );
 
-        return 'assets/resources/aas.svg'
-    }
+    public readonly state = this.store.state;
 
-    public get version(): string {
-        return this.versionToString(head(this.document?.content?.assetAdministrationShells)?.administration);
-    }
+    public readonly searchExpression = this.store.searchExpression;
 
-    public readonly dashboardPages: Observable<string[]>;
+    public readonly dashboardPages = this.dashboard.pages;
 
-    public get dashboardPage(): string {
-        return this._dashboardPage;
-    }
+    public readonly dashboardPage = this.dashboard.activePage;
 
-    public set dashboardPage(value: string) {
-        this.dashboard.setPageName(value);
-    }
+    public readonly selectedElements = signal<aas.Referable[]>([]);
 
-    public readonly readOnly: Observable<boolean>;
+    public readonly canUndo = this.commandHandler.canUndo;
 
-    public get canUndo(): boolean {
-        return this.commandHandler.canUndo;
-    }
+    public readonly canRedo = this.commandHandler.canRedo;
 
-    public get canRedo(): boolean {
-        return this.commandHandler.canRedo;
-    }
+    public readonly canPlay = computed(() => {
+        const state = this.store.state();
+        return (this.store.document()?.onlineReady ?? false) && state === 'offline';
+    });
 
-    public readonly canPlay: Observable<boolean>;
+    public readonly canStop = computed(() => {
+        const state = this.store.state();
+        return (this.store.document()?.onlineReady ?? false) && state === 'online';
+    });
 
-    public readonly canStop: Observable<boolean>;
+    public readonly canSynchronize = computed(() => {
+        const document = this.store.document();
+        return document != null && !document.readonly && document.modified ? document.modified : false;
+    });
+
+    public readonly canNewElement = computed(() => this.selectedElements().length === 1);
+
+    public readonly canEditElement = computed(() => this.selectedElements().length === 1);
+
+    public readonly canDeleteElement = computed(
+        () =>
+            this.selectedElements().length > 0 &&
+            this.selectedElements().every(item => item.modelType !== 'AssetAdministrationShell'),
+    );
+
+    public readonly canAddToDashboard = computed(() => {
+        const selectedElements = this.selectedElements();
+        return (
+            this.dashboardPage() != null &&
+            selectedElements.length > 0 &&
+            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
+        );
+    });
 
     public ngOnInit(): void {
-        const params = this.route.snapshot.queryParams as lib.AASQueryParams;
-        let query: lib.AASQuery | undefined;
-        if (params.format) {
-            query = this.clipboard.get(params.format);
-        } else if (params.id) {
-            query = {
-                id: params.id
-            };
-        }
-
-        if (query?.search) {
-            this.store.dispatch(AASActions.setSearch({ search: query.search }));
-        }
-
-        if (query) {
-            let document: Observable<AASDocument> | undefined;
-            if (query.url) {
-                document = this.project.getDocument(query.id, query.url);
-            } else {
-                document = this.project.getDocument(query.id);
+        this.route.queryParams.pipe(first()).subscribe(params => {
+            if (params?.search) {
+                this.store.searchExpression.set(params.search);
             }
 
-            document?.pipe(first()).subscribe(value => this.store.dispatch(AASActions.setDocument({ document: value })));
-        }
-
-        this.subscription.add(this.store.select(AASSelectors.selectDocument).pipe()
-            .subscribe((value) => {
-                if (!equalDocument(this.document, value)) {
-                    this.commandHandler.clear();
-                }
-
-                this.document = value;
-            }));
-
-        this.subscription.add(this.store.select(AASSelectors.selectTemplateStorage).pipe(
-            mergeMap(templateStorage => {
-                if (templateStorage.timestamp === 0) {
-                    return this.api.getTemplates().pipe(
-                        map(templates => this.store.dispatch(AASActions.setTemplateStorage({ templates })))
-                    );
+            if (params) {
+                const document: AASDocument = this.clipboard.get('AASDocument');
+                if (!document) {
+                    this.store.getDocument(params.id, params.endpoint);
+                } else if (!document.content) {
+                    this.store.getDocumentContent(document);
                 } else {
-                    return EMPTY;
+                    this.store.setDocument(document);
                 }
-            })
-        ).subscribe({
-            error: error => this.notify.error(error)
-        }));
-
-        this.subscription.add(this.store.select(AASSelectors.selectTemplates).pipe()
-            .subscribe(templates => {
-                this.templates = templates;
-            }));
-
-        this.subscription.add(this.dashboard.name.subscribe(name => {
-            this._dashboardPage = name;
-        }));
+            }
+        });
     }
 
     public ngAfterViewInit(): void {
-        if (this.aasTree) {
-            this.subscription.add(this.aasTree.selectedElements.subscribe(values => this.selectedElements = values));
-        }
-
         if (this.aasToolbar) {
             this.toolbar.set(this.aasToolbar);
         }
@@ -214,61 +167,52 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-        this.subscription.unsubscribe();
     }
 
     public play(): void {
-        this.store.dispatch(AASActions.setState({ value: 'online' }));
+        this.store.state.set('online');
     }
 
     public stop(): void {
-        this.store.dispatch(AASActions.setState({ value: 'offline' }));
+        this.store.state.set('offline');
     }
 
-    public canAddToDashboard(): boolean {
-        const selectedElements = this.selectedElements;
-        return this.dashboardPage != null && this.document != null &&
-            selectedElements.length > 0 &&
-            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element));
+    public setDashboardPage(page: DashboardPage): void {
+        this.dashboard.setPage(page);
     }
 
-    public async addToDashboard(chartType: string): Promise<boolean> {
-        if (this.document) {
-            try {
-                this.dashboard.add(
-                    this.dashboardPage,
-                    this.document,
-                    this.selectedElements,
-                    chartType as DashboardChartType);
-
-                this.clipboard.set('DashboardQuery', { page: this.dashboardPage } as DashboardQuery);
-                return await this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
-            } catch (error) {
-                this.notify.error(error);
-            }
+    public addToDashboard(chartType: string): void {
+        const document = this.store.document();
+        const page = this.dashboard.activePage();
+        if (!document || !page) {
+            return;
         }
 
-        return false;
+        this.dashboard.add(page, document, this.selectedElements(), chartType as DashboardChartType);
+        this.clipboard.set('DashboardQuery', { page: this.dashboardPage().name } as DashboardQuery);
+        this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
     }
 
-    public canSynchronize(): boolean {
-        return this.document != null && !this.document.readonly && this.document.modified ? this.document.modified : false;
-    }
-
-    public synchronize(): void {
-        if (!this.canSynchronize() || !this.document) return;
-
-        const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.putDocument(document)),
-            map((messages) => {
-                if (messages && messages.length > 0) {
-                    this.notify.info(messages.join('\r\n'));
+    public synchronize(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.store.document()),
+            mergeMap(document => {
+                if (!document) {
+                    return EMPTY;
                 }
 
-                this.store.dispatch(AASActions.resetModified({ document }));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+                return this.api.putDocument(document).pipe(
+                    map(messages => {
+                        if (messages && messages.length > 0) {
+                            this.notify.info(messages.join('\r\n'));
+                        }
 
+                        this.store.resetModified(document);
+                    }),
+                );
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
     public undo(): void {
@@ -279,97 +223,103 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         this.commandHandler.redo();
     }
 
-    public canNewElement(): boolean {
-        return this.selectedElements.length === 1;
-    }
+    public newElement(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.store.document()),
+            mergeMap(document => {
+                if (!document || this.selectedElements().length !== 1) {
+                    return EMPTY;
+                }
 
-    public newElement(): void {
-        if (!this.document?.content || this.selectedElements.length !== 1) return;
-
-        const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(NewElementFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.initialize(document.content, this.selectedElements[0], this.templates);
-                return from<Promise<NewElementResult | undefined>>(modalRef.result)
+                return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
+                    mergeMap(modalRef => {
+                        modalRef.componentInstance.initialize(document.content, this.selectedElements()[0]);
+                        return from<Promise<aas.Referable | undefined>>(modalRef.result);
+                    }),
+                    map(result => {
+                        if (result) {
+                            this.commandHandler.execute(
+                                new NewElementCommand(this.store, document, this.selectedElements()[0], result),
+                            );
+                        }
+                    }),
+                );
             }),
-            map((result) => {
-                if (!result) return;
-
-                this.commandHandler.execute(new NewElementCommand(
-                    this.store,
-                    document,
-                    this.selectedElements[0],
-                    result.element));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public canEditElement(): boolean {
-        return this.selectedElements.length === 1;
-    }
+    public editElement(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.store.document()),
+            mergeMap(document => {
+                if (!document || this.selectedElements().length !== 1) {
+                    return EMPTY;
+                }
 
-    public editElement(): void {
-        if (!this.document?.content || this.selectedElements.length !== 1) return;
-
-        const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(EditElementFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.initialize(this.selectedElements[0]);
-                return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
+                return of(this.modal.open(EditElementFormComponent, { backdrop: 'static' })).pipe(
+                    mergeMap(modalRef => {
+                        modalRef.componentInstance.initialize(this.selectedElements()[0]);
+                        return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
+                    }),
+                    map(result => {
+                        if (result) {
+                            this.commandHandler.execute(
+                                new UpdateElementCommand(this.store, document, this.selectedElements()[0], result),
+                            );
+                        }
+                    }),
+                );
             }),
-            map((result) => {
-                if (!result) return;
-
-                this.commandHandler.execute(new UpdateElementCommand(
-                    this.store,
-                    document,
-                    this.selectedElements[0],
-                    result));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public canDeleteElement(): boolean {
-        return this.selectedElements.length > 0 &&
-            this.selectedElements.every(item => item.modelType !== 'AssetAdministrationShell');
+    public deleteElement(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.store.document()),
+            map(document => {
+                if (document && this.selectedElements().length > 0) {
+                    this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements()));
+                }
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public deleteElement(): void {
-        if (!this.document || this.selectedElements.length <= 0) return;
+    public downloadDocument(): Observable<void> {
+        return of(this.store.document()).pipe(
+            mergeMap(document => {
+                if (!document) {
+                    return EMPTY;
+                }
 
-        const document = this.document;
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => {
-                this.commandHandler.execute(new DeleteCommand(this.store, document, this.selectedElements));
-            })).subscribe({ error: (error) => this.notify.error(error) });
+                return this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx');
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public canDownloadDocument(): boolean {
-        let type: AASEndpointType | undefined;
-        if (this.document) {
-            type = getEndpointType(this.document.container);
+    public searchExpressionChange(value: string): void {
+        this.store.searchExpression.set(value);
+    }
+
+    private isNumberProperty(element: aas.Referable): boolean {
+        if (isProperty(element)) {
+            return isNumberType(element.valueType);
         }
 
-        return type === 'AasxDirectory' || type === 'AasxServer';
+        return false;
     }
 
-    public downloadDocument(): void {
-        this.download.downloadDocument(
-            this.document!.idShort + '.aasx',
-            this.document!.id,
-            this.document!.container).subscribe({ error: (error) => this.notify.error(error) });
-    }
-
-    public findNext(): void {
-        this.aasTree?.findNext()
-    }
-
-    public findPrevious(): void {
-        this.aasTree?.findPrevious()
-    }
-
-    public applySearch(text: string): void {
-        this.store.dispatch(AASActions.setSearch({ search: text }));
+    // Hack, Hack
+    private isTimeSeries(element: aas.Referable): boolean {
+        return (
+            isBlob(element) &&
+            element.value != null &&
+            element.idShort === 'TimeSeriesHistory' &&
+            element.contentType === 'application/json'
+        );
     }
 
     private versionToString(administration?: aas.AdministrativeInformation): string {
@@ -388,21 +338,5 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         return version;
-    }
-
-    private isNumberProperty(element: aas.Referable): boolean {
-        if (isProperty(element)) {
-            return isNumberType(element.valueType);
-        }
-
-        return false;
-    }
-
-    // Hack, Hack 
-    private isTimeSeries(element: aas.Referable): boolean {
-        return isBlob(element) &&
-            element.value != null &&
-            element.idShort === 'TimeSeriesHistory' &&
-            element.contentType === 'application/json';
     }
 }

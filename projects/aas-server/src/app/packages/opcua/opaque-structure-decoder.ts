@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,8 +8,8 @@
 
 import { BinaryStream, DataValueOptions } from 'node-opcua';
 import { OpaqueStructure } from 'node-opcua-extension-object';
-import { aas } from 'common';
-import { UAKeyElements, UAKeyType } from './opcua.js';
+import { aas } from 'aas-core';
+import { UAKeyElements } from './opcua.js';
 
 export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string): DataValueOptions {
     if (dataType === 'AASKeyDataType') {
@@ -17,8 +17,8 @@ export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string):
             value: {
                 arrayType: 'Array',
                 dimensions: [1],
-                value: decodeToKeyArray(value.buffer)
-            }
+                value: decodeToKeyArray(value.buffer),
+            },
         };
     }
 
@@ -32,7 +32,7 @@ export function decodeOpaqueStructure(value: OpaqueStructure, dataType: string):
             const id = stream.readString() as string;
             keys.push({
                 type: toKeyTypes(type),
-                value: id
+                value: id,
             });
         }
 

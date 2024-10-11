@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,12 +9,16 @@
 import { TestBed } from '@angular/core/testing';
 import { Command } from '../../app/types/command';
 import { noop } from 'rxjs';
-import { NotifyService } from 'projects/aas-lib/src/public-api';
+import { NotifyService } from 'aas-lib';
 import { CommandHandlerService } from '../../app/aas/command-handler.service';
 
 class TestCommand extends Command {
-    constructor(private spy?: jasmine.Spy, private undoSpy?: jasmine.Spy, private redoSpy?: jasmine.Spy) {
-        super("TestCommand");
+    public constructor(
+        private spy?: jasmine.Spy,
+        private undoSpy?: jasmine.Spy,
+        private redoSpy?: jasmine.Spy,
+    ) {
+        super('TestCommand');
     }
 
     protected onExecute(): void {
@@ -41,12 +45,12 @@ class TestCommand extends Command {
 }
 
 class FailCommand extends Command {
-    constructor(private abortSpy: jasmine.Spy) {
-        super("TestCommand");
+    public constructor(private abortSpy: jasmine.Spy) {
+        super('TestCommand');
     }
 
     protected onExecute(): void {
-        throw new Error("Command throws an error.");
+        throw new Error('Command throws an error.');
     }
 
     protected onUndo(): void {
@@ -71,10 +75,10 @@ describe('CommandHandlerService', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error'])
-                }
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                },
             ],
-            imports: []
+            imports: [],
         });
 
         service = TestBed.inject(CommandHandlerService);
@@ -84,41 +88,41 @@ describe('CommandHandlerService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('indicates that undo is not possible', function () {
-        expect(service.canUndo).toBeFalse();
+    it('indicates that undo is not possible', () => {
+        expect(service.canUndo()).toBeFalse();
     });
 
-    it('indicates that redo is not possible', function () {
-        expect(service.canRedo).toBeFalse();
+    it('indicates that redo is not possible', () => {
+        expect(service.canRedo()).toBeFalse();
     });
 
-    it("can execute a command", function () {
+    it('can execute a command', () => {
         const spy = jasmine.createSpy('execute');
         service.execute(new TestCommand(spy));
         expect(spy).toHaveBeenCalled();
     });
 
-    it('can undo/redo a command', function () {
+    it('can undo/redo a command', () => {
         const undoSpy = jasmine.createSpy('undo');
         const redoSpy = jasmine.createSpy('redo');
         service.execute(new TestCommand(undefined, undoSpy, redoSpy));
-        expect(service.canUndo).toBeTrue();
+        expect(service.canUndo()).toBeTrue();
         service.undo();
         expect(undoSpy).toHaveBeenCalled();
-        expect(service.canRedo).toBeTrue();
+        expect(service.canRedo()).toBeTrue();
         service.redo();
         expect(redoSpy).toHaveBeenCalled();
     });
 
-    it("clears the undo/redo stack", function () {
+    it('clears the undo/redo stack', () => {
         service.execute(new TestCommand());
         service.execute(new TestCommand());
         service.clear();
-        expect(service.canUndo).toBeFalse();
-        expect(service.canRedo).toBeFalse();
+        expect(service.canUndo()).toBeFalse();
+        expect(service.canRedo()).toBeFalse();
     });
 
-    it("aborts a failed command", function () {
+    it('aborts a failed command', () => {
         const abortSpy = jasmine.createSpy('abort');
         expect(() => service.execute(new FailCommand(abortSpy))).toThrowError();
         expect(abortSpy).toHaveBeenCalled();

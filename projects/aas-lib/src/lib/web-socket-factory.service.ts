@@ -1,17 +1,17 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class WebSocketFactoryService {
     /**

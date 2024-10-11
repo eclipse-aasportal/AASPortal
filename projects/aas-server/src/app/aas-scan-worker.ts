@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,8 +13,9 @@ import { WorkerApp } from './worker-app.js';
 
 container.register('Logger', MemoryLogger);
 container.registerInstance(
-    'LOG_LEVEL', 
-    process.env.NODE_ENV === 'production' ? MemoryLoggerLevel.Error : MemoryLoggerLevel.All);
+    'LOG_LEVEL',
+    process.env.NODE_ENV === 'production' ? MemoryLoggerLevel.Error : MemoryLoggerLevel.All,
+);
 
 const app = container.resolve(WorkerApp);
 app.run();

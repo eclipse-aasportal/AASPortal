@@ -1,123 +1,119 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
-import { TranslateService } from '@ngx-translate/core';
-import { aas, AASContainer, AASDocument, AASWorkspace, stringFormat } from 'common';
-import * as lib from 'projects/aas-lib/src/public-api';
-import { BehaviorSubject, first, from, map, mergeMap, Observable, of, Subscription } from 'rxjs';
-import { ProjectService } from '../project/project.service';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    TemplateRef,
+    ViewChild,
+    computed,
+} from '@angular/core';
+
+import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
+import { catchError, EMPTY, first, from, map, mergeMap, Observable, of } from 'rxjs';
+import {
+    AASTableComponent,
+    AuthService,
+    ClipboardService,
+    CustomerFeedback,
+    DownloadService,
+    NotifyService,
+    SubmodelViewDescriptor,
+    ViewMode,
+    ViewQuery,
+    WindowService,
+    ZVEINameplate,
+    resolveSemanticId,
+    supportedSubmodelTemplates,
+} from 'aas-lib';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
-import * as StartActions from './start.actions';
-import { State } from './start.state';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { getEndpointType } from '../configuration';
-import { selectFilter, selectShowAll, selectViewMode } from './start.selectors';
 import { ToolbarService } from '../toolbar.service';
+import { StartApiService } from './start-api.service';
+import { FavoritesService } from './favorites.service';
+import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
+import { StartStore } from './start.store';
+import { AsyncPipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
+    standalone: true,
+    imports: [AASTableComponent, NgClass, AsyncPipe, TranslateModule, NgbModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
-    private readonly store: Store<State>
-    private readonly subscription = new Subscription();
-    private readonly someSelectedDocuments = new BehaviorSubject<boolean>(true);
-    private selectedDocuments: AASDocument[] = [];
-
-    constructor(
-        store: Store,
+export class StartComponent implements OnDestroy, AfterViewInit {
+    public constructor(
+        private readonly store: StartStore,
         private readonly router: Router,
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
-        private readonly window: lib.WindowService,
-        private readonly project: ProjectService,
-        private readonly notify: lib.NotifyService,
+        private readonly window: WindowService,
+        private readonly api: StartApiService,
+        private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
-        private readonly auth: lib.AuthService,
-        private readonly download: lib.DownloadService,
-        private readonly clipboard: lib.ClipboardService
+        private readonly auth: AuthService,
+        private readonly download: DownloadService,
+        private readonly clipboard: ClipboardService,
+        private readonly favorites: FavoritesService,
     ) {
-        this.store = store as Store<State>;
-        this.filter = this.store.select(selectFilter);
-        this.documents = this.project.documents;
+        if (this.store.viewMode() === ViewMode.Undefined) {
+            this.auth.ready.pipe(first(ready => ready)).subscribe({
+                next: () => this.store.getFirstPage(),
+                error: error => this.notify.error(error),
+            });
+        }
     }
-
-    @ViewChild('aasTable')
-    public aasTable: lib.AASTable | null = null;
 
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
-    public viewMode: lib.ViewMode = lib.ViewMode.List;
+    public readonly activeFavorites = this.store.activeFavorites;
 
-    public showAll = false;
+    public readonly favoritesLists = this.store.favoritesLists;
 
-    public readonly filter: Observable<string>;
+    public readonly filter = this.store.filter;
 
-    public documents: Observable<AASDocument[]>;
+    public readonly viewMode = this.store.viewMode;
 
-    public workspaces: AASWorkspace[] = [];
+    public readonly limit = this.store.limit;
 
-    public workspace: AASWorkspace | null = null;
+    public readonly filterText = this.store.filterText;
 
-    public allAvailable = true;
+    public readonly isFirstPage = this.store.isFirstPage;
 
-    public readonly endpoint = this.project.workspace.pipe(map(item => item?.name ?? '-'));
+    public readonly isLastPage = this.store.isLastPage;
 
-    public readonly endpoints = this.project.workspaces;
+    public readonly endpoints = this.api.getEndpoints();
 
-    public ngOnInit(): void {
-        this.subscription.add(
-            this.store
-                .select(selectShowAll).pipe()
-                .subscribe((value) => {
-                    this.showAll = value;
-                })
-        );
+    public readonly documents = this.store.documents;
 
-        this.subscription.add(
-            this.store
-                .select(selectViewMode).pipe()
-                .subscribe((value) => {
-                    this.viewMode = value;
-                })
-        );
+    public readonly selected = this.store.selected;
 
-        this.subscription.add(
-            this.project.workspace.subscribe((value) => {
-                this.workspace = value;
-            })
-        );
+    public readonly canDownloadDocument = computed(() => (this.selected().length > 0 ? true : false));
 
-        this.subscription.add(
-            this.project.workspaces.subscribe((value) => {
-                this.workspaces = value;
-            })
-        );
+    public readonly canDeleteDocument = computed(() => this.selected().length > 0);
 
-        this.subscription.add(
-            this.project.documents.subscribe(
-                (documents) => (this.allAvailable = documents.every((item) => item.content)))
-        );
+    public readonly canViewUserFeedback = computed(() =>
+        this.selected().some(document => this.selectSubmodels(document, CustomerFeedback).length === 1),
+    );
 
-        this.subscription.add(this.aasTable?.selectedDocuments.subscribe(
-            selectedDocuments => {
-                this.selectedDocuments = selectedDocuments;
-                this.someSelectedDocuments.next(selectedDocuments.length > 0);
-            }));
-    }
+    public readonly canViewNameplate = computed(() =>
+        this.selected().some(document => this.selectSubmodels(document, ZVEINameplate).length === 1),
+    );
 
     public ngAfterViewInit(): void {
         if (this.startToolbar) {
@@ -127,192 +123,245 @@ export class StartComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-        this.subscription.unsubscribe();
     }
 
-    public setViewMode(viewMode: string | lib.ViewMode): void {
-        this.store.dispatch(StartActions.setViewMode({ viewMode: viewMode as lib.ViewMode }));
-    }
-
-    public setShowAll(showAll: boolean): void {
-        this.store.dispatch(StartActions.setShowAll({ showAll }));
-    }
-
-    public addEndpoint(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(AddEndpointFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.workspaces = this.workspaces.map(item => item.name);
-                return from<Promise<string | undefined>>(modalRef.result)
-            }),
-            map((result) => {
-                if (!result) return;
-
-                const url = new URL(result);
-                this.project
-                    .addEndpoint(url.searchParams.get('name')!, result)
-                    .pipe(first())
-                    .subscribe({
-                        error: (error) => this.notify.error(error),
-                    });
-            })).subscribe({ error: (error) => this.notify.error(error) });
-    }
-
-    public removeEndpoint(): void {
-        if (this.workspaces.length <= 0) return;
-
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                modalRef.componentInstance.endpoints = [...this.workspaces]
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(item => ({
-                        name: item.name,
-                        url: item.containers.map((c, i) => i === 0 ? c.url.split('?')[0] : `${i + 1}`).join(', '),
-                        selected: false
-                    } as EndpointSelect));
-                return from<Promise<string[] | undefined>>(modalRef.result);
-            }),
-            mergeMap((endpoints) => from((endpoints ?? []))),
-            mergeMap((endpoint) => this.project.removeEndpoint(endpoint)))
-            .subscribe({ error: (error) => this.notify.error(error) });
-    }
-
-    public reset(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
-            mergeMap((result) => {
-                if (!result) return of(void 0);
-
-                return this.project.reset();
-            })).subscribe({ error: (error) => this.notify.error(error) });
-    }
-
-    public setWorkspace(name: string): void {
-        this.project.setWorkspace(name);
-    }
-
-    public canUploadDocument(): boolean {
-        return this.getUploadCapableEndpoints().length > 0;
-    }
-
-    public uploadDocument(): void {
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.modal.open(UploadFormComponent, { backdrop: 'static' })),
-            mergeMap((modalRef) => {
-                const containers = this.getUploadCapableEndpoints();
-                modalRef.componentInstance.containers = containers;
-                modalRef.componentInstance.container = containers[0];
-                return from<Promise<string | undefined>>(modalRef.result);
-            })).subscribe({
-                next: (result) => {
-                    if (result) {
-                        this.notify.info('INFO_UPLOAD_AASX_FILE_SUCCESS', result);
-                    }
-                },
-                error: (error) => this.notify.error(error)
-            });
-    }
-
-    public canDownloadDocument(): boolean {
-        return this.aasTable && this.selectedDocuments.length > 0 ? true : false;
-    }
-
-    public downloadDocument(): void {
-        if (!this.aasTable) return;
-
-        for (const document of this.selectedDocuments) {
-            this.download.downloadDocument(
-                document.idShort + '.aasx',
-                document.id,
-                document.container).subscribe({ error: (error) => this.notify.error(error) });
+    public setActiveFavorites(value: string): void {
+        const currentFavorites = this.favorites.get(value);
+        if (currentFavorites) {
+            this.store.getFavorites(currentFavorites.name, currentFavorites.documents);
+        } else {
+            this.store.getFirstPage();
         }
     }
 
-    public canDeleteDocument(): boolean {
-        return this.aasTable != null && this.selectedDocuments.length > 0 &&
-            this.selectedDocuments.every(
-                item => getEndpointType(item.container) === 'AasxDirectory');
+    public setViewMode(viewMode: string | ViewMode): void {
+        const activeFavorites = this.activeFavorites();
+        if (viewMode === ViewMode.List) {
+            if (!activeFavorites) {
+                this.store.getFirstPage();
+            } else {
+                const favoritesList = this.favorites.get(activeFavorites);
+                if (favoritesList) {
+                    this.store.getFavorites(favoritesList.name, favoritesList.documents);
+                }
+            }
+        } else {
+            this.store.setTreeView(this.selected());
+        }
     }
 
-    public deleteDocument(): void {
-        if (!this.aasTable || this.selectedDocuments.length === 0) return;
+    public addEndpoint(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.getEndpoints()),
+            map(endpoints => {
+                const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.initialize(endpoints);
+                return modalRef;
+            }),
+            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
+            mergeMap(result => {
+                if (!result) return EMPTY;
 
-        this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.window.confirm(stringFormat(
-                this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                this.selectedDocuments.map(item => item.idShort).join(', ')))),
-            mergeMap((result) => from(result ? this.selectedDocuments : [])),
-            mergeMap((document) => this.project.deleteDocument(document)))
-            .subscribe({ error: (error) => this.notify.error(error) });
+                return this.api.addEndpoint(result);
+            }),
+            catchError(error => this.notify.error(error)),
+        );
     }
 
-    public canViewUserFeedback(): boolean {
-        return this.selectedDocuments.some(document => this.selectSubmodels(document, lib.CustomerFeedback).length === 1);
+    public removeEndpoint(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.getEndpoints()),
+            mergeMap(endpoints => {
+                const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.endpoints.set(
+                    endpoints
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map(
+                            item =>
+                                ({
+                                    name: item.name,
+                                    url: item.url,
+                                    selected: false,
+                                }) as EndpointSelect,
+                        ),
+                );
+                return from<Promise<string[] | undefined>>(modalRef.result);
+            }),
+            mergeMap(endpoints => from(endpoints ?? [])),
+            mergeMap(endpoint => this.api.removeEndpoint(endpoint)),
+            catchError(error => this.notify.error(error)),
+        );
+    }
+
+    public reset(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
+            mergeMap(result => {
+                if (!result) return of(void 0);
+
+                return this.api.reset();
+            }),
+            catchError(error => this.notify.error(error)),
+        );
+    }
+
+    public uploadDocument(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.getEndpoints()),
+            mergeMap(endpoints => {
+                const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.endpoints.set(endpoints.sort((a, b) => a.name.localeCompare(b.name)));
+                modalRef.componentInstance.endpoint.set(endpoints[0]);
+                return from<Promise<string | undefined>>(modalRef.result);
+            }),
+            map(result => {
+                if (result) {
+                    this.notify.info('INFO_UPLOAD_AASX_FILE_SUCCESS', result);
+                }
+            }),
+            catchError(error => this.notify.error(error)),
+        );
+    }
+
+    public downloadDocument(): Observable<void> {
+        return from(this.selected()).pipe(
+            mergeMap(document =>
+                this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx'),
+            ),
+            catchError(error => this.notify.error(error)),
+        );
+    }
+
+    public deleteDocument(): Observable<void> {
+        if (this.selected().length === 0) {
+            return EMPTY;
+        }
+
+        return of(this.activeFavorites()).pipe(
+            mergeMap(activeFavorites => {
+                if (activeFavorites) {
+                    this.favorites.remove(this.selected(), activeFavorites);
+                    this.store.removeFavorites([...this.selected()]);
+                    return of(void 0);
+                } else {
+                    return this.auth.ensureAuthorized('editor').pipe(
+                        map(() =>
+                            this.window.confirm(
+                                stringFormat(
+                                    this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
+                                    this.selected()
+                                        .map(item => item.idShort)
+                                        .join(', '),
+                                ),
+                            ),
+                        ),
+                        mergeMap(result => from(result ? this.selected() : [])),
+                        mergeMap(document => this.api.delete(document.id, document.endpoint)),
+                        catchError(error => this.notify.error(error)),
+                    );
+                }
+            }),
+        );
     }
 
     public viewUserFeedback(): void {
-        const descriptor: lib.SubmodelViewDescriptor = {
-            template: lib.supportedSubmodelTemplates.get(lib.CustomerFeedback),
-            submodels: []
+        const descriptor: SubmodelViewDescriptor = {
+            template: supportedSubmodelTemplates.get(CustomerFeedback),
+            submodels: [],
         };
 
-        for (const document of this.selectedDocuments) {
-            const submodels = this.selectSubmodels(document, lib.CustomerFeedback);
+        for (const document of this.selected()) {
+            const submodels = this.selectSubmodels(document, CustomerFeedback);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
-                    url: document.container,
-                    idShort: submodels[0].idShort
+                    endpoint: document.endpoint,
+                    idShort: submodels[0].idShort,
                 });
             }
         }
 
         if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as lib.ViewQuery)
+            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
             this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
         }
-    }
-
-    public canViewNameplate(): boolean {
-        return this.selectedDocuments.some(document => this.selectSubmodels(document, lib.ZVEINameplate).length === 1);
     }
 
     public viewNameplate(): void {
-        const descriptor: lib.SubmodelViewDescriptor = {
-            template: lib.supportedSubmodelTemplates.get(lib.ZVEINameplate),
-            submodels: []
+        const descriptor: SubmodelViewDescriptor = {
+            template: supportedSubmodelTemplates.get(ZVEINameplate),
+            submodels: [],
         };
 
-        for (const document of this.selectedDocuments) {
-            const submodels = this.selectSubmodels(document, lib.ZVEINameplate);
+        for (const document of this.selected()) {
+            const submodels = this.selectSubmodels(document, ZVEINameplate);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
                     id: document.id,
-                    url: document.container,
-                    idShort: submodels[0].idShort
+                    endpoint: document.endpoint,
+                    idShort: submodels[0].idShort,
                 });
             }
         }
 
         if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as lib.ViewQuery)
+            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
             this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
         }
     }
 
-    public applyFilter(filter: string): void {
-        this.store.dispatch(StartActions.setFilter({ filter }));
+    public setFilter(filter: string): void {
+        try {
+            filter = filter.trim();
+            if (filter.length >= 3) {
+                new QueryParser(filter).check();
+            } else {
+                filter = '';
+            }
+
+            if (!this.activeFavorites) {
+                this.store.getFirstPage(filter);
+            } else {
+                this.store.setFilter(filter);
+            }
+        } catch (error) {
+            this.notify.error(error);
+        }
+    }
+
+    public setLimit(value: string | number): void {
+        this.store.getFirstPage(undefined, Number(value));
+    }
+
+    public firstPage(): void {
+        this.store.getFirstPage();
+    }
+
+    public previousPage(): void {
+        this.store.getPreviousPage();
+    }
+
+    public nextPage(): void {
+        this.store.getNextPage();
+    }
+
+    public lastPage(): void {
+        this.store.getLastPage();
+    }
+
+    public addToFavorites(): Observable<void> {
+        return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
+            mergeMap(modalRef => {
+                modalRef.componentInstance.documents = [...this.selected()];
+                return from(modalRef.result);
+            }),
+            map(() => {
+                this.selected.set([]);
+            }),
+        );
     }
 
     private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {
-        return document.content?.submodels.filter(submodel => lib.resolveSemanticId(submodel) === semanticId) ?? [];
-    }
-
-    private getUploadCapableEndpoints(): AASContainer[] {
-        return this.workspace?.containers.filter(item => {
-            const type = getEndpointType(item.url);
-            return type === 'AasxDirectory' || type === 'AasxServer';
-        }) ?? [];
+        return document.content?.submodels.filter(submodel => resolveSemanticId(submodel) === semanticId) ?? [];
     }
 }

@@ -1,81 +1,111 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
-<div id="start-container" class="container-fluid">
-    <fhg-aas-table #aasTable [viewMode]="viewMode" [showAll]="showAll" [filter]="filter"
-        [documents]="documents"></fhg-aas-table>
+<div id="start-container" class="overflow-auto h-100 px-2">
+    <fhg-aas-table [documents]="documents()" [viewMode]="viewMode()" [(selected)]="selected"
+        [filter]="filter()"></fhg-aas-table>
 </div>
 
-<ng-content />
 <ng-template #startToolbar>
-    <div class="btn-group me-2">
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints">
-                <i class="bi bi-stack-overflow"></i>
-                <span>&nbsp;</span>
-                <span>{{endpoint | async}}</span>
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                <ng-container *ngFor="let dropdownItem of endpoints | async">
-                    <button ngbDropdownItem (click)="setWorkspace(dropdownItem.name)">{{dropdownItem.name}}</button>
-                </ng-container>
-            </div>
-        </div>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
+            <i class="bi bi-star"></i>
+        </button>
+        <select #selectFavorites
+            [ngClass]="activeFavorites() !== '' ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [value]="activeFavorites()" (change)="setActiveFavorites(selectFavorites.value)">
+            @for (option of favoritesLists(); track option; let i = $index) {
+            @if (i === 0) {
+            <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
+            } @else {
+            <option class="fst-normal fw-normal" [value]="option">{{option}}</option>
+            }
+            }
+        </select>
+    </div>
+    @if (activeFavorites() === '') {
+    <div class="input-group me-2 my-1">
+        <button type="button" class="btn btn-primary" (click)="firstPage()">
+            <i class="bi bi-chevron-bar-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <select #selectLimit class="form-select" [value]="limit()" (change)="setLimit(selectLimit.value)">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+        </select>
+        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage()">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="lastPage()">
+            <i class="bi bi-chevron-bar-right"></i>
+        </button>
+    </div>
+    }
+    <div class="btn-group me-2 my-1">
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
                 <i class="bi bi-gear"></i>
             </button>
             <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
-                <button ngbDropdownItem (click)="addEndpoint()" translate>CMD_ADD_ENDPOINT</button>
-                <button ngbDropdownItem (click)="removeEndpoint()" translate>CMD_REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="reset()" translate>CMD_RESET_CONFIGURATION</button>
+                <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>CMD_ADD_ENDPOINT</button>
+                <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>CMD_REMOVE_ENDPOINT</button>
+                <button ngbDropdownItem (click)="reset().subscribe()" translate>CMD_RESET_CONFIGURATION</button>
             </div>
         </div>
     </div>
-    <div class="btn-group me-2">
-        <button type="button" class="btn btn-primary" (click)="uploadDocument()" [disabled]="!canUploadDocument()">
+    <div class="btn-group me-2 my-1">
+        <button type="button" class="btn btn-primary" (click)="uploadDocument().subscribe()">
             <i class="bi bi-upload"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="downloadDocument()" [disabled]="!canDownloadDocument()">
+        <button type="button" class="btn btn-primary" (click)="downloadDocument().subscribe()"
+            [disabled]="!canDownloadDocument()">
             <i class="bi bi-download"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="deleteDocument()" [disabled]="!canDeleteDocument()">
+        <button type="button" class="btn btn-primary" (click)="deleteDocument().subscribe()"
+            [disabled]="!canDeleteDocument()">
             <i class="bi bi-trash"></i>
         </button>
     </div>
-    <div class="btn-group me-2" id="viewModeGroup">
+    <div class="btn-group me-2 my-1" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="viewMode === 'list'">
+            (change)="setViewMode('list')" [checked]="viewMode() === 'list'">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="viewMode === 'tree'">
+            (change)="setViewMode('tree')" [checked]="viewMode() === 'tree'">
         <label class="btn btn-primary" for="viewModeTree">
             <i class="bi bi-diagram-3"></i>
         </label>
     </div>
-    <div class="btn-group me-2">
+    <div class="btn-group me-2 my-1">
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints"
                 translate>LABEL_VIEWS</button>
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
                 <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
                     translate>CMD_VIEW_USER_FEEDBACK</button>
-                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!this.canViewNameplate()"
+                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
                     translate>CMD_VIEW_NAMEPLATE</button>
             </div>
         </div>
     </div>
-    <div class="input-group flex-grow-1 me-2" [hidden]="viewMode === 'tree'">
-        <div class="input-group-text"><i class="bi bi-filter"></i></div>
-        <input #textInput type="text" class="form-control" [value]="filter | async"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="applyFilter(textInput.value)"
-            [disabled]="viewMode === 'tree'">
+    <div class="input-group flex-grow-1 me-2 my-1">
+        <div class="input-group-text">
+            <i class="bi bi-filter"></i>
+        </div>
+        <input #textInput type="text" class="form-control" [value]="filterText()"
+            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
+            (keydown.enter)="textInput.blur()">
     </div>
 </ng-template>

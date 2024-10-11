@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import jimp from 'jimp';
+import { Jimp } from 'jimp';
 import { Duplex } from 'stream';
 
 export class ImageProcessing {
@@ -19,9 +19,10 @@ export class ImageProcessing {
      * @returns The resized image.
      */
     public static async resizeAsync(
-        source: NodeJS.ReadableStream, 
-        width: number | undefined, 
-        height: number | undefined): Promise<NodeJS.ReadableStream> {
+        source: NodeJS.ReadableStream,
+        width: number | undefined,
+        height: number | undefined,
+    ): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
             source.on('data', function (buffer: Uint8Array) {
@@ -39,9 +40,9 @@ export class ImageProcessing {
             source.resume();
         });
 
-        const image = await jimp.read(buffer);
-        await image.resize(width || jimp.AUTO, height || jimp.AUTO);
-        const outBuffer = await image.getBufferAsync(jimp.MIME_PNG);
+        const image = await Jimp.fromBuffer(buffer);
+        await image.resize({ w: width !== undefined ? width : 0, h: height !== undefined ? height : 0 });
+        const outBuffer = await image.getBuffer('image/png');
 
         const stream = new Duplex();
         stream.push(outBuffer);
@@ -50,12 +51,11 @@ export class ImageProcessing {
     }
 
     /**
-     * Converts the specified source image to the specified mime-type.
+     * Converts the specified source image to an PNG.
      * @param source The source image.
-     * @param mimeType The target mime-type.
      * @returns The converted image.
      */
-    public static async convertAsync(source: NodeJS.ReadableStream, mimeType: string): Promise<NodeJS.ReadableStream> {
+    public static async convertAsync(source: NodeJS.ReadableStream): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
             source.on('data', function (buffer: Uint8Array) {
@@ -73,8 +73,8 @@ export class ImageProcessing {
             source.resume();
         });
 
-        const image = await jimp.read(buffer);
-        const outBuffer = await image.getBufferAsync(mimeType);
+        const image = await Jimp.fromBuffer(buffer);
+        const outBuffer = await image.getBuffer('image/png');
         const stream = new Duplex();
         stream.push(outBuffer);
         stream.push(null);

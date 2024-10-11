@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,17 +12,19 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
+import { AASCursor, AASPage } from 'aas-core';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
+import { encodeBase64Url } from '../../app/convert.js';
 
 describe('DocumentsController', function () {
     let app: Express;
@@ -35,32 +37,27 @@ describe('DocumentsController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
-
-        aasProvider = createSpyObj<AASProvider>(
-            [
-                'updateDocumentAsync',
-                'getWorkspaces',
-                'getContainer',
-                'getContentAsync',
-                'getDocuments',
-                'getDocument',
-                'getDocumentAsync',
-                'addDocumentsAsync',
-                'deleteDocumentAsync',
-                'getDataElementValueAsync',
-                'invoke',
-                'resetAsync'
-            ]);
+        aasProvider = createSpyObj<AASProvider>([
+            'updateDocumentAsync',
+            'getContentAsync',
+            'getPackageAsync',
+            'getDocumentAsync',
+            'getDocumentsAsync',
+            'addPackagesAsync',
+            'deletePackageAsync',
+            'getDataElementValueAsync',
+            'invoke',
+            'resetAsync',
+        ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
@@ -82,13 +79,27 @@ describe('DocumentsController', function () {
     });
 
     it('getDocument: /api/v1/documents/:id', async function () {
-        aasProvider.getDocument.mockReturnValue(sampleDocument);
+        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
-        expect(aasProvider.getDocument).toHaveBeenCalled();
+        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+    });
+
+    it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
+        const page: AASPage = { previous: null, documents: [sampleDocument], next: null };
+        aasProvider.getDocumentsAsync.mockResolvedValue(page);
+        const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
+        const filter = encodeBase64Url('#prop:Name=Value');
+        const response = await request(app)
+            .get(`/api/v1/documents?cursor=${cursor}&filter=${filter}`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(page);
+        expect(aasProvider.getDocumentsAsync).toHaveBeenCalled();
     });
 });

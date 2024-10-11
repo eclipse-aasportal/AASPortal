@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,8 +8,7 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import { ApplicationError, ErrorData, convertToString, stringFormat } from 'common';
-import { noop, toString } from 'lodash-es';
+import { ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'aas-core';
 
 /**
  * Converts a message to a localized text.
@@ -17,7 +16,7 @@ import { noop, toString } from 'lodash-es';
  * @param translate The translate service.
  * @returns The message as localized text.
  */
-export function messageToString(message: any, translate: TranslateService): string {
+export function messageToString(message: unknown, translate: TranslateService): string {
     let text: string;
     if (message instanceof ApplicationError) {
         text = format(message.message, message.name, message.args);
@@ -34,16 +33,17 @@ export function messageToString(message: any, translate: TranslateService): stri
     } else if (isErrorData(message)) {
         text = format(message.message, message.name, message.args);
     } else {
-        text = toString(message);
+        text = convertToString(message);
     }
 
     return text;
 
-    function isErrorData(value: object): value is ErrorData {
-        return typeof value === 'object' && 'message' in value && 'name' in value && 'type' in value;
+    function isErrorData(value: unknown): value is ErrorData {
+        const errorData = value as ErrorData;
+        return errorData.message !== undefined && errorData.name !== undefined && errorData.type !== undefined;
     }
 
-    function format(message: string, name: string, args: any[]): string {
+    function format(message: string, name: string, args: unknown[]): string {
         if (name) {
             return stringFormat(translate.instant(name), args);
         }
@@ -56,7 +56,7 @@ export function messageToString(message: any, translate: TranslateService): stri
  * Resolves the specified error to an displayable object.
  * @param error The error.
  * @param translate The translation service.
- * @returns 
+ * @returns
  */
 export async function resolveError(error: unknown, translate: TranslateService): Promise<string> {
     let message = error;
@@ -71,7 +71,7 @@ export async function resolveError(error: unknown, translate: TranslateService):
                 }
             }
         } else {
-            message = convertToString(error.error);
+            message = `${error.message}: ${convertToString(error.error)}`;
         }
     }
 

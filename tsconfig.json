@@ -15,10 +15,9 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "moduleResolution": "NodeNext",
-        "paths": {
-            "io-planning-ui": [
-                "projects/aas-lib/src/public-api"
-            ]
-        },
-    }
+        "module": "NodeNext"
+    },
+    "ts-node": {
+        "esm": true
+      }
 }

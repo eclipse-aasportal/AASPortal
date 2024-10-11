@@ -1,37 +1,29 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, LiveRequest } from "common";
-import { Logger } from "../logging/logger.js";
-import { SocketClient } from "../live/socket-client.js";
-import { AASPackage } from "./aas-package.js";
-import { SocketSubscription } from "../live/socket-subscription.js";
+import { aas, LiveRequest } from 'aas-core';
+import { Logger } from '../logging/logger.js';
+import { SocketClient } from '../live/socket-client.js';
+import { AASPackage } from './aas-package.js';
+import { SocketSubscription } from '../live/socket-subscription.js';
 
 /** Represents a resource of Asset Administration Shells. */
 export abstract class AASResource {
-    constructor(
+    protected constructor(
         protected readonly logger: Logger,
-        url: string | URL) {
-        this.url = typeof url === 'string' ? new URL(url) : url;
+        public readonly url: string,
+        public readonly name: string,
+    ) {}
 
-        this.baseUrl = new URL(this.url);
-        this.baseUrl.hash = '';
-        this.baseUrl.search = '';
-    }
+    public abstract readonly version: string;
 
     /** Indicates whether an active connection is established. */
     public abstract readonly isOpen: boolean;
-
-    /** The URL of the AAS source inclusive search parameters. */
-    public readonly url: URL;
-
-    /** The base URL of the AAS source without search parameters. */
-    public readonly baseUrl: URL;
 
     /** Indicates whether the AAS source is read-only. */
     public abstract readonly readOnly: boolean;
@@ -60,7 +52,8 @@ export abstract class AASResource {
     public abstract createSubscription(
         client: SocketClient,
         message: LiveRequest,
-        env: aas.Environment): SocketSubscription;
+        env: aas.Environment,
+    ): SocketSubscription;
 
     /**
      * Downloads an aasx package form the current source.
@@ -73,14 +66,14 @@ export abstract class AASResource {
      * Uploads an AASX package.
      * @param file The AASX package file.
      */
-    public abstract postPackageAsync(file: Express.Multer.File): Promise<AASPackage | undefined>;
+    public abstract postPackageAsync(file: Express.Multer.File): Promise<string>;
 
     /**
      * Delete an aasx package from the current source.
      * @param aasIdentifier The AAS identifier.
      * @param name The name of the package in the source.
      */
-    public abstract deletePackageAsync(aasIdentifier: string, name: string): Promise<void>;
+    public abstract deletePackageAsync(aasIdentifier: string, name: string): Promise<string>;
 
     /**
      * Invokes the specified operation synchronously.
@@ -97,7 +90,11 @@ export abstract class AASResource {
      * @param idShortPath The path from the Submodel to the Blob element.
      * @returns The Blob value.
      */
-    public abstract getBlobValueAsync(env: aas.Environment, submodelId: string, idShortPath: string): Promise<string | undefined>;
+    public abstract getBlobValueAsync(
+        env: aas.Environment,
+        submodelId: string,
+        idShortPath: string,
+    ): Promise<string | undefined>;
 
     /**
      * Resolves a new URL from the base URL and the specified URL.
@@ -105,6 +102,6 @@ export abstract class AASResource {
      * @returns A new URL.
      */
     protected resolve(url: string): URL {
-        return new URL(url, this.baseUrl);
+        return new URL(url, this.url);
     }
 }

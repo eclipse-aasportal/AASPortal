@@ -1,14 +1,15 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component, OnInit } from "@angular/core";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { TranslateService } from "@ngx-translate/core";
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface EndpointSelect {
     name: string;
@@ -17,17 +18,22 @@ export interface EndpointSelect {
 }
 
 @Component({
-    selector: "fhg-remove-endpoint",
-    templateUrl: "./remove-endpoint-form.component.html",
-    styleUrls: ["./remove-endpoint-form.component.scss"],
+    selector: 'fhg-remove-endpoint',
+    templateUrl: './remove-endpoint-form.component.html',
+    styleUrls: ['./remove-endpoint-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RemoveEndpointFormComponent {
-    constructor(private modal: NgbActiveModal, private translate: TranslateService) {
-    }
+    public constructor(
+        private modal: NgbActiveModal,
+        private translate: TranslateService,
+    ) {}
 
-    public endpoints: EndpointSelect[] = [];
+    public readonly endpoints = signal<EndpointSelect[]>([]);
 
-    public messages: string[] = [];
+    public readonly messages = signal<string[]>([]);
 
     public inputChange() {
         this.clearMessages();
@@ -35,12 +41,14 @@ export class RemoveEndpointFormComponent {
 
     public submit(): void {
         this.clearMessages();
-        const result = this.endpoints.filter(item => item.selected).map(item => item.name);
+        const result = this.endpoints()
+            .filter(item => item.selected)
+            .map(item => item.name);
 
         if (result.length > 0) {
             this.modal.close(result);
         } else {
-            this.messages.push(this.translate.instant('ERROR_NO_ELEMENT_SELECTED'));
+            this.messages.update(messages => [...messages, this.translate.instant('ERROR_NO_ELEMENT_SELECTED')]);
         }
     }
 
@@ -50,7 +58,7 @@ export class RemoveEndpointFormComponent {
 
     private clearMessages(): void {
         if (this.messages.length > 0) {
-            this.messages = [];
+            this.messages.set([]);
         }
     }
 }

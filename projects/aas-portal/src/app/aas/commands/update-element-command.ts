@@ -1,33 +1,30 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, AASDocument, selectReferable } from 'common';
-import { cloneDeep, noop } from 'lodash-es';
+import { aas, AASDocument, selectReferable, noop } from 'aas-core';
+import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
-import { Store } from '@ngrx/store';
-import { State } from '../aas.state';
-import * as AASActions from '../aas.actions';
+import { AASStore } from '../aas.store';
 
 export class UpdateElementCommand extends Command {
-    private readonly store: Store<State>;
     private readonly origin: aas.SubmodelElement;
     private readonly element: aas.SubmodelElement;
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    constructor(
-        store: Store<State>,
+    public constructor(
+        private readonly store: AASStore,
         document: AASDocument,
         origin: aas.SubmodelElement,
-        element: aas.SubmodelElement) {
+        element: aas.SubmodelElement,
+    ) {
         super('SetValue');
 
-        this.store = store;
         this.document = this.memento = document;
         this.origin = origin;
         this.element = element;
@@ -39,22 +36,22 @@ export class UpdateElementCommand extends Command {
         const targetCollection = this.getChildren(this.document, this.origin);
         const index = sourceCollection.indexOf(this.origin);
         targetCollection[index] = this.element;
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onUndo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.memento }));
+        this.store.applyDocument(this.memento);
     }
 
     protected onRedo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onAbort(): void {
         noop();
     }
 
-    private getChildren(document: AASDocument, element: aas.SubmodelElement): aas.SubmodelElementCollection[] {
+    private getChildren(document: AASDocument, element: aas.SubmodelElement): aas.SubmodelElement[] {
         if (!element.parent) {
             throw new Error(`${element.idShort} is not referable.`);
         }
@@ -69,6 +66,12 @@ export class UpdateElementCommand extends Command {
             children = (parent as aas.Submodel).submodelElements;
         } else if (parent.modelType === 'SubmodelElementCollection') {
             children = (parent as aas.SubmodelElementCollection).value;
+        } else if (parent.modelType === 'SubmodelElementList') {
+            children = (parent as aas.SubmodelElementList).value;
+        } else if (parent.modelType === 'Entity') {
+            children = (parent as aas.Entity).statements;
+        } else if (parent.modelType === 'AnnotatedRelationshipElement') {
+            children = (parent as aas.AnnotatedRelationshipElement).annotations;
         }
 
         if (!children) {

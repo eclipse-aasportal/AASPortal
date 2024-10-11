@@ -1,28 +1,33 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { isAbsolute, resolve } from 'path';
-import { Message, PackageInfo } from 'common';
+import { isAbsolute, resolve } from 'path/posix';
+import { Message, AppInfo } from 'aas-core';
 import { Logger } from './logging/logger.js';
 import { readFile } from 'fs/promises';
 import { inject, singleton } from 'tsyringe';
+import { Variable } from './variable.js';
 
 @singleton()
 export class ApplicationInfo {
-    private data?: PackageInfo;
+    private data?: AppInfo;
 
-    constructor(
-        @inject('Logger') private readonly logger: Logger, 
-    ) { }
+    public constructor(
+        @inject('Logger') private readonly logger: Logger,
+        @inject(Variable) private readonly variable: Variable,
+        data?: AppInfo,
+    ) {
+        this.data = data;
+    }
 
-    public async getAsync(file?: string): Promise<PackageInfo> {
+    public async getAsync(): Promise<AppInfo> {
         if (!this.data) {
-            this.data = await this.readAsync(file);
+            this.data = await this.readAsync();
         }
 
         return this.data;
@@ -32,17 +37,17 @@ export class ApplicationInfo {
         return this.logger.getMessages();
     }
 
-    private async readAsync(file?: string): Promise<PackageInfo> {
+    private async readAsync(file?: string): Promise<AppInfo> {
         try {
             let path: string;
             if (file) {
                 if (isAbsolute(file)) {
                     path = file;
                 } else {
-                    path = resolve('.', file);
+                    path = resolve(this.variable.ASSETS, file);
                 }
             } else {
-                path = resolve('.', 'app-info.json');
+                path = resolve(this.variable.ASSETS, 'app-info.json');
             }
 
             return JSON.parse((await readFile(path)).toString());
@@ -55,7 +60,7 @@ export class ApplicationInfo {
                 description: '',
                 license: '',
                 homepage: '',
-                libraries: []
+                libraries: [],
             };
         }
     }

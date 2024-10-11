@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { ApplicationError } from "common";
+import { ApplicationError } from 'aas-core';
 import { NextFunction, Request, Response } from "express";
 import { ValidateError } from "tsoa";
 import { ERRORS } from "../../app/errors.js";

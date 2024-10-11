@@ -1,32 +1,38 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { singleton } from 'tsyringe';
-import path from 'path';
+import path from 'path/posix';
 
 @singleton()
 export class Variable {
-    constructor() {
+    public constructor() {
         this.JWT_SECRET = process.env.JWT_SECRET ?? 'The quick brown fox jumps over the lazy dog.';
         this.JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
-        this.JWT_EXPIRES_IN = process.env.JWT_EXPIRED_IN ? Number(process.env.JWT_EXPIRED_IN) : 7 * 24 * 60 * 60;
+        this.JWT_EXPIRES_IN = process.env.JWT_EXPIRED_IN ? Number(process.env.JWT_EXPIRED_IN) : 604800;
         this.NODE_SERVER_PORT = Number(process.env.NODE_SERVER_PORT);
         this.MAX_WORKERS = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 8;
         this.USER_STORAGE = process.env.USER_STORAGE;
-        this.TEMPLATE_STORAGE = process.env.TEMPLATE_STORAGE;
+        this.TEMPLATE_STORAGE = process.env.TEMPLATE_STORAGE ?? 'file:///templates';
         this.CORS_ORIGIN = process.env.CORS_ORIGIN ? JSON.parse(process.env.CORS_ORIGIN) : '*';
         this.CONTENT_ROOT = path.resolve(process.env.CONTENT_ROOT ?? './');
         this.WEB_ROOT = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
         this.ASSETS = path.resolve(process.env.ASSETS ?? './assets');
         this.ENDPOINTS = process.env.ENDPOINTS ? JSON.parse(process.env.ENDPOINTS) : ['file:///samples?name=Samples'];
-        this.TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
+        this.SCAN_TEMPLATES_TIMEOUT = process.env.SCAN_TEMPLATES_TIMEOUT ? Number(process.env.TIMEOUT) : 300000;
+        this.SCAN_CONTAINER_TIMEOUT = process.env.SCAN_CONTAINER_TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
+        this.HTTPS_PFX_FILE = process.env.HTTPS_PFX_FILE;
+        this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
+        this.AAS_INDEX = process.env.AAS_INDEX;
+        this.AAS_SERVER_USERNAME = process.env.AAS_SERVER_USERNAME ?? 'aas-server';
+        this.AAS_SERVER_PASSWORD = process.env.AAS_SERVER_PASSWORD ?? 'aas-server';
     }
 
     /** The secret for HS256 encryption or the private key file for RS256 encryption. */
@@ -51,7 +57,7 @@ export class Variable {
     public readonly USER_STORAGE?: string;
 
     /** The URL of the template storage. */
-    public readonly TEMPLATE_STORAGE?: string;
+    public readonly TEMPLATE_STORAGE: string;
 
     /** */
     public readonly CORS_ORIGIN: string | string[];
@@ -68,12 +74,30 @@ export class Variable {
     /** The URLs of the initial AAS container endpoints. */
     public readonly ENDPOINTS: string[];
 
-    /** */
-    public readonly TIMEOUT: number;
+    /** The time before a new endpoint scan starts.*/
+    public readonly SCAN_CONTAINER_TIMEOUT: number;
+
+    /** The time before a new template scan starts. */
+    public readonly SCAN_TEMPLATES_TIMEOUT: number;
 
     /** The key file if AASServer supports HTTPS. */
     public readonly HTTPS_KEY_FILE?: string;
 
     /** The certificate file if AASServer supports HTTPS. */
     public readonly HTTPS_CERT_FILE?: string;
+
+    /** The pfx file if AASServer supports HTTPS. */
+    public readonly HTTPS_PFX_FILE?: string;
+
+    /** The validity period of an AAS in milliseconds. */
+    public readonly AAS_EXPIRES_IN: number;
+
+    /** The AASIndex realization. */
+    public readonly AAS_INDEX?: string;
+
+    /** The user name of AASServer (default: aas-server) */
+    public readonly AAS_SERVER_USERNAME: string;
+
+    /** The root password. */
+    public readonly AAS_SERVER_PASSWORD: string;
 }

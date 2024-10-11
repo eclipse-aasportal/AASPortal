@@ -1,32 +1,30 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { MemoryLogger, MemoryLoggerLevel } from '../app/logging/memory-logger.js';
 import { DebugConsole } from '../app/logging/logger.js';
-import { createSpyObj } from './utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { createSpyObj } from 'fhg-jest';
 
-describe('MemoryLogger', function () {
-    describe('log level Info', function () {
+describe('MemoryLogger', () => {
+    describe('log level Info', () => {
         let logger: MemoryLogger;
 
-        beforeEach(function () {
-            logger = new MemoryLogger(
-                MemoryLoggerLevel.Info,
-                createSpyObj<DebugConsole>(['debug']));
+        beforeEach(() => {
+            logger = new MemoryLogger(MemoryLoggerLevel.Info, createSpyObj<DebugConsole>(['debug']));
         });
 
-        it('should create', function () {
+        it('should create', () => {
             expect(logger).toBeTruthy();
         });
 
-        it('logs all message types', function () {
+        it('logs all message types', () => {
             logger.start('test');
             logger.info('This is an info.');
             logger.warning('This is a warning.');
@@ -35,7 +33,7 @@ describe('MemoryLogger', function () {
             expect(logger.getMessages().length).toEqual(3);
         });
 
-        it('logs message objects', function () {
+        it('logs message objects', () => {
             logger.start('test');
             logger.log({ type: 'Info', text: 'This is an info.', timestamp: Date.now() });
             logger.log({ type: 'Warning', text: 'This is a warning.', timestamp: Date.now() });
@@ -44,7 +42,7 @@ describe('MemoryLogger', function () {
             expect(logger.getMessages().length).toEqual(3);
         });
 
-        it('logs only different errors', function () {
+        it('logs only different errors', () => {
             logger.start('test');
             logger.error('This is a first error.');
             logger.error(new Error('This is a first error.'));
@@ -53,7 +51,7 @@ describe('MemoryLogger', function () {
             expect(logger.getMessages().length).toEqual(2);
         });
 
-        it('logs only different warnings', function () {
+        it('logs only different warnings', () => {
             logger.start('test');
             logger.warning('This is a first warning.');
             logger.warning('This is a first warning.');
@@ -62,7 +60,7 @@ describe('MemoryLogger', function () {
             expect(logger.getMessages().length).toEqual(2);
         });
 
-        it('logs only different info messages', function () {
+        it('logs only different info messages', () => {
             logger.start('test');
             logger.info('This is a first info.');
             logger.info('This is a seconde info.');
@@ -72,14 +70,14 @@ describe('MemoryLogger', function () {
         });
     });
 
-    describe('log level Error', function () {
+    describe('log level Error', () => {
         let logger: MemoryLogger;
 
-        beforeEach(function () {
+        beforeEach(() => {
             logger = new MemoryLogger(MemoryLoggerLevel.Error, createSpyObj<DebugConsole>(['debug']));
         });
 
-        it('logs ony errors', function () {
+        it('logs ony errors', () => {
             logger.start('test');
             logger.info('This is an info.');
             logger.warning('This is a warning.');
@@ -89,14 +87,14 @@ describe('MemoryLogger', function () {
         });
     });
 
-    describe('log level Warning', function () {
+    describe('log level Warning', () => {
         let logger: MemoryLogger;
 
-        beforeEach(function () {
+        beforeEach(() => {
             logger = new MemoryLogger(MemoryLoggerLevel.Warning, createSpyObj<DebugConsole>(['debug']));
         });
 
-        it('logs ony errors and warnings', function () {
+        it('logs ony errors and warnings', () => {
             logger.start('test');
             logger.info('This is an info.');
             logger.warning('This is a warning.');
@@ -106,21 +104,21 @@ describe('MemoryLogger', function () {
         });
     });
 
-    describe('log debug', function () {
+    describe('log debug', () => {
         let logger: MemoryLogger;
         let console: jest.Mocked<DebugConsole>;
 
-        beforeEach(function () {
+        beforeEach(() => {
             console = createSpyObj<DebugConsole>(['debug']);
             logger = new MemoryLogger(MemoryLoggerLevel.All, console);
         });
 
-        it('logs debug messages to a console', function () {
+        it('logs debug messages to a console', () => {
             logger.debug('This is a debug message.');
             expect(console.debug).toHaveBeenCalled();
         });
 
-        it('logs errors to a console', function () {
+        it('logs errors to a console', () => {
             logger.debug(new Error('This is a debug message.'));
             expect(console.debug).toHaveBeenCalled();
         });

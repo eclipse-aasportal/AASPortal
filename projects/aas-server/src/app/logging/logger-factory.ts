@@ -1,17 +1,18 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import path from 'path';
+import path from 'path/posix';
 import fs from 'fs';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { isMainThread } from 'worker_threads';
-import { noop } from 'lodash-es';
+import { noop } from 'aas-core';
+import { ConsoleTransport } from './console-transport.js';
 
 /* istanbul ignore next */
 export class LoggerFactory {
@@ -24,19 +25,16 @@ export class LoggerFactory {
         return winston.createLogger({
             level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
             transports: [
+                new ConsoleTransport(),
                 new DailyRotateFile({
                     filename: filename,
                     datePattern: 'YYYY-MM-DD',
                     zippedArchive: false,
                     maxSize: '20m',
                     maxFiles: '2d',
-                    format: winston.format.combine(
-                        winston.format.timestamp(),
-                        winston.format.json())
+                    format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
                 }),
-                new winston.transports.Console({
-                    format: winston.format.simple(),
-                })]
+            ],
         });
     }
 

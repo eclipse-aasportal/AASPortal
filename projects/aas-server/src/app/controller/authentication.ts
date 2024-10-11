@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,7 @@
 
 import { container, inject, singleton } from 'tsyringe';
 import { Request } from 'express';
-import { UserRole, ApplicationError, isUserAuthorized, JWTPayload } from 'common';
+import { UserRole, ApplicationError, isUserAuthorized, JWTPayload } from 'aas-core';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
@@ -22,10 +22,10 @@ export class Authentication {
     private static instance?: Authentication;
     private readonly publicKey: string;
 
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(AuthService) private readonly auth: AuthService,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         if (this.variable.JWT_PUBLIC_KEY) {
             this.publicKey = fs.readFileSync(this.variable.JWT_PUBLIC_KEY, 'utf8');
@@ -49,7 +49,7 @@ export class Authentication {
         }
 
         if (payload.role === 'admin' || payload.role === 'editor') {
-            if (!payload.sub || !await this.auth.hasUserAsync(payload.sub)) {
+            if (!payload.sub || !(await this.auth.hasUserAsync(payload.sub))) {
                 throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
             }
         } else if (payload.role !== 'guest') {

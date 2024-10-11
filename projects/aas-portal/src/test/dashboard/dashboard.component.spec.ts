@@ -1,344 +1,273 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { JWTPayload, WebSocketData } from 'common';
-import { first, of, Subject } from 'rxjs';
-import { AASLibModule, NotifyService, AuthService, WebSocketFactoryService } from 'projects/aas-lib/src/public-api';
-import { EffectsModule } from '@ngrx/effects';
-import { Store, StoreModule } from '@ngrx/store';
+import { provideRouter } from '@angular/router';
+import { EMPTY, of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { CommonModule } from '@angular/common';
+import { AuthService, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
+import { WebSocketData } from 'aas-core';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
-import { TestWebSocketFactoryService } from '../../test/assets/test-web-socket-factory.service';
-import { AppRoutingModule } from '../../app/app-routing.module';
-import { dashboardReducer } from '../../app/dashboard/dashboard.reducer';
+import { DashboardChart, DashboardService } from '../../app/dashboard/dashboard.service';
 import { pages } from './test-pages';
-import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { SelectionMode } from '../../app/types/selection-mode';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import * as DashboardActions from '../../app/dashboard/dashboard.actions';
-import { DashboardChart, State } from '../../app/dashboard/dashboard.state';
+import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { ToolbarService } from '../../app/toolbar.service';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
-    let webSocketSubject: Subject<WebSocketData>;
-    let store: Store<State>;
+    let webSocketSubject: WebSocketSubject<WebSocketData>;
     let service: DashboardService;
+    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
     let auth: jasmine.SpyObj<AuthService>;
+    const chart1 = '42';
+    const chart2 = '4711';
+    // const chart3 = '0815';
 
     beforeEach(() => {
-        webSocketSubject = new Subject<WebSocketData>();
+        webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
+        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
+        webSocketFactory.create.and.returnValue(webSocketSubject);
 
-        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], {
-            payload: of({ id: 'john.doe@email.com', role: 'editor', name: 'John' } as JWTPayload)
-        });
-
-        auth.checkCookie.and.returnValue(true);
-        auth.getCookie.and.returnValue(JSON.stringify(pages));
+        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { ready: of(true) });
+        auth.checkCookie.and.returnValue(of(true));
+        auth.setCookie.and.returnValue(of(void 0));
+        auth.getCookie.and.returnValue(EMPTY);
 
         TestBed.configureTestingModule({
-            declarations: [
-                DashboardComponent
-            ],
             providers: [
                 {
+                    provide: AuthService,
+                    useValue: auth,
+                },
+                {
                     provide: WebSocketFactoryService,
-                    useValue: new TestWebSocketFactoryService(webSocketSubject)
+                    useValue: webSocketFactory,
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error'])
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AuthService,
-                    useValue: auth
-                }
+                    provide: DashboardApiService,
+                    useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
+                },
+                {
+                    provide: WindowService,
+                    useValue: jasmine.createSpyObj<WindowService>(['prompt']),
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                },
+                provideRouter([]),
             ],
             imports: [
-                CommonModule,
-                AppRoutingModule,
-                HttpClientTestingModule,
-                AASLibModule,
-                EffectsModule.forRoot(),
-                StoreModule.forRoot(
-                    {
-                        dashboard: dashboardReducer
-                    }),
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(DashboardComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        store = TestBed.inject(Store);
-        service = TestBed.inject(DashboardService);
 
-        store.dispatch(DashboardActions.setPages({ pages }));
-        store.dispatch(DashboardActions.setPageName({ name: 'Test' }));
+        service = TestBed.inject(DashboardService);
+        service.state = { pages: pages, index: 1 };
+        spyOn(service, 'save').and.returnValue(of(void 0));
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('shows the Test page', function () {
-        expect(component.page.name).toEqual('Test');
+    it('shows the Test page', () => {
+        expect(component.activePage().name).toEqual('Test');
     });
 
-    it('displays two rows', function () {
-        expect(component.rows.length).toEqual(2);
+    it('displays two rows', () => {
+        expect(component.rows().length).toEqual(2);
     });
 
-    describe('single selection', function () {
-        it('supports single mode selection', function () {
-            expect(component.selectionMode).toEqual(SelectionMode.Single);
+    describe('single selection', () => {
+        it('supports single mode selection', () => {
+            expect(component.selectionMode()).toEqual(SelectionMode.Single);
         });
 
-        it('indicates no item selected', function () {
+        it('indicates no item selected', () => {
             expect(component.selectedItem).toBeNull();
             expect(component.selectedItems.length).toEqual(0);
         });
 
-        it('allows to toggle the selection of a chart', function () {
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.selectedItem).toEqual(component.rows[0].columns[0].item);
+        it('allows to toggle the selection of a chart', () => {
+            const rows = component.rows();
+            component.toggleSelection(rows[0].columns[0]);
+            expect(component.selectedItem).toEqual(rows[0].columns[0].item);
             expect(component.selectedItems.length).toEqual(1);
-            component.toggleSelection(component.rows[0].columns[0]);
+            component.toggleSelection(rows[0].columns[0]);
             expect(component.selectedItem).toBeNull();
             expect(component.selectedItems.length).toEqual(0);
         });
 
-        it('ensures that only one item is selected', function () {
-            component.toggleSelection(component.rows[0].columns[0]);
-            expect(component.selectedItem).toEqual(component.rows[0].columns[0].item);
+        it('ensures that only one item is selected', () => {
+            const rows = component.rows();
+            component.toggleSelection(rows[0].columns[0]);
+            expect(component.selectedItem).toEqual(rows[0].columns[0].item);
             expect(component.selectedItems.length).toEqual(1);
-            component.toggleSelection(component.rows[0].columns[1]);
-            expect(component.selectedItem).toEqual(component.rows[0].columns[1].item);
+            component.toggleSelection(rows[0].columns[1]);
+            expect(component.selectedItem).toEqual(rows[0].columns[1].item);
             expect(component.selectedItems.length).toEqual(1);
         });
     });
 
-    describe('view mode', function () {
-        it('has a view mode (initial)', function () {
-            expect(component.editMode).toBeFalse();
+    describe('view mode', () => {
+        it('has a view mode (initial)', () => {
+            expect(component.editMode()).toBeFalse();
         });
     });
 
-    describe('edit mode', function () {
-        beforeEach(function () {
-            component.editMode = true;
+    describe('edit mode', () => {
+        beforeEach(() => {
+            component.editMode.set(true);
         });
 
-        it('has an edit mode', function () {
-            expect(component.editMode).toBeTrue();
+        it('has an edit mode', () => {
+            expect(component.editMode()).toBeTrue();
         });
 
-        it('can move item[0, 1] to the left', function (done: DoneFn) {
-            const id = component.rows[0].columns[1].id;
-            component.toggleSelection(component.rows[0].columns[1]);
+        it('can move item[0, 1] to the left', () => {
+            component.toggleSelection(component.rows()[0].columns[1]);
             expect(component.canMoveLeft()).toBeTrue();
             component.moveLeft();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[0].id).toEqual(chart2);
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[1].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[1].id).toEqual(chart2);
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                    done();
-                });
+
+            expect(component.rows()[0].columns[0].id).toEqual(chart2);
         });
 
-        it('can move item[0, 0] to the right including undo/redo', function (done: DoneFn) {
-            const id = component.rows[0].columns[0].id;
-            component.toggleSelection(component.rows[0].columns[0]);
+        it('can move item[0, 0] to the right including undo/redo', () => {
+            component.toggleSelection(component.rows()[0].columns[0]);
             expect(component.canMoveRight()).toBeTrue();
             component.moveRight();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[1].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[1].id).toEqual(chart1);
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[0].id).toEqual(chart1);
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[1].id).toEqual(id);
-                    done();
-                });
+
+            expect(component.rows()[0].columns[1].id).toEqual(chart1);
         });
 
-        it('can move item[0, 0] up creating a new row including undo/redo', function (done: DoneFn) {
-            const id = component.rows[0].columns[0].id;
-            component.toggleSelection(component.rows[0].columns[0]);
+        it('can move item[0, 0] up creating a new row including undo/redo', () => {
+            component.toggleSelection(component.rows()[0].columns[0]);
             expect(component.canMoveUp()).toBeTrue();
             component.moveUp();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows.length).toEqual(3);
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[0].id).toEqual(chart1);
+            expect(component.rows().length).toEqual(3);
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows.length).toEqual(2);
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[0].id).toEqual(chart1);
+            expect(component.rows().length).toEqual(2);
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows.length).toEqual(3);
-                    expect(rows[0].columns[0].id).toEqual(id);
-                    done();
-                });
+
+            expect(component.rows()[0].columns[0].id).toEqual(chart1);
+            expect(component.rows().length).toEqual(3);
         });
 
-        it('can move item[0, 0] down to [1, 1] including undo/redo', function (done: DoneFn) {
-            const id = component.rows[0].columns[0].id;
-            component.toggleSelection(component.rows[0].columns[0]);
+        it('can move item[0, 0] down to [1, 1] including undo/redo', () => {
+            component.toggleSelection(component.rows()[0].columns[0]);
             expect(component.canMoveDown()).toBeTrue();
             component.moveDown();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[1].columns[1].id).toEqual(id);
-                });
 
+            expect(component.rows()[1].columns[1].id).toEqual(chart1);
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[0].columns[0].id).toEqual(id);
-                });
 
+            expect(component.rows()[0].columns[0].id).toEqual(chart1);
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect(rows[1].columns[1].id).toEqual(id);
-                    done();
-                });
+
+            expect(component.rows()[1].columns[1].id).toEqual(chart1);
         });
 
-        it('gets the color of a chart', function () {
-            expect(component.getColor(component.rows[0].columns[0])).toEqual('#123456');
+        it('gets the color of a chart', () => {
+            expect(component.getColor(component.rows()[0].columns[0])).toEqual('#123456');
         });
 
-        it('sets the color of a chart including undo/redo', function (done: DoneFn) {
-            component.changeColor(component.rows[0].columns[0], '#AA55AA');
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-                });
+        it('sets the color of a chart including undo/redo', () => {
+            component.changeColor(component.rows()[0].columns[0], '#AA55AA');
 
+            expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
-                });
 
+            expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-                    done();
-                });
+
+            expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
         });
 
-        it('gets the source labels of a chart', function () {
-            expect(component.getSources(component.rows[0].columns[0])).toEqual(['RotationSpeed']);
+        it('gets the source labels of a chart', () => {
+            expect(component.getSources(component.rows()[0].columns[0])).toEqual(['RotationSpeed']);
         });
 
-        it('can delete the Test page', function (done: DoneFn) {
-            const name = component.page.name;
+        it('can delete the Test page', () => {
+            const name = component.activePage().name;
             component.delete();
-            service.pages.pipe(first()).subscribe(pages => {
-                expect(pages.find(item => item.name === name)).toBeUndefined();
-                done();
-            });
+            expect(component.pages().find(item => item.name === name)).toBeUndefined();
         });
 
-        it('can change the min value', function (done: DoneFn) {
-            component.changeMin(component.rows[0].columns[0], '0');
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
-                });
+        it('can change the min value', () => {
+            component.changeMin(component.rows()[0].columns[0], '0');
 
+            expect((component.rows()[0].columns[0].item as DashboardChart).min).toEqual(0);
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).min).toBeUndefined();
-                });
 
+            expect((component.rows()[0].columns[0].item as DashboardChart).min).toBeUndefined();
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).min).toEqual(0);
-                    done();
-                });
+
+            expect((component.rows()[0].columns[0].item as DashboardChart).min).toEqual(0);
         });
 
-        it('can change the max value', function (done: DoneFn) {
-            component.changeMax(component.rows[0].columns[0], '5500');
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
-                });
+        it('can change the max value', () => {
+            component.changeMax(component.rows()[0].columns[0], '5500');
 
+            expect((component.rows()[0].columns[0].item as DashboardChart).max).toEqual(5500);
             expect(component.canUndo()).toBeTrue();
             component.undo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).max).toBeUndefined();
-                });
 
+            expect((component.rows()[0].columns[0].item as DashboardChart).max).toBeUndefined();
             expect(component.canRedo()).toBeTrue();
             component.redo();
-            store.select(state => state.dashboard.rows).pipe(first())
-                .subscribe(rows => {
-                    expect((rows[0].columns[0].item as DashboardChart).max).toEqual(5500);
-                    done();
-                });
+
+            expect((component.rows()[0].columns[0].item as DashboardChart).max).toEqual(5500);
         });
     });
 });

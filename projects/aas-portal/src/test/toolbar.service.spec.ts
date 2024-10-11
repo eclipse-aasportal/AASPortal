@@ -1,15 +1,15 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { ToolbarService } from '../app/toolbar.service';
 import { TemplateRef } from '@angular/core';
-import { first } from 'rxjs';
+
+import { ToolbarService } from '../app/toolbar.service';
 
 describe('ToolbarService', () => {
     let service: ToolbarService;
@@ -23,33 +23,27 @@ describe('ToolbarService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('set', function () {
-        beforeEach(function() {
+    describe('set', () => {
+        beforeEach(() => {
             service.clear();
         });
 
-        it('sets a new toolbar', function (done: DoneFn) {
+        it('sets a new toolbar', async () => {
             const template = jasmine.createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
-            service.set(template);
-            service.toolbarTemplate.pipe(first(value => value !== null)).subscribe(value => {
-                expect(value).toEqual(template);
-                done();
-            })
+            await service.set(template);
+            expect(service.toolbarTemplate()).toEqual(template);
         });
     });
 
-    describe('clear', function () {
-        beforeEach(function () {
+    describe('clear', () => {
+        beforeEach(() => {
             const template = jasmine.createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
             service.set(template);
         });
 
-        it('removes a toolbar', function (done: DoneFn) {
-            service.clear();
-            service.toolbarTemplate.pipe(first(value => value === null)).subscribe(value => {
-                expect(value).toBeNull();
-                done();
-            })
+        it('removes a toolbar', async () => {
+            await service.clear();
+            expect(service.toolbarTemplate()).toBeNull();
         });
     });
 });

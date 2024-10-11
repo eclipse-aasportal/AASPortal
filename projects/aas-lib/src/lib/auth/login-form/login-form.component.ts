@@ -1,16 +1,17 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
-import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'common';
-import { isEmpty } from 'lodash-es';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'aas-core';
+import isEmpty from 'lodash-es/isEmpty';
 
 import { messageToString } from '../../convert';
 import { ERRORS } from '../../types/errors';
@@ -27,36 +28,43 @@ export interface LoginFormResult {
 @Component({
     selector: 'fhg-login',
     templateUrl: './login-form.component.html',
-    styleUrls: ['./login-form.component.scss']
+    styleUrls: ['./login-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginFormComponent {
     private newPasswordSent = false;
 
-    constructor(
+    public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
-        private api: AuthApiService) { }
+        private api: AuthApiService,
+    ) {}
 
-    public passwordPerEMail = false;
+    public readonly passwordPerEMail = signal(false);
 
-    public userId = '';
+    public readonly userId = signal('');
 
-    public password = '';
+    public readonly password = signal('');
 
-    public stayLoggedIn = false;
+    public readonly stayLoggedIn = signal(false);
 
-    public messages: MessageEntry[] = [];
+    public readonly messages = signal<MessageEntry[]>([]);
 
     public async resetPassword(): Promise<void> {
         this.clearMessages();
         if (!this.newPasswordSent) {
-            if (isEmpty(this.userId)) {
+            if (isEmpty(this.userId())) {
                 this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-            } else if (!isValidEMail(this.userId)) {
+            } else if (!isValidEMail(this.userId())) {
                 this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
             } else {
                 try {
-                    this.pushMessage(stringFormat(this.translate.instant(INFO.NEW_PASSWORD_SENT), this.userId), 'bg-info w-100');
+                    this.pushMessage(
+                        stringFormat(this.translate.instant(INFO.NEW_PASSWORD_SENT), this.userId),
+                        'bg-info w-100',
+                    );
                 } catch (error) {
                     this.pushMessage(messageToString(error, this.translate));
                 } finally {
@@ -67,33 +75,32 @@ export class LoginFormComponent {
     }
 
     public registerUser(): void {
-        this.modal.close({ action: "register" } as LoginFormResult);
+        this.modal.close({ action: 'register' } as LoginFormResult);
     }
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.userId)) {
+        if (isEmpty(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-        } else if (!isValidEMail(this.userId)) {
+        } else if (!isValidEMail(this.userId())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (isEmpty(this.password)) {
+        } else if (isEmpty(this.password())) {
             this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-        } else if (!isValidPassword(this.password)) {
+        } else if (!isValidPassword(this.password())) {
             this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
         } else {
-            const credentials: Credentials = { id: this.userId, password: this.password };
-            this.api.login(credentials).subscribe(
-                {
-                    next: value => {
-                        const result: LoginFormResult = {
-                            stayLoggedIn: this.stayLoggedIn,
-                            token: value.token
-                        };
+            const credentials: Credentials = { id: this.userId(), password: this.password() };
+            this.api.login(credentials).subscribe({
+                next: value => {
+                    const result: LoginFormResult = {
+                        stayLoggedIn: this.stayLoggedIn(),
+                        token: value.token,
+                    };
 
-                        this.modal.close(result);
-                    },
-                    error: error => this.pushMessage(messageToString(error, this.translate))
-                });
+                    this.modal.close(result);
+                },
+                error: error => this.pushMessage(messageToString(error, this.translate)),
+            });
         }
     }
 
@@ -102,15 +109,17 @@ export class LoginFormComponent {
     }
 
     private pushMessage(text: string, type = 'bg-danger w-100'): void {
-        this.messages = [{
-            text: text,
-            classname: type,
-            autohide: false,
-            delay: 0
-        }];
+        this.messages.set([
+            {
+                text: text,
+                classname: type,
+                autohide: false,
+                delay: 0,
+            },
+        ]);
     }
 
     private clearMessages(): void {
-        this.messages = [];
+        this.messages.set([]);
     }
 }

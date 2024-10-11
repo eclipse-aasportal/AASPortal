@@ -1,113 +1,88 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { TranslateService } from '@ngx-translate/core';
-import { Message } from 'common';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    QueryList,
+    ViewChildren,
+    computed,
+    input,
+    signal,
+} from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Message } from 'aas-core';
 import { Subscription } from 'rxjs';
 import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
-import { MessageTableFeatureState, MessageTableState } from './message-table.state';
-import * as MessageTableActions from './message-table.actions';
-import * as MessageTableSelectors from './message-table.selectors';
+import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-message-table',
     templateUrl: './message-table.component.html',
-    styleUrls: ['./message-table.component.scss']
+    styleUrls: ['./message-table.component.scss'],
+    standalone: true,
+    imports: [SortableHeaderDirective, NgbPagination, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
+export class MessageTableComponent implements OnDestroy {
     private readonly dateTimeOptions: Intl.DateTimeFormatOptions = {
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', second: 'numeric'
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
     };
 
-    private readonly store: Store<MessageTableFeatureState>;
     private readonly subscription = new Subscription();
-    private _collection: Message[] = [];
-    private snapshot: MessageTableState = {
-        showInfo: false,
-        showWarning: false,
-        showError: true,
-        column: '',
-        direction: ''
-    };
+    private readonly column = signal('');
+    private readonly direction = signal('');
 
-    constructor(
-        store: Store,
-        private translate: TranslateService) {
-        this.store = store as Store<MessageTableFeatureState>;
-    }
+    public constructor(private translate: TranslateService) {}
 
     @ViewChildren(SortableHeaderDirective)
     public headers!: QueryList<SortableHeaderDirective>;
 
-    @Input()
-    public collection: Message[] = [];
+    public readonly collection = input<Message[]>([]);
 
-    @Input()
-    public pageSize = 10;
+    public readonly pageSize = input(10);
 
-    public page = 1;
+    public readonly page = signal(1);
 
-    public messages: Message[] = [];
+    public readonly messages = computed(() => {
+        const values = this.sort(
+            this.filter(this.collection(), this.showInfo(), this.showWarning(), this.showError()),
+            this.column(),
+            this.direction(),
+        );
 
-    public get size(): number {
-        return this._collection.length;
-    }
+        const pageSize = this.pageSize();
+        const page = this.page();
+        if (pageSize > 0 && values.length > pageSize) {
+            return values.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
+        } else {
+            return values;
+        }
+    });
 
-    public get showInfo(): boolean {
-        return this.snapshot.showInfo;
-    }
+    public readonly size = computed(
+        () => this.filter(this.collection(), this.showInfo(), this.showWarning(), this.showError()).length,
+    );
 
-    public get showWarning(): boolean {
-        return this.snapshot.showWarning;
-    }
+    public readonly showInfo = signal(false);
 
-    public get showError(): boolean {
-        return this.snapshot.showError;
-    }
+    public readonly showWarning = signal(false);
 
-    public ngOnInit(): void {
-        this.subscription.add(this.store.select(MessageTableSelectors.selectState).pipe()
-            .subscribe(state => {
-                this.snapshot = state;
-                this.filterSort();
-                this.refreshMessages();
-            }));
-    }
+    public readonly showError = signal(true);
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
-    }
-
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['collection']) {
-            this.filterSort();
-            this.refreshMessages();
-        }
-
-        if (changes['pageSize']) {
-            this.filterSort();
-            this.refreshMessages();
-        }
-    }
-
-    public toggleShowInfo(): void {
-        this.store.dispatch(MessageTableActions.toggleShowInfo());
-    }
-
-    public toggleShowWarning(): void {
-        this.store.dispatch(MessageTableActions.toggleShowWarning());
-    }
-
-    public toggleShowError(): void {
-        this.store.dispatch(MessageTableActions.toggleShowError());
     }
 
     public onSort({ column, direction }: SortEvent): void {
@@ -117,53 +92,50 @@ export class MessageTableComponent implements OnInit, OnChanges, OnDestroy {
             }
         });
 
-        this.store.dispatch(MessageTableActions.setSortParameter({ column, direction }));
-    }
-
-    public refreshMessages(): void {
-        if (this.pageSize > 0 && this.size > this.pageSize) {
-            this.messages = this._collection.slice(
-                (this.page - 1) * this.pageSize,
-                (this.page - 1) * this.pageSize + this.pageSize,
-            );
-        } else {
-            this.messages = this._collection;
-        }
+        this.column.set(column);
+        this.direction.set(direction);
     }
 
     public timestampToString(value: number): string {
-        return new Intl.DateTimeFormat(this.translate.currentLang, this.dateTimeOptions).format(value)
+        return new Intl.DateTimeFormat(this.translate.currentLang, this.dateTimeOptions).format(value);
     }
 
-    private filterSort(): void {
-        if (this.snapshot.showError && this.snapshot.showWarning && this.snapshot.showInfo ||
-            !this.snapshot.showError && !this.snapshot.showWarning && !this.snapshot.showInfo) {
-            this._collection = this.collection;
-        }
-        else {
-            this._collection = this.collection.filter(item => item.type === 'Error' && this.snapshot.showError ||
-                item.type === 'Warning' && this.snapshot.showWarning ||
-                item.type === 'Info' && this.snapshot.showInfo);
+    private filter(collection: Message[], showInfo: boolean, showWarning: boolean, showError: boolean): Message[] {
+        let values: Message[];
+        if ((showError && showWarning && showInfo) || (!showError && !showWarning && !showInfo)) {
+            values = [...collection];
+        } else {
+            values = collection.filter(
+                item =>
+                    (item.type === 'Error' && showError) ||
+                    (item.type === 'Warning' && showWarning) ||
+                    (item.type === 'Info' && showInfo),
+            );
         }
 
-        if (this.snapshot.column && this.snapshot.direction) {
-            if (this.snapshot.direction === 'asc') {
-                this._collection.sort((a, b) => this.compare(a, b, this.snapshot.column));
+        return values;
+    }
+
+    private sort(values: Message[], column: string, direction: string): Message[] {
+        if (column && direction) {
+            if (direction === 'asc') {
+                values.sort((a, b) => this.compare(a, b, column));
             } else {
-                this._collection.sort((a, b) => this.compare(b, a, this.snapshot.column));
+                values.sort((a, b) => this.compare(b, a, column));
             }
         }
+
+        return values;
     }
 
     private compare(a: Message, b: Message, column: string): number {
         switch (column) {
             case 'text':
                 return a.text.localeCompare(b.text, this.translate.currentLang, { sensitivity: 'accent' });
-            case 'type':
-                {
-                    const value = a.type.localeCompare(b.type, this.translate.currentLang, { sensitivity: 'accent' });
-                    return value !== 0 ? value : (a.timestamp - b.timestamp);
-                }
+            case 'type': {
+                const value = a.type.localeCompare(b.type, this.translate.currentLang, { sensitivity: 'accent' });
+                return value !== 0 ? value : a.timestamp - b.timestamp;
+            }
             case 'timestamp':
                 return a.timestamp - b.timestamp;
             default:

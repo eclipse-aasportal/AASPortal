@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Message, MessageType } from "common";
+import { Message, MessageType } from 'aas-core';
 import { singleton } from 'tsyringe';
 
 /**
@@ -15,7 +15,7 @@ import { singleton } from 'tsyringe';
 export abstract class Logger {
     /**
      * Logs an error.
-     * @param error 
+     * @param error
      * @param args Additional arguments.
      */
     public abstract error(error: Error | string, ...args: unknown[]): void;
@@ -46,7 +46,7 @@ export abstract class Logger {
      * @param message The message.
      */
     public abstract log(message: Message): void;
-    
+
     /**
      * Starts the message recording for the specified context.
      * @param context The context name.

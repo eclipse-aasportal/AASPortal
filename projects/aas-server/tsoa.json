@@ -5,7 +5,7 @@
         "src/app/controller/**/*controller.ts"
     ],
     "multerOpts": {
-        "dest": "/temp"
+        "dest": "./temp"
     },
     "spec": {
         "outputDirectory": "./src/app",

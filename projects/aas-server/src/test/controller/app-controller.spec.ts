@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,12 +12,12 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import { Logger } from '../../app/logging/logger.js';
-import { Message, PackageInfo } from 'common';
+import { Message, AppInfo } from 'aas-core';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { ApplicationInfo } from '../../app/application-info.js';
 import { AuthService } from '../../app/auth/auth-service.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
@@ -35,15 +35,14 @@ describe('AppController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
         applicationInfo = createSpyObj<ApplicationInfo>(['getAsync', 'getMessages']);
 
@@ -67,28 +66,27 @@ describe('AppController', function () {
     });
 
     it('getInfo: /api/v1/app/info', async function () {
-        const data: PackageInfo = {
-            name: "aas-portal-project",
-            version: "2.0.0",
-            description: "Web-based visualization and control of asset administration shells.",
-            author: "Fraunhofer IOSB-INA e.V.",
-            homepage: "https://www.iosb-ina.fraunhofer.de/",
-            license: "Apache-2.0",
+        const data: AppInfo = {
+            name: 'aas-portal-project',
+            version: '2.0.0',
+            description: 'Web-based visualization and control of asset administration shells.',
+            author: 'Fraunhofer IOSB-INA e.V.',
+            homepage: 'https://www.iosb-ina.fraunhofer.de/',
+            license: 'Apache-2.0',
             libraries: [
                 {
-                    name: "Library",
-                    version: "1.0",
-                    description: "A library.",
-                    license: "MIT",
-                    homepage: "https://www.iosb-ina.fraunhofer.de/"
-                }
-            ]
+                    name: 'Library',
+                    version: '1.0',
+                    description: 'A library.',
+                    license: 'MIT',
+                    licenseText: 'License text...',
+                    homepage: 'https://www.iosb-ina.fraunhofer.de/',
+                },
+            ],
         };
 
-        applicationInfo.getAsync.mockReturnValue(new Promise<PackageInfo>(resolve => resolve(data)));
-        const response = await request(app)
-            .get('/api/v1/app/info')
-            .set('Authorization', `Bearer ${getToken()}`);
+        applicationInfo.getAsync.mockReturnValue(new Promise<AppInfo>(resolve => resolve(data)));
+        const response = await request(app).get('/api/v1/app/info').set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(data);
@@ -97,15 +95,13 @@ describe('AppController', function () {
     it('getMessages: /api/v1/app/messages', async function () {
         const messages: Message[] = [
             { type: 'Info', text: 'An information.', timestamp: 0 },
-            { type: 'Error', text: 'An error.', timestamp: 1 }
+            { type: 'Error', text: 'An error.', timestamp: 1 },
         ];
 
         applicationInfo.getMessages.mockReturnValue(messages);
-        const response = await request(app)
-            .get('/api/v1/app/messages')
-            .set('Authorization', `Bearer ${getToken()}`);
+        const response = await request(app).get('/api/v1/app/messages').set('Authorization', `Bearer ${getToken()}`);
 
-        expect(response.statusCode).toBe(200)
+        expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(messages);
     });
 });
