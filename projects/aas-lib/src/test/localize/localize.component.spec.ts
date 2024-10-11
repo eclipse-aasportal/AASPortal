@@ -1,19 +1,14 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { first } from 'rxjs';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { CommonModule } from '@angular/common';
 
-import { CultureInfo } from '../../lib/localize/culture-info';
 import { LocalizeComponent } from '../../lib/localize/localize.component';
 import { WindowService } from '../../lib/window.service';
 
@@ -26,30 +21,26 @@ describe('LocalizeComponent', () => {
         window = jasmine.createSpyObj<WindowService>(['getLocalStorageItem', 'setLocalStorageItem']);
 
         TestBed.configureTestingModule({
-            declarations: [LocalizeComponent],
             providers: [
                 {
                     provide: WindowService,
-                    useValue: window
-                }
+                    useValue: window,
+                },
             ],
             imports: [
-                CommonModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     defaultLanguage: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(LocalizeComponent);
         component = fixture.componentInstance;
-        component.languages = ['en-us', 'de-de'];
-        component.ngOnChanges({ languages: new SimpleChange(undefined, component.languages, true) });
+        fixture.componentRef.setInput('languages', ['en-us', 'de-de']);
         fixture.detectChanges();
     });
 
@@ -57,28 +48,17 @@ describe('LocalizeComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('provides a list of supported languages', function (done: DoneFn) {
+    it('provides a list of supported languages', () => {
         window.getLocalStorageItem.and.returnValue(null);
-        component.cultures.pipe(first()).subscribe(value => {
-            expect(value.map(item => item.localeId)).toEqual(['en-us', 'de-de']);
-            done();
-        });
+        expect(component.cultures().map(item => item.localeId)).toEqual(['en-us', 'de-de']);
     });
 
-    it('returns the current language', function (done: DoneFn) {
-        component.culture.pipe(first()).subscribe(value => {
-            expect(value?.localeId).toEqual('en-us');
-            done();
-        });
+    it('returns the current language', () => {
+        expect(component.culture()?.localeId).toEqual('en-us');
     });
 
-    it('allows setting a new current language', function (done: DoneFn) {
-        component.cultures.pipe(first()).subscribe(value => {
-            component.setCulture(value.find(item => item.localeId === 'de-de') as CultureInfo);
-            component.culture.pipe(first()).subscribe(value => {
-                expect(value?.localeId).toEqual('de-de');
-                done();
-            })
-        });
+    it('allows setting a new current language', () => {
+        component.setCulture(component.cultures().find(item => item.localeId === 'de-de')!);
+        expect(component.culture()?.localeId).toEqual('de-de');
     });
 });

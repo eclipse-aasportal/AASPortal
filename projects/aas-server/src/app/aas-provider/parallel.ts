@@ -1,28 +1,28 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { EventEmitter } from "events";
-import { noop } from "lodash-es";
-import { Worker, SHARE_ENV } from "worker_threads";
+import { EventEmitter } from 'events';
+import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
-import path from 'path';
+import path from 'path/posix';
+import { noop } from 'aas-core';
 
-import { ScanResultType, ScanResult } from "./scan-result.js";
-import { WorkerData } from "./worker-data.js";
-import { Logger } from "../logging/logger.js";
+import { ScanResultType, ScanResult } from './scan-result.js';
+import { WorkerData } from './worker-data.js';
+import { Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
 
 /** Represents a worker task for scanning a container. */
 class WorkerTask extends EventEmitter {
     private _worker?: Worker;
 
-    constructor(data: WorkerData) {
+    public constructor(data: WorkerData) {
         super();
 
         this.data = data;
@@ -37,37 +37,36 @@ class WorkerTask extends EventEmitter {
     public execute(worker: Worker) {
         this._worker = worker;
 
-        worker.on("message", this.workerOnMessage);
-        worker.on("error", this.workerOnError);
-        worker.on("exit", this.workerOnExit);
+        worker.on('message', this.workerOnMessage);
+        worker.on('error', this.workerOnError);
+        worker.on('exit', this.workerOnExit);
         worker.postMessage(this.data);
     }
 
     public destroy(): void {
-        this.removeAllListeners();
         if (this._worker) {
-            this._worker.off("message", this.workerOnMessage);
-            this._worker.off("exit", this.workerOnExit);
-            this._worker.off("error", this.workerOnError);
+            this._worker.off('message', this.workerOnMessage);
+            this._worker.off('exit', this.workerOnExit);
+            this._worker.off('error', this.workerOnError);
         }
     }
 
     private workerOnMessage = (value: Uint8Array) => {
         const result: ScanResult = JSON.parse(Buffer.from(value).toString());
         if (result.type === ScanResultType.End) {
-            this.emit("end", this, result);
+            this.emit('end', this, result);
         } else {
-            this.emit("message", result);
+            this.emit('message', result);
         }
-    }
+    };
 
     private workerOnError = (error: Error) => {
-        this.emit("error", error, this);
-    }
+        this.emit('error', error, this);
+    };
 
     private workerOnExit = (code: number) => {
-        this.emit("exit", code, this);
-    }
+        this.emit('exit', code, this);
+    };
 }
 
 /** Provides a pool of worker threads. */
@@ -77,17 +76,14 @@ export class Parallel extends EventEmitter {
     private readonly waiting = new Array<WorkerTask>();
     private readonly pool = new Map<Worker, boolean>();
 
-    constructor(
+    public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         super();
-        this.script = path.resolve(this.variable.CONTENT_ROOT ?? './', 'aas-scan-worker.js');
-        if (fs.existsSync(this.script)) {
-            for (let i = 0; i < this.variable.MAX_WORKERS; i++) {
-                this.pool.set(new Worker(this.script, { env: SHARE_ENV }), true);
-            }
-        } else {
+
+        this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan-worker.js');
+        if (!fs.existsSync(this.script)) {
             this.logger.error(`${this.script} does not exist.`);
         }
     }
@@ -98,9 +94,9 @@ export class Parallel extends EventEmitter {
      */
     public execute(data: WorkerData): void {
         const task = new WorkerTask(data);
-        task.on("message", this.taskOnMessage.bind(this));
-        task.on("end", this.taskOnEnd.bind(this));
-        task.on("error", this.taskOnError.bind(this));
+        task.on('message', this.taskOnMessage);
+        task.on('end', this.taskOnEnd);
+        task.on('error', this.taskOnError);
 
         const worker = this.nextWorker();
         if (worker) {
@@ -118,18 +114,27 @@ export class Parallel extends EventEmitter {
             }
         }
 
+        if (this.pool.size < this.variable.MAX_WORKERS) {
+            const worker = new Worker(this.script, { env: SHARE_ENV });
+            this.pool.set(worker, false);
+            return worker;
+        }
+
         return undefined;
     }
 
-    private taskOnMessage(result: ScanResult) {
-        this.emit("message", result);
-    }
+    private taskOnMessage = (result: ScanResult) => {
+        this.emit('message', result);
+    };
 
-    private taskOnEnd(task: WorkerTask, result: ScanResult) {
-        this.emit("end", result);
+    private taskOnEnd = (task: WorkerTask, result: ScanResult) => {
+        this.emit('end', result);
 
         if (task) {
             const worker = task.worker;
+            task.off('message', this.taskOnMessage);
+            task.off('end', this.taskOnEnd);
+            task.off('error', this.taskOnError);
             task.destroy();
             if (worker) {
                 if (this.waiting.length > 0) {
@@ -142,30 +147,28 @@ export class Parallel extends EventEmitter {
                 }
             }
         }
-    }
+    };
 
-    private taskOnError(error: Error, task: WorkerTask): void {
+    private taskOnError = (error: Error, task: WorkerTask) => {
         this.logger.error(error);
 
         try {
             if (task) {
+                task.off('message', this.taskOnMessage);
+                task.off('end', this.taskOnEnd);
+                task.off('error', this.taskOnError);
                 task.destroy();
                 if (task.worker) {
-                    this.pool.delete(task.worker)
+                    this.pool.delete(task.worker);
                 }
 
                 const index = this.waiting.indexOf(task);
                 if (index >= 0) {
                     this.waiting.splice(index, 1);
                 }
-
-                while (this.pool.size < this.variable.MAX_WORKERS) {
-                    this.pool.set(new Worker(this.script, { env: SHARE_ENV }), true);
-                }
             }
-        }
-        catch (error) {
+        } catch (error) {
             noop();
         }
-    }
+    };
 }

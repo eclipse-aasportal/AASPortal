@@ -1,19 +1,18 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { CommonModule } from '@angular/common';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { UploadFormComponent } from '../../app/start/upload-form/upload-form.component';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('UploadFormComponent', () => {
     let component: UploadFormComponent;
@@ -21,24 +20,22 @@ describe('UploadFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                UploadFormComponent
-            ],
             providers: [
-                NgbActiveModal
+                {
+                    provide: NgbActiveModal,
+                    useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
+                },
+                provideHttpClient(),
+                provideHttpClientTesting(),
             ],
             imports: [
-                CommonModule,
-                HttpClientTestingModule,
-                FormsModule,
-                NgbModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(UploadFormComponent);

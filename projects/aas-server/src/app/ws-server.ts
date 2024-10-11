@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { inject, singleton } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import EventEmitter from 'events';
 import fs from 'fs';
 
@@ -26,10 +26,10 @@ export class WSServer extends EventEmitter {
     private readonly clients: Set<SocketClient> = new Set<SocketClient>();
     private readonly server: http.Server | https.Server;
 
-    constructor(
+    public constructor(
         @inject(App) app: App,
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger
+        @inject('Logger') private readonly logger: Logger,
     ) {
         super();
 
@@ -37,6 +37,11 @@ export class WSServer extends EventEmitter {
             this.server = https.createServer({
                 key: fs.readFileSync(this.variable.HTTPS_KEY_FILE),
                 cert: fs.readFileSync(this.variable.HTTPS_CERT_FILE),
+            });
+        } else if (this.variable.HTTPS_PFX_FILE) {
+            this.server = https.createServer({
+                pfx: fs.readFileSync(this.variable.HTTPS_PFX_FILE),
+                passphrase: this.variable.AAS_SERVER_PASSWORD,
             });
         } else {
             this.server = http.createServer();
@@ -53,7 +58,7 @@ export class WSServer extends EventEmitter {
     public run(): void {
         this.server.listen(this.variable.NODE_SERVER_PORT, () => {
             this.logger.info(`AAS-Server listening on ${this.variable.NODE_SERVER_PORT}`);
-        })
+        });
     }
 
     public notify(name: string, data: WebSocketData): void {
@@ -67,7 +72,7 @@ export class WSServer extends EventEmitter {
     public close(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.clients.forEach(client => client.close());
-            this.wss.close((error) => {
+            this.wss.close(error => {
                 if (error) {
                     reject(error);
                 } else {
@@ -83,18 +88,18 @@ export class WSServer extends EventEmitter {
         client.on('close', this.onClientClose);
         client.on('error', this.onClientError);
         this.clients.add(client);
-    }
+    };
 
     private onClose = (): void => {
         this.wss.clients.forEach(ws => ws.close());
         this.wss.off('connection', this.onConnection);
         this.wss.off('close', this.onClose);
         this.wss.off('error', this.onError);
-    }
+    };
 
     private onError = (error: Error): void => {
         this.logger.error(`WebSocket server error: ${error?.message}`);
-    }
+    };
 
     private onClientClose = (code: number, reason: string, client: SocketClient): void => {
         this.emit('close', client);
@@ -106,13 +111,13 @@ export class WSServer extends EventEmitter {
         if (!this.clients.delete(client)) {
             this.logger.error(`Unknown WebSocket client detected.`);
         }
-    }
+    };
 
     private onClientMessage = (data: WebSocketData, client: SocketClient): void => {
         this.emit('message', data, client);
-    }
+    };
 
     private onClientError = (error: Error, client: SocketClient): void => {
         this.emit('error', error, client);
-    }
+    };
 }

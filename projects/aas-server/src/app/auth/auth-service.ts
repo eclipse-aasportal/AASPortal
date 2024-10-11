@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,12 +10,11 @@ import { inject, singleton } from 'tsyringe';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { isEmpty } from 'lodash-es';
+import isEmpty from 'lodash-es/isEmpty.js';
 import { Mailer } from '../mailer.js';
 import { ERRORS } from '../errors.js';
 import { UserData } from './user-data.js';
 import { UserStorage } from './user-storage.js';
-import { CookieStorage } from './cookie-storage.js';
 import { Variable } from '../variable.js';
 import {
     Credentials,
@@ -27,19 +26,18 @@ import {
     getUserNameFromEMail,
     Cookie,
     JWTPayload,
-    AuthResult
-} from 'common';
+    AuthResult,
+} from 'aas-core';
 
 @singleton()
 export class AuthService {
     private readonly algorithm: jwt.Algorithm;
     private readonly privateKey: string;
 
-    constructor(
+    public constructor(
         @inject(Mailer) private readonly mailer: Mailer,
         @inject('UserStorage') private readonly userStorage: UserStorage,
-        @inject('CookieStorage') private readonly cookieStorage: CookieStorage,
-        @inject(Variable) private readonly variable: Variable
+        @inject(Variable) private readonly variable: Variable,
     ) {
         if (variable.JWT_PUBLIC_KEY) {
             this.algorithm = 'RS256';
@@ -73,6 +71,15 @@ export class AuthService {
         return { token };
     }
 
+    public async getProfileAsync(id: string): Promise<UserProfile> {
+        const data = await this.userStorage.readAsync(id);
+        if (data == null) {
+            throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
+        }
+
+        return { id: data.id, name: data.name } as UserProfile;
+    }
+
     public async updateProfileAsync(id: string, profile: UserProfile): Promise<AuthResult> {
         const data = await this.userStorage.readAsync(id);
         if (data == null) {
@@ -96,7 +103,7 @@ export class AuthService {
                 throw new ApplicationError(
                     `An account already exists for this e-mail '${profile.id}'.`,
                     ERRORS.UserAlreadyExists,
-                    profile.id
+                    profile.id,
                 );
             }
 
@@ -118,7 +125,7 @@ export class AuthService {
             throw new ApplicationError(
                 `An account already exists for this e-mail '${profile.id}'.`,
                 ERRORS.UserAlreadyExists,
-                profile.id
+                profile.id,
             );
         }
 
@@ -137,7 +144,7 @@ export class AuthService {
             role: 'editor',
             password: await bcrypt.hash(profile.password, 10),
             created: new Date(),
-            lastLoggedIn: new Date(0)
+            lastLoggedIn: new Date(0),
         };
 
         const token = this.generateToken(data.id, data.name, data.role);
@@ -164,19 +171,19 @@ export class AuthService {
     }
 
     public getCookieAsync(id: string, name: string): Promise<Cookie | undefined> {
-        return this.cookieStorage.getAsync(id, name);
+        return this.userStorage.getCookieAsync(id, name);
     }
 
     public getCookiesAsync(id: string): Promise<Cookie[]> {
-        return this.cookieStorage.getAllAsync(id);
+        return this.userStorage.getCookiesAsync(id);
     }
 
     public setCookieAsync(id: string, name: string, data: string): Promise<void> {
-        return this.cookieStorage.setAsync(id, name, data);
+        return this.userStorage.setCookieAsync(id, name, data);
     }
 
     public deleteCookieAsync(id: string, name: string): Promise<void> {
-        return this.cookieStorage.deleteAsync(id, name);
+        return this.userStorage.deleteCookieAsync(id, name);
     }
 
     public hasUserAsync(id: string): Promise<boolean> {
@@ -185,19 +192,18 @@ export class AuthService {
 
     private generateToken(subject: string, name: string, role: UserRole): string {
         const payload: JWTPayload = { name, role };
-        return jwt.sign(payload, this.privateKey,
-            {
-                subject,
-                expiresIn: this.variable.JWT_EXPIRES_IN,
-                algorithm: this.algorithm
-            });
+        return jwt.sign(payload, this.privateKey, {
+            subject,
+            expiresIn: this.variable.JWT_EXPIRES_IN,
+            algorithm: this.algorithm,
+        });
     }
 
     private generateGuestToken(): string {
         const payload: JWTPayload = { role: 'guest' };
         return jwt.sign(payload, this.privateKey, {
             expiresIn: this.variable.JWT_EXPIRES_IN,
-            algorithm: this.algorithm
+            algorithm: this.algorithm,
         });
     }
 
@@ -206,7 +212,7 @@ export class AuthService {
         return jwt.sign(payload, this.privateKey, {
             subject,
             expiresIn: this.variable.JWT_SHORT_EXP,
-            algorithm: this.algorithm
+            algorithm: this.algorithm,
         });
     }
 

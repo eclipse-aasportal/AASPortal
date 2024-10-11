@@ -1,0 +1,9 @@
+# Ignore everything
+**/*
+
+# But not TS and JS files
+!**/*.ts
+!**/*.js
+
+# Check subdirectories too
+!*/

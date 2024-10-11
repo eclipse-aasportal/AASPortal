@@ -1,18 +1,18 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 
 import { WebSocketFactoryService } from '../lib/web-socket-factory.service';
 
-describe('WindowService', () => {
+describe('WebSocketFactoryService', () => {
     let service: WebSocketFactoryService;
     let webSocket: WebSocketSubject<WebSocketData>;
 
@@ -21,7 +21,7 @@ describe('WindowService', () => {
         service = TestBed.inject(WebSocketFactoryService);
     });
 
-    afterEach(function(){
+    afterEach(() => {
         webSocket?.unsubscribe();
     });
 
@@ -29,8 +29,8 @@ describe('WindowService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('creates a new WebSocket connection', function () {
-        webSocket = service.create("http://localhost:8888");
+    it('creates a new WebSocket connection', () => {
+        webSocket = service.create('http://localhost:8888');
         expect(webSocket).toBeTruthy();
     });
 });

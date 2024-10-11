@@ -1,9 +1,0 @@
-{
-    "name": "aas-portal-project",
-    "version": "3.0.0",
-    "description": "Web-based visualization and control of asset administration shells.",
-    "author": "Fraunhofer IOSB-INA",
-    "homepage": "https://www.iosb-ina.fraunhofer.de/",
-    "license": "Apache-2.0",
-    "libraries": []
-}

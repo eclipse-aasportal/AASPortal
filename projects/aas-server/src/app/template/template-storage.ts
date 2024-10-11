@@ -1,74 +1,134 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import * as $path from 'path';
-import { TemplateDescriptor, aas } from 'common';
+import { extname, join } from 'path/posix';
+import { TemplateDescriptor, aas } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
-import { AASReader } from '../packages/aas-reader.js';
-import { JsonReader } from '../packages/json-reader.js';
-import { JsonReaderV2 } from '../packages/json-reader-v2.js';
-import * as aasV2 from '../types/aas-v2.js';
+import { inject, singleton } from 'tsyringe';
+import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
+import { Variable } from '../variable.js';
+import { createJsonReader } from '../packages/create-json-reader.js';
+import { createXmlReader } from '../packages/create-xml-reader.js';
+import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
+import { ScanTemplatesData } from '../aas-provider/worker-data.js';
+import { ScanResult, ScanResultType, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { Parallel } from '../aas-provider/parallel.js';
+import { TaskHandler } from '../aas-provider/task-handler.js';
 
+@singleton()
 export class TemplateStorage {
-    constructor(
-        private readonly logger: Logger,
-        private readonly fileStorage: FileStorage
-    ) { }
+    private readonly fileStorage: FileStorage;
+    private readonly root: string;
+    private readonly timeout: number;
+    private readonly url: URL;
+    private templates: TemplateDescriptor[] = [];
 
-    public async readAsync(): Promise<TemplateDescriptor[]> {
-        const descriptors: TemplateDescriptor[] = [];
-        if (await this.fileStorage.exists(this.fileStorage.root)) {
-            await this.readDirAsync(this.fileStorage.root, descriptors)
-        }
+    public constructor(
+        @inject('Logger') private readonly logger: Logger,
+        @inject(Variable) variable: Variable,
+        @inject(FileStorageProvider) provider: FileStorageProvider,
+        @inject(Parallel) private readonly parallel: Parallel,
+        @inject(TaskHandler) private readonly taskHandler: TaskHandler,
+    ) {
+        this.url = new URL(variable.TEMPLATE_STORAGE);
+        this.timeout = variable.SCAN_TEMPLATES_TIMEOUT;
+        this.root = this.url.pathname;
+        this.fileStorage = provider.get(this.url);
 
-        return descriptors;
+        this.parallel.on('message', this.parallelOnMessage);
+        this.parallel.on('end', this.parallelOnEnd);
     }
 
-    private async readDirAsync(dir: string, descriptors: TemplateDescriptor[]): Promise<void> {
-        for (const entry of await this.fileStorage.readDir(dir)) {
-            const path = $path.join(dir, entry);
-            if (await this.fileStorage.isDirectory(path)) {
-                await this.readDirAsync(path, descriptors);
-            } else {
-                const format = $path.extname(path).toLowerCase();
-                switch (format) {
-                    case '.json':
-                        descriptors.push({
-                            name: $path.basename(path, $path.extname(format)),
-                            endpoint: { type: 'file', address: path },
-                            format: '.json',
-                            template: await this.readTemplateAsync(path)
-                        });
-                        break;
+    public start(): void {
+        setTimeout(this.startScan, 100);
+    }
 
-                    case '.xml':
-                        throw new Error(`Template format '${format}' is not implemented`);
-                }
+    public getTemplatesAsync(): Promise<TemplateDescriptor[]> {
+        return Promise.resolve(this.templates);
+    }
+
+    public async readTemplateAsync(path: string): Promise<aas.Referable | aas.Environment> {
+        switch (extname(path)) {
+            case '.json':
+                return this.readFromJson(path);
+            case '.xml':
+                return this.readFromXml(path);
+            case '.aasx':
+                return this.readFromAasx(path);
+            default:
+                throw new Error('Not implemented.');
+        }
+    }
+
+    private startScan = () => {
+        this.scanTemplates(this.taskHandler.createTaskId());
+    };
+
+    private scanTemplates = async (taskId: number) => {
+        const data: ScanTemplatesData = {
+            type: 'ScanTemplatesData',
+            taskId,
+        };
+
+        this.taskHandler.set(taskId, { name: 'TemplateStorage', owner: this, type: 'ScanTemplates' });
+        this.parallel.execute(data);
+    };
+
+    private async readFromAasx(file: string): Promise<aas.Environment> {
+        let source: AasxDirectory | undefined;
+        try {
+            source = new AasxDirectory(this.logger, this.fileStorage, this.url);
+            await source.openAsync();
+            const pkg = source.createPackage(file);
+            return await pkg.getEnvironmentAsync();
+        } finally {
+            await source?.closeAsync();
+        }
+    }
+
+    private async readFromXml(path: string): Promise<aas.Environment> {
+        const xml = (await this.fileStorage.readFile(join(this.root, path))).toString();
+        return createXmlReader(xml).readEnvironment();
+    }
+
+    private async readFromJson(path: string): Promise<aas.Referable> {
+        const referable = JSON.parse((await this.fileStorage.readFile(join(this.root, path))).toString());
+        return createJsonReader(referable).read(referable);
+    }
+
+    private parallelOnMessage = (result: ScanResult) => {
+        try {
+            if (this.isScanTemplatesResult(result)) {
+                this.templates = result.templates;
             }
+        } catch (error) {
+            this.logger.error(error);
         }
-    }
+    };
 
-    private async readTemplateAsync(file: string): Promise<aas.Referable> {
-        const referable = JSON.parse((await this.fileStorage.readFile(file)).toString());
-        const reader = this.createReader(referable);
-        return reader.read(referable);
-    }
-
-    private createReader(referable: object): AASReader {
-        if (typeof (referable as aas.Referable).modelType === 'string') {
-            return new JsonReader(this.logger);
+    private parallelOnEnd = (result: ScanResult) => {
+        const task = this.taskHandler.get(result.taskId);
+        if (!task || task.owner !== this) {
+            return;
         }
 
-        if (typeof (referable as aasV2.Referable).modelType?.name === 'string') {
-            return new JsonReaderV2(this.logger);
-        }
+        this.taskHandler.delete(result.taskId);
+        setTimeout(this.scanTemplates, this.timeout, result.taskId);
 
-        throw new Error('Not implemented.');
+        if (result.messages) {
+            this.logger.start(`scan ${task?.name ?? 'undefined'}`);
+            result.messages.forEach(message => this.logger.log(message));
+            this.logger.stop();
+        }
+    };
+
+    private isScanTemplatesResult(result: ScanResult): result is ScanTemplatesResult {
+        return result.type === ScanResultType.Update;
     }
 }

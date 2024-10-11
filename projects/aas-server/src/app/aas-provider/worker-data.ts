@@ -1,18 +1,16 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { AASContainer } from "common";
-import { ScanStatistic } from "./scan-result.js";
+import { AASContainer } from 'aas-core';
 
 export interface WorkerData {
     taskId: number;
-    type: 'ScanContainerData' | 'ScanEndpointData';
-    statistic: ScanStatistic;
+    type: 'ScanContainerData' | 'ScanTemplatesData';
 }
 
 export interface ScanContainerData extends WorkerData {
@@ -20,16 +18,14 @@ export interface ScanContainerData extends WorkerData {
     container: AASContainer;
 }
 
-export interface ScanEndpointData extends WorkerData {
-    type: 'ScanEndpointData';
-    endpoint: string;
-    containers: AASContainer[];
+export interface ScanTemplatesData extends WorkerData {
+    type: 'ScanTemplatesData';
 }
 
 export function isScanContainerData(data: WorkerData): data is ScanContainerData {
     return data.type === 'ScanContainerData';
 }
 
-export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
-    return data.type === 'ScanEndpointData';
+export function isScanTemplatesData(data: WorkerData): data is ScanTemplatesData {
+    return data.type === 'ScanTemplatesData';
 }

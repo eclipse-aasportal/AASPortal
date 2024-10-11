@@ -1,30 +1,30 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
-<div class="container-fluid">
+<div class="overflow-auto h-100 p-2">
     <h1>AASPortal</h1>
-    <p>The AASPortal is a web portal for the visualization and management of Asset Administration Shells (AAS) licensed under the Apache License 2.0.</p>
-    <p>The implementation uses the concepts of the document "Details of the Asset Administration Shell" published on www.plattform-i40.de which is licensed under Creative Commons CC BY 4.0.</p>
-    <p>Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
-zur Foerderung der angewandten Forschung e.V.</p>
+    <p>The AASPortal is a web portal for the visualization and management of Asset Administration Shells (AAS) licensed
+        under the Apache License 2.0.</p>
+    <p>The implementation uses the concepts of the document "Details of the Asset Administration Shell" published on
+        www.plattform-i40.de which is licensed under Creative Commons CC BY 4.0.</p>
+    <p>Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der
+        Fraunhofer-Gesellschaft
+        zur Foerderung der angewandten Forschung e.V.</p>
     <p>
-        <span>Internet:&nbsp;</span><a [href]="homepage" target="_blank">{{homepage}}</a><br>
+        <span>Internet:&nbsp;</span><a [href]="homepage()" target="_blank">{{homepage()}}</a><br>
     </p>
-    <h2>AASPortal</h2>
-    <p>Version: {{version}}</p>
-    <h2>AAS-Server</h2>
-    <p>Version: {{serverVersion}}</p>
     <h2>Third-party Libraries</h2>
     <p>The application is based on some third-party libraries for which specific copyright statements and licenses
         apply.</p>
-    <fhg-library-table [collection]="libraries"></fhg-library-table>
+    <fhg-license-info [libraries]="libraries()"></fhg-license-info>
+
     <h2>Server Messages</h2>
-    <fhg-message-table [collection]="messages"></fhg-message-table>
+    <fhg-message-table [collection]="messages()"></fhg-message-table>
 </div>
 
 <ng-template #aboutToolbar></ng-template>

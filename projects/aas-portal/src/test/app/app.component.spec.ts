@@ -1,34 +1,33 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from '../../app/app.component';
 import { Component } from '@angular/core';
+import { MainComponent } from '../../app/main/main.component';
 
 @Component({
     selector: 'fhg-main',
     template: '<p></p>',
-    styleUrls: []
+    styleUrls: [],
+    standalone: true,
 })
-class TestMainComponent {
-}
+class TestMainComponent {}
 
 describe('AppComponent', () => {
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                RouterTestingModule
-            ],
-            declarations: [
-                TestMainComponent,
-                AppComponent
-            ],
+        TestBed.overrideComponent(AppComponent, {
+            remove: {
+                imports: [MainComponent],
+            },
+            add: {
+                imports: [TestMainComponent],
+            },
         });
     });
 
@@ -36,11 +35,5 @@ describe('AppComponent', () => {
         const fixture = TestBed.createComponent(AppComponent);
         const app = fixture.componentInstance;
         expect(app).toBeTruthy();
-    });
-
-    it(`should have as title 'AASPortal'`, () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        const app = fixture.componentInstance;
-        expect(app.title).toEqual('AASPortal');
     });
 });

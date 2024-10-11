@@ -1,68 +1,72 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { DownloadService } from 'projects/aas-lib/src/public-api';
-import { AASContainer } from 'common';
+import { TranslateModule } from '@ngx-translate/core';
+import { DownloadService } from 'aas-lib';
+import { AASEndpoint } from 'aas-core';
 
 @Component({
     selector: 'fhg-upload-form',
     templateUrl: './upload-form.component.html',
-    styleUrls: ['./upload-form.component.scss']
+    styleUrls: ['./upload-form.component.scss'],
+    standalone: true,
+    imports: [FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadFormComponent {
     private uploading = false;
+    private files: FileList | null = null;
 
-    constructor(
+    public constructor(
         private readonly modal: NgbActiveModal,
-        private readonly download: DownloadService) { }
+        private readonly download: DownloadService,
+    ) {}
 
-    @ViewChild('fileInput')
-    public fileInput: ElementRef<HTMLInputElement> | null = null;
+    public readonly endpoint = signal<AASEndpoint | null>(null);
 
-    public files: string | string[] | null = null;
+    public readonly endpoints = signal<AASEndpoint[]>([]);
 
-    public container: AASContainer | null = null;
+    public readonly progress = signal(0);
 
-    public containers: AASContainer[] = [];
-
-    public progress = 0;
+    public setFiles(files: FileList | null): void {
+        this.files = files;
+    }
 
     public canSubmit(): boolean {
-        return this.fileInput?.nativeElement?.files != null &&
-            this.fileInput.nativeElement.files.length > 0 &&
-            this.container != null;
+        return this.files != null && this.files.length > 0 && this.endpoint() != null;
     }
 
     public submit(): void {
-        if (!this.uploading && this.container?.url) {
+        const endpoint = this.endpoint();
+        if (!this.uploading && endpoint) {
             this.uploading = true;
-            const file = this.fileInput!.nativeElement!.files![0];
-            this.download.uploadDocuments(this.container.url, [file])
-                .subscribe({
-                    next: (event: HttpEvent<any>) => {
-                        switch (event.type) {
-                            case HttpEventType.Sent:
-                                break;
-                            case HttpEventType.ResponseHeader:
-                                break;
-                            case HttpEventType.UploadProgress:
-                                this.progress = Math.round(event.loaded / event.total! * 100);
-                                break;
-                            case HttpEventType.Response:
-                                break;
-                        }
-                    },
-                    complete: () => this.modal.close(file.name),
-                    error: (error) => this.modal.dismiss(error)
-                });
+            const file = this.files![0];
+            this.download.uploadDocuments(endpoint.name, [file]).subscribe({
+                next: (event: HttpEvent<unknown>) => {
+                    switch (event.type) {
+                        case HttpEventType.Sent:
+                            break;
+                        case HttpEventType.ResponseHeader:
+                            break;
+                        case HttpEventType.UploadProgress:
+                            this.progress.set(Math.round((event.loaded / event.total!) * 100));
+                            break;
+                        case HttpEventType.Response:
+                            break;
+                    }
+                },
+                complete: () => this.modal.close(file.name),
+                error: error => this.modal.dismiss(error),
+            });
         }
     }
 

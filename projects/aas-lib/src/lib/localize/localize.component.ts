@@ -1,41 +1,50 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { Observable, BehaviorSubject, Subscription } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { Subscription } from 'rxjs';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
+
 import { CultureInfo } from './culture-info';
 import { WindowService } from '../window.service';
 
 @Component({
     selector: 'fhg-localize',
     templateUrl: './localize.component.html',
-    styleUrls: ['./localize.component.scss']
+    styleUrls: ['./localize.component.scss'],
+    standalone: true,
+    imports: [AsyncPipe, NgbModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
+export class LocalizeComponent implements OnInit, OnDestroy {
     private readonly subscription = new Subscription();
-    private readonly _cultures = new BehaviorSubject<CultureInfo[]>([]);
-    private readonly _culture = new BehaviorSubject<CultureInfo | undefined>(undefined);
+    private readonly _culture = signal<CultureInfo | null>(null);
 
-    constructor(
+    public constructor(
         private readonly translate: TranslateService,
-        private readonly window: WindowService
-    ) {
-        this.cultures = this._cultures.asObservable();
-        this.culture = this._culture.asObservable();
-    }
+        private readonly window: WindowService,
+    ) {}
 
-    @Input()
-    public languages: string[] = ['en-us'];
+    public readonly languages = input<string[]>(['en-us']);
 
-    public readonly cultures: Observable<CultureInfo[]>;
+    public readonly cultures = computed(() => {
+        return this.languages().map(
+            lang =>
+                ({
+                    localeId: lang,
+                    name: new Intl.DisplayNames([lang], { type: 'language' }).of(lang),
+                }) as CultureInfo,
+        );
+    });
 
-    public readonly culture: Observable<CultureInfo | undefined>;
+    public readonly culture = this._culture.asReadonly();
 
     public setCulture(value: CultureInfo): void {
         this.translate.use(value.localeId);
@@ -54,33 +63,16 @@ export class LocalizeComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['languages']) {
-            const items = this.languages.map(lang => (
-                {
-                    localeId: lang,
-                    name: new Intl.DisplayNames([lang], { type: 'language' }).of(lang)
-                } as CultureInfo));
-
-            const current = this.findCulture(items, this.translate.currentLang) ??
-                this.findCulture(items, this.translate.defaultLang) ??
-                items[0];
-
-            this._cultures.next(items);
-            this._culture.next(current);
-        }
-    }
-
     public ngOnDestroy() {
         this.subscription.unsubscribe();
     }
 
     private onLangChange = (value: LangChangeEvent): void => {
-        const item = this.findCulture(this._cultures.value, value.lang);
+        const item = this.findCulture(this.cultures(), value.lang);
         if (item) {
-            this._culture.next(item);
+            this._culture.set(item);
         }
-    }
+    };
 
     private findCulture(cultures: CultureInfo[], localeId: string): CultureInfo | undefined {
         localeId = localeId?.toLocaleLowerCase();

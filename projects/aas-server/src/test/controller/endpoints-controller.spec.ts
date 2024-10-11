@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,11 +12,12 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
+import { AASEndpoint } from 'aas-core';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
@@ -34,21 +35,21 @@ describe('EndpointsController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(
-            [
-                'hasUserAsync',
-                'loginAsync',
-                'getCookieAsync',
-                'getCookiesAsync',
-                'setCookieAsync',
-                'deleteCookieAsync'
-            ]);
+        auth = createSpyObj<AuthService>([
+            'hasUserAsync',
+            'loginAsync',
+            'getCookieAsync',
+            'getCookiesAsync',
+            'setCookieAsync',
+            'deleteCookieAsync',
+        ]);
 
-        aasProvider = createSpyObj<AASProvider>(
-            [
-                'addEndpointAsync',
-                'removeEndpointAsync',
-            ]);
+        aasProvider = createSpyObj<AASProvider>([
+            'getEndpoints',
+            'addEndpointAsync',
+            'removeEndpointAsync',
+            'resetAsync',
+        ]);
 
         authentication = createSpyObj<Authentication>(['checkAsync']);
         authentication.checkAsync.mockResolvedValue(guestPayload);
@@ -69,14 +70,29 @@ describe('EndpointsController', function () {
         app.use(errorHandler);
     });
 
+    it('getEndpoints: /api/v1/endpoints', async function () {
+        const endpoints: AASEndpoint = {
+            name: 'Test',
+            url: 'http://localhost:1234',
+            type: 'AAS_API',
+        };
+
+        aasProvider.getEndpoints.mockResolvedValue([endpoints]);
+        const response = await request(app).get('/api/v1/endpoints').set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual([endpoints]);
+        expect(aasProvider.getEndpoints).toHaveBeenCalled();
+    });
+
     it('POST: /api/v1/endpoints/:name', async function () {
-        const url = new URL('file:///assets/samples');
-        url.searchParams.append('type', 'AasxDirectory');
-        aasProvider.addEndpointAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-        const response = await request(app).post('/api/v1/endpoints/samples')
+        const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'FileSystem' };
+        aasProvider.addEndpointAsync.mockResolvedValue();
+        auth.hasUserAsync.mockResolvedValue(true);
+        const response = await request(app)
+            .post('/api/v1/endpoints/samples')
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .send({ url: url.href });
+            .send(endpoint);
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.addEndpointAsync).toHaveBeenCalled();
@@ -91,5 +107,16 @@ describe('EndpointsController', function () {
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.removeEndpointAsync).toHaveBeenCalled();
+    });
+
+    it('reset: /api/v1/endpoints', async function () {
+        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        aasProvider.resetAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
+        const response = await request(app)
+            .delete('/api/v1/endpoints')
+            .set('Authorization', `Bearer ${getToken('John')}`);
+
+        expect(response.statusCode).toBe(204);
+        expect(aasProvider.resetAsync).toHaveBeenCalled();
     });
 });

@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -10,15 +10,21 @@
     <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
         <div class="d-inline-flex">
             <div class="px-2"><i class="bi bi-person-circle"></i></div>
-            <div>{{userName}}</div>
+            <div>{{userName()}}</div>
         </div>
     </a>
     <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="login()" translate>CMD_LOGIN</a>
-        <a type="button" class="dropdown-item" *ngIf="!userAuthenticated" (click)="register()"
+        @if (!userAuthenticated()) {
+        <a type="button" class="dropdown-item" (click)="login()" (keydown.enter)="login()" tabindex="1"
+            translate>CMD_LOGIN</a>
+        <a type="button" class="dropdown-item" (click)="register()" (keydown.enter)="register()" tabindex="2"
             translate>CMD_REGISTER_USER</a>
-        <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="updateUserProfile()"
-            translate>CMD_UPDATE_PROFILE</a>
-        <a type="button" class="dropdown-item" *ngIf="userAuthenticated" (click)="logout()" translate>CMD_LOGOUT</a>
+        }
+        @else {
+        <a type="button" class="dropdown-item" (click)="logout()" (keydown.enter)="logout()" tabindex="4"
+            translate>CMD_LOGOUT</a>
+        <a type="button" class="dropdown-item" (click)="updateUserProfile()" (keydown.enter)="updateUserProfile()"
+            tabindex="3" translate>CMD_UPDATE_PROFILE</a>
+        }
     </div>
 </div>

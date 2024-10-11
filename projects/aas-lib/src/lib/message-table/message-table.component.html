@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -27,44 +27,53 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let message of messages">
+        @for (message of messages(); track message) {
+        <tr>
             <td>
-                <div *ngIf="message.type === 'Info'" class="text-info">
+                @if (message.type === 'Info') {
+                <div class="text-info">
                     <i class="bi bi-info"></i>
                 </div>
-                <div *ngIf="message.type === 'Warning'" class="text-warning">
+                }@else if (message.type === 'Warning') {
+                <div class="text-warning">
                     <i class="bi bi-exclamation"></i>
                 </div>
-                <div *ngIf="message.type === 'Error'" class="text-danger">
+                }
+                @else {
+                <div class="text-danger">
                     <i class="bi bi-bug"></i>
                 </div>
+                }
             </td>
             <td [noWrap]="true">{{timestampToString(message.timestamp)}}</td>
             <td [noWrap]="true">{{message.text}}</td>
         </tr>
+        }
     </tbody>
     <tfoot>
         <td [colSpan]="3">
             <div class="d-flex align-items-start">
                 <div class="btn-group btn-group-sm me-2" role="group">
-                    <input type="checkbox" class="btn-check" id="message-table-show-info" autocomplete="off"
-                        [checked]="showInfo" (change)="toggleShowInfo()">
+                    <input #info type="checkbox" class="btn-check" id="message-table-show-info" autocomplete="off"
+                        [checked]="showInfo()" (change)="showInfo.set(info.checked)">
                     <label class="btn btn-outline-primary" for="message-table-show-info"><i
                             class="bi bi-info"></i></label>
 
-                    <input type="checkbox" class="btn-check" id="message-table-show-warn" autocomplete="off"
-                        [checked]="showWarning" (change)="toggleShowWarning()">
+                    <input #warning type="checkbox" class="btn-check" id="message-table-show-warn" autocomplete="off"
+                        [checked]="showWarning()" (change)="showWarning.set(warning.checked)">
                     <label class="btn btn-outline-warning" for="message-table-show-warn"><i
                             class="bi bi-exclamation"></i></label>
 
-                    <input type="checkbox" class="btn-check" id="message-table-show-error" autocomplete="off"
-                        [checked]="showError" (change)="toggleShowError()">
+                    <input #error type="checkbox" class="btn-check" id="message-table-show-error" autocomplete="off"
+                        [checked]="showError()" (change)="showError.set(error.checked)">
                     <label class="btn btn-outline-danger" for="message-table-show-error"><i
                             class="bi bi-bug"></i></label>
                 </div>
-                <ngb-pagination *ngIf="pageSize > 0 && size > pageSize" class="link-primary" [collectionSize]="size"
-                    [(page)]="page" [pageSize]="pageSize" [maxSize]="5" size="sm" (pageChange)="refreshMessages()">
+                @if (pageSize() > 0 && size() > pageSize()) {
+                <ngb-pagination class="link-primary" [collectionSize]="size()" [(page)]="page" [pageSize]="pageSize()"
+                    [maxSize]="5" size="sm">
                 </ngb-pagination>
+                }
             </div>
         </td>
     </tfoot>

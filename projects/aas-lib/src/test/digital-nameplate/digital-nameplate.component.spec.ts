@@ -1,16 +1,14 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { SimpleChange } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { selectElement } from 'common';
+import { selectElement } from 'aas-core';
 import { nameplate } from './digital-nameplate-document';
 import { DigitalNameplateComponent } from '../../lib/digital-nameplate/digital-nameplate.component';
 
@@ -20,27 +18,23 @@ describe('DigitalNameplateComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                DigitalNameplateComponent
-            ],
-            providers: [],
             imports: [
-                CommonModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         });
 
         fixture = TestBed.createComponent(DigitalNameplateComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
+        fixture.componentRef.setInput('submodels', [
+            { document: nameplate, submodel: selectElement(nameplate.content!, 'Nameplate')! },
+        ]);
 
-        component.submodels = [{ document: nameplate, submodel: selectElement(nameplate.content!, 'Nameplate')! }];
-        component.ngOnChanges({ 'submodels': new SimpleChange(null, component.submodels, true) });
+        fixture.detectChanges();
     });
 
     it('should create', () => {
@@ -48,6 +42,6 @@ describe('DigitalNameplateComponent', () => {
     });
 
     it('provides a "ManufacturerName" property', function () {
-        expect(component.nameplates[0].manufacturerName).toEqual('Muster AG');
+        expect(component.nameplates()[0].manufacturerName).toEqual('Muster AG');
     });
 });

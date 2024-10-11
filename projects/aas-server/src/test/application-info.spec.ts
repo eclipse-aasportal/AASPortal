@@ -1,33 +1,33 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { resolve } from 'path';
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { AppInfo } from 'aas-core';
+import { createSpyObj } from 'fhg-jest';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
-import { readFile } from 'fs/promises';
-import { PackageInfo } from 'common';
-import { createSpyObj } from './utils.js';
-import { describe, beforeEach, it, expect } from '@jest/globals';
+import { Variable } from '../app/variable.js';
 
-describe('Application Info service', function () {
-    let logger: Logger;
+import appInfo from '../assets/app-info.json' with { type: 'json ' };
+
+describe('Application Info service', () => {
+    let logger: jest.Mocked<Logger>;
+    let variable: jest.Mocked<Variable>;
     let applicationInfo: ApplicationInfo;
-    let file: string;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        file = resolve('.', 'src/test/assets/app-info.json');
-        applicationInfo = new ApplicationInfo(logger);
+        variable = createSpyObj<Variable>({}, { ASSETS: './' });
+        applicationInfo = new ApplicationInfo(logger, variable, appInfo as AppInfo);
     });
 
-    it('gets the AASServer package info', async function () {
-        const expected: PackageInfo = JSON.parse((await readFile(file)).toString());
-        await expect(applicationInfo.getAsync(file)).resolves.toEqual(expected);
+    it('gets the AASServer package info', async () => {
+        await expect(applicationInfo.getAsync()).resolves.toEqual(appInfo);
     });
 });

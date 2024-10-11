@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -15,17 +15,19 @@
         <button type="button" class="btn-close" (click)="cancel()" aria-label="Cancel"></button>
     </div>
     <div class="modal-body">
-        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+        @for (message of messages(); track message) {
+        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
             <div class="d-flex">{{message}}</div>
         </ngb-toast>
+        }
         <div class="form-floating mb-3">
-            <input #inputEMail type="email" class="form-control" id="intputProfileEMail" [(ngModel)]="id"
-                name="userId" placeholder="example@email.com" (input)="onInputEMail()">
+            <input #inputEMail type="email" class="form-control" id="intputProfileEMail" [(ngModel)]="id" name="userId"
+                placeholder="example@email.com" (input)="onInputEMail()">
             <label for="intputProfileEMail" translate>LABEL_EMAIL</label>
         </div>
         <div class="form-floating mb-3">
             <input type="text" class="form-control" id="intputProfileName" [(ngModel)]="name" name="name"
-                [placeholder]="defaultName" aria-hidden="true">
+                [placeholder]="defaultName()" aria-hidden="true">
             <label for="intputProfileName" translate>LABEL_NAME</label>
         </div>
         <button type="button" class="btn btn-outline-primary mb-1" (click)="collapse.toggle()"

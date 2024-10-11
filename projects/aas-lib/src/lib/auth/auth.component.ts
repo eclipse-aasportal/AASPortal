@@ -1,32 +1,34 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component } from "@angular/core";
-import { NotifyService } from "../notify/notify.service";
-import { AuthService } from "./auth.service";
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { NotifyService } from '../notify/notify.service';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from './auth.service';
 
 @Component({
-    selector: "fhg-auth",
-    templateUrl: "./auth.component.html",
-    styleUrls: ["./auth.component.scss"],
+    selector: 'fhg-auth',
+    templateUrl: './auth.component.html',
+    styleUrls: ['./auth.component.scss'],
+    standalone: true,
+    imports: [NgbModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {
-    constructor(
+    public constructor(
         private auth: AuthService,
-        private notify: NotifyService) { }
+        private notify: NotifyService,
+    ) {}
 
-    public get userAuthenticated(): boolean {
-        return this.auth.authenticated;
-    }
+    public readonly userAuthenticated = this.auth.authenticated;
 
-    public get userName(): string | undefined {
-        return this.auth.name;
-    }
+    public readonly userName = this.auth.name;
 
     public register(): void {
         this.auth.register().subscribe({ error: error => this.notify.error(error) });

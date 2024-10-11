@@ -1,16 +1,17 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateService } from '@ngx-translate/core';
-import { convertBlobToBase64Async, extension } from 'projects/aas-lib/src/public-api';
-import { aas, extensionToMimeType, toInvariant, toLocale } from 'common';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { convertBlobToBase64Async, extension } from 'aas-lib';
+import { aas, extensionToMimeType, toInvariant, toLocale } from 'aas-core';
 
 export interface LangStringRow extends aas.LangString {
     index: number;
@@ -20,26 +21,32 @@ export interface LangStringRow extends aas.LangString {
 @Component({
     selector: 'fhg-edit-element',
     templateUrl: './edit-element-form.component.html',
-    styleUrls: ['./edit-element-form.component.scss']
+    styleUrls: ['./edit-element-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditElementFormComponent {
     private element?: aas.Referable;
 
-    constructor(private modal: NgbActiveModal, private translate: TranslateService) { }
+    public constructor(
+        private modal: NgbActiveModal,
+        private translate: TranslateService,
+    ) {}
 
-    public modelType!: aas.ModelType;
+    public readonly modelType = signal<aas.ModelType | undefined>(undefined);
 
-    public idShort = '';
+    public readonly idShort = signal('');
 
-    public semanticId = '';
+    public readonly semanticId = signal('');
 
-    public categories: string[] = ['-', 'CONSTANT', 'PARAMETER', 'VARIABLE'];
+    public readonly categories = signal<string[]>(['-', 'CONSTANT', 'PARAMETER', 'VARIABLE']).asReadonly();
 
-    public category = '-';
+    public readonly category = signal('-');
 
-    public valueType: aas.DataTypeDefXsd | null = null;
+    public readonly valueType = signal<aas.DataTypeDefXsd | null>(null);
 
-    public valueTypes: aas.DataTypeDefXsd[] = [
+    public readonly valueTypes = signal<aas.DataTypeDefXsd[]>([
         'xs:anyURI',
         'xs:base64Binary',
         'xs:boolean',
@@ -69,31 +76,31 @@ export class EditElementFormComponent {
         'xs:unsignedByte',
         'xs:unsignedInt',
         'xs:unsignedLong',
-        'xs:unsignedShort'
-    ];
+        'xs:unsignedShort',
+    ]).asReadonly();
 
-    public value?: string;
+    public readonly value = signal<string | undefined>(undefined);
 
-    public min?: string;
+    public readonly min = signal<string | undefined>(undefined);
 
-    public max?: string;
+    public readonly max = signal<string | undefined>(undefined);
 
-    public langStrings: LangStringRow[] = [];
+    public readonly langStrings = signal<LangStringRow[]>([]);
 
-    public contentType?: string;
+    public readonly contentType = signal<string | undefined>(undefined);
 
-    public files?: string[];
+    public readonly files = signal<string[]>([]);
 
-    public messages: string[] = [];
+    public readonly messages = signal<string[]>([]);
 
     public initialize(element: aas.SubmodelElement) {
         this.element = { ...element };
-        this.modelType = element.modelType;
-        this.semanticId = this.referenceToString(element.semanticId);
-        this.category = element.category ?? '-';
-        this.idShort = element.idShort;
+        this.modelType.set(element.modelType);
+        this.semanticId.set(this.referenceToString(element.semanticId));
+        this.category.set(element.category ?? '-');
+        this.idShort.set(element.idShort);
 
-        switch (this.modelType) {
+        switch (this.modelType()) {
             case 'Property':
                 this.initProperty();
                 break;
@@ -120,7 +127,7 @@ export class EditElementFormComponent {
     }
 
     public select(item: LangStringRow): void {
-        this.langStrings.forEach((langString) => {
+        this.langStrings().forEach(langString => {
             if (item === langString && langString.index >= 0) {
                 langString.selected = !langString.selected;
             } else {
@@ -131,19 +138,26 @@ export class EditElementFormComponent {
 
     public addLangString(): void {
         this.clearMessages();
-        const last = this.langStrings[this.langStrings.length - 1];
-        last.index = this.langStrings.length - 1;
-        this.langStrings.forEach(item => item.selected = false);
-        last.selected = true;
-        this.langStrings.push({ language: '', text: '', selected: false, index: -1 });
+        this.langStrings.update(values => {
+            const j = values.length - 1;
+            values.forEach((value, i) => {
+                value.index = i;
+                value.selected = i === j;
+            });
+
+            return [...values, { language: '', text: '', selected: false, index: -1 }];
+        });
     }
 
     public removeLangString(item: LangStringRow) {
         this.clearMessages();
         if (item.index >= 0) {
-            this.langStrings = this.langStrings.filter(langString => langString !== item);
-            this.langStrings.forEach((langString, index) => langString.index = index);
-            this.langStrings[this.langStrings.length - 1].index = -1;
+            this.langStrings.update(values => {
+                const langStrings = values.filter(value => value !== item);
+                langStrings.forEach((langString, index) => (langString.index = index));
+                langStrings[langStrings.length - 1].index = -1;
+                return langStrings;
+            });
         }
     }
 
@@ -163,54 +177,56 @@ export class EditElementFormComponent {
         if (files && files.length === 1) {
             const ext = extension(files[0].name);
             if (ext) {
-                const temp = this.value;
-                this.value = undefined;
-                this.contentType = extensionToMimeType(ext);
-                convertBlobToBase64Async(files[0]).then(
-                    value => this.value = value
-                ).catch(() => {
-                    this.value = temp;
-                    this.pushMessage('Unable to read file.');
-                })
+                const temp = this.value();
+                this.value.set(undefined);
+                this.contentType.set(extensionToMimeType(ext));
+                convertBlobToBase64Async(files[0])
+                    .then(value => this.value.set(value))
+                    .catch(() => {
+                        this.value.set(temp);
+                        this.pushMessage('Unable to read file.');
+                    });
             }
         }
     }
 
     private initProperty(): void {
         const property = this.element as aas.Property;
-        this.value = toLocale(property.value, property.valueType, this.translate.currentLang);
-        this.valueType = property.valueType ?? null;
+        this.value.set(toLocale(property.value, property.valueType, this.translate.currentLang));
+        this.valueType.set(property.valueType ?? null);
     }
 
     private initMultiLanguageProperty(): void {
         const multiLangProperty = this.element as aas.MultiLanguageProperty;
-        this.langStrings = multiLangProperty.value.map(
-            (item, index) => ({ ...item, selected: false, index } as LangStringRow));
-
-        this.langStrings.push({ language: '', text: '', selected: false, index: -1 });
+        this.langStrings.set([
+            ...(multiLangProperty.value
+                ? multiLangProperty.value.map((item, index) => ({ ...item, selected: false, index }) as LangStringRow)
+                : []),
+            { language: '', text: '', selected: false, index: -1 },
+        ]);
     }
 
     private initRange(): void {
         const range = this.element as aas.Range;
-        this.min = toLocale(range.min, range.valueType, this.translate.currentLang);
-        this.max = toLocale(range.max, range.valueType, this.translate.currentLang);
-        this.valueType = range.valueType ?? null;
+        this.min.set(toLocale(range.min, range.valueType, this.translate.currentLang));
+        this.max.set(toLocale(range.max, range.valueType, this.translate.currentLang));
+        this.valueType.set(range.valueType ?? null);
     }
 
     private initBlob(): void {
         const blob = this.element as aas.Blob;
-        this.contentType = blob.contentType;
-        this.value = blob.value;
+        this.contentType.set(blob.contentType);
+        this.value.set(blob.value);
     }
 
     private submitElement(): boolean {
-        if (this.category !== '-') {
-            this.element!.category = this.category;
+        if (this.category() !== '-') {
+            this.element!.category = this.category();
         } else {
             delete this.element!.category;
         }
 
-        switch (this.modelType) {
+        switch (this.modelType()) {
             case 'Property':
                 return this.submitProperty();
             case 'MultiLanguageProperty':
@@ -225,17 +241,18 @@ export class EditElementFormComponent {
     }
 
     private submitProperty(): boolean {
-        if (this.valueType && this.element) {
+        const valueType = this.valueType();
+        if (valueType && this.element) {
             const property = this.element as aas.Property;
-            property.valueType = this.valueType;
+            property.valueType = valueType;
 
-            if (this.value) {
-                const value = toInvariant(this.value, this.valueType, this.translate.currentLang);
+            if (this.value()) {
+                const value = toInvariant(this.value(), valueType, this.translate.currentLang);
                 if (value) {
                     property.value = value;
                     return true;
                 } else {
-                    this.pushMessage(`"${this.value}"cannot be converted to type "${this.valueType}".`);
+                    this.pushMessage(`"${this.value()}"cannot be converted to type "${valueType}".`);
                 }
             } else {
                 return true;
@@ -248,7 +265,8 @@ export class EditElementFormComponent {
     private submitMultiLanguageProperty(): boolean {
         if (this.element) {
             const multiLangProperty = this.element as aas.MultiLanguageProperty;
-            multiLangProperty.value = this.langStrings.filter(item => item.language && item.text && item.index >= 0)
+            multiLangProperty.value = this.langStrings()
+                .filter(item => item.language && item.text && item.index >= 0)
                 .map(item => ({ language: item.language, text: item.text }));
 
             return true;
@@ -258,19 +276,20 @@ export class EditElementFormComponent {
     }
 
     private submitRange(): boolean {
-        if (this.valueType && this.element) {
+        const valueType = this.valueType();
+        if (valueType && this.element) {
             const range = this.element as aas.Range;
-            range.valueType = this.valueType;
+            range.valueType = valueType;
 
             if (this.min && this.max) {
-                const min = toInvariant(this.min, this.valueType, this.translate.currentLang);
-                const max = toInvariant(this.max, this.valueType, this.translate.currentLang);
+                const min = toInvariant(this.min(), valueType, this.translate.currentLang);
+                const max = toInvariant(this.max(), valueType, this.translate.currentLang);
                 if (min && max) {
                     range.min = min;
                     range.max = max;
                     return true;
                 } else {
-                    this.pushMessage(`"${this.min}...${this.max}"cannot be converted to type "${this.valueType}".`);
+                    this.pushMessage(`"${this.min()}...${this.max()}"cannot be converted to type "${valueType}".`);
                 }
             } else {
                 return true;
@@ -281,10 +300,12 @@ export class EditElementFormComponent {
     }
 
     private submitBlob(): boolean {
-        if (this.value && this.element && this.contentType) {
+        const value = this.value();
+        const contentType = this.contentType();
+        if (value && this.element && contentType) {
             const blob = this.element as aas.Blob;
-            blob.contentType = this.contentType;
-            blob.value = this.value;
+            blob.contentType = contentType;
+            blob.value = value;
             return true;
         }
 
@@ -296,10 +317,10 @@ export class EditElementFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message];
+        this.messages.set([message]);
     }
 
     private clearMessages() {
-        this.messages = [];
+        this.messages.set([]);
     }
 }

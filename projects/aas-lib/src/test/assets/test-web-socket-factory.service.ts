@@ -1,18 +1,18 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { WebSocketData } from 'common';
+import { WebSocketData } from 'aas-core';
 import { Subject } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 
 export class TestWebSocketFactoryService implements Partial<WebSocketFactoryService> {
-    constructor(private readonly subject: Subject<WebSocketData>) {}
+    public constructor(private readonly subject: Subject<WebSocketData>) {}
 
     public create(): WebSocketSubject<WebSocketData> {
         return this.subject as WebSocketSubject<WebSocketData>;

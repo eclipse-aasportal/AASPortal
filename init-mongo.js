@@ -4,7 +4,7 @@ db.createUser({
     roles: [
         {
             role: 'readWrite',
-            db: 'aasportal-users'
-        }
-    ]
-})
+            db: 'aasportal-users',
+        },
+    ],
+});

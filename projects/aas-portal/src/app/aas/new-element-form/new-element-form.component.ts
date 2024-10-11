@@ -1,110 +1,116 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TemplateDescriptor, aas, getChildren, isSubmodel } from 'common';
-import { cloneDeep, head } from 'lodash-es';
-
-export interface NewElementResult {
-    index?: number;
-    element: aas.Referable;
-}
+import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
+import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { TemplateService } from 'aas-lib';
+import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'aas-core';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-new-element',
     templateUrl: './new-element-form.component.html',
-    styleUrls: ['./new-element-form.component.scss']
+    styleUrls: ['./new-element-form.component.scss'],
+    standalone: true,
+    imports: [NgbToast, FormsModule, AsyncPipe, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewElementFormComponent {
+    private readonly _messages = signal<string[]>([]);
+    private readonly _modelTypes = signal<aas.ModelType[]>([]);
     private env?: aas.Environment;
     private parent?: aas.Referable;
-    private _templates: TemplateDescriptor[] = [];
-    private _modelType?: aas.ModelType;
-    private _template?: TemplateDescriptor;
 
-    constructor(private readonly modal: NgbActiveModal) { }
-
-    public modelTypes: aas.ModelType[] = [];
-
-    public get modelType(): aas.ModelType | undefined {
-        return this._modelType;
+    public constructor(
+        private readonly modal: NgbActiveModal,
+        private readonly api: TemplateService,
+    ) {
+        effect(() => {
+            const template = this.template();
+            this.idShort = template?.idShort || '';
+        });
     }
 
-    public set modelType(value: aas.ModelType | undefined) {
-        this._modelType = value;
-        this.template = head(this.templates);
-    }
+    public readonly modelTypes = this._modelTypes.asReadonly();
 
-    public get templates(): TemplateDescriptor[] {
-        return this.modelType
-            ? this._templates.filter(item => item.template?.modelType === this.modelType)
-            : this._templates;
-    }
+    public readonly modelType = signal<aas.ModelType | undefined>(undefined);
 
-    public get template(): TemplateDescriptor | undefined {
-        return this._template;
-    }
+    public readonly templates = computed(() => [
+        { idShort: '-', template: null, modelType: '' } as TemplateDescriptor,
+        ...this.api.templates(),
+    ]);
 
-    public set template(value: TemplateDescriptor | undefined) {
-        this._template = value;
-        this.idShort = value?.template?.idShort ?? '';
-    }
+    public readonly template = signal<TemplateDescriptor | undefined>(undefined);
 
     public idShort = '';
 
-    public messages: string[] = [];
+    public readonly messages = this._messages.asReadonly();
 
     public cancel() {
         this.modal.close();
     }
 
-    public initialize(env: aas.Environment, parent: aas.Referable, templates: TemplateDescriptor[]): void {
+    public initialize(env: aas.Environment, parent: aas.Referable): void {
         this.env = env;
         this.parent = parent;
-        this.templates.push({ name: '-' }, ...templates);
 
         switch (this.parent.modelType) {
             case 'AssetAdministrationShell':
-                this.modelTypes.push('Submodel');
-                this.modelType = 'Submodel';
+                this._modelTypes.set(['Submodel']);
+                this.modelType.set('Submodel');
                 break;
             case 'Submodel':
-                this.modelTypes.push('MultiLanguageProperty', 'Property', 'SubmodelElementCollection', 'SubmodelElementList');
-                this.modelType = 'Property';
+                this._modelTypes.set([
+                    'MultiLanguageProperty',
+                    'Property',
+                    'SubmodelElementCollection',
+                    'SubmodelElementList',
+                ]);
+                this.modelType.set('Property');
                 break;
             case 'SubmodelElementCollection':
-                this.modelTypes.push('MultiLanguageProperty', 'Property', 'SubmodelElementCollection', 'SubmodelElementList');
-                this.modelType = 'SubmodelElementCollection';
+                this._modelTypes.set([
+                    'MultiLanguageProperty',
+                    'Property',
+                    'SubmodelElementCollection',
+                    'SubmodelElementList',
+                ]);
+                this.modelType.set('SubmodelElementCollection');
                 break;
             case 'SubmodelElementList':
-                this.modelTypes.push('MultiLanguageProperty', 'Property', 'SubmodelElementCollection', 'SubmodelElementList');
-                this.modelType = 'SubmodelElementList';
+                this._modelTypes.set([
+                    'MultiLanguageProperty',
+                    'Property',
+                    'SubmodelElementCollection',
+                    'SubmodelElementList',
+                ]);
+                this.modelType.set('SubmodelElementList');
         }
     }
 
     public submit(): void {
         this.clearMessages();
         if (this.validate()) {
-            this.modal.close({
-                element: this.createElement()
-            } as NewElementResult);
+            this.api.getTemplate(this.template()!.endpoint!).subscribe(template => {
+                if (isEnvironment(template)) {
+                    template.submodels[0].idShort = this.idShort;
+                } else {
+                    template.idShort = this.idShort;
+                }
+                return this.modal.close(template);
+            });
         }
     }
 
-    private createElement(): aas.Referable {
-        const element = cloneDeep(this.template!.template!);
-        element.idShort = this.idShort;
-        return element;
-    }
-
     private validate(): boolean {
-        if (!this.idShort || !this.parent || !this.env || !this.template?.template) {
+        if (!this.idShort || !this.parent || !this.env || !this.template()?.endpoint) {
             this.pushMessage(`Invalid name.`);
             return false;
         }
@@ -115,8 +121,8 @@ export class NewElementFormComponent {
             return false;
         }
 
-        if (isSubmodel(this.template.template)) {
-            const id = this.template.template.id;
+        if (this.template()?.modelType === 'Submodel') {
+            const id = this.template()?.id;
             if (this.env.submodels.some(child => child.id === id)) {
                 this.pushMessage(`A ${this.modelType} with the identification "${id}" already exists.`);
                 return false;
@@ -127,10 +133,10 @@ export class NewElementFormComponent {
     }
 
     private pushMessage(message: string): void {
-        this.messages = [message];
+        this._messages.update(values => [...values, message]);
     }
 
     private clearMessages(): void {
-        this.messages = [];
+        this._messages.set([]);
     }
 }

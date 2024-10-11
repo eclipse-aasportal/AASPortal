@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,58 +8,59 @@
 
 /** Defines the supported AAS element types. */
 export type ModelTypes =
-    'Asset' |
-    'AssetAdministrationShell' |
-    'ConceptDescription' |
-    'Submodel' |
-    'AccessPermissionRule' |
-    'AnnotatedRelationshipElement' |
-    'BasicEvent' |
-    'Blob' |
-    'Capability' |
-    'ConceptDictionary' |
-    'DataElement' |
-    'File' |
-    'Entity' |
-    'Event' |
-    'MultiLanguageProperty' |
-    'Operation' |
-    'Property' |
-    'Range' |
-    'ReferenceElement' |
-    'RelationshipElement' |
-    'SubmodelElement' |
-    'SubmodelElementCollection' |
-    'View' |
-    'GlobalReference' |
-    'FragmentReference' |
-    'Constraint' |
-    'Formula' |
-    'Qualifier';
+    | 'Asset'
+    | 'AssetAdministrationShell'
+    | 'ConceptDescription'
+    | 'Submodel'
+    | 'AccessPermissionRule'
+    | 'AnnotatedRelationshipElement'
+    | 'BasicEvent'
+    | 'Blob'
+    | 'Capability'
+    | 'ConceptDictionary'
+    | 'DataElement'
+    | 'File'
+    | 'Entity'
+    | 'Event'
+    | 'MultiLanguageProperty'
+    | 'Operation'
+    | 'Property'
+    | 'Range'
+    | 'ReferenceElement'
+    | 'RelationshipElement'
+    | 'SubmodelElement'
+    | 'SubmodelElementCollection'
+    | 'View'
+    | 'GlobalReference'
+    | 'FragmentReference'
+    | 'Constraint'
+    | 'Formula'
+    | 'Qualifier';
 
 /** Identifiable elements within an asset administration shell that are not identifiable (from AAS Metamodel). */
 export type IdentifiableElements = 'Asset' | 'AssetAdministrationShell' | 'ConceptDescription' | 'Submodel';
 
 /** Referable elements within an asset administration shell (from AAS Metamodel). */
-export type ReferableElements = IdentifiableElements |
-    'AccessPermissionRule' |
-    'AnnotatedRelationshipElement' |
-    'BasicEvent' |
-    'Blob' |
-    'Capability' |
-    'DataElement' |
-    'File' |
-    'Entity' |
-    'Event' |
-    'MultiLanguageProperty' |
-    'Operation' |
-    'Property' |
-    'Range' |
-    'View' |
-    'ReferenceElement' |
-    'RelationshipElement' |
-    'SubmodelElement' |
-    'SubmodelElementCollection';
+export type ReferableElements =
+    | IdentifiableElements
+    | 'AccessPermissionRule'
+    | 'AnnotatedRelationshipElement'
+    | 'BasicEvent'
+    | 'Blob'
+    | 'Capability'
+    | 'DataElement'
+    | 'File'
+    | 'Entity'
+    | 'Event'
+    | 'MultiLanguageProperty'
+    | 'Operation'
+    | 'Property'
+    | 'Range'
+    | 'View'
+    | 'ReferenceElement'
+    | 'RelationshipElement'
+    | 'SubmodelElement'
+    | 'SubmodelElementCollection';
 
 /** Different key value types within a key (from AAS Metamodel). */
 export type KeyElements = ReferableElements | 'GlobalReference' | 'FragmentReference';
@@ -69,58 +70,58 @@ export type KeyType = 'IRI' | 'IRDI' | 'Custom' | 'IdShort' | 'FragmentId';
 
 /**  */
 export type DataTypeDefXsd =
-    'anyURI' |
-    'base64Binary' |
-    'boolean' |
-    'byte' |
-    'date' |
-    'dateTime' |
-    'dateTimeStamp' |
-    'dayTimeDuration' |
-    'decimal' |
-    'double' |
-    'duration' |
-    'float' |
-    'gDay' |
-    'gMonth' |
-    'gMonthDay' |
-    'gYear' |
-    'gYearMonth' |
-    'hexBinary' |
-    'int' |
-    'integer' |
-    'long' |
-    'negativeInteger' |
-    'nonNegativeInteger' |
-    'nonPositiveInteger' |
-    'positiveInteger' |
-    'short' |
-    'string' |
-    'time' |
-    'unsignedByte' |
-    'unsignedInt' |
-    'unsignedLong' |
-    'unsignedShort' |
-    'yearMonthDuration';
+    | 'anyURI'
+    | 'base64Binary'
+    | 'boolean'
+    | 'byte'
+    | 'date'
+    | 'dateTime'
+    | 'dateTimeStamp'
+    | 'dayTimeDuration'
+    | 'decimal'
+    | 'double'
+    | 'duration'
+    | 'float'
+    | 'gDay'
+    | 'gMonth'
+    | 'gMonthDay'
+    | 'gYear'
+    | 'gYearMonth'
+    | 'hexBinary'
+    | 'int'
+    | 'integer'
+    | 'long'
+    | 'negativeInteger'
+    | 'nonNegativeInteger'
+    | 'nonPositiveInteger'
+    | 'positiveInteger'
+    | 'short'
+    | 'string'
+    | 'time'
+    | 'unsignedByte'
+    | 'unsignedInt'
+    | 'unsignedLong'
+    | 'unsignedShort'
+    | 'yearMonthDuration';
 
-/** Enumeration of simple data types for a IEC61360 concept description 
- * using the data specification template DataSpecificationIEC61360 */
-export type DataTypeIEC61360 =
-    'DATE' |
-    'STRING' |
-    'STRING_TRANSLATABLE' |
-    'INTEGER_MEASURE' |
-    'INTEGER_COUNT' |
-    'INTEGER_CURRENCY' |
-    'REAL_MEASURE' |
-    'REAL_COUNT' |
-    'REAL_CURRENCY' |
-    'BOOLEAN' |
-    'URL' |
-    'RATIONAL' |
-    'RATIONAL_MEASURE' |
-    'TIME' |
-    'TIMESTAMP';
+/** Enumeration of simple data types for a IEC61360 concept description
+ * using the data specification template DataSpecificationIec61360 */
+export type DataTypeIec61360 =
+    | 'DATE'
+    | 'STRING'
+    | 'STRING_TRANSLATABLE'
+    | 'INTEGER_MEASURE'
+    | 'INTEGER_COUNT'
+    | 'INTEGER_CURRENCY'
+    | 'REAL_MEASURE'
+    | 'REAL_COUNT'
+    | 'REAL_CURRENCY'
+    | 'BOOLEAN'
+    | 'URL'
+    | 'RATIONAL'
+    | 'RATIONAL_MEASURE'
+    | 'TIME'
+    | 'TIMESTAMP';
 
 /** Reference to an element by its id (from AAS Metamodel). */
 export interface Key {
@@ -195,7 +196,7 @@ export interface Qualifiable {
 /** Metainformation of a property (from AAS Metamodel). */
 export type Category = 'CONSTANT' | 'PARAMETER' | 'VARIABLE';
 
-/** An element that is referable by its idShort. This id is not globally unique. 
+/** An element that is referable by its idShort. This id is not globally unique.
  * This id is unique within the name space of the element. */
 export interface Referable {
     modelType: ModelType;
@@ -226,19 +227,18 @@ export interface Identifiable extends Referable {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataSpecificationContent {
-}
+export interface DataSpecificationContent {}
 
-/** Content of data specification template for concept descriptions for properties, 
+/** Content of data specification template for concept descriptions for properties,
  * values and value lists conformant to IEC 61360. */
-export interface DataSpecificationIEC61360Content extends DataSpecificationContent {
+export interface DataSpecificationIec61360Content extends DataSpecificationContent {
     preferredName: LangString[];
     shortName?: LangString[];
     unit?: string;
     unitId?: Reference;
     sourceOfDefinition?: string;
     symbol?: string;
-    dataType?: DataTypeIEC61360;
+    dataType?: DataTypeIec61360;
     definition?: LangString[];
     valueFormat?: string;
     valueList?: ValueList;
@@ -246,9 +246,14 @@ export interface DataSpecificationIEC61360Content extends DataSpecificationConte
     levelType?: LevelType;
 }
 
-export type LevelType = 'Max' | 'Min' | 'Nom' | 'Typ';
+export interface LevelType {
+    max: boolean;
+    min: boolean;
+    nom: boolean;
+    typ: boolean;
+}
 
-/** Content of data specification template for concept descriptions for physical units 
+/** Content of data specification template for concept descriptions for physical units
  * conformant to IEC 61360. */
 export interface DataSpecificationPhysicalUnitContent extends DataSpecificationContent {
     unitName: string;
@@ -263,16 +268,15 @@ export interface DataSpecificationPhysicalUnitContent extends DataSpecificationC
     sourceOfDefinition?: string;
     conversionFactor?: string;
     registrationAuthorityId?: string;
-    supplier?: string
+    supplier?: string;
 }
 
 export interface ValueList {
-    valueReferencePairTypes: ValueReferencePairType[]
+    valueReferencePairTypes: ValueReferencePairType[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ValueReferencePairType extends ValueObject {
-}
+export interface ValueReferencePairType extends ValueObject {}
 
 export interface EmbeddedDataSpecification {
     dataSpecification: Reference;
@@ -290,8 +294,7 @@ export interface Asset extends Identifiable, HasDataSpecification {
 export type AssetKind = 'Type' | 'Instance';
 
 /** A submodel element is an element suitable for the description and differentiation of assets. */
-export interface SubmodelElement extends Referable, HasDataSpecification, HasSemantic, Qualifiable, HasKind {
-}
+export interface SubmodelElement extends Referable, HasDataSpecification, HasSemantic, Qualifiable, HasKind {}
 
 export interface SubmodelElementCollection extends SubmodelElement {
     ordered?: boolean;
@@ -301,8 +304,7 @@ export interface SubmodelElementCollection extends SubmodelElement {
 
 /** An event element. */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Event extends SubmodelElement {
-}
+export interface Event extends SubmodelElement {}
 
 /** A basic event element. */
 export interface BasicEvent extends Event {
@@ -346,23 +348,23 @@ export interface MultiLanguageProperty extends DataElement {
 
 export type LangStringSet = {
     langString: LangString[];
-}
+};
 
-/** A File is a data element that represents an address to a file. 
+/** A File is a data element that represents an address to a file.
  * The value is an URI that can represent an absolute or relative path. */
 export interface File extends DataElement {
     mimeType: string;
     value?: string;
 }
 
-/** A BLOB is a data element that represents a file that is contained with its source code in the 
+/** A BLOB is a data element that represents a file that is contained with its source code in the
  * value attribute. */
 export interface Blob extends DataElement {
     mimeType: string;
     value?: string;
 }
 
-/** A reference element is a data element that defines a logical reference to another element 
+/** A reference element is a data element that defines a logical reference to another element
  * within the same or another AAS or a reference to an external object or entity. */
 export interface ReferenceElement extends DataElement {
     value: Reference;
@@ -374,8 +376,8 @@ export interface RelationshipElement extends SubmodelElement {
     second: Reference;
 }
 
-/** An annotated relationship element is a relationship element that can be annotated 
-  * with additional data elements.*/
+/** An annotated relationship element is a relationship element that can be annotated
+ * with additional data elements.*/
 export interface AnnotatedRelationshipElement extends RelationshipElement {
     annotation: DataElement[];
 }
@@ -383,9 +385,9 @@ export interface AnnotatedRelationshipElement extends RelationshipElement {
 /** Enumeration for denoting whether an entity is a self-managed entity or a co-managed entity. */
 export type EntityType =
     /** For co-managed entities there is no separate AAS. Co-managed entities need to be part of a self-managed entity. */
-    'CoManagedEntity' |
+    | 'CoManagedEntity'
     /** Self-Managed Entities have their own AAS but can be part of the bill of material of a composite self-managed entity. */
-    'SelfManagedEntity';
+    | 'SelfManagedEntity';
 
 /** An IdentifierKeyValuePair describes a generic identifier as key-value pair. */
 export interface IdentifierKeyValuePair {
@@ -401,11 +403,10 @@ export interface Entity extends SubmodelElement {
     statements?: SubmodelElement[];
 }
 
-/** A capability is the implementation-independent description of the potential of an 
+/** A capability is the implementation-independent description of the potential of an
  * asset to achieve a certain effect in the physical or virtual world.  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Capability extends SubmodelElement {
-}
+export interface Capability extends SubmodelElement {}
 
 /** An operation variable is a submodel element that is used as input or output variable of an operation. */
 export interface OperationVariable {
@@ -432,8 +433,8 @@ export interface View extends Referable, HasDataSpecification, HasSemantic {
     containedElements?: Reference[];
 }
 
-/** The semantics of a property or other elements that may have a semantic description is defined by 
-  * a concept description. */
+/** The semantics of a property or other elements that may have a semantic description is defined by
+ * a concept description. */
 export interface ConceptDescription extends Identifiable, HasDataSpecification {
     isCaseOf?: Reference[];
 }
@@ -453,7 +454,7 @@ export interface AssetAdministrationShell extends Identifiable, HasDataSpecifica
 
 /** Asset Administration Shell environment */
 export interface AssetAdministrationShellEnvironment {
-    assetAdministrationShells: AssetAdministrationShell[],
+    assetAdministrationShells: AssetAdministrationShell[];
     assets: Asset[];
     submodels: Submodel[];
     conceptDescriptions: ConceptDescription[];

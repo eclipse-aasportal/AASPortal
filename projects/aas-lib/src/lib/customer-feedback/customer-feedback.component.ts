@@ -1,95 +1,96 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { TranslateService } from '@ngx-translate/core';
-import { aas, getLocaleValue, getPreferredName } from 'common';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, signal } from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
-import * as CustomerFeedbackActions from './customer-feedback.actions';
-import { CustomerFeedbackFeatureState, FeedbackItem, GeneralItem } from './customer-feedback.state';
+import { aas, getLocaleValue, getPreferredName } from 'aas-core';
 import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
-import { selectCustomerFeedback } from './customer-feedback.selectors';
+import { ScoreComponent } from '../score/score.component';
+
+export interface GeneralItem {
+    name: string;
+    score: number;
+    sum: number;
+    count: number;
+    like: boolean;
+}
+
+export interface FeedbackItem {
+    stars: string[];
+    createdAt: string;
+    subject: string;
+    message: string;
+}
 
 @Component({
     selector: 'fhg-customer-feedback',
     templateUrl: './customer-feedback.component.html',
-    styleUrls: ['./customer-feedback.component.scss']
+    styleUrls: ['./customer-feedback.component.scss'],
+    standalone: true,
+    imports: [ScoreComponent, DecimalPipe, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnChanges, OnDestroy {
+export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDestroy {
     private static readonly maxStars = 5;
-    private readonly store: Store<CustomerFeedbackFeatureState>
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
 
-    constructor(
-        store: Store,
-        private readonly translate: TranslateService
-    ) {
-        this.store = store as Store<CustomerFeedbackFeatureState>;
+    public constructor(private readonly translate: TranslateService) {
+        effect(
+            () => {
+                this.init(this.submodels());
+            },
+            { allowSignalWrites: true },
+        );
     }
 
-    @Input()
-    public submodels: DocumentSubmodelPair[] | null = null;
+    public readonly submodels = input<DocumentSubmodelPair[] | null>(null);
 
-    public get name(): string {
-        let value: string | undefined;
-        if (this.submodels) {
-            const names = this.submodels.map(
-                item => getLocaleValue(
-                    getPreferredName(item.document.content!, item.submodel),
-                    this.translate.currentLang) ?? item.submodel.idShort);
-
-            if (names.length <= 2) {
-                value = names.join(', ');
-            } else {
-                value = `${names[0]}, ..., ${names[names.length - 1]} (${names.length})`;
-            }
+    public readonly name = computed(() => {
+        const submodels = this.submodels();
+        if (!submodels) {
+            return '';
         }
 
-        return value ?? '';
-    }
+        const names = submodels.map(
+            item =>
+                getLocaleValue(getPreferredName(item.document.content!, item.submodel), this.translate.currentLang) ??
+                item.submodel.idShort,
+        );
 
-    public stars = 0.0;
+        if (names.length <= 2) {
+            return names.join(', ');
+        }
 
-    public count = 0;
+        return `${names[0]}, ..., ${names[names.length - 1]} (${names.length})`;
+    });
 
-    public items: GeneralItem[] = [];
-
-    public feedbacks: FeedbackItem[] = [];
-
-    public starClassNames: string[] = [];
+    public readonly stars = signal(0.0);
+    public readonly count = signal(0);
+    public readonly items = signal<GeneralItem[]>([]);
+    public readonly feedbacks = signal<FeedbackItem[]>([]);
+    public readonly starClassNames = signal<string[]>([]);
 
     public ngOnInit(): void {
-        this.subscription.add(this.store.select(selectCustomerFeedback).pipe().subscribe(state => {
-            this.stars = state.stars;
-            this.count = state.count;
-            this.starClassNames = state.starClassNames;
-            this.items = state.items.filter(item => item.count > 0);
-            this.feedbacks = state.feedbacks;
-        }));
-
-        this.subscription.add(this.translate.onLangChange.subscribe(() => {
-            this.init();
-        }));
-    }
-
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['submodels']) {
-            this.init();
-        }
+        this.subscription.add(
+            this.translate.onLangChange.subscribe(() => {
+                this.init(this.submodels());
+            }),
+        );
     }
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    private init(): void {
+    private init(submodels: DocumentSubmodelPair[] | null): void {
         this.map.clear();
         let count = 0;
         let stars = 0.0;
@@ -97,13 +98,15 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
         const feedbacks: FeedbackItem[] = [];
         let starClassNames: string[] | undefined;
         let sumStars = 0;
-        if (this.submodels) {
-            for (const pair of this.submodels) {
+        if (submodels) {
+            for (const pair of submodels) {
                 if (pair.submodel.submodelElements) {
                     for (const feedback of pair.submodel.submodelElements.filter(
-                        item => item.modelType === 'SubmodelElementCollection')) {
+                        item => item.modelType === 'SubmodelElementCollection',
+                    )) {
                         const general = (feedback as aas.SubmodelElementCollection).value?.find(
-                            item => item.modelType === 'SubmodelElementCollection' && item.idShort === 'General');
+                            item => item.modelType === 'SubmodelElementCollection' && item.idShort === 'General',
+                        );
 
                         if (general) {
                             sumStars += this.getStars(feedback);
@@ -115,7 +118,7 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
                             stars: this.initStarClassNames(this.getStars(feedback)),
                             createdAt: this.getCreatedAt(feedback),
                             subject: pair.submodel.idShort,
-                            message: this.getMessage(feedback)
+                            message: this.getMessage(feedback),
                         });
                     }
                 }
@@ -134,13 +137,11 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
             starClassNames = this.initStarClassNames(0);
         }
 
-        this.store.dispatch(CustomerFeedbackActions.initialize({
-            stars,
-            count,
-            starClassNames,
-            items,
-            feedbacks
-        }));
+        this.stars.set(stars);
+        this.count.set(count);
+        this.starClassNames.set(starClassNames);
+        this.items.set(items.filter(item => item.count > 0));
+        this.feedbacks.set(feedbacks);
     }
 
     private buildItems(general: aas.SubmodelElementCollection, items: GeneralItem[]): void {
@@ -153,7 +154,7 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
                         score: 0,
                         sum: 0.0,
                         count: 0,
-                        like: false
+                        like: false,
                     };
 
                     this.map.set(element.idShort, item);
@@ -220,7 +221,6 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnCh
     }
 
     private findProperty(element: aas.SubmodelElementCollection, name: string): aas.Property | undefined {
-        return element.value?.find(
-            child => child.modelType === 'Property' && child.idShort === name) as aas.Property;
+        return element.value?.find(child => child.modelType === 'Property' && child.idShort === name) as aas.Property;
     }
 }

@@ -1,24 +1,22 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { cloneDeep } from "lodash-es";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
-import { DashboardPage, DashboardItem } from "../dashboard.state";
+import cloneDeep from 'lodash-es/cloneDeep';
+import { DashboardService, DashboardPage, DashboardItem } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
 
 export class DeleteItemCommand extends DashboardCommand {
-    constructor(
-        store: Store,
-        private dashboard: DashboardService,
+    public constructor(
+        dashboard: DashboardService,
         private page: DashboardPage,
-        private items: DashboardItem[]) {
-        super('Delete item', store);
+        private items: DashboardItem[],
+    ) {
+        super('Delete item', dashboard);
     }
 
     protected executing(): void {
@@ -26,6 +24,6 @@ export class DeleteItemCommand extends DashboardCommand {
         page.items = page.items.filter(item => this.items.find(i => i.id === item.id) == null);
         const grid = this.dashboard.getGrid(page);
         this.validateItems(grid);
-        this.dashboard.update(page, this.getRows(grid));
+        this.dashboard.update(page);
     }
 }

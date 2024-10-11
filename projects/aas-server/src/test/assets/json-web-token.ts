@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { JWTPayload } from 'common';
+import { JWTPayload } from 'aas-core';
 import jwt from 'jsonwebtoken';
 
 export const guestPayload: JWTPayload = { role: 'guest' };

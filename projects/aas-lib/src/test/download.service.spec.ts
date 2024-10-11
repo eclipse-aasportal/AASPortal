@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
@@ -21,17 +21,15 @@ describe('DownloadService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [],
             imports: [
-                HttpClientTestingModule,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader
-                    }
-                })
-
-            ]
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
+            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
         });
 
         service = TestBed.inject(DownloadService);
@@ -48,12 +46,11 @@ describe('DownloadService', () => {
     });
 
     describe('uploadDocuments', function () {
-        it('POST: /api/v1/containers/:url/documents/:id', function () {
-            const file = jasmine.createSpyObj<File>(
-                ['arrayBuffer', 'slice', 'stream', 'text']);
+        it('POST: /api/v1/containers/:name/documents/:id', function () {
+            const file = jasmine.createSpyObj<File>(['arrayBuffer', 'slice', 'stream', 'text']);
 
-            service.uploadDocuments('file:///samples', file).subscribe();
-            const req = httpTestingController.expectOne('/api/v1/containers/ZmlsZTovLy9zYW1wbGVz/documents');
+            service.uploadDocuments('Samples', file).subscribe();
+            const req = httpTestingController.expectOne('/api/v1/containers/U2FtcGxlcw/packages');
             expect(req.request.method).toEqual('POST');
             expect(req.request.body).toBeDefined();
         });
@@ -63,10 +60,11 @@ describe('DownloadService', () => {
         it('downloads an AASX package file', function () {
             const spy = spyOn(httpClient, 'get').and.returnValue(EMPTY);
             service.downloadDocument(
-                'http://localhost:1234',
+                'Samples',
                 'https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237',
-                'Test.aasx'
+                'Test.aasx',
             );
+
             expect(spy).toHaveBeenCalled();
         });
     });

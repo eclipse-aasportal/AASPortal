@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -17,7 +17,7 @@ export class AuthInterceptor implements HttpInterceptor {
         const token = localStorage.getItem('.Token');
         if (token) {
             const cloned = req.clone({
-                headers: req.headers.set('Authorization', 'Bearer ' + token)
+                headers: req.headers.set('Authorization', 'Bearer ' + token),
             });
 
             return next.handle(cloned);

@@ -1,31 +1,26 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Injectable, TemplateRef } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, TemplateRef, signal } from '@angular/core';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ToolbarService {
-    private readonly toolbarTemplate$ = new BehaviorSubject<TemplateRef<unknown> | null>(null);
+    private _toolbarTemplate = signal<TemplateRef<unknown> | null>(null);
 
-    constructor() {
-        this.toolbarTemplate = this.toolbarTemplate$.asObservable();
+    public readonly toolbarTemplate = this._toolbarTemplate.asReadonly();
+
+    public set(value: TemplateRef<unknown>): Promise<void> {
+        return Promise.resolve().then(() => this._toolbarTemplate.set(value));
     }
 
-    public readonly toolbarTemplate: Observable<TemplateRef<unknown> | null>;
-
-    public set(value: TemplateRef<unknown>): void {
-        Promise.resolve().then(() => this.toolbarTemplate$.next(value));
-    }
-
-    public clear(): void {
-        Promise.resolve().then(() => this.toolbarTemplate$.next(null));
+    public clear(): Promise<void> {
+        return Promise.resolve().then(() => this._toolbarTemplate.set(null));
     }
 }

@@ -1,19 +1,14 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Store } from '@ngrx/store';
+import { Injectable, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { trim } from 'lodash-es';
-import { Subscription } from 'rxjs';
-import { normalize } from '../convert';
-import * as AASTreeActions from './aas-tree.actions';
-import * as AASTreeSelectors from './aas-tree.selectors';
-import { AASTreeRow, SearchTerm, SearchQuery, Operator, AASTreeFeatureState } from './aas-tree.state';
+import trim from 'lodash-es/trim';
 import {
     aas,
     AASAbbreviation,
@@ -21,83 +16,79 @@ import {
     convertToString,
     getModelTypeFromAbbreviation,
     parseDate,
-    parseNumber
-} from 'common';
-import { Injectable } from '@angular/core';
+    parseNumber,
+} from 'aas-core';
+
+import { normalize } from '../convert';
+import { AASTreeRow } from './aas-tree-row';
+import { AASTreeService, Operator, SearchQuery, SearchTerm } from './aas-tree.service';
 
 @Injectable()
 export class AASTreeSearch {
-    private store: Store<AASTreeFeatureState>
     private readonly loop = true;
-    private subscription = new Subscription();
     private terms: SearchTerm[] = [];
-    private rows: AASTreeRow[] = [];
-    private index = -1;
 
-    constructor(store: Store, private translate: TranslateService) {
-        this.store = store as Store<AASTreeFeatureState>
+    public constructor(
+        private readonly store: AASTreeService,
+        private readonly translate: TranslateService,
+    ) {}
 
-        this.subscription.add(this.store.select(AASTreeSelectors.selectRows).pipe()
-            .subscribe(rows => {
-                this.rows = rows;
-            }));
-
-        this.subscription.add(this.store.select(AASTreeSelectors.selectTerms).pipe()
-            .subscribe(terms => {
-                this.terms = terms;
-                this.findFirst();
-            }));
-
-        this.subscription.add(this.store.select(AASTreeSelectors.selectMatchIndex).pipe()
-            .subscribe((value) => this.index = value));
+    public find(referable: aas.Referable): void {
+        const rows = untracked(this.store.state).rows;
+        const index = rows.findIndex(row => row.element === referable);
+        if (index >= 0) {
+            this.store.setMatchIndex(index);
+        }
     }
 
-    public destroy(): void {
-        this.subscription.unsubscribe();
-    }
+    public start(value: string): void {
+        if (!value) return;
 
-    public start(value: string) {
-        if (value) {
-            const terms: SearchTerm[] = [];
-            for (const expression of this.splitOr(value)) {
-                const term: SearchTerm = {};
-                if (expression.length >= 3) {
-                    if (expression.startsWith('#')) {
-                        const query = this.parseExpression(expression);
-                        if (query) {
-                            term.query = query;
-                        }
-                    } else {
-                        term.text = expression.toLocaleLowerCase(this.translate.currentLang);
+        const terms: SearchTerm[] = [];
+        for (const expression of this.splitOr(value)) {
+            const term: SearchTerm = {};
+            if (expression.length >= 3) {
+                if (expression.startsWith('#')) {
+                    const query = this.parseExpression(expression);
+                    if (query) {
+                        term.query = query;
                     }
-                }
-
-                if (term.text || term.query) {
-                    terms.push(term);
+                } else {
+                    term.text = expression.toLocaleLowerCase(this.translate.currentLang);
                 }
             }
 
-            if (terms.length > 0) {
-                this.store.dispatch(AASTreeActions.setSearchText({ terms }));
-            } else {
-                this.store.dispatch(AASTreeActions.setMatchIndex({ index: -1 }));
+            if (term.text || term.query) {
+                terms.push(term);
             }
+        }
+
+        if (terms.length > 0) {
+            this.terms = terms;
+            this.findFirst();
+        } else {
+            this.store.setMatchIndex(-1);
         }
     }
 
     public findNext(): boolean {
         let completed = false;
-        if (this.rows.length > 0 && (this.terms.length > 0)) {
+        const state = untracked(this.store.state);
+        if (state.rows.length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = this.index < 0 ? 0 : this.index + 1;
+            let i = state.matchIndex < 0 ? 0 : state.matchIndex + 1;
+            if (i >= state.rows.length) {
+                i = 0;
+            }
+
             const start = i;
             while (this.loop) {
-                if (this.match(this.rows[i])) {
+                if (this.match(state.rows[i])) {
                     match = true;
                     break;
                 }
 
-                if (++i >= this.rows.length) {
+                if (++i >= state.rows.length) {
                     i = 0;
                     completed = true;
                 }
@@ -107,7 +98,7 @@ export class AASTreeSearch {
                 }
             }
 
-            this.store.dispatch(AASTreeActions.setMatchIndex({ index: match ? i : -1 }));
+            this.store.setMatchIndex(match ? i : -1);
         }
 
         return completed;
@@ -115,18 +106,19 @@ export class AASTreeSearch {
 
     public findPrevious(): boolean {
         let completed = false;
-        if (this.rows.length > 0 && (this.terms.length > 0)) {
+        const state = untracked(this.store.state);
+        if (state.rows.length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = this.index <= 0 ? this.rows.length - 1 : this.index - 1;
+            let i = state.matchIndex <= 0 ? state.rows.length - 1 : state.matchIndex - 1;
             const start = i;
             while (this.loop) {
-                if (this.match(this.rows[i])) {
+                if (this.match(state.rows[i])) {
                     match = true;
                     break;
                 }
 
                 if (--i <= 0) {
-                    i = this.rows.length - 1;
+                    i = state.rows.length - 1;
                     completed = true;
                 }
 
@@ -135,7 +127,7 @@ export class AASTreeSearch {
                 }
             }
 
-            this.store.dispatch(AASTreeActions.setMatchIndex({ index: match ? i : -1 }));
+            this.store.setMatchIndex(match ? i : -1);
         }
 
         return completed;
@@ -146,17 +138,18 @@ export class AASTreeSearch {
     }
 
     private findFirst(): void {
-        if (this.rows.length > 0 && (this.terms.length > 0)) {
+        const state = untracked(this.store.state);
+        if (state.rows.length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = this.index < 0 ? 0 : this.index;
+            let i = state.matchIndex < 0 ? 0 : state.matchIndex;
             const start = i;
             while (this.loop) {
-                if (this.match(this.rows[i])) {
+                if (this.match(state.rows[i])) {
                     match = true;
                     break;
                 }
 
-                if (++i >= this.rows.length) {
+                if (++i >= state.rows.length) {
                     i = 0;
                 }
 
@@ -165,7 +158,7 @@ export class AASTreeSearch {
                 }
             }
 
-            this.store.dispatch(AASTreeActions.setMatchIndex({ index: match ? i : -1 }));
+            this.store.setMatchIndex(match ? i : -1);
         }
     }
 
@@ -202,7 +195,7 @@ export class AASTreeSearch {
         return query;
     }
 
-    private parseOperator(expression: string): { index: number, operator: Operator } | undefined {
+    private parseOperator(expression: string): { index: number; operator: Operator } | undefined {
         let index = expression.indexOf('<=');
         if (index > 0) {
             return { index: index, operator: '<=' };
@@ -233,7 +226,7 @@ export class AASTreeSearch {
             return { index, operator: '<' };
         }
 
-        return undefined
+        return undefined;
     }
 
     private fromString(s: string): string | boolean {
@@ -268,10 +261,9 @@ export class AASTreeSearch {
                     }
                 }
             } else if (term.text) {
-                match = row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
-                    row.typeInfo.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
-                    (typeof row.value === 'string' &&
-                        row.value.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0);
+                match =
+                    row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
+                    this.contains(row.element, term.text);
             }
 
             if (match) {
@@ -280,6 +272,33 @@ export class AASTreeSearch {
         }
 
         return match;
+    }
+
+    private contains(referable: aas.Referable, text: string): boolean {
+        const stack = [referable as unknown as { [key: string]: unknown }];
+        while (stack.length > 0) {
+            const obj = stack.pop();
+            if (!obj) {
+                break;
+            }
+
+            for (const name in obj) {
+                if (name.indexOf(text) >= 0) {
+                    return true;
+                }
+
+                const value = obj[name];
+                if (typeof value === 'string') {
+                    if (value.indexOf(text) >= 0) {
+                        return true;
+                    }
+                } else if (typeof value === 'object') {
+                    stack.push(value as { [key: string]: unknown });
+                }
+            }
+        }
+
+        return false;
     }
 
     private containsString(a: string, b?: string): boolean {
@@ -300,11 +319,17 @@ export class AASTreeSearch {
             }
             case 'ReferenceElement': {
                 const referenceElement = referable as aas.ReferenceElement;
+                if (!referenceElement.value) {
+                    return false;
+                }
+
                 return referenceElement.value.keys.some(key => this.containsString(key.value, value as string));
             }
             case 'MultiLanguageProperty': {
                 const langString = (referable as aas.MultiLanguageProperty).value;
-                return langString ? langString.some(item => item ? this.containsString(item.text, value as string) : false) : false;
+                return langString
+                    ? langString.some(item => (item ? this.containsString(item.text, value as string) : false))
+                    : false;
             }
             default:
                 return false;
@@ -314,7 +339,7 @@ export class AASTreeSearch {
     private matchProperty(property: aas.Property, b: string | boolean, operator: Operator = '='): boolean {
         const a = convertFromString(property.value, property.valueType);
         if (typeof a === 'boolean') {
-            return (typeof b === 'boolean') && a === b;
+            return typeof b === 'boolean' && a === b;
         } else if (typeof b === 'boolean') {
             return false;
         }
@@ -337,7 +362,7 @@ export class AASTreeSearch {
                     return typeof min === 'number' && typeof max === 'number' && a >= min && a <= max;
                 } else {
                     const d = isDate
-                        ? parseDate(b, this.translate.currentLang)?.getTime() ?? 0
+                        ? (parseDate(b, this.translate.currentLang)?.getTime() ?? 0)
                         : parseNumber(b, this.translate.currentLang);
 
                     if (typeof d !== 'number') {
@@ -364,8 +389,10 @@ export class AASTreeSearch {
             return false;
         }
 
-        return this.containsString(convertToString(a), b) ||
-            this.containsString(convertToString(a, this.translate.currentLang), b);
+        return (
+            this.containsString(convertToString(a), b) ||
+            this.containsString(convertToString(a, this.translate.currentLang), b)
+        );
     }
 
     private isDate(valueType: aas.DataTypeDefXsd): boolean {

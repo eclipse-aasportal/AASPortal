@@ -1,22 +1,22 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { aas, DefaultType, LiveRequest } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { aas, LiveRequest } from 'common';
-import { AasxServer } from '../../../app/packages/aasx-server/aasx-server.js';
+import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
 import env from '../../assets/aas-environment.js';
-import { createSpyObj, DoneFn } from '../../utils.js';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { createSpyObj, DoneFn } from 'fhg-jest'
 
 describe('HttpSubscription', function () {
-    let aasxServer: jest.Mocked<AasxServer>;
+    let aasxServer: jest.Mocked<AASApiClient>;
     let logger: jest.Mocked<Logger>;
     let client: jest.Mocked<SocketClient>;
     let subscription: HttpSubscription;
@@ -24,29 +24,37 @@ describe('HttpSubscription', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        aasxServer = createSpyObj<AasxServer>(
-            ['getShellsAsync', 'commitAsync', 'openFileAsync', 'readValueAsync', 'resolveNodeId']);
+        aasxServer = createSpyObj<AASApiClient>([
+            'getShellsAsync',
+            'commitAsync',
+            'openFileAsync',
+            'readValueAsync',
+            'resolveNodeId',
+        ]);
 
         const reference: aas.Reference = {
             type: 'ModelReference',
-            keys: [{
-                type: 'Submodel',
-                value: 'http://i40.customer.com/type/1/1/F13E8576F6488342'
-            },
-            {
-                type: 'Property',
-                value: 'GLN',
-            }]
+            keys: [
+                {
+                    type: 'Submodel',
+                    value: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                },
+                {
+                    type: 'Property',
+                    value: 'GLN',
+                },
+            ],
         };
 
         const request: LiveRequest = {
-            type: 'file',
-            url: 'file://doc',
+            endpoint: 'FileSystem',
             id: 'http://customer.com/aas/9175_7013_7091_9168',
-            nodes: [{
-                nodeId: JSON.stringify(reference),
-                valueType: 'xs:integer'
-            }],
+            nodes: [
+                {
+                    nodeId: JSON.stringify(reference),
+                    valueType: 'xs:integer',
+                },
+            ],
         };
 
         subscription = new HttpSubscription(logger, aasxServer, client, request, env);
@@ -56,14 +64,16 @@ describe('HttpSubscription', function () {
         expect(subscription).toBeTruthy();
     });
 
-    it('open/close subscription', function (done: DoneFn) {
+    it('open/close subscription', (done: DoneFn) => {
         jest.useFakeTimers();
-        aasxServer.readValueAsync.mockReturnValue(new Promise<any>(result => {
-            expect(true).toBeTruthy();
-            result(42);
-            subscription.close();            
-            done();
-        }));
+        aasxServer.readValueAsync.mockReturnValue(
+            new Promise<DefaultType>(result => {
+                expect(true).toBeTruthy();
+                result(42);
+                subscription.close();
+                done();
+            }),
+        );
 
         subscription.open();
     });

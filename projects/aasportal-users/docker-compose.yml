@@ -1,0 +1,16 @@
+services:
+  mongo:
+    image: mongo
+    container_name: aasportal-users
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodata:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=aasportal-users
+
+volumes:
+  mongodata:

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { WebSocket } from 'ws';
 import { SocketClient } from '../../app/live/socket-client.js';
-import { createSpyObj } from '../utils.js';
+import { createSpyObj } from 'fhg-jest';
 import { SocketSubscription } from '../../app/live/socket-subscription.js';
 
 describe('SocketClient', function () {
@@ -32,6 +32,6 @@ describe('SocketClient', function () {
         expect(client.has('test')).toBeTruthy();
 
         client.notify({ type: 'test', data: 42 });
-        expect(ws.send).toHaveBeenCalled(); 
+        expect(ws.send).toHaveBeenCalled();
     });
 });

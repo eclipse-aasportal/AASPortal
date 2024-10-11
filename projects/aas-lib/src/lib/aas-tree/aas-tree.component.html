@@ -1,73 +1,111 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
+@if (document()?.content) {
 <table class="table table-sm table-hover table-striped align-middle">
     <thead>
         <tr>
             <th class="aas-tree-th-checkbox">
                 <input type="checkbox" class="form-check-input" (change)="toggleSelections()"
-                    [disabled]="state === 'online'" [checked]="someSelected | async">
+                    [disabled]="state() === 'online'" [indeterminate]="someSelected()" [checked]="everySelected()">
             </th>
             <th>
+                @if (expanded()) {
                 <a class="link-secondary" href="javascript:void(0);" (click)="collapse()">
                     <i class="bi bi-dash-square-dotted"></i>
                 </a>
+            } @else {
+                <a class="link-secondary" href="javascript:void(0);" (click)="expand()">
+                    <i class="bi bi-plus-square-dotted"></i>
+                </a>
+            }
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let node of nodes | async" [ngClass]="visualState(node)" [id]="node.id">
+        @for (node of nodes(); track node.id) {
+        <tr [ngClass]="visualState(node)" [id]="node.id">
             <td>
-                <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)" [checked]="node.selected"
-                    [disabled]="state === 'online'" />
+                <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)"
+                    [checked]="node.selected" [disabled]="state() === 'online'" />
             </td>
-            <td [colSpan]="node.isLeaf ? 1 : 2">
+            @if (node.isLeaf) {
+                <td>
+                    <div class="d-flex" style="overflow-x: hidden">
+                        <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
+                        <div class="wh-4"></div>
+                        <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
+                            {{node.abbreviation}}</div>
+                        <div class="ms-1 flex-grow-1 text-nowrap">
+                            <b>{{node.name}}</b>
+                            <span class="text-secondary">&nbsp;[</span>
+                            <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
+                            <span class="text-secondary">]</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-end">
+                    @if (node.canOpen) {
+                    <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.value}}</a>
+                    } @else if (node.element.modelType === 'RelationshipElement') {
+                    <div class="d-flex flex-column ts-x-small me-2">
+                        <a href="javascript:void(0);" class="text-nowrap"
+                            (click)="openReference(node.relationship?.first)">{{toString(node.relationship?.first)}}</a>
+                        <a href="javascript:void(0);" class="text-nowrap"
+                            (click)="openReference(node.relationship?.second)">{{toString(node.relationship?.second)}}</a>
+                    </div>
+                    } @else {
+                    <div class="text-nowrap me-2">{{node.value}}</div>
+                    }
+                </td>
+            } @else {
+            <td [colSpan]="2">
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
-                    <a *ngIf="!node.isLeaf && !node.expanded && node.hasChildren" (click)="expand(node)"
-                        href="javascript:void(0);">
-                        <div class="text-dark">
-                            <i class="bi bi-plus-square"></i>
-                        </div>
-                    </a>
-                    <div *ngIf="!node.isLeaf && !node.expanded && !node.hasChildren" class="text-muted">
-                        <i class="bi bi-square"></i>
-                    </div>
-                    <a *ngIf="!node.isLeaf && node.expanded" href="javascript:void(0);" (click)="collapse(node)">
+                    @if (node.expanded) {
+                    <a href="javascript:void(0);" (click)="collapse(node)">
                         <div class="text-dark">
                             <i class="bi bi-dash-square"></i>
                         </div>
                     </a>
-                    <div *ngIf="node.isLeaf" class="wh-4"></div>
+                    }@else {
+                    @if (node.hasChildren) {
+                    <a (click)="expand(node)" href="javascript:void(0);">
+                        <div class="text-dark">
+                            <i class="bi bi-plus-square"></i>
+                        </div>
+                    </a>
+                    }@else {
+                    <div class="text-muted">
+                        <i class="bi bi-square"></i>
+                    </div>
+                    }
+                    }
                     <div class="ms-1 w-9 rounded bg-info text-white ts-small text-center">
                         {{node.abbreviation}}</div>
-                    <div *ngIf="node.hasSemantic" class="ms-1 flex-grow-1 text-nowrap">
+                    <div class="ms-1 flex-grow-1 text-nowrap">
+                        @if (node.canOpen) {
                         <a (click)="open(node)" href="javascript:void(0);">{{node.name}}</a>
-                        <span class="text-secondary">&nbsp;[</span>
-                        <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
-                        <span class="text-secondary">]</span>
-                    </div>
-                    <div *ngIf="!node.hasSemantic" class="ms-1 flex-grow-1 text-nowrap">
+                        }@else {
                         <b>{{node.name}}</b>
+                        }
                         <span class="text-secondary">&nbsp;[</span>
                         <span class="text-secondary text-nowrap">{{node.typeInfo}}</span>
                         <span class="text-secondary">]</span>
                     </div>
                 </div>
             </td>
-            <td *ngIf="node.isLeaf" align="right">
-                <div *ngIf="node.displayType === 'text'" class="text-nowrap me-2">{{getValue(node)}}</div>
-                <input *ngIf="node.displayType === 'boolean'" class="form-check-input" [readonly]="true"
-                    [checked]="getValue(node)">
-                <a *ngIf="node.displayType === 'url'" href="javascript:void(0);" class="text-nowrap me-2"
-                    (click)="open(node)">{{node.value}}</a>
-            </td>
+            }
         </tr>
+        }
     </tbody>
 </table>
+} @else {
+<div class="alert alert-info text-center mt-2" role="alert">{{message()}}</div>
+}

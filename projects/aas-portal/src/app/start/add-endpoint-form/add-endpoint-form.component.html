@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -12,27 +12,30 @@
             <i class="bi bi-plus-circle"></i>
             <span class="ms-2" translate>CAPTION_ADD_ENDPOINT</span>
         </h4>
-        <button type="button" class="btn-close" (click)="cancel()"></button>
+        <button type="button" class="btn-close" (click)="cancel()"> </button>
     </div>
     <div class="modal-body">
-        <ngb-toast *ngFor="let message of messages" [autohide]="false" class="bg-danger w-100 mb-3">
+        @for (message of messages(); track message) {
+        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
             <div class="d-flex">
                 <div class="flex-grow-1">{{ message }}</div>
             </div>
         </ngb-toast>
-        <label class="form-lable" for="input-endpoint-name" translate>LABEL_REGISTRY_NAME</label>
+        }
+        <label class="form-lable" for="input-endpoint-name" translate>LABEL_ENDPOINT_NAME</label>
         <input id="input-endpoint-name" type="text" class="form-control mb-3"
             placeholder="{{'PLACEHOLDER_ENDPOINT_NAME' | translate}}" [(ngModel)]="name" name="name"
             (input)="inputValue()">
-        <label class="form-lable" for="div-endpoint-url" translate>LABEL_REGISTRY_URL</label>
+        <label class="form-lable" for="div-endpoint-url" translate>LABEL_ENDPOINT_URL</label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
-            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item.name}}</button>
+            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item().name}}</button>
             <div class="dropdown-menu" ngbDropdownMenu>
-                <button type="button" *ngFor="let item of items" (click)="setItem(item)"
-                    ngbDropdownItem>{{item.name}}</button>
+                @for (item of items(); track item) {
+                <button type="button" (click)="setItem(item)" ngbDropdownItem>{{item.name}}</button>
+                }
             </div>
             <input id="input-endpoint-url" type="text" class="form-control"
-                placeholder="{{'PLACEHOLDER_ENDPOINT_URL' | translate}}" [(ngModel)]="item.value" name="value"
+                placeholder="{{'PLACEHOLDER_ENDPOINT_URL' | translate}}" [(ngModel)]="item().value" name="value"
                 (input)="inputValue()">
         </div>
     </div>

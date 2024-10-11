@@ -1,0 +1,21 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="modal-header">
+    <h4 class="modal-title text-info">
+        <i class="bi bi-image"></i>
+        <span class="ms-2">{{name()}}</span>
+    </h4>
+    <button type="button" class="btn-close" (click)="close()"> </button>
+</div>
+<div class="modal-body">
+    <fhg-img classname="img-fluid" [src]="image()" [alt]="name()" [width]="600" [height]="400"/>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()" translate>CMD_CLOSE</button>
+</div>

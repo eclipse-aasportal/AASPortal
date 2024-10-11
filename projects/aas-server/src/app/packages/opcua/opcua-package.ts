@@ -1,35 +1,31 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { AttributeIds, ClientSession, DataType, DataValue, NodeId, VariantArrayType } from 'node-opcua';
-import { NodeCrawler } from 'node-opcua-client-crawler';
+import { NodeCrawler, NodeCrawlerClientSession } from 'node-opcua-client-crawler';
 import { OpaqueStructure } from 'node-opcua-extension-object';
 import { Readable } from 'stream';
-import { OpcuaServer } from './opcua-server.js';
+import { OpcuaClient } from './opcua-client.js';
 import { OPCUAComponent, OPCUAProperty, readDataTypeAsync } from './opcua.js';
 import { AASPackage } from '../aas-package.js';
 import { Logger } from '../../logging/logger.js';
 import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
-import { AASDocument, aas } from 'common';
+import { AASDocument, aas } from 'aas-core';
 import { OpcuaReader } from './opcua-reader.js';
 
 export class OpcuaPackage extends AASPackage {
-    private readonly server: OpcuaServer;
+    private readonly server: OpcuaClient;
     private readonly nodeId: string;
     private readonly dataTypes: OpcuaDataTypeDictionary;
 
-    constructor(
-        logger: Logger,
-        server: OpcuaServer,
-        nodeId: string,
-        dataTypes?: OpcuaDataTypeDictionary) {
+    public constructor(logger: Logger, server: OpcuaClient, nodeId: string, dataTypes?: OpcuaDataTypeDictionary) {
         super(logger);
 
         this.server = server;
@@ -39,34 +35,39 @@ export class OpcuaPackage extends AASPackage {
 
     public async createDocumentAsync(): Promise<AASDocument> {
         const component = await this.crawlAsync();
-        const reader = new OpcuaReader(this.logger, component, this.dataTypes);
-        const environment = await reader.readEnvironment();
-
         if (component.typeDefinition !== 'AASAssetAdministrationShellType') {
             throw new Error(`${this.nodeId}: ${component.typeDefinition} is an unexpected type definition.`);
         }
 
+        const content = await new OpcuaReader(this.logger, component, this.dataTypes).readEnvironment();
         const document: AASDocument = {
             id: this.getIdentifier(component),
-            container: this.server.url.href,
-            endpoint: { type: 'opc', address: this.nodeId },
+            endpoint: this.server.name,
+            address: this.nodeId,
             idShort: component.browseName,
-            content: environment,
-            timeStamp: Date.now(),
+            assetId: 'ToDo...',
             readonly: this.server.readOnly,
             onlineReady: this.server.onlineReady,
-            modified: false
+            content,
+            timestamp: Date.now(),
+            crc32: this.computeCrc32(content),
         };
 
         return document;
     }
 
-    public getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+    public override async getEnvironmentAsync(): Promise<aas.Environment> {
+        const component = await this.crawlAsync();
+        const reader = new OpcuaReader(this.logger, component, this.dataTypes);
+        return await reader.readEnvironment();
+    }
+
+    public override setEnvironmentAsync(): Promise<string[]> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public commitDocumentAsync(): Promise<string[]> {
-        throw new Error('Method not implemented.');
+    public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public async openReadStreamAsync(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
@@ -76,7 +77,7 @@ export class OpcuaPackage extends AASPackage {
         }
 
         const clientFile = new ClientFile(session, file.nodeId);
-        await clientFile.open(OpenFileMode.Read)
+        await clientFile.open(OpenFileMode.Read);
         try {
             const buffer = await clientFile.read(0);
             return Readable.from(buffer);
@@ -86,8 +87,8 @@ export class OpcuaPackage extends AASPackage {
     }
 
     private async crawlAsync(): Promise<OPCUAComponent> {
-        const crawler = new NodeCrawler(this.server.getSession());
-        const component = await crawler.read(NodeId.resolveNodeId(this.nodeId)) as OPCUAComponent;
+        const crawler = new NodeCrawler(this.server.getSession() as unknown as NodeCrawlerClientSession);
+        const component = (await crawler.read(NodeId.resolveNodeId(this.nodeId))) as OPCUAComponent;
         await this.resolveAsync(component);
         return component;
     }
@@ -125,11 +126,10 @@ export class OpcuaPackage extends AASPackage {
     }
 
     private async readDataValueAsync(session: ClientSession, property: OPCUAProperty): Promise<DataValue> {
-        return await session.read(
-            {
-                nodeId: property.nodeId,
-                attributeId: AttributeIds.Value
-            });
+        return await session.read({
+            nodeId: property.nodeId,
+            attributeId: AttributeIds.Value,
+        });
     }
 
     private readOpaqueStructure(dataValue: DataValue): OpaqueStructure[] | undefined {

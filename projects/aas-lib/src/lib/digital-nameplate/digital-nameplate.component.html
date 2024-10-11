@@ -1,33 +1,35 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
-<div *ngFor="let nameplate of nameplates" class="container border rounded">
+@for (nameplate of nameplates(); track nameplate) {
+  <div class="container border rounded">
     <div class="row">
-        <div class="col">
-            <span>{{nameplate.serialNumber}}</span>
-        </div>
-        <div class="col">
-            <span>{{nameplate.productCountryOfOrigin}}</span><span>-</span><span>{{nameplate.yearOfConstruction}}</span>
-        </div>
+      <div class="col">
+        <span>{{nameplate.serialNumber}}</span>
+      </div>
+      <div class="col">
+        <span>{{nameplate.productCountryOfOrigin}}</span><span>-</span><span>{{nameplate.yearOfConstruction}}</span>
+      </div>
     </div>
     <div class="row">
-        <div class="col">
-            <span>{{nameplate.manufacturerName}}</span>
-        </div>
+      <div class="col">
+        <span>{{nameplate.manufacturerName}}</span>
+      </div>
     </div>
     <div class="row">
-        <div class="col">
-            <span>{{nameplate.street}}</span>
-        </div>
+      <div class="col">
+        <span>{{nameplate.street}}</span>
+      </div>
     </div>
     <div class="row">
-        <div class="col">
-            <span>{{nameplate.countryCode}}</span><span>-</span><span>{{nameplate.zip}}</span><span>&nbsp;</span><span>{{nameplate.cityTown}}</span>
-        </div>
+      <div class="col">
+        <span>{{nameplate.countryCode}}</span><span>-</span><span>{{nameplate.zip}}</span><span>&nbsp;</span><span>{{nameplate.cityTown}}</span>
+      </div>
     </div>
-</div>
+  </div>
+}

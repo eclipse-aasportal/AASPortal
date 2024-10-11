@@ -1,26 +1,24 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Store } from "@ngrx/store";
-import { cloneDeep } from "lodash-es";
-import { DashboardChart, DashboardPage } from "../dashboard.state";
-import { DashboardService } from "../dashboard.service";
-import { DashboardCommand } from "./dashboard-command";
+import cloneDeep from 'lodash-es/cloneDeep';
+import { DashboardChart, DashboardPage, DashboardService } from '../dashboard.service';
+import { DashboardCommand } from './dashboard-command';
 
 export class SetMinMaxCommand extends DashboardCommand {
-    constructor(
-        store: Store,
-        private dashboard: DashboardService,
+    public constructor(
+        dashboard: DashboardService,
         private page: DashboardPage,
         private chart: DashboardChart,
         private min?: number,
-        private max?: number) {
-        super('Set min/max', store);
+        private max?: number,
+    ) {
+        super('Set min/max', dashboard);
     }
 
     protected executing(): void {

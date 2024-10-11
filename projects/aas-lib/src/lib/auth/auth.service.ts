@@ -1,16 +1,16 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, from, last, map, mergeMap, Observable, of, throwError } from 'rxjs';
-import jwtDecode from 'jwt-decode';
+import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 import {
     ApplicationError,
     Credentials,
@@ -19,8 +19,8 @@ import {
     UserProfile,
     UserRole,
     JWTPayload,
-    toBoolean
-} from 'common';
+    toBoolean,
+} from 'aas-core';
 
 import { NotifyService } from '../notify/notify.service';
 import { ERRORS } from '../types/errors';
@@ -31,63 +31,58 @@ import { AuthApiService } from './auth-api.service';
 import { WindowService } from '../window.service';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class AuthService {
-    private readonly payload$ = new BehaviorSubject<JWTPayload>({ role: 'guest' });
+    private readonly _payload = signal<JWTPayload>({ role: 'guest' });
     private readonly ready$ = new BehaviorSubject<boolean>(false);
-    private readonly cookies = new Map<string, string>();
 
-    constructor(
+    public constructor(
         private modal: NgbModal,
         private translate: TranslateService,
         private api: AuthApiService,
         private notify: NotifyService,
-        private window: WindowService
+        private window: WindowService,
     ) {
-        this.payload = this.payload$.asObservable();
-        this.ready = this.ready$.asObservable();
-
         const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
         const token = this.window.getLocalStorageItem('.Token');
         if (stayLoggedIn && token && this.isValid(token)) {
-            this.nextPayload(token);
-            this.ready$.next(true);
-            return;
+            const payload = jwtDecode(token) as JWTPayload;
+            if (payload && payload.sub) {
+                this.ensureLoggedInAsUser(token, payload.sub);
+                return;
+            }
         }
 
         this.loginAsGuest().subscribe({
-            error: (error) => notify.error(error),
-            complete: () => this.ready$.next(true)
+            error: error => {
+                this.notify.error(error);
+                this.ready$.next(true);
+            },
+            complete: () => this.ready$.next(true),
         });
     }
 
     /** Signals that an authentication was performed. */
-    public readonly ready: Observable<boolean>;
+    public readonly ready = this.ready$.asObservable();
 
     /** The e-mail of the current user. */
-    public get userId(): string | undefined {
-        return this.payload$.getValue()?.sub;
-    }
+    public readonly userId = computed(() => this._payload()?.sub);
 
     /** The name or alias of the current user. */
-    public get name(): string | undefined {
-        return this.payload$.getValue()?.name ?? this.translate.instant('GUEST_USER');
-    }
+    public readonly name = computed(() => this._payload()?.name ?? (this.translate.instant('GUEST_USER') as string));
 
     /** The current user role. */
-    public get role(): UserRole {
-        return this.payload$.getValue()?.role ?? 'guest';
-    }
+    public readonly role = computed(() => this._payload()?.role ?? 'guest');
 
     /** Indicates whether the current user is authenticated. */
-    public get authenticated(): boolean {
-        const payload = this.payload$.getValue();
+    public readonly authenticated = computed(() => {
+        const payload = this._payload();
         return payload.sub != null && (payload.role === 'editor' || payload.role === 'admin');
-    }
+    });
 
     /** The current active JSON web token. */
-    public readonly payload: Observable<JWTPayload>;
+    public readonly payload = this._payload.asReadonly();
 
     /**
      * User login.
@@ -103,7 +98,7 @@ export class AuthService {
                 const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
                 const token = this.window.getLocalStorageItem('.Token');
                 if (stayLoggedIn && token) {
-                    modalRef.componentInstance.stayLoggedIn = stayLoggedIn;
+                    modalRef.componentInstance.stayLoggedIn.set(stayLoggedIn);
                 }
 
                 return from<Promise<LoginFormResult | undefined>>(modalRef.result);
@@ -121,7 +116,8 @@ export class AuthService {
                 }
 
                 return of(void 0);
-            }));
+            }),
+        );
     }
 
     /**
@@ -133,11 +129,13 @@ export class AuthService {
             return of(void 0);
         }
 
-        return this.login().pipe(map(() => {
-            if (!this.isAuthorized(role)) {
-                throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
-            }
-        }));
+        return this.login().pipe(
+            map(() => {
+                if (!this.isAuthorized(role)) {
+                    throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
+                }
+            }),
+        );
     }
 
     /** Logs out the current user. */
@@ -169,7 +167,8 @@ export class AuthService {
                         this.window.removeLocalStorageItem('.StayLoggedIn');
                     }
                 }
-            }));
+            }),
+        );
     }
 
     /**
@@ -177,20 +176,19 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public updateUserProfile(profile?: UserProfile): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this._payload();
         if (!payload || !payload.sub || !payload.name) {
             return throwError(() => new Error('Invalid operation.'));
         }
 
         if (profile) {
-            return this.api.updateProfile(payload.sub, profile).pipe(
-                map(result => this.nextPayload(result.token)));
+            return this.api.updateProfile(payload.sub, profile).pipe(map(result => this.nextPayload(result.token)));
         }
 
         return of(this.modal.open(ProfileFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
             mergeMap(form => {
                 form.componentInstance.initialize({ id: payload.sub, name: payload.name });
-                return from<Promise<ProfileFormResult>>(form.result)
+                return from<Promise<ProfileFormResult>>(form.result);
             }),
             mergeMap(result => {
                 if (result?.token) {
@@ -203,14 +201,15 @@ export class AuthService {
                 }
 
                 return of(void 0);
-            }));
+            }),
+        );
     }
 
     /**
      * Deletes the account of the current authenticated user.
      */
     public deleteUser(): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this._payload();
         if (!payload || !payload.sub || !payload.name) {
             throw new Error('Invalid operation');
         }
@@ -223,7 +222,7 @@ export class AuthService {
      * @param expected The expected role, the current user must have.
      */
     public isAuthorized(expected: UserRole): boolean {
-        return isUserAuthorized(this.role, expected);
+        return isUserAuthorized(this.role(), expected);
     }
 
     /**
@@ -231,12 +230,16 @@ export class AuthService {
      * @param name The cookie name.
      * @returns `true` if the cookie exists; otherwise, `false`.
      */
-    public checkCookie(name: string): boolean {
-        if (this.authenticated) {
-            return this.cookies.has(name);
-        }
+    public checkCookie(name: string): Observable<boolean> {
+        return of(this._payload()).pipe(
+            mergeMap(payload => {
+                if (payload && payload.sub) {
+                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie != null));
+                }
 
-        return this.window.getLocalStorageItem(name) != null;
+                return of(this.window.getLocalStorageItem(name) != null);
+            }),
+        );
     }
 
     /**
@@ -244,16 +247,16 @@ export class AuthService {
      * @param name The cookie name.
      * @returns The cookie value.
      */
-    public getCookie(name: string): string | null {
-        let data: string | null;
-        const payload = this.payload$.getValue();
-        if (payload) {
-            data = this.cookies.get(name) ?? null;
-        } else {
-            data = this.window.getLocalStorageItem(name);
-        }
+    public getCookie(name: string): Observable<string | undefined> {
+        return of(this._payload()).pipe(
+            mergeMap(payload => {
+                if (payload && payload.sub) {
+                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
+                }
 
-        return data;
+                return of(this.window.getLocalStorageItem(name) ?? undefined);
+            }),
+        );
     }
 
     /**
@@ -261,19 +264,14 @@ export class AuthService {
      * @param name The cookie name.
      * @param data The cookie value.
      */
-    public setCookie(name: string, data: string): void {
-        const payload = this.payload$.getValue();
+    public setCookie(name: string, data: string): Observable<void> {
+        const payload = this._payload();
         if (payload && payload.sub) {
             const id = payload.sub;
-            this.api.setCookie(id, { name, data }).pipe(
-                last(),
-                mergeMap(() => this.api.getCookies(id))).subscribe(
-                    {
-                        next: (cookies) => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
-                        error: (error) => this.notify.error(error)
-                    });
+            return this.api.setCookie(id, { name, data });
         } else {
             this.window.setLocalStorageItem(name, data);
+            return of(void 0);
         }
     }
 
@@ -282,19 +280,30 @@ export class AuthService {
      * @param name The cookie name.
      */
     public deleteCookie(name: string): Observable<void> {
-        const payload = this.payload$.getValue();
+        const payload = this._payload();
         if (payload && payload.sub) {
             const id = payload.sub;
-            return this.api.deleteCookie(id, name).pipe(
-                mergeMap(() => this.api.getCookies(id)),
-                map(cookies => {
-                    this.cookies.clear();
-                    cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data));
-                }));
+            return this.api.deleteCookie(id, name);
         } else {
             this.window.removeLocalStorageItem(name);
             return of(void 0);
         }
+    }
+
+    private ensureLoggedInAsUser(token: string, id: string): void {
+        this.api
+            .getProfile(id)
+            .pipe(
+                map(() => this.nextPayload(token)),
+                catchError(() => this.loginAsGuest()),
+            )
+            .subscribe({
+                error: error => {
+                    this.notify.error(error);
+                    this.ready$.next(true);
+                },
+                complete: () => this.ready$.next(true),
+            });
     }
 
     private loginAsGuest(): Observable<void> {
@@ -306,7 +315,7 @@ export class AuthService {
     private isValid(token: string): boolean {
         try {
             const value = jwtDecode(token) as JWTPayload;
-            return value.exp == null || (Date.now() / 1000 < value.exp);
+            return value.exp == null || Date.now() / 1000 < value.exp;
         } catch (error) {
             return false;
         }
@@ -315,13 +324,6 @@ export class AuthService {
     private nextPayload(token: string): void {
         this.window.setLocalStorageItem('.Token', token);
         const payload = jwtDecode(token) as JWTPayload;
-        this.payload$.next(payload);
-        this.cookies.clear();
-        if (payload.sub) {
-            this.api.getCookies(payload.sub).subscribe({
-                next: (cookies) => cookies.forEach(cookie => this.cookies.set(cookie.name, cookie.data)),
-                error: (error) => this.notify.error(error)
-            });
-        }
+        this._payload.set(payload);
     }
 }

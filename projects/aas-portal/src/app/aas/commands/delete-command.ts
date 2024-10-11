@@ -1,45 +1,54 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, AASDocument, getChildren, getParent, isAssetAdministrationShell, isSubmodel, normalize, selectSubmodel } from "common";
-import { cloneDeep, noop } from "lodash-es";
-import { Store } from "@ngrx/store";
-import { State } from '../aas.state';
-import * as AASActions from '../aas.actions';
-import { Command } from "../../types/command";
+import {
+    aas,
+    AASDocument,
+    getChildren,
+    getParent,
+    isAssetAdministrationShell,
+    isSubmodel,
+    normalize,
+    selectSubmodel,
+    noop,
+} from 'aas-core';
+
+import cloneDeep from 'lodash-es/cloneDeep';
+import { Command } from '../../types/command';
+import { AASStore } from '../aas.store';
 
 export class DeleteCommand extends Command {
-    private readonly store: Store<State>;
     private readonly elements: aas.Referable[];
     private readonly memento: AASDocument;
     private document: AASDocument;
 
-    constructor(store: Store<State>, document: AASDocument, elements: aas.Referable | aas.Referable[]) {
-        super("Delete");
+    public constructor(
+        private readonly store: AASStore,
+        document: AASDocument,
+        elements: aas.Referable | aas.Referable[],
+    ) {
+        super('Delete');
 
         if (!document.content) {
-            throw new Error("Document content is undefined.")
+            throw new Error('Document content is undefined.');
         }
 
-        this.store = store;
         this.memento = document;
         this.document = {
             ...document,
             content: {
                 ...document.content!,
                 assetAdministrationShells: [...document.content!.assetAdministrationShells],
-                submodels: [...document.content!.submodels]
-            }
+                submodels: [...document.content!.submodels],
+            },
         };
 
-        this.elements = Array.isArray(elements)
-            ? normalize(document.content, elements, item => item)
-            : [elements];
+        this.elements = Array.isArray(elements) ? normalize(document.content, elements, item => item) : [elements];
     }
 
     protected onExecute(): void {
@@ -76,7 +85,7 @@ export class DeleteCommand extends Command {
             }
         }
 
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     private deleteFromShells(element: aas.Submodel) {
@@ -94,11 +103,11 @@ export class DeleteCommand extends Command {
     }
 
     protected onUndo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.memento }));
+        this.store.applyDocument(this.memento);
     }
 
     protected onRedo(): void {
-        this.store.dispatch(AASActions.applyDocument({ document: this.document }));
+        this.store.applyDocument(this.document);
     }
 
     protected onAbort(): void {

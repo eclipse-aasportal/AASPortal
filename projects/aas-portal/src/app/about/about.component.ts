@@ -1,56 +1,63 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
-import { Library, Message } from 'common';
-import { ServerApiService } from './server-api.service';
-import pkg from '../../../../../package.json';
-import { TranslateService } from '@ngx-translate/core';
+import {
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    AfterViewInit,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
+import { Library, Message } from 'aas-core';
+import { LicenseInfoComponent, MessageTableComponent } from 'aas-lib';
+import { AboutApiService } from './about-api.service';
 import { ToolbarService } from '../toolbar.service';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'fhg-about',
     templateUrl: './about.component.html',
-    styleUrls: ['./about.component.scss']
+    styleUrls: ['./about.component.scss'],
+    standalone: true,
+    imports: [LicenseInfoComponent, MessageTableComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
-    constructor(
-        private serverApi: ServerApiService,
-        private translate: TranslateService,
-        private toolbar: ToolbarService) {
-        this.author = pkg.author;
-        this.version = pkg.version;
-        this.homepage = pkg.homepage;
-    }
+    private readonly _serverVersion = signal('');
+    private readonly _libraries = signal<Library[]>([]);
+    private readonly _messages = signal<Message[]>([]);
+
+    public constructor(
+        private api: AboutApiService,
+        private toolbar: ToolbarService,
+    ) {}
 
     @ViewChild('aasToolbar', { read: TemplateRef })
     public aboutToolbar: TemplateRef<unknown> | null = null;
 
-    public version = '';
+    public readonly author = signal(environment.author).asReadonly();
 
-    public serverVersion = ''
+    public readonly homepage = signal(environment.homepage).asReadonly();
 
-    public author = '';
+    public readonly libraries = this._libraries.asReadonly();
 
-    public homepage = '';
-
-    public libraries: Library[] = [];
-
-    public messages: Message[] = [];
+    public readonly messages = this._messages.asReadonly();
 
     public ngOnInit(): void {
-
-        this.serverApi.getInfo().subscribe(info => {
-            this.serverVersion = info.version;
-            this.libraries = info.libraries ?? [];
+        this.api.getInfo().subscribe(info => {
+            this._serverVersion.set(info.version);
+            this._libraries.set(info.libraries ?? []);
         });
 
-        this.serverApi.getMessages().subscribe(messages => this.messages = messages);
+        this.api.getMessages().subscribe(messages => this._messages.set(messages));
     }
 
     public ngAfterViewInit(): void {

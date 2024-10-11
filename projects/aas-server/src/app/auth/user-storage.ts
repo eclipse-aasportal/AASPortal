@@ -1,12 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { UserData } from "./user-data.js";
+import { Cookie } from 'aas-core';
+import { UserData } from './user-data.js';
 
 /** Defines user storage. */
 export abstract class UserStorage {
@@ -36,4 +37,39 @@ export abstract class UserStorage {
      * @returns `true` if the specified user was successfully deleted; otherwise, `false`.
      */
     public abstract deleteAsync(userId: string): Promise<boolean>;
+
+    /**
+     * Determines whether a cookie with the specified name exists.
+     * @param userId The user identification.
+     * @param name The cookie name.
+     */
+    public abstract checkCookieAsync(userId: string, name: string): Promise<boolean>;
+
+    /**
+     * Gets the value of a cookie.
+     * @param userId The user identification.
+     * @param name The cookie name.
+     */
+    public abstract getCookieAsync(userId: string, name: string): Promise<Cookie | undefined>;
+
+    /**
+     * Gets all cookies for the user with the specified ID.
+     * @param userId The user identification.
+     */
+    public abstract getCookiesAsync(userId: string): Promise<Cookie[]>;
+
+    /**
+     * Sets a new cookie value.
+     * @param userId The user identification.
+     * @param name The cookie name.
+     * @param data
+     */
+    public abstract setCookieAsync(userId: string, name: string, data: string): Promise<void>;
+
+    /**
+     * Deletes a cookie.
+     * @param userId The user identification.
+     * @param name The cookie name.
+     */
+    public abstract deleteCookieAsync(userId: string, name: string): Promise<void>;
 }

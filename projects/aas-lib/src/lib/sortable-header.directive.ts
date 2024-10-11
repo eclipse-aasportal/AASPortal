@@ -1,14 +1,14 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Directive, EventEmitter, Input, Output } from "@angular/core";
+import { Directive, EventEmitter, Input, Output } from '@angular/core';
 
-const rotate: { [key: string]: SortDirection } = { 'asc': 'desc', 'desc': '', '': 'asc' };
+const rotate: { [key: string]: SortDirection } = { asc: 'desc', desc: '', '': 'asc' };
 
 export type SortDirection = 'asc' | 'desc' | '';
 
@@ -18,12 +18,15 @@ export interface SortEvent {
 }
 
 @Directive({
+    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: 'th[sortable]',
+    // eslint-disable-next-line @angular-eslint/no-host-metadata-property
     host: {
         '[class.asc]': 'direction === "asc"',
         '[class.desc]': 'direction === "desc"',
-        '(click)': 'rotate()'
-    }
+        '(click)': 'rotate()',
+    },
+    standalone: true,
 })
 export class SortableHeaderDirective {
     @Input()

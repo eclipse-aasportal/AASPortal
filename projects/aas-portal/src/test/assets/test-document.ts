@@ -1,55 +1,53 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, AASWorkspace, aas } from 'common';
+import { AASDocument, AASContainer, aas } from 'aas-core';
 
 export function createContainer(url: string, documents: AASDocument[]): AASContainer {
     return {
         documents: documents,
         url: url,
-        name: url
+        name: url,
+        type: 'AAS_API'
     };
 }
 
-export function createWorkspace(name: string, containers: AASContainer[]): AASWorkspace {
-    return {
-        name: name,
-        containers: containers,
-    };
-}
-
-export function createDocument(name: string, url= "http://localhost/container1"): AASDocument {
+export function createDocument(name: string, endpoint= "http://localhost/container1"): AASDocument {
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,
-        container: url,
-        endpoint: { address: "", type: "file" },
-        timeStamp: 0,
+        assetId: 'http://localhost/asset/${name}',
+        endpoint: endpoint,
+        address: '',
         modified: false,
         readonly: false,
         onlineReady: false,
         content: { assetAdministrationShells: [], submodels: [], conceptDescriptions: [] },
+        timestamp: 123456,
+        crc32: 0,
     };
 
     return document;
 }
 
-export function createDocumentHeader(name: string, url: string): AASDocument {
+export function createDocumentHeader(name: string, endpoint: string): AASDocument {
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,
-        container: url,
-        endpoint: { address: "", type: "file" },
-        timeStamp: 0,
+        assetId: 'http://localhost/asset/${name}',
+        endpoint: endpoint,
+        address: '',
         modified: false,
         readonly: false,
         onlineReady: false,
         content: null,
+        timestamp: 123456,
+        crc32: 0,
     };
 
     return document;

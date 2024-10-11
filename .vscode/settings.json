@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "aaslist",
+        "AASPORTAL",
+        "aasv",
         "aasv3",
         "angewandten",
         "autohide",
@@ -22,16 +24,36 @@
         "nicht",
         "NMTOKEN",
         "NMTOKENS",
+        "opnxml",
+        "owncloud",
         "preprocessors",
         "Qualifiable",
         "rechtlich",
         "selbstaendige",
+        "Sematics",
         "submodel",
         "tsoa",
         "tsyringe",
         "Ungroup",
         "uuid",
+        "webdav",
         "xmldoc",
         "ZVEI"
+    ],
+    "files.eol": "\n",
+    "jest.debugMode": true,
+    "jest.virtualFolders": [
+        {
+            "name": "aas-core",
+            "rootPath": "./projects/aas-core",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js",
+        },
+        {
+            "name": "aas-server",
+            "rootPath": "./projects/aas-server",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
+        }
     ]
 }

@@ -1,44 +1,45 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { Store, StoreModule } from '@ngrx/store';
-import { first } from 'rxjs';
-import { aas, AASDocument, selectElement } from 'common';
-import { cloneDeep } from 'lodash-es';
-import { aasReducer } from '../../app/aas/aas.reducer';
+import { aas, AASDocument, selectElement } from 'aas-core';
+import cloneDeep from 'lodash-es/cloneDeep';
+import { NotifyService } from 'aas-lib';
 import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
-import { AASState } from '../../app/aas/aas.state';
+import { AASStore } from '../../app/aas/aas.store';
+import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('NewElementCommand', function () {
     let command: NewElementCommand;
-    let store: Store<{ aas: AASState }>;
     let document: AASDocument;
     let submodel: aas.Submodel;
+    let store: AASStore;
 
     beforeEach(function () {
         document = cloneDeep(aasNoTechnicalData);
         submodel = cloneDeep(submodelTechnicalData);
 
         TestBed.configureTestingModule({
-            declarations: [],
             providers: [
+                {
+                    provide: NotifyService,
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                },
+                {
+                    provide: AASApiService,
+                    useValue: jasmine.createSpyObj<AASApiService>(['getContent', 'getDocument', 'putDocument']),
+                },
             ],
-            imports: [
-                StoreModule.forRoot(
-                    {
-                        aas: aasReducer
-                    }),
-            ]
         });
 
-        store = TestBed.inject(Store);
+        store = TestBed.inject(AASStore);
+        store.setDocument(document);
     });
 
     beforeEach(function () {
@@ -46,26 +47,25 @@ describe('NewElementCommand', function () {
         command.execute();
     });
 
-    it('can be executed', function (done: DoneFn) {
-        store.select(state => state.aas.document).pipe(first()).subscribe(document => {
-            const element = selectElement(document!.content!, 'TechnicalData');
-            expect(element).toBeDefined();
-            done();
-        });
+    it('can be executed', () => {
+        const document = store.document();
+        const element = selectElement(document!.content!, 'TechnicalData');
+        expect(element).toBeDefined();
     });
 
-    it('can be undone/redone', function (done: DoneFn) {
-        command.undo();
-        store.select(state => state.aas.document).pipe(first()).subscribe(document => {
+    it('can be undone/redone', () => {
+        {
+            command.undo();
+            const document = store.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
-        });
+        }
 
-        command.redo();
-        store.select(state => state.aas.document).pipe(first()).subscribe(document => {
+        {
+            command.redo();
+            const document = store.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeDefined();
-            done();
-        });
+        }
     });
 });

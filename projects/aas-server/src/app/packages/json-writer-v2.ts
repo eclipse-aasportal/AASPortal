@@ -1,26 +1,27 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { AASWriter } from './aas-writer.js';
-import { aas, isSubmodelElement } from 'common';
+import { aas, isSubmodelElement } from 'aas-core';
 import * as aasv2 from '../types/aas-v2.js';
 
 export class JsonWriterV2 extends AASWriter {
-    public writeEnvironment(env: aas.Environment): any {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public override write(env: aas.Environment): string {
         throw new Error('Method not implemented.');
     }
 
-    public write(source: aas.Referable): any {
+    public convert<T extends aasv2.Referable>(source: aas.Referable): T {
         if (source.modelType === 'Submodel') {
-            return this.writeSubmodel(source as aas.Submodel);
+            return this.writeSubmodel(source as aas.Submodel) as unknown as T;
         }
 
-        return this.writeSubmodelElement(source as aas.SubmodelElement);
+        return this.writeSubmodelElement(source as aas.SubmodelElement) as T;
     }
 
     private writeSubmodel(source: aas.Submodel): aasv2.Submodel {
@@ -29,7 +30,7 @@ export class JsonWriterV2 extends AASWriter {
             ...this.writeHasDataSpecification(source),
             ...this.writeHasSemantic(source),
             ...this.writeQualifiable(source),
-            ...this.writeHasKind(source)
+            ...this.writeHasKind(source),
         };
 
         if (source.submodelElements) {
@@ -70,9 +71,11 @@ export class JsonWriterV2 extends AASWriter {
         }
     }
 
-    private writeAnnotatedRelationshipElement(source: aas.AnnotatedRelationshipElement): aasv2.AnnotatedRelationshipElement {
+    private writeAnnotatedRelationshipElement(
+        source: aas.AnnotatedRelationshipElement,
+    ): aasv2.AnnotatedRelationshipElement {
         if (!source.annotations) {
-            throw new Error('AnnotatedRelationshipElement.annotation')
+            throw new Error('AnnotatedRelationshipElement.annotation');
         }
 
         const relationship: aasv2.AnnotatedRelationshipElement = {
@@ -90,7 +93,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const basicEvent: aasv2.BasicEvent = {
             ...this.writeSubmodelElementType(source),
-            observed: this.writeReference(source.observed)
+            observed: this.writeReference(source.observed),
         };
 
         return basicEvent;
@@ -104,7 +107,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const blob: aasv2.Blob = {
             ...this.writeSubmodelElementType(source),
-            mimeType
+            mimeType,
         };
 
         if (source.value) {
@@ -121,7 +124,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const entity: aasv2.Entity = {
             ...this.writeSubmodelElementType(source),
-            entityType: source.entityType
+            entityType: source.entityType,
         };
 
         if (source.globalAssetId) {
@@ -144,7 +147,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const file: aasv2.File = {
             ...this.writeSubmodelElementType(source),
-            mimeType
+            mimeType,
         };
 
         if (source.value) {
@@ -166,15 +169,15 @@ export class JsonWriterV2 extends AASWriter {
 
         const property: aasv2.MultiLanguageProperty = {
             ...this.writeSubmodelElementType(source),
-            value: { langString }
-        }
+            value: { langString },
+        };
 
         return property;
     }
 
     private writeOperation(source: aas.Operation): aasv2.Operation {
         const operation: aasv2.Operation = {
-            ...this.writeSubmodelElementType(source)
+            ...this.writeSubmodelElementType(source),
         };
 
         if (source.inputVariables) {
@@ -192,13 +195,12 @@ export class JsonWriterV2 extends AASWriter {
         return operation;
     }
 
-
     private writeOperationVariable(source: aas.OperationVariable): aasv2.OperationVariable {
         let value: aasv2.SubmodelElement | undefined;
         if (isSubmodelElement(source.value)) {
             value = this.writeSubmodelElementType(source.value);
         } else if ('submodelElement' in source.value) {
-            const submodelElement = (source.value as any).submodelElement;
+            const submodelElement = (source.value as { submodelElement: aasv2.SubmodelElement }).submodelElement;
             if (isSubmodelElement(submodelElement)) {
                 value = this.writeSubmodelElement(submodelElement);
             }
@@ -219,7 +221,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const property: aasv2.Property = {
             ...this.writeSubmodelElementType(source),
-            valueType
+            valueType,
         };
 
         if (source.value) {
@@ -240,7 +242,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const range: aasv2.Range = {
             ...this.writeSubmodelElementType(source),
-            valueType: this.writeValueTypeDef(source.valueType)!
+            valueType: this.writeValueTypeDef(source.valueType)!,
         };
 
         if (source.min) {
@@ -261,7 +263,7 @@ export class JsonWriterV2 extends AASWriter {
 
         const reference: aasv2.ReferenceElement = {
             ...this.writeSubmodelElementType(source),
-            value: this.writeReference(source.value)
+            value: this.writeReference(source.value),
         };
 
         return reference;
@@ -269,17 +271,17 @@ export class JsonWriterV2 extends AASWriter {
 
     private writeRelationshipElement(source: aas.RelationshipElement): aasv2.RelationshipElement {
         if (!source.first) {
-            throw new Error('RelationshipElement.first')
+            throw new Error('RelationshipElement.first');
         }
 
         if (!source.second) {
-            throw new Error('RelationshipElement.second')
+            throw new Error('RelationshipElement.second');
         }
 
         const relationship: aasv2.RelationshipElement = {
             ...this.writeSubmodelElementType(source),
             first: this.writeReference(source.first),
-            second: this.writeReference(source.second)
+            second: this.writeReference(source.second),
         };
 
         return relationship;
@@ -291,7 +293,7 @@ export class JsonWriterV2 extends AASWriter {
         };
 
         if (source.value) {
-            collection.value = source.value.map(item => this.writeSubmodelElement(item))
+            collection.value = source.value.map(item => this.writeSubmodelElement(item));
         }
 
         return collection;
@@ -313,9 +315,9 @@ export class JsonWriterV2 extends AASWriter {
                     type: key.type as aasv2.KeyElements,
                     value: key.value,
                     index: index,
-                    local: true
+                    local: true,
                 } as aasv2.Key;
-            })
+            }),
         };
     }
 
@@ -325,7 +327,6 @@ export class JsonWriterV2 extends AASWriter {
             ...this.writeHasSemantic(source),
             ...this.writeHasDataSpecification(source),
             ...this.writeQualifiable(source),
-            ...this.writeHasKind(source)
         };
     }
 
@@ -337,7 +338,7 @@ export class JsonWriterV2 extends AASWriter {
         const identification = this.writeIdentifier(source.id);
         const identifiable: aasv2.Identifiable = {
             ...this.writeReferable(source),
-            identification
+            identification,
         };
 
         if (source.administration) {
@@ -350,27 +351,27 @@ export class JsonWriterV2 extends AASWriter {
     private writeIdentifier(id: string): aasv2.Identifier {
         let idType: aasv2.KeyType;
         try {
-            const _ = new URL(id);
+            new URL(id);
             idType = 'IRI';
-        } catch (_) {
+        } catch {
             idType = 'IRDI';
         }
 
-        return { id, idType }
+        return { id, idType };
     }
 
     private writeReferable(source: aas.Referable): aasv2.Referable {
         const referable: aasv2.Referable = {
             idShort: source.idShort,
-            modelType: { name: this.writeModelTypes(source.modelType) }
+            modelType: { name: this.writeModelTypes(source.modelType) },
         };
 
         if (source.category) {
             referable.category = source.category as aasv2.Category;
         }
 
-        if (source.descriptions) {
-            referable.descriptions = source.descriptions.map(item => ({ language: item.language, text: item.text }));
+        if (source.description) {
+            referable.descriptions = source.description.map(item => ({ language: item.language, text: item.text }));
         }
 
         return referable;
@@ -379,8 +380,9 @@ export class JsonWriterV2 extends AASWriter {
     private writeHasDataSpecification(source: aas.HasDataSpecification): aasv2.HasDataSpecification {
         const hasDataSpecification: aasv2.HasDataSpecification = {};
         if (source.embeddedDataSpecifications) {
-            hasDataSpecification.embeddedDataSpecifications = source.embeddedDataSpecifications
-                .map(item => this.writeEmbeddedDatSpecification(item));
+            hasDataSpecification.embeddedDataSpecifications = source.embeddedDataSpecifications.map(item =>
+                this.writeEmbeddedDatSpecification(item),
+            );
         }
 
         return hasDataSpecification;
@@ -396,24 +398,27 @@ export class JsonWriterV2 extends AASWriter {
         }
 
         const dataSpecificationContent = this.writeDataSpecificationIEC61360(
-            source.dataSpecificationContent as aas.DataSpecificationIEC61360);
+            source.dataSpecificationContent as aas.DataSpecificationIec61360,
+        );
 
         const specification: aasv2.EmbeddedDataSpecification = {
             dataSpecification: this.writeReference(source.dataSpecification),
-            dataSpecificationContent
+            dataSpecificationContent,
         };
 
         return specification;
     }
 
-    private writeDataSpecificationIEC61360(source: aas.DataSpecificationIEC61360): aasv2.DataSpecificationIEC61360Content {
+    private writeDataSpecificationIEC61360(
+        source: aas.DataSpecificationIec61360,
+    ): aasv2.DataSpecificationIec61360Content {
         if (!source.preferredName) {
-            throw new Error(`DataSpecificationIEC61360.preferredName`);
+            throw new Error(`DataSpecificationIec61360.preferredName`);
         }
 
-        const iec61360: aasv2.DataSpecificationIEC61360Content = {
-            preferredName: source.preferredName
-        }
+        const iec61360: aasv2.DataSpecificationIec61360Content = {
+            preferredName: source.preferredName,
+        };
 
         if (source.dataType) {
             iec61360.dataType = this.writeDataTypeIEC61360(source.dataType);
@@ -467,31 +472,33 @@ export class JsonWriterV2 extends AASWriter {
             throw new Error('ValueList.valueReferencePairs');
         }
 
-        return { valueReferencePairTypes: source.valueReferencePairs.map(item => { 
-            const pair: aasv2.ValueReferencePairType = {};
-            if (item.value) {
-                pair.value = item.value;
-            }
+        return {
+            valueReferencePairTypes: source.valueReferencePairs.map(item => {
+                const pair: aasv2.ValueReferencePairType = {};
+                if (item.value) {
+                    pair.value = item.value;
+                }
 
-            if (item.valueId) {
-                pair.valueId = this.writeReference(item.valueId);
-            }
+                if (item.valueId) {
+                    pair.valueId = this.writeReference(item.valueId);
+                }
 
-            return pair;
-         }) };
+                return pair;
+            }),
+        };
     }
 
-    private writeDataTypeIEC61360(source: aas.DataTypeIEC61360): aasv2.DataTypeIEC61360 {
+    private writeDataTypeIEC61360(source: aas.DataTypeIec61360): aasv2.DataTypeIec61360 {
         switch (source) {
             case 'IRDI':
             case 'IRI':
                 return 'URL';
             default:
-                return source as aasv2.DataTypeIEC61360;
+                return source as aasv2.DataTypeIec61360;
         }
     }
 
-    private writeHasSemantic(source: aas.HasSemantic): aasv2.HasSemantic {
+    private writeHasSemantic(source: aas.HasSemantics): aasv2.HasSemantic {
         const hasSemantic: aasv2.HasSemantic = {};
         if (source.semanticId) {
             hasSemantic.semanticId = this.writeReference(source.semanticId);
@@ -518,7 +525,7 @@ export class JsonWriterV2 extends AASWriter {
         const qualifier: aasv2.Qualifier = {
             modelType: { name: 'Qualifier' },
             type: source.type,
-            valueType: this.writeDataTypeDefXsd(source.valueType)
+            valueType: this.writeDataTypeDefXsd(source.valueType),
         };
 
         if (source.value) {
@@ -608,12 +615,15 @@ export class JsonWriterV2 extends AASWriter {
     }
 
     private writeKeyType(source: aas.Key): aasv2.KeyType {
-        if (source.type === 'Submodel' || source.type === 'AssetAdministrationShell' ||
-            source.type === 'ConceptDescription') {
+        if (
+            source.type === 'Submodel' ||
+            source.type === 'AssetAdministrationShell' ||
+            source.type === 'ConceptDescription'
+        ) {
             try {
-                const _ = new URL(source.value);
+                new URL(source.value);
                 return 'IRI';
-            } catch (_) {
+            } catch {
                 return 'IRDI';
             }
         }
