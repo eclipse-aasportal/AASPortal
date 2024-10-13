@@ -11,15 +11,18 @@ import https from 'https';
 import net from 'net';
 import FormData from 'form-data';
 import { parseUrl } from '../convert.js';
+import { singleton } from 'tsyringe';
 
-export class ServerMessage {
+@singleton()
+export class HttpClient {
     /**
      * Gets an object of type `T` from a server.
-     * @param url The URL of the object.
      * @template T The type of the object.
+     * @param url The URL of the object.
+     * @param headers Additional outgoing http headers.
      * @returns The requested object.
      */
-    public get<T extends object>(url: URL): Promise<T> {
+    public get<T extends object>(url: URL, headers?: http.OutgoingHttpHeaders): Promise<T> {
         return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 host: url.hostname,
@@ -28,6 +31,10 @@ export class ServerMessage {
                 method: 'GET',
                 timeout: 3000,
             };
+
+            if (headers) {
+                options.headers = { ...headers };
+            }
 
             const requester = url.protocol === 'https:' ? https.request : http.request;
             const request = requester(options, response => {
@@ -38,7 +45,7 @@ export class ServerMessage {
 
                 response.on('end', () => {
                     try {
-                        ServerMessage.checkStatusCode(response, data);
+                        HttpClient.checkStatusCode(response, data);
                         result(JSON.parse(data));
                     } catch (error) {
                         reject(error);
@@ -58,9 +65,10 @@ export class ServerMessage {
     /**
      * Gets the response of the request with the specified URL.
      * @param url The URL of the request.
+     * @param headers Additional outgoing http headers.
      * @returns The request.
      */
-    public getResponse(url: URL): Promise<http.IncomingMessage> {
+    public getResponse(url: URL, headers?: http.OutgoingHttpHeaders): Promise<http.IncomingMessage> {
         return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 host: url.hostname,
@@ -69,6 +77,10 @@ export class ServerMessage {
                 method: 'GET',
                 timeout: 3000,
             };
+
+            if (headers) {
+                options.headers = { ...headers };
+            }
 
             const requester = url.protocol === 'https:' ? https.request : http.request;
             const request = requester(options, response => result(response));
@@ -83,8 +95,9 @@ export class ServerMessage {
      * Updates the specified object.
      * @param url The destination URL.
      * @param obj The object to send.
+     * @param headers Additional outgoing http headers.
      */
-    public put(url: URL, obj: object): Promise<string> {
+    public put(url: URL, obj: object, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
         return new Promise((result, reject) => {
             const data = JSON.stringify(obj);
             const options: http.RequestOptions = {
@@ -95,6 +108,7 @@ export class ServerMessage {
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(data),
+                    ...headers,
                 },
             };
 
@@ -107,7 +121,7 @@ export class ServerMessage {
 
                 response.on('end', () => {
                     try {
-                        ServerMessage.checkStatusCode(response, responseData);
+                        HttpClient.checkStatusCode(response, responseData);
                         result(responseData);
                     } catch (error) {
                         reject(error);
@@ -126,16 +140,18 @@ export class ServerMessage {
      * Inserts the specified object.
      * @param url The destination URL.
      * @param obj The object to send.
+     * @param headers Additional outgoing http headers.
      */
-    public post(url: URL, obj: FormData | object): Promise<string> {
-        return obj instanceof FormData ? this.postFormData(url, obj) : this.postObject(url, obj);
+    public post(url: URL, obj: FormData | object, headers?: http.OutgoingHttpHeaders): Promise<string> {
+        return obj instanceof FormData ? this.postFormData(url, obj, headers) : this.postObject(url, obj, headers);
     }
 
     /**
      * Deletes an object.
      * @param url The URL of the object to delete.
+     * @param headers Additional outgoing http headers.
      */
-    public delete(url: URL): Promise<string> {
+    public delete(url: URL, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
         return new Promise((result, reject) => {
             const options: https.RequestOptions = {
                 hostname: url.hostname,
@@ -144,6 +160,7 @@ export class ServerMessage {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...headers,
                 },
             };
 
@@ -156,7 +173,7 @@ export class ServerMessage {
 
                 response.on('end', function () {
                     try {
-                        ServerMessage.checkStatusCode(response, responseData);
+                        HttpClient.checkStatusCode(response, responseData);
                         result(responseData);
                     } catch (error) {
                         reject(error);
@@ -201,7 +218,7 @@ export class ServerMessage {
         });
     }
 
-    private postObject(url: URL, obj: object): Promise<string> {
+    private postObject(url: URL, obj: object, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
         return new Promise((result, reject) => {
             const data = JSON.stringify(obj);
             const options: http.RequestOptions = {
@@ -212,6 +229,7 @@ export class ServerMessage {
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(data),
+                    ...headers,
                 },
             };
 
@@ -224,7 +242,7 @@ export class ServerMessage {
 
                 response.on('end', () => {
                     try {
-                        ServerMessage.checkStatusCode(response, responseData);
+                        HttpClient.checkStatusCode(response, responseData);
                         result(responseData);
                     } catch (error) {
                         reject(error);
@@ -239,14 +257,14 @@ export class ServerMessage {
         });
     }
 
-    private postFormData(url: URL, formData: FormData): Promise<string> {
+    private postFormData(url: URL, formData: FormData, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
         return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 hostname: url.hostname,
                 port: url.port,
                 path: url.pathname + url.search,
                 method: 'POST',
-                headers: formData.getHeaders(),
+                headers: { ...formData.getHeaders(), ...headers },
             };
 
             const requester = url.protocol === 'https:' ? https.request : http.request;
@@ -258,7 +276,7 @@ export class ServerMessage {
 
                 response.on('end', function () {
                     try {
-                        ServerMessage.checkStatusCode(response, responseData);
+                        HttpClient.checkStatusCode(response, responseData);
                         result(responseData);
                     } catch (error) {
                         reject(error);

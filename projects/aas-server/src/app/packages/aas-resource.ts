@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, LiveRequest } from 'aas-core';
+import { aas, AASEndpoint, LiveRequest } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { SocketClient } from '../live/socket-client.js';
 import { AASPackage } from './aas-package.js';
@@ -16,8 +16,7 @@ import { SocketSubscription } from '../live/socket-subscription.js';
 export abstract class AASResource {
     protected constructor(
         protected readonly logger: Logger,
-        public readonly url: string,
-        public readonly name: string,
+        public readonly endpoint: AASEndpoint,
     ) {}
 
     public abstract readonly version: string;
@@ -102,6 +101,6 @@ export abstract class AASResource {
      * @returns A new URL.
      */
     protected resolve(url: string): URL {
-        return new URL(url, this.url);
+        return new URL(url, this.endpoint.url);
     }
 }

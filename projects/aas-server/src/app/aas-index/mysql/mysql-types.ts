@@ -7,9 +7,15 @@
  *****************************************************************************/
 
 import { RowDataPacket } from 'mysql2/promise';
-import { AASEndpoint, AASDocument } from 'aas-core';
+import { AASDocument, AASEndpointType } from 'aas-core';
 
-export interface MySqlEndpoint extends AASEndpoint, RowDataPacket {}
+export interface MySqlEndpoint extends RowDataPacket {
+    name: string;
+    url: string;
+    type: AASEndpointType;
+    version?: string;
+    headers?: string;
+}
 
 export interface MySqlDocument extends AASDocument, RowDataPacket {
     uuid: string;

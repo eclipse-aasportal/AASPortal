@@ -38,6 +38,7 @@ export class MySqlIndex extends AASIndex {
                     url: row.url,
                     type: row.type,
                     version: row.version,
+                    headers: row.headers ? JSON.parse(row.headers) : undefined,
                 }) as AASEndpoint,
         );
     }
@@ -67,11 +68,12 @@ export class MySqlIndex extends AASIndex {
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await (
             await this.connection
-        ).query<ResultSetHeader>('INSERT INTO `endpoints` (name, url, type, version) VALUES (?, ?, ?, ?)', [
+        ).query<ResultSetHeader>('INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?)', [
             endpoint.name,
             endpoint.url,
             endpoint.type,
             endpoint.version,
+            endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
         ]);
     }
 

@@ -88,8 +88,6 @@
     "LABEL_SELECT_WORKSPACE": "Gruppe",
     "LABEL_SELECT_REGISTRY": "AAS-Registry",
     "LABEL_SHOW_ALL": "Alle anzeigen",
-    "LABEL_ENDPOINT_NAME": "Name",
-    "LABEL_ENDPOINT_URL": "URL",
     "LABEL_VIEW_MODE": "Anzeige:",
     "LABEL_INFO": "Info",
     "LABEL_WARNING": "Warnungen",
@@ -118,8 +116,6 @@
     "PLACEHOLDER_NEW_PASSWORD": "Neues Passwort eingeben",
     "PLACEHOLDER_REPEAT_PASSWORD": "Passwort bestätigen",
     "PLACEHOLDER_USERNAME": "Namen eingeben",
-    "PLACEHOLDER_ENDPOINT_URL": "URL eingeben",
-    "PLACEHOLDER_ENDPOINT_NAME": "Name eingeben",
     "PLACEHOLDER_FILTER": "Filter",
     "PLACEHOLDER_WORKSPACE": "Gruppenname",
     "PLACEHOLDER_SEARCH": "Suche",
@@ -178,11 +174,18 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
-    "AASEndpointType": {
+    "AddEndpointForm": {
         "FileSystem": "Dateisystem",
         "AAS_API": "AAS API",
         "WebDAV": "WebDAV",
-        "OPC_UA": "OPC UA"
+        "OPC_UA": "OPC UA",
+        "LABEL_NAME": "Name",
+        "LABEL_URL": "URL",
+        "PLACEHOLDER_NAME": "eindeutigen Namen eingeben",
+        "PLACEHOLDER_URL_FILE": "file:///",
+        "PLACEHOLDER_URL_HTTP": "http(s)://",
+        "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
+        "PLACEHOLDER_URL_WEBDAV": "http(s)://"
     },
     "CustomerFeedback": {
         "OverallRating": "Gesamtbewertung",

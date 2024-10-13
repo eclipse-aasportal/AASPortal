@@ -8,7 +8,7 @@
 
 import { parentPort } from 'worker_threads';
 import { extname, join } from 'path/posix';
-import { TemplateDescriptor, isSubmodel } from 'aas-core';
+import { AASEndpoint, TemplateDescriptor, isSubmodel } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
@@ -25,16 +25,21 @@ import { WorkerData } from '../aas-provider/worker-data.js';
 export class TemplateScan {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
-    private readonly url: URL;
+    private readonly endpoint: AASEndpoint;
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(Variable) variable: Variable,
         @inject(FileStorageProvider) provider: FileStorageProvider,
     ) {
-        this.url = new URL(variable.TEMPLATE_STORAGE);
-        this.root = this.url.pathname;
-        this.fileStorage = provider.get(this.url);
+        const url = new URL(variable.TEMPLATE_STORAGE);
+        this.root = url.pathname;
+        this.fileStorage = provider.get(url);
+        this.endpoint = {
+            name: url.hostname,
+            type: url.protocol === 'file:' ? 'FileSystem' : 'WebDAV',
+            url: url.toString(),
+        };
     }
 
     public async scanAsync(data: WorkerData): Promise<void> {
@@ -126,7 +131,7 @@ export class TemplateScan {
     private async fromAasxFile(file: string): Promise<TemplateDescriptor | undefined> {
         let source: AasxDirectory | undefined;
         try {
-            source = new AasxDirectory(this.logger, this.fileStorage, this.url);
+            source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
             await source.openAsync();
             const pkg = source.createPackage(file);
             const submodel = (await pkg.getEnvironmentAsync()).submodels[0];

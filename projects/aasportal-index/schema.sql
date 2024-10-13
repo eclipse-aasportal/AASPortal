@@ -4,7 +4,8 @@ CREATE TABLE endpoints (
     name VARCHAR(32) PRIMARY KEY,
     url VARCHAR(255) UNIQUE NOT NULL,
     type VARCHAR(32) NOT NULL,
-    version VARCHAR(8)
+    version VARCHAR(8),
+    headers VARCHAR(255)
 );
 
 CREATE TABLE documents (

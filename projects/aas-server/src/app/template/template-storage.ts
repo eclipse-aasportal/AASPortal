@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { extname, join } from 'path/posix';
-import { TemplateDescriptor, aas } from 'aas-core';
+import { AASEndpoint, TemplateDescriptor, aas } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
@@ -26,7 +26,7 @@ export class TemplateStorage {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
     private readonly timeout: number;
-    private readonly url: URL;
+    private readonly endpoint: AASEndpoint;
     private templates: TemplateDescriptor[] = [];
 
     public constructor(
@@ -36,10 +36,15 @@ export class TemplateStorage {
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        this.url = new URL(variable.TEMPLATE_STORAGE);
+        const url = new URL(variable.TEMPLATE_STORAGE);
         this.timeout = variable.SCAN_TEMPLATES_TIMEOUT;
-        this.root = this.url.pathname;
-        this.fileStorage = provider.get(this.url);
+        this.root = url.pathname;
+        this.fileStorage = provider.get(url);
+        this.endpoint = {
+            name: url.hostname,
+            type: url.protocol === 'file:' ? 'FileSystem' : 'WebDAV',
+            url: url.toString(),
+        };
 
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
@@ -83,7 +88,7 @@ export class TemplateStorage {
     private async readFromAasx(file: string): Promise<aas.Environment> {
         let source: AasxDirectory | undefined;
         try {
-            source = new AasxDirectory(this.logger, this.fileStorage, this.url);
+            source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
             await source.openAsync();
             const pkg = source.createPackage(file);
             return await pkg.getEnvironmentAsync();

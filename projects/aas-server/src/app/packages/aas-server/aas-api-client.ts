@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { aas, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'aas-core';
-import { ServerMessage } from '../server-message.js';
+import { aas, AASEndpoint, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'aas-core';
+import { HttpClient } from '../http-client.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
@@ -25,13 +25,18 @@ export abstract class AASApiClient extends AASResource {
     private reentry = 0;
 
     /**
-     * @param url The URL of the AASX-Server.
+     * @param logger The logger.
+     * @param http The HTTP client.
+     * @param endpoint AAS endpoint.
+     * @param name The endpoint name.
      */
-    public constructor(logger: Logger, url: string, name: string) {
-        super(logger, url, name);
+    public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
+        super(logger, endpoint);
+
+        this.http = http;
     }
 
-    protected readonly message = new ServerMessage();
+    protected readonly http: HttpClient;
 
     public get isOpen(): boolean {
         return this.reentry > 0;
@@ -39,14 +44,14 @@ export abstract class AASApiClient extends AASResource {
 
     public async testAsync(): Promise<void> {
         if (this.reentry === 0) {
-            await this.message.checkUrlExist(this.url);
+            await this.http.checkUrlExist(this.endpoint.url);
         }
     }
 
     /**
      * Reads the environment of the AAS with the specified identifier.
      * @param id The AAS identifier.
-     * @returns
+     * @returns An AAS environment.
      */
     public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
 
@@ -115,7 +120,7 @@ export abstract class AASApiClient extends AASResource {
      * @returns The current value.
      */
     public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.message.get<PropertyValue>(new URL(url));
+        const property = await this.http.get<PropertyValue>(new URL(url), this.endpoint.headers);
         return convertFromString(property.value, valueType);
     }
 

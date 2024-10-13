@@ -22,22 +22,73 @@
             </div>
         </ngb-toast>
         }
-        <label class="form-lable" for="input-endpoint-name" translate>LABEL_ENDPOINT_NAME</label>
+        <label class="form-lable" for="input-endpoint-name" translate>AddEndpointForm.LABEL_NAME</label>
         <input id="input-endpoint-name" type="text" class="form-control mb-3"
-            placeholder="{{'PLACEHOLDER_ENDPOINT_NAME' | translate}}" [(ngModel)]="name" name="name"
+            placeholder="{{'AddEndpointForm.PLACEHOLDER_NAME' | translate}}" [(ngModel)]="name" name="name"
             (input)="inputValue()">
-        <label class="form-lable" for="div-endpoint-url" translate>LABEL_ENDPOINT_URL</label>
+        <label class="form-lable" for="div-endpoint-url" translate>AddEndpointForm.LABEL_URL</label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
-            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item().name}}</button>
+            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{'AddEndpointForm.' + item().type |
+                translate}}</button>
             <div class="dropdown-menu" ngbDropdownMenu>
                 @for (item of items(); track item) {
-                <button type="button" (click)="setItem(item)" ngbDropdownItem>{{item.name}}</button>
+                <button type="button" (click)="setItem(item)" ngbDropdownItem>{{'AddEndpointForm.' + item.type |
+                    translate}}</button>
                 }
             </div>
             <input id="input-endpoint-url" type="text" class="form-control"
-                placeholder="{{'PLACEHOLDER_ENDPOINT_URL' | translate}}" [(ngModel)]="item().value" name="value"
+                placeholder="{{item().placeholder | translate}}" [(ngModel)]="item().value" name="value"
                 (input)="inputValue()">
         </div>
+        @if (item().type === 'AAS_API') {
+        <div class="col-12" style="max-height: 200px; overflow-y: auto;">
+            <table class="table table-sm table-striped table-borderless">
+                <thead>
+                    <th [style.width.px]="16"></th>
+                    <th></th>
+                    <th></th>
+                    <th [style.width.px]="16"></th>
+                </thead>
+                <tbody>
+                    @for (header of headers(); track header.name) {
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input" [checked]="header.selected"
+                                [(ngModel)]="header.selected" name="headerSelected" />
+                        </td>
+                        <td>
+                            @if (!header.selected) {
+                            <div class="small">{{header.name}}</div>
+                            } @else {
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="header.name"
+                                placeholder="header name" name="headerName" />
+                            }
+                        </td>
+                        <td>
+                            @if (!header.selected) {
+                            <div class="small">{{header.value}}</div>
+                            } @else {
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="header.value"
+                                placeholder="value" name="headerValue" />
+                            }
+                        </td>
+                        <td>
+                            @if (header === lastHeader()) {
+                            <a class="text-primary" href="javascript:void(0)" (click)="addHeader()">
+                                <i class="bi bi-plus"></i>
+                            </a>
+                            } @else {
+                            <a class="text-danger" href="javascript:void(0)" (click)="removeHeader(header)">
+                                <i class="bi bi-dash"></i>
+                            </a>
+                            }
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary" translate>CMD_OK</button>

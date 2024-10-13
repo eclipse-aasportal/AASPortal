@@ -9,27 +9,27 @@
 import net from 'net';
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
-import { ServerMessage } from '../../app/packages/server-message.js';
+import { HttpClient } from '../../app/packages/http-client.js';
 import { createSpyObj } from 'fhg-jest';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
-describe('ServerMessage', function () {
-    let server: ServerMessage;
+describe('HttpClient', () => {
+    let server: HttpClient;
 
-    beforeEach(function () {
-        server = new ServerMessage();
+    beforeEach(() => {
+        server = new HttpClient();
     });
 
     afterEach(() => {
         jest.restoreAllMocks();
     });
 
-    it('should created', function () {
+    it('should created', () => {
         expect(server).toBeTruthy();
     });
 
-    describe('get', function () {
-        beforeEach(function () {
+    describe('get', () => {
+        beforeEach(() => {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
                 stream.push(JSON.stringify({ text: 'Hello World!' }));
@@ -41,15 +41,15 @@ describe('ServerMessage', function () {
             });
         });
 
-        it('gets an object from a server', async function () {
+        it('gets an object from a server', async () => {
             await expect(server.get<{ text: string }>(new URL('http://localhost:1234/hello/world'))).resolves.toEqual({
                 text: 'Hello World!',
             });
         });
     });
 
-    describe('getResponse', function () {
-        beforeEach(function () {
+    describe('getResponse', () => {
+        beforeEach(() => {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
                 stream.push(JSON.stringify({ text: 'Hello World!' }));
@@ -59,13 +59,13 @@ describe('ServerMessage', function () {
             });
         });
 
-        it('gets the message response', async function () {
+        it('gets the message response', async () => {
             await expect(server.getResponse(new URL('http://localhost:1234/hello/world'))).resolves.toBeTruthy();
         });
     });
 
-    describe('put', function () {
-        beforeEach(function () {
+    describe('put', () => {
+        beforeEach(() => {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
                 stream.push(JSON.stringify('OK'));
@@ -77,15 +77,15 @@ describe('ServerMessage', function () {
             });
         });
 
-        it('updates an object on a server', async function () {
+        it('updates an object on a server', async () => {
             await expect(
                 server.put(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }),
             ).resolves.toEqual(JSON.stringify('OK'));
         });
     });
 
-    describe('post', function () {
-        beforeEach(function () {
+    describe('post', () => {
+        beforeEach(() => {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
                 stream.push(JSON.stringify('Created'));
@@ -97,15 +97,15 @@ describe('ServerMessage', function () {
             });
         });
 
-        it('updates an object on a server', async function () {
+        it('updates an object on a server', async () => {
             await expect(
                 server.post(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }),
             ).resolves.toEqual(JSON.stringify('Created'));
         });
     });
 
-    describe('delete', function () {
-        beforeEach(function () {
+    describe('delete', () => {
+        beforeEach(() => {
             jest.spyOn(http, 'request').mockImplementation((_, callback) => {
                 const stream = new IncomingMessage(new Socket());
                 stream.push(JSON.stringify('Deleted'));
@@ -117,21 +117,21 @@ describe('ServerMessage', function () {
             });
         });
 
-        it('updates an object on a server', async function () {
+        it('updates an object on a server', async () => {
             await expect(server.delete(new URL('http://localhost:1234/hello/world'))).resolves.toEqual(
                 JSON.stringify('Deleted'),
             );
         });
     });
 
-    describe('checkUrlExist', function () {
+    describe('checkUrlExist', () => {
         let socket: jest.Mocked<net.Socket>;
 
-        beforeEach(function () {
+        beforeEach(() => {
             socket = createSpyObj<net.Socket>(['setTimeout', 'on', 'end', 'destroy']);
         });
 
-        it('validates a connection', async function () {
+        it('validates a connection', async () => {
             socket.on.mockImplementation((event, listener) => {
                 if (event === 'end') {
                     setTimeout(() => (listener as () => void)());
@@ -144,7 +144,7 @@ describe('ServerMessage', function () {
             await expect(server.checkUrlExist('http://localhost:1234')).resolves.toBeUndefined();
         });
 
-        it('throws an error if a connection does not exist', async function () {
+        it('throws an error if a connection does not exist', async () => {
             socket.on.mockImplementation((event, listener) => {
                 if (event === 'timeout') {
                     setTimeout(() => (listener as () => void)());

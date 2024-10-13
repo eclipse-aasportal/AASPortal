@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { aas, ApplicationError } from 'aas-core';
-import { basename, extname, join } from 'path/posix';
+import { aas, AASEndpoint, ApplicationError } from 'aas-core';
+import { extname, join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
@@ -24,14 +24,10 @@ export class AasxDirectory extends AASResource {
     public constructor(
         logger: Logger,
         private readonly fileStorage: FileStorage,
-        url: string | URL,
-        name?: string,
+        endpoint: AASEndpoint,
     ) {
-        if (typeof url === 'string') {
-            url = new URL(url);
-        }
-
-        super(logger, url.href, name ?? basename(url.pathname));
+        const url = new URL(endpoint.url);
+        super(logger, endpoint);
 
         this.root = url.pathname;
     }
@@ -69,7 +65,7 @@ export class AasxDirectory extends AASResource {
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
             if (!(await this.fileStorage.exists(this.root))) {
-                throw new Error(`The directory '${this.url}' does not exist.`);
+                throw new Error(`The directory '${this.endpoint}' does not exist.`);
             }
 
             ++this.reentry;

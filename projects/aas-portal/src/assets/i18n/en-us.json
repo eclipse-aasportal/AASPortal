@@ -118,8 +118,6 @@
     "PLACEHOLDER_NEW_PASSWORD": "enter new password",
     "PLACEHOLDER_CONFIRM_PASSWORD": "confirm password",
     "PLACEHOLDER_USERNAME": "enter a name",
-    "PLACEHOLDER_ENDPOINT_URL": "enter an URL",
-    "PLACEHOLDER_ENDPOINT_NAME": "enter a name",
     "PLACEHOLDER_FILTER": "Filter",
     "PLACEHOLDER_WORKSPACE": "group name",
     "PLACEHOLDER_SEARCH": "Search",
@@ -177,11 +175,18 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
-    "AASEndpointType": {
+    "AddEndpointForm": {
         "FileSystem": "File system",
         "AAS_API": "AAS API",
         "WebDAV": "WebDAV",
-        "OPC_UA": "OPC UA"
+        "OPC_UA": "OPC UA",
+        "LABEL_NAME": "Name",
+        "LABEL_URL": "URL",
+        "PLACEHOLDER_NAME": "enter a unique name",
+        "PLACEHOLDER_URL_FILE": "file:///",
+        "PLACEHOLDER_URL_HTTP": "http(s)://",
+        "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
+        "PLACEHOLDER_URL_WEBDAV": "http(s)://"
     },
     "CustomerFeedback": {
         "OverallRating": "Overall rating",

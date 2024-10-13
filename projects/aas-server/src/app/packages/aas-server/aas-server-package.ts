@@ -46,7 +46,7 @@ export class AASServerPackage extends AASPackage {
         const environment = await this.server.readEnvironmentAsync(this.idShort);
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
-            endpoint: this.server.name,
+            endpoint: this.server.endpoint.name,
             address: this.idShort,
             idShort: environment.assetAdministrationShells[0].idShort,
             assetId: environment.assetAdministrationShells[0].assetInformation.globalAssetId,

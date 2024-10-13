@@ -54,6 +54,7 @@ export type AASEndpoint = {
     url: string;
     type: AASEndpointType;
     version?: string;
+    headers?: Record<string, string>;
 };
 
 /** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */

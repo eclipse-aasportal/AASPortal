@@ -6,16 +6,25 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import head from 'lodash-es/head';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointType, stringFormat } from 'aas-core';
 
-export interface EndpointItem {
+export interface HeaderItem {
     name: string;
+    value: string;
+    selected: boolean;
+}
+
+export interface EndpointItem {
     type: AASEndpointType;
     value: string;
+    placeholder: string;
+    headers: HeaderItem[];
+    selected: boolean;
 }
 
 @Component({
@@ -28,53 +37,104 @@ export interface EndpointItem {
 })
 export class AddEndpointFormComponent {
     private readonly endpoints = signal<AASEndpoint[]>([]);
-    public readonly _messages = signal<string[]>([]);
+    private readonly _messages = signal<string[]>([]);
+    private readonly _items = signal<EndpointItem[]>([
+        {
+            type: 'AAS_API',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_HTTP',
+            headers: [{ name: '', value: '', selected: true }],
+            selected: true,
+        },
+        {
+            type: 'OPC_UA',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_OPCUA',
+            headers: [{ name: '', value: '', selected: true }],
+            selected: false,
+        },
+        {
+            type: 'WebDAV',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_WEBDAV',
+            headers: [{ name: '', value: '', selected: true }],
+            selected: false,
+        },
+        {
+            type: 'FileSystem',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_FILE',
+            headers: [{ name: '', value: '', selected: true }],
+            selected: false,
+        },
+    ]);
 
     public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
     ) {}
 
-    public readonly messages = this._messages.asReadonly();
-
     public readonly name = signal('');
 
-    public readonly items = signal<EndpointItem[]>([
-        {
-            name: this.translate.instant('AASEndpointType.AAS_API'),
-            type: 'AAS_API',
-            value: 'http://',
-        },
-        {
-            name: this.translate.instant('AASEndpointType.OPC_UA'),
-            type: 'OPC_UA',
-            value: 'opc.tcp://',
-        },
-        {
-            name: this.translate.instant('AASEndpointType.WebDAV'),
-            type: 'WebDAV',
-            value: 'http://',
-        },
-        {
-            name: this.translate.instant('AASEndpointType.FileSystem'),
-            type: 'FileSystem',
-            value: 'file:///',
-        },
-    ]).asReadonly();
+    public readonly messages = this._messages.asReadonly();
 
-    public readonly item = signal(this.items()[0]);
+    public readonly items = this._items.asReadonly();
+
+    public readonly item = computed(() => this._items().find(item => item.selected)!);
+
+    public readonly headers = computed(() => this.item().headers);
+
+    public readonly header = computed(() => this.item().headers.find(header => header.selected)!);
+
+    public readonly lastHeader = computed(() => head(this.headers())!);
 
     public initialize(endpoints: AASEndpoint[]): void {
         this.endpoints.set(endpoints);
     }
 
     public setItem(value: EndpointItem): void {
-        this.item.set(value);
+        this._items.update(items =>
+            items.map(item => {
+                item.selected = item === value;
+                return item;
+            }),
+        );
+
         this.clearMessages();
     }
 
     public inputValue(): void {
         this.clearMessages();
+    }
+
+    public addHeader(): void {
+        this._items.update(items =>
+            items.map(item => {
+                if (item.selected) {
+                    const headers = item.headers.map(header => {
+                        header.selected = false;
+                        return header;
+                    });
+
+                    headers.push({ name: '', value: '', selected: true });
+                    item.headers = headers;
+                }
+
+                return item;
+            }),
+        );
+    }
+
+    public removeHeader(header: HeaderItem): void {
+        this._items.update(items =>
+            items.map(item => {
+                if (item.selected) {
+                    item.headers = item.headers.filter(head => head !== header);
+                }
+
+                return item;
+            }),
+        );
     }
 
     public submit(): void {
@@ -89,6 +149,12 @@ export class AddEndpointFormComponent {
                 endpoint.version = version;
             } else if (this.item().type === 'AAS_API') {
                 endpoint.version = 'v3';
+            }
+
+            const headers = this.item().headers.filter(header => header.name && header.value);
+            if (headers.length > 0) {
+                endpoint.headers = {};
+                headers.forEach(header => (endpoint.headers![header.name] = header.value));
             }
 
             this.modal.close(endpoint);
