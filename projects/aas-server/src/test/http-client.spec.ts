@@ -9,7 +9,7 @@
 import net from 'net';
 import http, { IncomingMessage } from 'http';
 import { Socket } from 'net';
-import { HttpClient } from '../../app/packages/http-client.js';
+import { HttpClient } from '../app/http-client.js';
 import { createSpyObj } from 'fhg-jest';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 

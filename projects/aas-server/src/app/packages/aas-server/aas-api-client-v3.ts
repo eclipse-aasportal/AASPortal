@@ -26,7 +26,7 @@ import {
     isSubmodelElement,
     selectSubmodel,
 } from 'aas-core';
-import { HttpClient } from '../http-client.js';
+import { HttpClient } from '../../http-client.js';
 
 interface PackageDescriptor {
     aasIds: string[];

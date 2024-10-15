@@ -21,7 +21,7 @@ import { AASApiClientV0 } from '../../../app/packages/aas-server/aas-api-client-
 import { Logger } from '../../../app/logging/logger.js';
 import aasEnvironment from '../../assets/aas-environment.js';
 import { createSpyObj } from 'fhg-jest';
-import { HttpClient } from '../../../app/packages/http-client.js';
+import { HttpClient } from '../../../app/http-client.js';
 
 describe('AASApiClientV0', function () {
     let logger: jest.Mocked<Logger>;

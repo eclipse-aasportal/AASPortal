@@ -83,7 +83,7 @@ class TreeInitialize {
         for (const shell of this.env.assetAdministrationShells) {
             const row = this.createRow(shell, -1, 0, true);
             this.rows.push(row);
-            row.firstChild = this.hasChildren(shell) ? this.rows.length : -1;
+            row.firstChild = this.env.submodels.length > 0 ? this.rows.length : -1;
             this.traverse(shell, this.rows.length - 1, 1);
             for (const stateRow of this.rows) {
                 if (stateRow.expanded || stateRow.selected) {

@@ -28,7 +28,7 @@ import { JsonReaderV2 } from '../json-reader-v2.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import { ERRORS } from '../../errors.js';
 import { JsonReaderV3 } from '../json-reader-v3.js';
-import { HttpClient } from '../http-client.js';
+import { HttpClient } from '../../http-client.js';
 
 interface PackageDescriptor {
     aasIds: string[];

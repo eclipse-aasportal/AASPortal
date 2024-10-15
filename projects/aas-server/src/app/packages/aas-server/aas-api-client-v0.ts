@@ -12,7 +12,7 @@ import { JsonReaderV2 } from '../json-reader-v2.js';
 import { AASApiClient } from './aas-api-client.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import * as aasV2 from '../../types/aas-v2.js';
-import { HttpClient } from '../http-client.js';
+import { HttpClient } from '../../http-client.js';
 
 interface AASList {
     aaslist: string[];

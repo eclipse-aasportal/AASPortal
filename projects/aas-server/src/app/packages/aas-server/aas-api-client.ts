@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, AASEndpoint, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'aas-core';
-import { HttpClient } from '../http-client.js';
+import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';

@@ -10,7 +10,7 @@ import http from 'http';
 import https from 'https';
 import net from 'net';
 import FormData from 'form-data';
-import { parseUrl } from '../convert.js';
+import { parseUrl } from './convert.js';
 import { singleton } from 'tsyringe';
 
 @singleton()
@@ -22,19 +22,18 @@ export class HttpClient {
      * @param headers Additional outgoing http headers.
      * @returns The requested object.
      */
-    public get<T extends object>(url: URL, headers?: http.OutgoingHttpHeaders): Promise<T> {
+    public get<T extends object>(url: URL, headers: http.OutgoingHttpHeaders = {}): Promise<T> {
         return new Promise((result, reject) => {
             const options: http.RequestOptions = {
                 host: url.hostname,
                 port: url.port,
                 path: url.pathname + url.search,
                 method: 'GET',
-                timeout: 3000,
+                headers: {
+                    connection: 'keep-alive',
+                    ...headers,
+                },
             };
-
-            if (headers) {
-                options.headers = { ...headers };
-            }
 
             const requester = url.protocol === 'https:' ? https.request : http.request;
             const request = requester(options, response => {

@@ -20,7 +20,7 @@ import { AASApiClientV3 } from '../packages/aas-server/aas-api-client-v3.js';
 import { AASApiClientV1 } from '../packages/aas-server/aas-api-client-v1.js';
 import { AASApiClientV0 } from '../packages/aas-server/aas-api-client-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
-import { HttpClient } from '../packages/http-client.js';
+import { HttpClient } from '../http-client.js';
 
 @singleton()
 export class AASResourceScanFactory {

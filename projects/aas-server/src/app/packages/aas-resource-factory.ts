@@ -17,7 +17,7 @@ import { OpcuaClient } from './opcua/opcua-client.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { AASApiClientV1 } from './aas-server/aas-api-client-v1.js';
-import { HttpClient } from './http-client.js';
+import { HttpClient } from '../http-client.js';
 
 @singleton()
 export class AASResourceFactory {

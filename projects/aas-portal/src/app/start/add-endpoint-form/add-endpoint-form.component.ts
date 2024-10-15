@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import head from 'lodash-es/head';
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
@@ -14,17 +13,15 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointType, stringFormat } from 'aas-core';
 
 export interface HeaderItem {
+    id: string;
     name: string;
     value: string;
-    selected: boolean;
 }
 
 export interface EndpointItem {
     type: AASEndpointType;
     value: string;
     placeholder: string;
-    headers: HeaderItem[];
-    selected: boolean;
 }
 
 @Component({
@@ -38,35 +35,35 @@ export interface EndpointItem {
 export class AddEndpointFormComponent {
     private readonly endpoints = signal<AASEndpoint[]>([]);
     private readonly _messages = signal<string[]>([]);
+    private _selectedItemIndex = signal(0);
     private readonly _items = signal<EndpointItem[]>([
         {
             type: 'AAS_API',
             value: '',
             placeholder: 'AddEndpointForm.PLACEHOLDER_URL_HTTP',
-            headers: [{ name: '', value: '', selected: true }],
-            selected: true,
         },
         {
             type: 'OPC_UA',
             value: '',
             placeholder: 'AddEndpointForm.PLACEHOLDER_URL_OPCUA',
-            headers: [{ name: '', value: '', selected: true }],
-            selected: false,
         },
         {
             type: 'WebDAV',
             value: '',
             placeholder: 'AddEndpointForm.PLACEHOLDER_URL_WEBDAV',
-            headers: [{ name: '', value: '', selected: true }],
-            selected: false,
         },
         {
             type: 'FileSystem',
             value: '',
             placeholder: 'AddEndpointForm.PLACEHOLDER_URL_FILE',
-            headers: [{ name: '', value: '', selected: true }],
-            selected: false,
         },
+    ]);
+
+    private readonly _selectedHeaderIndex = signal(-1);
+    private readonly _headers = signal<HeaderItem[]>([
+        { id: '1', name: '', value: '' },
+        { id: '2', name: '', value: '' },
+        { id: '3', name: '', value: '' },
     ]);
 
     public constructor(
@@ -80,25 +77,32 @@ export class AddEndpointFormComponent {
 
     public readonly items = this._items.asReadonly();
 
-    public readonly item = computed(() => this._items().find(item => item.selected)!);
+    public readonly selectedItem = computed(() => this._items()[this._selectedItemIndex()]);
 
-    public readonly headers = computed(() => this.item().headers);
+    public readonly headers = this._headers.asReadonly();
 
-    public readonly header = computed(() => this.item().headers.find(header => header.selected)!);
-
-    public readonly lastHeader = computed(() => head(this.headers())!);
+    public readonly selectedHeader = computed(() =>
+        this._selectedHeaderIndex() < 0 ? undefined : this._headers()[this._selectedHeaderIndex()],
+    );
 
     public initialize(endpoints: AASEndpoint[]): void {
         this.endpoints.set(endpoints);
     }
 
-    public setItem(value: EndpointItem): void {
-        this._items.update(items =>
-            items.map(item => {
-                item.selected = item === value;
-                return item;
-            }),
-        );
+    public selectItem(value: EndpointItem): void {
+        this._selectedItemIndex.set(this._items().indexOf(value));
+        this.clearMessages();
+    }
+
+    public selectHeader(value: HeaderItem): void {
+        this._selectedHeaderIndex.update(state => {
+            const index = this._headers().indexOf(value);
+            if (state >= 0 && index === state) {
+                return -1;
+            }
+
+            return index;
+        });
 
         this.clearMessages();
     }
@@ -107,51 +111,26 @@ export class AddEndpointFormComponent {
         this.clearMessages();
     }
 
-    public addHeader(): void {
-        this._items.update(items =>
-            items.map(item => {
-                if (item.selected) {
-                    const headers = item.headers.map(header => {
-                        header.selected = false;
-                        return header;
-                    });
-
-                    headers.push({ name: '', value: '', selected: true });
-                    item.headers = headers;
-                }
-
-                return item;
-            }),
-        );
-    }
-
-    public removeHeader(header: HeaderItem): void {
-        this._items.update(items =>
-            items.map(item => {
-                if (item.selected) {
-                    item.headers = item.headers.filter(head => head !== header);
-                }
-
-                return item;
-            }),
-        );
-    }
-
     public submit(): void {
+        const selectedItem = this.selectedItem();
+        if (selectedItem === undefined) {
+            return;
+        }
+
         this.clearMessages();
         const name = this.validateName();
-        const url = this.validateUrl(this.item().value.trim());
+        const url = this.validateUrl(selectedItem.value.trim(), selectedItem.type);
         if (name && url) {
             const version = url.searchParams.get('version');
             url.search = '';
-            const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type };
+            const endpoint: AASEndpoint = { url: url.href, name, type: selectedItem.type };
             if (version) {
                 endpoint.version = version;
-            } else if (this.item().type === 'AAS_API') {
+            } else if (selectedItem.type === 'AAS_API') {
                 endpoint.version = 'v3';
             }
 
-            const headers = this.item().headers.filter(header => header.name && header.value);
+            const headers = this.headers().filter(header => header.name && header.value);
             if (headers.length > 0) {
                 endpoint.headers = {};
                 headers.forEach(header => (endpoint.headers![header.name] = header.value));
@@ -192,10 +171,10 @@ export class AddEndpointFormComponent {
         return name;
     }
 
-    private validateUrl(value: string): URL | undefined {
+    private validateUrl(value: string, type: AASEndpointType): URL | undefined {
         try {
             const url = new URL(value);
-            switch (this.item().type) {
+            switch (type) {
                 case 'AAS_API':
                     this.validateAASApiEndpoint(url);
                     break;
@@ -212,10 +191,7 @@ export class AddEndpointFormComponent {
 
             return url;
         } catch (error) {
-            this._messages.update(messages => [
-                ...messages,
-                this.createMessage('ERROR_INVALID_URL', this.item().value),
-            ]);
+            this._messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', value)]);
 
             return undefined;
         }

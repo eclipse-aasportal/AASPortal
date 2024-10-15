@@ -13,7 +13,7 @@ import { AASApiClientV3, OperationResult } from '../../../app/packages/aas-serve
 import { aas, DifferenceItem } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
-import { HttpClient } from '../../../app/packages/http-client.js';
+import { HttpClient } from '../../../app/http-client.js';
 
 describe('AASApiClientV3', () => {
     let logger: Logger;

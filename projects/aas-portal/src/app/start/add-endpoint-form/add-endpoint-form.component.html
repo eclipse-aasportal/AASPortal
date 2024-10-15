@@ -28,63 +28,51 @@
             (input)="inputValue()">
         <label class="form-lable" for="div-endpoint-url" translate>AddEndpointForm.LABEL_URL</label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
-            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{'AddEndpointForm.' + item().type |
+            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{'AddEndpointForm.' + selectedItem().type
+                |
                 translate}}</button>
             <div class="dropdown-menu" ngbDropdownMenu>
                 @for (item of items(); track item) {
-                <button type="button" (click)="setItem(item)" ngbDropdownItem>{{'AddEndpointForm.' + item.type |
+                <button type="button" (click)="selectItem(item)" ngbDropdownItem>{{'AddEndpointForm.' + item.type |
                     translate}}</button>
                 }
             </div>
             <input id="input-endpoint-url" type="text" class="form-control"
-                placeholder="{{item().placeholder | translate}}" [(ngModel)]="item().value" name="value"
+                placeholder="{{selectedItem().placeholder | translate}}" [(ngModel)]="selectedItem().value" name="value"
                 (input)="inputValue()">
         </div>
-        @if (item().type === 'AAS_API') {
-        <div class="col-12" style="max-height: 200px; overflow-y: auto;">
+        @if (selectedItem().type === 'AAS_API') {
+        <div class="col-12 mt-2" style="max-height: 200px; overflow-y: auto;">
             <table class="table table-sm table-striped table-borderless">
                 <thead>
-                    <th [style.width.px]="16"></th>
-                    <th></th>
-                    <th></th>
-                    <th [style.width.px]="16"></th>
+                    <tr>
+                        <th scope="col" class="text-center" [style.width]="'32px'">#</th>
+                        <th scope="col" class="text-center">Header</th>
+                        <th scope="col" class="text-center">Value</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    @for (header of headers(); track header.name) {
+                    @for (header of headers(); track header.id) {
                     <tr>
+                        <th scope="row" (click)="selectHeader(header)">{{header.id}}</th>
+                        @if (header === selectedHeader()) {
                         <td>
-                            <input type="checkbox" class="form-check-input" [checked]="header.selected"
-                                [(ngModel)]="header.selected" name="headerSelected" />
-                        </td>
-                        <td>
-                            @if (!header.selected) {
-                            <div class="small">{{header.name}}</div>
-                            } @else {
                             <input type="text" class="form-control form-control-sm" [(ngModel)]="header.name"
                                 placeholder="header name" name="headerName" />
-                            }
                         </td>
                         <td>
-                            @if (!header.selected) {
-                            <div class="small">{{header.value}}</div>
-                            } @else {
                             <input type="text" class="form-control form-control-sm" [(ngModel)]="header.value"
                                 placeholder="value" name="headerValue" />
-                            }
                         </td>
-                        <td>
-                            @if (header === lastHeader()) {
-                            <a class="text-primary" href="javascript:void(0)" (click)="addHeader()">
-                                <i class="bi bi-plus"></i>
-                            </a>
-                            } @else {
-                            <a class="text-danger" href="javascript:void(0)" (click)="removeHeader(header)">
-                                <i class="bi bi-dash"></i>
-                            </a>
-                            }
+                        } @else {
+                        <td  (click)="selectHeader(header)">
+                            <div class="small">{{header.name}}</div>
                         </td>
-                    </tr>
-                    }
+                        <td  (click)="selectHeader(header)">
+                            <div class="small">{{header.value}}</div>
+                        </td>
+                        }
+                        }
                 </tbody>
             </table>
         </div>
