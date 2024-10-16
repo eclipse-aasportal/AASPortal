@@ -98,7 +98,7 @@ export class AASApiClientV3 extends AASApiClient {
                 try {
                     submodels.push(
                         await this.http.get<aas.Submodel>(
-                            this.resolve(`submodels/${submodelId}`),
+                            this.resolve(`shells/${aasId}/submodels/${submodelId}`),
                             this.endpoint.headers,
                         ),
                     );
