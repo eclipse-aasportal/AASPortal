@@ -51,7 +51,7 @@ describe('AddEndpointFormComponent', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item.set({ ...component.items()[3], value: 'file:///my-endpoint' });
+        component.selectItem(component.items()[3]);
         component.name.set('My endpoint');
 
         form.dispatchEvent(new Event('submit'));
@@ -65,7 +65,7 @@ describe('AddEndpointFormComponent', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item.set({ ...component.items()[3], value: 'file:///a\\b\\my-endpoint' });
+        component.selectItem(component.items()[3]);
         component.name.set('My endpoint');
 
         form.dispatchEvent(new Event('submit'));
@@ -78,7 +78,7 @@ describe('AddEndpointFormComponent', () => {
     it('ignores AAS endpoint: Name: "", URL: "file:///my-endpoint"', () => {
         spyOn(modal, 'close');
 
-        component.item.set({ ...component.items()[3], value: 'file:///my-endpoint' });
+        component.selectItem(component.items()[3]);
         component.name.set('');
 
         form.dispatchEvent(new Event('submit'));
@@ -89,7 +89,7 @@ describe('AddEndpointFormComponent', () => {
     it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', () => {
         spyOn(modal, 'close');
 
-        component.item.set({ ...component.items()[3], value: 'file:///' });
+        component.selectItem(component.items()[3]);
         component.name.set('My endpoint');
 
         form.dispatchEvent(new Event('submit'));
@@ -101,7 +101,7 @@ describe('AddEndpointFormComponent', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item.set({ ...component.items()[1], value: 'opc.tcp://localhost:30001/I4AASServer' });
+        component.selectItem(component.items()[1]);
         component.name.set('I4AAS Server');
 
         form.dispatchEvent(new Event('submit'));
@@ -114,7 +114,7 @@ describe('AddEndpointFormComponent', () => {
     it('ignores AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://"', () => {
         spyOn(modal, 'close');
 
-        component.item.set(component.items()[1]);
+        component.selectItem(component.items()[1]);
         fixture.detectChanges();
 
         inputNameElement.value = 'I4AAS Server';
@@ -131,7 +131,7 @@ describe('AddEndpointFormComponent', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item.set({ ...component.items()[0], value: 'http://localhost:50001/' });
+        component.selectItem(component.items()[0]);
         component.name.set('AASX Server');
 
         form.dispatchEvent(new Event('submit'));
@@ -145,7 +145,7 @@ describe('AddEndpointFormComponent', () => {
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
-        component.item.set({ ...component.items()[2], value: 'http://localhost:8080/root/folder' });
+        component.selectItem(component.items()[2]);
         component.name.set('WebDAV Server');
 
         form.dispatchEvent(new Event('submit'));

@@ -9,9 +9,9 @@
 import { singleton } from 'tsyringe';
 
 export interface Task {
-    name: string;
+    endpointName: string;
     owner: object;
-    type: 'ScanContainer' | 'ScanTemplates';
+    type: 'ScanEndpoint' | 'ScanTemplates';
 }
 
 @singleton()
@@ -34,7 +34,7 @@ export class TaskHandler {
 
     public empty(owner: object, name?: string): boolean {
         for (const task of this.tasks.values()) {
-            if (task.owner === owner && (!name || task.name === name)) {
+            if (task.owner === owner && (!name || task.endpointName === name)) {
                 return false;
             }
         }

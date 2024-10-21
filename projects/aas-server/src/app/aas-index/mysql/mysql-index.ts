@@ -15,6 +15,8 @@ import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
+import { PagedResult } from '../../types/paged-result.js';
+import { encodeBase64Url } from '../../convert.js';
 
 export class MySqlIndex extends AASIndex {
     private readonly connection: Promise<Connection>;
@@ -117,12 +119,29 @@ export class MySqlIndex extends AASIndex {
         return this.getLastPage(cursor.limit);
     }
 
-    public override async getContainerDocuments(endpointName: string): Promise<AASDocument[]> {
-        return (
-            await (
-                await this.connection
-            ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?', [endpointName])
-        )[0].map(row => this.toDocument(row));
+    public override async nextPage(
+        endpointName: string,
+        cursor: string | undefined,
+        limit: number = 100,
+    ): Promise<PagedResult<AASDocument>> {
+        const connection = await this.connection;
+        let sql: string;
+        const values: unknown[] = [endpointName + cursor];
+        if (cursor) {
+            values.push(limit + 1);
+            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) > ? ORDER BY endpoint ASC, id ASC LIMIT ?;';
+        } else {
+            sql = 'SELECT * FROM `documents` ORDER BY endpoint ASC, id ASC LIMIT ?;';
+        }
+
+        const [results] = await connection.query<MySqlDocument[]>(sql, values);
+        const documents = results.map(result => this.toDocument(result));
+        return {
+            result: documents.slice(0, limit),
+            paging_metadata: {
+                cursor: documents.length >= limit + 1 ? encodeBase64Url(documents[limit].id) : undefined,
+            },
+        };
     }
 
     public override async update(document: AASDocument): Promise<void> {

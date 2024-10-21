@@ -11,6 +11,7 @@ import { Logger } from '../logging/logger.js';
 import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
 import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
+import { PagedResult } from '../types/paged-result.js';
 
 export class AASServerScan extends AASResourceScan {
     private readonly logger: Logger;
@@ -23,11 +24,12 @@ export class AASServerScan extends AASResourceScan {
         this.server = server;
     }
 
-    public async scanAsync(): Promise<AASDocument[]> {
+    public async scanAsync(cursor?: string): Promise<PagedResult<AASDocument>> {
         try {
             await this.server.openAsync();
             const documents: AASDocument[] = [];
-            const ids = new Set(await this.server.getShellsAsync());
+            const result = await this.server.getShellsAsync(cursor);
+            const ids = new Set(result.result);
             for (const id of ids) {
                 try {
                     const aasPackage = new AASServerPackage(this.logger, this.server, id);
@@ -39,7 +41,7 @@ export class AASServerScan extends AASResourceScan {
                 }
             }
 
-            return documents;
+            return { result: documents, paging_metadata: { cursor: result.paging_metadata.cursor } };
         } finally {
             await this.server.closeAsync();
         }

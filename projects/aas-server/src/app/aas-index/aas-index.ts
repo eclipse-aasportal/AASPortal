@@ -20,6 +20,8 @@ import {
     toBoolean,
 } from 'aas-core';
 
+import { PagedResult } from '../types/paged-result.js';
+
 export abstract class AASIndex {
     public abstract getCount(query?: string): Promise<number>;
 
@@ -35,7 +37,11 @@ export abstract class AASIndex {
 
     public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage>;
 
-    public abstract getContainerDocuments(endpointName: string): Promise<AASDocument[]>;
+    public abstract nextPage(
+        endpointName: string,
+        cursor: string | undefined,
+        limit?: number,
+    ): Promise<PagedResult<AASDocument>>;
 
     public abstract update(document: AASDocument): Promise<void>;
 

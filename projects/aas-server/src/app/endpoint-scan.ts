@@ -10,15 +10,15 @@ import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
 import { AASDocument } from 'aas-core';
-import { ScanContainerData } from './aas-provider/worker-data.js';
-import { ScanContainerResult, ScanResultType } from './aas-provider/scan-result.js';
+import { ScanEndpointData } from './aas-provider/worker-data.js';
+import { ScanEndpointResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
 import { Variable } from './variable.js';
 
 @singleton()
-export class ScanContainer {
-    private data!: ScanContainerData;
+export class EndpointScan {
+    private data!: ScanEndpointData;
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
@@ -26,15 +26,15 @@ export class ScanContainer {
         @inject(Variable) private readonly variable: Variable,
     ) {}
 
-    public async scanAsync(data: ScanContainerData): Promise<void> {
+    public async scanAsync(data: ScanEndpointData): Promise<string | undefined> {
         this.data = data;
-        let documents: AASDocument[];
-        const scan = this.resourceScanFactory.create(data.container);
+        const scan = this.resourceScanFactory.create(data.endpoint);
         try {
             scan.on('scanned', this.onDocumentScanned);
             scan.on('error', this.onError);
-            documents = await scan.scanAsync();
-            this.computeDeleted(documents);
+            const result = await scan.scanAsync(data.cursor);
+            this.computeDeleted(result.result);
+            return result.paging_metadata.cursor;
         } finally {
             scan.off('scanned', this.onDocumentScanned);
             scan.off('error', this.onError);
@@ -42,10 +42,12 @@ export class ScanContainer {
     }
 
     private computeDeleted(documents: AASDocument[]): void {
-        if (!this.data.container.documents) return;
+        if (this.data.documents === undefined) {
+            return;
+        }
 
         const current = new Map<string, AASDocument>(documents.map(item => [item.id, item]));
-        for (const document of this.data.container.documents) {
+        for (const document of this.data.documents) {
             if (!current.has(document.id)) {
                 this.postDeleted(document);
             }
@@ -53,7 +55,7 @@ export class ScanContainer {
     }
 
     private onDocumentScanned = (document: AASDocument): void => {
-        const reference = this.data.container.documents?.find(item => item.id === document.id);
+        const reference = this.data.documents?.find(item => item.id === document.id);
         if (reference) {
             if (this.documentChanged(document, reference)) {
                 this.postChanged(document);
@@ -68,10 +70,12 @@ export class ScanContainer {
     };
 
     private postChanged(document: AASDocument): void {
-        const value: ScanContainerResult = {
+        const value: ScanEndpointResult = {
             taskId: this.data.taskId,
             type: ScanResultType.Changed,
-            container: this.data.container,
+            endpoint: this.data.endpoint,
+            documents: this.data.documents,
+            cursor: this.data.cursor,
             document: document,
         };
 
@@ -80,10 +84,12 @@ export class ScanContainer {
     }
 
     private postDeleted(document: AASDocument): void {
-        const value: ScanContainerResult = {
+        const value: ScanEndpointResult = {
             taskId: this.data.taskId,
             type: ScanResultType.Removed,
-            container: this.data.container,
+            endpoint: this.data.endpoint,
+            documents: this.data.documents,
+            cursor: this.data.cursor,
             document: document,
         };
 
@@ -92,10 +98,12 @@ export class ScanContainer {
     }
 
     private postAdded(document: AASDocument): void {
-        const value: ScanContainerResult = {
+        const value: ScanEndpointResult = {
             taskId: this.data.taskId,
             type: ScanResultType.Added,
-            container: this.data.container,
+            endpoint: this.data.endpoint,
+            documents: this.data.documents,
+            cursor: this.data.cursor,
             document: document,
         };
 
@@ -113,17 +121,4 @@ export class ScanContainer {
 
         return true;
     }
-
-    // private equalContent(a: aas.Environment | null, b: aas.Environment | null): boolean {
-    //     let equals: boolean;
-    //     if (a === b) {
-    //         equals = true;
-    //     } else if (a !== null && b !== null) {
-    //         equals = isDeepEqual(a, b);
-    //     } else {
-    //         equals = false;
-    //     }
-
-    //     return equals;
-    // }
 }

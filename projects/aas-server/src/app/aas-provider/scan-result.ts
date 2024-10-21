@@ -6,13 +6,14 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message, TemplateDescriptor } from 'aas-core';
+import { AASDocument, Message, TemplateDescriptor, AASEndpoint } from 'aas-core';
 
 export enum ScanResultType {
     Added,
     Removed,
     Changed,
     Update,
+    NextPage,
     End,
 }
 
@@ -26,15 +27,21 @@ export interface ScanResult {
     messages?: Message[];
 }
 
-/** The result of a container scan. */
-export interface ScanContainerResult extends ScanResult {
-    /** The AAS container. */
-    container: AASContainer;
-    /** The result subject. */
+/** The result of an endpoint scan. */
+export interface ScanEndpointResult extends ScanResult {
+    endpoint: AASEndpoint;
+    documents: AASDocument[];
+    cursor?: string;
     document: AASDocument;
 }
 
-/** The result of a container scan. */
+/** The result of a template scan. */
 export interface ScanTemplatesResult extends ScanResult {
     templates: TemplateDescriptor[];
+}
+
+/** The result for a next page request. */
+export interface ScanNextPageResult extends ScanResult {
+    endpoint: AASEndpoint;
+    cursor: string;
 }

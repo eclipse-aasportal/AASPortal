@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, ApplicationError } from 'aas-core';
+import { aas, AASEndpoint, ApplicationError, noop } from 'aas-core';
 import { extname, join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
@@ -16,6 +16,7 @@ import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 export class AasxDirectory extends AASResource {
     private readonly root: string;
@@ -46,10 +47,11 @@ export class AasxDirectory extends AASResource {
         return this.fileStorage.readFile(join(this.root, name));
     }
 
-    public async getFiles(): Promise<string[]> {
+    public async getFiles(cursor?: string): Promise<PagedResult<string>> {
+        noop(cursor);
         const files: string[] = [];
         await this.readDirAsync(this.root, '', files);
-        return files;
+        return { result: files, paging_metadata: {} };
     }
 
     public async testAsync(): Promise<void> {

@@ -100,7 +100,14 @@ export abstract class AASResource {
      * @param url The URL.
      * @returns A new URL.
      */
-    protected resolve(url: string): URL {
-        return new URL(url, this.endpoint.url);
+    protected resolve(url: string, searchParams?: Record<string, string | number>): URL {
+        const resolvedUrl = new URL(url, this.endpoint.url);
+        if (searchParams) {
+            for (const name in searchParams) {
+                resolvedUrl.searchParams.set(name, String(searchParams[name]));
+            }
+        }
+
+        return resolvedUrl;
     }
 }

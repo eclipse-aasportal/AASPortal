@@ -59,6 +59,7 @@ export type AASEndpoint = {
 
 /** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
 export interface AASContainer extends AASEndpoint {
+    cursor?: string;
     documents?: AASDocument[];
 }
 

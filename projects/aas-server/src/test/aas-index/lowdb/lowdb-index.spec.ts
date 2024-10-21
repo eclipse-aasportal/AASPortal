@@ -44,8 +44,8 @@ describe('LowDbIndex', () => {
 
     describe('getContainerDocuments', () => {
         it('returns all documents that belongs to a container', async () => {
-            const array = await index.getContainerDocuments('Samples');
-            expect(array).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));
+            const result = await index.nextPage('Samples', undefined);
+            expect(result.result).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));
         });
     });
 

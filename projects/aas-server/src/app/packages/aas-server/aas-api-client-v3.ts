@@ -9,12 +9,6 @@
 import FormData from 'form-data';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { createReadStream } from 'fs';
-import { encodeBase64Url } from '../../convert.js';
-import { AASApiClient } from './aas-api-client.js';
-import { Logger } from '../../logging/logger.js';
-import { JsonReaderV3 } from '../json-reader-v3.js';
-import { JsonWriterV3 } from '../json-writer-v3.js';
-import { ERRORS } from '../../errors.js';
 import {
     aas,
     AASEndpoint,
@@ -26,7 +20,15 @@ import {
     isSubmodelElement,
     selectSubmodel,
 } from 'aas-core';
+
+import { encodeBase64Url } from '../../convert.js';
+import { AASApiClient } from './aas-api-client.js';
+import { Logger } from '../../logging/logger.js';
+import { JsonReaderV3 } from '../json-reader-v3.js';
+import { JsonWriterV3 } from '../json-writer-v3.js';
+import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -55,15 +57,6 @@ export interface OperationResult {
     inoutputVariables?: aas.OperationVariable[];
 }
 
-interface PagedResultPagingMetadata {
-    cursor?: string;
-}
-
-interface PagedResult<T> {
-    result: T[];
-    paging_metadata: PagedResultPagingMetadata;
-}
-
 export class AASApiClientV3 extends AASApiClient {
     public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
         super(logger, http, endpoint);
@@ -75,13 +68,21 @@ export class AASApiClientV3 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(): Promise<string[]> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<string>> {
+        const searchParams: Record<string, string | number> = { limit: 10 };
+        if (cursor) {
+            searchParams.cursor = cursor;
+        }
+
         const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
-            this.resolve('shells'),
+            this.resolve('shells', searchParams),
             this.endpoint.headers,
         );
 
-        return result.result.map(shell => shell.id);
+        return {
+            result: result.result.map(shell => shell.id),
+            paging_metadata: { cursor: result.paging_metadata.cursor },
+        };
     }
 
     public async readEnvironmentAsync(id: string): Promise<aas.Environment> {
@@ -91,42 +92,34 @@ export class AASApiClientV3 extends AASApiClient {
             this.endpoint.headers,
         );
 
-        const submodels: aas.Submodel[] = [];
-        if (shell.submodels) {
-            for (const reference of shell.submodels) {
-                const submodelId = encodeBase64Url(reference.keys[0].value);
-                try {
-                    submodels.push(
-                        await this.http.get<aas.Submodel>(
-                            this.resolve(`shells/${aasId}/submodels/${submodelId}`),
-                            this.endpoint.headers,
-                        ),
-                    );
-                } catch (error) {
-                    this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
-                }
-            }
-        }
+        const env: aas.Environment = {
+            assetAdministrationShells: [shell],
+            submodels: await this.readSubmodels(aasId, shell.submodels),
+            conceptDescriptions: [],
+        };
 
-        let conceptDescriptions: aas.ConceptDescription[];
-        try {
+        return new JsonReaderV3(env).readEnvironment();
+    }
+
+    public async readConceptDescriptionsAsync(): Promise<aas.ConceptDescription[]> {
+        const conceptDescriptions: aas.ConceptDescription[] = [];
+        let cursor: string | undefined;
+        const searchParams: Record<string, string | number> = { limit: 100 };
+        do {
+            if (cursor) {
+                searchParams.cursor = cursor;
+            }
+
             const pagedResult = await this.http.get<PagedResult<aas.ConceptDescription>>(
                 this.resolve(`concept-descriptions`),
                 this.endpoint.headers,
             );
 
-            conceptDescriptions = pagedResult.result;
-        } catch {
-            conceptDescriptions = [];
-        }
+            conceptDescriptions.push(...pagedResult.result);
+            cursor = pagedResult.paging_metadata.cursor;
+        } while (cursor);
 
-        const sourceEnv: aas.Environment = {
-            assetAdministrationShells: [shell],
-            submodels,
-            conceptDescriptions,
-        };
-
-        return new JsonReaderV3(sourceEnv).readEnvironment();
+        return conceptDescriptions;
     }
 
     public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
@@ -181,10 +174,11 @@ export class AASApiClientV3 extends AASApiClient {
         return messages;
     }
 
-    public async openFileAsync(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async openFileAsync(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+        const aasId = encodeBase64Url(shell.id);
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);
-        const url = this.resolve(`submodels/${smId}/submodel-elements/${path}/attachment`);
+        const url = this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${path}/attachment`);
         return await this.http.getResponse(url, this.endpoint.headers);
     }
 
@@ -276,6 +270,29 @@ export class AASApiClientV3 extends AASApiClient {
         }
 
         return blob.value;
+    }
+
+    private async readSubmodels(aasId: string, submodelRefs: aas.Reference[] | undefined): Promise<aas.Submodel[]> {
+        const submodels: aas.Submodel[] = [];
+        if (submodelRefs === undefined) {
+            return submodels;
+        }
+
+        for (const reference of submodelRefs) {
+            const smId = encodeBase64Url(reference.keys[0].value);
+            try {
+                submodels.push(
+                    await this.http.get<aas.Submodel>(
+                        this.resolve(`shells/${aasId}/submodels/${smId}`),
+                        this.endpoint.headers,
+                    ),
+                );
+            } catch (error) {
+                this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
+            }
+        }
+
+        return submodels;
     }
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {

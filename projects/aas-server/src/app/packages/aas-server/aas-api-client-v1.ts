@@ -17,6 +17,7 @@ import {
     isAssetAdministrationShell,
     isSubmodel,
     isSubmodelElement,
+    noop,
     selectSubmodel,
 } from 'aas-core';
 
@@ -29,6 +30,7 @@ import { JsonWriterV2 } from '../json-writer-v2.js';
 import { ERRORS } from '../../errors.js';
 import { JsonReaderV3 } from '../json-reader-v3.js';
 import { HttpClient } from '../../http-client.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -71,13 +73,15 @@ export class AASApiClientV1 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(): Promise<string[]> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<string>> {
         const result = await this.http.get<aasv2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
         );
 
-        return result.map(shell => shell.identification.id);
+        noop(cursor);
+
+        return { result: result.map(shell => shell.identification.id), paging_metadata: {} };
     }
 
     public async readEnvironmentAsync(id: string): Promise<aas.Environment> {

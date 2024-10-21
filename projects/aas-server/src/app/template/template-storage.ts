@@ -81,7 +81,7 @@ export class TemplateStorage {
             taskId,
         };
 
-        this.taskHandler.set(taskId, { name: 'TemplateStorage', owner: this, type: 'ScanTemplates' });
+        this.taskHandler.set(taskId, { endpointName: 'TemplateStorage', owner: this, type: 'ScanTemplates' });
         this.parallel.execute(data);
     };
 
@@ -127,7 +127,7 @@ export class TemplateStorage {
         setTimeout(this.scanTemplates, this.timeout, result.taskId);
 
         if (result.messages) {
-            this.logger.start(`scan ${task?.name ?? 'undefined'}`);
+            this.logger.start(`scan ${task?.endpointName ?? 'undefined'}`);
             result.messages.forEach(message => this.logger.log(message));
             this.logger.stop();
         }

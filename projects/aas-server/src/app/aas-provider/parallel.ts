@@ -53,10 +53,16 @@ class WorkerTask extends EventEmitter {
 
     private workerOnMessage = (value: Uint8Array) => {
         const result: ScanResult = JSON.parse(Buffer.from(value).toString());
-        if (result.type === ScanResultType.End) {
-            this.emit('end', this, result);
-        } else {
-            this.emit('message', result);
+        switch (result.type) {
+            case ScanResultType.End:
+                this.emit('end', result, this);
+                break;
+            case ScanResultType.NextPage:
+                this.emit('nextPage', result, this);
+                break;
+            default:
+                this.emit('message', result);
+                break;
         }
     };
 
@@ -95,6 +101,7 @@ export class Parallel extends EventEmitter {
     public execute(data: WorkerData): void {
         const task = new WorkerTask(data);
         task.on('message', this.taskOnMessage);
+        task.on('nextPage', this.taskOnNextPage);
         task.on('end', this.taskOnEnd);
         task.on('error', this.taskOnError);
 
@@ -127,7 +134,11 @@ export class Parallel extends EventEmitter {
         this.emit('message', result);
     };
 
-    private taskOnEnd = (task: WorkerTask, result: ScanResult) => {
+    private taskOnNextPage = (result: ScanResult, task: WorkerTask) => {
+        this.emit('nextPage', result, task.worker);
+    };
+
+    private taskOnEnd = (result: ScanResult, task: WorkerTask) => {
         this.emit('end', result);
 
         if (task) {

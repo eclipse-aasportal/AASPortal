@@ -6,13 +6,14 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, DifferenceItem, selectSubmodel } from 'aas-core';
+import { aas, AASEndpoint, DifferenceItem, noop, selectSubmodel } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { AASApiClient } from './aas-api-client.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import * as aasV2 from '../../types/aas-v2.js';
 import { HttpClient } from '../../http-client.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 interface AASList {
     aaslist: string[];
@@ -29,9 +30,12 @@ export class AASApiClientV0 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(): Promise<string[]> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<string>> {
         const value = await this.http.get<AASList>(this.resolve('/server/listaas'));
-        return value.aaslist.map(item => item.split(' : ')[1].trim());
+
+        noop(cursor);
+
+        return { result: value.aaslist.map(item => item.split(' : ')[1].trim()), paging_metadata: {} };
     }
 
     public override async readEnvironmentAsync(id: string): Promise<aas.Environment> {

@@ -15,6 +15,7 @@ import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { AASServerPackage } from './aas-server-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 interface PropertyValue {
     value: string;
@@ -91,7 +92,7 @@ export abstract class AASApiClient extends AASResource {
      * Gets the names of the Asset Administration Shells contained in the current AASX server.
      * @returns The names of the AASs contained in the current AASX server.
      */
-    public abstract getShellsAsync(): Promise<string[]>;
+    public abstract getShellsAsync(cursor?: string): Promise<PagedResult<string>>;
 
     /**
      * ToDo

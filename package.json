@@ -55,6 +55,7 @@
         "@popperjs/core": "^2.11.8",
         "@xmldom/xmldom": "^0.8.10",
         "aas-core": "projects/aas-core",
+        "axios": "^1.7.7",
         "bcryptjs": "^2.4.3",
         "bootstrap": "^5.3.3",
         "bootstrap-icons": "^1.11.3",

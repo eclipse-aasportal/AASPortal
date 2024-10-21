@@ -26,6 +26,8 @@ import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
 import { ERRORS } from '../../errors.js';
 import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
+import { decodeBase64Url, encodeBase64Url } from '../../convert.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
@@ -88,9 +90,51 @@ export class LowDbIndex extends AASIndex {
         return true;
     }
 
-    public override async getContainerDocuments(endpointName: string): Promise<AASDocument[]> {
+    public override async nextPage(
+        endpointName: string,
+        cursor: string | undefined,
+        limit: number = 10,
+    ): Promise<PagedResult<AASDocument>> {
         await this.promise;
-        return this.db.data.documents.filter(document => document.endpoint === endpointName);
+
+        if (cursor) {
+            cursor = decodeBase64Url(cursor);
+        }
+
+        const documents: AASDocument[] = [];
+        if (this.db.data.documents.length === 0) {
+            return { result: documents, paging_metadata: {} };
+        }
+
+        const items = this.db.data.documents;
+        const index = items.findIndex(item => {
+            if (item.endpoint !== endpointName) {
+                return false;
+            }
+
+            return cursor === undefined || cursor.localeCompare(item.id) <= 0;
+        });
+
+        if (index < 0) {
+            return { result: documents, paging_metadata: {} };
+        }
+
+        const result: AASDocument[] = [];
+        for (let i = 0, j = index, n = items.length; i < limit && j < n; i++, j++) {
+            const item = items[j];
+            if (item.endpoint !== endpointName) {
+                break;
+            }
+
+            result.push(item);
+        }
+
+        const k = index + limit + 1;
+        if (k >= items.length || items[k].endpoint !== endpointName) {
+            return { result, paging_metadata: {} };
+        }
+
+        return { result, paging_metadata: { cursor: encodeBase64Url(items[k].id) } };
     }
 
     public override async getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage> {

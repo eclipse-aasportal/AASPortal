@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import http from 'http';
-import https from 'https';
 import net from 'net';
 import FormData from 'form-data';
-import { parseUrl } from './convert.js';
+import axios, { AxiosResponse } from 'axios';
 import { singleton } from 'tsyringe';
+import { parseUrl } from './convert.js';
 
 @singleton()
 export class HttpClient {
@@ -22,43 +22,12 @@ export class HttpClient {
      * @param headers Additional outgoing http headers.
      * @returns The requested object.
      */
-    public get<T extends object>(url: URL, headers: http.OutgoingHttpHeaders = {}): Promise<T> {
-        return new Promise((result, reject) => {
-            const options: http.RequestOptions = {
-                host: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'GET',
-                headers: {
-                    connection: 'keep-alive',
-                    ...headers,
-                },
-            };
-
-            const requester = url.protocol === 'https:' ? https.request : http.request;
-            const request = requester(options, response => {
-                let data = '';
-                response.on('data', (chunk: string) => {
-                    data += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        HttpClient.checkStatusCode(response, data);
-                        result(JSON.parse(data));
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            });
-
-            request
-                .on('timeout', () => request.destroy())
-                .on('error', error => reject(error))
-                .end();
+    public async get<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
+        const response: AxiosResponse<T> = await axios.get(url.toString(), {
+            headers,
         });
+
+        return response.data;
     }
 
     /**
@@ -67,27 +36,13 @@ export class HttpClient {
      * @param headers Additional outgoing http headers.
      * @returns The request.
      */
-    public getResponse(url: URL, headers?: http.OutgoingHttpHeaders): Promise<http.IncomingMessage> {
-        return new Promise((result, reject) => {
-            const options: http.RequestOptions = {
-                host: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'GET',
-                timeout: 3000,
-            };
-
-            if (headers) {
-                options.headers = { ...headers };
-            }
-
-            const requester = url.protocol === 'https:' ? https.request : http.request;
-            const request = requester(options, response => result(response));
-            request
-                .on('timeout', () => request.destroy())
-                .on('error', error => reject(error))
-                .end();
+    public async getResponse(url: URL, headers?: Record<string, string>): Promise<http.IncomingMessage> {
+        const response = await axios.get(url.toString(), {
+            headers,
+            responseType: 'stream',
         });
+
+        return response.data;
     }
 
     /**
@@ -96,43 +51,18 @@ export class HttpClient {
      * @param obj The object to send.
      * @param headers Additional outgoing http headers.
      */
-    public put(url: URL, obj: object, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
-        return new Promise((result, reject) => {
-            const data = JSON.stringify(obj);
-            const options: http.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data),
-                    ...headers,
-                },
-            };
-
-            const requester = url.protocol === 'https:' ? https.request : http.request;
-            const request = requester(options, response => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        HttpClient.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            }).on('error', error => reject(error));
-
-            request.write(data);
-            request.end();
+    public async put(url: URL, obj: object, headers?: Record<string, string>): Promise<string> {
+        const response = await axios.put(url.toString(), {
+            obj,
+            headers,
         });
+
+        const data = response.data;
+        if (typeof data === 'string') {
+            return data;
+        }
+
+        return response.statusText;
     }
 
     /**
@@ -141,7 +71,7 @@ export class HttpClient {
      * @param obj The object to send.
      * @param headers Additional outgoing http headers.
      */
-    public post(url: URL, obj: FormData | object, headers?: http.OutgoingHttpHeaders): Promise<string> {
+    public post(url: URL, obj: FormData | object, headers?: Record<string, string>): Promise<string> {
         return obj instanceof FormData ? this.postFormData(url, obj, headers) : this.postObject(url, obj, headers);
     }
 
@@ -150,40 +80,17 @@ export class HttpClient {
      * @param url The URL of the object to delete.
      * @param headers Additional outgoing http headers.
      */
-    public delete(url: URL, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
-        return new Promise((result, reject) => {
-            const options: https.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...headers,
-                },
-            };
-
-            const requester = url.protocol === 'https:' ? https.request : http.request;
-            requester(options, response => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
-
-                response.on('end', function () {
-                    try {
-                        HttpClient.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            })
-                .on('error', error => reject(error))
-                .end();
+    public async delete(url: URL, headers?: Record<string, string>): Promise<string> {
+        const response = await axios.delete(url.toString(), {
+            headers,
         });
+
+        const data = response.data;
+        if (typeof data === 'string') {
+            return data;
+        }
+
+        return response.statusText;
     }
 
     /**
@@ -196,110 +103,42 @@ export class HttpClient {
             const port = Number(temp.port ? temp.port : temp.protocol === 'http:' ? 80 : 443);
             const socket = net.createConnection(port, temp.hostname);
             socket.setTimeout(3000);
-            socket.on('connect', () => {
-                socket.end();
-            });
-
-            socket.on('end', () => {
-                socket.destroy();
-                resolve();
-            });
-
-            socket.on('timeout', () => {
-                socket.destroy();
-                reject(new Error(`${url} does not exist.`));
-            });
-
-            socket.on('error', () => {
-                socket.destroy();
-                reject(new Error(`${url} does not exist.`));
-            });
+            socket
+                .on('connect', () => {
+                    socket.end();
+                })
+                .on('end', () => {
+                    socket.destroy();
+                    resolve();
+                })
+                .on('timeout', () => {
+                    socket.destroy();
+                    reject(new Error(`${url} does not exist.`));
+                })
+                .on('error', () => {
+                    socket.destroy();
+                    reject(new Error(`${url} does not exist.`));
+                });
         });
     }
 
-    private postObject(url: URL, obj: object, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
-        return new Promise((result, reject) => {
-            const data = JSON.stringify(obj);
-            const options: http.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data),
-                    ...headers,
-                },
-            };
-
-            const requester = url.protocol === 'https:' ? https.request : http.request;
-            const request = requester(options, response => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        HttpClient.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            }).on('error', error => reject(error));
-
-            request.write(data);
-            request.end();
-        });
-    }
-
-    private postFormData(url: URL, formData: FormData, headers: http.OutgoingHttpHeaders = {}): Promise<string> {
-        return new Promise((result, reject) => {
-            const options: http.RequestOptions = {
-                hostname: url.hostname,
-                port: url.port,
-                path: url.pathname + url.search,
-                method: 'POST',
-                headers: { ...formData.getHeaders(), ...headers },
-            };
-
-            const requester = url.protocol === 'https:' ? https.request : http.request;
-            const request = requester(options, response => {
-                let responseData = '';
-                response.on('data', (chunk: string) => {
-                    responseData += chunk;
-                });
-
-                response.on('end', function () {
-                    try {
-                        HttpClient.checkStatusCode(response, responseData);
-                        result(responseData);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                response.on('error', error => reject(error));
-            }).on('error', error => reject(error));
-
-            formData.pipe(request);
-        });
-    }
-
-    private static checkStatusCode(response: http.IncomingMessage, data?: string): void {
-        if (!response.statusCode) {
-            throw new Error(data ? `Unknown status code: ${data}` : 'Unknown status code.');
+    private async postObject(url: URL, obj: object, headers: Record<string, string> | undefined): Promise<string> {
+        const response = await axios.post(url.toString(), obj, { headers });
+        const data = response.data;
+        if (typeof data === 'string') {
+            return data;
         }
 
-        if (response.statusCode < 200 || response.statusCode >= 300) {
-            throw new Error(
-                data
-                    ? `(${response.statusCode}) ${response.statusMessage}: ${data}`
-                    : `(${response.statusCode}) ${response.statusMessage}.`,
-            );
+        return response.statusText;
+    }
+
+    private async postFormData(url: URL, formData: FormData, headers?: Record<string, string>): Promise<string> {
+        const response = await axios.post(url.toString(), formData, { headers });
+        const data = response.data;
+        if (typeof data === 'string') {
+            return data;
         }
+
+        return response.statusText;
     }
 }
