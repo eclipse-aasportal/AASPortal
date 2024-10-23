@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASEndpoint } from 'aas-core';
+import { AASEndpoint } from 'aas-core';
 
 export interface WorkerData {
     taskId: number;
@@ -16,8 +16,6 @@ export interface WorkerData {
 export interface ScanEndpointData extends WorkerData {
     type: 'ScanEndpointData';
     endpoint: AASEndpoint;
-    documents: AASDocument[];
-    cursor?: string;
 }
 
 export interface ScanTemplatesData extends WorkerData {

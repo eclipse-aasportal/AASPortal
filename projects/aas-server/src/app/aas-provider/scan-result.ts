@@ -30,18 +30,10 @@ export interface ScanResult {
 /** The result of an endpoint scan. */
 export interface ScanEndpointResult extends ScanResult {
     endpoint: AASEndpoint;
-    documents: AASDocument[];
-    cursor?: string;
     document: AASDocument;
 }
 
 /** The result of a template scan. */
 export interface ScanTemplatesResult extends ScanResult {
     templates: TemplateDescriptor[];
-}
-
-/** The result for a next page request. */
-export interface ScanNextPageResult extends ScanResult {
-    endpoint: AASEndpoint;
-    cursor: string;
 }

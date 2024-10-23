@@ -7,13 +7,12 @@
  *****************************************************************************/
 
 import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescription } from 'node-opcua';
-import { AASDocument, noop } from 'aas-core';
+import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../packages/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { OpcuaPackage } from '../packages/opcua/opcua-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
-import { PagedResult } from '../types/paged-result.js';
 
 export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;
@@ -26,9 +25,8 @@ export class OpcuaServerScan extends AASResourceScan {
         this.server = server;
     }
 
-    public async scanAsync(cursor?: string): Promise<PagedResult<AASDocument>> {
+    public async scanAsync(): Promise<void> {
         try {
-            noop(cursor);
             await this.server.openAsync();
             const documents: AASDocument[] = [];
             const dataTypes = new OpcuaDataTypeDictionary();
@@ -44,8 +42,6 @@ export class OpcuaServerScan extends AASResourceScan {
                     this.emit('error', error, this.server, nodeId);
                 }
             }
-
-            return { result: documents, paging_metadata: {} };
         } finally {
             await this.server.closeAsync();
         }

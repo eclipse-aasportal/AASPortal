@@ -11,7 +11,6 @@ import { Logger } from '../logging/logger.js';
 import { AasxPackage } from '../packages/file-system/aasx-package.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { AASResourceScan } from './aas-resource-scan.js';
-import { PagedResult } from '../types/paged-result.js';
 
 export class DirectoryScan extends AASResourceScan {
     public constructor(
@@ -21,7 +20,7 @@ export class DirectoryScan extends AASResourceScan {
         super();
     }
 
-    public async scanAsync(cursor?: string): Promise<PagedResult<AASDocument>> {
+    public async scanAsync(): Promise<void> {
         try {
             await this.source.openAsync();
             const result = await this.source.getFiles(cursor);
@@ -36,8 +35,6 @@ export class DirectoryScan extends AASResourceScan {
                     this.emit('error', error, this.source, file);
                 }
             }
-
-            return { result: documents, paging_metadata: { cursor: result.paging_metadata.cursor } };
         } finally {
             await this.source.closeAsync();
         }

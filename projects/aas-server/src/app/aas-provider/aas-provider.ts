@@ -26,7 +26,7 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from '../aas-index/aas-index.js';
-import { ScanResultType, ScanResult, ScanEndpointResult, ScanNextPageResult } from './scan-result.js';
+import { ScanResultType, ScanResult, ScanEndpointResult } from './scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
 import { ScanEndpointData } from './worker-data.js';
@@ -61,7 +61,6 @@ export class AASProvider {
         this.timeout = variable.SCAN_CONTAINER_TIMEOUT;
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
-        this.parallel.on('nextPage', this.parallelOnNextPage);
     }
 
     /**
@@ -471,25 +470,41 @@ export class AASProvider {
         }
     };
 
-    private scanEndpoint = async (taskId: number, endpoint: AASEndpoint) => {
-        const result = await this.index.nextPage(endpoint.name, undefined);
-        const data: ScanEndpointData = {
-            type: 'ScanEndpointData',
-            taskId,
-            endpoint,
-            documents: result.result,
-        };
-
-        this.taskHandler.set(taskId, { endpointName: endpoint.name, owner: this, type: 'ScanEndpoint' });
-        this.parallel.execute(data);
-    };
-
     private notify(data: AASServerMessage): void {
         this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: data,
         });
     }
+
+    private scanEndpoint = async (taskId: number, endpoint: AASEndpoint) => {
+        const data: ScanEndpointData = {
+            type: 'ScanEndpointData',
+            taskId,
+            endpoint,
+        };
+
+        this.taskHandler.set(taskId, { endpointName: endpoint.name, owner: this, type: 'ScanEndpoint' });
+        this.parallel.execute(data);
+    };
+
+    private parallelOnMessage = async (result: ScanEndpointResult) => {
+        try {
+            switch (result.type) {
+                case ScanResultType.Changed:
+                    await this.onChanged(result);
+                    break;
+                case ScanResultType.Added:
+                    await this.onAdded(result);
+                    break;
+                case ScanResultType.Removed:
+                    await this.onRemoved(result);
+                    break;
+            }
+        } catch (error) {
+            this.logger.error(error);
+        }
+    };
 
     private parallelOnEnd = async (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
@@ -512,37 +527,6 @@ export class AASProvider {
         if (this.resetRequested && this.taskHandler.empty(this)) {
             await this.restart();
         }
-    };
-
-    private parallelOnMessage = async (result: ScanEndpointResult) => {
-        try {
-            switch (result.type) {
-                case ScanResultType.Changed:
-                    await this.onChanged(result);
-                    break;
-                case ScanResultType.Added:
-                    await this.onAdded(result);
-                    break;
-                case ScanResultType.Removed:
-                    await this.onRemoved(result);
-                    break;
-            }
-        } catch (error) {
-            this.logger.error(error);
-        }
-    };
-
-    private parallelOnNextPage = async (result: ScanNextPageResult, worker: Worker) => {
-        const a = await this.index.nextPage(result.endpoint.name, result.cursor);
-        const data: ScanEndpointData = {
-            type: 'ScanEndpointData',
-            taskId: result.taskId,
-            endpoint: result.endpoint,
-            documents: a.result,
-            cursor: a.paging_metadata.cursor,
-        };
-
-        worker.postMessage(data);
     };
 
     private async onChanged(result: ScanEndpointResult): Promise<void> {

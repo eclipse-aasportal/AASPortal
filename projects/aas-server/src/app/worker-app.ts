@@ -9,17 +9,11 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { ScanNextPageResult, ScanResult, ScanResultType } from './aas-provider/scan-result.js';
+import { ScanResult, ScanResultType } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { EndpointScan } from './endpoint-scan.js';
 import { TemplateScan } from './template/template-scan.js';
-import {
-    ScanEndpointData,
-    ScanTemplatesData,
-    WorkerData,
-    isScanEndpointData,
-    isScanTemplatesData,
-} from './aas-provider/worker-data.js';
+import { WorkerData, isScanEndpointData, isScanTemplatesData } from './aas-provider/worker-data.js';
 
 @singleton()
 export class WorkerApp {
@@ -40,62 +34,24 @@ export class WorkerApp {
 
         try {
             this.logger.start(`Scan ${data.taskId}`);
-            let result: ScanResult;
-
             if (isScanEndpointData(data)) {
-                result = await this.scanEndpoint(data);
+                await this.endpointScan.scanAsync(data);
             } else if (isScanTemplatesData(data)) {
-                result = await this.scanTemplates(data);
-            } else {
-                result = {
-                    taskId: data.taskId,
-                    type: ScanResultType.End,
-                    messages: this.logger.getMessages(),
-                };
+                await this.templateScan.scanAsync(data);
             }
-
-            parentPort.postMessage(toUint8Array(result));
         } catch (error) {
             this.logger.error(error);
+        } finally {
             this.logger.stop();
-            const result: ScanResult = {
-                taskId: data.taskId,
-                type: ScanResultType.End,
-                messages: this.logger.getMessages(),
-            };
-
-            parentPort.postMessage(toUint8Array(result));
+            parentPort.postMessage(toUint8Array(this.createEndResult));
         }
     };
 
-    private async scanEndpoint(data: ScanEndpointData): Promise<ScanResult> {
-        const cursor = await this.endpointScan.scanAsync(data);
-        this.logger.stop();
-
-        if (cursor) {
-            return {
-                taskId: data.taskId,
-                type: ScanResultType.NextPage,
-                cursor,
-                messages: this.logger.getMessages(),
-            } as ScanNextPageResult;
-        }
-
+    private createEndResult(taskId: number): ScanResult {
         return {
-            taskId: data.taskId,
+            taskId: taskId,
             type: ScanResultType.End,
             messages: this.logger.getMessages(),
-        } as ScanResult;
-    }
-
-    private async scanTemplates(data: ScanTemplatesData): Promise<ScanResult> {
-        await this.templateScan.scanAsync(data);
-        this.logger.stop();
-
-        return {
-            taskId: data.taskId,
-            type: ScanResultType.End,
-            messages: this.logger.getMessages(),
-        } as ScanResult;
+        };
     }
 }
