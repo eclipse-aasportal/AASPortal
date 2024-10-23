@@ -57,9 +57,6 @@ class WorkerTask extends EventEmitter {
             case ScanResultType.End:
                 this.emit('end', result, this);
                 break;
-            case ScanResultType.NextPage:
-                this.emit('nextPage', result, this);
-                break;
             default:
                 this.emit('message', result);
                 break;
@@ -101,7 +98,6 @@ export class Parallel extends EventEmitter {
     public execute(data: WorkerData): void {
         const task = new WorkerTask(data);
         task.on('message', this.taskOnMessage);
-        task.on('nextPage', this.taskOnNextPage);
         task.on('end', this.taskOnEnd);
         task.on('error', this.taskOnError);
 
@@ -132,10 +128,6 @@ export class Parallel extends EventEmitter {
 
     private taskOnMessage = (result: ScanResult) => {
         this.emit('message', result);
-    };
-
-    private taskOnNextPage = (result: ScanResult, task: WorkerTask) => {
-        this.emit('nextPage', result, task.worker);
     };
 
     private taskOnEnd = (result: ScanResult, task: WorkerTask) => {

@@ -15,6 +15,7 @@ import { ScanEndpointResult, ScanResultType } from './aas-provider/scan-result.j
 import { toUint8Array } from './convert.js';
 import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
 import { Variable } from './variable.js';
+import { AASIndex } from './aas-index/aas-index.js';
 
 @singleton()
 export class EndpointScan {
@@ -22,6 +23,7 @@ export class EndpointScan {
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
+        @inject('AASIndex') private readonly index: AASIndex,
         @inject(AASResourceScanFactory) private readonly resourceScanFactory: AASResourceScanFactory,
         @inject(Variable) private readonly variable: Variable,
     ) {}
@@ -31,21 +33,21 @@ export class EndpointScan {
         const scan = this.resourceScanFactory.create(data.endpoint);
         try {
             scan.on('compare', this.compare);
-            scan.on('removed', this.removed);
+            scan.on('remove', this.postRemove);
+            scan.on('add', this.postAdd);
             scan.on('error', this.onError);
-            const result = await scan.scanAsync(data);
-            // this.computeDeleted(result.result);
-            return result.paging_metadata.cursor;
+            await scan.scanAsync(this.index, data.endpoint);
         } finally {
             scan.off('compare', this.compare);
-            scan.off('removed', this.removed);
+            scan.off('remove', this.postRemove);
+            scan.off('add', this.postAdd);
             scan.off('error', this.onError);
         }
     }
 
     private compare = (reference: AASDocument, document: AASDocument): void => {
         if (this.documentChanged(document, reference)) {
-            this.postChanged(document);
+            this.postUpdate(document);
         }
     };
 
@@ -53,10 +55,10 @@ export class EndpointScan {
         this.logger.error(error);
     };
 
-    private postChanged(document: AASDocument): void {
+    private postUpdate(document: AASDocument): void {
         const value: ScanEndpointResult = {
             taskId: this.data.taskId,
-            type: ScanResultType.Changed,
+            type: ScanResultType.Update,
             endpoint: this.data.endpoint,
             document: document,
         };
@@ -65,10 +67,10 @@ export class EndpointScan {
         parentPort?.postMessage(array, [array.buffer]);
     }
 
-    private removed = (document: AASDocument): void => {
+    private postRemove = (document: AASDocument): void => {
         const value: ScanEndpointResult = {
             taskId: this.data.taskId,
-            type: ScanResultType.Removed,
+            type: ScanResultType.Remove,
             endpoint: this.data.endpoint,
             document: document,
         };
@@ -77,17 +79,17 @@ export class EndpointScan {
         parentPort?.postMessage(array, [array.buffer]);
     };
 
-    private postAdded(document: AASDocument): void {
+    private postAdd = (document: AASDocument): void => {
         const value: ScanEndpointResult = {
             taskId: this.data.taskId,
-            type: ScanResultType.Added,
+            type: ScanResultType.Add,
             endpoint: this.data.endpoint,
             document: document,
         };
 
         const array = toUint8Array(value);
         parentPort?.postMessage(array, [array.buffer]);
-    }
+    };
 
     private documentChanged(document: AASDocument, reference: AASDocument): boolean {
         if (

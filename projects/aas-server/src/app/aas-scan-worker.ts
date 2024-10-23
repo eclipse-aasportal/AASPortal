@@ -10,8 +10,10 @@ import 'reflect-metadata';
 import { MemoryLogger, MemoryLoggerLevel } from './logging/memory-logger.js';
 import { container } from 'tsyringe';
 import { WorkerApp } from './worker-app.js';
+import { AASIndexFactory } from './aas-index/aas-index-factory.js';
 
 container.register('Logger', MemoryLogger);
+container.register('AASIndex', { useFactory: c => new AASIndexFactory(c).create() });
 container.registerInstance(
     'LOG_LEVEL',
     process.env.NODE_ENV === 'production' ? MemoryLoggerLevel.Error : MemoryLoggerLevel.All,

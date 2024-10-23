@@ -9,11 +9,9 @@
 import { AASDocument, Message, TemplateDescriptor, AASEndpoint } from 'aas-core';
 
 export enum ScanResultType {
-    Added,
-    Removed,
-    Changed,
+    Add,
+    Remove,
     Update,
-    NextPage,
     End,
 }
 

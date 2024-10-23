@@ -11,8 +11,11 @@ import { Logger } from '../logging/logger.js';
 import { AasxPackage } from '../packages/file-system/aasx-package.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { AASResourceScan } from './aas-resource-scan.js';
+import { PagedResult } from '../types/paged-result.js';
 
 export class DirectoryScan extends AASResourceScan {
+    private readonly map = new Map<string, AASDocument>();
+
     public constructor(
         private readonly logger: Logger,
         private readonly source: AasxDirectory,
@@ -20,23 +23,35 @@ export class DirectoryScan extends AASResourceScan {
         super();
     }
 
-    public async scanAsync(): Promise<void> {
-        try {
-            await this.source.openAsync();
-            const result = await this.source.getFiles(cursor);
-            const documents: AASDocument[] = [];
-            for (const file of result.result) {
-                try {
-                    const aasxPackage = new AasxPackage(this.logger, this.source, file);
-                    const document = await aasxPackage.createDocumentAsync();
-                    documents.push(document);
-                    this.emit('scanned', document);
-                } catch (error) {
-                    this.emit('error', error, this.source, file);
-                }
+    protected override open(): Promise<void> {
+        this.map.clear();
+        return this.source.openAsync();
+    }
+
+    protected override close(): Promise<void> {
+        this.map.clear();
+        return this.source.closeAsync();
+    }
+
+    protected override createDocument(id: string): Promise<AASDocument> {
+        const document = this.map.get(id);
+        return document ? Promise.resolve(document) : Promise.reject(new Error(`${id} not found.`));
+    }
+
+    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {
+        const result = await this.source.getFiles(cursor);
+        const ids: string[] = [];
+        for (const file of result.result) {
+            try {
+                const aasxPackage = new AasxPackage(this.logger, this.source, file);
+                const document = await aasxPackage.createDocumentAsync();
+                ids.push(document.id);
+                this.map.set(document.id, document);
+            } catch (error) {
+                this.emit('error', error, this.source, file);
             }
-        } finally {
-            await this.source.closeAsync();
         }
+
+        return { result: ids, paging_metadata: {} };
     }
 }

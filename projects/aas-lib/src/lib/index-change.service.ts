@@ -105,8 +105,8 @@ export class IndexChangeService {
             case 'Removed':
                 this.documentRemoved();
                 break;
-            case 'Changed':
-                this.documentChanged();
+            case 'Update':
+                this.documentUpdate();
                 break;
             case 'EndpointAdded':
                 this.endpointAdded();
@@ -128,7 +128,7 @@ export class IndexChangeService {
         this.state.update(state => ({ ...state, removedDocuments: state.removedDocuments + 1 }));
     }
 
-    private documentChanged(): void {
+    private documentUpdate(): void {
         this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + 1 }));
     }
 

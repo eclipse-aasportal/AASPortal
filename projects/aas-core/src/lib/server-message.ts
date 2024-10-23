@@ -12,7 +12,7 @@ import { AASDocument, AASEndpoint } from './types.js';
 export type AASServerMessageType =
     | 'Added'
     | 'Removed'
-    | 'Changed'
+    | 'Update'
     | 'Offline'
     | 'EndpointAdded'
     | 'EndpointRemoved'

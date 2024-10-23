@@ -11,12 +11,11 @@ import { Logger } from '../logging/logger.js';
 import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
 import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
+import { PagedResult } from '../types/paged-result.js';
 
 export class AASServerScan extends AASResourceScan {
     private readonly logger: Logger;
     private readonly server: AASApiClient;
-
-    private static set = new Set<string>();
 
     public constructor(logger: Logger, server: AASApiClient) {
         super();
@@ -25,31 +24,19 @@ export class AASServerScan extends AASResourceScan {
         this.server = server;
     }
 
-    public async scanAsync(): Promise<void> {
-        try {
-            await this.server.openAsync();
+    protected override open(): Promise<void> {
+        return this.server.openAsync();
+    }
+    protected override close(): Promise<void> {
+        return this.server.closeAsync();
+    }
 
-            const documents: AASDocument[] = [];
-            const result = await this.server.getShellsAsync();
-            const ids = new Set(result.result);
-            for (const id of ids) {
-                if (AASServerScan.set.has(id)) {
-                    AASServerScan.set.delete(id);
-                } else {
-                    AASServerScan.set.add(id);
-                }
-                
-                try {
-                    const aasPackage = new AASServerPackage(this.logger, this.server, id);
-                    const document = await aasPackage.createDocumentAsync();
-                    documents.push(document);
-                    this.emit('scanned', document);
-                } catch (error) {
-                    this.emit('error', error, this.server, id);
-                }
-            }
-        } finally {
-            await this.server.closeAsync();
-        }
+    protected override createDocument(id: string): Promise<AASDocument> {
+        const aasPackage = new AASServerPackage(this.logger, this.server, id);
+        return aasPackage.createDocumentAsync();
+    }
+
+    protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {
+        return this.server.getShellsAsync(cursor);
     }
 }

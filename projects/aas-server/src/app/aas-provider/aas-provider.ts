@@ -22,6 +22,7 @@ import {
     ApplicationError,
     getChildren,
     isReferenceElement,
+    noop,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -374,12 +375,13 @@ export class AASProvider {
 
     /** Only used for test. */
     public async scanAsync(factory: AASResourceScanFactory): Promise<void> {
-        for (const endpoint of await this.index.getEndpoints()) {
-            if (endpoint.type === 'FileSystem') {
-                const result = await factory.create(endpoint).scanAsync();
-                result.result.forEach(async document => await this.index.add(document));
-            }
-        }
+        noop(factory);
+        // for (const endpoint of await this.index.getEndpoints()) {
+        //     if (endpoint.type === 'FileSystem') {
+        //         const result = await factory.create(endpoint).scanAsync();
+        //         result.result.forEach(async document => await this.index.add(document));
+        //     }
+        // }
     }
 
     /**
@@ -460,6 +462,13 @@ export class AASProvider {
         return resource.createSubscription(client, message, env);
     }
 
+    private notify(data: AASServerMessage): void {
+        this.wsServer.notify('IndexChange', {
+            type: 'AASServerMessage',
+            data: data,
+        });
+    }
+
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
@@ -469,13 +478,6 @@ export class AASProvider {
             this.logger.error(error);
         }
     };
-
-    private notify(data: AASServerMessage): void {
-        this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
-            data: data,
-        });
-    }
 
     private scanEndpoint = async (taskId: number, endpoint: AASEndpoint) => {
         const data: ScanEndpointData = {
@@ -491,13 +493,13 @@ export class AASProvider {
     private parallelOnMessage = async (result: ScanEndpointResult) => {
         try {
             switch (result.type) {
-                case ScanResultType.Changed:
-                    await this.onChanged(result);
+                case ScanResultType.Update:
+                    await this.onUpdate(result);
                     break;
-                case ScanResultType.Added:
+                case ScanResultType.Add:
                     await this.onAdded(result);
                     break;
-                case ScanResultType.Removed:
+                case ScanResultType.Remove:
                     await this.onRemoved(result);
                     break;
             }
@@ -529,7 +531,7 @@ export class AASProvider {
         }
     };
 
-    private async onChanged(result: ScanEndpointResult): Promise<void> {
+    private async onUpdate(result: ScanEndpointResult): Promise<void> {
         const document = result.document;
         if ((await this.index.hasEndpoint(document.endpoint)) === false) {
             return;
@@ -540,7 +542,7 @@ export class AASProvider {
             this.cache.set(document.endpoint, document.id, document.content);
         }
 
-        this.sendMessage({ type: 'Changed', document: { ...document, content: null } });
+        this.sendMessage({ type: 'Update', document: { ...document, content: null } });
     }
 
     private async onAdded(result: ScanEndpointResult): Promise<void> {
