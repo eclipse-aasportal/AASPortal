@@ -21,8 +21,13 @@ import {
 } from 'aas-core';
 
 import { PagedResult } from '../types/paged-result.js';
+import { KeywordDirectory } from './keyword-directory.js';
+import { LangString } from '../types/aas-v2.js';
 
+/** Represents an index of Asset Administration Shells. */
 export abstract class AASIndex {
+    protected constructor(private readonly keywordDirectory: KeywordDirectory) {}
+
     public abstract getCount(query?: string): Promise<number>;
 
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
@@ -68,18 +73,18 @@ export abstract class AASIndex {
         return getAbbreviation(referable.modelType)!.toLowerCase();
     }
 
-    protected toStringValue(referable: aas.Referable): string | undefined {
+    protected toStringValue(referable: aas.Referable, max: number = 512): string | undefined {
         switch (referable.modelType) {
             case 'Property': {
                 const property = referable as aas.Property;
                 if (baseType(property.valueType) === 'string') {
-                    return property.value;
+                    return this.preprocessString(property.value, max);
                 }
 
                 return undefined;
             }
             case 'MultiLanguageProperty':
-                return (referable as aas.MultiLanguageProperty).value?.map(item => item.text).join(' ');
+                return this.preprocessString((referable as aas.MultiLanguageProperty).value);
             case 'File':
                 return (referable as aas.File).value;
             case 'Blob':
@@ -126,5 +131,30 @@ export abstract class AASIndex {
         }
 
         return BigInt(referable.value);
+    }
+
+    private preprocessString(value: string | LangString[] | undefined, max: number = 512): string | undefined {
+        if (value === undefined) {
+            return undefined;
+        }
+
+        if (typeof value === 'string') {
+            if (value.length < 128) {
+                return value;
+            }
+
+            return this.keywordDirectory.toString(this.keywordDirectory.containedKeyword(value), ';', max);
+        }
+
+        const keywords: string[] = [];
+        for (const item of value) {
+            if (item.text.length < 32) {
+                keywords.push(item.text);
+            } else {
+                keywords.push(...this.keywordDirectory.containedKeyword(item.text, item.language));
+            }
+        }
+
+        return this.keywordDirectory.toString(keywords, ';', max);
     }
 }

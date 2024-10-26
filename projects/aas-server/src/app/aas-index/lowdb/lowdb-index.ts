@@ -28,15 +28,17 @@ import { ERRORS } from '../../errors.js';
 import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
 import { decodeBase64Url, encodeBase64Url } from '../../convert.js';
 import { PagedResult } from '../../types/paged-result.js';
+import { KeywordDirectory } from '../keyword-directory.js';
 
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
 
     public constructor(
         private readonly db: Low<LowDbData>,
+        keywordDirectory: KeywordDirectory,
         private readonly variable: Variable,
     ) {
-        super();
+        super(keywordDirectory);
 
         this.promise = this.initialize();
     }
@@ -93,7 +95,7 @@ export class LowDbIndex extends AASIndex {
     public override async nextPage(
         endpointName: string,
         cursor: string | undefined,
-        limit: number = 10,
+        limit: number = 100,
     ): Promise<PagedResult<AASDocument>> {
         await this.promise;
 

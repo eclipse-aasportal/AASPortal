@@ -15,11 +15,13 @@ import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-index/lowdb/lowdb-index.js';
 import { LowDbData } from '../../../app/aas-index/lowdb/lowdb-types.js';
+import { KeywordDirectory } from 'projects/aas-server/src/app/aas-index/keyword-directory.js';
 
 describe('LowDbIndex', () => {
     let index: LowDbIndex;
     let db: jest.Mocked<Low<LowDbData>>;
     let variable: jest.Mocked<Variable>;
+    let keywords: jest.Mocked<KeywordDirectory>;
     let dbData: LowDbData;
 
     beforeAll(async () => {
@@ -35,7 +37,8 @@ describe('LowDbIndex', () => {
         db = createSpyObj<Low<LowDbData>>(['read', 'write'], { data: dbData });
         db.read.mockResolvedValue();
         variable = createSpyObj<Variable>([], { ENDPOINTS: [] });
-        index = new LowDbIndex(db, variable);
+        keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
+        index = new LowDbIndex(db, keywords, variable);
     });
 
     it('should create', () => {

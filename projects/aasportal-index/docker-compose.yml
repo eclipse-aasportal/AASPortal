@@ -5,7 +5,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/1.sql
-      - sqldata:/var/lib/mysql
+      - aasindex:/var/lib/mysql
 
     restart: always
     environment:
@@ -17,4 +17,4 @@ services:
       - 3306:3306
 
 volumes:
-  sqldata:
+  aasindex:

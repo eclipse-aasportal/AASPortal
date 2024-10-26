@@ -177,7 +177,7 @@ export class XmlWriterV3 extends AASWriter {
         this.writeReference(embeddedDataSpecification.dataSpecification, this.appendChild(node, 'dataSpecification'));
         const contentNode = this.appendChild(node, 'dataSpecificationContent');
         const content = embeddedDataSpecification.dataSpecificationContent;
-        if (content.modelType === 'DataSpecificationIec61360') {
+        if (content.modelType === 'DataSpecificationIEC61360') {
             this.writeDataSpecificationIec61360(
                 content as aas.DataSpecificationIec61360,
                 this.appendChild(contentNode, 'dataSpecificationIec61360'),

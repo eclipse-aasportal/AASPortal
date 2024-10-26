@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbCollapse, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointType, stringFormat } from 'aas-core';
 
@@ -29,7 +29,7 @@ export interface EndpointItem {
     templateUrl: './add-endpoint-form.component.html',
     styleUrls: ['./add-endpoint-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, NgbDropdownModule, TranslateModule, FormsModule],
+    imports: [NgbToast, NgbDropdownModule, NgbCollapse, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEndpointFormComponent {
@@ -60,11 +60,7 @@ export class AddEndpointFormComponent {
     ]);
 
     private readonly _selectedHeaderIndex = signal(-1);
-    private readonly _headers = signal<HeaderItem[]>([
-        { id: '1', name: '', value: '' },
-        { id: '2', name: '', value: '' },
-        { id: '3', name: '', value: '' },
-    ]);
+    private readonly _headers = signal<HeaderItem[]>([{ id: '1', name: '', value: '' }]);
 
     public constructor(
         private modal: NgbActiveModal,
@@ -80,6 +76,8 @@ export class AddEndpointFormComponent {
     public readonly selectedItem = computed(() => this._items()[this._selectedItemIndex()]);
 
     public readonly headers = this._headers.asReadonly();
+
+    public readonly isCollapsed = signal(true);
 
     public readonly selectedHeader = computed(() =>
         this._selectedHeaderIndex() < 0 ? undefined : this._headers()[this._selectedHeaderIndex()],
@@ -98,6 +96,7 @@ export class AddEndpointFormComponent {
         this._selectedHeaderIndex.update(state => {
             const index = this._headers().indexOf(value);
             if (state >= 0 && index === state) {
+                this.updateHeaders();
                 return -1;
             }
 
@@ -192,7 +191,6 @@ export class AddEndpointFormComponent {
             return url;
         } catch (error) {
             this._messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', value)]);
-
             return undefined;
         }
     }
@@ -204,6 +202,10 @@ export class AddEndpointFormComponent {
     private validateAASApiEndpoint(url: URL): void {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
             throw new Error('Protocol "http:" or "https:" expected.');
+        }
+
+        if (!url.hostname) {
+            throw new Error('Empty host name.');
         }
     }
 
@@ -226,8 +228,8 @@ export class AddEndpointFormComponent {
             throw new Error('Protocol "opc.tcp:" expected.');
         }
 
-        if (url.pathname === '//' || url.pathname === '/') {
-            throw new Error('Empty pathname.');
+        if (!url.hostname) {
+            throw new Error('Empty host name.');
         }
     }
 
@@ -236,8 +238,23 @@ export class AddEndpointFormComponent {
             throw new Error('Protocol "http:" or "https:" expected.');
         }
 
-        if (url.pathname === '/') {
-            throw new Error('Empty pathname.');
+        if (!url.hostname) {
+            throw new Error('Empty host name.');
         }
+    }
+
+    private updateHeaders(): void {
+        this._headers.update(state => {
+            let index = 1;
+            const items: HeaderItem[] = [];
+            for (const item of state) {
+                if (item.name || item.value) {
+                    items.push({ ...item, id: String(index++) });
+                }
+            }
+
+            items.push({ id: String(index++), name: '', value: '' });
+            return items;
+        });
     }
 }

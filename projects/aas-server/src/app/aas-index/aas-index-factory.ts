@@ -17,6 +17,7 @@ import { LowDbData } from './lowdb/lowdb-types.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
 import { Logger } from '../logging/logger.js';
 import { urlToString } from '../convert.js';
+import { KeywordDirectory } from './keyword-directory.js';
 
 export class AASIndexFactory {
     public constructor(private readonly container: DependencyContainer) {}
@@ -24,11 +25,12 @@ export class AASIndexFactory {
     public create(): AASIndex {
         const variable = this.container.resolve(Variable);
         const logger = this.container.resolve<Logger>('Logger');
+        const keywordDirectory = this.container.resolve(KeywordDirectory);
         if (variable.AAS_INDEX) {
             try {
                 const url = new URL(variable.AAS_INDEX);
                 if (url.protocol === 'mysql:') {
-                    const index = new MySqlIndex(variable);
+                    const index = new MySqlIndex(keywordDirectory, variable);
                     logger.info(`AAS index connected to ${urlToString(url)}.`);
                     return index;
                 }
@@ -41,7 +43,7 @@ export class AASIndexFactory {
 
         const dbFile = path.join(variable.CONTENT_ROOT, 'db.json');
         const db = new Low<LowDbData>(new JSONFile(dbFile), { documents: [], endpoints: [], elements: [] });
-        const index = new LowDbIndex(db, variable);
+        const index = new LowDbIndex(db, keywordDirectory, variable);
         logger.info('Using internal AAS index.');
         return index;
     }

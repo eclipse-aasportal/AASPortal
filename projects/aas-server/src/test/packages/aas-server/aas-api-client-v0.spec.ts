@@ -45,7 +45,8 @@ describe('AASApiClientV0', function () {
     describe('getShellsAsync', () => {
         it('returns the AAS list', async () => {
             http.get.mockResolvedValue(listaas);
-            await expect(client.getShellsAsync()).resolves.toEqual([
+            const result = await client.getShellsAsync();
+            expect(result.result).toEqual([
                 'AssistanceSystem_Dte',
                 'CunaCup_Becher1',
                 'CunaCup_Becher2',

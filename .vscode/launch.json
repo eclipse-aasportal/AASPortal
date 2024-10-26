@@ -57,7 +57,7 @@
             "name": "Test aas-portal",
             "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "test",
+            "preLaunchTask": "test-aas-portal",
             "url": "http://localhost:9876/debug.html",
         },
         {
