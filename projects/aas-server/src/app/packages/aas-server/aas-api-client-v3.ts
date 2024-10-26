@@ -69,7 +69,7 @@ export class AASApiClientV3 extends AASApiClient {
     public readonly onlineReady = true;
 
     public async getShellsAsync(cursor?: string): Promise<PagedResult<string>> {
-        const searchParams: Record<string, string | number> = { limit: 10 };
+        const searchParams: Record<string, string | number> = { limit: 100 };
         if (cursor) {
             searchParams.cursor = cursor;
         }

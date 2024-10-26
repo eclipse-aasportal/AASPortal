@@ -42,39 +42,45 @@
                 (input)="inputValue()">
         </div>
         @if (selectedItem().type === 'AAS_API') {
-        <div class="col-12 mt-2" style="max-height: 200px; overflow-y: auto;">
-            <table class="table table-sm table-striped table-borderless">
-                <thead>
-                    <tr>
-                        <th scope="col" class="text-center" [style.width]="'32px'">#</th>
-                        <th scope="col" class="text-center">Header</th>
-                        <th scope="col" class="text-center">Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (header of headers(); track header.id) {
-                    <tr>
-                        <th scope="row" (click)="selectHeader(header)">{{header.id}}</th>
-                        @if (header === selectedHeader()) {
-                        <td>
-                            <input type="text" class="form-control form-control-sm" [(ngModel)]="header.name"
-                                placeholder="header name" name="headerName" />
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-control-sm" [(ngModel)]="header.value"
-                                placeholder="value" name="headerValue" />
-                        </td>
-                        } @else {
-                        <td  (click)="selectHeader(header)">
-                            <div class="small">{{header.name}}</div>
-                        </td>
-                        <td  (click)="selectHeader(header)">
-                            <div class="small">{{header.value}}</div>
-                        </td>
-                        }
-                        }
-                </tbody>
-            </table>
+        <button type="button" class="btn btn-primary my-2" (click)="collapse.toggle()"
+            [attr.aria-expanded]="isCollapsed() === false" aria-controls="collapseExample" translate>
+            AddEndpointForm.ADVANCED_SETTINGS
+        </button>
+        <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+            <div class="col-12 mt-2" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-sm table-striped table-borderless">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center" [style.width]="'32px'">#</th>
+                            <th scope="col" class="text-center">Header</th>
+                            <th scope="col" class="text-center">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (header of headers(); track header.id) {
+                        <tr>
+                            <th scope="row" (click)="selectHeader(header)">{{header.id}}</th>
+                            @if (header === selectedHeader()) {
+                            <td>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="header.name"
+                                    placeholder="header name" name="headerName" />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="header.value"
+                                    placeholder="value" name="headerValue" />
+                            </td>
+                            } @else {
+                            <td (click)="selectHeader(header)">
+                                <div class="small">{{header.name}}</div>
+                            </td>
+                            <td (click)="selectHeader(header)">
+                                <div class="small">{{header.value}}</div>
+                            </td>
+                            }
+                            }
+                    </tbody>
+                </table>
+            </div>
         </div>
         }
     </div>

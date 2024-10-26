@@ -21,14 +21,13 @@ export abstract class AASResourceScan extends EventEmitter {
     public async scanAsync(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
         try {
             await this.open();
-
             const map = new Map<string, { reference?: AASDocument; document?: AASDocument }>();
             let indexCursor: string | undefined;
             let endpointCursor: string | undefined;
-            let a = true;
-            let b = true;
+            let endOfIndex = false;
+            let endOfEndpoint = false;
             do {
-                if (a) {
+                if (!endOfIndex) {
                     const result = await index.nextPage(endpoint.name, indexCursor);
                     for (const reference of result.result) {
                         let value = map.get(reference.id);
@@ -42,11 +41,11 @@ export abstract class AASResourceScan extends EventEmitter {
 
                     indexCursor = result.paging_metadata.cursor;
                     if (indexCursor === undefined) {
-                        a = false;
+                        endOfIndex = true;
                     }
                 }
 
-                if (b) {
+                if (!endOfEndpoint) {
                     const result = await this.nextEndpointPage(endpointCursor);
                     for (const id of result.result) {
                         let value = map.get(id);
@@ -62,7 +61,7 @@ export abstract class AASResourceScan extends EventEmitter {
 
                     endpointCursor = result.paging_metadata.cursor;
                     if (endpointCursor === undefined) {
-                        b = false;
+                        endOfEndpoint = true;
                     }
                 }
 
@@ -71,24 +70,24 @@ export abstract class AASResourceScan extends EventEmitter {
                     if (value.reference && value.document) {
                         keys.push(value.reference.id);
                         this.emit('compare', value.reference, value.document);
-                    } else if (!a && value.document) {
+                    } else if (endOfIndex && value.document) {
                         keys.push(value.document.id);
                         this.emit('add', value.document);
-                    } else if (!b && value.reference) {
+                    } else if (endOfEndpoint && value.reference) {
                         keys.push(value.reference.id);
                         this.emit('remove', value.document);
                     }
                 }
 
                 keys.forEach(key => map.delete(key));
-            } while (a || b);
+            } while (!endOfIndex || !endOfEndpoint);
 
             for (const value of map.values()) {
                 if (value.reference && value.document) {
                     this.emit('compare', value.reference, value.document);
-                } else if (!a && value.document) {
+                } else if (value.document) {
                     this.emit('add', value.document);
-                } else if (!b && value.reference) {
+                } else if (value.reference) {
                     this.emit('remove', value.document);
                 }
             }

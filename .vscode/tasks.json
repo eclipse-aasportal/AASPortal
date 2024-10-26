@@ -23,7 +23,7 @@
         },
         {
             "type": "shell",
-            "label": "test",
+            "label": "test-aas-portal",
             "command": "npm",
             "args": ["run", "test", "-w", "aas-portal"],
             "isBackground": true,

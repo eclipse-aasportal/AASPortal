@@ -6,8 +6,10 @@
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
 import net from 'net';
-import http, { IncomingMessage } from 'http';
+import { IncomingMessage } from 'http';
+import axios from 'axios';
 import { Socket } from 'net';
 import { HttpClient } from '../app/http-client.js';
 import { createSpyObj } from 'fhg-jest';
@@ -30,15 +32,7 @@ describe('HttpClient', () => {
 
     describe('get', () => {
         beforeEach(() => {
-            jest.spyOn(http, 'request').mockImplementation((_, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify({ text: 'Hello World!' }));
-                stream.push(null);
-                stream.statusCode = 200;
-                stream.statusMessage = 'OK';
-                (callback as (res: IncomingMessage) => void)(stream);
-                return new http.ClientRequest('http://localhost:1234/hello/world');
-            });
+            jest.spyOn(axios, 'get').mockResolvedValue({ data: { text: 'Hello World!' } });
         });
 
         it('gets an object from a server', async () => {
@@ -50,13 +44,10 @@ describe('HttpClient', () => {
 
     describe('getResponse', () => {
         beforeEach(() => {
-            jest.spyOn(http, 'request').mockImplementation((_, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify({ text: 'Hello World!' }));
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                return new http.ClientRequest('http://localhost:1234/hello/world');
-            });
+            const stream = new IncomingMessage(new Socket());
+            stream.push(JSON.stringify({ text: 'Hello World!' }));
+            stream.push(null);
+            jest.spyOn(axios, 'get').mockResolvedValue({ data: stream });
         });
 
         it('gets the message response', async () => {
@@ -66,61 +57,35 @@ describe('HttpClient', () => {
 
     describe('put', () => {
         beforeEach(() => {
-            jest.spyOn(http, 'request').mockImplementation((_, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('OK'));
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 200;
-                stream.statusMessage = 'OK';
-                return new http.ClientRequest('http://localhost:1234/hello/world');
-            });
+            jest.spyOn(axios, 'put').mockResolvedValue({ data: 42, statusText: 'OK' });
         });
 
         it('updates an object on a server', async () => {
             await expect(
                 server.put(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }),
-            ).resolves.toEqual(JSON.stringify('OK'));
+            ).resolves.toEqual('OK');
         });
     });
 
     describe('post', () => {
         beforeEach(() => {
-            jest.spyOn(http, 'request').mockImplementation((_, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Created'));
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 201;
-                stream.statusMessage = 'Created';
-                return new http.ClientRequest('http://localhost:1234/hello/world');
-            });
+            jest.spyOn(axios, 'post').mockResolvedValue({ data: 4711, statusText: 'Created' });
         });
 
         it('updates an object on a server', async () => {
             await expect(
                 server.post(new URL('http://localhost:1234/hello/world'), { text: 'Hello World!' }),
-            ).resolves.toEqual(JSON.stringify('Created'));
+            ).resolves.toEqual('Created');
         });
     });
 
     describe('delete', () => {
         beforeEach(() => {
-            jest.spyOn(http, 'request').mockImplementation((_, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify('Deleted'));
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 204;
-                stream.statusMessage = 'No Content';
-                return new http.ClientRequest('http://localhost:1234/hello/world');
-            });
+            jest.spyOn(axios, 'delete').mockResolvedValue({ data: {}, statusText: 'Deleted' });
         });
 
         it('updates an object on a server', async () => {
-            await expect(server.delete(new URL('http://localhost:1234/hello/world'))).resolves.toEqual(
-                JSON.stringify('Deleted'),
-            );
+            await expect(server.delete(new URL('http://localhost:1234/hello/world'))).resolves.toEqual('Deleted');
         });
     });
 

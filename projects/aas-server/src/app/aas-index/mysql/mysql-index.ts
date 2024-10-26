@@ -16,13 +16,16 @@ import { urlToEndpoint } from '../../configuration.js';
 import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
 import { PagedResult } from '../../types/paged-result.js';
-import { encodeBase64Url } from '../../convert.js';
+import { KeywordDirectory } from '../keyword-directory.js';
 
 export class MySqlIndex extends AASIndex {
     private readonly connection: Promise<Connection>;
 
-    public constructor(private readonly variable: Variable) {
-        super();
+    public constructor(
+        keywordDirectory: KeywordDirectory,
+        private readonly variable: Variable,
+    ) {
+        super(keywordDirectory);
 
         this.connection = this.initialize();
     }
@@ -54,9 +57,22 @@ export class MySqlIndex extends AASIndex {
             throw new Error(`An endpoint with the name "${name}" does not exist.`);
         }
 
-        const endpoint = results[0];
+        const result = results[0];
+        const endpoint: AASEndpoint = {
+            name: result.name,
+            url: result.url,
+            type: result.type,
+        };
 
-        return { name: endpoint.name, url: endpoint.url, type: endpoint.type, version: endpoint.version };
+        if (result.version) {
+            endpoint.version = result.version;
+        }
+
+        if (result.headers) {
+            endpoint.headers = JSON.parse(result.headers);
+        }
+
+        return endpoint;
     }
 
     public override async hasEndpoint(name: string): Promise<boolean> {
@@ -126,20 +142,21 @@ export class MySqlIndex extends AASIndex {
     ): Promise<PagedResult<AASDocument>> {
         const connection = await this.connection;
         let sql: string;
-        const values: unknown[] = [endpointName + cursor];
+        const values: unknown[] = [endpointName];
         if (cursor) {
-            values.push(limit + 1);
-            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) > ? ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            values.push(cursor);
+            sql = 'SELECT * FROM `documents` WHERE endpoint = ? AND id >= ? ORDER BY id ASC LIMIT ?;';
         } else {
-            sql = 'SELECT * FROM `documents` ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            sql = 'SELECT * FROM `documents` WHERE endpoint = ? ORDER BY id ASC LIMIT ?;';
         }
 
+        values.push(limit + 1);
         const [results] = await connection.query<MySqlDocument[]>(sql, values);
         const documents = results.map(result => this.toDocument(result));
         return {
             result: documents.slice(0, limit),
             paging_metadata: {
-                cursor: documents.length >= limit + 1 ? encodeBase64Url(documents[limit].id) : undefined,
+                cursor: documents.length >= limit + 1 ? documents[limit].id : undefined,
             },
         };
     }
@@ -461,7 +478,7 @@ export class MySqlIndex extends AASIndex {
                 this.toAbbreviation(referable),
                 isIdentifiable(referable) ? referable.id : undefined,
                 referable.idShort,
-                this.toStringValue(referable),
+                this.toStringValue(referable, 512),
                 this.toNumberValue(referable),
                 this.toDateValue(referable),
                 this.toBooleanValue(referable),

@@ -43,7 +43,7 @@ export class WorkerApp {
             this.logger.error(error);
         } finally {
             this.logger.stop();
-            parentPort.postMessage(toUint8Array(this.createEndResult));
+            parentPort.postMessage(toUint8Array(this.createEndResult(data.taskId)));
         }
     };
 
