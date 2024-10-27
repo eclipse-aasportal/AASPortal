@@ -29,22 +29,37 @@ import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
 import { decodeBase64Url, encodeBase64Url } from '../../convert.js';
 import { PagedResult } from '../../types/paged-result.js';
 import { KeywordDirectory } from '../keyword-directory.js';
+import { Logger } from '../../logging/logger.js';
 
 export class LowDbIndex extends AASIndex {
     private readonly promise: Promise<void>;
 
     public constructor(
+        private readonly logger: Logger,
+        private readonly variable: Variable,
         private readonly db: Low<LowDbData>,
         keywordDirectory: KeywordDirectory,
-        private readonly variable: Variable,
     ) {
         super(keywordDirectory);
 
         this.promise = this.initialize();
+        this.promise.then(() => logger.info('Using internal AAS index.')).catch(error => logger.error(error));
     }
 
-    public override getCount(): Promise<number> {
-        return Promise.resolve(this.db.data.documents.length);
+    public override async getCount(endpoint?: string): Promise<number> {
+        await this.promise;
+        if (endpoint === undefined) {
+            return this.db.data.documents.length;
+        }
+
+        let count = 0;
+        this.db.data.documents.forEach(item => {
+            if (item.endpoint === endpoint) {
+                ++count;
+            }
+        });
+
+        return count;
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {

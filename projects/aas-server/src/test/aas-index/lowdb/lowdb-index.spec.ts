@@ -16,10 +16,12 @@ import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-index/lowdb/lowdb-index.js';
 import { LowDbData } from '../../../app/aas-index/lowdb/lowdb-types.js';
 import { KeywordDirectory } from 'projects/aas-server/src/app/aas-index/keyword-directory.js';
+import { Logger } from '../../../app/logging/logger.js';
 
 describe('LowDbIndex', () => {
     let index: LowDbIndex;
     let db: jest.Mocked<Low<LowDbData>>;
+    let logger: jest.Mocked<Logger>;
     let variable: jest.Mocked<Variable>;
     let keywords: jest.Mocked<KeywordDirectory>;
     let dbData: LowDbData;
@@ -36,16 +38,17 @@ describe('LowDbIndex', () => {
     beforeEach(() => {
         db = createSpyObj<Low<LowDbData>>(['read', 'write'], { data: dbData });
         db.read.mockResolvedValue();
+        logger = createSpyObj<Logger>(['error', 'info']);
         variable = createSpyObj<Variable>([], { ENDPOINTS: [] });
         keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
-        index = new LowDbIndex(db, keywords, variable);
+        index = new LowDbIndex(logger, variable, db, keywords);
     });
 
     it('should create', () => {
         expect(index).toBeTruthy();
     });
 
-    describe('getContainerDocuments', () => {
+    describe('nextPage', () => {
         it('returns all documents that belongs to a container', async () => {
             const result = await index.nextPage('Samples', undefined);
             expect(result.result).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));

@@ -28,7 +28,7 @@ import { LangString } from '../types/aas-v2.js';
 export abstract class AASIndex {
     protected constructor(private readonly keywordDirectory: KeywordDirectory) {}
 
-    public abstract getCount(query?: string): Promise<number>;
+    public abstract getCount(endpoint?: string): Promise<number>;
 
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
 

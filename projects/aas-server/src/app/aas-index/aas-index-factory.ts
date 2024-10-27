@@ -30,9 +30,7 @@ export class AASIndexFactory {
             try {
                 const url = new URL(variable.AAS_INDEX);
                 if (url.protocol === 'mysql:') {
-                    const index = new MySqlIndex(keywordDirectory, variable);
-                    logger.info(`AAS index connected to ${urlToString(url)}.`);
-                    return index;
+                    return new MySqlIndex(logger, variable, keywordDirectory);
                 }
 
                 throw new Error(`${urlToString(url)} is a not supported AAS index.`);
@@ -43,8 +41,6 @@ export class AASIndexFactory {
 
         const dbFile = path.join(variable.CONTENT_ROOT, 'db.json');
         const db = new Low<LowDbData>(new JSONFile(dbFile), { documents: [], endpoints: [], elements: [] });
-        const index = new LowDbIndex(db, keywordDirectory, variable);
-        logger.info('Using internal AAS index.');
-        return index;
+        return new LowDbIndex(logger, variable, db, keywordDirectory);
     }
 }
