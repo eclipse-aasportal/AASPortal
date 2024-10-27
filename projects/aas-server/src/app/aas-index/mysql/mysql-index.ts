@@ -17,22 +17,46 @@ import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
 import { PagedResult } from '../../types/paged-result.js';
 import { KeywordDirectory } from '../keyword-directory.js';
+import { Logger } from '../../logging/logger.js';
+import { urlToString } from '../../convert.js';
 
 export class MySqlIndex extends AASIndex {
     private readonly connection: Promise<Connection>;
 
     public constructor(
-        keywordDirectory: KeywordDirectory,
+        private readonly logger: Logger,
         private readonly variable: Variable,
+        keywordDirectory: KeywordDirectory,
+        connection?: Connection,
     ) {
         super(keywordDirectory);
 
-        this.connection = this.initialize();
+        if (connection === undefined) {
+            this.connection = this.initialize();
+            this.connection
+                .then(() => {
+                    logger.info(`AAS index connected to ${urlToString(this.variable.AAS_INDEX)}.`);
+                })
+                .catch(error => {
+                    this.logger.error(error);
+                });
+        } else {
+            this.connection = new Promise(resolve => resolve(connection));
+        }
     }
 
-    public override async getCount(): Promise<number> {
-        return (await (await this.connection).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count'))[0][0]
-            .count;
+    public override async getCount(endpoint?: string): Promise<number> {
+        if (endpoint === undefined) {
+            return (
+                await (await this.connection).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count')
+            )[0][0].count;
+        }
+
+        return (
+            await (
+                await this.connection
+            ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count', [endpoint])
+        )[0][0].count;
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {
