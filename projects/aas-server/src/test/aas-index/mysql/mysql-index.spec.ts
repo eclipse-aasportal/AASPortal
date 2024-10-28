@@ -13,7 +13,7 @@ import { MySqlIndex } from '../../../app/aas-index/mysql/mysql-index.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { Variable } from '../../../app/variable.js';
 import { KeywordDirectory } from '../../../app/aas-index/keyword-directory.js';
-import { DocumentCount } from '../../../app/aas-index/mysql/mysql-types.js';
+import { DocumentCount, MySqlEndpoint } from '../../../app/aas-index/mysql/mysql-types.js';
 
 describe('MySqlIndex', () => {
     let index: MySqlIndex;
@@ -60,6 +60,33 @@ describe('MySqlIndex', () => {
             ]);
 
             expect(count).toEqual(42);
+        });
+    });
+
+    describe('getEndpoints', () => {
+        it('returns all registered endpoints', () => {
+            const result: MySqlEndpoint[] = [
+                {
+                    constructor: { name: 'RowDataPacket' },
+                    name: 'Endpoint 1',
+                    url: 'http://endpoint1.com',
+                    type: 'AAS_API',
+                },
+                {
+                    constructor: { name: 'RowDataPacket' },
+                    name: 'Endpoint 2',
+                    url: 'http://endpoint2.com',
+                    type: 'AAS_API',
+                },
+            ];
+
+            connection.query.mockResolvedValue([[result], []]);
+            const actual = index.getEndpoints();
+            expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints`');
+            expect(actual).toEqual([
+                { name: 'Endpoint 1', url: 'http://endpoint1.com', type: 'AAS_API' },
+                { name: 'Endpoint 2', url: 'http://endpoint2.com', type: 'AAS_API' },
+            ]);
         });
     });
 });
