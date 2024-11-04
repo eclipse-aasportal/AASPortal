@@ -43,14 +43,15 @@ export class WorkerApp {
             this.logger.error(error);
         } finally {
             this.logger.stop();
-            parentPort.postMessage(toUint8Array(this.createEndResult(data.taskId)));
+            parentPort.postMessage(toUint8Array(this.createEndResult(data)));
         }
     };
 
-    private createEndResult(taskId: number): ScanResult {
+    private createEndResult(data: WorkerData): ScanResult {
         return {
-            taskId: taskId,
+            taskId: data.taskId,
             type: ScanResultType.End,
+            start: data.start,
             messages: this.logger.getMessages(),
         };
     }

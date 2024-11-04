@@ -61,6 +61,7 @@ export class EndpointScan {
             type: ScanResultType.Update,
             endpoint: this.data.endpoint,
             document: document,
+            start: this.data.start,
         };
 
         const array = toUint8Array(value);
@@ -73,6 +74,7 @@ export class EndpointScan {
             type: ScanResultType.Remove,
             endpoint: this.data.endpoint,
             document: document,
+            start: this.data.start,
         };
 
         const array = toUint8Array(value);
@@ -85,6 +87,7 @@ export class EndpointScan {
             type: ScanResultType.Add,
             endpoint: this.data.endpoint,
             document: document,
+            start: this.data.start,
         };
 
         const array = toUint8Array(value);

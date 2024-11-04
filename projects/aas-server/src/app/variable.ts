@@ -24,8 +24,14 @@ export class Variable {
         this.WEB_ROOT = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
         this.ASSETS = path.resolve(process.env.ASSETS ?? './assets');
         this.ENDPOINTS = process.env.ENDPOINTS ? JSON.parse(process.env.ENDPOINTS) : ['file:///samples?name=Samples'];
-        this.SCAN_TEMPLATES_TIMEOUT = process.env.SCAN_TEMPLATES_TIMEOUT ? Number(process.env.TIMEOUT) : 300000;
-        this.SCAN_CONTAINER_TIMEOUT = process.env.SCAN_CONTAINER_TIMEOUT ? Number(process.env.TIMEOUT) : 5000;
+        this.SCAN_TEMPLATES_TIMEOUT = process.env.SCAN_TEMPLATES_TIMEOUT
+            ? Number(process.env.SCAN_TEMPLATES_TIMEOUT)
+            : 300000;
+
+        this.SCAN_ENDPOINT_TIMEOUT = process.env.SCAN_ENDPOINT_TIMEOUT
+            ? Number(process.env.SCAN_ENDPOINT_TIMEOUT)
+            : 5000;
+
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;
         this.HTTPS_PFX_FILE = process.env.HTTPS_PFX_FILE;
@@ -75,7 +81,7 @@ export class Variable {
     public readonly ENDPOINTS: string[];
 
     /** The time before a new endpoint scan starts.*/
-    public readonly SCAN_CONTAINER_TIMEOUT: number;
+    public readonly SCAN_ENDPOINT_TIMEOUT: number;
 
     /** The time before a new template scan starts. */
     public readonly SCAN_TEMPLATES_TIMEOUT: number;

@@ -39,6 +39,7 @@ describe('TemplateStorage', function () {
                 const result: ScanTemplatesResult = {
                     taskId: 1,
                     type: ScanResultType.Update,
+                    start: 0,
                     templates: [
                         {
                             idShort: 'aSubmodel',

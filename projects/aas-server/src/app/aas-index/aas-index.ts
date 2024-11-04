@@ -10,7 +10,7 @@ import {
     AASCursor,
     AASDocument,
     AASEndpoint,
-    AASPage,
+    AASPagedResult,
     aas,
     baseType,
     getAbbreviation,
@@ -40,7 +40,7 @@ export abstract class AASIndex {
 
     public abstract removeEndpoint(endpointName: string): Promise<boolean>;
 
-    public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage>;
+    public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult>;
 
     public abstract nextPage(
         endpointName: string,

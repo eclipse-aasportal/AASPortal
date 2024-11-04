@@ -15,6 +15,7 @@ export interface MySqlEndpoint extends RowDataPacket {
     type: AASEndpointType;
     version?: string;
     headers?: string;
+    schedule?: string;
 }
 
 export interface MySqlDocument extends AASDocument, RowDataPacket {

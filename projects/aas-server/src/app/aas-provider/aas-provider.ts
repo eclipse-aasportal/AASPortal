@@ -17,11 +17,12 @@ import {
     aas,
     selectElement,
     AASCursor,
-    AASPage,
+    AASPagedResult,
     AASEndpoint,
     ApplicationError,
     getChildren,
     isReferenceElement,
+    AASEndpointSchedule,
     noop,
 } from 'aas-core';
 
@@ -35,7 +36,6 @@ import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
 import { AASResourceFactory } from '../packages/aas-resource-factory.js';
-import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
@@ -45,21 +45,19 @@ import { AASCache } from './aas-cache.js';
 
 @singleton()
 export class AASProvider {
-    private readonly timeout: number;
     private readonly file: string | undefined;
     private readonly cache = new AASCache();
     private wsServer!: WSServer;
     private resetRequested = false;
 
     public constructor(
-        @inject(Variable) variable: Variable,
+        @inject(Variable) private readonly variable: Variable,
         @inject('Logger') private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
         @inject('AASIndex') private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        this.timeout = variable.SCAN_CONTAINER_TIMEOUT;
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
     }
@@ -88,7 +86,7 @@ export class AASProvider {
      * @param language The current language.
      * @returns A page of documents.
      */
-    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
+    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPagedResult> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
             return this.index.getDocuments(cursor, filter, language ?? 'en');
@@ -373,17 +371,6 @@ export class AASProvider {
         }
     }
 
-    /** Only used for test. */
-    public async scanAsync(factory: AASResourceScanFactory): Promise<void> {
-        noop(factory);
-        // for (const endpoint of await this.index.getEndpoints()) {
-        //     if (endpoint.type === 'FileSystem') {
-        //         const result = await factory.create(endpoint).scanAsync();
-        //         result.result.forEach(async document => await this.index.add(document));
-        //     }
-        // }
-    }
-
     /**
      * Invokes an operation synchronous.
      * @param endpointName The endpoint name.
@@ -472,18 +459,47 @@ export class AASProvider {
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
-                setTimeout(this.scanEndpoint, 0, this.taskHandler.createTaskId(), endpoint);
+                if (endpoint.schedule?.type === 'never') {
+                    continue;
+                }
+
+                setTimeout(
+                    this.scanEndpoint,
+                    this.computeTimeout(endpoint.schedule),
+                    this.taskHandler.createTaskId(),
+                    endpoint,
+                );
             }
         } catch (error) {
             this.logger.error(error);
         }
     };
 
+    private computeTimeout(schedule: AASEndpointSchedule | undefined, start?: number): number {
+        if (schedule === undefined) {
+            return this.variable.SCAN_ENDPOINT_TIMEOUT;
+        }
+
+        start = start || Date.now();
+        if (schedule.type === 'every') {
+            const values = schedule.values;
+            if (values && values.length > 0 && typeof values[0] === 'number') {
+                const timeout = Date.now() - start - values[0];
+                return timeout >= 0 ? timeout : values[0];
+            }
+        } else if (schedule.type === 'daily' || ) {
+            noop();
+        }
+
+        return this.variable.SCAN_ENDPOINT_TIMEOUT;
+    }
+
     private scanEndpoint = async (taskId: number, endpoint: AASEndpoint) => {
         const data: ScanEndpointData = {
             type: 'ScanEndpointData',
             taskId,
             endpoint,
+            start: Date.now(),
         };
 
         this.taskHandler.set(taskId, { endpointName: endpoint.name, owner: this, type: 'ScanEndpoint' });
@@ -515,9 +531,19 @@ export class AASProvider {
         }
 
         this.taskHandler.delete(result.taskId);
-        if ((await await this.index.hasEndpoint(task.endpointName)) === true) {
+        if ((await this.index.hasEndpoint(task.endpointName)) === true) {
             const endpoint = await this.index.getEndpoint(task.endpointName);
-            setTimeout(this.scanEndpoint, this.timeout, result.taskId, endpoint);
+
+            if (endpoint.schedule?.type === 'once') {
+                return;
+            }
+
+            setTimeout(
+                this.scanEndpoint,
+                this.computeTimeout(endpoint.schedule, result.start),
+                result.taskId,
+                endpoint,
+            );
         }
 
         if (result.messages) {

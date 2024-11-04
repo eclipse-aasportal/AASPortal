@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AASCursor, AASDocument, AASEndpoint, AASPage, aas } from 'aas-core';
+import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
 import { encodeBase64Url } from 'aas-lib';
 
 /** The client side AAS provider service. */
@@ -65,7 +65,7 @@ export class StartApiService {
      * @param language The language to used for the filter.
      * @returns The document page.
      */
-    public getPage(cursor: AASCursor, filter?: string, language?: string): Observable<AASPage> {
+    public getPage(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
         let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
         if (filter) {
             url += `&filter=${encodeBase64Url(filter)}`;
@@ -74,7 +74,7 @@ export class StartApiService {
             }
         }
 
-        return this.http.get<AASPage>(url);
+        return this.http.get<AASPagedResult>(url);
     }
 
     /**

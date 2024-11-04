@@ -45,6 +45,12 @@ export type AASAbbreviation =
     | 'SME'
     | 'SML';
 
+/** The schedule type. */
+export interface AASEndpointSchedule {
+    type: 'never' | 'once' | 'every' | 'daily' | 'weekly';
+    values?: (string | number)[];
+}
+
 /** The kind of AAS container or server. */
 export type AASEndpointType = 'FileSystem' | 'AAS_API' | 'OPC_UA' | 'WebDAV';
 
@@ -53,6 +59,7 @@ export type AASEndpoint = {
     name: string;
     url: string;
     type: AASEndpointType;
+    schedule?: AASEndpointSchedule;
     version?: string;
     headers?: Record<string, string>;
 };
@@ -99,7 +106,7 @@ export interface AASDocument extends AASDocumentId {
 }
 
 /** Represents a page of AAS documents from the total set. */
-export interface AASPage {
+export interface AASPagedResult {
     previous: AASDocumentId | null;
     next: AASDocumentId | null;
     documents: AASDocument[];

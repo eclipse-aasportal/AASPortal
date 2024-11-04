@@ -79,6 +79,7 @@ export class TemplateStorage {
         const data: ScanTemplatesData = {
             type: 'ScanTemplatesData',
             taskId,
+            start: Date.now(),
         };
 
         this.taskHandler.set(taskId, { endpointName: 'TemplateStorage', owner: this, type: 'ScanTemplates' });

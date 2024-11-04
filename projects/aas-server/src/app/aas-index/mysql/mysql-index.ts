@@ -9,7 +9,17 @@
 import { v4 } from 'uuid';
 import isEmpty from 'lodash-es/isEmpty.js';
 import mysql, { Connection, ResultSetHeader } from 'mysql2/promise';
-import { AASEndpoint, AASCursor, AASPage, AASDocument, flat, aas, AASDocumentId, isIdentifiable } from 'aas-core';
+import {
+    AASEndpoint,
+    AASCursor,
+    AASDocument,
+    flat,
+    aas,
+    AASDocumentId,
+    isIdentifiable,
+    AASPagedResult,
+} from 'aas-core';
+
 import { AASIndex } from '../aas-index.js';
 import { Variable } from '../../variable.js';
 import { urlToEndpoint } from '../../configuration.js';
@@ -48,19 +58,19 @@ export class MySqlIndex extends AASIndex {
     public override async getCount(endpoint?: string): Promise<number> {
         if (endpoint === undefined) {
             return (
-                await (await this.connection).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count')
+                await (await this.connection).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count;')
             )[0][0].count;
         }
 
         return (
             await (
                 await this.connection
-            ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count', [endpoint])
+            ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;', [endpoint])
         )[0][0].count;
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {
-        return (await (await this.connection).query<MySqlEndpoint[]>('SELECT * FROM `endpoints`'))[0].map(
+        return (await (await this.connection).query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;'))[0].map(
             row =>
                 ({
                     name: row.name,
@@ -75,7 +85,7 @@ export class MySqlIndex extends AASIndex {
     public override async getEndpoint(name: string): Promise<AASEndpoint> {
         const [results] = await (
             await this.connection
-        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?', [name]);
+        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
 
         if (results.length === 0) {
             throw new Error(`An endpoint with the name "${name}" does not exist.`);
@@ -96,13 +106,17 @@ export class MySqlIndex extends AASIndex {
             endpoint.headers = JSON.parse(result.headers);
         }
 
+        if (result.schedule) {
+            endpoint.schedule = JSON.parse(result.schedule);
+        }
+
         return endpoint;
     }
 
     public override async hasEndpoint(name: string): Promise<boolean> {
         const [results] = await (
             await this.connection
-        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?', [name]);
+        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
 
         return results.length > 0;
     }
@@ -110,13 +124,16 @@ export class MySqlIndex extends AASIndex {
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await (
             await this.connection
-        ).query<ResultSetHeader>('INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?)', [
-            endpoint.name,
-            endpoint.url,
-            endpoint.type,
-            endpoint.version,
-            endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
-        ]);
+        ).query<ResultSetHeader>(
+            'INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?);',
+            [
+                endpoint.name,
+                endpoint.url,
+                endpoint.type,
+                endpoint.version,
+                endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+            ],
+        );
     }
 
     public override async removeEndpoint(endpointName: string): Promise<boolean> {
@@ -126,7 +143,7 @@ export class MySqlIndex extends AASIndex {
 
             const result = await (
                 await this.connection
-            ).query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?', [endpointName]);
+            ).query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [endpointName]);
 
             this.removeDocuments(endpointName);
 
@@ -138,7 +155,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage> {
+    public override getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult> {
         let q: MySqlQuery | undefined;
         if (query) {
             q = new MySqlQuery(query, language ?? 'en');
@@ -200,7 +217,7 @@ export class MySqlIndex extends AASIndex {
 
             const uuid = result[0][0].uuid;
             await connection.query<ResultSetHeader>(
-                'UPDATE `documents` SET address = ?, crc32 = ?, idShort = ?, onlineReady = ?, readonly = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?',
+                'UPDATE `documents` SET address = ?, crc32 = ?, idShort = ?, onlineReady = ?, readonly = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
                 [
                     document.address,
                     document.crc32,
@@ -231,7 +248,7 @@ export class MySqlIndex extends AASIndex {
             await connection.beginTransaction();
             const uuid = v4();
             await connection.query<ResultSetHeader>(
-                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, onlineReady, readonly, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, onlineReady, readonly, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
                 [
                     uuid,
                     document.address,
@@ -320,17 +337,17 @@ export class MySqlIndex extends AASIndex {
     private async removeDocuments(endpointName: string): Promise<void> {
         const connection = await this.connection;
         const documents = (
-            await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?', [endpointName])
+            await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?;', [endpointName])
         )[0];
 
-        await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?', [endpointName]);
+        await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);
 
         for (const document of documents) {
             await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
         }
     }
 
-    private async getFirstPage(limit: number, query?: MySqlQuery): Promise<AASPage> {
+    private async getFirstPage(limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
         const connection = await this.connection;
         let sql: string;
         const values: unknown[] = [];
@@ -361,7 +378,7 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getNextPage(current: AASDocumentId, limit: number, query?: MySqlQuery): Promise<AASPage> {
+    private async getNextPage(current: AASDocumentId, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
         const connection = await this.connection;
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
@@ -393,7 +410,7 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getPreviousPage(current: AASDocumentId, limit: number, query?: MySqlQuery): Promise<AASPage> {
+    private async getPreviousPage(current: AASDocumentId, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
         const connection = await this.connection;
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
@@ -425,7 +442,7 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getLastPage(limit: number, query?: MySqlQuery): Promise<AASPage> {
+    private async getLastPage(limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
         const connection = await this.connection;
         let sql: string;
         const values: unknown[] = [];

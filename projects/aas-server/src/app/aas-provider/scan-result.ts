@@ -15,13 +15,11 @@ export enum ScanResultType {
     End,
 }
 
-/** The result of a container scan. */
+/** The result of an endpoint scan. */
 export interface ScanResult {
-    /** The result. */
     type: ScanResultType;
-    /** The task identifier. */
     taskId: number;
-    /** The message memory. */
+    start: number;
     messages?: Message[];
 }
 
