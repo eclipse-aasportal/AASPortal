@@ -26,11 +26,11 @@ export class Variable {
         this.ENDPOINTS = process.env.ENDPOINTS ? JSON.parse(process.env.ENDPOINTS) : ['file:///samples?name=Samples'];
         this.SCAN_TEMPLATES_TIMEOUT = process.env.SCAN_TEMPLATES_TIMEOUT
             ? Number(process.env.SCAN_TEMPLATES_TIMEOUT)
-            : 300000;
+            : 3600000;
 
         this.SCAN_ENDPOINT_TIMEOUT = process.env.SCAN_ENDPOINT_TIMEOUT
             ? Number(process.env.SCAN_ENDPOINT_TIMEOUT)
-            : 5000;
+            : 3600000;
 
         this.HTTPS_CERT_FILE = process.env.HTTPS_CERT_FILE;
         this.HTTPS_KEY_FILE = process.env.HTTPS_KEY_FILE;

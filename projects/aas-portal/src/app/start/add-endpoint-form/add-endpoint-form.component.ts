@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASEndpoint, AASEndpointType, stringFormat } from 'aas-core';
+import { AASEndpoint, AASEndpointScheduleType, AASEndpointType, stringFormat } from 'aas-core';
 
 export interface HeaderItem {
     id: string;
@@ -75,6 +75,12 @@ export class AddEndpointFormComponent {
 
     public readonly selectedItem = computed(() => this._items()[this._selectedItemIndex()]);
 
+    public readonly schedule = signal<AASEndpointScheduleType>('every');
+
+    public readonly minutes = signal(0);
+
+    public readonly hours = signal(1);
+
     public readonly headers = this._headers.asReadonly();
 
     public readonly isCollapsed = signal(true);
@@ -127,6 +133,18 @@ export class AddEndpointFormComponent {
                 endpoint.version = version;
             } else if (selectedItem.type === 'AAS_API') {
                 endpoint.version = 'v3';
+            }
+
+            switch (this.schedule()) {
+                case 'never':
+                    endpoint.schedule = { type: 'never' };
+                    break;
+                case 'once':
+                    endpoint.schedule = { type: 'once' };
+                    break;
+                default:
+                    endpoint.schedule = { type: 'every', values: [(this.hours() * 60 + this.minutes()) * 60000] };
+                    break;
             }
 
             const headers = this.headers().filter(header => header.name && header.value);
