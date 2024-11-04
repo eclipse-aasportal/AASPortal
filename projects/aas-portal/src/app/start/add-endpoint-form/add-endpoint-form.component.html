@@ -48,21 +48,30 @@
         </button>
         <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeNever" value="never">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeNever" value="never"
+                    [(ngModel)]="schedule">
                 <label class="form-check-label" for="scheduleTypeNever">Never</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeOnce" value="once">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeOnce" value="once"
+                    [(ngModel)]="schedule">
                 <label class="form-check-label" for="scheduleTypeOnce">Once</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeEvery" value="every">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeEvery" value="every"
+                    [(ngModel)]="schedule">
                 <label class="form-check-label" for="scheduleTypeEvery">Every</label>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeEach" value="daily">
-                <label class="form-check-label" for="scheduleTypeEach">Each</label>
+            @if (schedule() === 'every') {
+            <div class="input-group mt-3">
+                <input type="text" class="form-control awp-number-input" placeholder="Hours" min="0" max="99"
+                    aria-label="Hours" [(ngModel)]="hours">
+                <span class="input-group-text">Hours</span>
+                <input type="number" class="form-control awp-number-input" placeholder="Minutes" min="0" max="59"
+                    aria-label="Minutes" [(ngModel)]="minutes">
+                <span class="input-group-text">Minutes</span>
             </div>
+            }
             <div class="col-12 mt-2" style="max-height: 200px; overflow-y: auto;">
                 <table class="table table-sm table-striped table-borderless">
                     <caption class="caption-top">Headers</caption>
