@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { Observable, catchError, concat, from, map, mergeMap, of } from 'rxjs';
 import { ViewMode } from 'aas-lib';
-import { AASDocument, AASDocumentId, AASPage, aas, equalArray } from 'aas-core';
+import { AASDocument, AASDocumentId, AASPagedResult, aas, equalArray } from 'aas-core';
 import { StartApiService } from './start-api.service';
 import { TranslateService } from '@ngx-translate/core';
 import { FavoritesService } from './favorites.service';
@@ -198,7 +198,7 @@ export class StartStore {
         return { id: document.id, endpoint: document.endpoint };
     }
 
-    private setPageAndLoadContents(page: AASPage, limit?: number, filter?: string): Observable<void> {
+    private setPageAndLoadContents(page: AASPagedResult, limit?: number, filter?: string): Observable<void> {
         return concat(
             of(this.setPage(page, limit, filter)),
             from(page.documents).pipe(
@@ -212,7 +212,7 @@ export class StartStore {
         );
     }
 
-    private setPage(page: AASPage, limit: number | undefined, filter: string | undefined): void {
+    private setPage(page: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
         this._viewMode.set(ViewMode.List);
         this._activeFavorites.set('');
         this._documents.set(page.documents);

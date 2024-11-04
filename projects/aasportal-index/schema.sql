@@ -5,7 +5,8 @@ CREATE TABLE endpoints (
     url VARCHAR(255) UNIQUE NOT NULL,
     type VARCHAR(32) NOT NULL,
     version VARCHAR(8),
-    headers VARCHAR(255)
+    headers VARCHAR(255),
+    schedule VARCHAR(255),
 );
 
 CREATE TABLE documents (

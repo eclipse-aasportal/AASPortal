@@ -13,13 +13,14 @@ import {
     AASDocument,
     AASDocumentId,
     AASEndpoint,
-    AASPage,
+    AASPagedResult,
     ApplicationError,
     BaseValueType,
     aas,
     flat,
     isIdentifiable,
 } from 'aas-core';
+
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
 import { Variable } from '../../variable.js';
@@ -154,7 +155,7 @@ export class LowDbIndex extends AASIndex {
         return { result, paging_metadata: { cursor: encodeBase64Url(items[k].id) } };
     }
 
-    public override async getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPage> {
+    public override async getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult> {
         await this.promise;
 
         let filter: LowDbQuery | undefined;
@@ -293,7 +294,7 @@ export class LowDbIndex extends AASIndex {
         return index;
     }
 
-    private getFirstPage(limit: number, filter?: LowDbQuery): AASPage {
+    private getFirstPage(limit: number, filter?: LowDbQuery): AASPagedResult {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { previous: null, documents, next: null };
@@ -324,7 +325,7 @@ export class LowDbIndex extends AASIndex {
         };
     }
 
-    private getNextPage(current: AASDocumentId, limit: number, filter?: LowDbQuery): AASPage {
+    private getNextPage(current: AASDocumentId, limit: number, filter?: LowDbQuery): AASPagedResult {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { previous: null, documents, next: null };
@@ -362,7 +363,7 @@ export class LowDbIndex extends AASIndex {
         };
     }
 
-    private getPreviousPage(current: AASDocumentId, limit: number, filter?: LowDbQuery): AASPage {
+    private getPreviousPage(current: AASDocumentId, limit: number, filter?: LowDbQuery): AASPagedResult {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { previous: null, documents, next: null };
@@ -400,7 +401,7 @@ export class LowDbIndex extends AASIndex {
         };
     }
 
-    private getLastPage(limit: number, filter?: LowDbQuery): AASPage {
+    private getLastPage(limit: number, filter?: LowDbQuery): AASPagedResult {
         const documents: AASDocument[] = [];
         if (this.db.data.documents.length === 0) {
             return { previous: null, documents, next: null };

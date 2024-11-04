@@ -42,13 +42,30 @@
                 (input)="inputValue()">
         </div>
         @if (selectedItem().type === 'AAS_API') {
-        <button type="button" class="btn btn-primary my-2" (click)="collapse.toggle()"
+        <button type="button" class="btn btn-primary mt-3 mb-2" (click)="collapse.toggle()"
             [attr.aria-expanded]="isCollapsed() === false" aria-controls="collapseExample" translate>
             AddEndpointForm.ADVANCED_SETTINGS
         </button>
         <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeNever" value="never">
+                <label class="form-check-label" for="scheduleTypeNever">Never</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeOnce" value="once">
+                <label class="form-check-label" for="scheduleTypeOnce">Once</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeEvery" value="every">
+                <label class="form-check-label" for="scheduleTypeEvery">Every</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeEach" value="daily">
+                <label class="form-check-label" for="scheduleTypeEach">Each</label>
+            </div>
             <div class="col-12 mt-2" style="max-height: 200px; overflow-y: auto;">
                 <table class="table table-sm table-striped table-borderless">
+                    <caption class="caption-top">Headers</caption>
                     <thead>
                         <tr>
                             <th scope="col" class="text-center" [style.width]="'32px'">#</th>

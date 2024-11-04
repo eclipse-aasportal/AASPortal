@@ -52,6 +52,7 @@ export class TemplateScan {
             taskId: data.taskId,
             type: ScanResultType.Update,
             templates: templates,
+            start: data.start,
         };
 
         const array = toUint8Array(value);
