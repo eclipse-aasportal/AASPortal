@@ -23,7 +23,6 @@ import {
     getChildren,
     isReferenceElement,
     AASEndpointSchedule,
-    noop,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -487,8 +486,6 @@ export class AASProvider {
                 const timeout = Date.now() - start - values[0];
                 return timeout >= 0 ? timeout : values[0];
             }
-        } else if (schedule.type === 'daily' || ) {
-            noop();
         }
 
         return this.variable.SCAN_ENDPOINT_TIMEOUT;

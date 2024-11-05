@@ -186,7 +186,9 @@
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
-        "ADVANCED_SETTINGS": "Erweiterte Einstellungen"
+        "ADVANCED_SETTINGS": "Erweiterte Einstellungen",
+        "MINUTES": "Minuten",
+        "HOURS": "Stunden"
     },
     "CustomerFeedback": {
         "OverallRating": "Gesamtbewertung",

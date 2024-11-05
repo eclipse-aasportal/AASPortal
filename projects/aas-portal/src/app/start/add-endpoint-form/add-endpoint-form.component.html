@@ -64,12 +64,12 @@
             </div>
             @if (schedule() === 'every') {
             <div class="input-group mt-3">
-                <input type="text" class="form-control awp-number-input" placeholder="Hours" min="0" max="99"
-                    aria-label="Hours" [(ngModel)]="hours">
-                <span class="input-group-text">Hours</span>
-                <input type="number" class="form-control awp-number-input" placeholder="Minutes" min="0" max="59"
-                    aria-label="Minutes" [(ngModel)]="minutes">
-                <span class="input-group-text">Minutes</span>
+                <input #inputHours type="number" class="form-control awp-number-input" min="0" max="99"
+                    aria-label="Hours" [value]="hours()" (input)="hours.set(inputHours.valueAsNumber)">
+                <span class="input-group-text" translate>AddEndpointForm.HOURS</span>
+                <input #inputMinutes type="number" class="form-control awp-number-input" min="0" max="59"
+                    aria-label="Minutes" [value]="minutes()" (input)="minutes.set(inputMinutes.valueAsNumber)">
+                <span class="input-group-text" translate>AddEndpointForm.MINUTES</span>
             </div>
             }
             <div class="col-12 mt-2" style="max-height: 200px; overflow-y: auto;">
