@@ -8,7 +8,7 @@
 
 import { AASDocument, Message, TemplateDescriptor, AASEndpoint } from 'aas-core';
 
-export enum ScanResultType {
+export enum ScanResultKind {
     Add,
     Remove,
     Update,
@@ -17,7 +17,8 @@ export enum ScanResultType {
 
 /** The result of an endpoint scan. */
 export interface ScanResult {
-    type: ScanResultType;
+    type: 'ScanEndResult' | 'ScanEndpointResult' | 'ScanTemplatesResult';
+    kind: ScanResultKind;
     taskId: number;
     start: number;
     messages?: Message[];

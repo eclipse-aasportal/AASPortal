@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Get, OperationId, Query, Route, Security, Tags } from 'tsoa';
+import { Get, OperationId, Path, Query, Route, Security, Tags } from 'tsoa';
 import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { AuthService } from '../auth/auth-service.js';
@@ -55,17 +55,18 @@ export class DocumentsController extends AASController {
         }
     }
 
+    /**
+     * The total count of AAS documents over all endpoints or a specified endpoint.
+     * @param endpoint The endpoint name or `undefined`.
+     * @returns The total number of AAS documents.
+     */
     @Get('count')
     @Security('bearerAuth', ['guest'])
-    @OperationId('getDocumentCount')
-    public async getDocumentCount(@Query() filter?: string): Promise<number> {
+    @OperationId('getCount')
+    public async getCount(): Promise<{ count: number }> {
         try {
-            this.logger.start('getDocuments');
-            if (filter) {
-                filter = decodeBase64Url(filter);
-            }
-
-            return await this.aasProvider.getDocumentCountAsync(filter);
+            this.logger.start('getCount');
+            return { count: await this.aasProvider.getCountAsync() };
         } finally {
             this.logger.stop();
         }
@@ -79,7 +80,7 @@ export class DocumentsController extends AASController {
     @Get('{id}')
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
-    public async getDocument(id: string): Promise<AASDocument> {
+    public async getDocument(@Path() id: string): Promise<AASDocument> {
         try {
             this.logger.start('getDocument');
             return await this.aasProvider.getDocumentAsync(decodeBase64Url(id));

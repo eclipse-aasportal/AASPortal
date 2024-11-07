@@ -39,7 +39,7 @@ describe('MySqlIndex', () => {
         it('returns the total number of documents', async () => {
             const result: DocumentCount = {
                 constructor: { name: 'RowDataPacket' },
-                count: 42,
+                'COUNT(*)': 42,
             };
 
             connection.query.mockResolvedValue([[result], []]);
@@ -50,7 +50,7 @@ describe('MySqlIndex', () => {
         it('returns the total number of documents of the specified Endpoint', async () => {
             const result: DocumentCount = {
                 constructor: { name: 'RowDataPacket' },
-                count: 42,
+                'COUNT(*)': 42,
             };
 
             connection.query.mockResolvedValue([[result], []]);

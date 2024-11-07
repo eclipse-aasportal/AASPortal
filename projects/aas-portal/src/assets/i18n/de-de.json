@@ -214,5 +214,9 @@
         "MODEL_TYPE_EXPECTED": "Modelltypabkürzung an Position {0} erwartet.",
         "TERM_EXPECTED": "Term erwartet an Position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
+    },
+    "IndexChangeService": {
+        "ENDPOINTS": "Endpunkte",
+        "SHELLS": "Verwaltungsschalen"
     }
 }

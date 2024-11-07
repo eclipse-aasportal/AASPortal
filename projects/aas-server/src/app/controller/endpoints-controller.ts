@@ -15,6 +15,7 @@ import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { Variable } from '../variable.js';
+import { decodeBase64Url } from '../convert.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -38,8 +39,41 @@ export class EndpointsController extends AASController {
     @OperationId('getEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         try {
-            this.logger.start('getWorkspaces');
+            this.logger.start('getEndpoints');
             return await this.aasProvider.getEndpoints();
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * Gets the number of registered endpoints.
+     * @returns The number of registered endpoints.
+     */
+    @Get('count')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getCount')
+    public async getCount(): Promise<{ count: number }> {
+        try {
+            this.logger.start('getEndpointCount');
+            return { count: await this.aasProvider.getEndpointCount() };
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * The total count of AAS documents of the specified endpoint.
+     * @param endpoint The endpoint name or `undefined`.
+     * @returns The total number of AAS documents.
+     */
+    @Get('{name}/documents/count')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getEndpointCount')
+    public async getEndpointCount(@Path() name: string): Promise<{ count: number }> {
+        try {
+            this.logger.start('getCount');
+            return { count: await this.aasProvider.getCountAsync(decodeBase64Url(name)) };
         } finally {
             this.logger.stop();
         }
@@ -56,7 +90,7 @@ export class EndpointsController extends AASController {
     public addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         try {
             this.logger.start('addEndpoint');
-            return this.aasProvider.addEndpointAsync(name, endpoint);
+            return this.aasProvider.addEndpointAsync(decodeBase64Url(name), endpoint);
         } finally {
             this.logger.stop();
         }
@@ -71,8 +105,8 @@ export class EndpointsController extends AASController {
     @OperationId('deleteEndpoint')
     public deleteEndpoint(@Path() name: string): Promise<void> {
         try {
-            this.logger.start('deleteEndpoint');
-            return this.aasProvider.removeEndpointAsync(name);
+            this.logger.start('removeEndpoint');
+            return this.aasProvider.removeEndpointAsync(decodeBase64Url(name));
         } finally {
             this.logger.stop();
         }

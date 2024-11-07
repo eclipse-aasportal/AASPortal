@@ -7,16 +7,16 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, input, Signal, signal } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
 import { AASDocument } from 'aas-core';
-import { AuthComponent, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
+import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
 import { MainApiService } from '../../app/main/main-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
-import { Component, input, signal } from '@angular/core';
 
 @Component({
     selector: 'fhg-auth',
@@ -48,6 +48,7 @@ describe('MainComponent', () => {
     let api: jasmine.SpyObj<MainApiService>;
     let window: jasmine.SpyObj<WindowService>;
     let toolbar: jasmine.SpyObj<ToolbarService>;
+    let indexChange: jasmine.SpyObj<IndexChangeService>;
 
     beforeEach(() => {
         documentSubject = new Subject<AASDocument | null>();
@@ -56,6 +57,9 @@ describe('MainComponent', () => {
         window = jasmine.createSpyObj<WindowService>(['getQueryParams']);
         window.getQueryParams.and.returnValue(new URLSearchParams());
         toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
+        indexChange = jasmine.createSpyObj<IndexChangeService>(['clear'], {
+            summary: (() => 'Hallo') as Signal<string>,
+        });
 
         TestBed.configureTestingModule({
             providers: [
@@ -70,6 +74,10 @@ describe('MainComponent', () => {
                 {
                     provide: ToolbarService,
                     useValue: toolbar,
+                },
+                {
+                    provide: IndexChangeService,
+                    useValue: indexChange,
                 },
                 provideRouter([]),
             ],

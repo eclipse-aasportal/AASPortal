@@ -95,8 +95,6 @@ export class MainComponent implements OnInit {
 
     public readonly version = signal(environment.version).asReadonly();
 
-    public readonly count = this.indexChange.count;
-
     public readonly summary = this.indexChange.summary;
 
     public ngOnInit(): void {

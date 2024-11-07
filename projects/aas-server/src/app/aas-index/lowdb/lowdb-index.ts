@@ -68,6 +68,11 @@ export class LowDbIndex extends AASIndex {
         return this.db.data.endpoints;
     }
 
+    public override async getEndpointCount(): Promise<number> {
+        await this.promise;
+        return this.db.data.endpoints.length;
+    }
+
     public override async getEndpoint(name: string): Promise<AASEndpoint> {
         await this.promise;
         const endpoint = this.db.data.endpoints.find(endpoint => endpoint.name === name);

@@ -9,7 +9,7 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { ScanResult, ScanResultType } from './aas-provider/scan-result.js';
+import { ScanResult, ScanResultKind } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { EndpointScan } from './endpoint-scan.js';
 import { TemplateScan } from './template/template-scan.js';
@@ -49,8 +49,9 @@ export class WorkerApp {
 
     private createEndResult(data: WorkerData): ScanResult {
         return {
+            type: 'ScanEndResult',
             taskId: data.taskId,
-            type: ScanResultType.End,
+            kind: ScanResultKind.End,
             start: data.start,
             messages: this.logger.getMessages(),
         };

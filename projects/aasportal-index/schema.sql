@@ -6,7 +6,7 @@ CREATE TABLE endpoints (
     type VARCHAR(32) NOT NULL,
     version VARCHAR(8),
     headers VARCHAR(255),
-    schedule VARCHAR(255),
+    schedule VARCHAR(255)
 );
 
 CREATE TABLE documents (

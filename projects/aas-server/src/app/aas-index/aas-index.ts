@@ -32,6 +32,8 @@ export abstract class AASIndex {
 
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
 
+    public abstract getEndpointCount(): Promise<number>;
+
     public abstract getEndpoint(name: string): Promise<AASEndpoint>;
 
     public abstract hasEndpoint(name: string): Promise<boolean>;
