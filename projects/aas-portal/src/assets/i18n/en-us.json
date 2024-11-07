@@ -215,5 +215,9 @@
         "MODEL_TYPE_EXPECTED": "Model type abbreviation expected at position {0}.",
         "TERM_EXPECTED": "Term expected at position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unexpected closing bracket at position ${0}."
+    },
+    "IndexChangeService": {
+        "ENDPOINTS": "Endpoints",
+        "SHELLS": "Shells"
     }
 }

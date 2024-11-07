@@ -17,7 +17,7 @@ import { createJsonReader } from '../packages/create-json-reader.js';
 import { createXmlReader } from '../packages/create-xml-reader.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { ScanTemplatesData } from '../aas-provider/worker-data.js';
-import { ScanResult, ScanResultType, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { ScanResult, ScanTemplatesResult } from '../aas-provider/scan-result.js';
 import { Parallel } from '../aas-provider/parallel.js';
 import { TaskHandler } from '../aas-provider/task-handler.js';
 
@@ -135,6 +135,6 @@ export class TemplateStorage {
     };
 
     private isScanTemplatesResult(result: ScanResult): result is ScanTemplatesResult {
-        return result.type === ScanResultType.Update;
+        return result.type === 'ScanTemplatesResult';
     }
 }

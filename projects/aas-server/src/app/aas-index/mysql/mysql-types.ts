@@ -34,5 +34,5 @@ export interface MySqlElement extends RowDataPacket {
 }
 
 export interface DocumentCount extends RowDataPacket {
-    count: number;
+    'COUNT(*)': number;
 }

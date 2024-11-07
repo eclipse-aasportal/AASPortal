@@ -57,16 +57,26 @@ export class MySqlIndex extends AASIndex {
 
     public override async getCount(endpoint?: string): Promise<number> {
         if (endpoint === undefined) {
-            return (
-                await (await this.connection).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count;')
-            )[0][0].count;
+            const result = await (
+                await this.connection
+            ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count;');
+
+            return result[0][0]['COUNT(*)'];
         }
 
-        return (
-            await (
-                await this.connection
-            ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;', [endpoint])
-        )[0][0].count;
+        const result = await (
+            await this.connection
+        ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;', [endpoint]);
+
+        return result[0][0]['COUNT(*)'];
+    }
+
+    public override async getEndpointCount(): Promise<number> {
+        const result = await (
+            await this.connection
+        ).query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
+
+        return result[0][0]['COUNT(*)'];
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {

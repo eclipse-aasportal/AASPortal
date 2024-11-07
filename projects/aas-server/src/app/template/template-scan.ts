@@ -17,7 +17,7 @@ import { Variable } from '../variable.js';
 import { createJsonReader } from '../packages/create-json-reader.js';
 import { createXmlReader } from '../packages/create-xml-reader.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
-import { ScanResultType, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { ScanResultKind, ScanTemplatesResult } from '../aas-provider/scan-result.js';
 import { toUint8Array } from '../convert.js';
 import { WorkerData } from '../aas-provider/worker-data.js';
 
@@ -49,8 +49,9 @@ export class TemplateScan {
         }
 
         const value: ScanTemplatesResult = {
+            type: 'ScanTemplatesResult',
             taskId: data.taskId,
-            type: ScanResultType.Update,
+            kind: ScanResultKind.Update,
             templates: templates,
             start: data.start,
         };
@@ -135,7 +136,12 @@ export class TemplateScan {
             source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
             await source.openAsync();
             const pkg = source.createPackage(file);
-            const submodel = (await pkg.getEnvironmentAsync()).submodels[0];
+            const env = await pkg.getEnvironmentAsync();
+            if (env.submodels.length === 0) {
+                return undefined;
+            }
+
+            const submodel = env.submodels[0];
             return {
                 modelType: submodel.modelType,
                 idShort: submodel.idShort,

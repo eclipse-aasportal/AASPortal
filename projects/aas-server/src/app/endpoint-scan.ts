@@ -11,7 +11,7 @@ import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
 import { AASDocument } from 'aas-core';
 import { ScanEndpointData } from './aas-provider/worker-data.js';
-import { ScanEndpointResult, ScanResultType } from './aas-provider/scan-result.js';
+import { ScanEndpointResult, ScanResultKind } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
 import { Variable } from './variable.js';
@@ -57,8 +57,9 @@ export class EndpointScan {
 
     private postUpdate(document: AASDocument): void {
         const value: ScanEndpointResult = {
+            type: 'ScanEndpointResult',
             taskId: this.data.taskId,
-            type: ScanResultType.Update,
+            kind: ScanResultKind.Update,
             endpoint: this.data.endpoint,
             document: document,
             start: this.data.start,
@@ -70,8 +71,9 @@ export class EndpointScan {
 
     private postRemove = (document: AASDocument): void => {
         const value: ScanEndpointResult = {
+            type: 'ScanEndpointResult',
             taskId: this.data.taskId,
-            type: ScanResultType.Remove,
+            kind: ScanResultKind.Remove,
             endpoint: this.data.endpoint,
             document: document,
             start: this.data.start,
@@ -83,8 +85,9 @@ export class EndpointScan {
 
     private postAdd = (document: AASDocument): void => {
         const value: ScanEndpointResult = {
+            type: 'ScanEndpointResult',
             taskId: this.data.taskId,
-            type: ScanResultType.Add,
+            kind: ScanResultKind.Add,
             endpoint: this.data.endpoint,
             document: document,
             start: this.data.start,

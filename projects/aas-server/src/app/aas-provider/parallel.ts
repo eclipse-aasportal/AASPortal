@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
 
-import { ScanResultType, ScanResult } from './scan-result.js';
+import { ScanResultKind, ScanResult } from './scan-result.js';
 import { WorkerData } from './worker-data.js';
 import { Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
@@ -53,8 +53,8 @@ class WorkerTask extends EventEmitter {
 
     private workerOnMessage = (value: Uint8Array) => {
         const result: ScanResult = JSON.parse(Buffer.from(value).toString());
-        switch (result.type) {
-            case ScanResultType.End:
+        switch (result.kind) {
+            case ScanResultKind.End:
                 this.emit('end', result, this);
                 break;
             default:

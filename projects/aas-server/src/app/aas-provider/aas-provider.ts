@@ -27,7 +27,7 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from '../aas-index/aas-index.js';
-import { ScanResultType, ScanResult, ScanEndpointResult } from './scan-result.js';
+import { ScanResultKind, ScanResult, ScanEndpointResult } from './scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
 import { ScanEndpointData } from './worker-data.js';
@@ -79,6 +79,13 @@ export class AASProvider {
     }
 
     /**
+     * Gets the number of registered AAS endpoints.
+     */
+    public getEndpointCount(): Promise<number> {
+        return this.index.getEndpointCount();
+    }
+
+    /**
      * Gets a page of documents from the specified cursor.
      * @param cursor The cursor.
      * @param filter A filter expression.
@@ -95,12 +102,12 @@ export class AASProvider {
     }
 
     /**
-     * The total count of AAS documents.
-     * @param filter A filter expression.
+     * The total count of AAS documents over all endpoints or a specified endpoint.
+     * @param endpoint The endpoint name.
      * @returns The total count of documents.
      */
-    public getDocumentCountAsync(filter?: string): Promise<number> {
-        return this.index.getCount(filter);
+    public getCountAsync(endpoint?: string): Promise<number> {
+        return this.index.getCount(endpoint);
     }
 
     /**
@@ -462,12 +469,7 @@ export class AASProvider {
                     continue;
                 }
 
-                setTimeout(
-                    this.scanEndpoint,
-                    this.computeTimeout(endpoint.schedule),
-                    this.taskHandler.createTaskId(),
-                    endpoint,
-                );
+                setTimeout(this.scanEndpoint, 0, this.taskHandler.createTaskId(), endpoint);
             }
         } catch (error) {
             this.logger.error(error);
@@ -503,23 +505,29 @@ export class AASProvider {
         this.parallel.execute(data);
     };
 
-    private parallelOnMessage = async (result: ScanEndpointResult) => {
+    private parallelOnMessage = async (result: ScanResult) => {
         try {
-            switch (result.type) {
-                case ScanResultType.Update:
-                    await this.onUpdate(result);
-                    break;
-                case ScanResultType.Add:
-                    await this.onAdded(result);
-                    break;
-                case ScanResultType.Remove:
-                    await this.onRemoved(result);
-                    break;
+            if (this.isScanEndpointResult(result)) {
+                switch (result.kind) {
+                    case ScanResultKind.Update:
+                        await this.onUpdate(result);
+                        break;
+                    case ScanResultKind.Add:
+                        await this.onAdded(result);
+                        break;
+                    case ScanResultKind.Remove:
+                        await this.onRemoved(result);
+                        break;
+                }
             }
         } catch (error) {
             this.logger.error(error);
         }
     };
+
+    private isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
+        return result.type === 'ScanEndpointResult';
+    }
 
     private parallelOnEnd = async (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);

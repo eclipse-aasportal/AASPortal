@@ -17,7 +17,7 @@ import { FileStorageProvider } from '../../app/file-storage/file-storage-provide
 import { Variable } from '../../app/variable.js';
 import { TaskHandler } from '../../app/aas-provider/task-handler.js';
 import { Parallel } from '../../app/aas-provider/parallel.js';
-import { ScanResultType, ScanTemplatesResult } from '../../app/aas-provider/scan-result.js';
+import { ScanResultKind, ScanTemplatesResult } from '../../app/aas-provider/scan-result.js';
 
 describe('TemplateStorage', function () {
     let templateStorage: TemplateStorage;
@@ -37,8 +37,9 @@ describe('TemplateStorage', function () {
         parallel.on.mockImplementation((eventName, handler) => {
             if (eventName === 'message') {
                 const result: ScanTemplatesResult = {
+                    type: 'ScanTemplatesResult',
                     taskId: 1,
-                    type: ScanResultType.Update,
+                    kind: ScanResultKind.Update,
                     start: 0,
                     templates: [
                         {

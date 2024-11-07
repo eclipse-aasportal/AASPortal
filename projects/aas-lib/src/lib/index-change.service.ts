@@ -7,17 +7,16 @@
  *****************************************************************************/
 
 import { computed, EventEmitter, Injectable, signal } from '@angular/core';
-import { WebSocketData, AASServerMessage } from 'aas-core';
+import { TranslateService } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
+import { WebSocketData, AASServerMessage } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
-import { NotifyService } from '../public-api';
+import { HttpClient } from '@angular/common/http';
 
 interface State {
-    addedDocuments: number;
+    documentCount: number;
+    endpointCount: number;
     changedDocuments: number;
-    removedDocuments: number;
-    addedEndpoints: number;
-    removedEndpoints: number;
 }
 
 @Injectable({
@@ -26,52 +25,51 @@ interface State {
 export class IndexChangeService {
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
     private readonly state = signal<State>({
-        addedDocuments: 0,
+        documentCount: 0,
+        endpointCount: 0,
         changedDocuments: 0,
-        removedDocuments: 0,
-        addedEndpoints: 0,
-        removedEndpoints: 0,
     });
 
     public constructor(
+        private readonly http: HttpClient,
         private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly notify: NotifyService,
+        private readonly translate: TranslateService,
     ) {
         this.subscribeIndexChanged();
+
+        this.http.get<{ count: number }>('/api/v1/endpoints/count').subscribe({
+            next: result => {
+                this.state.update(state => ({ ...state, endpointCount: result.count }));
+            },
+            error: error => {
+                console.debug(error);
+            },
+        });
+
+        this.http
+            .get<{ count: number }>('/api/v1/documents/count')
+            .subscribe(result => this.state.update(state => ({ ...state, documentCount: result.count })));
     }
 
     public readonly reset = new EventEmitter();
 
-    public readonly count = computed(() => {
-        const state = this.state();
-        return (
-            state.addedDocuments +
-            state.addedEndpoints +
-            state.changedDocuments +
-            state.removedDocuments +
-            state.removedEndpoints
-        );
-    });
-
     public readonly summary = computed(() => {
         const state = this.state();
-        return `+${state.addedDocuments}/${state.changedDocuments}/-${state.removedDocuments}; +${state.addedEndpoints}/-${state.removedEndpoints}`;
+        if (state.changedDocuments === 0) {
+            return `${state.documentCount} ${this.translate.instant('IndexChangeService.SHELLS')} / ${state.endpointCount} ${this.translate.instant('IndexChangeService.ENDPOINTS')}`;
+        }
+
+        return `${state.documentCount} ${this.translate.instant('IndexChangeService.SHELLS')} (${state.changedDocuments}) / ${state.endpointCount} ${this.translate.instant('IndexChangeService.ENDPOINTS')}`;
     });
 
-    public readonly addedDocuments = computed(() => this.state().addedDocuments);
-    public readonly addedEndpoints = computed(() => this.state().addedEndpoints);
+    public readonly documentCount = computed(() => this.state().documentCount);
+
+    public readonly endpointCount = computed(() => this.state().endpointCount);
+
     public readonly changedDocuments = computed(() => this.state().changedDocuments);
-    public readonly removedDocuments = computed(() => this.state().removedDocuments);
-    public readonly removedEndpoints = computed(() => this.state().removedEndpoints);
 
     public clear(): void {
-        this.state.set({
-            addedDocuments: 0,
-            changedDocuments: 0,
-            removedDocuments: 0,
-            addedEndpoints: 0,
-            removedEndpoints: 0,
-        });
+        this.state.update(state => ({ ...state, changedDocuments: 0 }));
     }
 
     private subscribeIndexChanged = (): void => {
@@ -121,11 +119,11 @@ export class IndexChangeService {
     }
 
     private documentAdded(): void {
-        this.state.update(state => ({ ...state, addedDocuments: state.addedDocuments + 1 }));
+        this.state.update(state => ({ ...state, addedDocuments: state.documentCount + 1 }));
     }
 
     private documentRemoved(): void {
-        this.state.update(state => ({ ...state, removedDocuments: state.removedDocuments + 1 }));
+        this.state.update(state => ({ ...state, removedDocuments: state.documentCount - 1 }));
     }
 
     private documentUpdate(): void {
@@ -133,10 +131,10 @@ export class IndexChangeService {
     }
 
     private endpointAdded(): void {
-        this.state.update(state => ({ ...state, addedEndpoints: state.addedEndpoints + 1 }));
+        this.state.update(state => ({ ...state, addedEndpoints: state.endpointCount + 1 }));
     }
 
     private endpointRemoved(): void {
-        this.state.update(state => ({ ...state, removedEndpoints: state.removedEndpoints + 1 }));
+        this.state.update(state => ({ ...state, removedEndpoints: state.endpointCount - 1 }));
     }
 }

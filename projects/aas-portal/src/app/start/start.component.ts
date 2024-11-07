@@ -240,7 +240,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         return of(this.activeFavorites()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.selected(), activeFavorites);
+                    this.favorites.remove(this.selected(), activeFavorites).subscribe();
                     this.store.removeFavorites([...this.selected()]);
                     return of(void 0);
                 } else {

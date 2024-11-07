@@ -27,10 +27,11 @@ export class FavoritesService {
             .pipe(
                 first(ready => ready === true),
                 mergeMap(() => this.auth.getCookie('.Favorites')),
+                map(value => {
+                    this._lists.set(value ? (JSON.parse(value) as FavoritesList[]) : []);
+                }),
             )
-            .subscribe(value => {
-                this._lists.set(value ? (JSON.parse(value) as FavoritesList[]) : []);
-            });
+            .subscribe();
     }
 
     public readonly lists = this._lists.asReadonly();
@@ -44,8 +45,7 @@ export class FavoritesService {
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): Observable<void> {
-        return of(this._lists).pipe(
-            map(lists => [...lists()]),
+        return of(this._lists()).pipe(
             map(lists => {
                 const i = lists.findIndex(list => list.name === name);
                 let list: FavoritesList;
@@ -80,8 +80,7 @@ export class FavoritesService {
     }
 
     public remove(documents: AASDocument[], name: string): Observable<void> {
-        return of(this._lists).pipe(
-            map(lists => [...lists()]),
+        return of(this._lists()).pipe(
             map(lists => {
                 const i = lists.findIndex(list => list.name === name);
                 if (i < 0) {
@@ -108,8 +107,8 @@ export class FavoritesService {
     }
 
     public delete(name: string): Observable<void> {
-        return of(this._lists).pipe(
-            map(lists => lists().filter(list => list.name !== name)),
+        return of(this._lists()).pipe(
+            map(lists => lists.filter(list => list.name !== name)),
             mergeMap(lists => {
                 return (
                     lists.length > 0
