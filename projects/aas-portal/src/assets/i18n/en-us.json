@@ -14,7 +14,6 @@
     "CAPTION_CREATE_WORKSPACE": "Group",
     "CAPTION_EDIT_WORKSPACE": "Edit Group",
     "CAPTION_REMOVE_WORKSPACE": "Remove Group",
-    "CAPTION_ADD_ENDPOINT": "Add AAS Endpoint",
     "CAPTION_REMOVE_ENDPOINT": "Remove AAS Endpoint",
     "CAPTION_NEW_ELEMENT": "Insert New",
     "CAPTION_EDIT_ELEMENT": "Edit",
@@ -149,7 +148,6 @@
     "ERROR_INVALID_CONTAINER_URL": "'{0}' addresses an invalid or not supported AAS resource.",
     "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
     "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name.",
-    "FAVORITES": "Favorites",
     "INFO_NEW_PASSWORD_SENT": "A new password was sent to '{0}'.",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} was downloaded successfully.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} was uploaded successfully.",
@@ -175,7 +173,11 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
+    "Start": {
+        "FAVORITES": "All shells"
+    },
     "AddEndpointForm": {
+        "CAPTION_ADD_ENDPOINT": "Add AAS Endpoint",
         "FileSystem": "File system",
         "AAS_API": "AAS API",
         "WebDAV": "WebDAV",
@@ -188,8 +190,14 @@
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "ADVANCED_SETTINGS": "Advanced settings",
+        "SCHEDULE": "Search endpoint",
+        "ONCE": "once",
+        "EVERY": "cyclic",
         "MINUTES": "Minutes",
-        "HOURS": "Hours"
+        "HOURS": "Hours",
+        "HEADERS": "HTTP headers",
+        "HEADER": "Header",
+        "VALUE": "Value"
     },
     "CustomerFeedback": {
         "OverallRating": "Overall rating",

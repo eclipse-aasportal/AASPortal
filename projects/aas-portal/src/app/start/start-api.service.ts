@@ -28,15 +28,23 @@ export class StartApiService {
     }
 
     /**
-     * Adds a new endpoint to the AASServer configuration.
-     * @param endpoint The AAS container endpoint.
+     * Adds a new endpoint.
+     * @param endpoint The AAS endpoint.
      */
     public addEndpoint(endpoint: AASEndpoint): Observable<void> {
         return this.http.post<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint.name)}`, endpoint);
     }
 
     /**
-     * Removes the specified endpoint from the AASServer configuration.
+     * Updates an existing endpoint.
+     * @param endpoint The AAS endpoint.
+     */
+    public updateEndpoint(endpoint: AASEndpoint): Observable<void> {
+        return this.http.put<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint.name)}`, endpoint);
+    }
+
+    /**
+     * Removes the specified endpoint.
      * @param name The name of the endpoint.
      */
     public removeEndpoint(name: string): Observable<void> {

@@ -21,7 +21,7 @@
             [value]="activeFavorites()" (change)="setActiveFavorites(selectFavorites.value)">
             @for (option of favoritesLists(); track option; let i = $index) {
             @if (i === 0) {
-            <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
+            <option class="fst-italic fw-light" [value]="''" translate>Start.FAVORITES</option>
             } @else {
             <option class="fst-normal fw-normal" [value]="option">{{option}}</option>
             }

@@ -40,6 +40,8 @@ export abstract class AASIndex {
 
     public abstract addEndpoint(endpoint: AASEndpoint): Promise<void>;
 
+    public abstract updateEndpoint(endpoint: AASEndpoint): Promise<void>;
+
     public abstract removeEndpoint(endpointName: string): Promise<boolean>;
 
     public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult>;

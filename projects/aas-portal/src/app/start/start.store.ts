@@ -15,7 +15,6 @@ export class StartStore {
     private readonly _limit = signal(10);
     private readonly _previous = signal<AASDocumentId | null>(null);
     private readonly _next = signal<AASDocumentId | null>(null);
-    private _totalCount = 0;
     private readonly _documents = signal<AASDocument[]>([], { equal: (a, b) => equalArray(a, b) });
     private readonly _activeFavorites = signal('');
 
@@ -81,16 +80,25 @@ export class StartStore {
 
     public setFilter(filter: string): void {
         this._filterText.set(filter);
+        if (!this._activeFavorites()) {
+            this.getFirstPage();
+        }
     }
 
     public getFirstPage(filter?: string, limit?: number): void {
+        if (!filter) {
+            if (!this._activeFavorites()) {
+                filter = this._filterText();
+            }
+        }
+
         this.api
             .getPage(
                 {
                     previous: null,
                     limit: limit ?? this._limit(),
                 },
-                filter ?? this._filterText(),
+                filter,
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page, limit, filter)))

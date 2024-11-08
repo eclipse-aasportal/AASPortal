@@ -220,7 +220,7 @@ export class AASProvider {
     /**
      * Adds a new endpoint.
      * @param endpointName The endpoint name.
-     * @param url The endpoint URL.
+     * @param endpoint The endpoint to update.
      */
     public async addEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
         if (endpointName !== endpoint.name) {
@@ -238,6 +238,20 @@ export class AASProvider {
         });
 
         setTimeout(this.scanEndpoint, 0, this.taskHandler.createTaskId(), endpoint);
+    }
+
+    /**
+     * Updates an existing endpoint.
+     * @param endpointName The endpoint name.
+     * @param endpoint The endpoint to update.
+     */
+    public async updateEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
+        if (endpointName !== endpoint.name) {
+            await this.index.removeEndpoint(endpointName);
+            await this.index.addEndpoint(endpoint);
+        } else {
+            await this.index.updateEndpoint(endpoint);
+        }
     }
 
     /**
