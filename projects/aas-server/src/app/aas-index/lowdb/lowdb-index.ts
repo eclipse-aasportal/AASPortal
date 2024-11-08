@@ -102,6 +102,17 @@ export class LowDbIndex extends AASIndex {
         await this.db.write();
     }
 
+    public override async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
+        await this.promise;
+        const index = this.db.data.endpoints.findIndex(item => item.name === endpoint.name);
+        if (index < 0) {
+            throw new Error(`An endpoint with the name ${name} does not exist.`);
+        }
+
+        this.db.data.endpoints[index] = endpoint;
+        await this.db.write();
+    }
+
     public override async removeEndpoint(endpointName: string): Promise<boolean> {
         await this.promise;
         const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === endpointName);

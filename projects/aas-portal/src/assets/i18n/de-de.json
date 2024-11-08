@@ -14,7 +14,6 @@
     "CAPTION_CREATE_WORKSPACE": "Gruppieren",
     "CAPTION_EDIT_WORKSPACE": "Gruppe bearbeiten",
     "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",
-    "CAPTION_ADD_ENDPOINT": "AAS-Endpunkt hinzufügen",
     "CAPTION_REMOVE_ENDPOINT": "AAS-Endpunkt entfernen",
     "CAPTION_NEW_ELEMENT": "Neu hinzufügen",
     "CAPTION_EDIT_ELEMENT": "Bearbeiten",
@@ -147,7 +146,6 @@
     "ERROR_INVALID_CONTAINER_URL": "'{0}' adressiert eine ungülig oder nicht unterstützte VWS-Ressoure.",
     "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
     "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name.",
-    "FAVORITES": "Favoriten",
     "INFO_NEW_PASSWORD_SENT": "Ein neues Passwort wurde an '{0}' gesendet",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} wurde erfolgreich heruntergeladen.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} wurde erfolgreich hochgeladen.",
@@ -174,7 +172,11 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
+    "Start": {
+        "FAVORITES": "Alle Verwaltungsschalen"
+    },
     "AddEndpointForm": {
+        "CAPTION_ADD_ENDPOINT": "AAS-Endpunkt hinzufügen",
         "FileSystem": "Dateisystem",
         "AAS_API": "AAS API",
         "WebDAV": "WebDAV",
@@ -187,8 +189,14 @@
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "ADVANCED_SETTINGS": "Erweiterte Einstellungen",
+        "SCHEDULE": "Endpunkt durchsuchen",
+        "ONCE": "einmalig",
+        "EVERY": "zyklisch",
         "MINUTES": "Minuten",
-        "HOURS": "Stunden"
+        "HOURS": "Stunden",
+        "HEADERS": "HTTP-Header-Felder",
+        "HEADER": "Feld",
+        "VALUE": "Wert"
     },
     "CustomerFeedback": {
         "OverallRating": "Gesamtbewertung",

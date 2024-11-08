@@ -80,16 +80,24 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {
-        return (await (await this.connection).query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;'))[0].map(
-            row =>
-                ({
-                    name: row.name,
-                    url: row.url,
-                    type: row.type,
-                    version: row.version,
-                    headers: row.headers ? JSON.parse(row.headers) : undefined,
-                }) as AASEndpoint,
-        );
+        return (await (await this.connection).query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;'))[0].map(row => {
+            const endpoint: AASEndpoint = {
+                name: row.name,
+                url: row.url,
+                type: row.type,
+                version: row.version,
+            };
+
+            if (row.headers) {
+                endpoint.headers = JSON.parse(row.headers);
+            }
+
+            if (row.schedule) {
+                endpoint.schedule = JSON.parse(row.schedule);
+            }
+
+            return endpoint;
+        });
     }
 
     public override async getEndpoint(name: string): Promise<AASEndpoint> {
@@ -142,8 +150,22 @@ export class MySqlIndex extends AASIndex {
                 endpoint.type,
                 endpoint.version,
                 endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+                endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
             ],
         );
+    }
+
+    public override async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
+        await (
+            await this.connection
+        ).query<ResultSetHeader>('UPDATE `documents` SET url = ?, type = ?, version = ?, headers = ? WHERE name = ?;', [
+            endpoint.url,
+            endpoint.type,
+            endpoint.version,
+            endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+            endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
+            endpoint.name,
+        ]);
     }
 
     public override async removeEndpoint(endpointName: string): Promise<boolean> {

@@ -119,11 +119,11 @@ export class IndexChangeService {
     }
 
     private documentAdded(): void {
-        this.state.update(state => ({ ...state, addedDocuments: state.documentCount + 1 }));
+        this.state.update(state => ({ ...state, documentCount: state.documentCount + 1 }));
     }
 
     private documentRemoved(): void {
-        this.state.update(state => ({ ...state, removedDocuments: state.documentCount - 1 }));
+        this.state.update(state => ({ ...state, documentCount: state.documentCount - 1 }));
     }
 
     private documentUpdate(): void {
@@ -131,10 +131,10 @@ export class IndexChangeService {
     }
 
     private endpointAdded(): void {
-        this.state.update(state => ({ ...state, addedEndpoints: state.endpointCount + 1 }));
+        this.state.update(state => ({ ...state, endpointCount: state.endpointCount + 1 }));
     }
 
     private endpointRemoved(): void {
-        this.state.update(state => ({ ...state, removedEndpoints: state.endpointCount - 1 }));
+        this.state.update(state => ({ ...state, endpointCount: state.endpointCount - 1 }));
     }
 }

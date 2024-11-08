@@ -67,7 +67,7 @@ export class FavoritesService {
                     }
                 }
 
-                return lists;
+                return [...lists];
             }),
             mergeMap(lists => {
                 return this.auth.setCookie('.Favorites', JSON.stringify(lists)).pipe(
@@ -94,7 +94,7 @@ export class FavoritesService {
 
                 lists[i] = list;
 
-                return lists;
+                return [...lists];
             }),
             mergeMap(lists => {
                 return this.auth.setCookie('.Favorites', JSON.stringify(lists)).pipe(

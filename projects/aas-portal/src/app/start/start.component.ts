@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { Router } from '@angular/router';
+import { NgClass } from '@angular/common';
 import {
     AfterViewInit,
     ChangeDetectionStrategy,
@@ -45,14 +46,13 @@ import { StartApiService } from './start-api.service';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { StartStore } from './start.store';
-import { AsyncPipe, NgClass } from '@angular/common';
 
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
     standalone: true,
-    imports: [AASTableComponent, NgClass, AsyncPipe, TranslateModule, NgbModule],
+    imports: [AASTableComponent, NgClass, TranslateModule, NgbModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy, AfterViewInit {
@@ -160,7 +160,9 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             }),
             mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
             mergeMap(result => {
-                if (!result) return EMPTY;
+                if (result === undefined) {
+                    return EMPTY;
+                }
 
                 return this.api.addEndpoint(result);
             }),
