@@ -45,7 +45,7 @@ export type AASAbbreviation =
     | 'SME'
     | 'SML';
 
-export type AASEndpointScheduleType = 'never' | 'once' | 'every' | 'daily' | 'weekly';
+export type AASEndpointScheduleType = 'manual' | 'once' | 'every' | 'daily' | 'weekly';
 
 /** The schedule type. */
 export interface AASEndpointSchedule {

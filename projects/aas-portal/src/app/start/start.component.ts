@@ -46,6 +46,7 @@ import { StartApiService } from './start-api.service';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { StartStore } from './start.store';
+import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
 
 @Component({
     selector: 'fhg-start',
@@ -165,6 +166,26 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 }
 
                 return this.api.addEndpoint(result);
+            }),
+            catchError(error => this.notify.error(error)),
+        );
+    }
+
+    public updateEndpoint(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.getEndpoints()),
+            map(endpoints => {
+                const modalRef = this.modal.open(UpdateEndpointFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.initialize(endpoints);
+                return modalRef;
+            }),
+            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
+            mergeMap(result => {
+                if (result === undefined) {
+                    return EMPTY;
+                }
+
+                return this.api.updateEndpoint(result);
             }),
             catchError(error => this.notify.error(error)),
         );
