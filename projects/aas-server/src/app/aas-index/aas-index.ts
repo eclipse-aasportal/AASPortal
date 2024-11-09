@@ -40,7 +40,7 @@ export abstract class AASIndex {
 
     public abstract addEndpoint(endpoint: AASEndpoint): Promise<void>;
 
-    public abstract updateEndpoint(endpoint: AASEndpoint): Promise<void>;
+    public abstract updateEndpoint(endpoint: AASEndpoint, name?: string): Promise<void>;
 
     public abstract removeEndpoint(endpointName: string): Promise<boolean>;
 

@@ -56,31 +56,31 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async getCount(endpoint?: string): Promise<number> {
+        const connection = await this.connection;
         if (endpoint === undefined) {
-            const result = await (
-                await this.connection
-            ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count;');
+            const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count;');
 
             return result[0][0]['COUNT(*)'];
         }
 
-        const result = await (
-            await this.connection
-        ).query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;', [endpoint]);
+        const result = await connection.query<DocumentCount[]>(
+            'SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;',
+            [endpoint],
+        );
 
         return result[0][0]['COUNT(*)'];
     }
 
     public override async getEndpointCount(): Promise<number> {
-        const result = await (
-            await this.connection
-        ).query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
-
+        const connection = await this.connection;
+        const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
         return result[0][0]['COUNT(*)'];
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {
-        return (await (await this.connection).query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;'))[0].map(row => {
+        const connection = await this.connection;
+        const result = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;');
+        return result[0].map(row => {
             const endpoint: AASEndpoint = {
                 name: row.name,
                 url: row.url,
@@ -101,10 +101,8 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async getEndpoint(name: string): Promise<AASEndpoint> {
-        const [results] = await (
-            await this.connection
-        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
-
+        const connection = await this.connection;
+        const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
         if (results.length === 0) {
             throw new Error(`An endpoint with the name "${name}" does not exist.`);
         }
@@ -132,18 +130,15 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async hasEndpoint(name: string): Promise<boolean> {
-        const [results] = await (
-            await this.connection
-        ).query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
-
+        const connection = await this.connection;
+        const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
         return results.length > 0;
     }
 
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
-        await (
-            await this.connection
-        ).query<ResultSetHeader>(
-            'INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?);',
+        const connection = await this.connection;
+        await connection.query<ResultSetHeader>(
+            'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
             [
                 endpoint.name,
                 endpoint.url,
@@ -155,17 +150,43 @@ export class MySqlIndex extends AASIndex {
         );
     }
 
-    public override async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
-        await (
-            await this.connection
-        ).query<ResultSetHeader>('UPDATE `documents` SET url = ?, type = ?, version = ?, headers = ? WHERE name = ?;', [
-            endpoint.url,
-            endpoint.type,
-            endpoint.version,
-            endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
-            endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
-            endpoint.name,
-        ]);
+    public override async updateEndpoint(endpoint: AASEndpoint, name?: string): Promise<void> {
+        const connection = await this.connection;
+        if (name === undefined || endpoint.name === name) {
+            await connection.query<ResultSetHeader>(
+                'UPDATE `documents` SET url = ?, type = ?, version = ?, headers = ? schedule = ? WHERE name = ?;',
+                [
+                    endpoint.url,
+                    endpoint.type,
+                    endpoint.version,
+                    endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+                    endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
+                    endpoint.name,
+                ],
+            );
+        } else {
+            try {
+                await connection.beginTransaction();
+                await connection.query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [endpoint.name]);
+                this.removeDocuments(endpoint.name);
+                await connection.query<ResultSetHeader>(
+                    'INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?);',
+                    [
+                        endpoint.name,
+                        endpoint.url,
+                        endpoint.type,
+                        endpoint.version,
+                        endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+                        endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
+                    ],
+                );
+
+                await connection.commit();
+            } catch (error) {
+                await connection.rollback();
+                throw error;
+            }
+        }
     }
 
     public override async removeEndpoint(endpointName: string): Promise<boolean> {
@@ -173,9 +194,9 @@ export class MySqlIndex extends AASIndex {
         try {
             await connection.beginTransaction();
 
-            const result = await (
-                await this.connection
-            ).query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [endpointName]);
+            const result = await connection.query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [
+                endpointName,
+            ]);
 
             this.removeDocuments(endpointName);
 
@@ -506,13 +527,11 @@ export class MySqlIndex extends AASIndex {
     }
 
     private async selectEndpointDocument(endpoint: string, id: string): Promise<MySqlDocument | undefined> {
-        const [results] = await (
-            await this.connection
-        ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)', [
-            endpoint,
-            id,
-            id,
-        ]);
+        const connection = await this.connection;
+        const [results] = await connection.query<MySqlDocument[]>(
+            'SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)',
+            [endpoint, id, id],
+        );
 
         if (results.length === 0) {
             return undefined;
@@ -522,9 +541,11 @@ export class MySqlIndex extends AASIndex {
     }
 
     private async selectDocument(id: string): Promise<MySqlDocument | undefined> {
-        const [results] = await (
-            await this.connection
-        ).query<MySqlDocument[]>('SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)', [id, id]);
+        const connection = await this.connection;
+        const [results] = await connection.query<MySqlDocument[]>(
+            'SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)',
+            [id, id],
+        );
 
         if (results.length === 0) {
             return undefined;
