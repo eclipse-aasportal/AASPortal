@@ -246,11 +246,10 @@ export class AASProvider {
      * @param endpoint The endpoint to update.
      */
     public async updateEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
-        if (endpointName !== endpoint.name) {
-            await this.index.removeEndpoint(endpointName);
-            await this.index.addEndpoint(endpoint);
-        } else {
+        if (endpointName === endpoint.name) {
             await this.index.updateEndpoint(endpoint);
+        } else {
+            await this.index.updateEndpoint(endpoint, endpointName);
         }
     }
 

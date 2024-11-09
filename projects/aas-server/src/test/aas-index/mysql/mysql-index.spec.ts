@@ -141,8 +141,24 @@ describe('MySqlIndex', () => {
 
             await expect(index.addEndpoint(endpoint)).resolves.toEqual(void 0);
             expect(connection.query).toHaveBeenLastCalledWith(
-                'INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?);',
-                [endpoint.name, endpoint.url, endpoint.type, undefined, undefined],
+                'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
+                [endpoint.name, endpoint.url, endpoint.type, undefined, undefined, undefined],
+            );
+        });
+    });
+
+    describe('updateEndpoint', () => {
+        it('updates an existing Endpoint', async () => {
+            const endpoint: AASEndpoint = {
+                name: 'Endpoint 1',
+                url: 'http://endpoint1.com',
+                type: 'AAS_API',
+            };
+
+            await expect(index.updateEndpoint(endpoint)).resolves.toEqual(void 0);
+            expect(connection.query).toHaveBeenLastCalledWith(
+                'UPDATE `documents` SET url = ?, type = ?, version = ?, headers = ? schedule = ? WHERE name = ?;',
+                [endpoint.url, endpoint.type, undefined, undefined, undefined, endpoint.name],
             );
         });
     });
