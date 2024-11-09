@@ -154,7 +154,7 @@ export class MySqlIndex extends AASIndex {
         const connection = await this.connection;
         if (name === undefined || endpoint.name === name) {
             await connection.query<ResultSetHeader>(
-                'UPDATE `documents` SET url = ?, type = ?, version = ?, headers = ? schedule = ? WHERE name = ?;',
+                'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [
                     endpoint.url,
                     endpoint.type,

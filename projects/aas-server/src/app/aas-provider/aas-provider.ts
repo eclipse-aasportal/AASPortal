@@ -478,7 +478,7 @@ export class AASProvider {
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
-                if (endpoint.schedule?.type === 'never') {
+                if (endpoint.schedule?.type === 'manual') {
                     continue;
                 }
 

@@ -157,7 +157,7 @@ describe('MySqlIndex', () => {
 
             await expect(index.updateEndpoint(endpoint)).resolves.toEqual(void 0);
             expect(connection.query).toHaveBeenLastCalledWith(
-                'UPDATE `documents` SET url = ?, type = ?, version = ?, headers = ? schedule = ? WHERE name = ?;',
+                'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [endpoint.url, endpoint.type, undefined, undefined, undefined, endpoint.name],
             );
         });
