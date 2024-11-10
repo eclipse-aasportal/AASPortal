@@ -19,7 +19,7 @@ import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { ScanTemplatesData } from '../aas-provider/worker-data.js';
 import { ScanResult, ScanTemplatesResult } from '../aas-provider/scan-result.js';
 import { Parallel } from '../aas-provider/parallel.js';
-import { TaskHandler } from '../aas-provider/task-handler.js';
+import { Task, TaskHandler } from '../aas-provider/task-handler.js';
 
 @singleton()
 export class TemplateStorage {
@@ -72,17 +72,19 @@ export class TemplateStorage {
     }
 
     private startScan = () => {
-        this.scanTemplates(this.taskHandler.createTaskId());
+        const task = this.taskHandler.createTask('TemplateStorage', this, 'ScanTemplates');
+        this.taskHandler.set(task);
+        this.scanTemplates(task);
     };
 
-    private scanTemplates = async (taskId: number) => {
+    private scanTemplates = async (task: Task) => {
         const data: ScanTemplatesData = {
             type: 'ScanTemplatesData',
-            taskId,
-            start: Date.now(),
+            taskId: task.id,
         };
 
-        this.taskHandler.set(taskId, { endpointName: 'TemplateStorage', owner: this, type: 'ScanTemplates' });
+        task.start = Date.now();
+        task.state = 'inProgress';
         this.parallel.execute(data);
     };
 
@@ -120,11 +122,12 @@ export class TemplateStorage {
 
     private parallelOnEnd = (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
-        if (!task || task.owner !== this) {
+        if (task === undefined || task.owner !== this) {
             return;
         }
 
-        this.taskHandler.delete(result.taskId);
+        task.state = 'idle';
+        task.end = Date.now();
         setTimeout(this.scanTemplates, this.timeout, result.taskId);
 
         if (result.messages) {

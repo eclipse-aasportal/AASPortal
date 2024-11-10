@@ -69,19 +69,35 @@ describe('MySqlIndex', () => {
                     name: 'Endpoint 1',
                     url: 'http://endpoint1.com',
                     type: 'AAS_API',
+                    version: 'v3',
+                    headers: null,
+                    schedule: null,
                 },
                 {
                     constructor: { name: 'RowDataPacket' },
                     name: 'Endpoint 2',
                     url: 'http://endpoint2.com',
                     type: 'AAS_API',
+                    version: 'v3',
+                    headers: null,
+                    schedule: null,
                 },
             ];
 
             connection.query.mockResolvedValue([result, []]);
             await expect(index.getEndpoints()).resolves.toEqual([
-                { name: 'Endpoint 1', url: 'http://endpoint1.com', type: 'AAS_API' },
-                { name: 'Endpoint 2', url: 'http://endpoint2.com', type: 'AAS_API' },
+                {
+                    name: 'Endpoint 1',
+                    url: 'http://endpoint1.com',
+                    type: 'AAS_API',
+                    version: 'v3',
+                },
+                {
+                    name: 'Endpoint 2',
+                    url: 'http://endpoint2.com',
+                    type: 'AAS_API',
+                    version: 'v3',
+                },
             ]);
 
             expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints`;');
@@ -95,12 +111,20 @@ describe('MySqlIndex', () => {
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
                 type: 'AAS_API',
+                version: 'v3',
+                headers: null,
+                schedule: null,
             };
 
             connection.query.mockResolvedValue([[result], []]);
             const actual = await index.getEndpoint('Endpoint 1');
             expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
-            expect(actual).toEqual({ name: 'Endpoint 1', url: 'http://endpoint1.com', type: 'AAS_API' });
+            expect(actual).toEqual({
+                name: 'Endpoint 1',
+                url: 'http://endpoint1.com',
+                type: 'AAS_API',
+                version: 'v3',
+            });
         });
 
         it('throws an error if endpoint does not exist', async () => {
@@ -117,6 +141,9 @@ describe('MySqlIndex', () => {
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
                 type: 'AAS_API',
+                version: 'v3',
+                headers: null,
+                schedule: null,
             };
 
             connection.query.mockResolvedValue([[result], []]);
@@ -247,7 +274,8 @@ describe('MySqlIndex', () => {
                             address: '',
                             crc32: 0,
                             idShort: 'Shell 1',
-                            readonly: false,
+                            assetId: null,
+                            thumbnail: null,
                             timestamp: 0,
                             id: 'http://document1/aas',
                             endpoint: 'Endpoint 1',
@@ -258,7 +286,8 @@ describe('MySqlIndex', () => {
                             address: '',
                             crc32: 0,
                             idShort: 'Shell 2',
-                            readonly: false,
+                            assetId: null,
+                            thumbnail: null,
                             timestamp: 0,
                             id: 'http://document2/aas',
                             endpoint: 'Endpoint 1',

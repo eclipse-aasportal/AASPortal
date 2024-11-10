@@ -38,7 +38,7 @@ import { AASResourceFactory } from '../packages/aas-resource-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
-import { TaskHandler } from './task-handler.js';
+import { Task, TaskHandler } from './task-handler.js';
 import { HierarchicalStructure } from './hierarchical-structure.js';
 import { AASCache } from './aas-cache.js';
 
@@ -237,7 +237,8 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        setTimeout(this.scanEndpoint, 0, this.taskHandler.createTaskId(), endpoint);
+        const task = this.taskHandler.createTask(endpointName, this, 'ScanEndpoint');
+        setTimeout(this.scanEndpoint, 0, task, endpoint);
     }
 
     /**
@@ -261,6 +262,11 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
             await this.index.removeEndpoint(endpoint.name);
+            const task = this.taskHandler.find(endpointName, 'ScanEndpoint');
+            if (task) {
+                this.taskHandler.delete(task.id);
+            }
+
             this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
             this.wsServer.notify('IndexChange', {
                 type: 'AASServerMessage',
@@ -429,6 +435,27 @@ export class AASProvider {
         return nodes;
     }
 
+    /** Starts a scan of the AAS endpoint with the specified name.
+     * @param name The name of the endpoint.
+     */
+    public async startEndpointScan(name: string): Promise<void> {
+        const endpoint = await this.index.getEndpoint(name);
+        const task = this.taskHandler.find(name, 'ScanEndpoint');
+        if (task === undefined) {
+            throw new Error(``);
+        }
+
+        if (endpoint.schedule?.type !== 'manual') {
+            throw new Error(`Endpoint ${name} is not configured for the manual start of a scan.`);
+        }
+
+        if (task.state === 'inProgress') {
+            throw new Error(`Scanning endpoint ${name} is already in progress.`);
+        }
+
+        setTimeout(this.scanEndpoint, 0, task, endpoint);
+    }
+
     private async restart(): Promise<void> {
         this.resetRequested = false;
         await this.index.reset();
@@ -482,14 +509,16 @@ export class AASProvider {
                     continue;
                 }
 
-                setTimeout(this.scanEndpoint, 0, this.taskHandler.createTaskId(), endpoint);
+                const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
+                this.taskHandler.set(task);
+                setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         } catch (error) {
             this.logger.error(error);
         }
     };
 
-    private computeTimeout(schedule: AASEndpointSchedule | undefined, start?: number): number {
+    private computeTimeout(schedule: AASEndpointSchedule | undefined, start: number, end: number): number {
         if (schedule === undefined) {
             return this.variable.SCAN_ENDPOINT_TIMEOUT;
         }
@@ -498,7 +527,7 @@ export class AASProvider {
         if (schedule.type === 'every') {
             const values = schedule.values;
             if (values && values.length > 0 && typeof values[0] === 'number') {
-                const timeout = Date.now() - start - values[0];
+                const timeout = end - start - values[0];
                 return timeout >= 0 ? timeout : values[0];
             }
         }
@@ -506,15 +535,15 @@ export class AASProvider {
         return this.variable.SCAN_ENDPOINT_TIMEOUT;
     }
 
-    private scanEndpoint = async (taskId: number, endpoint: AASEndpoint) => {
+    private scanEndpoint = async (task: Task, endpoint: AASEndpoint) => {
         const data: ScanEndpointData = {
             type: 'ScanEndpointData',
-            taskId,
+            taskId: task.id,
             endpoint,
-            start: Date.now(),
         };
 
-        this.taskHandler.set(taskId, { endpointName: endpoint.name, owner: this, type: 'ScanEndpoint' });
+        task.state = 'inProgress';
+        task.start = Date.now();
         this.parallel.execute(data);
     };
 
@@ -544,21 +573,21 @@ export class AASProvider {
 
     private parallelOnEnd = async (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
-        if (!task || task.owner !== this) {
+        if (task === undefined || task.owner !== this) {
             return;
         }
 
-        this.taskHandler.delete(result.taskId);
         if ((await this.index.hasEndpoint(task.endpointName)) === true) {
             const endpoint = await this.index.getEndpoint(task.endpointName);
-
-            if (endpoint.schedule?.type === 'once') {
+            if (endpoint.schedule?.type === 'once' || endpoint.schedule?.type === 'manual') {
                 return;
             }
 
+            task.state === 'idle';
+            task.end = Date.now();
             setTimeout(
                 this.scanEndpoint,
-                this.computeTimeout(endpoint.schedule, result.start),
+                this.computeTimeout(endpoint.schedule, task.start, task.end),
                 result.taskId,
                 endpoint,
             );
