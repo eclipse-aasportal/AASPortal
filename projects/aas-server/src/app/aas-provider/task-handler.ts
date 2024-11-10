@@ -9,9 +9,13 @@
 import { singleton } from 'tsyringe';
 
 export interface Task {
+    id: number;
     endpointName: string;
     owner: object;
     type: 'ScanEndpoint' | 'ScanTemplates';
+    state: 'idle' | 'inProgress';
+    start: number;
+    end: number;
 }
 
 @singleton()
@@ -28,8 +32,8 @@ export class TaskHandler {
         return this.tasks.get(taskId);
     }
 
-    public set(taskId: number, task: Task) {
-        this.tasks.set(taskId, task);
+    public set(task: Task) {
+        this.tasks.set(task.id, task);
     }
 
     public empty(owner: object, name?: string): boolean {
@@ -42,9 +46,27 @@ export class TaskHandler {
         return true;
     }
 
-    public createTaskId(): number {
-        const taskId = this.nextTaskId;
+    public createTask(endpointName: string, owner: object, type: 'ScanEndpoint' | 'ScanTemplates'): Task {
+        const id = this.nextTaskId;
         ++this.nextTaskId;
-        return taskId;
+        return {
+            id,
+            type,
+            endpointName,
+            owner,
+            state: 'idle',
+            start: 0,
+            end: 0,
+        };
+    }
+
+    public find(endpointName: string, type: 'ScanEndpoint' | 'ScanTemplates'): Task | undefined {
+        for (const task of this.tasks.values()) {
+            if (task.endpointName === endpointName && type === task.type) {
+                return task;
+            }
+        }
+
+        return undefined;
     }
 }

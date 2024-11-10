@@ -143,4 +143,20 @@ export class EndpointsController extends AASController {
             this.logger.stop();
         }
     }
+
+    /**
+     * @summary Starts a scan of the AAS endpoint with the specified name.
+     * @param name The endpoint name.
+     */
+    @Post('{name}/scan')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('reset')
+    public async startEndpointScan(@Path() name: string): Promise<void> {
+        try {
+            this.logger.start('startEndpointScan');
+            await this.aasProvider.startEndpointScan(decodeBase64Url(name));
+        } finally {
+            this.logger.stop();
+        }
+    }
 }

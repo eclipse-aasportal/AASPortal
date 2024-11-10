@@ -52,7 +52,6 @@ export class WorkerApp {
             type: 'ScanEndResult',
             taskId: data.taskId,
             kind: ScanResultKind.End,
-            start: data.start,
             messages: this.logger.getMessages(),
         };
     }

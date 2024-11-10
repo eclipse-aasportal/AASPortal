@@ -11,7 +11,6 @@ import { AASEndpoint } from 'aas-core';
 export interface WorkerData {
     taskId: number;
     type: 'ScanEndpointData' | 'ScanTemplatesData';
-    start: number;
 }
 
 export interface ScanEndpointData extends WorkerData {

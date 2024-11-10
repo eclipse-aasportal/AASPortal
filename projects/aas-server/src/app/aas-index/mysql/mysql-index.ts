@@ -85,8 +85,11 @@ export class MySqlIndex extends AASIndex {
                 name: row.name,
                 url: row.url,
                 type: row.type,
-                version: row.version,
             };
+
+            if (row.version) {
+                endpoint.version = row.version;
+            }
 
             if (row.headers) {
                 endpoint.headers = JSON.parse(row.headers);
@@ -270,17 +273,8 @@ export class MySqlIndex extends AASIndex {
 
             const uuid = result[0][0].uuid;
             await connection.query<ResultSetHeader>(
-                'UPDATE `documents` SET address = ?, crc32 = ?, idShort = ?, onlineReady = ?, readonly = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
-                [
-                    document.address,
-                    document.crc32,
-                    document.idShort,
-                    !!document.onlineReady,
-                    document.readonly,
-                    document.timestamp,
-                    document.thumbnail,
-                    uuid,
-                ],
+                'UPDATE `documents` SET address = ?, crc32 = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
+                [document.address, document.crc32, document.idShort, document.timestamp, document.thumbnail, uuid],
             );
 
             if (document.content) {
@@ -301,7 +295,7 @@ export class MySqlIndex extends AASIndex {
             await connection.beginTransaction();
             const uuid = v4();
             await connection.query<ResultSetHeader>(
-                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, onlineReady, readonly, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
                 [
                     uuid,
                     document.address,
@@ -309,10 +303,8 @@ export class MySqlIndex extends AASIndex {
                     document.endpoint,
                     document.id,
                     document.idShort,
-                    document.assetId,
-                    !!document.onlineReady,
-                    document.readonly,
-                    document.thumbnail ?? '',
+                    document.assetId || null,
+                    document.thumbnail || null,
                     BigInt(document.timestamp),
                 ],
             );
@@ -582,19 +574,27 @@ export class MySqlIndex extends AASIndex {
     }
 
     private toDocument(result: MySqlDocument): AASDocument {
-        return {
+        const document: AASDocument = {
             address: result.address,
             crc32: result.crc32,
             endpoint: result.endpoint,
             id: result.id,
             idShort: result.idShort,
-            assetId: result.assetId,
-            readonly: result.readonly ? true : false,
             timestamp: Number(result.timestamp),
             content: null,
-            onlineReady: result.onlineReady ? true : false,
-            thumbnail: result.thumbnail,
+            onlineReady: true,
+            readonly: true,
         };
+
+        if (result.assetId) {
+            document.assetId = result.assetId;
+        }
+
+        if (result.thumbnail) {
+            document.thumbnail = result.thumbnail;
+        }
+
+        return document;
     }
 
     private async initialize(): Promise<Connection> {

@@ -20,7 +20,6 @@ export interface ScanResult {
     type: 'ScanEndResult' | 'ScanEndpointResult' | 'ScanTemplatesResult';
     kind: ScanResultKind;
     taskId: number;
-    start: number;
     messages?: Message[];
 }
 

@@ -17,8 +17,6 @@ CREATE TABLE documents (
     id VARCHAR(255), 
     idShort VARCHAR(100), 
     assetId VARCHAR(255),
-    onlineReady BOOL, 
-    readonly BOOL, 
     thumbnail VARCHAR(7167), 
     timestamp LONG
 );
