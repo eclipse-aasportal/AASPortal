@@ -69,8 +69,8 @@ export class EndpointsController extends AASController {
      */
     @Get('{name}/documents/count')
     @Security('bearerAuth', ['guest'])
-    @OperationId('getEndpointCount')
-    public async getEndpointCount(@Path() name: string): Promise<{ count: number }> {
+    @OperationId('getDocumentCount')
+    public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
         try {
             this.logger.start('getCount');
             return { count: await this.aasProvider.getCountAsync(decodeBase64Url(name)) };
@@ -130,7 +130,7 @@ export class EndpointsController extends AASController {
     }
 
     /**
-     * @summary Resets the AASServer container configuration.
+     * @summary Resets the AAS endpoint configuration.
      */
     @Delete('')
     @Security('bearerAuth', ['editor'])
@@ -148,9 +148,9 @@ export class EndpointsController extends AASController {
      * @summary Starts a scan of the AAS endpoint with the specified name.
      * @param name The endpoint name.
      */
-    @Post('{name}/scan')
+    @Put('{name}/scan')
     @Security('bearerAuth', ['editor'])
-    @OperationId('reset')
+    @OperationId('startEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
         try {
             this.logger.start('startEndpointScan');
