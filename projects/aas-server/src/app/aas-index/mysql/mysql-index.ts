@@ -211,25 +211,25 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult> {
-        let q: MySqlQuery | undefined;
-        if (query) {
-            q = new MySqlQuery(query, language ?? 'en');
+    public override getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
+        let query: MySqlQuery | undefined;
+        if (expression) {
+            query = new MySqlQuery(expression, language ?? 'en');
         }
 
         if (cursor.next) {
-            return this.getNextPage(cursor.next, cursor.limit);
+            return this.getNextPage(cursor.next, cursor.limit, query);
         }
 
         if (cursor.previous) {
-            return this.getPreviousPage(cursor.previous, cursor.limit);
+            return this.getPreviousPage(cursor.previous, cursor.limit, query);
         }
 
         if (cursor.previous === null) {
-            return this.getFirstPage(cursor.limit, q);
+            return this.getFirstPage(cursor.limit, query);
         }
 
-        return this.getLastPage(cursor.limit);
+        return this.getLastPage(cursor.limit, query);
     }
 
     public override async nextPage(

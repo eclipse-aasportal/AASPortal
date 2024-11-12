@@ -183,27 +183,31 @@ export class LowDbIndex extends AASIndex {
         return { result, paging_metadata: { cursor: encodeBase64Url(items[k].id) } };
     }
 
-    public override async getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult> {
+    public override async getDocuments(
+        cursor: AASCursor,
+        expression?: string,
+        language?: string,
+    ): Promise<AASPagedResult> {
         await this.promise;
 
-        let filter: LowDbQuery | undefined;
-        if (query) {
-            filter = new LowDbQuery(query, language ?? 'en');
+        let query: LowDbQuery | undefined;
+        if (expression) {
+            query = new LowDbQuery(expression, language ?? 'en');
         }
 
         if (cursor.next) {
-            return this.getNextPage(cursor.next, cursor.limit, filter);
+            return this.getNextPage(cursor.next, cursor.limit, query);
         }
 
         if (cursor.previous) {
-            return this.getPreviousPage(cursor.previous, cursor.limit, filter);
+            return this.getPreviousPage(cursor.previous, cursor.limit, query);
         }
 
         if (cursor.previous === null) {
-            return this.getFirstPage(cursor.limit, filter);
+            return this.getFirstPage(cursor.limit, query);
         }
 
-        return this.getLastPage(cursor.limit, filter);
+        return this.getLastPage(cursor.limit, query);
     }
 
     public override async update(document: AASDocument): Promise<void> {
