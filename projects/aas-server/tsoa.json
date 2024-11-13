@@ -8,7 +8,7 @@
         "dest": "./temp"
     },
     "spec": {
-        "outputDirectory": "./src/app",
+        "outputDirectory": "./src/assets",
         "specVersion": 3,
         "schemes": [
             "http"
