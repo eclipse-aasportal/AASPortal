@@ -80,7 +80,7 @@
         "rxjs": "~7.8.1",
         "swagger-ui-express": "^5.0.1",
         "tslib": "^2.7.0",
-        "tsoa": "^5.1.1",
+        "tsoa": "^6.5.1",
         "tsyringe": "^4.8.0",
         "uuid": "^10.0.0",
         "webdav": "^5.7.1",
