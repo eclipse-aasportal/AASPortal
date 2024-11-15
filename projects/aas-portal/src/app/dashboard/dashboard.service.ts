@@ -121,12 +121,12 @@ export class DashboardService {
                                 0,
                             );
 
-                            this._state.set({ pages, index });
+                            return { pages, index } as DashboardState;
                         }),
                     ),
                 ),
             )
-            .subscribe();
+            .subscribe(value => this._state.set(value));
     }
 
     public readonly activePage = computed(() => this._state().pages[this._state().index]);
@@ -170,9 +170,7 @@ export class DashboardService {
     ): void {
         page = cloneDeep(page);
         const properties = elements.filter(item => item.modelType === 'Property').map(item => item as aas.Property);
-
         const blobs = elements.filter(item => item.modelType === 'Blob').map(item => item as aas.Blob);
-
         const nodes = this.getNodes(page, document);
         if (properties.length > 0) {
             switch (chartType) {
