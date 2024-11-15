@@ -14,7 +14,6 @@
     "CAPTION_CREATE_WORKSPACE": "Group",
     "CAPTION_EDIT_WORKSPACE": "Edit Group",
     "CAPTION_REMOVE_WORKSPACE": "Remove Group",
-    "CAPTION_REMOVE_ENDPOINT": "Remove AAS Endpoint",
     "CAPTION_NEW_ELEMENT": "Insert New",
     "CAPTION_EDIT_ELEMENT": "Edit",
     "CAPTION_ERROR": "Error",
@@ -114,9 +113,7 @@
     "PLACEHOLDER_NEW_PASSWORD": "enter new password",
     "PLACEHOLDER_CONFIRM_PASSWORD": "confirm password",
     "PLACEHOLDER_USERNAME": "enter a name",
-    "PLACEHOLDER_FILTER": "Filter",
     "PLACEHOLDER_WORKSPACE": "group name",
-    "PLACEHOLDER_SEARCH": "Search",
     "PLACEHOLDER_NEW_FAVORITES": "new favorites",
     "GUEST_USER": "Guest",
     "ERROR_UNCAUGHT": "{0}",
@@ -155,7 +152,6 @@
     "INFO_AAS_OFFLINE": "The Asset Administration Shell is offline. Last update: {0}",
     "CONFIRM_DELETE_FILE": "Permanently delete {0}?",
     "CONFIRM_DELETE_FILES": "Permanently delete {0} files?",
-    "CONFIRM_RESET_CONFIGURATION": "Do you want to restore the default AASServer configuration?",
     "CONFIRM_DELETE_USER": "Do you want to delete the account '{0}'?",
     "CONFIRM_DELETE_DOCUMENT": "Do you really want to delete documents {0}?",
     "PROMPT_DASHBOARD_NAME": "Enter a name for the dashboard.",
@@ -176,7 +172,11 @@
         "ADD_ENDPOINT": "Add...",
         "UPDATE_ENDPOINT": "Edit...",
         "REMOVE_ENDPOINT": "Remove...",
-        "RESET": "Reset..."
+        "EXTRAS": "Extras...",
+        "PLACEHOLDER_FILTER": "Filter"
+    },
+    "AAS": {
+        "PLACEHOLDER_SEARCH": "Search"
     },
     "AddEndpointForm": {
         "CAPTION": "Add AAS Endpoint",
@@ -223,6 +223,21 @@
         "HEADERS": "HTTP headers",
         "HEADER": "Header",
         "VALUE": "Value"
+    },
+    "RemoveEndpointForm": {
+        "CAPTION": "Remove AAS Endpoint"
+    },
+    "ExtrasEndpointForm": {
+        "CAPTION": "Endpoint extras",
+        "NAME": "Name",
+        "COUNT": "Count",
+        "UPDATE": "Update",
+        "CONFIRM_RESET_CONFIGURATION": "Do you want to restore the default AASNodePortal configuration?",
+        "RESET": "Reset",
+        "CLOSE": "Close",
+        "manual": "manual",
+        "once": "once",
+        "every": "cyclic"
     },
     "CustomerFeedback": {
         "OverallRating": "Overall rating",

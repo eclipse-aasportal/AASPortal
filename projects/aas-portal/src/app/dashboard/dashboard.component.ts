@@ -9,7 +9,7 @@
 import 'chart.js/auto';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { ActivatedRoute } from '@angular/router';
-import { AsyncPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
     AfterViewInit,
@@ -79,7 +79,7 @@ interface TimeSeries {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     standalone: true,
-    imports: [NgClass, AsyncPipe, FormsModule, TranslateModule],
+    imports: [NgClass, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -148,7 +148,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public get selectedItem(): DashboardItem | null {
         if (this.selections.size === 1) {
-            return this.findItem(this.selections.values().next().value) ?? null;
+            return this.findItem(this.selections.values().next().value!) ?? null;
         }
 
         return null;

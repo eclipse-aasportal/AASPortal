@@ -14,7 +14,6 @@
     "CAPTION_CREATE_WORKSPACE": "Gruppieren",
     "CAPTION_EDIT_WORKSPACE": "Gruppe bearbeiten",
     "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",
-    "CAPTION_REMOVE_ENDPOINT": "AAS-Endpunkt entfernen",
     "CAPTION_NEW_ELEMENT": "Neu hinzufügen",
     "CAPTION_EDIT_ELEMENT": "Bearbeiten",
     "CAPTION_ERROR": "Fehler",
@@ -112,9 +111,7 @@
     "PLACEHOLDER_NEW_PASSWORD": "Neues Passwort eingeben",
     "PLACEHOLDER_REPEAT_PASSWORD": "Passwort bestätigen",
     "PLACEHOLDER_USERNAME": "Namen eingeben",
-    "PLACEHOLDER_FILTER": "Filter",
     "PLACEHOLDER_WORKSPACE": "Gruppenname",
-    "PLACEHOLDER_SEARCH": "Suche",
     "PLACEHOLDER_NEW_FAVORITES": "neue Favoriten",
     "GUEST_USER": "Gast",
     "ERROR_UNCAUGHT": "{0}",
@@ -154,7 +151,6 @@
     "INFO_AAS_OFFLINE": "Die Verwaltungsschale ist offline. Letzte Aktualisierung: {0}",
     "CONFIRM_DELETE_FILE": "{0} unwiderruflich löschen?",
     "CONFIRM_DELETE_FILES": "{0} Dateien unwiderruflich löschen?",
-    "CONFIRM_RESET_CONFIGURATION": "Möchten Sie die AASServer Standardkonfiguration wiederherstellen?",
     "CONFIRM_DELETE_USER": "Möchten Sie das Konto '{0}' löschen?",
     "CONFIRM_DELETE_DOCUMENT": "Möchten Sie wirklich die Dokumente {0} löschen?",
     "PROMPT_DASHBOARD_NAME": "Geben Sie einen Namen für das Dashboard ein.",
@@ -175,8 +171,12 @@
         "ADD_ENDPOINT": "Hinzufügen...",
         "UPDATE_ENDPOINT": "Bearbeiten...",
         "REMOVE_ENDPOINT": "Entfernen...",
-        "RESET": "Zurücksetzen..."
-        },
+        "EXTRAS": "Extras...",
+        "PLACEHOLDER_FILTER": "Filter"
+    },
+    "AAS": {
+        "PLACEHOLDER_SEARCH": "Suche"
+    },
     "AddEndpointForm": {
         "CAPTION": "AAS-Endpunkt hinzufügen",
         "FileSystem": "Dateisystem",
@@ -222,6 +222,21 @@
         "HEADERS": "HTTP-Header-Felder",
         "HEADER": "Feld",
         "VALUE": "Wert"
+    },
+    "RemoveEndpointForm": {
+        "CAPTION": "AAS-Endpunkt entfernen"
+    },
+    "ExtrasEndpointForm": {
+        "CAPTION": "Endpoint-Extras",
+        "NAME": "Name",
+        "COUNT": "Anzahl",
+        "UPDATE": "Aktualisierung",
+        "CONFIRM_RESET_CONFIGURATION": "Möchten Sie die AASNodePortal Standardkonfiguration wiederherstellen?",
+        "RESET": "Reset",
+        "CLOSE": "Schließen",
+        "manual": "manuell",
+        "once": "einmalig",
+        "every": "zyklisch"
     },
     "CustomerFeedback": {
         "OverallRating": "Gesamtbewertung",

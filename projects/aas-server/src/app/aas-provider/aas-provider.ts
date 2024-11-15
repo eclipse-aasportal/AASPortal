@@ -219,14 +219,9 @@ export class AASProvider {
 
     /**
      * Adds a new endpoint.
-     * @param endpointName The endpoint name.
-     * @param endpoint The endpoint to update.
+     * @param endpoint The endpoint to add.
      */
-    public async addEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
-        if (endpointName !== endpoint.name) {
-            throw new Error('Invalid operation.');
-        }
-
+    public async addEndpointAsync(endpoint: AASEndpoint): Promise<void> {
         await this.resourceFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
@@ -237,20 +232,30 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        const task = this.taskHandler.createTask(endpointName, this, 'ScanEndpoint');
-        setTimeout(this.scanEndpoint, 0, task, endpoint);
+        if (endpoint.schedule?.type === 'manual') {
+            return;
+        }
+
+        setTimeout(this.scanEndpoint, 0, this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint'), endpoint);
     }
 
     /**
      * Updates an existing endpoint.
-     * @param endpointName The endpoint name.
+     * @param endpointName The old endpoint name.
      * @param endpoint The endpoint to update.
      */
-    public async updateEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
-        if (endpointName === endpoint.name) {
-            await this.index.updateEndpoint(endpoint);
-        } else {
-            await this.index.updateEndpoint(endpoint, endpointName);
+    public async updateEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+        const old = await this.index.updateEndpoint(endpoint);
+
+        let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
+        if (task === undefined) {
+            task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
+        }
+
+        if (old.schedule?.type !== endpoint.schedule?.type) {
+            if (old.schedule?.type === 'manual') {
+                setTimeout(this.scanEndpoint, 0, task, endpoint);
+            }
         }
     }
 

@@ -108,13 +108,20 @@ export class DashboardService {
                     zip(this.auth.getCookie('.DashboardPage'), this.auth.getCookie('.DashboardPages')).pipe(
                         map(([value, data]) => {
                             const pages: DashboardPage[] = data ? JSON.parse(data) : [];
-                            this._state.set({
-                                pages,
-                                index: Math.max(
-                                    pages.findIndex(page => page.name === value),
-                                    0,
-                                ),
-                            });
+                            if (pages.length === 0) {
+                                pages.push({ name: this.createPageName(), items: [], requests: [] });
+                            }
+
+                            if (value === undefined) {
+                                value = pages[0].name;
+                            }
+
+                            const index = Math.max(
+                                pages.findIndex(page => page.name === value),
+                                0,
+                            );
+
+                            this._state.set({ pages, index });
                         }),
                     ),
                 ),

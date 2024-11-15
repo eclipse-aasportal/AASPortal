@@ -59,7 +59,6 @@ describe('StartComponent', () => {
             'getHierarchy',
             'getPage',
             'removeEndpoint',
-            'reset',
         ]);
 
         api.getPage.and.returnValue(

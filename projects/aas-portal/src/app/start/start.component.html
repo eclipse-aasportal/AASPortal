@@ -60,7 +60,7 @@
                 <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>Start.ADD_ENDPOINT</button>
                 <button ngbDropdownItem (click)="updateEndpoint().subscribe()" translate>Start.UPDATE_ENDPOINT</button>
                 <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>Start.REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="reset().subscribe()" translate>Start.RESET</button>
+                <button ngbDropdownItem (click)="extras().subscribe()" translate>Start.EXTRAS</button>
             </div>
         </div>
     </div>
@@ -106,7 +106,7 @@
             <i class="bi bi-filter"></i>
         </div>
         <input #textInput type="text" class="form-control" [value]="filterText()"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
+            [placeholder]="'Start.PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
             (keydown.enter)="textInput.blur()">
     </div>
 </ng-template>

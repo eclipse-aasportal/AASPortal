@@ -47,6 +47,7 @@ import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { StartStore } from './start.store';
 import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
+import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
 
 @Component({
     selector: 'fhg-start',
@@ -216,15 +217,12 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         );
     }
 
-    public reset(): Observable<void> {
+    public extras(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
-            mergeMap(result => {
-                if (!result) return of(void 0);
-
-                return this.api.reset();
+            mergeMap(() => {
+                const modalRef = this.modal.open(ExtrasEndpointFormComponent, { backdrop: 'static', scrollable: true });
+                return from(modalRef.result);
             }),
-            catchError(error => this.notify.error(error)),
         );
     }
 

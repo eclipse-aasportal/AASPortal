@@ -67,15 +67,15 @@
         }
     </div>
     }
-} @else {
+    } @else {
     <div class="alert alert-info text-center mt-2" role="alert">{{'INFO_EMPTY_DASHBOARD' | translate}}</div>
-}
+    }
 </div>
 
 <ng-template #dashboardToolbar>
     <div class="input-group me-2 my-1">
         <select #select class="form-select" [value]="activePage()" (change)="setPage(pages()[select.selectedIndex])">
-            @for (page of pages(); track page) {
+            @for (page of pages(); track page.name) {
             <option [ngValue]="page">{{page.name}}</option>
             }
         </select>

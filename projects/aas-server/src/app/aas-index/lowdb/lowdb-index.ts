@@ -102,27 +102,17 @@ export class LowDbIndex extends AASIndex {
         await this.db.write();
     }
 
-    public override async updateEndpoint(endpoint: AASEndpoint, name?: string): Promise<void> {
+    public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
         await this.promise;
         const index = this.db.data.endpoints.findIndex(item => item.name === endpoint.name);
         if (index < 0) {
             throw new Error(`An endpoint with the name ${name} does not exist.`);
         }
 
-        if (name !== undefined && name !== endpoint.name) {
-            if (this.db.data.endpoints.some(item => item.name === name)) {
-                throw new ApplicationError(
-                    `An endpoint with the name "${name}" already exists.`,
-                    ERRORS.RegistryAlreadyExists,
-                    endpoint.name,
-                );
-            }
-
-            this.removeDocuments(endpoint.name);
-        }
-
+        const old = this.db.data.endpoints[index];
         this.db.data.endpoints[index] = endpoint;
         await this.db.write();
+        return old;
     }
 
     public override async removeEndpoint(endpointName: string): Promise<boolean> {

@@ -14,7 +14,24 @@ import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { Variable } from '../app/variable.js';
 
-import appInfo from '../assets/app-info.json' with { type: 'json ' };
+const appInfo = {
+    name: 'aas-portal-project',
+    version: '2.0.0',
+    description: 'Web-based visualization and control of asset administration shells.',
+    author: 'Fraunhofer IOSB-INA e.V.',
+    homepage: 'https://www.iosb-ina.fraunhofer.de/',
+    license: 'Apache-2.0',
+    libraries: [
+        {
+            name: 'Library',
+            version: '1.0',
+            description: 'A library.',
+            license: 'MIT',
+            licenseText: 'License text...',
+            homepage: 'https://www.iosb-ina.fraunhofer.de/',
+        },
+    ],
+};
 
 describe('Application Info service', () => {
     let logger: jest.Mocked<Logger>;
