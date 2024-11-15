@@ -44,7 +44,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getCount()).resolves.toEqual(42);
-            expect(connection.query).toBeCalledWith('SELECT COUNT(*) FROM `documents` AS count;');
+            expect(connection.query).toBeCalledWith('SELECT COUNT(*) FROM `documents`;');
         });
 
         it('returns the total number of documents of the specified Endpoint', async () => {
@@ -55,7 +55,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getCount('Samples')).resolves.toEqual(42);
-            expect(connection.query).toBeCalledWith('SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;', [
+            expect(connection.query).toBeCalledWith('SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;', [
                 'Samples',
             ]);
         });
@@ -154,7 +154,7 @@ describe('MySqlIndex', () => {
         it('indicates that Unknown does not exist', async () => {
             connection.query.mockResolvedValue([[], []]);
             await expect(index.hasEndpoint('Endpoint 1')).resolves.toEqual(false);
-            expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
         });
     });
 
@@ -167,7 +167,7 @@ describe('MySqlIndex', () => {
             };
 
             await expect(index.addEndpoint(endpoint)).resolves.toEqual(void 0);
-            expect(connection.query).toHaveBeenLastCalledWith(
+            expect(connection.query).toHaveBeenCalledWith(
                 'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
                 [endpoint.name, endpoint.url, endpoint.type, undefined, undefined, undefined],
             );
@@ -182,8 +182,30 @@ describe('MySqlIndex', () => {
                 type: 'AAS_API',
             };
 
-            await expect(index.updateEndpoint(endpoint)).resolves.toEqual(void 0);
-            expect(connection.query).toHaveBeenLastCalledWith(
+            const result: MySqlEndpoint = {
+                constructor: { name: 'RowDataPacket' },
+                name: 'Endpoint 1',
+                url: 'http://endpoint1.com',
+                type: 'AAS_API',
+                version: 'v3',
+                headers: null,
+                schedule: null,
+            };
+
+            connection.query.mockResolvedValue([[result], []]);
+            await expect(index.updateEndpoint(endpoint)).resolves.toEqual({
+                name: 'Endpoint 1',
+                url: 'http://endpoint1.com',
+                type: 'AAS_API',
+                version: 'v3',
+            });
+
+            expect(connection.query).toHaveBeenNthCalledWith(1, 'SELECT * FROM `endpoints` WHERE name = ?;', [
+                'Endpoint 1',
+            ]);
+
+            expect(connection.query).toHaveBeenNthCalledWith(
+                2,
                 'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [endpoint.url, endpoint.type, undefined, undefined, undefined, endpoint.name],
             );

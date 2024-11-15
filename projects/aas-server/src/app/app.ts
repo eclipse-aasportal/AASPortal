@@ -23,6 +23,8 @@ import { Logger } from './logging/logger.js';
 
 @singleton()
 export class App {
+    private swaggerDoc?: JsonObject;
+
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
@@ -53,11 +55,13 @@ export class App {
         this.app.use(urlencoded({ extended: true }));
         this.app.use(morgan('dev'));
         this.app.use('/docs', swaggerUi.serve, async (_req: Request, res: Response) => {
-            const swaggerDoc: JsonObject = JSON.parse(
-                (await fs.promises.readFile(path.join(this.variable.ASSETS, 'swagger.json'))).toString(),
-            );
+            if (this.swaggerDoc === undefined) {
+                this.swaggerDoc = JSON.parse(
+                    (await fs.promises.readFile(path.join(this.variable.ASSETS, 'swagger.json'))).toString(),
+                );
+            }
 
-            return res.send(swaggerUi.generateHTML(swaggerDoc));
+            return res.send(swaggerUi.generateHTML(this.swaggerDoc));
         });
 
         RegisterRoutes(this.app);

@@ -90,7 +90,11 @@ export class EndpointsController extends AASController {
     public async addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         try {
             this.logger.start('addEndpoint');
-            await this.aasProvider.addEndpointAsync(decodeBase64Url(name), endpoint);
+            if (decodeBase64Url(name) !== endpoint.name) {
+                throw new Error('Invalid URL.');
+            }
+
+            await this.aasProvider.addEndpointAsync(endpoint);
         } finally {
             this.logger.stop();
         }
@@ -107,7 +111,11 @@ export class EndpointsController extends AASController {
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         try {
             this.logger.start('addEndpoint');
-            await this.aasProvider.updateEndpointAsync(decodeBase64Url(name), endpoint);
+            if (decodeBase64Url(name) !== endpoint.name) {
+                throw new Error('Invalid URL.');
+            }
+
+            await this.aasProvider.updateEndpointAsync(endpoint);
         } finally {
             this.logger.stop();
         }

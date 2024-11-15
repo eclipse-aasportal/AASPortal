@@ -51,11 +51,6 @@ export class StartApiService {
         return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(name)}`);
     }
 
-    /** Restores the default AAS endpoint configuration. */
-    public reset(): Observable<void> {
-        return this.http.delete<void>('/api/v1/endpoints');
-    }
-
     /**
      * Delete the specified AAS document from the corresponding AAS container.
      * @param id The identification of the AAS document to delete.
@@ -107,10 +102,5 @@ export class StartApiService {
         return this.http.get<AASDocument[]>(
             `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`,
         );
-    }
-
-    /** Gets the total amount of documents. */
-    public getDocumentCount(): Observable<number> {
-        return this.http.get<number>('/api/v1/documents/count');
     }
 }

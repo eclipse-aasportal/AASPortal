@@ -21,7 +21,6 @@ export interface Task {
 @singleton()
 export class TaskHandler {
     private readonly tasks = new Map<number, Task>();
-
     private nextTaskId = 1;
 
     public delete(taskId: number): void {

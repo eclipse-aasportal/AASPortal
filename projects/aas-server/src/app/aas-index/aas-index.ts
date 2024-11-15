@@ -28,7 +28,7 @@ import { LangString } from '../types/aas-v2.js';
 export abstract class AASIndex {
     protected constructor(private readonly keywordDirectory: KeywordDirectory) {}
 
-    public abstract getCount(endpoint?: string): Promise<number>;
+    public abstract getCount(endpointName?: string): Promise<number>;
 
     public abstract getEndpoints(): Promise<AASEndpoint[]>;
 
@@ -40,7 +40,12 @@ export abstract class AASIndex {
 
     public abstract addEndpoint(endpoint: AASEndpoint): Promise<void>;
 
-    public abstract updateEndpoint(endpoint: AASEndpoint, name?: string): Promise<void>;
+    /**
+     * Updates an existing endpoint description.
+     * @param endpoint The new endpoint description.
+     * @returns The old endpoint description.
+     */
+    public abstract updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint>;
 
     public abstract removeEndpoint(endpointName: string): Promise<boolean>;
 

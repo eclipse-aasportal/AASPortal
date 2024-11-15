@@ -43,7 +43,6 @@ import { DashboardChartType, DashboardPage, DashboardService } from '../dashboar
 import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
 import { AASStore } from './aas.store';
-import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 
@@ -52,7 +51,7 @@ import { FormsModule } from '@angular/forms';
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
     standalone: true,
-    imports: [SecuredImageComponent, AASTreeComponent, AsyncPipe, TranslateModule, FormsModule],
+    imports: [SecuredImageComponent, AASTreeComponent, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASComponent implements OnInit, OnDestroy, AfterViewInit {

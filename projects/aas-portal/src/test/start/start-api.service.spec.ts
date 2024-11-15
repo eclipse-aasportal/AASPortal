@@ -18,10 +18,10 @@ describe('StartApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    declarations: [],
-    imports: [],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            declarations: [],
+            imports: [],
+            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+        });
 
         service = TestBed.inject(StartApiService);
         httpTestingController = TestBed.inject(HttpTestingController);

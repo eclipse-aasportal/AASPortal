@@ -136,7 +136,7 @@ describe('EndpointsController', function () {
             .send(endpoint);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.updateEndpointAsync).toHaveBeenCalledWith('Samples', endpoint);
+        expect(aasProvider.updateEndpointAsync).toHaveBeenCalledWith(endpoint);
     });
 
     it('DELETE: /api/v1/endpoints/{name}', async () => {

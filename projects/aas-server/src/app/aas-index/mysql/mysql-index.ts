@@ -58,15 +58,14 @@ export class MySqlIndex extends AASIndex {
     public override async getCount(endpoint?: string): Promise<number> {
         const connection = await this.connection;
         if (endpoint === undefined) {
-            const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` AS count;');
+            const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents`;');
 
             return result[0][0]['COUNT(*)'];
         }
 
-        const result = await connection.query<DocumentCount[]>(
-            'SELECT COUNT(*) FROM `documents` WHERE endpoint = ? AS count;',
-            [endpoint],
-        );
+        const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;', [
+            endpoint,
+        ]);
 
         return result[0][0]['COUNT(*)'];
     }
@@ -110,26 +109,7 @@ export class MySqlIndex extends AASIndex {
             throw new Error(`An endpoint with the name "${name}" does not exist.`);
         }
 
-        const result = results[0];
-        const endpoint: AASEndpoint = {
-            name: result.name,
-            url: result.url,
-            type: result.type,
-        };
-
-        if (result.version) {
-            endpoint.version = result.version;
-        }
-
-        if (result.headers) {
-            endpoint.headers = JSON.parse(result.headers);
-        }
-
-        if (result.schedule) {
-            endpoint.schedule = JSON.parse(result.schedule);
-        }
-
-        return endpoint;
+        return this.toEndpoint(results[0]);
     }
 
     public override async hasEndpoint(name: string): Promise<boolean> {
@@ -153,9 +133,20 @@ export class MySqlIndex extends AASIndex {
         );
     }
 
-    public override async updateEndpoint(endpoint: AASEndpoint, name?: string): Promise<void> {
+    public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
         const connection = await this.connection;
-        if (name === undefined || endpoint.name === name) {
+        try {
+            await connection.beginTransaction();
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+                endpoint.name,
+            ]);
+
+            if (results.length === 0) {
+                throw new Error(`An endpoint with the name "${endpoint.name}" does not exist.`);
+            }
+
+            const old = this.toEndpoint(results[0]);
+
             await connection.query<ResultSetHeader>(
                 'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [
@@ -167,28 +158,11 @@ export class MySqlIndex extends AASIndex {
                     endpoint.name,
                 ],
             );
-        } else {
-            try {
-                await connection.beginTransaction();
-                await connection.query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [endpoint.name]);
-                this.removeDocuments(endpoint.name);
-                await connection.query<ResultSetHeader>(
-                    'INSERT INTO `endpoints` (name, url, type, version, headers) VALUES (?, ?, ?, ?, ?);',
-                    [
-                        endpoint.name,
-                        endpoint.url,
-                        endpoint.type,
-                        endpoint.version,
-                        endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
-                        endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
-                    ],
-                );
-
-                await connection.commit();
-            } catch (error) {
-                await connection.rollback();
-                throw error;
-            }
+            await connection.commit();
+            return old;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
         }
     }
 
@@ -295,7 +269,7 @@ export class MySqlIndex extends AASIndex {
             await connection.beginTransaction();
             const uuid = v4();
             await connection.query<ResultSetHeader>(
-                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
                 [
                     uuid,
                     document.address,
@@ -571,6 +545,28 @@ export class MySqlIndex extends AASIndex {
                 this.toBigintValue(referable),
             ],
         );
+    }
+
+    private toEndpoint(result: MySqlEndpoint): AASEndpoint {
+        const endpoint: AASEndpoint = {
+            name: result.name,
+            url: result.url,
+            type: result.type,
+        };
+
+        if (result.version) {
+            endpoint.version = result.version;
+        }
+
+        if (result.headers) {
+            endpoint.headers = JSON.parse(result.headers);
+        }
+
+        if (result.schedule) {
+            endpoint.schedule = JSON.parse(result.schedule);
+        }
+
+        return endpoint;
     }
 
     private toDocument(result: MySqlDocument): AASDocument {
