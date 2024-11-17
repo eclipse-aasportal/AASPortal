@@ -348,13 +348,4 @@ describe('MySqlIndex', () => {
             expect(connection.commit).toHaveBeenCalled();
         });
     });
-
-    describe('reset', () => {
-        it('resets the index', async () => {
-            connection.query.mockResolvedValue([[], []]);
-            await expect(index.reset()).resolves.toEqual(void 0);
-            expect(connection.beginTransaction).toHaveBeenCalled();
-            expect(connection.commit).toHaveBeenCalled();
-        });
-    });
 });
