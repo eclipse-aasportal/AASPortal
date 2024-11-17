@@ -56,6 +56,14 @@ export class WSServer extends EventEmitter {
     }
 
     public run(): void {
+        process.on('SIGTERM', () => {
+            this.logger.info('Shutting down AASNode');
+            this.server.close(() => {
+                this.logger.info('HTTP server closed.');
+                process.exit(0);
+            });
+        });
+
         this.server.listen(this.variable.NODE_SERVER_PORT, () => {
             this.logger.info(`AAS-Server listening on ${this.variable.NODE_SERVER_PORT}`);
         });

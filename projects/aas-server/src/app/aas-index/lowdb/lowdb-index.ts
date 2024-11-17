@@ -24,7 +24,6 @@ import {
 import { AASIndex } from '../aas-index.js';
 import { LowDbQuery } from './lowdb-query.js';
 import { Variable } from '../../variable.js';
-import { urlToEndpoint } from '../../configuration.js';
 import { ERRORS } from '../../errors.js';
 import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
 import { decodeBase64Url, encodeBase64Url } from '../../convert.js';
@@ -33,8 +32,6 @@ import { KeywordDirectory } from '../keyword-directory.js';
 import { Logger } from '../../logging/logger.js';
 
 export class LowDbIndex extends AASIndex {
-    private readonly promise: Promise<void>;
-
     public constructor(
         private readonly logger: Logger,
         private readonly variable: Variable,
@@ -42,54 +39,60 @@ export class LowDbIndex extends AASIndex {
         keywordDirectory: KeywordDirectory,
     ) {
         super(keywordDirectory);
-
-        this.promise = this.initialize();
-        this.promise.then(() => logger.info('Using internal AAS index.')).catch(error => logger.error(error));
     }
 
-    public override async getCount(endpoint?: string): Promise<number> {
-        await this.promise;
-        if (endpoint === undefined) {
-            return this.db.data.documents.length;
-        }
+    public override destroy(): Promise<void> {
+        return Promise.resolve();
+    }
 
-        let count = 0;
-        this.db.data.documents.forEach(item => {
-            if (item.endpoint === endpoint) {
-                ++count;
+    public override getCount(endpoint?: string): Promise<number> {
+        return new Promise<number>(resolve => {
+            if (endpoint === undefined) {
+                resolve(this.db.data.documents.length);
+                return;
             }
+
+            let count = 0;
+            this.db.data.documents.forEach(item => {
+                if (item.endpoint === endpoint) {
+                    ++count;
+                }
+            });
+
+            resolve(count);
         });
-
-        return count;
     }
 
-    public override async getEndpoints(): Promise<AASEndpoint[]> {
-        await this.promise;
-        return this.db.data.endpoints;
+    public override getEndpoints(): Promise<AASEndpoint[]> {
+        return new Promise<AASEndpoint[]>(resolve => {
+            resolve(this.db.data.endpoints);
+        });
     }
 
-    public override async getEndpointCount(): Promise<number> {
-        await this.promise;
-        return this.db.data.endpoints.length;
+    public override getEndpointCount(): Promise<number> {
+        return new Promise<number>(resolve => {
+            resolve(this.db.data.endpoints.length);
+        });
     }
 
-    public override async getEndpoint(name: string): Promise<AASEndpoint> {
-        await this.promise;
-        const endpoint = this.db.data.endpoints.find(endpoint => endpoint.name === name);
-        if (!endpoint) {
-            throw new Error(`An endpoint with the name ${name} does not exist.`);
-        }
+    public override getEndpoint(name: string): Promise<AASEndpoint> {
+        return new Promise<AASEndpoint>(resolve => {
+            const endpoint = this.db.data.endpoints.find(endpoint => endpoint.name === name);
+            if (!endpoint) {
+                throw new Error(`An endpoint with the name ${name} does not exist.`);
+            }
 
-        return endpoint;
+            resolve(endpoint);
+        });
     }
 
-    public override async hasEndpoint(name: string): Promise<boolean> {
-        await this.promise;
-        return this.db.data.endpoints.find(endpoint => endpoint.name === name) !== undefined;
+    public override hasEndpoint(name: string): Promise<boolean> {
+        return new Promise<boolean>(resolve => {
+            resolve(this.db.data.endpoints.find(endpoint => endpoint.name === name) !== undefined);
+        });
     }
 
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
-        await this.promise;
         if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
             throw new ApplicationError(
                 `An endpoint with the name "${name}" already exists.`,
@@ -103,7 +106,6 @@ export class LowDbIndex extends AASIndex {
     }
 
     public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
-        await this.promise;
         const index = this.db.data.endpoints.findIndex(item => item.name === endpoint.name);
         if (index < 0) {
             throw new Error(`An endpoint with the name ${name} does not exist.`);
@@ -116,9 +118,10 @@ export class LowDbIndex extends AASIndex {
     }
 
     public override async removeEndpoint(endpointName: string): Promise<boolean> {
-        await this.promise;
         const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === endpointName);
-        if (index < 0) return false;
+        if (index < 0) {
+            return false;
+        }
 
         this.db.data.endpoints.splice(index, 1);
         this.removeDocuments(endpointName);
@@ -126,82 +129,76 @@ export class LowDbIndex extends AASIndex {
         return true;
     }
 
-    public override async nextPage(
+    public override nextPage(
         endpointName: string,
         cursor: string | undefined,
         limit: number = 100,
     ): Promise<PagedResult<AASDocument>> {
-        await this.promise;
-
-        if (cursor) {
-            cursor = decodeBase64Url(cursor);
-        }
-
-        const documents: AASDocument[] = [];
-        if (this.db.data.documents.length === 0) {
-            return { result: documents, paging_metadata: {} };
-        }
-
-        const items = this.db.data.documents;
-        const index = items.findIndex(item => {
-            if (item.endpoint !== endpointName) {
-                return false;
+        return new Promise<PagedResult<AASDocument>>(resolve => {
+            if (cursor) {
+                cursor = decodeBase64Url(cursor);
             }
 
-            return cursor === undefined || cursor.localeCompare(item.id) <= 0;
+            const documents: AASDocument[] = [];
+            if (this.db.data.documents.length === 0) {
+                resolve({ result: documents, paging_metadata: {} });
+                return;
+            }
+
+            const items = this.db.data.documents;
+            const index = items.findIndex(item => {
+                if (item.endpoint !== endpointName) {
+                    return false;
+                }
+
+                return cursor === undefined || cursor.localeCompare(item.id) <= 0;
+            });
+
+            if (index < 0) {
+                resolve({ result: documents, paging_metadata: {} });
+                return;
+            }
+
+            const result: AASDocument[] = [];
+            for (let i = 0, j = index, n = items.length; i < limit && j < n; i++, j++) {
+                const item = items[j];
+                if (item.endpoint !== endpointName) {
+                    break;
+                }
+
+                result.push(item);
+            }
+
+            const k = index + limit + 1;
+            if (k >= items.length || items[k].endpoint !== endpointName) {
+                resolve({ result, paging_metadata: {} });
+                return;
+            }
+
+            resolve({ result, paging_metadata: { cursor: encodeBase64Url(items[k].id) } });
         });
-
-        if (index < 0) {
-            return { result: documents, paging_metadata: {} };
-        }
-
-        const result: AASDocument[] = [];
-        for (let i = 0, j = index, n = items.length; i < limit && j < n; i++, j++) {
-            const item = items[j];
-            if (item.endpoint !== endpointName) {
-                break;
-            }
-
-            result.push(item);
-        }
-
-        const k = index + limit + 1;
-        if (k >= items.length || items[k].endpoint !== endpointName) {
-            return { result, paging_metadata: {} };
-        }
-
-        return { result, paging_metadata: { cursor: encodeBase64Url(items[k].id) } };
     }
 
-    public override async getDocuments(
-        cursor: AASCursor,
-        expression?: string,
-        language?: string,
-    ): Promise<AASPagedResult> {
-        await this.promise;
+    public override getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
+        return new Promise<AASPagedResult>(resolve => {
+            let query: LowDbQuery | undefined;
+            if (expression) {
+                query = new LowDbQuery(expression, language ?? 'en');
+            }
 
-        let query: LowDbQuery | undefined;
-        if (expression) {
-            query = new LowDbQuery(expression, language ?? 'en');
-        }
-
-        if (cursor.next) {
-            return this.getNextPage(cursor.next, cursor.limit, query);
-        }
-
-        if (cursor.previous) {
-            return this.getPreviousPage(cursor.previous, cursor.limit, query);
-        }
-
-        if (cursor.previous === null) {
-            return this.getFirstPage(cursor.limit, query);
-        }
-
-        return this.getLastPage(cursor.limit, query);
+            if (cursor.next) {
+                resolve(this.getNextPage(cursor.next, cursor.limit, query));
+            } else if (cursor.previous) {
+                resolve(this.getPreviousPage(cursor.previous, cursor.limit, query));
+            } else if (cursor.previous === null) {
+                resolve(this.getFirstPage(cursor.limit, query));
+            } else {
+                resolve(this.getLastPage(cursor.limit, query));
+            }
+        });
     }
 
     public override async update(document: AASDocument): Promise<void> {
-        await this.promise;
         const name = document.endpoint;
         const documents = this.db.data.documents;
         const index = documents.findIndex(item => item.endpoint === name && item.id === document.id);
@@ -218,23 +215,23 @@ export class LowDbIndex extends AASIndex {
         }
     }
 
-    public async find(endpointName: string | undefined, id: string): Promise<AASDocument | undefined> {
-        await this.promise;
-        const document = endpointName
-            ? this.db.data.documents.find(
-                  item => item.endpoint === endpointName && (item.id === id || item.assetId === id),
-              )
-            : this.db.data.documents.find(item => item.id === id || item.assetId === id);
+    public override find(endpointName: string | undefined, id: string): Promise<AASDocument | undefined> {
+        return new Promise<AASDocument | undefined>(resolve => {
+            const document = endpointName
+                ? this.db.data.documents.find(
+                      item => item.endpoint === endpointName && (item.id === id || item.assetId === id),
+                  )
+                : this.db.data.documents.find(item => item.id === id || item.assetId === id);
 
-        if (document) {
-            return this.toDocument(document);
-        }
-
-        return undefined;
+            if (document === undefined) {
+                resolve(undefined);
+                return;
+            }
+            resolve(this.toDocument(document));
+        });
     }
 
     public override async add(document: AASDocument): Promise<void> {
-        await this.promise;
         const endpoint = document.endpoint;
         const id = document.id;
         const documents = this.db.data.documents;
@@ -254,7 +251,6 @@ export class LowDbIndex extends AASIndex {
     }
 
     public override async remove(endpointName: string, id: string): Promise<boolean> {
-        await this.promise;
         const documents = this.db.data.documents;
         const index = documents.findIndex(item => item.endpoint === endpointName && item.id === id);
         if (index < 0) return false;
@@ -274,11 +270,6 @@ export class LowDbIndex extends AASIndex {
         await this.db.write();
     }
 
-    public override async reset(): Promise<void> {
-        this.db.data.endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
-        await this.db.write();
-    }
-
     private removeDocuments(endpoint: string) {
         const documents = this.db.data.documents.filter(document => document.endpoint === endpoint);
         this.db.data.documents = this.db.data.documents.filter(document => document.endpoint !== endpoint);
@@ -291,16 +282,6 @@ export class LowDbIndex extends AASIndex {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { uuid, ...document } = item;
         return document;
-    }
-
-    private async initialize(): Promise<void> {
-        await this.db.read();
-
-        if (this.db.data.endpoints.length === 0) {
-            const endpoints = this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint));
-            this.db.data.endpoints.push(...endpoints);
-            await this.db.write();
-        }
     }
 
     private getInsertPosition(document: AASDocumentId): number {

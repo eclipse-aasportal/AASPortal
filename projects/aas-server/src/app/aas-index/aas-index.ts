@@ -15,6 +15,7 @@ import {
     baseType,
     getAbbreviation,
     isProperty,
+    isValidDate,
     parseDate,
     parseNumber,
     toBoolean,
@@ -76,7 +77,7 @@ export abstract class AASIndex {
 
     public abstract clear(): Promise<void>;
 
-    public abstract reset(): Promise<void>;
+    public abstract destroy(): Promise<void>;
 
     protected toAbbreviation(referable: aas.Referable): string {
         return getAbbreviation(referable.modelType)!.toLowerCase();
@@ -123,7 +124,8 @@ export abstract class AASIndex {
             return undefined;
         }
 
-        return parseDate(referable.value);
+        const value = parseDate(referable.value);
+        return isValidDate(value) ? value : undefined;
     }
 
     protected toBooleanValue(referable: aas.Referable): boolean | undefined {

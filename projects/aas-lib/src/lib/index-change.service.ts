@@ -114,6 +114,7 @@ export class IndexChangeService {
                 break;
             case 'Reset':
                 this.reset.emit();
+                this.state.set({ changedDocuments: 0, documentCount: 0, endpointCount: 0 });
                 break;
         }
     }

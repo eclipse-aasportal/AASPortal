@@ -384,7 +384,7 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
                     getSeconds(timeTuple?.items),
                 );
             } else {
-                date = new Date(NaN);
+                date = new Date(0);
             }
         } else {
             date = new Date(s);
@@ -494,6 +494,54 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
     function getSeconds(items?: string[]): number {
         return items && items.length > 2 ? Number(items[2].trim()) : 0;
     }
+}
+
+/**
+ * Indicates whether the specified date is valid.
+ * @param value The date value.
+ * @returns `true` if the date value is valid; otherwise, `false`.
+ */
+export function isValidDate(value: Date | undefined): boolean {
+    if (value === undefined) {
+        return false;
+    }
+
+    const year = value.getFullYear();
+    if (year < 1970 || year > 3000) {
+        return false;
+    }
+
+    const month = value.getMonth();
+    if (month < 0 || month > 11) {
+        return false;
+    }
+
+    const day = value.getDay();
+    if (day < 1 || day > 31) {
+        return false;
+    }
+
+    const hours = value.getHours();
+    if (hours < 0 || hours > 23) {
+        return false;
+    }
+
+    const minutes = value.getMinutes();
+    if (minutes < 0 || minutes > 59) {
+        return false;
+    }
+
+    const seconds = value.getSeconds();
+    if (seconds < 0 || seconds > 59) {
+        return false;
+    }
+
+    const ms = value.getMilliseconds();
+    if (ms < 0 || ms > 999) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
