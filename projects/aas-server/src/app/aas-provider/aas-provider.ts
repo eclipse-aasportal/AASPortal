@@ -41,10 +41,10 @@ import { ERRORS } from '../errors.js';
 import { Task, TaskHandler } from './task-handler.js';
 import { HierarchicalStructure } from './hierarchical-structure.js';
 import { AASCache } from './aas-cache.js';
+import { urlToEndpoint } from '../configuration.js';
 
 @singleton()
 export class AASProvider {
-    private readonly file: string | undefined;
     private readonly cache = new AASCache();
     private wsServer!: WSServer;
     private resetRequested = false;
@@ -59,6 +59,7 @@ export class AASProvider {
     ) {
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
+        this.taskHandler.on('empty', this.taskHandlerOnEmpty);
     }
 
     /**
@@ -68,7 +69,7 @@ export class AASProvider {
     public start(wsServer: WSServer): void {
         this.wsServer = wsServer;
         this.wsServer.on('message', this.onClientMessage);
-        setTimeout(this.startScan, 100);
+        this.initializeIndex().then(() => setTimeout(this.startScan, 100));
     }
 
     /**
@@ -294,16 +295,18 @@ export class AASProvider {
         this.resetRequested = true;
         await this.index.clear();
         this.cache.clear();
+        for (const task of [...this.taskHandler.tasks]) {
+            if (task.state === 'idle' && task.owner === this) {
+                this.taskHandler.delete(task.id);
+            }
+        }
+
         this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: {
                 type: 'Reset',
             } as AASServerMessage,
         });
-
-        if (this.taskHandler.empty(this)) {
-            await this.restart();
-        }
     }
 
     /**
@@ -445,13 +448,13 @@ export class AASProvider {
      */
     public async startEndpointScan(name: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
-        const task = this.taskHandler.find(name, 'ScanEndpoint');
-        if (task === undefined) {
-            throw new Error(``);
-        }
-
         if (endpoint.schedule?.type !== 'manual') {
             throw new Error(`Endpoint ${name} is not configured for the manual start of a scan.`);
+        }
+
+        let task = this.taskHandler.find(name, 'ScanEndpoint');
+        if (task === undefined) {
+            task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
         }
 
         if (task.state === 'inProgress') {
@@ -461,12 +464,33 @@ export class AASProvider {
         setTimeout(this.scanEndpoint, 0, task, endpoint);
     }
 
+    public destroy(): void {
+        this.parallel.off('message', this.parallelOnMessage);
+        this.parallel.off('end', this.parallelOnEnd);
+        this.taskHandler.off('empty', this.taskHandlerOnEmpty);
+    }
+
     private async restart(): Promise<void> {
         this.resetRequested = false;
-        await this.index.reset();
+        await this.initializeIndex();
         this.cache.clear();
         await this.startScan();
         this.logger.info('AAS Server configuration restored.');
+    }
+
+    private async initializeIndex(): Promise<void> {
+        if ((await this.index.getEndpointCount()) === 0) {
+            for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
+                await this.index.addEndpoint(endpoint);
+                this.wsServer.notify('IndexChange', {
+                    type: 'AASServerMessage',
+                    data: {
+                        type: 'EndpointAdded',
+                        endpoint: endpoint,
+                    } as AASServerMessage,
+                });
+            }
+        }
     }
 
     private onClientMessage = async (data: WebSocketData, client: SocketClient): Promise<void> => {
@@ -584,12 +608,13 @@ export class AASProvider {
 
         if ((await this.index.hasEndpoint(task.endpointName)) === true) {
             const endpoint = await this.index.getEndpoint(task.endpointName);
+            task.state = 'idle';
+            task.end = Date.now();
+
             if (endpoint.schedule?.type === 'once' || endpoint.schedule?.type === 'manual') {
                 return;
             }
 
-            task.state === 'idle';
-            task.end = Date.now();
             setTimeout(
                 this.scanEndpoint,
                 this.computeTimeout(endpoint.schedule, task.start, task.end),
@@ -604,8 +629,8 @@ export class AASProvider {
             this.logger.stop();
         }
 
-        if (this.resetRequested && this.taskHandler.empty(this)) {
-            await this.restart();
+        if (this.resetRequested) {
+            this.taskHandler.delete(task.id);
         }
     };
 
@@ -724,4 +749,10 @@ export class AASProvider {
             await resource.closeAsync();
         }
     }
+
+    private readonly taskHandlerOnEmpty = async (owner: object): Promise<void> => {
+        if (owner === this && this.resetRequested) {
+            await this.restart();
+        }
+    };
 }

@@ -15,28 +15,28 @@ import { PagedResult } from '../types/paged-result.js';
 
 export class AASServerScan extends AASResourceScan {
     private readonly logger: Logger;
-    private readonly server: AASApiClient;
+    private readonly client: AASApiClient;
 
     public constructor(logger: Logger, server: AASApiClient) {
         super();
 
         this.logger = logger;
-        this.server = server;
+        this.client = server;
     }
 
     protected override open(): Promise<void> {
-        return this.server.openAsync();
+        return this.client.openAsync();
     }
     protected override close(): Promise<void> {
-        return this.server.closeAsync();
+        return this.client.closeAsync();
     }
 
     protected override createDocument(id: string): Promise<AASDocument> {
-        const aasPackage = new AASServerPackage(this.logger, this.server, id);
+        const aasPackage = new AASServerPackage(this.logger, this.client, id);
         return aasPackage.createDocumentAsync();
     }
 
     protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {
-        return this.server.getShellsAsync(cursor);
+        return this.client.getShellsAsync(cursor);
     }
 }

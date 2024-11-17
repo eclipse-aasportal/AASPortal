@@ -22,7 +22,6 @@ import {
 
 import { AASIndex } from '../aas-index.js';
 import { Variable } from '../../variable.js';
-import { urlToEndpoint } from '../../configuration.js';
 import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
 import { PagedResult } from '../../types/paged-result.js';
@@ -31,35 +30,25 @@ import { Logger } from '../../logging/logger.js';
 import { urlToString } from '../../convert.js';
 
 export class MySqlIndex extends AASIndex {
-    private readonly connection: Promise<Connection>;
+    private _connection!: Connection;
 
     public constructor(
         private readonly logger: Logger,
         private readonly variable: Variable,
         keywordDirectory: KeywordDirectory,
-        connection?: Connection,
     ) {
         super(keywordDirectory);
+    }
 
-        if (connection === undefined) {
-            this.connection = this.initialize();
-            this.connection
-                .then(() => {
-                    logger.info(`AAS index connected to ${urlToString(this.variable.AAS_INDEX)}.`);
-                })
-                .catch(error => {
-                    this.logger.error(error);
-                });
-        } else {
-            this.connection = new Promise(resolve => resolve(connection));
-        }
+    public override async destroy(): Promise<void> {
+        const connection = await this.getConnection();
+        await connection.end();
     }
 
     public override async getCount(endpoint?: string): Promise<number> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         if (endpoint === undefined) {
             const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents`;');
-
             return result[0][0]['COUNT(*)'];
         }
 
@@ -71,39 +60,19 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async getEndpointCount(): Promise<number> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
         return result[0][0]['COUNT(*)'];
     }
 
     public override async getEndpoints(): Promise<AASEndpoint[]> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         const result = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;');
-        return result[0].map(row => {
-            const endpoint: AASEndpoint = {
-                name: row.name,
-                url: row.url,
-                type: row.type,
-            };
-
-            if (row.version) {
-                endpoint.version = row.version;
-            }
-
-            if (row.headers) {
-                endpoint.headers = JSON.parse(row.headers);
-            }
-
-            if (row.schedule) {
-                endpoint.schedule = JSON.parse(row.schedule);
-            }
-
-            return endpoint;
-        });
+        return result[0].map(row => this.toEndpoint(row));
     }
 
     public override async getEndpoint(name: string): Promise<AASEndpoint> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
         if (results.length === 0) {
             throw new Error(`An endpoint with the name "${name}" does not exist.`);
@@ -113,13 +82,13 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async hasEndpoint(name: string): Promise<boolean> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
         return results.length > 0;
     }
 
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         await connection.query<ResultSetHeader>(
             'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
             [
@@ -134,7 +103,7 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
             const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
@@ -167,16 +136,14 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async removeEndpoint(endpointName: string): Promise<boolean> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-
             const result = await connection.query<ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [
                 endpointName,
             ]);
 
-            this.removeDocuments(endpointName);
-
+            this.removeDocuments(connection, endpointName);
             await connection.commit();
             return result[0].affectedRows > 0;
         } catch (error) {
@@ -185,25 +152,30 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
+    public override async getDocuments(
+        cursor: AASCursor,
+        expression?: string,
+        language?: string,
+    ): Promise<AASPagedResult> {
         let query: MySqlQuery | undefined;
         if (expression) {
             query = new MySqlQuery(expression, language ?? 'en');
         }
 
+        const connection = await this.getConnection();
         if (cursor.next) {
-            return this.getNextPage(cursor.next, cursor.limit, query);
+            return this.getNextPage(connection, cursor.next, cursor.limit, query);
         }
 
         if (cursor.previous) {
-            return this.getPreviousPage(cursor.previous, cursor.limit, query);
+            return this.getPreviousPage(connection, cursor.previous, cursor.limit, query);
         }
 
         if (cursor.previous === null) {
-            return this.getFirstPage(cursor.limit, query);
+            return this.getFirstPage(connection, cursor.limit, query);
         }
 
-        return this.getLastPage(cursor.limit, query);
+        return this.getLastPage(connection, cursor.limit, query);
     }
 
     public override async nextPage(
@@ -211,7 +183,6 @@ export class MySqlIndex extends AASIndex {
         cursor: string | undefined,
         limit: number = 100,
     ): Promise<PagedResult<AASDocument>> {
-        const connection = await this.connection;
         let sql: string;
         const values: unknown[] = [endpointName];
         if (cursor) {
@@ -222,6 +193,7 @@ export class MySqlIndex extends AASIndex {
         }
 
         values.push(limit + 1);
+        const connection = await this.getConnection();
         const [results] = await connection.query<MySqlDocument[]>(sql, values);
         const documents = results.map(result => this.toDocument(result));
         return {
@@ -233,7 +205,7 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async update(document: AASDocument): Promise<void> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
             const result = await connection.query<MySqlDocument[]>(
@@ -264,7 +236,7 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async add(document: AASDocument): Promise<void> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
             const uuid = v4();
@@ -295,7 +267,10 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async find(endpoint: string | undefined, id: string): Promise<AASDocument | undefined> {
-        const document = endpoint ? await this.selectEndpointDocument(endpoint, id) : await this.selectDocument(id);
+        const connection = await this.getConnection();
+        const document = endpoint
+            ? await this.selectEndpointDocument(connection, endpoint, id)
+            : await this.selectDocument(connection, id);
         if (!document) {
             return undefined;
         }
@@ -304,7 +279,7 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async remove(endpointName: string, id: string): Promise<boolean> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
             const [results] = await connection.query<MySqlDocument[]>(
@@ -328,7 +303,7 @@ export class MySqlIndex extends AASIndex {
     }
 
     public override async clear(): Promise<void> {
-        const connection = await this.connection;
+        const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
             await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
@@ -341,20 +316,26 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async reset(): Promise<void> {
-        const connection = await this.connection;
-        try {
-            await connection.beginTransaction();
-            await this.addDefaultEndpoints(connection);
-            await connection.commit();
-        } catch (error) {
-            await connection.rollback();
-            throw error;
+    private async getConnection(): Promise<Connection> {
+        if (this._connection === undefined) {
+            const url = new URL(this.variable.AAS_INDEX!);
+            const username = isEmpty(url.username) ? this.variable.AAS_SERVER_USERNAME : url.username;
+            const password = isEmpty(url.password) ? this.variable.AAS_SERVER_PASSWORD : url.password;
+            this._connection = await mysql.createConnection({
+                host: url.hostname,
+                port: Number(url.port),
+                database: 'aas-index',
+                user: username,
+                password: password,
+            });
+
+            this.logger.info(`AAS index connected to ${urlToString(this.variable.AAS_INDEX)}.`);
         }
+
+        return this._connection;
     }
 
-    private async removeDocuments(endpointName: string): Promise<void> {
-        const connection = await this.connection;
+    private async removeDocuments(connection: Connection, endpointName: string): Promise<void> {
         const documents = (
             await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?;', [endpointName])
         )[0];
@@ -366,8 +347,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    private async getFirstPage(limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
-        const connection = await this.connection;
+    private async getFirstPage(connection: Connection, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
         if (query) {
@@ -397,8 +377,12 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getNextPage(current: AASDocumentId, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
-        const connection = await this.connection;
+    private async getNextPage(
+        connection: Connection,
+        current: AASDocumentId,
+        limit: number,
+        query?: MySqlQuery,
+    ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
 
@@ -429,8 +413,12 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getPreviousPage(current: AASDocumentId, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
-        const connection = await this.connection;
+    private async getPreviousPage(
+        connection: Connection,
+        current: AASDocumentId,
+        limit: number,
+        query?: MySqlQuery,
+    ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
 
@@ -461,8 +449,7 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async getLastPage(limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
-        const connection = await this.connection;
+    private async getLastPage(connection: Connection, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
         if (query) {
@@ -492,8 +479,11 @@ export class MySqlIndex extends AASIndex {
         };
     }
 
-    private async selectEndpointDocument(endpoint: string, id: string): Promise<MySqlDocument | undefined> {
-        const connection = await this.connection;
+    private async selectEndpointDocument(
+        connection: Connection,
+        endpoint: string,
+        id: string,
+    ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
             'SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)',
             [endpoint, id, id],
@@ -506,8 +496,7 @@ export class MySqlIndex extends AASIndex {
         return results[0];
     }
 
-    private async selectDocument(id: string): Promise<MySqlDocument | undefined> {
-        const connection = await this.connection;
+    private async selectDocument(connection: Connection, id: string): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
             'SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)',
             [id, id],
@@ -591,41 +580,5 @@ export class MySqlIndex extends AASIndex {
         }
 
         return document;
-    }
-
-    private async initialize(): Promise<Connection> {
-        const url = new URL(this.variable.AAS_INDEX!);
-        const username = isEmpty(url.username) ? this.variable.AAS_SERVER_USERNAME : url.username;
-        const password = isEmpty(url.password) ? this.variable.AAS_SERVER_PASSWORD : url.password;
-        const connection = await mysql.createConnection({
-            host: url.hostname,
-            port: Number(url.port),
-            database: 'aas-index',
-            user: username,
-            password: password,
-        });
-
-        const result = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`');
-        if (result[0].length === 0) {
-            try {
-                connection.beginTransaction();
-                await this.addDefaultEndpoints(connection);
-                connection.commit();
-            } catch (error) {
-                connection.rollback();
-                throw error;
-            }
-        }
-
-        return connection;
-    }
-
-    private async addDefaultEndpoints(connection: Connection): Promise<void> {
-        for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
-            await connection.query<ResultSetHeader>(
-                'INSERT INTO `endpoints` (name, url, type, version) VALUES (?, ?, ?, ?)',
-                [endpoint.name, endpoint.url, endpoint.type, endpoint.version],
-            );
-        }
     }
 }
