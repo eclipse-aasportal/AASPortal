@@ -36,8 +36,13 @@ export class MySqlIndex extends AASIndex {
         private readonly logger: Logger,
         private readonly variable: Variable,
         keywordDirectory: KeywordDirectory,
+        connection?: Connection,
     ) {
         super(keywordDirectory);
+
+        if (connection) {
+            this._connection = connection;
+        }
     }
 
     public override async destroy(): Promise<void> {
