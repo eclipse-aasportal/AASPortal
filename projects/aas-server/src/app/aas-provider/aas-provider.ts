@@ -615,12 +615,7 @@ export class AASProvider {
                 return;
             }
 
-            setTimeout(
-                this.scanEndpoint,
-                this.computeTimeout(endpoint.schedule, task.start, task.end),
-                result.taskId,
-                endpoint,
-            );
+            setTimeout(this.scanEndpoint, this.computeTimeout(endpoint.schedule, task.start, task.end), task, endpoint);
         }
 
         if (result.messages) {
