@@ -171,7 +171,7 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
     }
 
     private getScore(element: aas.Referable): number {
-        let score = Number(this.findProperty(element, 'Score')?.value);
+        let score = this.toNumber(this.findProperty(element, 'Score')?.value);
         if (!score && !this.findProperty(element, 'Sentiment')?.value) {
             score = Number.NaN;
         }
@@ -181,7 +181,7 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
 
     private getStars(element: aas.Referable): number {
         const property = this.findProperty(element, 'stars');
-        return property ? Number(property.value) : 0.0;
+        return property ? this.toNumber(property.value) : 0.0;
     }
 
     private getMessage(element: aas.Referable): string {
@@ -222,5 +222,9 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
 
     private findProperty(element: aas.SubmodelElementCollection, name: string): aas.Property | undefined {
         return element.value?.find(child => child.modelType === 'Property' && child.idShort === name) as aas.Property;
+    }
+
+    private toNumber(s: string | undefined): number {
+        return s ? Number(s.replace(',', '.')) : NaN;
     }
 }
