@@ -22,7 +22,7 @@ import {
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
-import { AASApiClient } from './aas-api-client.js';
+import { AASApiClient, IdName } from './aas-api-client.js';
 import { Logger } from '../../logging/logger.js';
 import * as aasv2 from '../../types/aas-v2.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
@@ -73,7 +73,7 @@ export class AASApiClientV1 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<string>> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<IdName>> {
         const result = await this.http.get<aasv2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
@@ -81,11 +81,14 @@ export class AASApiClientV1 extends AASApiClient {
 
         noop(cursor);
 
-        return { result: result.map(shell => shell.identification.id), paging_metadata: {} };
+        return {
+            result: result.map(shell => ({ id: shell.identification.id, idShort: shell.idShort })),
+            paging_metadata: {},
+        };
     }
 
-    public async readEnvironmentAsync(id: string): Promise<aas.Environment> {
-        const aasId = encodeBase64Url(id);
+    public async readEnvironmentAsync(id: IdName): Promise<aas.Environment> {
+        const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aasv2.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
             this.endpoint.headers,

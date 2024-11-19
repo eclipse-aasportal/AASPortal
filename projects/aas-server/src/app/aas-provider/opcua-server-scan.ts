@@ -14,6 +14,7 @@ import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { OpcuaPackage } from '../packages/opcua/opcua-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { PagedResult } from '../types/paged-result.js';
+import { IdName } from '../packages/aas-server/aas-api-client.js';
 
 export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;
@@ -37,14 +38,14 @@ export class OpcuaServerScan extends AASResourceScan {
         return this.server.closeAsync();
     }
 
-    protected override createDocument(id: string): Promise<AASDocument> {
-        const document = this.map.get(id);
+    protected override createDocument(id: IdName): Promise<AASDocument> {
+        const document = this.map.get(id.id);
         return document ? Promise.resolve(document) : Promise.reject(new Error(`${id} not found.`));
     }
 
-    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {
+    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<IdName>> {
         noop(cursor);
-        const ids: string[] = [];
+        const ids: IdName[] = [];
         const dataTypes = new OpcuaDataTypeDictionary();
         await dataTypes.initializeAsync(this.server.getSession());
         for (const description of await this.browseAsync('ObjectsFolder')) {
@@ -52,7 +53,7 @@ export class OpcuaServerScan extends AASResourceScan {
             try {
                 const opcuaPackage = new OpcuaPackage(this.logger, this.server, nodeId, dataTypes);
                 const document = await opcuaPackage.createDocumentAsync();
-                ids.push(document.id);
+                ids.push({ id: document.id, idShort: document.idShort });
                 this.map.set(document.id, document);
             } catch (error) {
                 this.emit('error', error, this.server, nodeId);

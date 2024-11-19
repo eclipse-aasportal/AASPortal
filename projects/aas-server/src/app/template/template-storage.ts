@@ -128,7 +128,7 @@ export class TemplateStorage {
 
         task.state = 'idle';
         task.end = Date.now();
-        setTimeout(this.scanTemplates, this.timeout, result.taskId);
+        setTimeout(this.scanTemplates, this.timeout, task);
 
         if (result.messages) {
             this.logger.start(`scan ${task?.endpointName ?? 'undefined'}`);

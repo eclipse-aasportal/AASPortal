@@ -21,6 +21,8 @@ interface PropertyValue {
     value: string;
 }
 
+export type IdName = { id: string; idShort: string };
+
 /** Provides access to an AASX-Server. */
 export abstract class AASApiClient extends AASResource {
     private reentry = 0;
@@ -54,19 +56,20 @@ export abstract class AASApiClient extends AASResource {
      * @param id The AAS identifier.
      * @returns An AAS environment.
      */
-    public abstract readEnvironmentAsync(id: string): Promise<aas.Environment>;
+    public abstract readEnvironmentAsync(id: IdName): Promise<aas.Environment>;
 
-    /** Gets the thumbnail of the AAS with the specified identifier.
+    /**
+     * Gets the thumbnail of the AAS with the specified identifier.
      * @param id The identifier of the current AAS.
      */
     public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
 
-    public openAsync(): Promise<void> {
+    public override openAsync(): Promise<void> {
         ++this.reentry;
         return Promise.resolve();
     }
 
-    public closeAsync(): Promise<void> {
+    public override closeAsync(): Promise<void> {
         return new Promise(resolve => {
             if (this.reentry > 0) {
                 --this.reentry;
@@ -76,8 +79,8 @@ export abstract class AASApiClient extends AASResource {
         });
     }
 
-    public createPackage(address: string): AASPackage {
-        return new AASServerPackage(this.logger, this, address);
+    public override createPackage(...args: string[]): AASPackage {
+        return new AASServerPackage(this.logger, this, args[0], args[1]);
     }
 
     public override createSubscription(
@@ -92,7 +95,7 @@ export abstract class AASApiClient extends AASResource {
      * Gets the names of the Asset Administration Shells contained in the current AASX server.
      * @returns The names of the AASs contained in the current AASX server.
      */
-    public abstract getShellsAsync(cursor?: string): Promise<PagedResult<string>>;
+    public abstract getShellsAsync(cursor?: string): Promise<PagedResult<IdName>>;
 
     /**
      * ToDo

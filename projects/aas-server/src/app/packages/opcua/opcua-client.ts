@@ -112,8 +112,8 @@ export class OpcuaClient extends AASResource {
         }
     }
 
-    public createPackage(address: string): AASPackage {
-        return new OpcuaPackage(this.logger, this, address);
+    public override createPackage(...args: string[]): AASPackage {
+        return new OpcuaPackage(this.logger, this, args[0]);
     }
 
     public createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {

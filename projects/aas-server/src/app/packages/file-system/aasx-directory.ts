@@ -84,8 +84,8 @@ export class AasxDirectory extends AASResource {
         });
     }
 
-    public override createPackage(address: string): AASPackage {
-        return new AasxPackage(this.logger, this, address);
+    public override createPackage(...args: string[]): AASPackage {
+        return new AasxPackage(this.logger, this, args[0]);
     }
 
     public override createSubscription(): SocketSubscription {

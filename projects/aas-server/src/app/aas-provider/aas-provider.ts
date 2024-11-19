@@ -146,7 +146,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            return await resource.createPackage(document.address).getThumbnailAsync(id);
+            return await resource.createPackage(document.address, document.idShort).getThumbnailAsync(id);
         } finally {
             await resource.closeAsync();
         }
@@ -174,7 +174,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            const pkg = resource.createPackage(document.address);
+            const pkg = resource.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = this.cache.get(document.endpoint, document.id);
                 if (!document.content) {
@@ -326,7 +326,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            const pkg = resource.createPackage(document.address);
+            const pkg = resource.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = await pkg.getEnvironmentAsync();
                 if (this.cache.has(document.endpoint, document.id)) {
@@ -419,7 +419,7 @@ export class AASProvider {
             await resource.openAsync();
             let env = document.content;
             if (!env) {
-                env = await resource.createPackage(document.address).getEnvironmentAsync();
+                env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
                 this.cache.set(document.endpoint, document.id, env);
             }
 
@@ -517,7 +517,7 @@ export class AASProvider {
         await resource.openAsync();
         let env = this.cache.get(document.endpoint, document.id);
         if (!env) {
-            env = await resource.createPackage(document.address).getEnvironmentAsync();
+            env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
             this.cache.set(document.endpoint, document.id, env);
         }
 
@@ -737,7 +737,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            env = await resource.createPackage(document.address).getEnvironmentAsync();
+            env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
             this.cache.set(document.endpoint, document.id, env);
             return env;
         } finally {
