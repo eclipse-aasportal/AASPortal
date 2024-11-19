@@ -9,7 +9,7 @@
 import { aas, AASEndpoint, DifferenceItem, noop, selectSubmodel } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
-import { AASApiClient, IdName } from './aas-api-client.js';
+import { AASApiClient, AASLabel } from './aas-api-client.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import * as aasV2 from '../../types/aas-v2.js';
 import { HttpClient } from '../../http-client.js';
@@ -24,17 +24,15 @@ export class AASApiClientV0 extends AASApiClient {
         super(logger, http, endpoint);
     }
 
-    public override readonly version = '0.0';
-
     public readonly readOnly = false;
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<IdName>> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>> {
         noop(cursor);
-        const value = await this.http.get<AASList>(this.resolve('/server/listaas'));
+        const result = await this.http.get<AASList>(this.resolve('/server/listaas'));
         return {
-            result: value.aaslist.map(entry => {
+            result: result.aaslist.map(entry => {
                 const items = entry.split(' : ');
                 return { id: items[2].trim().split(' ')[1].trim(), idShort: items[1].trim() };
             }),
@@ -42,7 +40,7 @@ export class AASApiClientV0 extends AASApiClient {
         };
     }
 
-    public override async readEnvironmentAsync(id: IdName): Promise<aas.Environment> {
+    public override async readEnvironmentAsync(id: AASLabel): Promise<aas.Environment> {
         const sourceEnv = await this.http.get<aasV2.AssetAdministrationShellEnvironment>(
             this.resolve(`/aas/${id.idShort}/aasenv`),
         );

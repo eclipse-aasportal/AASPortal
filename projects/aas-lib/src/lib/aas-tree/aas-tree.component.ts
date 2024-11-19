@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { NgClass, NgStyle } from '@angular/common';
+import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -67,23 +67,18 @@ import {
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeService } from './aas-tree.service';
 
-interface PropertyValue {
-    property: aas.Property;
-    value: BehaviorSubject<string | boolean>;
-}
-
 @Component({
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
     standalone: true,
-    imports: [NgClass, NgStyle, TranslateModule],
+    imports: [NgClass, NgStyle, TranslateModule, AsyncPipe],
     providers: [AASTreeSearch, AASTreeService, AASTreeApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTreeComponent implements OnInit, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
-    private readonly map = new Map<string, PropertyValue>();
+    private readonly map = new Map<string, AASTreeRow>();
     private readonly subscription = new Subscription();
     private readonly _expanded = signal(false);
     private shiftKey = false;
@@ -223,23 +218,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
 
         return state;
-    }
-
-    public getValue(node: AASTreeRow): string | boolean | undefined {
-        if (this.state() === 'online' && node.element.modelType === 'Property') {
-            const property = node.element as aas.Property;
-            let value: string | boolean;
-            const item = property.nodeId && this.map.get(property.nodeId);
-            if (item) {
-                value = item.value.getValue();
-            } else {
-                value = this.getPropertyValue(property);
-            }
-
-            return value;
-        } else {
-            return node.value;
-        }
     }
 
     public expand(node?: AASTreeRow): void {
@@ -499,8 +477,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                         valueType: property.valueType ?? 'undefined',
                     });
 
-                    const subject = new BehaviorSubject<string | boolean>(this.getPropertyValue(property));
-                    this.map.set(property.nodeId, { property: property, value: subject });
+                    this.map.set(property.nodeId, row);
                 }
             }
         }
@@ -555,14 +532,16 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private onMessage = (data: WebSocketData): void => {
         if (data.type === 'LiveNode[]') {
             for (const node of data.data as LiveNode[]) {
-                const item = this.map.get(node.nodeId);
-                if (item) {
-                    item.value.next(
-                        typeof node.value === 'boolean'
-                            ? node.value
-                            : convertToString(node.value, this.translate.currentLang),
-                    );
+                const row = this.map.get(node.nodeId);
+                if (row === undefined) {
+                    continue;
                 }
+
+                row.value.next(
+                    typeof node.value === 'boolean'
+                        ? node.value
+                        : convertToString(node.value, this.translate.currentLang),
+                );
             }
         }
     };

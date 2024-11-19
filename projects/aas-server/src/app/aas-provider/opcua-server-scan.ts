@@ -14,7 +14,7 @@ import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { OpcuaPackage } from '../packages/opcua/opcua-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { IdName } from '../packages/aas-server/aas-api-client.js';
+import { AASLabel } from '../packages/aas-server/aas-api-client.js';
 
 export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;
@@ -38,14 +38,14 @@ export class OpcuaServerScan extends AASResourceScan {
         return this.server.closeAsync();
     }
 
-    protected override createDocument(id: IdName): Promise<AASDocument> {
+    protected override createDocument(id: AASLabel): Promise<AASDocument> {
         const document = this.map.get(id.id);
         return document ? Promise.resolve(document) : Promise.reject(new Error(`${id} not found.`));
     }
 
-    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<IdName>> {
+    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {
         noop(cursor);
-        const ids: IdName[] = [];
+        const ids: AASLabel[] = [];
         const dataTypes = new OpcuaDataTypeDictionary();
         await dataTypes.initializeAsync(this.server.getSession());
         for (const description of await this.browseAsync('ObjectsFolder')) {

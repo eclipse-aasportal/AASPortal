@@ -40,6 +40,7 @@ import {
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../convert';
+import { BehaviorSubject } from 'rxjs';
 
 export class AASTreeRow extends TreeNode<aas.Referable> {
     public constructor(
@@ -52,7 +53,7 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         public readonly abbreviation: string,
         public readonly name: string,
         public readonly typeInfo: string,
-        public readonly value: string | boolean | undefined,
+        public readonly value: BehaviorSubject<string | boolean | undefined>,
         public readonly isLeaf: boolean,
         public readonly canOpen: boolean,
         parent: number,
@@ -145,7 +146,7 @@ class TreeInitialize {
             getAbbreviation(element.modelType) ?? '',
             element.idShort,
             this.getTypeInfo(element),
-            this.getValue(element, this.language),
+            new BehaviorSubject(this.getValue(element, this.language)),
             isLeaf,
             canOpen,
             parent,

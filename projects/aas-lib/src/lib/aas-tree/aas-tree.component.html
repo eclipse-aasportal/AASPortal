@@ -61,7 +61,7 @@
                             (click)="openReference(node.relationship?.second)">{{toString(node.relationship?.second)}}</a>
                     </div>
                     } @else {
-                    <div class="text-nowrap me-2">{{node.value}}</div>
+                    <div class="text-nowrap me-2">{{node.value | async}}</div>
                     }
                 </td>
             } @else {
