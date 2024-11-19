@@ -21,7 +21,8 @@ interface PropertyValue {
     value: string;
 }
 
-export type IdName = { id: string; idShort: string };
+/** The label of an AAS.  */
+export type AASLabel = { id: string; idShort: string };
 
 /** Provides access to an AASX-Server. */
 export abstract class AASApiClient extends AASResource {
@@ -41,10 +42,12 @@ export abstract class AASApiClient extends AASResource {
 
     protected readonly http: HttpClient;
 
+    /** Indicates whether a connection to an AAS endpoint exits. */
     public get isOpen(): boolean {
         return this.reentry > 0;
     }
 
+    /** Tests the connection to the endpoint. */
     public async testAsync(): Promise<void> {
         if (this.reentry === 0) {
             await this.http.checkUrlExist(this.endpoint.url);
@@ -53,10 +56,10 @@ export abstract class AASApiClient extends AASResource {
 
     /**
      * Reads the environment of the AAS with the specified identifier.
-     * @param id The AAS identifier.
+     * @param label The AAS label.
      * @returns An AAS environment.
      */
-    public abstract readEnvironmentAsync(id: IdName): Promise<aas.Environment>;
+    public abstract readEnvironmentAsync(label: AASLabel): Promise<aas.Environment>;
 
     /**
      * Gets the thumbnail of the AAS with the specified identifier.
@@ -64,11 +67,13 @@ export abstract class AASApiClient extends AASResource {
      */
     public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
 
+    /** Opens a connection to the AAS endpoint. */
     public override openAsync(): Promise<void> {
         ++this.reentry;
         return Promise.resolve();
     }
 
+    /** Closes the connection to the AAS endpoint. */
     public override closeAsync(): Promise<void> {
         return new Promise(resolve => {
             if (this.reentry > 0) {
@@ -79,23 +84,35 @@ export abstract class AASApiClient extends AASResource {
         });
     }
 
+    /**
+     * Creates a package from the specified arguments.
+     * @param args The AAS identifier (args[0]) and the name (args[1]) of the AAS.
+     * @returns A new `AASServerPackage` instance.
+     **/
     public override createPackage(...args: string[]): AASPackage {
         return new AASServerPackage(this.logger, this, args[0], args[1]);
     }
 
+    /**
+     * Creates a subscription for live data from an AAS endpoint.
+     * @param client The socket.
+     * @param request The list of SubmodelElements to get live data.
+     * @param env The AAS.
+     * @returns A new `HttpSubscription` instance.
+     */
     public override createSubscription(
         client: SocketClient,
-        message: LiveRequest,
+        request: LiveRequest,
         env: aas.Environment,
     ): SocketSubscription {
-        return new HttpSubscription(this.logger, this, client, message, env);
+        return new HttpSubscription(this.logger, this, client, request, env);
     }
 
     /**
      * Gets the names of the Asset Administration Shells contained in the current AASX server.
      * @returns The names of the AASs contained in the current AASX server.
      */
-    public abstract getShellsAsync(cursor?: string): Promise<PagedResult<IdName>>;
+    public abstract getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>>;
 
     /**
      * ToDo

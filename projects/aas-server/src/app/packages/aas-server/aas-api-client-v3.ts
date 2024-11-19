@@ -22,7 +22,7 @@ import {
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
-import { AASApiClient, IdName } from './aas-api-client.js';
+import { AASApiClient, AASLabel } from './aas-api-client.js';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV3 } from '../json-reader-v3.js';
 import { JsonWriterV3 } from '../json-writer-v3.js';
@@ -62,13 +62,11 @@ export class AASApiClientV3 extends AASApiClient {
         super(logger, http, endpoint);
     }
 
-    public override readonly version = 'v3';
-
     public readonly readOnly = false;
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<IdName>> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>> {
         const searchParams: Record<string, string | number> = { limit: 100 };
         if (cursor) {
             searchParams.cursor = cursor;
@@ -85,7 +83,7 @@ export class AASApiClientV3 extends AASApiClient {
         };
     }
 
-    public async readEnvironmentAsync(id: IdName): Promise<aas.Environment> {
+    public async readEnvironmentAsync(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),

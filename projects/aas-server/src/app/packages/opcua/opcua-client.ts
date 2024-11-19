@@ -54,8 +54,6 @@ export class OpcuaClient extends AASResource {
         }
     }
 
-    public override readonly version = '';
-
     public readonly readOnly = true;
 
     public readonly onlineReady = true;

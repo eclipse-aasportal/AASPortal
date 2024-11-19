@@ -12,7 +12,7 @@ import { AasxPackage } from '../packages/file-system/aasx-package.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { IdName } from '../packages/aas-server/aas-api-client.js';
+import { AASLabel } from '../packages/aas-server/aas-api-client.js';
 
 export class DirectoryScan extends AASResourceScan {
     private readonly map = new Map<string, AASDocument>();
@@ -34,14 +34,14 @@ export class DirectoryScan extends AASResourceScan {
         return this.source.closeAsync();
     }
 
-    protected override createDocument(id: IdName): Promise<AASDocument> {
+    protected override createDocument(id: AASLabel): Promise<AASDocument> {
         const document = this.map.get(id.id);
         return document ? Promise.resolve(document) : Promise.reject(new Error(`${id} not found.`));
     }
 
-    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<IdName>> {
+    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {
         const result = await this.source.getFiles(cursor);
-        const ids: IdName[] = [];
+        const ids: AASLabel[] = [];
         for (const file of result.result) {
             try {
                 const aasxPackage = new AasxPackage(this.logger, this.source, file);

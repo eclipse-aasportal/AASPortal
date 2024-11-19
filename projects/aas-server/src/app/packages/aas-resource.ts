@@ -19,8 +19,6 @@ export abstract class AASResource {
         public readonly endpoint: AASEndpoint,
     ) {}
 
-    public abstract readonly version: string;
-
     /** Indicates whether an active connection is established. */
     public abstract readonly isOpen: boolean;
 
@@ -45,12 +43,12 @@ export abstract class AASResource {
     /**
      * Creates a WebSocket subscription.
      * @param client The client.
-     * @param message The message.
+     * @param request The request.
      * @param env The AAS environment.
      */
     public abstract createSubscription(
         client: SocketClient,
-        message: LiveRequest,
+        request: LiveRequest,
         env: aas.Environment,
     ): SocketSubscription;
 

@@ -22,7 +22,7 @@ import {
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
-import { AASApiClient, IdName } from './aas-api-client.js';
+import { AASApiClient, AASLabel } from './aas-api-client.js';
 import { Logger } from '../../logging/logger.js';
 import * as aasv2 from '../../types/aas-v2.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
@@ -67,13 +67,11 @@ export class AASApiClientV1 extends AASApiClient {
         super(logger, http, endpoint);
     }
 
-    public override readonly version = 'v1';
-
     public readonly readOnly = false;
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<IdName>> {
+    public async getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>> {
         const result = await this.http.get<aasv2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
@@ -87,7 +85,7 @@ export class AASApiClientV1 extends AASApiClient {
         };
     }
 
-    public async readEnvironmentAsync(id: IdName): Promise<aas.Environment> {
+    public async readEnvironmentAsync(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aasv2.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
@@ -195,7 +193,7 @@ export class AASApiClientV1 extends AASApiClient {
         const aasId = encodeBase64Url(shell.id);
         const items = nodeId.split('.');
         const path = items[1].split('/').slice(1).join('.');
-        return this.resolve(`shells/${aasId}/submodels/${items[0]}/submodel/submodel-elements/${path}`).href;
+        return this.resolve(`shells/${aasId}/aas/submodels/${items[0]}/submodel/submodel-elements/${path}`).href;
     }
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
