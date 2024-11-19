@@ -10,6 +10,7 @@ import EventEmitter from 'events';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { AASIndex } from '../aas-index/aas-index.js';
 import { PagedResult } from '../types/paged-result.js';
+import { IdName } from '../packages/aas-server/aas-api-client.js';
 
 /** Defines an automate to scan an AAS resource for Asset Administration Shells. */
 export abstract class AASResourceScan extends EventEmitter {
@@ -47,15 +48,15 @@ export abstract class AASResourceScan extends EventEmitter {
 
                 if (!endOfEndpoint) {
                     const result = await this.nextEndpointPage(endpointCursor);
-                    for (const id of result.result) {
-                        let value = map.get(id);
+                    for (const item of result.result) {
+                        let value = map.get(item.id);
                         if (value === undefined) {
                             value = {};
-                            map.set(id, value);
+                            map.set(item.id, value);
                         }
 
                         if (value.document === undefined) {
-                            value.document = await this.createDocument(id);
+                            value.document = await this.createDocument(item);
                         }
                     }
 
@@ -100,7 +101,7 @@ export abstract class AASResourceScan extends EventEmitter {
 
     protected abstract close(): Promise<void>;
 
-    protected abstract createDocument(id: string): Promise<AASDocument>;
+    protected abstract createDocument(id: IdName): Promise<AASDocument>;
 
-    protected abstract nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>>;
+    protected abstract nextEndpointPage(cursor: string | undefined): Promise<PagedResult<IdName>>;
 }

@@ -47,10 +47,13 @@ describe('AASApiClientV0', function () {
             http.get.mockResolvedValue(listaas);
             const result = await client.getShellsAsync();
             expect(result.result).toEqual([
-                'AssistanceSystem_Dte',
-                'CunaCup_Becher1',
-                'CunaCup_Becher2',
-                'DTOrchestrator',
+                {
+                    id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:AssistanceSystem:Dte',
+                    idShort: 'AssistanceSystem_Dte',
+                },
+                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:CunaCup:Becher1', idShort: 'CunaCup_Becher1' },
+                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:CunaCup:Becher2', idShort: 'CunaCup_Becher2' },
+                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:DTOrchestrator', idShort: 'DTOrchestrator' },
             ]);
         });
     });
@@ -81,7 +84,9 @@ describe('AASApiClientV0', function () {
                 return new Promise(resolve => resolve(value));
             });
 
-            await expect(client.readEnvironmentAsync('CunaCup_Becher1')).resolves.toBeTruthy();
+            await expect(
+                client.readEnvironmentAsync({ id: 'http://aas/CunaCup_Becher1', idShort: 'CunaCup_Becher1' }),
+            ).resolves.toBeTruthy();
         });
     });
 

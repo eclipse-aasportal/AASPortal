@@ -39,8 +39,8 @@ export abstract class AASResource {
     /** Closes the container. */
     public abstract closeAsync(): Promise<void>;
 
-    /** ToDo */
-    public abstract createPackage(address: string): AASPackage;
+    /** Creates a package from the specified address. */
+    public abstract createPackage(...args: string[]): AASPackage;
 
     /**
      * Creates a WebSocket subscription.
