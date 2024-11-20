@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="fhg-dashboard-container" class="overflow-y-auto container-fluid h-100">
+<div id="fhg-dashboard-container" class="overflow-y-auto overflow-x-hidden container-fluid h-100 w-100">
     @if (!isEmpty()) {
     @for (row of rows(); track row) {
     <div class="row">
@@ -14,7 +14,9 @@
         <div [ngClass]="'col border border-3 rounded m-1 ' + (selected(column) ? 'border-primary' : 'border-secondary')"
             (click)="toggleSelection(column)" (keydown.enter)="toggleSelection(column)" tabindex="0">
             @if (!editMode()) {
-            <canvas #chart [id]="column.id"></canvas>
+            <div class="fhg-chart-container">
+                <canvas #chart [id]="column.id"></canvas>
+            </div>
             }
             @else {
             <div class="row mb-2 pt-2">

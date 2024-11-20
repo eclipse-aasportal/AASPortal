@@ -536,6 +536,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
                 datasets: [],
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         min: item.min,
@@ -581,6 +582,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             options: {
                 indexAxis: 'x',
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         min: item.min,
@@ -620,6 +622,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             options: {
                 indexAxis: 'y',
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         min: item.min,
@@ -658,6 +661,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
                 datasets: [],
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         min: item.min,
