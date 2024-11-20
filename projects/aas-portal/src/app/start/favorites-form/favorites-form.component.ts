@@ -78,12 +78,16 @@ export class FavoritesFormComponent {
 
     public get text(): string {
         const selectedItem = this._items().find(item => item.selected);
-        if (!selectedItem || this.documents.length === 0) {
+        if (selectedItem === undefined) {
             return '';
         }
 
+        if (this.documents.length === 0) {
+            return stringFormat(this.translate.instant('FavoritesForm.COUNT'), selectedItem.length);
+        }
+
         if (this.documents.length === 1) {
-            return this.translate.instant('TEXT_ADD_FAVORITE', selectedItem.length);
+            return stringFormat(this.translate.instant('TEXT_ADD_FAVORITE'), selectedItem.length);
         }
 
         return stringFormat(this.translate.instant('TEXT_ADD_FAVORITES'), this.documents.length, selectedItem.length);
@@ -93,7 +97,7 @@ export class FavoritesFormComponent {
         if (item.added) {
             this._items.update(items => items.filter(value => value !== item));
         } else {
-            item.delete = true;
+            this._items.update(items => items.map(i => (i === item ? { ...i, delete: true } : i)));
         }
     }
 

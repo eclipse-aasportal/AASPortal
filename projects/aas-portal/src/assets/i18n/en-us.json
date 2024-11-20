@@ -267,5 +267,9 @@
     "IndexChangeService": {
         "ENDPOINTS": "Endpoints",
         "SHELLS": "Shells"
+    },
+    "FavoritesForm": {
+        "COUNT": "{0} favorite(s)"
     }
+
 }

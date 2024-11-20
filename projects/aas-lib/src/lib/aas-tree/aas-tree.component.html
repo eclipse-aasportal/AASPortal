@@ -52,7 +52,7 @@
                 </td>
                 <td class="text-end">
                     @if (node.canOpen) {
-                    <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.value}}</a>
+                    <a href="javascript:void(0);" class="text-nowrap me-2" (click)="open(node)">{{node.value | async}}</a>
                     } @else if (node.element.modelType === 'RelationshipElement') {
                     <div class="d-flex flex-column ts-x-small me-2">
                         <a href="javascript:void(0);" class="text-nowrap"
