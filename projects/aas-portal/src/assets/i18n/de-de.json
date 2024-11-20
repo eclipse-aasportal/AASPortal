@@ -266,5 +266,8 @@
     "IndexChangeService": {
         "ENDPOINTS": "Endpunkte",
         "SHELLS": "Verwaltungsschalen"
+    },
+    "FavoritesForm": {
+        "COUNT": "{0} Favorit(en)"
     }
 }
