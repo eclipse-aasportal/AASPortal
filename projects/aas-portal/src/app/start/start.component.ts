@@ -16,6 +16,8 @@ import {
     TemplateRef,
     ViewChild,
     computed,
+    effect,
+    model,
 } from '@angular/core';
 
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -48,13 +50,14 @@ import { FavoritesFormComponent } from './favorites-form/favorites-form.componen
 import { StartStore } from './start.store';
 import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
 import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
     standalone: true,
-    imports: [AASTableComponent, NgClass, TranslateModule, NgbModule],
+    imports: [AASTableComponent, NgClass, TranslateModule, NgbModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy, AfterViewInit {
@@ -78,20 +81,43 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 error: error => this.notify.error(error),
             });
         }
+
+        effect(
+            () => {
+                const value = this.activeFavorites();
+                this.store.activeFavorites.set(value);
+                const currentFavorites = this.favorites.get(value);
+                if (currentFavorites) {
+                    this.store.getFavorites(currentFavorites.name, currentFavorites.documents);
+                } else {
+                    this.store.getFirstPage();
+                }
+            },
+            { allowSignalWrites: true },
+        );
+
+        effect(
+            () => {
+                const value = Number(this.limit());
+                this.store.limit.set(value);
+                this.store.getFirstPage();
+            },
+            { allowSignalWrites: true },
+        );
     }
 
     @ViewChild('startToolbar', { read: TemplateRef })
     public startToolbar: TemplateRef<unknown> | null = null;
 
-    public readonly activeFavorites = this.store.activeFavorites;
+    public readonly activeFavorites = model(this.store.activeFavorites());
+
+    public readonly limit = model(this.store.limit());
 
     public readonly favoritesLists = this.store.favoritesLists;
 
     public readonly filter = this.store.filter;
 
     public readonly viewMode = this.store.viewMode;
-
-    public readonly limit = this.store.limit;
 
     public readonly filterText = this.store.filterText;
 
@@ -125,15 +151,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-    }
-
-    public setActiveFavorites(value: string): void {
-        const currentFavorites = this.favorites.get(value);
-        if (currentFavorites) {
-            this.store.getFavorites(currentFavorites.name, currentFavorites.documents);
-        } else {
-            this.store.getFirstPage();
-        }
     }
 
     public setViewMode(viewMode: string | ViewMode): void {
@@ -261,7 +278,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         return of(this.activeFavorites()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.selected(), activeFavorites).subscribe();
+                    this.favorites.remove(this.selected(), activeFavorites);
                     this.store.removeFavorites([...this.selected()]);
                     return of(void 0);
                 } else {
@@ -348,10 +365,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         } catch (error) {
             this.notify.error(error);
         }
-    }
-
-    public setLimit(value: string | number): void {
-        this.store.getFirstPage(undefined, Number(value));
     }
 
     public firstPage(): void {

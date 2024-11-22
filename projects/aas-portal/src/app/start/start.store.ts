@@ -12,11 +12,9 @@ import { FavoritesService } from './favorites.service';
 export class StartStore {
     private readonly _viewMode = signal(ViewMode.Undefined);
     private readonly _filterText = signal('');
-    private readonly _limit = signal(10);
     private readonly _previous = signal<AASDocumentId | null>(null);
     private readonly _next = signal<AASDocumentId | null>(null);
     private readonly _documents = signal<AASDocument[]>([], { equal: (a, b) => equalArray(a, b) });
-    private readonly _activeFavorites = signal('');
 
     public constructor(
         private readonly api: StartApiService,
@@ -30,9 +28,9 @@ export class StartStore {
 
     public readonly favoritesLists = computed(() => ['', ...this.favorites.lists().map(list => list.name)]);
 
-    public readonly activeFavorites = this._activeFavorites.asReadonly();
+    public readonly activeFavorites = signal('');
 
-    public readonly limit = this._limit.asReadonly();
+    public readonly limit = signal(10);
 
     public readonly filterText = this._filterText.asReadonly();
 
@@ -40,7 +38,7 @@ export class StartStore {
 
     public readonly filter = computed(() => {
         const filterText = this._filterText();
-        return this._activeFavorites() ? filterText : '';
+        return this.activeFavorites() ? filterText : '';
     });
 
     public readonly isFirstPage = computed(() => this._previous() === null);
@@ -67,7 +65,7 @@ export class StartStore {
     }
 
     public removeFavorites(favorites: AASDocument[]): void {
-        if (!this._activeFavorites) {
+        if (!this.activeFavorites()) {
             return;
         }
 
@@ -80,14 +78,14 @@ export class StartStore {
 
     public setFilter(filter: string): void {
         this._filterText.set(filter);
-        if (!this._activeFavorites()) {
+        if (!this.activeFavorites()) {
             this.getFirstPage();
         }
     }
 
     public getFirstPage(filter?: string, limit?: number): void {
         if (!filter) {
-            if (!this._activeFavorites()) {
+            if (!this.activeFavorites()) {
                 filter = this._filterText();
             }
         }
@@ -96,7 +94,7 @@ export class StartStore {
             .getPage(
                 {
                     previous: null,
-                    limit: limit ?? this._limit(),
+                    limit: limit ?? this.limit(),
                 },
                 filter,
                 this.translate.currentLang,
@@ -114,7 +112,7 @@ export class StartStore {
             .getPage(
                 {
                     next: this.getId(this._documents()[this._documents().length - 1]),
-                    limit: this._limit(),
+                    limit: this.limit(),
                 },
                 this._filterText(),
                 this.translate.currentLang,
@@ -128,7 +126,7 @@ export class StartStore {
             .getPage(
                 {
                     next: null,
-                    limit: this._limit(),
+                    limit: this.limit(),
                 },
                 this._filterText(),
                 this.translate.currentLang,
@@ -146,7 +144,7 @@ export class StartStore {
             .getPage(
                 {
                     previous: this.getId(this._documents()[0]),
-                    limit: this._limit(),
+                    limit: this.limit(),
                 },
                 this._filterText(),
                 this.translate.currentLang,
@@ -164,7 +162,7 @@ export class StartStore {
             .getPage(
                 {
                     previous: this._previous(),
-                    limit: this._limit(),
+                    limit: this.limit(),
                 },
                 this._filterText(),
                 this.translate.currentLang,
@@ -187,7 +185,7 @@ export class StartStore {
     }
 
     public getFavorites(activeFavorites: string, documents: AASDocument[]): void {
-        this._activeFavorites.set(activeFavorites);
+        this.activeFavorites.set(activeFavorites);
         this._documents.set(documents);
         this._viewMode.set(ViewMode.List);
         from(documents)
@@ -222,12 +220,12 @@ export class StartStore {
 
     private setPage(page: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
         this._viewMode.set(ViewMode.List);
-        this._activeFavorites.set('');
+        this.activeFavorites.set('');
         this._documents.set(page.documents);
         this._previous.set(page.previous);
         this._next.set(page.next);
         if (limit) {
-            this._limit.set(limit);
+            this.limit.set(limit);
         }
 
         if (filter) {
