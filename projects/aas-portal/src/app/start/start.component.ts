@@ -357,7 +357,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 filter = '';
             }
 
-            if (!this.activeFavorites) {
+            if (!this.activeFavorites()) {
                 this.store.getFirstPage(filter);
             } else {
                 this.store.setFilter(filter);
