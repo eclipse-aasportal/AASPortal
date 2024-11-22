@@ -10,7 +10,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, model, signal } from '@angular/core';
 import { WindowService, ViewMode, AuthService, NotifyService, DownloadService, AASTableComponent } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { AASDocument, aas } from 'aas-core';
 
@@ -18,7 +17,6 @@ import { StartComponent } from '../../app/start/start.component';
 import { StartApiService } from '../../app/start/start-api.service';
 import { FavoritesList, FavoritesService } from '../../app/start/favorites.service';
 import { ToolbarService } from '../../app/toolbar.service';
-import { provideRouter } from '@angular/router';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -113,8 +111,6 @@ describe('StartComponent', () => {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
-                provideHttpClientTesting(),
-                provideRouter([]),
             ],
             imports: [
                 TranslateModule.forRoot({
