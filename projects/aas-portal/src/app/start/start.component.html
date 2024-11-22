@@ -78,14 +78,14 @@
     </div>
     <div class="btn-group me-2 my-1" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="viewMode() === 'list'">
+            [(ngModel)]="viewMode">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="viewMode() === 'tree'">
-        <label class="btn btn-primary" for="viewModeTree">
-            <i class="bi bi-diagram-3"></i>
+            [(ngModel)]="viewMode">
+        <label class=" btn btn-primary" for="viewModeTree">
+        <i class="bi bi-diagram-3"></i>
         </label>
     </div>
     <div class="btn-group me-2 my-1">
