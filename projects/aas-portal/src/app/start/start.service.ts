@@ -72,18 +72,9 @@ export class StartService {
         this.store.documents$.set(documents);
     }
 
-    public setFilter(filter: string): void {
-        this.store.filterText$.set(filter);
-        if (!this.store.activeFavorites) {
-            this.getFirstPage();
-        }
-    }
-
     public getFirstPage(filter?: string, limit?: number): void {
-        if (!filter) {
-            if (!this.store.activeFavorites) {
-                filter = this.store.filterText;
-            }
+        if (filter === undefined) {
+            filter = this.store.filterText;
         }
 
         this.api
@@ -218,11 +209,11 @@ export class StartService {
         this.store.documents$.set(page.documents);
         this.store.previous$.set(page.previous);
         this.store.next$.set(page.next);
-        if (limit) {
+        if (limit !== undefined) {
             this.store.limit$.set(limit);
         }
 
-        if (filter) {
+        if (filter !== undefined) {
             this.store.filterText$.set(filter);
         }
     }
