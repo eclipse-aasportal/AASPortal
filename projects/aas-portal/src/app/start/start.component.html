@@ -16,9 +16,8 @@
         <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
             <i class="bi bi-star"></i>
         </button>
-        <select #selectFavorites
-            [ngClass]="activeFavorites() !== '' ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
-            [value]="activeFavorites()" (change)="setActiveFavorites(selectFavorites.value)">
+        <select [ngClass]="activeFavorites() ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [(ngModel)]="activeFavorites">
             @for (option of favoritesLists(); track option; let i = $index) {
             @if (i === 0) {
             <option class="fst-italic fw-light" [value]="''" translate>Start.FAVORITES</option>
@@ -28,7 +27,7 @@
             }
         </select>
     </div>
-    @if (activeFavorites() === '') {
+    @if (!activeFavorites()) {
     <div class="input-group me-2 my-1">
         <button type="button" class="btn btn-primary" (click)="firstPage()">
             <i class="bi bi-chevron-bar-left"></i>
@@ -36,7 +35,7 @@
         <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <select #selectLimit class="form-select" [value]="limit()" (change)="setLimit(selectLimit.value)">
+        <select class="form-select" [(ngModel)]="limit">
             <option value="10">10</option>
             <option value="20">20</option>
             <option value="30">30</option>

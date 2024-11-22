@@ -20,7 +20,6 @@
     "CAPTION_INFO": "Info",
     "CAPTION_WARNING": "Warning",
     "CAPTION_UPLOAD_FILE": "Upload AASX File",
-    "CAPTION_FAVORITES": "Favorites",
     "CMD_OK": "OK",
     "CMD_OPEN_AAS": "Open AAS",
     "CMD_UPLOAD": "Upload",
@@ -47,7 +46,6 @@
     "CMD_DELETE_USER": "Delete user account...",
     "CMD_VIEW_USER_FEEDBACK": "User feedback",
     "CMD_VIEW_NAMEPLATE": "Nameplate",
-    "CMD_ADD_NEW_FAVORITES_LIST": "New favorites list",
     "CMD_SHOW_LICENSE_TEXT": "Show license text",
     "CMD_HIDE_LICENSE_TEXT": "Hide license text",
     "COLUMN_NAME": "Name",
@@ -140,8 +138,6 @@
     "ERROR_EMPTY_ENDPOINT_NAME": "Enter a unique AAS endpoint name.",
     "ERROR_NO_ELEMENT_SELECTED": "At least one element must be selected.",
     "ERROR_INVALID_CONTAINER_URL": "'{0}' addresses an invalid or not supported AAS resource.",
-    "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
-    "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name.",
     "INFO_NEW_PASSWORD_SENT": "A new password was sent to '{0}'.",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} was downloaded successfully.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} was uploaded successfully.",
@@ -245,7 +241,7 @@
         "Looks": "Looks",
         "Interaction": "Interaction",
         "Structure": "Structure",
-        "Haptics": "Haptics",
+        "Hacptics": "Haptics",
         "Acustics": "Acustics",
         "Assembly_Installation": "Assembly & Installation",
         "Material": "Material"
@@ -269,7 +265,11 @@
         "SHELLS": "Shells"
     },
     "FavoritesForm": {
-        "COUNT": "{0} favorite(s)"
-    }
+        "CAPTION": "Favorites",
+        "ADD_NEW": "New favorites list",
+        "COUNT": "{0} favorite(s)",
+        "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
+        "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
+        }
 
 }

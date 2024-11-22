@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { Injectable, signal } from '@angular/core';
+import { first, Observable, map, mergeMap } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService } from 'aas-lib';
-import { first, Observable, map, mergeMap, of } from 'rxjs';
 
 export interface FavoritesList {
     name: string;
@@ -44,82 +44,77 @@ export class FavoritesService {
         return this._lists().find(list => list.name === name);
     }
 
-    public add(documents: AASDocument[], name: string, newName?: string): Observable<void> {
-        return of(this._lists()).pipe(
-            map(lists => {
-                const i = lists.findIndex(list => list.name === name);
-                let list: FavoritesList;
-                if (i < 0) {
-                    list = { name, documents: [] };
-                    lists.push(list);
-                } else {
-                    list = { ...lists[i], documents: [...lists[i].documents] };
-                    lists[i] = list;
-                }
-
-                if (newName) {
-                    list.name = newName;
-                }
-
-                for (const document of documents) {
-                    if (!list.documents.some(item => item.endpoint === document.endpoint && item.id === document.id)) {
-                        list.documents.push({ ...document, content: null });
-                    }
-                }
-
-                return [...lists];
-            }),
-            mergeMap(lists => {
-                return this.auth.setCookie('.Favorites', JSON.stringify(lists)).pipe(
-                    map(() => {
-                        this._lists.set(lists);
-                    }),
-                );
-            }),
-        );
+    public add(documents: AASDocument[], name: string, newName?: string): void {
+        return this._lists.update(state => this.addFavorites(state, documents, name, newName));
     }
 
-    public remove(documents: AASDocument[], name: string): Observable<void> {
-        return of(this._lists()).pipe(
-            map(lists => {
-                const i = lists.findIndex(list => list.name === name);
-                if (i < 0) {
-                    throw new Error(`A favorites list "${name}" does not exists.`);
-                }
-
-                const list = { ...lists[i] };
-                list.documents = list.documents.filter(favorite =>
-                    documents.every(document => favorite.endpoint !== document.endpoint || favorite.id !== document.id),
-                );
-
-                lists[i] = list;
-
-                return [...lists];
-            }),
-            mergeMap(lists => {
-                return this.auth.setCookie('.Favorites', JSON.stringify(lists)).pipe(
-                    map(() => {
-                        this._lists.set(lists);
-                    }),
-                );
-            }),
-        );
+    public remove(documents: AASDocument[], name: string): void {
+        this._lists.update(state => this.removeFavorites(state, documents, name));
     }
 
-    public delete(name: string): Observable<void> {
-        return of(this._lists()).pipe(
-            map(lists => lists.filter(list => list.name !== name)),
-            mergeMap(lists => {
-                return (
-                    lists.length > 0
-                        ? this.auth.setCookie('.Favorites', JSON.stringify(lists))
-                        : this.auth.deleteCookie('.Favorites')
-                ).pipe(
-                    map(() => {
-                        this._lists.set(lists);
-                    }),
-                );
-            }),
-        );
+    public delete(name: string): void {
+        this._lists.update(state => this.deleteFavoritesList(state, name));
+    }
+
+    public save(): Observable<void> {
+        if (this._lists().length === 0) {
+            return this.auth.deleteCookie('.Favorites');
+        }
+
+        return this.auth.setCookie('.Favorites', JSON.stringify(this._lists()));
+    }
+
+    private addFavorites(
+        lists: FavoritesList[],
+        documents: AASDocument[],
+        name: string,
+        newName: string | undefined,
+    ): FavoritesList[] {
+        const i = lists.findIndex(list => list.name === name);
+        let list: FavoritesList;
+        if (i < 0) {
+            list = { name: newName || name, documents: documents.map(document => ({ ...document, content: null })) };
+            return [...lists, list];
+        }
+
+        lists = [...lists];
+        list = lists[i];
+        list = { ...list, documents: [...list.documents] };
+        lists[i] = list;
+
+        if (newName) {
+            list.name = newName;
+        }
+
+        for (const document of documents) {
+            if (!list.documents.some(item => item.endpoint === document.endpoint && item.id === document.id)) {
+                list.documents.push({ ...document, content: null });
+            }
+        }
+
+        return lists;
+    }
+
+    private removeFavorites(lists: FavoritesList[], documents: AASDocument[], name: string): FavoritesList[] {
+        return lists.map(list => {
+            if (list.name !== name) {
+                return list;
+            }
+
+            return {
+                ...list,
+                documents: list.documents.filter(favorite =>
+                    documents.every(document => !this.equal(document, favorite)),
+                ),
+            };
+        });
+    }
+
+    private equal(a: AASDocument, b: AASDocument): boolean {
+        return a === b || (a.endpoint === b.endpoint && a.id === b.id);
+    }
+
+    private deleteFavoritesList(lists: FavoritesList[], name: string): FavoritesList[] {
+        return lists.filter(list => list.name !== name);
     }
 }

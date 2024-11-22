@@ -20,7 +20,6 @@
     "CAPTION_INFO": "Info",
     "CAPTION_WARNING": "Warnung",
     "CAPTION_UPLOAD_FILE": "AASX-Datei hochladen",
-    "CAPTION_FAVORITES": "Favoriten",
     "CMD_OK": "OK",
     "CMD_OPEN_AAS": "VWS öffnen",
     "CMD_UPLOAD": "Hochladen",
@@ -47,7 +46,6 @@
     "CMD_DELETE_USER": "Benutzerkonto löschen...",
     "CMD_VIEW_USER_FEEDBACK": "Nutzer-Feedback",
     "CMD_VIEW_NAMEPLATE": "Typenschild",
-    "CMD_ADD_NEW_FAVORITES_LIST": "Neue Favoritenliste",
     "CMD_SHOW_LICENSE_TEXT": "Lizenztext anzeigen",
     "CMD_HIDE_LICENSE_TEXT": "Lizenztext verbergen",
     "COLUMN_VARIANT": "Variante",
@@ -138,8 +136,6 @@
     "ERROR_EMPTY_ENDPOINT_NAME": "Geben Sie einen eindeutigen Namen für den AAS-Endpunkt ein.",
     "ERROR_NO_ELEMENT_SELECTED": "Mindestens ein Element muss ausgewählt sein.",
     "ERROR_INVALID_CONTAINER_URL": "'{0}' adressiert eine ungülig oder nicht unterstützte VWS-Ressoure.",
-    "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
-    "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name.",
     "INFO_NEW_PASSWORD_SENT": "Ein neues Passwort wurde an '{0}' gesendet",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} wurde erfolgreich heruntergeladen.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} wurde erfolgreich hochgeladen.",
@@ -244,7 +240,7 @@
         "Looks": "Optik",
         "Interaction": "Funktionalität",
         "Structure": "Struktur",
-        "Haptics": "Haptik",
+        "Hacptics": "Haptik",
         "Acustics": "Akustik",
         "Assembly_Installation": "Montage & Installation",
         "Material": "Material"
@@ -268,6 +264,10 @@
         "SHELLS": "Verwaltungsschalen"
     },
     "FavoritesForm": {
-        "COUNT": "{0} Favorit(en)"
-    }
+        "CAPTION": "Favoriten",
+        "ADD_NEW": "Neue Favoritenliste",
+        "COUNT": "{0} Favorit(en)",
+        "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
+        "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
+        }
 }
