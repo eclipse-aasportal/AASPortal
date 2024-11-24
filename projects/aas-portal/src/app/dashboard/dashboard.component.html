@@ -76,9 +76,9 @@
 
 <ng-template #dashboardToolbar>
     <div class="input-group me-2 my-1">
-        <select #select class="form-select" [value]="activePage()" (change)="setPage(pages()[select.selectedIndex])">
-            @for (page of pages(); track page.name) {
-            <option [ngValue]="page">{{page.name}}</option>
+        <select #select class="form-select" [(ngModel)]="activePage">
+            @for (page of pages(); track page) {
+            <option [ngValue]="page">{{page}}</option>
             }
         </select>
         <button type="button" class="btn btn-primary" (click)="addNew()" [disabled]="!editMode()">
@@ -97,7 +97,7 @@
             <label class="form-check-label" for="toggleEditMode" translate>LABEL_EDIT_MODE</label>
         </div>
     </div>
-    <div class="btn-group me-2" [hidden]="!editMode">
+    <div class="btn-group me-2" [hidden]="!editMode()">
         <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="!canUndo()">
             <i class="bi bi-arrow-90deg-left"></i>
         </button>
@@ -105,7 +105,7 @@
             <i class="bi bi-arrow-90deg-right"></i>
         </button>
     </div>
-    <div class="btn-group me-2 my-1" [hidden]="!editMode">
+    <div class="btn-group me-2 my-1" [hidden]="!editMode()">
         <button type="button" class="btn btn-primary" (click)="moveLeft()" [disabled]="!canMoveLeft()">
             <i class="bi bi-box-arrow-left"></i>
         </button>
