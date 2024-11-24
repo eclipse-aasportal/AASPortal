@@ -18,9 +18,9 @@ describe('DashboardApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [],
+            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+        });
 
         service = TestBed.inject(DashboardApiService);
         httpTestingController = TestBed.inject(HttpTestingController);

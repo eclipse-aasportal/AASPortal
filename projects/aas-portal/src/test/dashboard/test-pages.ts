@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { DashboardChart, DashboardChartType, DashboardItemType } from '../../app/dashboard/dashboard.service';
+import { DashboardChart, DashboardChartType, DashboardItemType } from '../../app/dashboard/dashboard.store';
 import { maxRotationSpeed, rotationSpeed, torque } from '../../test/assets/sample-document';
 
 export const pages = [

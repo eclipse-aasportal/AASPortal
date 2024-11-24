@@ -6,47 +6,35 @@
  *
  *****************************************************************************/
 
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, untracked } from '@angular/core';
 import { OnlineState } from 'aas-lib';
-import { AASDocument } from 'aas-core';
-import { AASApiService } from './aas-api.service';
+import { aas, AASDocument } from 'aas-core';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AASStore {
-    private readonly _document = signal<AASDocument | null>(null);
+    public readonly document$ = signal<AASDocument | null>(null);
 
-    public constructor(private readonly api: AASApiService) {}
+    public readonly state$ = signal<OnlineState>('offline');
 
-    public readonly document = this._document.asReadonly();
+    public readonly searchExpression$ = signal('');
 
-    public readonly state = signal<OnlineState>('offline');
+    public readonly selectedElements$ = signal<aas.Referable[]>([]);
 
-    public readonly searchExpression = signal('');
-
-    public getDocumentContent(document: AASDocument): void {
-        this.api.getContent(document.id, document.endpoint).subscribe({
-            next: content => this._document.set({ ...document, content }),
-            error: () => this._document.set(document),
-        });
+    public get document(): AASDocument | null {
+        return untracked(this.document$);
     }
 
-    public getDocument(id: string, endpoint: string): void {
-        this.api.getDocument(id, endpoint).subscribe({
-            next: document => this._document.set(document),
-        });
+    public get state(): OnlineState {
+        return untracked(this.state$);
     }
 
-    public setDocument(document: AASDocument | null): void {
-        this._document.set(document);
+    public get searchExpression(): string {
+        return untracked(this.searchExpression$);
     }
 
-    public applyDocument(document: AASDocument): void {
-        this._document.set({ ...document, modified: true });
-    }
-
-    public resetModified(document: AASDocument): void {
-        this._document.set({ ...document, modified: false });
+    public get selectedElements(): aas.Referable[] {
+        return untracked(this.selectedElements$);
     }
 }
