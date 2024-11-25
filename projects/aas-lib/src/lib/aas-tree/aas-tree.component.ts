@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -72,7 +72,7 @@ import { AASTreeService } from './aas-tree.service';
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
     standalone: true,
-    imports: [NgClass, NgStyle, TranslateModule, AsyncPipe],
+    imports: [NgClass, NgStyle, TranslateModule],
     providers: [AASTreeSearch, AASTreeService, AASTreeApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -537,7 +537,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                     continue;
                 }
 
-                row.value.next(
+                row.value.set(
                     typeof node.value === 'boolean'
                         ? node.value
                         : convertToString(node.value, this.translate.currentLang),
