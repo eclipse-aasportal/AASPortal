@@ -21,7 +21,7 @@ export class StartApiService {
 
     /**
      * Returns all configured AAS endpoints.
-     * @returns An array of `AASContainer`.
+     * @returns An array of `AASEndpoint`.
      */
     public getEndpoints(): Observable<AASEndpoint[]> {
         return this.http.get<AASEndpoint[]>('/api/v1/endpoints');

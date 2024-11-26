@@ -45,7 +45,7 @@ export type AASAbbreviation =
     | 'SME'
     | 'SML';
 
-export type AASEndpointScheduleType = 'manual' | 'once' | 'every' | 'daily' | 'weekly';
+export type AASEndpointScheduleType = 'disabled' | 'manual' | 'once' | 'every' | 'daily' | 'weekly';
 
 /** The schedule type. */
 export interface AASEndpointSchedule {
@@ -65,12 +65,6 @@ export type AASEndpoint = {
     version?: string;
     headers?: Record<string, string>;
 };
-
-/** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
-export interface AASContainer extends AASEndpoint {
-    cursor?: string;
-    documents?: AASDocument[];
-}
 
 /** The unique identifier of an AAS. */
 export interface AASDocumentId {

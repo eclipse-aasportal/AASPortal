@@ -233,7 +233,8 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        if (endpoint.schedule?.type === 'manual') {
+        const type = endpoint.schedule?.type;
+        if (type === 'manual' || type === 'disabled') {
             return;
         }
 
@@ -253,8 +254,12 @@ export class AASProvider {
             task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
         }
 
-        if (old.schedule?.type !== endpoint.schedule?.type) {
-            if (old.schedule?.type === 'manual') {
+        const oldType = old.schedule?.type;
+        const newType = endpoint.schedule?.type;
+        if (oldType !== newType) {
+            if (newType === 'disabled') {
+                await this.index.clear(endpoint.name);
+            } else if (oldType === 'manual') {
                 setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         }
@@ -534,7 +539,8 @@ export class AASProvider {
     private startScan = async (): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
-                if (endpoint.schedule?.type === 'manual') {
+                const type = endpoint.schedule?.type;
+                if (type === 'manual' || type === 'disabled') {
                     continue;
                 }
 
@@ -606,12 +612,13 @@ export class AASProvider {
             return;
         }
 
-        if ((await this.index.hasEndpoint(task.endpointName)) === true) {
-            const endpoint = await this.index.getEndpoint(task.endpointName);
+        const endpoint = await this.index.findEndpoint(task.endpointName);
+        if (endpoint !== undefined) {
             task.state = 'idle';
             task.end = Date.now();
 
-            if (endpoint.schedule?.type === 'once' || endpoint.schedule?.type === 'manual') {
+            const type = endpoint.schedule?.type;
+            if (type === 'once' || type === 'manual' || type === 'disabled') {
                 return;
             }
 
@@ -631,7 +638,8 @@ export class AASProvider {
 
     private async onUpdate(result: ScanEndpointResult): Promise<void> {
         const document = result.document;
-        if ((await this.index.hasEndpoint(document.endpoint)) === false) {
+        const endpoint = await this.index.findEndpoint(document.endpoint);
+        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
             return;
         }
 
@@ -644,18 +652,21 @@ export class AASProvider {
     }
 
     private async onAdded(result: ScanEndpointResult): Promise<void> {
-        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) {
+        const document = result.document;
+        const endpoint = await this.index.findEndpoint(document.endpoint);
+        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
             return;
         }
 
-        await this.index.add(result.document);
-        this.logger.info(`Added: AAS ${result.document.idShort} [${result.document.id}] in ${result.endpoint.url}`);
-        this.sendMessage({ type: 'Added', document: result.document });
+        await this.index.add(document);
+        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
+        this.sendMessage({ type: 'Added', document });
     }
 
     private async onRemoved(result: ScanEndpointResult): Promise<void> {
         const document = result.document;
-        if ((await this.index.hasEndpoint(document.endpoint)) === false) {
+        const endpoint = await this.index.findEndpoint(document.endpoint);
+        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
             return;
         }
 

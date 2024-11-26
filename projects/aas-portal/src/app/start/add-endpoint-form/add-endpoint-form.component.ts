@@ -136,11 +136,10 @@ export class AddEndpointFormComponent {
             }
 
             switch (this.schedule()) {
+                case 'disabled':
                 case 'manual':
-                    endpoint.schedule = { type: 'manual' };
-                    break;
                 case 'once':
-                    endpoint.schedule = { type: 'once' };
+                    endpoint.schedule = { type: this.schedule() };
                     break;
                 default:
                     endpoint.schedule = { type: 'every', values: [(this.hours() * 60 + this.minutes()) * 60000] };

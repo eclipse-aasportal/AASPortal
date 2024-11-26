@@ -134,7 +134,7 @@ describe('MySqlIndex', () => {
         });
     });
 
-    describe('hasEndpoint', () => {
+    describe('findEndpoint', () => {
         it('indicates that Endpoint 1 exists', async () => {
             const result: MySqlEndpoint = {
                 constructor: { name: 'RowDataPacket' },
@@ -147,13 +147,13 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockResolvedValue([[result], []]);
-            await expect(index.hasEndpoint('Endpoint 1')).resolves.toEqual(true);
+            await expect(index.findEndpoint('Endpoint 1')).resolves.toBeDefined();
             expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
         });
 
         it('indicates that Unknown does not exist', async () => {
             connection.query.mockResolvedValue([[], []]);
-            await expect(index.hasEndpoint('Endpoint 1')).resolves.toEqual(false);
+            await expect(index.findEndpoint('Endpoint 1')).resolves.toBeUndefined();
             expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
         });
     });

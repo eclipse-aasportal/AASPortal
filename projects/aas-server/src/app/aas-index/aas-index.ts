@@ -37,7 +37,7 @@ export abstract class AASIndex {
 
     public abstract getEndpoint(name: string): Promise<AASEndpoint>;
 
-    public abstract hasEndpoint(name: string): Promise<boolean>;
+    public abstract findEndpoint(name: string): Promise<AASEndpoint | undefined>;
 
     public abstract addEndpoint(endpoint: AASEndpoint): Promise<void>;
 
@@ -75,7 +75,7 @@ export abstract class AASIndex {
 
     public abstract remove(endpoint?: string, id?: string): Promise<boolean>;
 
-    public abstract clear(): Promise<void>;
+    public abstract clear(endpoint?: string): Promise<void>;
 
     public abstract destroy(): Promise<void>;
 
