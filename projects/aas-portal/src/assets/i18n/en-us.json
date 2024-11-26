@@ -189,6 +189,7 @@
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "ADVANCED_SETTINGS": "Advanced settings",
         "SCHEDULE": "Update endpoint index",
+        "DISABLED": "disabled",
         "MANUAL": "manual",
         "ONCE": "once",
         "EVERY": "cyclic",
@@ -211,6 +212,7 @@
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "SCHEDULE": "Update endpoint index",
+        "DISABLED": "disabled",
         "MANUAL": "manual",
         "ONCE": "once",
         "EVERY": "cyclic",
@@ -231,6 +233,7 @@
         "CONFIRM_RESET_CONFIGURATION": "Do you want to restore the default AASNodePortal configuration?",
         "RESET": "Reset",
         "CLOSE": "Close",
+        "disabled": "disabled",
         "manual": "manual",
         "once": "once",
         "every": "cyclic"

@@ -86,16 +86,16 @@ export class LowDbIndex extends AASIndex {
         });
     }
 
-    public override hasEndpoint(name: string): Promise<boolean> {
-        return new Promise<boolean>(resolve => {
-            resolve(this.db.data.endpoints.find(endpoint => endpoint.name === name) !== undefined);
+    public override findEndpoint(name: string): Promise<AASEndpoint | undefined> {
+        return new Promise<AASEndpoint | undefined>(resolve => {
+            resolve(this.db.data.endpoints.find(endpoint => endpoint.name === name));
         });
     }
 
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
             throw new ApplicationError(
-                `An endpoint with the name "${name}" already exists.`,
+                `An endpoint with the name "${endpoint.name}" already exists.`,
                 ERRORS.RegistryAlreadyExists,
                 endpoint.name,
             );
@@ -108,7 +108,7 @@ export class LowDbIndex extends AASIndex {
     public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
         const index = this.db.data.endpoints.findIndex(item => item.name === endpoint.name);
         if (index < 0) {
-            throw new Error(`An endpoint with the name ${name} does not exist.`);
+            throw new Error(`An endpoint with the name ${endpoint.name} does not exist.`);
         }
 
         const old = this.db.data.endpoints[index];
@@ -253,7 +253,9 @@ export class LowDbIndex extends AASIndex {
     public override async remove(endpointName: string, id: string): Promise<boolean> {
         const documents = this.db.data.documents;
         const index = documents.findIndex(item => item.endpoint === endpointName && item.id === id);
-        if (index < 0) return false;
+        if (index < 0) {
+            return false;
+        }
 
         const documentId = documents[index].uuid;
         this.db.data.elements = this.db.data.elements.filter(element => element.uuid !== documentId);
@@ -263,10 +265,20 @@ export class LowDbIndex extends AASIndex {
         return true;
     }
 
-    public override async clear(): Promise<void> {
-        this.db.data.documents = [];
-        this.db.data.elements = [];
-        this.db.data.endpoints = [];
+    public override async clear(endpointName?: string): Promise<void> {
+        if (endpointName === undefined) {
+            this.db.data.documents = [];
+            this.db.data.elements = [];
+            this.db.data.endpoints = [];
+        } else {
+            const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === endpointName);
+            if (index < 0) {
+                return;
+            }
+
+            this.removeDocuments(endpointName);
+        }
+
         await this.db.write();
     }
 

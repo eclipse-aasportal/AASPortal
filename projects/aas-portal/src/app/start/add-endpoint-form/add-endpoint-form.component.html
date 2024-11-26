@@ -50,6 +50,11 @@
             <label class="form-lable" for="schedule-options" translate>AddEndpointForm.SCHEDULE</label>
             <div class="border border-light-subtle rounded p-2 mb-2" id="schedule-options">
                 <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeDisabled" value="disabled"
+                        [(ngModel)]="schedule">
+                    <label class="form-check-label" for="scheduleTypeDisabled" translate>AddEndpointForm.DISABLED</label>
+                </div>
+                <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeManual" value="manual"
                         [(ngModel)]="schedule">
                     <label class="form-check-label" for="scheduleTypeManual" translate>AddEndpointForm.MANUAL</label>

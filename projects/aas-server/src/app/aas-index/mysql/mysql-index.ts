@@ -86,10 +86,14 @@ export class MySqlIndex extends AASIndex {
         return this.toEndpoint(results[0]);
     }
 
-    public override async hasEndpoint(name: string): Promise<boolean> {
+    public override async findEndpoint(name: string): Promise<AASEndpoint | undefined> {
         const connection = await this.getConnection();
         const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [name]);
-        return results.length > 0;
+        if (results.length === 0) {
+            return undefined;
+        }
+
+        return this.toEndpoint(results[0]);
     }
 
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
@@ -307,13 +311,27 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async clear(): Promise<void> {
+    public override async clear(endpointName?: string): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-            await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
-            await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
-            await connection.query<ResultSetHeader>('DELETE FROM `endpoints`;');
+            if (endpointName === undefined) {
+                await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
+                await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
+                await connection.query<ResultSetHeader>('DELETE FROM `endpoints`;');
+            } else {
+                const documents = (
+                    await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?;', [
+                        endpointName,
+                    ])
+                )[0];
+
+                await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);
+
+                for (const document of documents) {
+                    await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
+                }
+            }
             await connection.commit();
         } catch (error) {
             await connection.rollback();
