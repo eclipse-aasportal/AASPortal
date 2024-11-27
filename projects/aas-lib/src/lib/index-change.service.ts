@@ -12,6 +12,7 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData, AASServerMessage } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
 import { HttpClient } from '@angular/common/http';
+import { map, Observable, zip } from 'rxjs';
 
 interface State {
     documentCount: number;
@@ -37,18 +38,17 @@ export class IndexChangeService {
     ) {
         this.subscribeIndexChanged();
 
-        this.http.get<{ count: number }>('/api/v1/endpoints/count').subscribe({
-            next: result => {
-                this.state.update(state => ({ ...state, endpointCount: result.count }));
-            },
-            error: error => {
-                console.debug(error);
-            },
-        });
-
-        this.http
-            .get<{ count: number }>('/api/v1/documents/count')
-            .subscribe(result => this.state.update(state => ({ ...state, documentCount: result.count })));
+        zip(
+            this.http.get<{ count: number }>('/api/v1/endpoints/count'),
+            this.http.get<{ count: number }>('/api/v1/documents/count'),
+        )
+            .pipe(
+                map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count]),
+                map(([endpointCount, documentCount]) =>
+                    this.state.update(state => ({ ...state, endpointCount, documentCount })),
+                ),
+            )
+            .subscribe();
     }
 
     public readonly reset = new EventEmitter();
@@ -68,8 +68,16 @@ export class IndexChangeService {
 
     public readonly changedDocuments = computed(() => this.state().changedDocuments);
 
-    public clear(): void {
-        this.state.update(state => ({ ...state, changedDocuments: 0 }));
+    public clear(): Observable<void> {
+        return zip(
+            this.http.get<{ count: number }>('/api/v1/endpoints/count'),
+            this.http.get<{ count: number }>('/api/v1/documents/count'),
+        ).pipe(
+            map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count]),
+            map(([endpointCount, documentCount]) =>
+                this.state.set({ endpointCount, documentCount, changedDocuments: 0 }),
+            ),
+        );
     }
 
     private subscribeIndexChanged = (): void => {
