@@ -120,7 +120,7 @@ export class MainComponent implements OnInit {
     }
 
     public clear(): void {
-        this.indexChange.clear();
+        this.indexChange.clear().subscribe();
     }
 
     public onKeyDown($event: KeyboardEvent): void {
