@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
+import trim from 'lodash-es/trim';
 import { Injectable, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import trim from 'lodash-es/trim';
 import {
     aas,
     AASAbbreviation,
@@ -21,7 +21,21 @@ import {
 
 import { normalize } from '../convert';
 import { AASTreeRow } from './aas-tree-row';
-import { AASTreeService, Operator, SearchQuery, SearchTerm } from './aas-tree.service';
+import { AASTreeStore } from './aas-tree.store';
+
+export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
+
+export interface SearchQuery {
+    modelType: aas.ModelType;
+    operator?: Operator;
+    name?: string;
+    value?: string | boolean;
+}
+
+export interface SearchTerm {
+    text?: string;
+    query?: SearchQuery;
+}
 
 @Injectable()
 export class AASTreeSearch {
@@ -29,12 +43,12 @@ export class AASTreeSearch {
     private terms: SearchTerm[] = [];
 
     public constructor(
-        private readonly store: AASTreeService,
+        private readonly store: AASTreeStore,
         private readonly translate: TranslateService,
     ) {}
 
     public find(referable: aas.Referable): void {
-        const rows = untracked(this.store.state).rows;
+        const rows = untracked(this.store.state$).rows;
         const index = rows.findIndex(row => row.element === referable);
         if (index >= 0) {
             this.store.setMatchIndex(index);
@@ -73,7 +87,7 @@ export class AASTreeSearch {
 
     public findNext(): boolean {
         let completed = false;
-        const state = untracked(this.store.state);
+        const state = untracked(this.store.state$);
         if (state.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = state.matchIndex < 0 ? 0 : state.matchIndex + 1;
@@ -106,7 +120,7 @@ export class AASTreeSearch {
 
     public findPrevious(): boolean {
         let completed = false;
-        const state = untracked(this.store.state);
+        const state = untracked(this.store.state$);
         if (state.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = state.matchIndex <= 0 ? state.rows.length - 1 : state.matchIndex - 1;
@@ -138,7 +152,7 @@ export class AASTreeSearch {
     }
 
     private findFirst(): void {
-        const state = untracked(this.store.state);
+        const state = untracked(this.store.state$);
         if (state.rows.length > 0 && this.terms.length > 0) {
             let match = false;
             let i = state.matchIndex < 0 ? 0 : state.matchIndex;

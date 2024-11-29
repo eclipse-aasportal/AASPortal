@@ -7,28 +7,50 @@
  *****************************************************************************/
 
 import { Injectable, signal, untracked } from '@angular/core';
+import { AASDocument, AASDocumentId, equalArray } from 'aas-core';
 import { ViewMode } from 'aas-lib';
-import { AASDocument, AASDocumentId } from 'aas-core';
+
+type StartState = {
+    viewMode: ViewMode;
+    documents: AASDocument[];
+    activeFavorites: string;
+    limit: number;
+    filterText: string;
+    selected: AASDocument[];
+    previous: AASDocumentId | null;
+    next: AASDocumentId | null;
+};
+
+const initialState: StartState = {
+    viewMode: ViewMode.Undefined,
+    documents: [],
+    activeFavorites: '',
+    limit: 10,
+    filterText: '',
+    selected: [],
+    previous: null,
+    next: null,
+};
 
 @Injectable({
     providedIn: 'root',
 })
 export class StartStore {
-    public readonly viewMode$ = signal(ViewMode.Undefined);
+    public readonly viewMode$ = signal(initialState.viewMode);
 
-    public readonly documents$ = signal<AASDocument[]>([]);
+    public readonly documents$ = signal<AASDocument[]>(initialState.documents, { equal: (a, b) => equalArray(a, b) });
 
-    public readonly activeFavorites$ = signal('');
+    public readonly activeFavorites$ = signal(initialState.activeFavorites);
 
-    public readonly limit$ = signal(10);
+    public readonly limit$ = signal(initialState.limit);
 
-    public readonly filterText$ = signal('');
+    public readonly filterText$ = signal(initialState.filterText);
 
-    public readonly selected$ = signal<AASDocument[]>([]);
+    public readonly selected$ = signal<AASDocument[]>(initialState.selected, { equal: (a, b) => equalArray(a, b) });
 
-    public readonly previous$ = signal<AASDocumentId | null>(null);
+    public readonly previous$ = signal<AASDocumentId | null>(initialState.previous);
 
-    public readonly next$ = signal<AASDocumentId | null>(null);
+    public readonly next$ = signal<AASDocumentId | null>(initialState.next);
 
     public get viewMode(): ViewMode {
         return untracked(this.viewMode$);

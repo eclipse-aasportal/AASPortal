@@ -9,13 +9,12 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../lib/aas-tree/aas-tree-search';
-import { sampleDocument } from '../assets/sample-document';
-import { AASTreeService } from '../../lib/aas-tree/aas-tree.service';
 import { NotifyService } from '../../lib/notify/notify.service';
+import { AASTreeStore } from '../../lib/aas-tree/aas-tree.store';
 
 describe('AASTreeSearch', function () {
     let search: AASTreeSearch;
-    let store: AASTreeService;
+    let store: AASTreeStore;
 
     beforeEach(async function () {
         await TestBed.configureTestingModule({
@@ -25,7 +24,7 @@ describe('AASTreeSearch', function () {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
-                AASTreeService,
+                AASTreeStore,
             ],
             imports: [
                 TranslateModule.forRoot({
@@ -37,9 +36,8 @@ describe('AASTreeSearch', function () {
             ],
         });
 
-        store = TestBed.inject(AASTreeService);
+        store = TestBed.inject(AASTreeStore);
         search = new AASTreeSearch(store, TestBed.inject(TranslateService));
-        store.updateRows(sampleDocument);
     });
 
     it('should create', () => {
