@@ -22,6 +22,8 @@ import {
     parseDate,
     toBoolean,
     flat,
+    getModelTypeFromAbbreviation,
+    AASAbbreviation,
 } from 'aas-core';
 
 export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
@@ -110,7 +112,7 @@ export class AASTableFilter {
     }
 
     private any(element: aas.Referable, query: AASQuery): boolean {
-        if (element.modelType === query.modelType) {
+        if (element.modelType === getModelTypeFromAbbreviation(query.modelType as AASAbbreviation)) {
             if (this.containsString(element.idShort, query.name)) {
                 if (!element || !query.value) {
                     return true;

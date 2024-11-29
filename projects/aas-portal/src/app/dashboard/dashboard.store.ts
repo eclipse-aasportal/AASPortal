@@ -81,19 +81,21 @@ export interface DashboardRow {
     columns: DashboardColumn[];
 }
 
-export interface DashboardState {
+export type DashboardState = {
     pages: DashboardPage[];
     index: number;
-}
+};
+
+const initialState: DashboardState = {
+    index: 0,
+    pages: [{ name: 'Dashboard 1', items: [], requests: [] }],
+};
 
 @Injectable({
     providedIn: 'root',
 })
 export class DashboardStore {
-    private readonly state$ = signal<DashboardState>({
-        index: 0,
-        pages: [{ name: this.createPageName([]), items: [], requests: [] }],
-    });
+    private readonly state$ = signal<DashboardState>(initialState);
 
     public constructor(private readonly auth: AuthService) {
         this.auth.ready

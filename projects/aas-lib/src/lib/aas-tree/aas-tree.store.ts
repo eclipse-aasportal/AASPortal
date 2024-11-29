@@ -6,64 +6,63 @@
  *
  *****************************************************************************/
 
-import { Injectable, computed, signal } from '@angular/core';
+import { computed, Injectable, signal, untracked } from '@angular/core';
+import { aas, AASDocument } from 'aas-core';
 import { AASTree, AASTreeRow } from './aas-tree-row';
-import { AASDocument, aas } from 'aas-core';
-import { TranslateService } from '@ngx-translate/core';
-import { NotifyService } from '../notify/notify.service';
 
-export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
-
-export interface SearchQuery {
-    modelType: aas.ModelType;
-    operator?: Operator;
-    name?: string;
-    value?: string | boolean;
-}
-
-export interface SearchTerm {
-    text?: string;
-    query?: SearchQuery;
-}
-
-interface AASTreeState {
+type AASTreeState = {
+    expanded: boolean;
     matchIndex: number;
     rows: AASTreeRow[];
     nodes: AASTreeRow[];
-}
+};
 
-@Injectable()
-export class AASTreeService {
-    private readonly _state = signal<AASTreeState>({ matchIndex: -1, rows: [], nodes: [] });
+const initialState: AASTreeState = {
+    expanded: false,
+    matchIndex: 0,
+    rows: [],
+    nodes: [],
+};
 
-    public constructor(
-        private readonly notify: NotifyService,
-        private readonly translate: TranslateService,
-    ) {}
+@Injectable({
+    providedIn: 'root',
+})
+export class AASTreeStore {
+    public readonly state$ = signal<AASTreeState>(initialState);
 
-    public readonly state = this._state.asReadonly();
+    public readonly selectedRows$ = computed(() => this.state$().rows.filter(row => row.selected));
 
-    public readonly rows = computed(() => this._state().rows);
-
-    public readonly matchIndex = computed(() => this._state().matchIndex);
-
-    public readonly nodes = computed(() => this._state().nodes);
-
-    public readonly selectedRows = computed(() => this._state().rows.filter(row => row.selected));
-
-    public readonly selectedElements = computed(() =>
-        this._state()
+    public readonly selectedElements$ = computed(() =>
+        this.state$()
             .rows.filter(row => row.selected)
             .map(item => item.element),
     );
 
-    public readonly matchRow = computed(() => {
-        const state = this._state();
-        return state.matchIndex >= 0 ? state.rows[state.matchIndex] : undefined;
-    });
+    public get rows(): AASTreeRow[] {
+        return untracked(this.state$).rows;
+    }
+
+    public document: AASDocument | null = null;
+
+    public shiftKey = false;
+
+    public altKey = false;
+
+    public setMatchIndex(matchIndex: number): void {
+        this.state$.update(state => {
+            const tree = new AASTree(state.rows);
+            tree.highlight(matchIndex);
+            return {
+                ...state,
+                matchIndex: matchIndex,
+                rows: tree.nodes,
+                nodes: tree.expanded,
+            };
+        });
+    }
 
     public highlight(node: AASTreeRow): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.highlight(node);
             return {
@@ -75,7 +74,7 @@ export class AASTreeService {
     }
 
     public toggleSelected(row: AASTreeRow, altKey: boolean, shiftKey: boolean): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.toggleSelected(row, altKey, shiftKey);
             return {
@@ -87,7 +86,7 @@ export class AASTreeService {
     }
 
     public toggleSelections(): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.toggleSelections();
             return {
@@ -99,7 +98,7 @@ export class AASTreeService {
     }
 
     public collapse(): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.collapse();
             return {
@@ -111,7 +110,7 @@ export class AASTreeService {
     }
 
     public expand(): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.expand();
             return {
@@ -123,7 +122,7 @@ export class AASTreeService {
     }
 
     public collapseRow(row: AASTreeRow): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.collapse(row);
             return {
@@ -135,7 +134,7 @@ export class AASTreeService {
     }
 
     public expandRow(arg: AASTreeRow | number): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.expand(arg);
             return {
@@ -146,29 +145,8 @@ export class AASTreeService {
         });
     }
 
-    public updateRows(document: AASDocument | null): void {
-        try {
-            if (document) {
-                const tree = AASTree.from(document, this.translate.currentLang);
-                this._state.set({
-                    matchIndex: -1,
-                    rows: tree.nodes,
-                    nodes: tree.expanded,
-                });
-            } else {
-                this._state.set({
-                    matchIndex: -1,
-                    rows: [],
-                    nodes: [],
-                });
-            }
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
     public setSelectedElements(elements: aas.Referable[]): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.selectedElements = elements;
             return {
@@ -179,20 +157,8 @@ export class AASTreeService {
         });
     }
 
-    public setMatchIndex(matchIndex: number): void {
-        this._state.update(state => {
-            const tree = new AASTree(state.rows);
-            tree.highlight(matchIndex);
-            return {
-                matchIndex: matchIndex,
-                rows: tree.nodes,
-                nodes: tree.expanded,
-            };
-        });
-    }
-
     public update(blob: aas.Blob, value: string): void {
-        this._state.update(state => {
+        this.state$.update(state => {
             blob.value = value;
             const tree = new AASTree(state.rows);
             tree.update(blob);
