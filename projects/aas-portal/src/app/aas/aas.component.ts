@@ -13,16 +13,15 @@ import { FormsModule } from '@angular/forms';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
-    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     OnDestroy,
     OnInit,
     TemplateRef,
-    ViewChild,
     computed,
     effect,
     model,
+    viewChild,
 } from '@angular/core';
 
 import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
@@ -56,7 +55,7 @@ import { DashboardChartType } from '../dashboard/dashboard.store';
     imports: [SecuredImageComponent, AASTreeComponent, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AASComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly store: AASStore,
         private readonly router: Router,
@@ -82,8 +81,7 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
-    @ViewChild('aasToolbar', { read: TemplateRef })
-    public aasToolbar: TemplateRef<unknown> | null = null;
+    public readonly aasToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
 
     public readonly dashboardPage = model<string>(this.dashboard.activePage());
 
@@ -168,12 +166,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }
         });
-    }
-
-    public ngAfterViewInit(): void {
-        if (this.aasToolbar) {
-            this.toolbar.set(this.aasToolbar);
-        }
     }
 
     public ngOnDestroy(): void {
@@ -305,10 +297,6 @@ export class AASComponent implements OnInit, OnDestroy, AfterViewInit {
             }),
             catchError(error => this.notify.error(error)),
         );
-    }
-
-    public searchExpressionChange(value: string): void {
-        this.store.searchExpression$.set(value);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

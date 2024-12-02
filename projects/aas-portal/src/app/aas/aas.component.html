@@ -97,8 +97,8 @@
     </div>
     <div class="input-group flex-grow-1 me-2 my-1">
         <div class="input-group-text"><i class="bi bi-search"></i></div>
-        <input #textInput type="text" class="form-control" [value]="searchExpression()"
-            [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate" (input)="searchExpressionChange(textInput.value)">
+        <input type="text" class="form-control" [(ngModel)]="searchExpression"
+            [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate">
         <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
             <i class="bi bi-chevron-down"></i>
         </button>
