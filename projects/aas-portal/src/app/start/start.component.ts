@@ -9,15 +9,14 @@
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import {
-    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     OnDestroy,
     TemplateRef,
-    ViewChild,
     computed,
     effect,
     model,
+    viewChild,
 } from '@angular/core';
 
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -62,7 +61,7 @@ import { StartService } from './start.service';
     providers: [StartService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StartComponent implements OnDestroy, AfterViewInit {
+export class StartComponent implements OnDestroy {
     public constructor(
         private readonly service: StartService,
         private readonly store: StartStore,
@@ -119,10 +118,19 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             },
             { allowSignalWrites: true },
         );
+
+        effect(
+            () => {
+                const startToolbar = this.startToolbar();
+                if (startToolbar) {
+                    this.toolbar.set(startToolbar);
+                }
+            },
+            { allowSignalWrites: true },
+        );
     }
 
-    @ViewChild('startToolbar', { read: TemplateRef })
-    public startToolbar: TemplateRef<unknown> | null = null;
+    public readonly startToolbar = viewChild<TemplateRef<unknown>>('startToolbar');
 
     public readonly activeFavorites = model(this.store.activeFavorites);
 
@@ -158,12 +166,6 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     public readonly canViewNameplate = computed(() =>
         this.store.selected$().some(document => this.selectSubmodels(document, ZVEINameplate).length === 1),
     );
-
-    public ngAfterViewInit(): void {
-        if (this.startToolbar) {
-            this.toolbar.set(this.startToolbar);
-        }
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

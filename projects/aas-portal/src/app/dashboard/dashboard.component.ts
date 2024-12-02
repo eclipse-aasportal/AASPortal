@@ -12,20 +12,18 @@ import { ActivatedRoute } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-    AfterViewInit,
     Component,
     ElementRef,
     OnDestroy,
     OnInit,
-    QueryList,
     TemplateRef,
-    ViewChild,
-    ViewChildren,
     computed,
     effect,
     untracked,
     ChangeDetectionStrategy,
     model,
+    viewChild,
+    viewChildren,
 } from '@angular/core';
 
 import isNumber from 'lodash-es/isNumber';
@@ -82,7 +80,7 @@ interface TimeSeries {
     imports: [NgClass, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DashboardComponent implements OnInit, OnDestroy {
     private readonly map = new Map<string, UpdateTuple>();
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
@@ -130,13 +128,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             { allowSignalWrites: true },
         );
+
+        effect(
+            () => {
+                const dashboardToolbar = this.dashboardToolbar();
+                if (dashboardToolbar !== undefined) {
+                    this.toolbar.set(dashboardToolbar);
+                }
+            },
+            { allowSignalWrites: true },
+        );
     }
 
-    @ViewChildren('chart')
-    public chartContainers: QueryList<ElementRef<HTMLCanvasElement>> | null = null;
+    public readonly chartContainers = viewChildren<ElementRef<HTMLCanvasElement>>('chart');
 
-    @ViewChild('dashboardToolbar', { read: TemplateRef })
-    public dashboardToolbar: TemplateRef<unknown> | null = null;
+    public readonly dashboardToolbar = viewChild<TemplateRef<unknown>>('dashboardToolbar');
 
     public readonly isEmpty = computed(() => this.store.activePage$().items.length === 0);
 
@@ -192,12 +198,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toolbar.clear();
         this.closeWebSocket();
         this.charts.forEach(item => item.chart.destroy());
-    }
-
-    public ngAfterViewInit(): void {
-        if (this.dashboardToolbar) {
-            this.toolbar.set(this.dashboardToolbar);
-        }
     }
 
     public toggleSelection(column: DashboardColumn): void {
@@ -463,8 +463,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         setTimeout(() => {
             try {
                 this.openWebSocket();
-                if (this.chartContainers) {
-                    this.createCharts(this.chartContainers);
+                if (this.chartContainers()) {
+                    this.createCharts(this.chartContainers());
                     if (this.webSocketSubject) {
                         for (const request of this.store.activePage.requests) {
                             this.webSocketSubject.next(this.createMessage(request));
@@ -499,7 +499,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    private createCharts(query: QueryList<ElementRef<HTMLCanvasElement>>): void {
+    private createCharts(query: ReadonlyArray<ElementRef<HTMLCanvasElement>>): void {
         this.charts.clear();
         this.store.activePage.items.forEach(item => {
             if (this.isChart(item)) {
