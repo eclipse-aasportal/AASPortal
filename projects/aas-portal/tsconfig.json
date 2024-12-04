@@ -6,8 +6,6 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "declaration": false,
-        "module": "ES2022",
-        "moduleResolution": "node",
         "importHelpers": true,
         "lib": [
             "ES2022",

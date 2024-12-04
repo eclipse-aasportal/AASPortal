@@ -9,6 +9,7 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
+import multer from 'multer';
 import morgan from 'morgan';
 import request from 'supertest';
 import { Logger } from '../../app/logging/logger.js';
@@ -61,7 +62,7 @@ describe('AppController', function () {
         app.use(morgan('dev'));
         app.set('trust proxy', 1);
 
-        RegisterRoutes(app);
+        RegisterRoutes(app, { multer: multer({ dest: './temp' }) });
         app.use(errorHandler);
     });
 

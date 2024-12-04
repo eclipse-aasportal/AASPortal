@@ -604,8 +604,4 @@ export class MySqlIndex extends AASIndex {
 
         return document;
     }
-
-    private toDocumentId(document: AASDocument): AASDocumentId {
-        return { endpoint: document.endpoint, id: document.id };
-    }
 }

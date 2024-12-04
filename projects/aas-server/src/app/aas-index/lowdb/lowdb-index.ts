@@ -336,7 +336,7 @@ export class LowDbIndex extends AASIndex {
         return {
             previous: null,
             documents: documents.slice(0, limit),
-            next: documents.length >= 0 ? documents[limit] : null,
+            next: documents.length >= 0 ? this.toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -348,7 +348,7 @@ export class LowDbIndex extends AASIndex {
 
         const n = limit + 1;
         const items = this.db.data.documents;
-        let i = items.findIndex(item => this.compare(current, item) < 0);
+        let i = items.findIndex(item => this.compare(current, item) <= 0);
         if (i < 0) {
             return this.getLastPage(limit, filter);
         }
@@ -374,7 +374,7 @@ export class LowDbIndex extends AASIndex {
         return {
             previous: current,
             documents: documents.slice(0, limit),
-            next: documents.length >= n ? documents[limit] : null,
+            next: documents.length >= n ? this.toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -410,7 +410,7 @@ export class LowDbIndex extends AASIndex {
         }
 
         return {
-            previous: documents.length >= n ? documents[0] : null,
+            previous: documents.length >= n ? this.toDocumentId(documents[0]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
@@ -443,7 +443,7 @@ export class LowDbIndex extends AASIndex {
         }
 
         return {
-            previous: documents.length >= n ? documents[0] : null,
+            previous: documents.length >= n ? this.toDocumentId(documents[0]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };

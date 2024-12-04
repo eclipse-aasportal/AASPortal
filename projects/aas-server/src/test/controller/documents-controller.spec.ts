@@ -11,6 +11,7 @@ import { container } from 'tsyringe';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
+import multer from 'multer';
 import request from 'supertest';
 import { AASCursor, AASPagedResult } from 'aas-core';
 
@@ -74,7 +75,7 @@ describe('DocumentsController', function () {
         app.use(morgan('dev'));
         app.set('trust proxy', 1);
 
-        RegisterRoutes(app);
+        RegisterRoutes(app, { multer: multer({ dest: './temp' }) });
         app.use(errorHandler);
     });
 
