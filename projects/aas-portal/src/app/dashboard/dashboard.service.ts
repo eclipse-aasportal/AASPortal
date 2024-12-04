@@ -30,11 +30,8 @@ export class DashboardService {
 
     public readonly pages = computed(() => this.store.pages$().map(page => page.name));
 
-    public setPage(name: string): void {
-        const index = this.store.pages.findIndex(page => page.name === name);
-        if (this.store.index !== index) {
-            this.store.updateState(state => ({ ...state, index }));
-        }
+    public setActivePage(name: string): void {
+        this.store.setActivePage(name);
     }
 
     public add(

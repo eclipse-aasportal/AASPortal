@@ -20,7 +20,7 @@ export interface FavoritesList {
     providedIn: 'root',
 })
 export class FavoritesService {
-    private readonly _lists = signal<FavoritesList[]>([]);
+    private readonly lists$ = signal<FavoritesList[]>([]);
 
     public constructor(private readonly auth: AuthService) {
         this.auth.ready
@@ -28,40 +28,40 @@ export class FavoritesService {
                 first(ready => ready === true),
                 mergeMap(() => this.auth.getCookie('.Favorites')),
                 map(value => {
-                    this._lists.set(value ? (JSON.parse(value) as FavoritesList[]) : []);
+                    this.lists$.set(value ? (JSON.parse(value) as FavoritesList[]) : []);
                 }),
             )
             .subscribe();
     }
 
-    public readonly lists = this._lists.asReadonly();
+    public readonly lists = this.lists$.asReadonly();
 
     public has(name: string): boolean {
-        return this._lists().some(list => list.name === name);
+        return this.lists$().some(list => list.name === name);
     }
 
     public get(name: string): FavoritesList | undefined {
-        return this._lists().find(list => list.name === name);
+        return this.lists$().find(list => list.name === name);
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): void {
-        return this._lists.update(state => this.addFavorites(state, documents, name, newName));
+        return this.lists$.update(state => this.addFavorites(state, documents, name, newName));
     }
 
     public remove(documents: AASDocument[], name: string): void {
-        this._lists.update(state => this.removeFavorites(state, documents, name));
+        this.lists$.update(state => this.removeFavorites(state, documents, name));
     }
 
     public delete(name: string): void {
-        this._lists.update(state => this.deleteFavoritesList(state, name));
+        this.lists$.update(state => this.deleteFavoritesList(state, name));
     }
 
     public save(): Observable<void> {
-        if (this._lists().length === 0) {
+        if (this.lists$().length === 0) {
             return this.auth.deleteCookie('.Favorites');
         }
 
-        return this.auth.setCookie('.Favorites', JSON.stringify(this._lists()));
+        return this.auth.setCookie('.Favorites', JSON.stringify(this.lists$()));
     }
 
     private addFavorites(

@@ -20,7 +20,8 @@ import {
     TemplateRef,
     computed,
     effect,
-    model,
+    signal,
+    untracked,
     viewChild,
 } from '@angular/core';
 
@@ -73,8 +74,17 @@ export class AASComponent implements OnInit, OnDestroy {
         effect(
             () => {
                 const value = this.dashboardPage();
-                if (value !== this.dashboard.activePage()) {
-                    this.dashboard.setPage(value);
+                if (value !== untracked(this.dashboard.activePage)) {
+                    this.dashboard.setActivePage(value);
+                }
+            },
+            { allowSignalWrites: true },
+        );
+        effect(
+            () => {
+                const aasToolbar = this.aasToolbar();
+                if (aasToolbar !== undefined) {
+                    this.toolbar.set(aasToolbar);
                 }
             },
             { allowSignalWrites: true },
@@ -82,8 +92,6 @@ export class AASComponent implements OnInit, OnDestroy {
     }
 
     public readonly aasToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
-
-    public readonly dashboardPage = model<string>(this.dashboard.activePage());
 
     public readonly address = computed(() => this.store.document$()?.address ?? '-');
 
@@ -108,6 +116,8 @@ export class AASComponent implements OnInit, OnDestroy {
     public readonly searchExpression = this.store.searchExpression$;
 
     public readonly dashboardPages = this.dashboard.pages;
+
+    public readonly dashboardPage = signal(this.dashboard.activePage());
 
     public readonly selectedElements = this.store.selectedElements$;
 

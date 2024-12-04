@@ -79,7 +79,9 @@ describe('StartComponent', () => {
             lists: signal<FavoritesList[]>([]),
         });
 
-        auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized'], { ready: of(true) });
+        auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], { ready: of(true) });
+        auth.getCookie.and.returnValue(of(undefined));
+        auth.setCookie.and.returnValue(of(undefined));
 
         TestBed.configureTestingModule({
             providers: [

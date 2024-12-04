@@ -21,9 +21,9 @@ import {
     effect,
     untracked,
     ChangeDetectionStrategy,
-    model,
     viewChild,
     viewChildren,
+    signal,
 } from '@angular/core';
 
 import isNumber from 'lodash-es/isNumber';
@@ -113,6 +113,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         effect(
             () => {
+                const value = this.activePage();
+                if (value !== this.store.activePage.name) {
+                    this.store.setActivePage(value);
+                }
+            },
+            { allowSignalWrites: true },
+        );
+
+        effect(
+            () => {
                 if (this.editMode()) {
                     this.enterEditMode();
                 } else {
@@ -146,7 +156,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     public readonly isEmpty = computed(() => this.store.activePage$().items.length === 0);
 
-    public readonly activePage = model(this.store.activePage$().name);
+    public readonly activePage = signal(this.store.activePage$().name);
 
     public readonly pages = computed(() => this.store.pages$().map(page => page.name));
 
