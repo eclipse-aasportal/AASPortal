@@ -5,8 +5,6 @@
         "outDir": "./build",
         "noImplicitAny": true,
         "skipLibCheck": true,
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
         "useUnknownInCatchVariables": false,

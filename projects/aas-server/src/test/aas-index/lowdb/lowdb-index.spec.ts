@@ -63,7 +63,7 @@ describe('LowDbIndex', () => {
             expect(page.next).toBeDefined();
             let n = page.documents.length;
             while (page.next !== null) {
-                cursor = { ...cursor, next: getId(page.documents[page.documents.length - 1]) };
+                cursor = { ...cursor, next: page.next };
                 page = await index.getDocuments(cursor);
                 n += page.documents.length;
             }

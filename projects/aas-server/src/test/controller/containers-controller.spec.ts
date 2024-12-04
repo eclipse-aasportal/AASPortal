@@ -10,6 +10,7 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
+import multer from 'multer';
 import morgan from 'morgan';
 import request from 'supertest';
 import { Readable } from 'stream';
@@ -74,7 +75,7 @@ describe('ContainersController', () => {
         app.use(morgan('dev'));
         app.set('trust proxy', 1);
 
-        RegisterRoutes(app);
+        RegisterRoutes(app, { multer: multer({ dest: './temp' }) });
         app.use(errorHandler);
     });
 
@@ -208,15 +209,15 @@ describe('ContainersController', () => {
         });
     });
 
-    it('updateDocument: /api/v1/containers/:url/documents/:id', async () => {
+    it('updateDocument: /api/v1/containers/{endpoint}/documents/{id}', async () => {
         aasProvider.updateDocumentAsync.mockReturnValue(Promise.resolve([]));
         auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
-        const url = Buffer.from('http://localhost/container').toString('base64url');
+        const endpoint = Buffer.from('Endpoint 1').toString('base64url');
         const id = Buffer.from('http://localhost/document').toString('base64url');
 
         const response = await request(app)
-            .put(`/api/v1/containers/${url}/documents/${id}`)
+            .put(`/api/v1/containers/${endpoint}/documents/${id}`)
             .set('Authorization', `Bearer ${getToken('John')}`)
             .attach('content', resolve('./src/test/assets/aas-example.json'));
 

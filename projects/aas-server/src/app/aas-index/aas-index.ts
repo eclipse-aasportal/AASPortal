@@ -9,6 +9,7 @@
 import {
     AASCursor,
     AASDocument,
+    AASDocumentId,
     AASEndpoint,
     AASPagedResult,
     aas,
@@ -142,6 +143,10 @@ export abstract class AASIndex {
         }
 
         return BigInt(referable.value);
+    }
+
+    protected toDocumentId(document: AASDocument): AASDocumentId {
+        return { endpoint: document.endpoint, id: document.id };
     }
 
     private preprocessString(value: string | LangString[] | undefined, max: number = 512): string | undefined {
