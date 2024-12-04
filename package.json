@@ -1,6 +1,6 @@
 {
   "name": "aas-portal-project",
-  "version": "3.0.0-development.114",
+  "version": "3.0.0-development.115",
   "description": "Web-based visualization and control of aaset administration shells.",
   "type": "module",
   "scripts": {
