@@ -21,7 +21,6 @@ const config: Config = {
             'ts-jest',
             {
                 useESM: true,
-                tsconfig: '<rootDir>/tsconfig.json',
                 babelConfig: {
                     plugins: ['@babel/plugin-syntax-import-attributes'],
                 },
