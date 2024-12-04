@@ -8,6 +8,8 @@
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
         "useUnknownInCatchVariables": false,
+        "moduleResolution": "bundler",
+        "module": "ES2022",
         "lib": [
             "ES2022"
         ]
