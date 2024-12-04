@@ -99,7 +99,7 @@ export class StartService {
         this.api
             .getPage(
                 {
-                    next: this.getId(documents[documents.length - 1]),
+                    next: this.store.next,
                     limit: this.store.limit,
                 },
                 this.store.filterText,
@@ -132,7 +132,7 @@ export class StartService {
         this.api
             .getPage(
                 {
-                    previous: this.getId(documents[0]),
+                    previous: this.store.previous,
                     limit: this.store.limit,
                 },
                 this.store.filterText,
@@ -150,7 +150,7 @@ export class StartService {
         this.api
             .getPage(
                 {
-                    previous: this.store.previous,
+                    next: this.getId(this.store.documents[0]),
                     limit: this.store.limit,
                 },
                 this.store.filterText,

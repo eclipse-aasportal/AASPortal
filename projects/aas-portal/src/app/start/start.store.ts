@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import { Injectable, signal, untracked } from '@angular/core';
+import { first, mergeMap, Observable } from 'rxjs';
 import { AASDocument, AASDocumentId, equalArray } from 'aas-core';
-import { ViewMode } from 'aas-lib';
+import { AuthService, ViewMode } from 'aas-lib';
 
 type StartState = {
     viewMode: ViewMode;
@@ -19,6 +20,12 @@ type StartState = {
     selected: AASDocument[];
     previous: AASDocumentId | null;
     next: AASDocumentId | null;
+};
+
+type StartCookie = {
+    activeFavorites: string;
+    limit: number;
+    filterText: string;
 };
 
 const initialState: StartState = {
@@ -36,6 +43,24 @@ const initialState: StartState = {
     providedIn: 'root',
 })
 export class StartStore {
+    public constructor(private readonly auth: AuthService) {
+        this.auth.ready
+            .pipe(
+                first(ready => ready === true),
+                mergeMap(() => this.auth.getCookie('.Start')),
+            )
+            .subscribe(value => {
+                if (value === undefined) {
+                    return;
+                }
+
+                const cookie: StartCookie = JSON.parse(value);
+                this.activeFavorites$.set(cookie.activeFavorites);
+                this.limit$.set(cookie.limit);
+                this.filterText$.set(cookie.filterText);
+            });
+    }
+
     public readonly viewMode$ = signal(initialState.viewMode);
 
     public readonly documents$ = signal<AASDocument[]>(initialState.documents, { equal: (a, b) => equalArray(a, b) });
@@ -82,5 +107,15 @@ export class StartStore {
 
     public get next(): AASDocumentId | null {
         return untracked(this.next$);
+    }
+
+    public save(): Observable<void> {
+        const cookie: StartCookie = {
+            activeFavorites: this.activeFavorites,
+            limit: this.limit,
+            filterText: this.filterText,
+        };
+
+        return this.auth.setCookie('.Start', JSON.stringify(cookie));
     }
 }

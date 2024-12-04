@@ -191,9 +191,16 @@ export class DashboardStore {
         return untracked(this.state$).index;
     }
 
-    public get activePage() {
+    public get activePage(): DashboardPage {
         const state = untracked(this.state$);
         return state.pages[state.index];
+    }
+
+    public setActivePage(name: string): void {
+        const index = this.pages.findIndex(page => page.name === name);
+        if (this.index !== index) {
+            this.updateState(state => ({ ...state, index }));
+        }
     }
 
     public update(page: DashboardPage): void {

@@ -8,17 +8,7 @@
 
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    TemplateRef,
-    computed,
-    effect,
-    model,
-    viewChild,
-} from '@angular/core';
-
+import { ChangeDetectionStrategy, Component, OnDestroy, TemplateRef, computed, effect, viewChild } from '@angular/core';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
@@ -87,12 +77,10 @@ export class StartComponent implements OnDestroy {
         effect(
             () => {
                 const name = this.activeFavorites();
-                if (name !== this.store.activeFavorites) {
-                    if (this.store.viewMode !== ViewMode.List) {
-                        this.viewMode.set(ViewMode.List);
-                    } else {
-                        this.service.setActiveFavorites(name);
-                    }
+                if (this.viewMode() !== ViewMode.List) {
+                    this.viewMode.set(ViewMode.List);
+                } else {
+                    this.service.setActiveFavorites(name);
                 }
             },
             { allowSignalWrites: true },
@@ -100,10 +88,9 @@ export class StartComponent implements OnDestroy {
 
         effect(
             () => {
-                const value = Number(this.limit());
-                if (!this.store.activeFavorites && value !== this.store.limit) {
-                    this.store.limit$.set(value);
-                    this.service.getFirstPage();
+                this.limit();
+                if (!this.store.activeFavorites) {
+                    this.service.refreshPage();
                 }
             },
             { allowSignalWrites: true },
@@ -112,9 +99,7 @@ export class StartComponent implements OnDestroy {
         effect(
             () => {
                 const viewMode = this.viewMode();
-                if (viewMode !== this.store.viewMode) {
-                    this.service.setViewMode(viewMode);
-                }
+                this.service.setViewMode(viewMode);
             },
             { allowSignalWrites: true },
         );
@@ -132,17 +117,17 @@ export class StartComponent implements OnDestroy {
 
     public readonly startToolbar = viewChild<TemplateRef<unknown>>('startToolbar');
 
-    public readonly activeFavorites = model(this.store.activeFavorites);
+    public readonly activeFavorites = this.store.activeFavorites$;
 
-    public readonly limit = model(this.store.limit);
+    public readonly limit = this.store.limit$;
 
-    public readonly viewMode = model(this.store.viewMode);
+    public readonly viewMode = this.store.viewMode$;
 
     public readonly favoritesLists = computed(() => ['', ...this.favorites.lists().map(list => list.name)]);
 
     public readonly filter = computed(() => {
         const filterText = this.store.filterText$();
-        return this.activeFavorites() ? filterText : '';
+        return this.store.activeFavorites$() ? filterText : '';
     });
 
     public readonly filterText = this.store.filterText$;
@@ -169,6 +154,7 @@ export class StartComponent implements OnDestroy {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
+        this.store.save().subscribe();
     }
 
     public addEndpoint(): Observable<void> {

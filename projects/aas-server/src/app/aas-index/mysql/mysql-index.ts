@@ -396,7 +396,7 @@ export class MySqlIndex extends AASIndex {
         return {
             previous: null,
             documents: documents.slice(0, limit),
-            next: documents.length >= limit + 1 ? documents[limit] : null,
+            next: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -412,17 +412,17 @@ export class MySqlIndex extends AASIndex {
         if (query) {
             if (query.joinElements) {
                 sql =
-                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) > ? AND (' +
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (' +
                     query.createSql(values) +
                     ') ORDER BY documents.endpoint ASC, documents.id ASC LIMIT ?;';
             } else {
                 sql =
-                    'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) > ? AND (' +
+                    'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? AND (' +
                     query.createSql(values) +
                     ') ORDER BY endpoint ASC, id ASC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) > ? ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY endpoint ASC, id ASC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -432,7 +432,7 @@ export class MySqlIndex extends AASIndex {
         return {
             previous: current,
             documents: documents.slice(0, limit),
-            next: documents.length >= limit + 1 ? documents[limit] : null,
+            next: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -466,7 +466,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? documents[0] : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
@@ -496,7 +496,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? documents[0] : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };
@@ -603,5 +603,9 @@ export class MySqlIndex extends AASIndex {
         }
 
         return document;
+    }
+
+    private toDocumentId(document: AASDocument): AASDocumentId {
+        return { endpoint: document.endpoint, id: document.id };
     }
 }

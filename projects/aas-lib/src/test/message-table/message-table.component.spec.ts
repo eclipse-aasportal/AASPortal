@@ -78,7 +78,7 @@ describe('MessageTableComponent', () => {
     });
 
     it('supports 3 sortable headers', () => {
-        expect(component.headers?.length).toEqual(3);
+        expect(component.headers()?.length).toEqual(3);
     });
 
     describe('show only errors', () => {
