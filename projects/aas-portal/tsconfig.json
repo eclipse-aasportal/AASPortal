@@ -3,12 +3,10 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./dist/out-tsc",
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "declaration": false,
-        "importHelpers": true,
         "moduleResolution": "bundler",
         "module": "ES2022",
+        "declaration": false,
+        "importHelpers": true,
         "lib": [
             "ES2022",
             "dom"

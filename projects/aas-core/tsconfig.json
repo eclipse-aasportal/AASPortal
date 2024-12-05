@@ -3,13 +3,11 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./build",
-        "noImplicitAny": true,
+        "moduleResolution": "bundler",
+        "module": "ES2022",
         "skipLibCheck": true,
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
-        "useUnknownInCatchVariables": false,
-        "moduleResolution": "bundler",
-        "module": "ES2022",
         "lib": [
             "ES2022"
         ]
