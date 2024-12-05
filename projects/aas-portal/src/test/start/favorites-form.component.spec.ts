@@ -20,7 +20,7 @@ describe('FavoritesFormComponent', () => {
     let service: jasmine.SpyObj<FavoritesService>;
 
     beforeEach(() => {
-        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save'], {
             lists: signal<FavoritesList[]>([]),
         });
 

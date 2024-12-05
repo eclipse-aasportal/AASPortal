@@ -12,12 +12,26 @@ import { AASDocument } from 'aas-core';
 import { ViewMode } from '../types/view-mode';
 import { AASTableRow, AASTableTree } from './aas-table-row';
 
+type AASTableState = {
+    documents: AASDocument[];
+    totalRows: AASTableRow[];
+    rows: AASTableRow[];
+};
+
+const initialState: AASTableState = {
+    documents: [],
+    totalRows: [],
+    rows: [],
+};
+
 @Injectable()
 export class AASTableStore {
-    private readonly _totalRows = signal<AASTableRow[]>([]);
-    private readonly _rows = signal<AASTableRow[]>([]);
+    private readonly _totalRows = signal<AASTableRow[]>(initialState.totalRows);
+    private readonly _rows = signal<AASTableRow[]>(initialState.rows);
 
     public readonly rows = this._rows.asReadonly();
+
+    public readonly documents = signal<AASDocument[]>(initialState.documents);
 
     public setSelected(documents: AASDocument[], viewMode: ViewMode): void {
         const tree = new AASTableTree(untracked(this._totalRows));

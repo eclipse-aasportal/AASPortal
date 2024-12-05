@@ -1,6 +1,6 @@
 {
     "entryFile": "src/app/aas-server.ts",
-    "noImplicitAdditionalProperties": "silently-remove-extras",
+    "noImplicitAdditionalProperties": "ignore",
     "controllerPathGlobs": [
         "src/app/controller/**/*controller.ts"
     ],
@@ -8,7 +8,7 @@
         "dest": "./temp"
     },
     "spec": {
-        "outputDirectory": "./src/app",
+        "outputDirectory": "./src/assets",
         "specVersion": 3,
         "schemes": [
             "http"

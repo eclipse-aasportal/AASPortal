@@ -117,7 +117,7 @@ export type ModelType =
     | 'Blob'
     | 'Capability'
     | 'ConceptDescription'
-    | 'DataSpecificationIec61360'
+    | 'DataSpecificationIEC61360'
     | 'Entity'
     | 'File'
     | 'MultiLanguageProperty'

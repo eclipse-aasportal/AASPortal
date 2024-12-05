@@ -7,27 +7,27 @@
  *****************************************************************************/
 
 import cloneDeep from 'lodash-es/cloneDeep';
-import { DashboardItem, DashboardPage, DashboardService } from '../dashboard.service';
+import { DashboardItem, DashboardPage, DashboardStore } from '../dashboard.store';
 import { DashboardCommand } from './dashboard-command';
 
 export class MoveUpCommand extends DashboardCommand {
     public constructor(
-        dashboard: DashboardService,
+        store: DashboardStore,
         private page: DashboardPage,
         private item: DashboardItem,
     ) {
-        super('Move up', dashboard);
+        super('Move up', store);
     }
 
     protected executing(): void {
-        if (!this.dashboard.canMoveUp(this.page, this.item)) {
+        if (!this.store.canMoveUp(this.page, this.item)) {
             throw new Error(`Item can not be moved up.`);
         }
 
         const page = cloneDeep(this.page);
         const item = page.items[this.page.items.indexOf(this.item)];
         const y = item.positions[0].y;
-        const grid = this.dashboard.getGrid(page);
+        const grid = this.store.getGrid(page);
         const sourceRow = grid[y];
         if (y > 0) {
             const targetRow = grid[y - 1];
@@ -47,6 +47,6 @@ export class MoveUpCommand extends DashboardCommand {
             this.validateItems(grid);
         }
 
-        this.dashboard.update(page);
+        this.store.update(page);
     }
 }

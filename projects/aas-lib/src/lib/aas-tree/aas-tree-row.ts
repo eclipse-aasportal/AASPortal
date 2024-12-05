@@ -40,6 +40,7 @@ import {
 import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../convert';
+import { signal, WritableSignal } from '@angular/core';
 
 export class AASTreeRow extends TreeNode<aas.Referable> {
     public constructor(
@@ -52,7 +53,7 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
         public readonly abbreviation: string,
         public readonly name: string,
         public readonly typeInfo: string,
-        public readonly value: string | boolean | undefined,
+        public readonly value: WritableSignal<string | boolean | undefined>,
         public readonly isLeaf: boolean,
         public readonly canOpen: boolean,
         parent: number,
@@ -83,7 +84,7 @@ class TreeInitialize {
         for (const shell of this.env.assetAdministrationShells) {
             const row = this.createRow(shell, -1, 0, true);
             this.rows.push(row);
-            row.firstChild = this.hasChildren(shell) ? this.rows.length : -1;
+            row.firstChild = this.env.submodels.length > 0 ? this.rows.length : -1;
             this.traverse(shell, this.rows.length - 1, 1);
             for (const stateRow of this.rows) {
                 if (stateRow.expanded || stateRow.selected) {
@@ -145,7 +146,7 @@ class TreeInitialize {
             getAbbreviation(element.modelType) ?? '',
             element.idShort,
             this.getTypeInfo(element),
-            this.getValue(element, this.language),
+            signal(this.getValue(element, this.language)),
             isLeaf,
             canOpen,
             parent,

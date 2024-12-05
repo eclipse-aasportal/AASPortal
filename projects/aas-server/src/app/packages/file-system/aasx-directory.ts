@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { aas, ApplicationError } from 'aas-core';
-import { basename, extname, join } from 'path/posix';
+import { aas, AASEndpoint, ApplicationError, noop } from 'aas-core';
+import { extname, join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
@@ -16,6 +16,7 @@ import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
+import { PagedResult } from '../../types/paged-result.js';
 
 export class AasxDirectory extends AASResource {
     private readonly root: string;
@@ -24,14 +25,10 @@ export class AasxDirectory extends AASResource {
     public constructor(
         logger: Logger,
         private readonly fileStorage: FileStorage,
-        url: string | URL,
-        name?: string,
+        endpoint: AASEndpoint,
     ) {
-        if (typeof url === 'string') {
-            url = new URL(url);
-        }
-
-        super(logger, url.href, name ?? basename(url.pathname));
+        const url = new URL(endpoint.url);
+        super(logger, endpoint);
 
         this.root = url.pathname;
     }
@@ -39,8 +36,6 @@ export class AasxDirectory extends AASResource {
     public get isOpen(): boolean {
         return this.reentry > 0;
     }
-
-    public override readonly version = '';
 
     public readonly readOnly = false;
 
@@ -50,10 +45,11 @@ export class AasxDirectory extends AASResource {
         return this.fileStorage.readFile(join(this.root, name));
     }
 
-    public async getFiles(): Promise<string[]> {
+    public async getFiles(cursor?: string): Promise<PagedResult<string>> {
+        noop(cursor);
         const files: string[] = [];
         await this.readDirAsync(this.root, '', files);
-        return files;
+        return { result: files, paging_metadata: {} };
     }
 
     public async testAsync(): Promise<void> {
@@ -69,7 +65,7 @@ export class AasxDirectory extends AASResource {
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
             if (!(await this.fileStorage.exists(this.root))) {
-                throw new Error(`The directory '${this.url}' does not exist.`);
+                throw new Error(`The directory '${this.endpoint}' does not exist.`);
             }
 
             ++this.reentry;
@@ -86,8 +82,8 @@ export class AasxDirectory extends AASResource {
         });
     }
 
-    public override createPackage(address: string): AASPackage {
-        return new AasxPackage(this.logger, this, address);
+    public override createPackage(...args: string[]): AASPackage {
+        return new AasxPackage(this.logger, this, args[0]);
     }
 
     public override createSubscription(): SocketSubscription {

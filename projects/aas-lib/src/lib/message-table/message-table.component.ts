@@ -6,21 +6,13 @@
  *
  *****************************************************************************/
 
-import {
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    QueryList,
-    ViewChildren,
-    computed,
-    input,
-    signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, input, signal, viewChildren } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Message } from 'aas-core';
 import { Subscription } from 'rxjs';
-import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
+import { Message } from 'aas-core';
+
+import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive';
 
 @Component({
     selector: 'fhg-message-table',
@@ -46,8 +38,7 @@ export class MessageTableComponent implements OnDestroy {
 
     public constructor(private translate: TranslateService) {}
 
-    @ViewChildren(SortableHeaderDirective)
-    public headers!: QueryList<SortableHeaderDirective>;
+    public readonly headers = viewChildren<SortableHeaderDirective>(SortableHeaderDirective);
 
     public readonly collection = input<Message[]>([]);
 
@@ -86,7 +77,7 @@ export class MessageTableComponent implements OnDestroy {
     }
 
     public onSort({ column, direction }: SortEvent): void {
-        this.headers.forEach(header => {
+        this.headers().forEach(header => {
             if (header.sortable !== column) {
                 header.direction = '';
             }

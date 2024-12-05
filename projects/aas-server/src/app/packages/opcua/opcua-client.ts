@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { LiveRequest, aas } from 'aas-core';
+import { AASEndpoint, LiveRequest, aas } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { OpcuaSubscription } from '../../live/opcua/opcua-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
@@ -35,8 +35,8 @@ export class OpcuaClient extends AASResource {
     private session: ClientSession | null = null;
     private reentry = 0;
 
-    public constructor(logger: Logger, url: string, name: string, options?: OPCUAClientOptions) {
-        super(logger, url, name);
+    public constructor(logger: Logger, endpoint: AASEndpoint, options?: OPCUAClientOptions) {
+        super(logger, endpoint);
 
         if (options) {
             this.options = this.resolveOpcuaClientOptions(options);
@@ -54,8 +54,6 @@ export class OpcuaClient extends AASResource {
         }
     }
 
-    public override readonly version = '';
-
     public readonly readOnly = true;
 
     public readonly onlineReady = true;
@@ -69,7 +67,7 @@ export class OpcuaClient extends AASResource {
      **/
     public getSession(): ClientSession {
         if (this.reentry <= 0 || this.session == null) {
-            throw new Error(`No session to ${this.url} established.`);
+            throw new Error(`No session to ${this.endpoint} established.`);
         }
 
         return this.session;
@@ -88,7 +86,7 @@ export class OpcuaClient extends AASResource {
     public async openAsync(): Promise<void> {
         if (this.reentry === 0) {
             this.client = OPCUAClient.create(this.options as OPCUAClientOptions);
-            await this.client.connect(this.url);
+            await this.client.connect(this.endpoint.url);
             this.session = await this.client.createSession();
         }
 
@@ -112,8 +110,8 @@ export class OpcuaClient extends AASResource {
         }
     }
 
-    public createPackage(address: string): AASPackage {
-        return new OpcuaPackage(this.logger, this, address);
+    public override createPackage(...args: string[]): AASPackage {
+        return new OpcuaPackage(this.logger, this, args[0]);
     }
 
     public createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {

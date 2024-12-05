@@ -42,7 +42,7 @@ export class OpcuaPackage extends AASPackage {
         const content = await new OpcuaReader(this.logger, component, this.dataTypes).readEnvironment();
         const document: AASDocument = {
             id: this.getIdentifier(component),
-            endpoint: this.server.name,
+            endpoint: this.server.endpoint.name,
             address: this.nodeId,
             idShort: component.browseName,
             assetId: 'ToDo...',
@@ -149,7 +149,9 @@ export class OpcuaPackage extends AASPackage {
         let id = this.readIdentifier(component);
         if (!id) {
             id = this.nodeId;
-            this.logger.debug(`Unable to read AAS identifier for '${component.browseName}' in '${this.server.url}'.'`);
+            this.logger.debug(
+                `Unable to read AAS identifier for '${component.browseName}' in '${this.server.endpoint}'.'`,
+            );
         }
 
         return id;

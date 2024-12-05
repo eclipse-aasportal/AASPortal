@@ -10,7 +10,7 @@
     <div class="modal-header text-info">
         <h4 class="modal-title">
             <i class="bi bi-plus-circle"></i>
-            <span class="ms-2" translate>CAPTION_ADD_ENDPOINT</span>
+            <span class="ms-2" translate>AddEndpointForm.CAPTION</span>
         </h4>
         <button type="button" class="btn-close" (click)="cancel()"> </button>
     </div>
@@ -22,22 +22,102 @@
             </div>
         </ngb-toast>
         }
-        <label class="form-lable" for="input-endpoint-name" translate>LABEL_ENDPOINT_NAME</label>
+        <label class="form-lable" for="input-endpoint-name" translate>AddEndpointForm.LABEL_NAME</label>
         <input id="input-endpoint-name" type="text" class="form-control mb-3"
-            placeholder="{{'PLACEHOLDER_ENDPOINT_NAME' | translate}}" [(ngModel)]="name" name="name"
+            placeholder="{{'AddEndpointForm.PLACEHOLDER_NAME' | translate}}" [(ngModel)]="name" name="name"
             (input)="inputValue()">
-        <label class="form-lable" for="div-endpoint-url" translate>LABEL_ENDPOINT_URL</label>
+        <label class="form-lable" for="div-endpoint-url" translate>AddEndpointForm.LABEL_URL</label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
-            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{item().name}}</button>
+            <button type="button" class="btn btn-secondary" ngbDropdownToggle>{{'AddEndpointForm.' + selectedItem().type
+                |
+                translate}}</button>
             <div class="dropdown-menu" ngbDropdownMenu>
                 @for (item of items(); track item) {
-                <button type="button" (click)="setItem(item)" ngbDropdownItem>{{item.name}}</button>
+                <button type="button" (click)="selectItem(item)" ngbDropdownItem>{{'AddEndpointForm.' + item.type |
+                    translate}}</button>
                 }
             </div>
             <input id="input-endpoint-url" type="text" class="form-control"
-                placeholder="{{'PLACEHOLDER_ENDPOINT_URL' | translate}}" [(ngModel)]="item().value" name="value"
+                placeholder="{{selectedItem().placeholder | translate}}" [(ngModel)]="selectedItem().value" name="value"
                 (input)="inputValue()">
         </div>
+        @if (selectedItem().type === 'AAS_API') {
+        <button type="button" class="btn btn-primary btn-sm mt-4 mb-2" (click)="collapse.toggle()"
+            [attr.aria-expanded]="isCollapsed() === false" aria-controls="collapseExample" translate>
+            AddEndpointForm.ADVANCED_SETTINGS
+        </button>
+        <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+            <label class="form-lable" for="schedule-options" translate>AddEndpointForm.SCHEDULE</label>
+            <div class="border border-light-subtle rounded p-2 mb-2" id="schedule-options">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeDisabled" value="disabled"
+                        [(ngModel)]="schedule">
+                    <label class="form-check-label" for="scheduleTypeDisabled" translate>AddEndpointForm.DISABLED</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeManual" value="manual"
+                        [(ngModel)]="schedule">
+                    <label class="form-check-label" for="scheduleTypeManual" translate>AddEndpointForm.MANUAL</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeOnce" value="once"
+                        [(ngModel)]="schedule">
+                    <label class="form-check-label" for="scheduleTypeOnce" translate>AddEndpointForm.ONCE</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="scheduleType" id="scheduleTypeEvery"
+                        value="every" [(ngModel)]="schedule">
+                    <label class="form-check-label" for="scheduleTypeEvery" translate>AddEndpointForm.EVERY</label>
+                </div>
+                @if (schedule() === 'every') {
+                <div class="input-group mt-3">
+                    <input #inputHours type="number" class="form-control awp-number-input" min="0" max="99"
+                        aria-label="Hours" [value]="hours()" (input)="hours.set(inputHours.valueAsNumber)">
+                    <span class="input-group-text" translate>AddEndpointForm.HOURS</span>
+                    <input #inputMinutes type="number" class="form-control awp-number-input" min="0" max="59"
+                        aria-label="Minutes" [value]="minutes()" (input)="minutes.set(inputMinutes.valueAsNumber)">
+                    <span class="input-group-text" translate>AddEndpointForm.MINUTES</span>
+                </div>
+                }
+            </div>
+            <label class="form-lable" for="http-headers" translate>AddEndpointForm.HEADERS</label>
+            <div id="http-headers" class="border border-light-subtle rounded p-2 col-12"
+                style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-sm table-striped table-borderless">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center" [style.width]="'32px'">#</th>
+                            <th scope="col" class="text-center" translate>AddEndpointForm.HEADER</th>
+                            <th scope="col" class="text-center" translate>AddEndpointForm.VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (header of headers(); track header.id) {
+                        <tr>
+                            <th scope="row" (click)="selectHeader(header)">{{header.id}}</th>
+                            @if (header === selectedHeader()) {
+                            <td>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="header.name"
+                                    placeholder="header name" name="headerName" />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="header.value"
+                                    placeholder="value" name="headerValue" />
+                            </td>
+                            } @else {
+                            <td (click)="selectHeader(header)">
+                                <div class="small">{{header.name}}</div>
+                            </td>
+                            <td (click)="selectHeader(header)">
+                                <div class="small">{{header.value}}</div>
+                            </td>
+                            }
+                            }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        }
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary" translate>CMD_OK</button>

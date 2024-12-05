@@ -14,7 +14,6 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
-    signal,
 } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
@@ -32,6 +31,7 @@ import {
     ViewQuery,
     ViewQueryParams,
 } from 'aas-lib';
+import { ViewStore } from './view.store';
 
 @Component({
     selector: 'fhg-view',
@@ -43,12 +43,11 @@ import {
 })
 export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly subscription = new Subscription();
-    private _template = signal<string | undefined>(undefined);
-    private _submodels = signal<DocumentSubmodelPair[]>([]);
 
     public constructor(
         private readonly route: ActivatedRoute,
         private readonly api: ViewApiService,
+        private readonly store: ViewStore,
         private readonly clipboard: ClipboardService,
         private readonly toolbar: ToolbarService,
     ) {}
@@ -56,9 +55,9 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('viewToolbar', { read: TemplateRef })
     public viewToolbar: TemplateRef<unknown> | null = null;
 
-    public readonly template = this._template.asReadonly();
+    public readonly template = this.store.template$.asReadonly();
 
-    public readonly submodels = this._submodels.asReadonly();
+    public readonly submodels = this.store.submodels$.asReadonly();
 
     public ngOnInit(): void {
         let query: ViewQuery | undefined;
@@ -84,8 +83,8 @@ export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
                     toArray(),
                 ),
             ).subscribe(tuple => {
-                this._submodels.set(tuple[1]);
-                this._template.set(tuple[0]);
+                this.store.submodels$.set(tuple[1]);
+                this.store.template$.set(tuple[0]);
             });
         }
     }

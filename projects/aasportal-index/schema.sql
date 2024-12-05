@@ -4,7 +4,9 @@ CREATE TABLE endpoints (
     name VARCHAR(32) PRIMARY KEY,
     url VARCHAR(255) UNIQUE NOT NULL,
     type VARCHAR(32) NOT NULL,
-    version VARCHAR(8)
+    version VARCHAR(8),
+    headers VARCHAR(255),
+    schedule VARCHAR(255)
 );
 
 CREATE TABLE documents (
@@ -15,8 +17,6 @@ CREATE TABLE documents (
     id VARCHAR(255), 
     idShort VARCHAR(100), 
     assetId VARCHAR(255),
-    onlineReady BOOL, 
-    readonly BOOL, 
     thumbnail VARCHAR(7167), 
     timestamp LONG
 );

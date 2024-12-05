@@ -6,35 +6,30 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, Message, TemplateDescriptor } from 'aas-core';
+import { AASDocument, Message, TemplateDescriptor, AASEndpoint } from 'aas-core';
 
-export enum ScanResultType {
-    Added,
-    Removed,
-    Changed,
+export enum ScanResultKind {
+    Add,
+    Remove,
     Update,
     End,
 }
 
-/** The result of a container scan. */
+/** The result of an endpoint scan. */
 export interface ScanResult {
-    /** The result. */
-    type: ScanResultType;
-    /** The task identifier. */
+    type: 'ScanEndResult' | 'ScanEndpointResult' | 'ScanTemplatesResult';
+    kind: ScanResultKind;
     taskId: number;
-    /** The message memory. */
     messages?: Message[];
 }
 
-/** The result of a container scan. */
-export interface ScanContainerResult extends ScanResult {
-    /** The AAS container. */
-    container: AASContainer;
-    /** The result subject. */
+/** The result of an endpoint scan. */
+export interface ScanEndpointResult extends ScanResult {
+    endpoint: AASEndpoint;
     document: AASDocument;
 }
 
-/** The result of a container scan. */
+/** The result of a template scan. */
 export interface ScanTemplatesResult extends ScanResult {
     templates: TemplateDescriptor[];
 }

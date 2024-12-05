@@ -37,7 +37,7 @@
                 @switch (row.state) {
                 @case ('unloaded') {
                 <div class="position-relative">
-                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" [alt]="row.name" />
                     <div
                         class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info">
                         <i class="bi bi-cloud-arrow-down"></i>
@@ -46,7 +46,7 @@
                 }
                 @case ('unavailable') {
                 <div class="position-relative">
-                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" [alt]="row.name" />
                     <div
                         class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger">
                         <i class="bi bi-cone-striped"></i>
@@ -55,7 +55,7 @@
                 }
                 @default {
                 <div>
-                    <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" alt="" />
+                    <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" [alt]="row.name" />
                 </div>
                 }
                 }
@@ -77,8 +77,8 @@
     <thead>
         <tr>
             <th class="th-w-checkbox">
-                <input type="checkbox" class="form-check-input" [indeterminate]="someSelected()" [checked]="everySelected()"
-                    (change)="toggleSelections()">
+                <input type="checkbox" class="form-check-input" [indeterminate]="someSelected()"
+                    [checked]="everySelected()" (change)="toggleSelections()">
             </th>
             <th scope="col">
                 <div class="text-center" translate>COLUMN_NAME</div>

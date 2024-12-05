@@ -36,7 +36,7 @@ describe('DeleteCommand', () => {
 
         store = TestBed.inject(AASStore);
         document = cloneDeep(sampleDocument);
-        store.setDocument(document);
+        store.document$.set(document);
     });
 
     describe('delete Submodel', () => {
@@ -49,7 +49,7 @@ describe('DeleteCommand', () => {
         });
 
         it('can be executed', () => {
-            const document = store.document();
+            const document = store.document$();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
             const submodels = document?.content?.assetAdministrationShells[0].submodels;
@@ -60,7 +60,7 @@ describe('DeleteCommand', () => {
         it('can be undone/redone', () => {
             {
                 command.undo();
-                const document = store.document();
+                const document = store.document$();
                 const element = selectElement(document!.content!, 'TechnicalData');
                 expect(element).toBeDefined();
                 const submodels = document?.content?.assetAdministrationShells[0].submodels;
@@ -70,7 +70,7 @@ describe('DeleteCommand', () => {
 
             {
                 command.redo();
-                const document = store.document();
+                const document = store.document$();
                 const element = selectElement(document!.content!, 'TechnicalData');
                 expect(element).toBeUndefined();
                 const submodels = document?.content?.assetAdministrationShells[0].submodels;
@@ -90,7 +90,7 @@ describe('DeleteCommand', () => {
         });
 
         it('can be executed', () => {
-            const document = store.document();
+            const document = store.document$();
             const element = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed');
             expect(element).toBeUndefined();
         });
@@ -98,14 +98,14 @@ describe('DeleteCommand', () => {
         it('can be undone/redone', () => {
             {
                 command.undo();
-                const document = store.document();
+                const document = store.document$();
                 const element = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed');
                 expect(element).toBeDefined();
             }
 
             {
                 command.redo();
-                const document = store.document();
+                const document = store.document$();
                 const element = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed');
                 expect(element).toBeUndefined();
             }

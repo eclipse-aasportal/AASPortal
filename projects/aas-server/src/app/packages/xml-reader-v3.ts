@@ -988,8 +988,8 @@ export class XmlReaderV3 extends AASReader {
         const values: aas.LangString[] = [];
         for (const child of this.selectNodes(expression, node)) {
             values.push({
-                language: this.getTextContent('./aas:language', child),
-                text: this.getTextContent('./aas:text', child),
+                language: this.getTextContent('./aas:language', child, ''),
+                text: this.getTextContent('./aas:text', child, ''),
             });
         }
 

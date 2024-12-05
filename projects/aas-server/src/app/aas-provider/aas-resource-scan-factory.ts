@@ -20,12 +20,14 @@ import { AASApiClientV3 } from '../packages/aas-server/aas-api-client-v3.js';
 import { AASApiClientV1 } from '../packages/aas-server/aas-api-client-v1.js';
 import { AASApiClientV0 } from '../packages/aas-server/aas-api-client-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
+import { HttpClient } from '../http-client.js';
 
 @singleton()
 export class AASResourceScanFactory {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
+        @inject(HttpClient) private readonly http: HttpClient,
     ) {}
 
     public create(endpoint: AASEndpoint): AASResourceScan {
@@ -34,13 +36,13 @@ export class AASResourceScanFactory {
                 let source: AASApiClient;
                 switch (endpoint.version) {
                     case 'v0':
-                        source = new AASApiClientV0(this.logger, endpoint.url, endpoint.name);
+                        source = new AASApiClientV0(this.logger, this.http, endpoint);
                         break;
                     case 'v1':
-                        source = new AASApiClientV1(this.logger, endpoint.url, endpoint.name);
+                        source = new AASApiClientV1(this.logger, this.http, endpoint);
                         break;
                     case 'v3':
-                        source = new AASApiClientV3(this.logger, endpoint.url, endpoint.name);
+                        source = new AASApiClientV3(this.logger, this.http, endpoint);
                         break;
                     default:
                         throw new Error('Not implemented.');
@@ -49,17 +51,12 @@ export class AASResourceScanFactory {
                 return new AASServerScan(this.logger, source);
             }
             case 'OPC_UA':
-                return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint.url, endpoint.name));
+                return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint));
             case 'WebDAV':
             case 'FileSystem':
                 return new DirectoryScan(
                     this.logger,
-                    new AasxDirectory(
-                        this.logger,
-                        this.fileStorageProvider.get(endpoint.url),
-                        endpoint.url,
-                        endpoint.name,
-                    ),
+                    new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint),
                 );
             default:
                 throw new Error('Not implemented.');

@@ -6,24 +6,24 @@
  *
  *****************************************************************************/
 
-import { AASContainer } from 'aas-core';
+import { AASEndpoint } from 'aas-core';
 
 export interface WorkerData {
     taskId: number;
-    type: 'ScanContainerData' | 'ScanTemplatesData';
+    type: 'ScanEndpointData' | 'ScanTemplatesData';
 }
 
-export interface ScanContainerData extends WorkerData {
-    type: 'ScanContainerData';
-    container: AASContainer;
+export interface ScanEndpointData extends WorkerData {
+    type: 'ScanEndpointData';
+    endpoint: AASEndpoint;
 }
 
 export interface ScanTemplatesData extends WorkerData {
     type: 'ScanTemplatesData';
 }
 
-export function isScanContainerData(data: WorkerData): data is ScanContainerData {
-    return data.type === 'ScanContainerData';
+export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
+    return data.type === 'ScanEndpointData';
 }
 
 export function isScanTemplatesData(data: WorkerData): data is ScanTemplatesData {

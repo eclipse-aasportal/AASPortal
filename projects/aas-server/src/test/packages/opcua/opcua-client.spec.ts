@@ -23,7 +23,11 @@ describe('OpcuaClient', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = new OpcuaClient(logger, 'opc.tcp://localhost:1234/I4AASServer', 'OPCUA Server');
+        server = new OpcuaClient(logger, {
+            url: 'opc.tcp://localhost:1234/I4AASServer',
+            name: 'OPCUA Server',
+            type: 'OPC_UA',
+        });
     });
 
     afterEach(() => {
@@ -167,6 +171,7 @@ describe('OpcuaClient', function () {
                 return new Promise<CallMethodResult>(resolve => resolve(result));
             };
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             session.call.mockImplementation(call as any);
             const operation: aas.Operation = {
                 idShort: 'add',
@@ -208,6 +213,7 @@ describe('OpcuaClient', function () {
                 return new Promise<CallMethodResult>(resolve => resolve(result));
             };
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             session.call.mockImplementation(call as any);
             const operation: aas.Operation = {
                 idShort: 'add',

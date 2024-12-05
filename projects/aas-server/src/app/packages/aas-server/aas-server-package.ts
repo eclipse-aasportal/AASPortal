@@ -15,18 +15,20 @@ import { ImageProcessing } from '../../image-processing.js';
 
 export class AASServerPackage extends AASPackage {
     private readonly server: AASApiClient;
+    private readonly id: string;
     private readonly idShort: string;
 
     /**
      * Creates a new AAS-Registry package.
      * @param logger The logger service.
      * @param resource The handle.
-     * @param idShort The name of the AAS.
+     * @param id The identifier of the AAS.
      */
-    public constructor(logger: Logger, resource: AASResource, idShort: string) {
+    public constructor(logger: Logger, resource: AASResource, id: string, idShort: string) {
         super(logger);
 
         this.server = resource as AASApiClient;
+        this.id = id;
         this.idShort = idShort;
     }
 
@@ -43,11 +45,11 @@ export class AASServerPackage extends AASPackage {
     }
 
     public async createDocumentAsync(): Promise<AASDocument> {
-        const environment = await this.server.readEnvironmentAsync(this.idShort);
+        const environment = await this.server.readEnvironmentAsync({ id: this.id, idShort: this.idShort });
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
-            endpoint: this.server.name,
-            address: this.idShort,
+            endpoint: this.server.endpoint.name,
+            address: this.id,
             idShort: environment.assetAdministrationShells[0].idShort,
             assetId: environment.assetAdministrationShells[0].assetInformation.globalAssetId,
             readonly: this.server.readOnly,
@@ -66,7 +68,7 @@ export class AASServerPackage extends AASPackage {
     }
 
     public override getEnvironmentAsync(): Promise<aas.Environment> {
-        return this.server.readEnvironmentAsync(this.idShort);
+        return this.server.readEnvironmentAsync({ id: this.id, idShort: this.idShort });
     }
 
     public async setEnvironmentAsync(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {

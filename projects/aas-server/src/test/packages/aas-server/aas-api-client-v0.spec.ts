@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
-import http, { IncomingMessage } from 'http';
+import { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { aas, selectElement } from 'aas-core';
 import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
@@ -21,110 +21,107 @@ import { AASApiClientV0 } from '../../../app/packages/aas-server/aas-api-client-
 import { Logger } from '../../../app/logging/logger.js';
 import aasEnvironment from '../../assets/aas-environment.js';
 import { createSpyObj } from 'fhg-jest';
+import { HttpClient } from '../../../app/http-client.js';
 
 describe('AASApiClientV0', function () {
     let logger: jest.Mocked<Logger>;
     let client: AASApiClient;
+    let http: jest.Mocked<HttpClient>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        client = new AASApiClientV0(logger, 'http://localhost:1234', 'AASX Server');
+        http = createSpyObj<HttpClient>(['get', 'getResponse']);
+        client = new AASApiClientV0(logger, http, {
+            name: 'AASX Server',
+            type: 'AAS_API',
+            url: 'http://localhost:1234',
+        });
     });
 
     afterEach(() => {
         jest.restoreAllMocks();
     });
 
-    it('returns the AAS list', async function () {
-        jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-            const stream = new IncomingMessage(new Socket());
-            stream.push(JSON.stringify(listaas));
-            stream.push(null);
-            stream.statusCode = 200;
-            stream.statusMessage = 'OK';
-            (callback as (res: IncomingMessage) => void)(stream);
-            return new http.ClientRequest('http://localhost:1234');
+    describe('getShellsAsync', () => {
+        it('returns the AAS list', async () => {
+            http.get.mockResolvedValue(listaas);
+            const result = await client.getShellsAsync();
+            expect(result.result).toEqual([
+                {
+                    id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:AssistanceSystem:Dte',
+                    idShort: 'AssistanceSystem_Dte',
+                },
+                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:CunaCup:Becher1', idShort: 'CunaCup_Becher1' },
+                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:CunaCup:Becher2', idShort: 'CunaCup_Becher2' },
+                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:DTOrchestrator', idShort: 'DTOrchestrator' },
+            ]);
         });
-
-        await expect(client.getShellsAsync()).resolves.toEqual([
-            'AssistanceSystem_Dte',
-            'CunaCup_Becher1',
-            'CunaCup_Becher2',
-            'DTOrchestrator',
-        ]);
     });
 
-    it('gets the AAS with the specified idShort', async function () {
-        jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-            let value: unknown;
-            switch ((options as http.RequestOptions).path) {
-                case '/aas/CunaCup_Becher1/submodels':
-                    value = submodels;
-                    break;
-                case '/aas/CunaCup_Becher1/submodels/Nameplate_Becher1/complete':
-                    value = nameplate;
-                    break;
-                case '/aas/CunaCup_Becher1/submodels/DigitalProductPassport_Becher1/complete':
-                    value = digitalProductPassport;
-                    break;
-                case '/aas/CunaCup_Becher1/submodels/CustomerFeedback_Becher1/complete':
-                    value = customerFeedback;
-                    break;
-                default:
-                    value = becher1;
-                    break;
-            }
+    describe('readEnvironmentAsync', () => {
+        it('gets the AAS with the specified idShort', async () => {
+            http.get.mockImplementation(url => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                let value: any;
+                switch (url.pathname) {
+                    case '/aas/CunaCup_Becher1/submodels':
+                        value = submodels;
+                        break;
+                    case '/aas/CunaCup_Becher1/submodels/Nameplate_Becher1/complete':
+                        value = nameplate;
+                        break;
+                    case '/aas/CunaCup_Becher1/submodels/DigitalProductPassport_Becher1/complete':
+                        value = digitalProductPassport;
+                        break;
+                    case '/aas/CunaCup_Becher1/submodels/CustomerFeedback_Becher1/complete':
+                        value = customerFeedback;
+                        break;
+                    default:
+                        value = becher1;
+                        break;
+                }
 
-            const stream = new IncomingMessage(new Socket());
-            stream.push(JSON.stringify(value));
-            stream.push(null);
-            stream.statusCode = 200;
-            stream.statusMessage = 'OK';
-            (callback as (res: IncomingMessage) => void)(stream);
+                return new Promise(resolve => resolve(value));
+            });
 
-            return new http.ClientRequest('http://localhost:1234');
+            await expect(
+                client.readEnvironmentAsync({ id: 'http://aas/CunaCup_Becher1', idShort: 'CunaCup_Becher1' }),
+            ).resolves.toBeTruthy();
         });
-
-        await expect(client.readEnvironmentAsync('CunaCup_Becher1')).resolves.toBeTruthy();
     });
 
-    it('can open a file', async function () {
-        jest.spyOn(http, 'request').mockImplementation((options, callback) => {
+    describe('openFileAsync', () => {
+        it('can open a file', async () => {
             const stream = new IncomingMessage(new Socket());
             stream.push(
                 JSON.stringify({
                     aaslist: ['0 : ExampleMotor : [IRI] http://customer.com/aas/9175_7013_7091_9168 : '],
                 }),
             );
+
             stream.push(null);
             stream.statusCode = 200;
             stream.statusMessage = 'OK';
-            (callback as (res: IncomingMessage) => void)(stream);
 
-            return new http.ClientRequest('http://localhost:1234');
+            http.get.mockResolvedValue({
+                aaslist: ['0 : ExampleMotor : [IRI] http://customer.com/aas/9175_7013_7091_9168 : '],
+            });
+
+            http.getResponse.mockResolvedValue(stream);
+            await expect(
+                client.openFileAsync(
+                    aasEnvironment.assetAdministrationShells[0],
+                    selectElement(aasEnvironment, 'Documentation', 'OperatingManual', 'DigitalFile_PDF')!,
+                ),
+            ).resolves.toBeTruthy();
         });
-
-        await expect(
-            client.openFileAsync(
-                aasEnvironment.assetAdministrationShells[0],
-                selectElement(aasEnvironment, 'Documentation', 'OperatingManual', 'DigitalFile_PDF')!,
-            ),
-        ).resolves.toBeTruthy();
     });
 
-    it('reads the current value of a data element', async function () {
-        jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-            const stream = new IncomingMessage(new Socket());
-            stream.push(JSON.stringify({ value: 42 }));
-            stream.push(null);
-            stream.statusCode = 200;
-            stream.statusMessage = 'OK';
-            (callback as (res: IncomingMessage) => void)(stream);
-
-            return new http.ClientRequest('http://localhost:1234');
+    describe('readValueAsync', () => {
+        it('reads the current value of a data element', async () => {
+            http.get.mockResolvedValue({ value: '42' });
+            await expect(client.readValueAsync('http://localhost:1234', 'xs:int')).resolves.toBe(42);
         });
-
-        await expect(client.readValueAsync('http://localhost:1234', 'xs:int')).resolves.toBe(42);
     });
 
     describe('resolveNodeId', function () {

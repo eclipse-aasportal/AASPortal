@@ -23,9 +23,13 @@ describe('TemplateService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [{ provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [],
+            providers: [
+                { provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
 
         http = TestBed.inject(HttpClient);
         service = TestBed.inject(TemplateService);

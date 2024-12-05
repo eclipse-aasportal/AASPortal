@@ -73,15 +73,15 @@ export class NewElementCommand extends Command {
             throw new Error('Invalid operation.');
         }
 
-        this.store.applyDocument(this.document);
+        this.store.document$.set({ ...this.document, modified: true });
     }
 
     protected onUndo(): void {
-        this.store.applyDocument(this.memento);
+        this.store.document$.set({ ...this.memento, modified: true });
     }
 
     protected onRedo(): void {
-        this.store.applyDocument(this.document);
+        this.store.document$.set({ ...this.document, modified: true });
     }
 
     protected onAbort(): void {

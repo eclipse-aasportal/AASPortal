@@ -22,11 +22,10 @@ describe('AasxServerPackage', () => {
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         server = createSpyObj<AASApiClient>(['readEnvironmentAsync'], {
-            url: 'http:/localhost:1234',
-            name: 'Test',
+            endpoint: { name: 'Test', type: 'AAS_API', url: 'http:/localhost:1234' },
         });
 
-        aasPackage = new AASServerPackage(logger, server, 'CunaCup_Becher1');
+        aasPackage = new AASServerPackage(logger, server, 'http://aas/CunaCup_Becher1', 'CunaCup_Becher1');
         env = {
             assetAdministrationShells: [
                 {

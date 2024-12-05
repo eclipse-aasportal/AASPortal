@@ -45,10 +45,8 @@
     </div>
     <div class="fhg-main-statusbar d-flex flex-row-reverse p-2">
         <div class="ts-x-small">© 2024 Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
-        @if (count() > 0) {
-        <span class="badge rounded-pill text-bg-info mx-2 fhg-pointer" (click)="clear()" tabindex="0"
+        <span class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0"
             (keydown)="onKeyDown($event)">{{summary()}}</span>
-        }
     </div>
 </div>
 

@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+import path from 'path';
+import fs from 'fs';
 import { inject, singleton } from 'tsyringe';
 import express, { Express, NextFunction, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
@@ -14,7 +16,6 @@ import swaggerUi, { JsonObject } from 'swagger-ui-express';
 import { ApplicationError } from 'aas-core';
 import { ValidateError } from 'tsoa';
 
-import swaggerDoc from './swagger.json' with { type: 'json' };
 import { RegisterRoutes } from './routes/routes.js';
 import { ERRORS } from './errors.js';
 import { Variable } from './variable.js';
@@ -22,6 +23,8 @@ import { Logger } from './logging/logger.js';
 
 @singleton()
 export class App {
+    private swaggerDoc?: JsonObject;
+
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
@@ -51,7 +54,15 @@ export class App {
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
         this.app.use(morgan('dev'));
-        this.app.use('/api-docs', this.setHost, swaggerUi.serveFiles(swaggerDoc, {}), swaggerUi.setup());
+        this.app.use('/docs', swaggerUi.serve, async (_req: Request, res: Response) => {
+            if (this.swaggerDoc === undefined) {
+                this.swaggerDoc = JSON.parse(
+                    (await fs.promises.readFile(path.join(this.variable.ASSETS, 'swagger.json'))).toString(),
+                );
+            }
+
+            return res.send(swaggerUi.generateHTML(this.swaggerDoc));
+        });
 
         RegisterRoutes(this.app);
 
@@ -95,12 +106,6 @@ export class App {
         res.status(404).send({
             message: 'Not Found',
         });
-    };
-
-    private setHost = (req: Request, res: Response, next: NextFunction) => {
-        (swaggerDoc as { host?: string }).host = req.get('host');
-        (req as Request & { swaggerDoc: JsonObject }).swaggerDoc = swaggerDoc;
-        next();
     };
 
     private getIndex = (req: Request, res: Response) => {

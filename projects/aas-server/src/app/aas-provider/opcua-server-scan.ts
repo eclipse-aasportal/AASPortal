@@ -7,16 +7,19 @@
  *****************************************************************************/
 
 import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescription } from 'node-opcua';
-import { AASDocument } from 'aas-core';
+import { AASDocument, noop } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../packages/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../packages/opcua/opcua-client.js';
 import { OpcuaPackage } from '../packages/opcua/opcua-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
+import { PagedResult } from '../types/paged-result.js';
+import { AASLabel } from '../packages/aas-server/aas-api-client.js';
 
 export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;
     private readonly server: OpcuaClient;
+    private readonly map = new Map<string, AASDocument>();
 
     public constructor(logger: Logger, server: OpcuaClient) {
         super();
@@ -25,28 +28,39 @@ export class OpcuaServerScan extends AASResourceScan {
         this.server = server;
     }
 
-    public async scanAsync(): Promise<AASDocument[]> {
-        try {
-            await this.server.openAsync();
-            const documents: AASDocument[] = [];
-            const dataTypes = new OpcuaDataTypeDictionary();
-            await dataTypes.initializeAsync(this.server.getSession());
-            for (const description of await this.browseAsync('ObjectsFolder')) {
-                const nodeId = description.nodeId.toString();
-                try {
-                    const opcuaPackage = new OpcuaPackage(this.logger, this.server, nodeId, dataTypes);
-                    const document = await opcuaPackage.createDocumentAsync();
-                    documents.push(document);
-                    this.emit('scanned', document);
-                } catch (error) {
-                    this.emit('error', error, this.server, nodeId);
-                }
-            }
+    protected override open(): Promise<void> {
+        this.map.clear();
+        return this.server.openAsync();
+    }
 
-            return documents;
-        } finally {
-            await this.server.closeAsync();
+    protected override close(): Promise<void> {
+        this.map.clear();
+        return this.server.closeAsync();
+    }
+
+    protected override createDocument(id: AASLabel): Promise<AASDocument> {
+        const document = this.map.get(id.id);
+        return document ? Promise.resolve(document) : Promise.reject(new Error(`${id} not found.`));
+    }
+
+    protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {
+        noop(cursor);
+        const ids: AASLabel[] = [];
+        const dataTypes = new OpcuaDataTypeDictionary();
+        await dataTypes.initializeAsync(this.server.getSession());
+        for (const description of await this.browseAsync('ObjectsFolder')) {
+            const nodeId = description.nodeId.toString();
+            try {
+                const opcuaPackage = new OpcuaPackage(this.logger, this.server, nodeId, dataTypes);
+                const document = await opcuaPackage.createDocumentAsync();
+                ids.push({ id: document.id, idShort: document.idShort });
+                this.map.set(document.id, document);
+            } catch (error) {
+                this.emit('error', error, this.server, nodeId);
+            }
         }
+
+        return { result: ids, paging_metadata: {} };
     }
 
     private async browseAsync(

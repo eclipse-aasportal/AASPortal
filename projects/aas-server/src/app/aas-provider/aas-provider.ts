@@ -17,50 +17,49 @@ import {
     aas,
     selectElement,
     AASCursor,
-    AASPage,
+    AASPagedResult,
     AASEndpoint,
     ApplicationError,
     getChildren,
     isReferenceElement,
+    AASEndpointSchedule,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from '../aas-index/aas-index.js';
-import { ScanResultType, ScanResult, ScanContainerResult } from './scan-result.js';
+import { ScanResultKind, ScanResult, ScanEndpointResult } from './scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
-import { ScanContainerData } from './worker-data.js';
+import { ScanEndpointData } from './worker-data.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
 import { AASResourceFactory } from '../packages/aas-resource-factory.js';
-import { AASResourceScanFactory } from './aas-resource-scan-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
-import { TaskHandler } from './task-handler.js';
+import { Task, TaskHandler } from './task-handler.js';
 import { HierarchicalStructure } from './hierarchical-structure.js';
 import { AASCache } from './aas-cache.js';
+import { urlToEndpoint } from '../configuration.js';
 
 @singleton()
 export class AASProvider {
-    private readonly timeout: number;
-    private readonly file: string | undefined;
     private readonly cache = new AASCache();
     private wsServer!: WSServer;
     private resetRequested = false;
 
     public constructor(
-        @inject(Variable) variable: Variable,
+        @inject(Variable) private readonly variable: Variable,
         @inject('Logger') private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
         @inject('AASIndex') private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        this.timeout = variable.SCAN_CONTAINER_TIMEOUT;
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
+        this.taskHandler.on('empty', this.taskHandlerOnEmpty);
     }
 
     /**
@@ -70,7 +69,7 @@ export class AASProvider {
     public start(wsServer: WSServer): void {
         this.wsServer = wsServer;
         this.wsServer.on('message', this.onClientMessage);
-        setTimeout(this.startScan, 100);
+        this.initializeIndex().then(() => setTimeout(this.startScan, 100));
     }
 
     /**
@@ -81,13 +80,20 @@ export class AASProvider {
     }
 
     /**
+     * Gets the number of registered AAS endpoints.
+     */
+    public getEndpointCount(): Promise<number> {
+        return this.index.getEndpointCount();
+    }
+
+    /**
      * Gets a page of documents from the specified cursor.
      * @param cursor The cursor.
      * @param filter A filter expression.
      * @param language The current language.
      * @returns A page of documents.
      */
-    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPage> {
+    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPagedResult> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
             return this.index.getDocuments(cursor, filter, language ?? 'en');
@@ -97,12 +103,12 @@ export class AASProvider {
     }
 
     /**
-     * The total count of AAS documents.
-     * @param filter A filter expression.
+     * The total count of AAS documents over all endpoints or a specified endpoint.
+     * @param endpoint The endpoint name.
      * @returns The total count of documents.
      */
-    public getDocumentCountAsync(filter?: string): Promise<number> {
-        return this.index.getCount(filter);
+    public getCountAsync(endpoint?: string): Promise<number> {
+        return this.index.getCount(endpoint);
     }
 
     /**
@@ -140,7 +146,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            return await resource.createPackage(document.address).getThumbnailAsync(id);
+            return await resource.createPackage(document.address, document.idShort).getThumbnailAsync(id);
         } finally {
             await resource.closeAsync();
         }
@@ -168,7 +174,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            const pkg = resource.createPackage(document.address);
+            const pkg = resource.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = this.cache.get(document.endpoint, document.id);
                 if (!document.content) {
@@ -214,14 +220,9 @@ export class AASProvider {
 
     /**
      * Adds a new endpoint.
-     * @param endpointName The endpoint name.
-     * @param url The endpoint URL.
+     * @param endpoint The endpoint to add.
      */
-    public async addEndpointAsync(endpointName: string, endpoint: AASEndpoint): Promise<void> {
-        if (endpointName !== endpoint.name) {
-            throw new Error('Invalid operation.');
-        }
-
+    public async addEndpointAsync(endpoint: AASEndpoint): Promise<void> {
         await this.resourceFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
@@ -232,7 +233,36 @@ export class AASProvider {
             } as AASServerMessage,
         });
 
-        setTimeout(this.scanContainer, 0, this.taskHandler.createTaskId(), endpoint);
+        const type = endpoint.schedule?.type;
+        if (type === 'manual' || type === 'disabled') {
+            return;
+        }
+
+        setTimeout(this.scanEndpoint, 0, this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint'), endpoint);
+    }
+
+    /**
+     * Updates an existing endpoint.
+     * @param endpointName The old endpoint name.
+     * @param endpoint The endpoint to update.
+     */
+    public async updateEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+        const old = await this.index.updateEndpoint(endpoint);
+
+        let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
+        if (task === undefined) {
+            task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
+        }
+
+        const oldType = old.schedule?.type;
+        const newType = endpoint.schedule?.type;
+        if (oldType !== newType) {
+            if (newType === 'disabled') {
+                await this.index.clear(endpoint.name);
+            } else if (oldType === 'manual') {
+                setTimeout(this.scanEndpoint, 0, task, endpoint);
+            }
+        }
     }
 
     /**
@@ -243,6 +273,11 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
             await this.index.removeEndpoint(endpoint.name);
+            const task = this.taskHandler.find(endpointName, 'ScanEndpoint');
+            if (task) {
+                this.taskHandler.delete(task.id);
+            }
+
             this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
             this.wsServer.notify('IndexChange', {
                 type: 'AASServerMessage',
@@ -265,16 +300,18 @@ export class AASProvider {
         this.resetRequested = true;
         await this.index.clear();
         this.cache.clear();
+        for (const task of [...this.taskHandler.tasks]) {
+            if (task.state === 'idle' && task.owner === this) {
+                this.taskHandler.delete(task.id);
+            }
+        }
+
         this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
             data: {
                 type: 'Reset',
             } as AASServerMessage,
         });
-
-        if (this.taskHandler.empty(this)) {
-            await this.restart();
-        }
     }
 
     /**
@@ -294,7 +331,7 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            const pkg = resource.createPackage(document.address);
+            const pkg = resource.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = await pkg.getEnvironmentAsync();
                 if (this.cache.has(document.endpoint, document.id)) {
@@ -372,16 +409,6 @@ export class AASProvider {
         }
     }
 
-    /** Only used for test. */
-    public async scanAsync(factory: AASResourceScanFactory): Promise<void> {
-        for (const endpoint of await this.index.getEndpoints()) {
-            if (endpoint.type === 'FileSystem') {
-                const documents = await factory.create(endpoint).scanAsync();
-                documents.forEach(async document => await this.index.add(document));
-            }
-        }
-    }
-
     /**
      * Invokes an operation synchronous.
      * @param endpointName The endpoint name.
@@ -397,7 +424,7 @@ export class AASProvider {
             await resource.openAsync();
             let env = document.content;
             if (!env) {
-                env = await resource.createPackage(document.address).getEnvironmentAsync();
+                env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
                 this.cache.set(document.endpoint, document.id, env);
             }
 
@@ -421,12 +448,54 @@ export class AASProvider {
         return nodes;
     }
 
+    /** Starts a scan of the AAS endpoint with the specified name.
+     * @param name The name of the endpoint.
+     */
+    public async startEndpointScan(name: string): Promise<void> {
+        const endpoint = await this.index.getEndpoint(name);
+        if (endpoint.schedule?.type !== 'manual') {
+            throw new Error(`Endpoint ${name} is not configured for the manual start of a scan.`);
+        }
+
+        let task = this.taskHandler.find(name, 'ScanEndpoint');
+        if (task === undefined) {
+            task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
+        }
+
+        if (task.state === 'inProgress') {
+            throw new Error(`Scanning endpoint ${name} is already in progress.`);
+        }
+
+        setTimeout(this.scanEndpoint, 0, task, endpoint);
+    }
+
+    public destroy(): void {
+        this.parallel.off('message', this.parallelOnMessage);
+        this.parallel.off('end', this.parallelOnEnd);
+        this.taskHandler.off('empty', this.taskHandlerOnEmpty);
+    }
+
     private async restart(): Promise<void> {
         this.resetRequested = false;
-        await this.index.reset();
+        await this.initializeIndex();
         this.cache.clear();
         await this.startScan();
         this.logger.info('AAS Server configuration restored.');
+    }
+
+    private async initializeIndex(): Promise<void> {
+        if ((await this.index.getEndpointCount()) === 0) {
+            for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
+                await this.index.addEndpoint(endpoint);
+                this.wsServer.notify('IndexChange', {
+                    type: 'AASServerMessage',
+                    data: {
+                        type: 'EndpointAdded',
+                        endpoint: endpoint,
+                    } as AASServerMessage,
+                });
+            }
+        }
     }
 
     private onClientMessage = async (data: WebSocketData, client: SocketClient): Promise<void> => {
@@ -453,34 +522,12 @@ export class AASProvider {
         await resource.openAsync();
         let env = this.cache.get(document.endpoint, document.id);
         if (!env) {
-            env = await resource.createPackage(document.address).getEnvironmentAsync();
+            env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
             this.cache.set(document.endpoint, document.id, env);
         }
 
         return resource.createSubscription(client, message, env);
     }
-
-    private startScan = async (): Promise<void> => {
-        try {
-            for (const endpoint of await this.index.getEndpoints()) {
-                setTimeout(this.scanContainer, 0, this.taskHandler.createTaskId(), endpoint);
-            }
-        } catch (error) {
-            this.logger.error(error);
-        }
-    };
-
-    private scanContainer = async (taskId: number, endpoint: AASEndpoint) => {
-        const documents = await this.index.getContainerDocuments(endpoint.name);
-        const data: ScanContainerData = {
-            type: 'ScanContainerData',
-            taskId,
-            container: { ...endpoint, documents },
-        };
-
-        this.taskHandler.set(taskId, { name: endpoint.name, owner: this, type: 'ScanContainer' });
-        this.parallel.execute(data);
-    };
 
     private notify(data: AASServerMessage): void {
         this.wsServer.notify('IndexChange', {
@@ -489,50 +536,110 @@ export class AASProvider {
         });
     }
 
-    private parallelOnEnd = async (result: ScanResult) => {
-        const task = this.taskHandler.get(result.taskId);
-        if (!task || task.owner !== this) {
-            return;
-        }
-
-        this.taskHandler.delete(result.taskId);
-        if ((await await this.index.hasEndpoint(task.name)) === true) {
-            const endpoint = await this.index.getEndpoint(task.name);
-            setTimeout(this.scanContainer, this.timeout, result.taskId, endpoint);
-        }
-
-        if (result.messages) {
-            this.logger.start(`scan ${task.name ?? 'undefined'}`);
-            result.messages.forEach(message => this.logger.log(message));
-            this.logger.stop();
-        }
-
-        if (this.resetRequested && this.taskHandler.empty(this)) {
-            await this.restart();
-        }
-    };
-
-    private parallelOnMessage = async (result: ScanResult) => {
+    private startScan = async (): Promise<void> => {
         try {
-            switch (result.type) {
-                case ScanResultType.Changed:
-                    await this.onChanged(result as ScanContainerResult);
-                    break;
-                case ScanResultType.Added:
-                    await this.onAdded(result as ScanContainerResult);
-                    break;
-                case ScanResultType.Removed:
-                    await this.onRemoved(result as ScanContainerResult);
-                    break;
+            for (const endpoint of await this.index.getEndpoints()) {
+                const type = endpoint.schedule?.type;
+                if (type === 'manual' || type === 'disabled') {
+                    continue;
+                }
+
+                const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
+                this.taskHandler.set(task);
+                setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         } catch (error) {
             this.logger.error(error);
         }
     };
 
-    private async onChanged(result: ScanContainerResult): Promise<void> {
+    private computeTimeout(schedule: AASEndpointSchedule | undefined, start: number, end: number): number {
+        if (schedule === undefined) {
+            return this.variable.SCAN_ENDPOINT_TIMEOUT;
+        }
+
+        start = start || Date.now();
+        if (schedule.type === 'every') {
+            const values = schedule.values;
+            if (values && values.length > 0 && typeof values[0] === 'number') {
+                const timeout = end - start - values[0];
+                return timeout >= 0 ? timeout : values[0];
+            }
+        }
+
+        return this.variable.SCAN_ENDPOINT_TIMEOUT;
+    }
+
+    private scanEndpoint = async (task: Task, endpoint: AASEndpoint) => {
+        const data: ScanEndpointData = {
+            type: 'ScanEndpointData',
+            taskId: task.id,
+            endpoint,
+        };
+
+        task.state = 'inProgress';
+        task.start = Date.now();
+        this.parallel.execute(data);
+    };
+
+    private parallelOnMessage = async (result: ScanResult) => {
+        try {
+            if (this.isScanEndpointResult(result)) {
+                switch (result.kind) {
+                    case ScanResultKind.Update:
+                        await this.onUpdate(result);
+                        break;
+                    case ScanResultKind.Add:
+                        await this.onAdded(result);
+                        break;
+                    case ScanResultKind.Remove:
+                        await this.onRemoved(result);
+                        break;
+                }
+            }
+        } catch (error) {
+            this.logger.error(error);
+        }
+    };
+
+    private isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
+        return result.type === 'ScanEndpointResult';
+    }
+
+    private parallelOnEnd = async (result: ScanResult) => {
+        const task = this.taskHandler.get(result.taskId);
+        if (task === undefined || task.owner !== this) {
+            return;
+        }
+
+        const endpoint = await this.index.findEndpoint(task.endpointName);
+        if (endpoint !== undefined) {
+            task.state = 'idle';
+            task.end = Date.now();
+
+            const type = endpoint.schedule?.type;
+            if (type === 'once' || type === 'manual' || type === 'disabled') {
+                return;
+            }
+
+            setTimeout(this.scanEndpoint, this.computeTimeout(endpoint.schedule, task.start, task.end), task, endpoint);
+        }
+
+        if (result.messages) {
+            this.logger.start(`scan ${task.endpointName ?? 'undefined'}`);
+            result.messages.forEach(message => this.logger.log(message));
+            this.logger.stop();
+        }
+
+        if (this.resetRequested) {
+            this.taskHandler.delete(task.id);
+        }
+    };
+
+    private async onUpdate(result: ScanEndpointResult): Promise<void> {
         const document = result.document;
-        if ((await this.index.hasEndpoint(document.endpoint)) === false) {
+        const endpoint = await this.index.findEndpoint(document.endpoint);
+        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
             return;
         }
 
@@ -541,28 +648,31 @@ export class AASProvider {
             this.cache.set(document.endpoint, document.id, document.content);
         }
 
-        this.sendMessage({ type: 'Changed', document: { ...document, content: null } });
+        this.sendMessage({ type: 'Update', document: { ...document, content: null } });
     }
 
-    private async onAdded(result: ScanContainerResult): Promise<void> {
-        if ((await this.index.hasEndpoint(result.document.endpoint)) === false) {
-            return;
-        }
-
-        await this.index.add(result.document);
-        this.logger.info(`Added: AAS ${result.document.idShort} [${result.document.id}] in ${result.container.url}`);
-        this.sendMessage({ type: 'Added', document: result.document });
-    }
-
-    private async onRemoved(result: ScanContainerResult): Promise<void> {
+    private async onAdded(result: ScanEndpointResult): Promise<void> {
         const document = result.document;
-        if ((await this.index.hasEndpoint(document.endpoint)) === false) {
+        const endpoint = await this.index.findEndpoint(document.endpoint);
+        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
             return;
         }
 
-        await this.index.remove(result.container.name, document.id);
+        await this.index.add(document);
+        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
+        this.sendMessage({ type: 'Added', document });
+    }
+
+    private async onRemoved(result: ScanEndpointResult): Promise<void> {
+        const document = result.document;
+        const endpoint = await this.index.findEndpoint(document.endpoint);
+        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
+            return;
+        }
+
+        await this.index.remove(result.endpoint.name, document.id);
         this.cache.remove(document.endpoint, document.id);
-        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.container.url}`);
+        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
         this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
     }
 
@@ -638,11 +748,17 @@ export class AASProvider {
         const resource = this.resourceFactory.create(endpoint);
         try {
             await resource.openAsync();
-            env = await resource.createPackage(document.address).getEnvironmentAsync();
+            env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
             this.cache.set(document.endpoint, document.id, env);
             return env;
         } finally {
             await resource.closeAsync();
         }
     }
+
+    private readonly taskHandlerOnEmpty = async (owner: object): Promise<void> => {
+        if (owner === this && this.resetRequested) {
+            await this.restart();
+        }
+    };
 }

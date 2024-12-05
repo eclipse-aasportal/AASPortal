@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, LiveRequest } from 'aas-core';
+import { aas, AASEndpoint, LiveRequest } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { SocketClient } from '../live/socket-client.js';
 import { AASPackage } from './aas-package.js';
@@ -16,11 +16,8 @@ import { SocketSubscription } from '../live/socket-subscription.js';
 export abstract class AASResource {
     protected constructor(
         protected readonly logger: Logger,
-        public readonly url: string,
-        public readonly name: string,
+        public readonly endpoint: AASEndpoint,
     ) {}
-
-    public abstract readonly version: string;
 
     /** Indicates whether an active connection is established. */
     public abstract readonly isOpen: boolean;
@@ -40,18 +37,18 @@ export abstract class AASResource {
     /** Closes the container. */
     public abstract closeAsync(): Promise<void>;
 
-    /** ToDo */
-    public abstract createPackage(address: string): AASPackage;
+    /** Creates a package from the specified address. */
+    public abstract createPackage(...args: string[]): AASPackage;
 
     /**
      * Creates a WebSocket subscription.
      * @param client The client.
-     * @param message The message.
+     * @param request The request.
      * @param env The AAS environment.
      */
     public abstract createSubscription(
         client: SocketClient,
-        message: LiveRequest,
+        request: LiveRequest,
         env: aas.Environment,
     ): SocketSubscription;
 
@@ -101,7 +98,14 @@ export abstract class AASResource {
      * @param url The URL.
      * @returns A new URL.
      */
-    protected resolve(url: string): URL {
-        return new URL(url, this.url);
+    protected resolve(url: string, searchParams?: Record<string, string | number>): URL {
+        const resolvedUrl = new URL(url, this.endpoint.url);
+        if (searchParams) {
+            for (const name in searchParams) {
+                resolvedUrl.searchParams.set(name, String(searchParams[name]));
+            }
+        }
+
+        return resolvedUrl;
     }
 }
