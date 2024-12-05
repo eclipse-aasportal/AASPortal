@@ -33,7 +33,7 @@ test:
     - if: '$CI_COMMIT_MESSAGE =~ /(Release)/'
   script:
     - apk add --no-cache chromium && export CHROME_BIN='/usr/bin/chromium-browser'
-    - npm ci
+    - npm install
     - npm run build -ws
     - npm run test -ws
     - npm run coverage
