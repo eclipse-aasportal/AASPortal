@@ -8,7 +8,6 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import multer from 'multer';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
@@ -61,7 +60,7 @@ describe('TemplateController', () => {
         app.use(morgan('dev'));
         app.set('trust proxy', 1);
 
-        RegisterRoutes(app, { multer: multer({ dest: './temp' }) });
+        RegisterRoutes(app);
         app.use(errorHandler);
     });
 
