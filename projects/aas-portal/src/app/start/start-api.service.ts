@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AASCursor, AASDocument, AASEndpoint, AASPage, aas } from 'aas-core';
+import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
 import { encodeBase64Url } from 'aas-lib';
 
 /** The client side AAS provider service. */
@@ -21,31 +21,34 @@ export class StartApiService {
 
     /**
      * Returns all configured AAS endpoints.
-     * @returns An array of `AASContainer`.
+     * @returns An array of `AASEndpoint`.
      */
     public getEndpoints(): Observable<AASEndpoint[]> {
         return this.http.get<AASEndpoint[]>('/api/v1/endpoints');
     }
 
     /**
-     * Adds a new endpoint to the AASServer configuration.
-     * @param endpoint The AAS container endpoint.
+     * Adds a new endpoint.
+     * @param endpoint The AAS endpoint.
      */
     public addEndpoint(endpoint: AASEndpoint): Observable<void> {
-        return this.http.post<void>(`/api/v1/endpoints/${endpoint.name}`, endpoint);
+        return this.http.post<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint.name)}`, endpoint);
     }
 
     /**
-     * Removes the specified endpoint from the AASServer configuration.
+     * Updates an existing endpoint.
+     * @param endpoint The AAS endpoint.
+     */
+    public updateEndpoint(endpoint: AASEndpoint): Observable<void> {
+        return this.http.put<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint.name)}`, endpoint);
+    }
+
+    /**
+     * Removes the specified endpoint.
      * @param name The name of the endpoint.
      */
     public removeEndpoint(name: string): Observable<void> {
-        return this.http.delete<void>(`/api/v1/endpoints/${name}`);
-    }
-
-    /** Restores the default AAS endpoint configuration. */
-    public reset(): Observable<void> {
-        return this.http.delete<void>('/api/v1/endpoints');
+        return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(name)}`);
     }
 
     /**
@@ -65,7 +68,7 @@ export class StartApiService {
      * @param language The language to used for the filter.
      * @returns The document page.
      */
-    public getPage(cursor: AASCursor, filter?: string, language?: string): Observable<AASPage> {
+    public getPage(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
         let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
         if (filter) {
             url += `&filter=${encodeBase64Url(filter)}`;
@@ -74,7 +77,7 @@ export class StartApiService {
             }
         }
 
-        return this.http.get<AASPage>(url);
+        return this.http.get<AASPagedResult>(url);
     }
 
     /**
@@ -99,10 +102,5 @@ export class StartApiService {
         return this.http.get<AASDocument[]>(
             `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`,
         );
-    }
-
-    /** Gets the total amount of documents. */
-    public getDocumentCount(): Observable<number> {
-        return this.http.get<number>('/api/v1/documents/count');
     }
 }

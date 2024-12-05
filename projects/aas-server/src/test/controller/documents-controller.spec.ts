@@ -12,7 +12,7 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
-import { AASCursor, AASPage } from 'aas-core';
+import { AASCursor, AASPagedResult } from 'aas-core';
 
 import { Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -90,7 +90,7 @@ describe('DocumentsController', function () {
     });
 
     it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
-        const page: AASPage = { previous: null, documents: [sampleDocument], next: null };
+        const page: AASPagedResult = { previous: null, documents: [sampleDocument], next: null };
         aasProvider.getDocumentsAsync.mockResolvedValue(page);
         const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
         const filter = encodeBase64Url('#prop:Name=Value');

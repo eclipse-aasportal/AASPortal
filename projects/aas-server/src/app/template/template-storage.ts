@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { extname, join } from 'path/posix';
-import { TemplateDescriptor, aas } from 'aas-core';
+import { AASEndpoint, TemplateDescriptor, aas } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
@@ -17,16 +17,16 @@ import { createJsonReader } from '../packages/create-json-reader.js';
 import { createXmlReader } from '../packages/create-xml-reader.js';
 import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
 import { ScanTemplatesData } from '../aas-provider/worker-data.js';
-import { ScanResult, ScanResultType, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { ScanResult, ScanTemplatesResult } from '../aas-provider/scan-result.js';
 import { Parallel } from '../aas-provider/parallel.js';
-import { TaskHandler } from '../aas-provider/task-handler.js';
+import { Task, TaskHandler } from '../aas-provider/task-handler.js';
 
 @singleton()
 export class TemplateStorage {
     private readonly fileStorage: FileStorage;
     private readonly root: string;
     private readonly timeout: number;
-    private readonly url: URL;
+    private readonly endpoint: AASEndpoint;
     private templates: TemplateDescriptor[] = [];
 
     public constructor(
@@ -36,10 +36,15 @@ export class TemplateStorage {
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        this.url = new URL(variable.TEMPLATE_STORAGE);
+        const url = new URL(variable.TEMPLATE_STORAGE);
         this.timeout = variable.SCAN_TEMPLATES_TIMEOUT;
-        this.root = this.url.pathname;
-        this.fileStorage = provider.get(this.url);
+        this.root = url.pathname;
+        this.fileStorage = provider.get(url);
+        this.endpoint = {
+            name: url.hostname,
+            type: url.protocol === 'file:' ? 'FileSystem' : 'WebDAV',
+            url: url.toString(),
+        };
 
         this.parallel.on('message', this.parallelOnMessage);
         this.parallel.on('end', this.parallelOnEnd);
@@ -67,23 +72,26 @@ export class TemplateStorage {
     }
 
     private startScan = () => {
-        this.scanTemplates(this.taskHandler.createTaskId());
+        const task = this.taskHandler.createTask('TemplateStorage', this, 'ScanTemplates');
+        this.taskHandler.set(task);
+        this.scanTemplates(task);
     };
 
-    private scanTemplates = async (taskId: number) => {
+    private scanTemplates = async (task: Task) => {
         const data: ScanTemplatesData = {
             type: 'ScanTemplatesData',
-            taskId,
+            taskId: task.id,
         };
 
-        this.taskHandler.set(taskId, { name: 'TemplateStorage', owner: this, type: 'ScanTemplates' });
+        task.start = Date.now();
+        task.state = 'inProgress';
         this.parallel.execute(data);
     };
 
     private async readFromAasx(file: string): Promise<aas.Environment> {
         let source: AasxDirectory | undefined;
         try {
-            source = new AasxDirectory(this.logger, this.fileStorage, this.url);
+            source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
             await source.openAsync();
             const pkg = source.createPackage(file);
             return await pkg.getEnvironmentAsync();
@@ -114,21 +122,22 @@ export class TemplateStorage {
 
     private parallelOnEnd = (result: ScanResult) => {
         const task = this.taskHandler.get(result.taskId);
-        if (!task || task.owner !== this) {
+        if (task === undefined || task.owner !== this) {
             return;
         }
 
-        this.taskHandler.delete(result.taskId);
-        setTimeout(this.scanTemplates, this.timeout, result.taskId);
+        task.state = 'idle';
+        task.end = Date.now();
+        setTimeout(this.scanTemplates, this.timeout, task);
 
         if (result.messages) {
-            this.logger.start(`scan ${task?.name ?? 'undefined'}`);
+            this.logger.start(`scan ${task?.endpointName ?? 'undefined'}`);
             result.messages.forEach(message => this.logger.log(message));
             this.logger.stop();
         }
     };
 
     private isScanTemplatesResult(result: ScanResult): result is ScanTemplatesResult {
-        return result.type === ScanResultType.Update;
+        return result.type === 'ScanTemplatesResult';
     }
 }

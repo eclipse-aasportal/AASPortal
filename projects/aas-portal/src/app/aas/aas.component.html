@@ -49,10 +49,9 @@
         </button>
     </div>
     <div class="input-group me-2 my-1">
-        <select #select class="form-select" [value]="dashboardPage()"
-            (change)="setDashboardPage(dashboardPages()[select.selectedIndex])">
-            @for (page of dashboardPages(); track page.name) {
-            <option [ngValue]="page">{{page.name}}</option>
+        <select class="form-select" [(ngModel)]="dashboardPage">
+            @for (page of dashboardPages(); track page) {
+            <option [ngValue]="page">{{page}}</option>
             }
         </select>
         <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')"
@@ -98,8 +97,8 @@
     </div>
     <div class="input-group flex-grow-1 me-2 my-1">
         <div class="input-group-text"><i class="bi bi-search"></i></div>
-        <input #textInput type="text" class="form-control" [value]="searchExpression()"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (input)="searchExpressionChange(textInput.value)">
+        <input type="text" class="form-control" [(ngModel)]="searchExpression"
+            [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate">
         <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
             <i class="bi bi-chevron-down"></i>
         </button>

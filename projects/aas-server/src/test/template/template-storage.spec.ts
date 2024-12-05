@@ -17,9 +17,9 @@ import { FileStorageProvider } from '../../app/file-storage/file-storage-provide
 import { Variable } from '../../app/variable.js';
 import { TaskHandler } from '../../app/aas-provider/task-handler.js';
 import { Parallel } from '../../app/aas-provider/parallel.js';
-import { ScanResultType, ScanTemplatesResult } from '../../app/aas-provider/scan-result.js';
+import { ScanResultKind, ScanTemplatesResult } from '../../app/aas-provider/scan-result.js';
 
-describe('TemplateStorage', function () {
+describe('TemplateStorage', () => {
     let templateStorage: TemplateStorage;
     let logger: jest.Mocked<Logger>;
     let fileStorage: jest.Mocked<FileStorage>;
@@ -27,7 +27,7 @@ describe('TemplateStorage', function () {
     let variable: jest.Mocked<Variable>;
     let parallel: jest.Mocked<Parallel>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error']);
         fileStorageProvider = createSpyObj<FileStorageProvider>(['get']);
         fileStorage = createSpyObj<FileStorage>(['exists', 'readDir', 'readFile']);
@@ -37,8 +37,9 @@ describe('TemplateStorage', function () {
         parallel.on.mockImplementation((eventName, handler) => {
             if (eventName === 'message') {
                 const result: ScanTemplatesResult = {
+                    type: 'ScanTemplatesResult',
                     taskId: 1,
-                    type: ScanResultType.Update,
+                    kind: ScanResultKind.Update,
                     templates: [
                         {
                             idShort: 'aSubmodel',
@@ -59,12 +60,12 @@ describe('TemplateStorage', function () {
         templateStorage = new TemplateStorage(logger, variable, fileStorageProvider, parallel, new TaskHandler());
     });
 
-    it('should create', function () {
+    it('should create', () => {
         expect(templateStorage).toBeTruthy();
     });
 
-    describe('getTemplatesAsync', function () {
-        it('gets all available templates', async function () {
+    describe('getTemplatesAsync', () => {
+        it('gets all available templates', async () => {
             await expect(templateStorage.getTemplatesAsync()).resolves.toEqual([
                 {
                     idShort: 'aSubmodel',
@@ -77,10 +78,10 @@ describe('TemplateStorage', function () {
         });
     });
 
-    describe('readTemplateAsync', function () {
+    describe('readTemplateAsync', () => {
         let submodel: aas.Submodel;
 
-        beforeEach(function () {
+        beforeEach(() => {
             submodel = {
                 id: 'http://aas/submodel',
                 idShort: 'aSubmodel',
@@ -89,7 +90,7 @@ describe('TemplateStorage', function () {
             };
         });
 
-        it('reads the template with the address "submodel.json"', async function () {
+        it('reads the template with the address "submodel.json"', async () => {
             fileStorage.readFile.mockResolvedValue(Buffer.from(JSON.stringify(submodel)));
             await expect(templateStorage.readTemplateAsync('submodel.json')).resolves.toEqual(submodel);
             expect(fileStorage.readFile).toHaveBeenCalledWith('/templates/submodel.json');

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Body, Delete, Get, OperationId, Path, Post, Route, Security, Tags } from 'tsoa';
+import { Body, Delete, Get, OperationId, Path, Post, Put, Route, Security, Tags } from 'tsoa';
 import { AASEndpoint } from 'aas-core';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
@@ -15,6 +15,7 @@ import { AuthService } from '../auth/auth-service.js';
 import { Logger } from '../logging/logger.js';
 import { AASController } from './aas-controller.js';
 import { Variable } from '../variable.js';
+import { decodeBase64Url } from '../convert.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -38,8 +39,41 @@ export class EndpointsController extends AASController {
     @OperationId('getEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         try {
-            this.logger.start('getWorkspaces');
+            this.logger.start('getEndpoints');
             return await this.aasProvider.getEndpoints();
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Gets the number of registered endpoints.
+     * @returns The number of registered endpoints.
+     */
+    @Get('count')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getCount')
+    public async getCount(): Promise<{ count: number }> {
+        try {
+            this.logger.start('getEndpointCount');
+            return { count: await this.aasProvider.getEndpointCount() };
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary The total count of AAS documents of the specified endpoint.
+     * @param endpoint The endpoint name or `undefined`.
+     * @returns The total number of AAS documents.
+     */
+    @Get('{name}/documents/count')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getDocumentCount')
+    public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
+        try {
+            this.logger.start('getCount');
+            return { count: await this.aasProvider.getCountAsync(decodeBase64Url(name)) };
         } finally {
             this.logger.stop();
         }
@@ -53,10 +87,35 @@ export class EndpointsController extends AASController {
     @Post('{name}')
     @Security('bearerAuth', ['editor'])
     @OperationId('addEndpoint')
-    public addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
+    public async addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         try {
             this.logger.start('addEndpoint');
-            return this.aasProvider.addEndpointAsync(name, endpoint);
+            if (decodeBase64Url(name) !== endpoint.name) {
+                throw new Error('Invalid URL.');
+            }
+
+            await this.aasProvider.addEndpointAsync(endpoint);
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Updates an existing endpoint.
+     * @param name The old endpoint name.
+     * @param endpoint The endpoint to update.
+     */
+    @Put('{name}')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('updateEndpoint')
+    public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
+        try {
+            this.logger.start('addEndpoint');
+            if (decodeBase64Url(name) !== endpoint.name) {
+                throw new Error('Invalid URL.');
+            }
+
+            await this.aasProvider.updateEndpointAsync(endpoint);
         } finally {
             this.logger.stop();
         }
@@ -69,17 +128,17 @@ export class EndpointsController extends AASController {
     @Delete('{name}')
     @Security('bearerAuth', ['editor'])
     @OperationId('deleteEndpoint')
-    public deleteEndpoint(@Path() name: string): Promise<void> {
+    public async deleteEndpoint(@Path() name: string): Promise<void> {
         try {
-            this.logger.start('deleteEndpoint');
-            return this.aasProvider.removeEndpointAsync(name);
+            this.logger.start('removeEndpoint');
+            await this.aasProvider.removeEndpointAsync(decodeBase64Url(name));
         } finally {
             this.logger.stop();
         }
     }
 
     /**
-     * @summary Resets the AASServer container configuration.
+     * @summary Resets the AAS endpoint configuration.
      */
     @Delete('')
     @Security('bearerAuth', ['editor'])
@@ -88,6 +147,22 @@ export class EndpointsController extends AASController {
         try {
             this.logger.start('reset');
             await this.aasProvider.resetAsync();
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Starts a scan of the AAS endpoint with the specified name.
+     * @param name The endpoint name.
+     */
+    @Put('{name}/scan')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('startEndpointScan')
+    public async startEndpointScan(@Path() name: string): Promise<void> {
+        try {
+            this.logger.start('startEndpointScan');
+            await this.aasProvider.startEndpointScan(decodeBase64Url(name));
         } finally {
             this.logger.stop();
         }

@@ -11,11 +11,12 @@ import {
     OnDestroy,
     OnInit,
     TemplateRef,
-    ViewChild,
-    AfterViewInit,
     signal,
     ChangeDetectionStrategy,
+    viewChild,
+    effect,
 } from '@angular/core';
+
 import { Library, Message } from 'aas-core';
 import { LicenseInfoComponent, MessageTableComponent } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
@@ -30,7 +31,7 @@ import { environment } from '../../environments/environment';
     imports: [LicenseInfoComponent, MessageTableComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AboutComponent implements OnInit, OnDestroy {
     private readonly _serverVersion = signal('');
     private readonly _libraries = signal<Library[]>([]);
     private readonly _messages = signal<Message[]>([]);
@@ -38,10 +39,19 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
     public constructor(
         private api: AboutApiService,
         private toolbar: ToolbarService,
-    ) {}
+    ) {
+        effect(
+            () => {
+                const aboutToolbar = this.aboutToolbar();
+                if (aboutToolbar) {
+                    this.toolbar.set(aboutToolbar);
+                }
+            },
+            { allowSignalWrites: true },
+        );
+    }
 
-    @ViewChild('aasToolbar', { read: TemplateRef })
-    public aboutToolbar: TemplateRef<unknown> | null = null;
+    public readonly aboutToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
 
     public readonly author = signal(environment.author).asReadonly();
 
@@ -58,12 +68,6 @@ export class AboutComponent implements OnInit, OnDestroy, AfterViewInit {
         });
 
         this.api.getMessages().subscribe(messages => this._messages.set(messages));
-    }
-
-    public ngAfterViewInit(): void {
-        if (this.aboutToolbar) {
-            this.toolbar.set(this.aboutToolbar);
-        }
     }
 
     public ngOnDestroy(): void {

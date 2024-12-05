@@ -7,16 +7,8 @@
  *****************************************************************************/
 
 import { Router } from '@angular/router';
-import {
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    TemplateRef,
-    ViewChild,
-    computed,
-} from '@angular/core';
-
+import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnDestroy, TemplateRef, computed, effect, viewChild } from '@angular/core';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
@@ -45,24 +37,29 @@ import { StartApiService } from './start-api.service';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { StartStore } from './start.store';
-import { AsyncPipe, NgClass } from '@angular/common';
+import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
+import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
+import { FormsModule } from '@angular/forms';
+import { StartService } from './start.service';
 
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
     standalone: true,
-    imports: [AASTableComponent, NgClass, AsyncPipe, TranslateModule, NgbModule],
+    imports: [AASTableComponent, NgClass, TranslateModule, NgbModule, FormsModule],
+    providers: [StartService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StartComponent implements OnDestroy, AfterViewInit {
+export class StartComponent implements OnDestroy {
     public constructor(
+        private readonly service: StartService,
         private readonly store: StartStore,
+        private readonly api: StartApiService,
         private readonly router: Router,
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
         private readonly window: WindowService,
-        private readonly api: StartApiService,
         private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
@@ -70,84 +67,94 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         private readonly clipboard: ClipboardService,
         private readonly favorites: FavoritesService,
     ) {
-        if (this.store.viewMode() === ViewMode.Undefined) {
+        if (this.store.viewMode === ViewMode.Undefined) {
             this.auth.ready.pipe(first(ready => ready)).subscribe({
-                next: () => this.store.getFirstPage(),
+                next: () => this.viewMode.set(ViewMode.List),
                 error: error => this.notify.error(error),
             });
         }
+
+        effect(
+            () => {
+                const name = this.activeFavorites();
+                if (this.viewMode() !== ViewMode.List) {
+                    this.viewMode.set(ViewMode.List);
+                } else {
+                    this.service.setActiveFavorites(name);
+                }
+            },
+            { allowSignalWrites: true },
+        );
+
+        effect(
+            () => {
+                this.limit();
+                if (!this.store.activeFavorites) {
+                    this.service.refreshPage();
+                }
+            },
+            { allowSignalWrites: true },
+        );
+
+        effect(
+            () => {
+                const viewMode = this.viewMode();
+                this.service.setViewMode(viewMode);
+            },
+            { allowSignalWrites: true },
+        );
+
+        effect(
+            () => {
+                const startToolbar = this.startToolbar();
+                if (startToolbar) {
+                    this.toolbar.set(startToolbar);
+                }
+            },
+            { allowSignalWrites: true },
+        );
     }
 
-    @ViewChild('startToolbar', { read: TemplateRef })
-    public startToolbar: TemplateRef<unknown> | null = null;
+    public readonly startToolbar = viewChild<TemplateRef<unknown>>('startToolbar');
 
-    public readonly activeFavorites = this.store.activeFavorites;
+    public readonly activeFavorites = this.store.activeFavorites$;
 
-    public readonly favoritesLists = this.store.favoritesLists;
+    public readonly limit = this.store.limit$;
 
-    public readonly filter = this.store.filter;
+    public readonly viewMode = this.store.viewMode$;
 
-    public readonly viewMode = this.store.viewMode;
+    public readonly favoritesLists = computed(() => ['', ...this.favorites.lists().map(list => list.name)]);
 
-    public readonly limit = this.store.limit;
+    public readonly filter = computed(() => {
+        const filterText = this.store.filterText$();
+        return this.store.activeFavorites$() ? filterText : '';
+    });
 
-    public readonly filterText = this.store.filterText;
+    public readonly filterText = this.store.filterText$;
 
-    public readonly isFirstPage = this.store.isFirstPage;
+    public readonly isFirstPage = computed(() => this.store.previous$() === null);
 
-    public readonly isLastPage = this.store.isLastPage;
+    public readonly isLastPage = computed(() => this.store.next$() === null);
 
-    public readonly endpoints = this.api.getEndpoints();
+    public readonly documents = this.store.documents$;
 
-    public readonly documents = this.store.documents;
+    public readonly selected = this.store.selected$;
 
-    public readonly selected = this.store.selected;
+    public readonly canDownloadDocument = computed(() => (this.store.selected$().length > 0 ? true : false));
 
-    public readonly canDownloadDocument = computed(() => (this.selected().length > 0 ? true : false));
-
-    public readonly canDeleteDocument = computed(() => this.selected().length > 0);
+    public readonly canDeleteDocument = computed(() => this.store.selected$().length > 0);
 
     public readonly canViewUserFeedback = computed(() =>
-        this.selected().some(document => this.selectSubmodels(document, CustomerFeedback).length === 1),
+        this.store.selected$().some(document => this.selectSubmodels(document, CustomerFeedback).length === 1),
     );
 
     public readonly canViewNameplate = computed(() =>
-        this.selected().some(document => this.selectSubmodels(document, ZVEINameplate).length === 1),
+        this.store.selected$().some(document => this.selectSubmodels(document, ZVEINameplate).length === 1),
     );
-
-    public ngAfterViewInit(): void {
-        if (this.startToolbar) {
-            this.toolbar.set(this.startToolbar);
-        }
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-    }
-
-    public setActiveFavorites(value: string): void {
-        const currentFavorites = this.favorites.get(value);
-        if (currentFavorites) {
-            this.store.getFavorites(currentFavorites.name, currentFavorites.documents);
-        } else {
-            this.store.getFirstPage();
-        }
-    }
-
-    public setViewMode(viewMode: string | ViewMode): void {
-        const activeFavorites = this.activeFavorites();
-        if (viewMode === ViewMode.List) {
-            if (!activeFavorites) {
-                this.store.getFirstPage();
-            } else {
-                const favoritesList = this.favorites.get(activeFavorites);
-                if (favoritesList) {
-                    this.store.getFavorites(favoritesList.name, favoritesList.documents);
-                }
-            }
-        } else {
-            this.store.setTreeView(this.selected());
-        }
+        this.store.save().subscribe();
     }
 
     public addEndpoint(): Observable<void> {
@@ -160,9 +167,31 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             }),
             mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
             mergeMap(result => {
-                if (!result) return EMPTY;
+                if (result === undefined) {
+                    return EMPTY;
+                }
 
                 return this.api.addEndpoint(result);
+            }),
+            catchError(error => this.notify.error(error)),
+        );
+    }
+
+    public updateEndpoint(): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.getEndpoints()),
+            map(endpoints => {
+                const modalRef = this.modal.open(UpdateEndpointFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.initialize(endpoints);
+                return modalRef;
+            }),
+            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
+            mergeMap(result => {
+                if (result === undefined) {
+                    return EMPTY;
+                }
+
+                return this.api.updateEndpoint(result);
             }),
             catchError(error => this.notify.error(error)),
         );
@@ -193,15 +222,12 @@ export class StartComponent implements OnDestroy, AfterViewInit {
         );
     }
 
-    public reset(): Observable<void> {
+    public extras(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.window.confirm(this.translate.instant('CONFIRM_RESET_CONFIGURATION'))),
-            mergeMap(result => {
-                if (!result) return of(void 0);
-
-                return this.api.reset();
+            mergeMap(() => {
+                const modalRef = this.modal.open(ExtrasEndpointFormComponent, { backdrop: 'static', scrollable: true });
+                return from(modalRef.result);
             }),
-            catchError(error => this.notify.error(error)),
         );
     }
 
@@ -224,7 +250,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public downloadDocument(): Observable<void> {
-        return from(this.selected()).pipe(
+        return from(this.store.selected).pipe(
             mergeMap(document =>
                 this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
@@ -233,15 +259,15 @@ export class StartComponent implements OnDestroy, AfterViewInit {
     }
 
     public deleteDocument(): Observable<void> {
-        if (this.selected().length === 0) {
+        if (this.store.selected.length === 0) {
             return EMPTY;
         }
 
-        return of(this.activeFavorites()).pipe(
+        return of(this.store.activeFavorites).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.selected(), activeFavorites);
-                    this.store.removeFavorites([...this.selected()]);
+                    this.favorites.remove(this.store.selected, activeFavorites);
+                    this.service.removeFavorites([...this.store.selected]);
                     return of(void 0);
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
@@ -249,13 +275,11 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                             this.window.confirm(
                                 stringFormat(
                                     this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                                    this.selected()
-                                        .map(item => item.idShort)
-                                        .join(', '),
+                                    this.store.selected.map(item => item.idShort).join(', '),
                                 ),
                             ),
                         ),
-                        mergeMap(result => from(result ? this.selected() : [])),
+                        mergeMap(result => from(result ? this.store.selected : [])),
                         mergeMap(document => this.api.delete(document.id, document.endpoint)),
                         catchError(error => this.notify.error(error)),
                     );
@@ -270,7 +294,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             submodels: [],
         };
 
-        for (const document of this.selected()) {
+        for (const document of this.store.selected) {
             const submodels = this.selectSubmodels(document, CustomerFeedback);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
@@ -293,7 +317,7 @@ export class StartComponent implements OnDestroy, AfterViewInit {
             submodels: [],
         };
 
-        for (const document of this.selected()) {
+        for (const document of this.store.selected) {
             const submodels = this.selectSubmodels(document, ZVEINameplate);
             if (submodels.length === 1) {
                 descriptor.submodels.push({
@@ -319,40 +343,36 @@ export class StartComponent implements OnDestroy, AfterViewInit {
                 filter = '';
             }
 
-            if (!this.activeFavorites) {
-                this.store.getFirstPage(filter);
+            if (!this.store.activeFavorites) {
+                this.service.getFirstPage(filter);
             } else {
-                this.store.setFilter(filter);
+                this.store.filterText$.set(filter);
             }
         } catch (error) {
             this.notify.error(error);
         }
     }
 
-    public setLimit(value: string | number): void {
-        this.store.getFirstPage(undefined, Number(value));
-    }
-
     public firstPage(): void {
-        this.store.getFirstPage();
+        this.service.getFirstPage();
     }
 
     public previousPage(): void {
-        this.store.getPreviousPage();
+        this.service.getPreviousPage();
     }
 
     public nextPage(): void {
-        this.store.getNextPage();
+        this.service.getNextPage();
     }
 
     public lastPage(): void {
-        this.store.getLastPage();
+        this.service.getLastPage();
     }
 
     public addToFavorites(): Observable<void> {
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this.selected()];
+                modalRef.componentInstance.documents = [...this.store.selected];
                 return from(modalRef.result);
             }),
             map(() => {

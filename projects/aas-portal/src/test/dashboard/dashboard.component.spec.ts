@@ -8,24 +8,23 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { EMPTY, of, Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthService, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
 import { WebSocketData } from 'aas-core';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
-import { DashboardChart, DashboardService } from '../../app/dashboard/dashboard.service';
 import { pages } from './test-pages';
 import { SelectionMode } from '../../app/types/selection-mode';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { ToolbarService } from '../../app/toolbar.service';
+import { DashboardChart } from '../../app/dashboard/dashboard.store';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
     let webSocketSubject: WebSocketSubject<WebSocketData>;
-    let service: DashboardService;
     let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
     let auth: jasmine.SpyObj<AuthService>;
     const chart1 = '42';
@@ -40,7 +39,13 @@ describe('DashboardComponent', () => {
         auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { ready: of(true) });
         auth.checkCookie.and.returnValue(of(true));
         auth.setCookie.and.returnValue(of(void 0));
-        auth.getCookie.and.returnValue(EMPTY);
+        auth.getCookie.and.callFake(name => {
+            if (name === '.DashboardPage') {
+                return of('Test');
+            }
+
+            return of(JSON.stringify(pages));
+        });
 
         TestBed.configureTestingModule({
             providers: [
@@ -83,10 +88,6 @@ describe('DashboardComponent', () => {
         fixture = TestBed.createComponent(DashboardComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-
-        service = TestBed.inject(DashboardService);
-        service.state = { pages: pages, index: 1 };
-        spyOn(service, 'save').and.returnValue(of(void 0));
     });
 
     it('should create', () => {
@@ -94,7 +95,7 @@ describe('DashboardComponent', () => {
     });
 
     it('shows the Test page', () => {
-        expect(component.activePage().name).toEqual('Test');
+        expect(component.activePage()).toEqual('Test');
     });
 
     it('displays two rows', () => {
@@ -237,9 +238,9 @@ describe('DashboardComponent', () => {
         });
 
         it('can delete the Test page', () => {
-            const name = component.activePage().name;
+            const name = component.activePage();
             component.delete();
-            expect(component.pages().find(item => item.name === name)).toBeUndefined();
+            expect(component.pages().find(item => item === name)).toBeUndefined();
         });
 
         it('can change the min value', () => {

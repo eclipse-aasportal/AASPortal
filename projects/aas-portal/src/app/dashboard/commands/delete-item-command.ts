@@ -7,23 +7,23 @@
  *****************************************************************************/
 
 import cloneDeep from 'lodash-es/cloneDeep';
-import { DashboardService, DashboardPage, DashboardItem } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
+import { DashboardItem, DashboardPage, DashboardStore } from '../dashboard.store';
 
 export class DeleteItemCommand extends DashboardCommand {
     public constructor(
-        dashboard: DashboardService,
+        store: DashboardStore,
         private page: DashboardPage,
         private items: DashboardItem[],
     ) {
-        super('Delete item', dashboard);
+        super('Delete item', store);
     }
 
     protected executing(): void {
         const page = cloneDeep(this.page);
         page.items = page.items.filter(item => this.items.find(i => i.id === item.id) == null);
-        const grid = this.dashboard.getGrid(page);
+        const grid = this.store.getGrid(page);
         this.validateItems(grid);
-        this.dashboard.update(page);
+        this.store.update(page);
     }
 }

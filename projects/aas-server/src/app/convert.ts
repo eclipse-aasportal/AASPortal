@@ -30,7 +30,11 @@ export function parseUrl(url: string): URL {
     }
 }
 
-export function urlToString(url: URL | string): string {
+export function urlToString(url: URL | string | undefined): string {
+    if (url === undefined) {
+        return '';
+    }
+
     const temp = new URL(url);
     temp.password = '';
     temp.username = '';

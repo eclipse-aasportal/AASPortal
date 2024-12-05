@@ -17,12 +17,14 @@ import { OpcuaClient } from './opcua/opcua-client.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { AASApiClientV1 } from './aas-server/aas-api-client-v1.js';
+import { HttpClient } from '../http-client.js';
 
 @singleton()
 export class AASResourceFactory {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
+        @inject(HttpClient) private readonly http: HttpClient,
     ) {}
 
     /**
@@ -35,24 +37,19 @@ export class AASResourceFactory {
             case 'AAS_API':
                 switch (endpoint.version) {
                     case 'v3':
-                        return new AASApiClientV3(this.logger, endpoint.url, endpoint.name);
+                        return new AASApiClientV3(this.logger, this.http, endpoint);
                     case 'v1':
-                        return new AASApiClientV1(this.logger, endpoint.url, endpoint.name);
+                        return new AASApiClientV1(this.logger, this.http, endpoint);
                     case 'v0':
-                        return new AASApiClientV0(this.logger, endpoint.url, endpoint.name);
+                        return new AASApiClientV0(this.logger, this.http, endpoint);
                     default:
                         throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                 }
             case 'OPC_UA':
-                return new OpcuaClient(this.logger, endpoint.url, endpoint.name);
+                return new OpcuaClient(this.logger, endpoint);
             case 'WebDAV':
             case 'FileSystem': {
-                return new AasxDirectory(
-                    this.logger,
-                    this.fileStorageProvider.get(endpoint.url),
-                    endpoint.url,
-                    endpoint.name,
-                );
+                return new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint);
             }
             default:
                 throw new Error('Not implemented.');
@@ -70,20 +67,20 @@ export class AASResourceFactory {
                 case 'AAS_API':
                     switch (endpoint.version) {
                         case 'v3':
-                            await new AASApiClientV3(this.logger, endpoint.url, endpoint.name).testAsync();
+                            await new AASApiClientV3(this.logger, this.http, endpoint).testAsync();
                             break;
                         case 'v1':
-                            await new AASApiClientV1(this.logger, endpoint.url, endpoint.name).testAsync();
+                            await new AASApiClientV1(this.logger, this.http, endpoint).testAsync();
                             break;
                         case 'v0':
-                            await new AASApiClientV0(this.logger, endpoint.url, endpoint.name).testAsync();
+                            await new AASApiClientV0(this.logger, this.http, endpoint).testAsync();
                             break;
                         default:
                             throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                     }
                     break;
                 case 'OPC_UA':
-                    await new OpcuaClient(this.logger, endpoint.url, endpoint.name).testAsync();
+                    await new OpcuaClient(this.logger, endpoint).testAsync();
                     break;
                 case 'WebDAV':
                 case 'FileSystem':
@@ -91,8 +88,7 @@ export class AASResourceFactory {
                         await new AasxDirectory(
                             this.logger,
                             this.fileStorageProvider.get(endpoint.url),
-                            endpoint.url,
-                            endpoint.name,
+                            endpoint,
                         ).testAsync();
                     }
                     break;

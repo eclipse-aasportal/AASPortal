@@ -6,16 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, AASContainer, aas } from 'aas-core';
-
-export function createContainer(url: string, documents: AASDocument[]): AASContainer {
-    return {
-        documents: documents,
-        url: url,
-        name: url,
-        type: 'AAS_API'
-    };
-}
+import { AASDocument, aas } from 'aas-core';
 
 export function createDocument(name: string, endpoint= "http://localhost/container1"): AASDocument {
     const document: AASDocument = {

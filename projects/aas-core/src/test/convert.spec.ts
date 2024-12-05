@@ -23,6 +23,7 @@ import {
     toBoolean,
     mimeTypeToExtension,
     extensionToMimeType,
+    isValidDate,
 } from '../lib/convert.js';
 
 describe('Convert', () => {
@@ -333,6 +334,20 @@ describe('Convert', () => {
         it('converts date "new Date(2023, 1, 27, 13, 14, 15, 16)"', () => {
             const date = new Date(2023, 1, 27, 13, 14, 15).toString();
             expect(parseDate(date)).toEqual(new Date(2023, 1, 27, 13, 14, 15));
+        });
+
+        it('converts "2023-03-22"', () => {
+            expect(parseDate('2023-03-22')).toEqual(new Date('2023-03-22'));
+        });
+    });
+
+    describe('isValidDate', () => {
+        it('indicates that IEC 61984 is invalid', () => {
+            expect(isValidDate(new Date('IEC 61984'))).toEqual(false);
+        });
+
+        it('indicates that 2023-03-22 is valid', () => {
+            expect(isValidDate(new Date('2023-03-22'))).toEqual(true);
         });
     });
 

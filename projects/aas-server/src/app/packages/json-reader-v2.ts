@@ -642,11 +642,11 @@ export class JsonReaderV2 extends AASReader {
         source: aasv2.DataSpecificationIec61360Content,
     ): aas.DataSpecificationIec61360 {
         if (!source.preferredName) {
-            throw new Error(`DataSpecificationIec61360.preferredName`);
+            throw new Error(`DataSpecificationIEC61360.preferredName`);
         }
 
         const iec61360: aas.DataSpecificationIec61360 = {
-            modelType: 'DataSpecificationIec61360',
+            modelType: 'DataSpecificationIEC61360',
             preferredName: this.readLangStringSet(source.preferredName),
         };
 

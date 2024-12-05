@@ -15,11 +15,15 @@ import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-index/lowdb/lowdb-index.js';
 import { LowDbData } from '../../../app/aas-index/lowdb/lowdb-types.js';
+import { KeywordDirectory } from 'projects/aas-server/src/app/aas-index/keyword-directory.js';
+import { Logger } from '../../../app/logging/logger.js';
 
 describe('LowDbIndex', () => {
     let index: LowDbIndex;
     let db: jest.Mocked<Low<LowDbData>>;
+    let logger: jest.Mocked<Logger>;
     let variable: jest.Mocked<Variable>;
+    let keywords: jest.Mocked<KeywordDirectory>;
     let dbData: LowDbData;
 
     beforeAll(async () => {
@@ -34,18 +38,20 @@ describe('LowDbIndex', () => {
     beforeEach(() => {
         db = createSpyObj<Low<LowDbData>>(['read', 'write'], { data: dbData });
         db.read.mockResolvedValue();
+        logger = createSpyObj<Logger>(['error', 'info']);
         variable = createSpyObj<Variable>([], { ENDPOINTS: [] });
-        index = new LowDbIndex(db, variable);
+        keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
+        index = new LowDbIndex(logger, variable, db, keywords);
     });
 
     it('should create', () => {
         expect(index).toBeTruthy();
     });
 
-    describe('getContainerDocuments', () => {
+    describe('nextPage', () => {
         it('returns all documents that belongs to a container', async () => {
-            const array = await index.getContainerDocuments('Samples');
-            expect(array).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));
+            const result = await index.nextPage('Samples', undefined);
+            expect(result.result).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));
         });
     });
 
@@ -57,7 +63,7 @@ describe('LowDbIndex', () => {
             expect(page.next).toBeDefined();
             let n = page.documents.length;
             while (page.next !== null) {
-                cursor = { ...cursor, next: getId(page.documents[page.documents.length - 1]) };
+                cursor = { ...cursor, next: page.next };
                 page = await index.getDocuments(cursor);
                 n += page.documents.length;
             }

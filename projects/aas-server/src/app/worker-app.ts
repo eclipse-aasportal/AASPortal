@@ -9,17 +9,17 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { WorkerData, isScanContainerData, isScanTemplatesData } from './aas-provider/worker-data.js';
-import { ScanResult, ScanResultType } from './aas-provider/scan-result.js';
+import { ScanResult, ScanResultKind } from './aas-provider/scan-result.js';
 import { toUint8Array } from './convert.js';
-import { ScanContainer } from './scan-container.js';
+import { EndpointScan } from './endpoint-scan.js';
 import { TemplateScan } from './template/template-scan.js';
+import { WorkerData, isScanEndpointData, isScanTemplatesData } from './aas-provider/worker-data.js';
 
 @singleton()
 export class WorkerApp {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
-        @inject(ScanContainer) private readonly scanContainer: ScanContainer,
+        @inject(EndpointScan) private readonly endpointScan: EndpointScan,
         @inject(TemplateScan) private readonly templateScan: TemplateScan,
     ) {}
 
@@ -27,11 +27,15 @@ export class WorkerApp {
         parentPort?.on('message', this.parentPortOnMessage);
     }
 
-    private parentPortOnMessage = async (data: WorkerData) => {
+    private readonly parentPortOnMessage = async (data: WorkerData) => {
+        if (parentPort === null) {
+            return;
+        }
+
         try {
             this.logger.start(`Scan ${data.taskId}`);
-            if (isScanContainerData(data)) {
-                await this.scanContainer.scanAsync(data);
+            if (isScanEndpointData(data)) {
+                await this.endpointScan.scanAsync(data);
             } else if (isScanTemplatesData(data)) {
                 await this.templateScan.scanAsync(data);
             }
@@ -39,13 +43,16 @@ export class WorkerApp {
             this.logger.error(error);
         } finally {
             this.logger.stop();
-            const result: ScanResult = {
-                taskId: data.taskId,
-                type: ScanResultType.End,
-                messages: this.logger.getMessages(),
-            };
-
-            parentPort?.postMessage(toUint8Array(result));
+            parentPort.postMessage(toUint8Array(this.createEndResult(data)));
         }
     };
+
+    private createEndResult(data: WorkerData): ScanResult {
+        return {
+            type: 'ScanEndResult',
+            taskId: data.taskId,
+            kind: ScanResultKind.End,
+            messages: this.logger.getMessages(),
+        };
+    }
 }

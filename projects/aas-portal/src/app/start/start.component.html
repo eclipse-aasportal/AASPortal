@@ -16,19 +16,18 @@
         <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
             <i class="bi bi-star"></i>
         </button>
-        <select #selectFavorites
-            [ngClass]="activeFavorites() !== '' ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
-            [value]="activeFavorites()" (change)="setActiveFavorites(selectFavorites.value)">
+        <select [ngClass]="activeFavorites() ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [(ngModel)]="activeFavorites">
             @for (option of favoritesLists(); track option; let i = $index) {
             @if (i === 0) {
-            <option class="fst-italic fw-light" [value]="''" translate>FAVORITES</option>
+            <option class="fst-italic fw-light" [value]="''" translate>Start.FAVORITES</option>
             } @else {
             <option class="fst-normal fw-normal" [value]="option">{{option}}</option>
             }
             }
         </select>
     </div>
-    @if (activeFavorites() === '') {
+    @if (!activeFavorites()) {
     <div class="input-group me-2 my-1">
         <button type="button" class="btn btn-primary" (click)="firstPage()">
             <i class="bi bi-chevron-bar-left"></i>
@@ -36,12 +35,12 @@
         <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <select #selectLimit class="form-select" [value]="limit()" (change)="setLimit(selectLimit.value)">
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
+        <select class="form-select" [(ngModel)]="limit">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="30">30</option>
+            <option [ngValue]="40">40</option>
+            <option [ngValue]="50">50</option>
         </select>
         <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage()">
             <i class="bi bi-chevron-right"></i>
@@ -53,13 +52,14 @@
     }
     <div class="btn-group me-2 my-1">
         <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints">
-                <i class="bi bi-gear"></i>
+            <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints" translate>
+                Start.ENDPOINT
             </button>
             <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
-                <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>CMD_ADD_ENDPOINT</button>
-                <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>CMD_REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="reset().subscribe()" translate>CMD_RESET_CONFIGURATION</button>
+                <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>Start.ADD_ENDPOINT</button>
+                <button ngbDropdownItem (click)="updateEndpoint().subscribe()" translate>Start.UPDATE_ENDPOINT</button>
+                <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>Start.REMOVE_ENDPOINT</button>
+                <button ngbDropdownItem (click)="extras().subscribe()" translate>Start.EXTRAS</button>
             </div>
         </div>
     </div>
@@ -78,14 +78,14 @@
     </div>
     <div class="btn-group me-2 my-1" id="viewModeGroup">
         <input type="radio" [value]="'list'" class="btn-check" id="viewModeList" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('list')" [checked]="viewMode() === 'list'">
+            [(ngModel)]="viewMode">
         <label class="btn btn-primary" for="viewModeList">
             <i class="bi bi-list"></i>
         </label>
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
-            (change)="setViewMode('tree')" [checked]="viewMode() === 'tree'">
-        <label class="btn btn-primary" for="viewModeTree">
-            <i class="bi bi-diagram-3"></i>
+            [(ngModel)]="viewMode">
+        <label class=" btn btn-primary" for="viewModeTree">
+        <i class="bi bi-diagram-3"></i>
         </label>
     </div>
     <div class="btn-group me-2 my-1">
@@ -105,7 +105,7 @@
             <i class="bi bi-filter"></i>
         </div>
         <input #textInput type="text" class="form-control" [value]="filterText()"
-            [placeholder]="'PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
+            [placeholder]="'Start.PLACEHOLDER_FILTER' | translate" (change)="setFilter(textInput.value)"
             (keydown.enter)="textInput.blur()">
     </div>
 </ng-template>

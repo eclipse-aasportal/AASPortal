@@ -6,33 +6,38 @@
  *
  *****************************************************************************/
 
-import http, { IncomingMessage } from 'http';
 import { createSpyObj } from 'fhg-jest';
 import env from '../../assets/aas-environment.js';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { AASApiClientV3, OperationResult } from '../../../app/packages/aas-server/aas-api-client-v3.js';
 import { aas, DifferenceItem } from 'aas-core';
-import { Socket } from 'net';
 import { Logger } from '../../../app/logging/logger.js';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
+import { HttpClient } from '../../../app/http-client.js';
 
-describe('AASApiClientV3', function () {
+describe('AASApiClientV3', () => {
     let logger: Logger;
     let client: AASApiClientV3;
+    let http: jest.Mocked<HttpClient>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        client = new AASApiClientV3(logger, 'http://localhost:1234', 'AASX Server');
+        http = createSpyObj<HttpClient>(['get', 'getResponse', 'post', 'put', 'delete']);
+        client = new AASApiClientV3(logger, http, {
+            name: 'AASX Server',
+            type: 'AAS_API',
+            url: 'http://localhost:1234',
+        });
     });
 
-    describe('resolveNodeId', function () {
+    describe('resolveNodeId', () => {
         let shell: jest.Mocked<aas.AssetAdministrationShell>;
 
-        beforeEach(function () {
+        beforeEach(() => {
             shell = createSpyObj<aas.AssetAdministrationShell>({}, { id: 'http://localhost/test/aas' });
         });
 
-        it('returns the URL to "property1"', function () {
+        it('returns the URL to "property1"', () => {
             const aasId = Buffer.from('http://localhost/test/aas').toString('base64url');
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
             const nodeId = smId + '.submodel1/property1';
@@ -42,11 +47,11 @@ describe('AASApiClientV3', function () {
         });
     });
 
-    describe('commitAsync', function () {
+    describe('commitAsync', () => {
         let source: aas.Environment;
         let destination: aas.Environment;
 
-        beforeEach(async function () {
+        beforeEach(async () => {
             source = env;
             destination = cloneDeep(source);
         });
@@ -55,17 +60,8 @@ describe('AASApiClientV3', function () {
             jest.restoreAllMocks();
         });
 
-        it('inserts a submodel', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push('Submodel inserted.');
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 201;
-                stream.statusMessage = 'Created';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
+        it('inserts a submodel', async () => {
+            http.post.mockResolvedValue('Submodel inserted.');
             const diffs: DifferenceItem[] = [
                 {
                     type: 'inserted',
@@ -76,17 +72,8 @@ describe('AASApiClientV3', function () {
             await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
         });
 
-        it('inserts a submodel-element', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push('SubmodelElement inserted.');
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 201;
-                stream.statusMessage = 'Created';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
+        it('inserts a submodel-element', async () => {
+            http.post.mockResolvedValue('SubmodelElement inserted.');
             const diffs: DifferenceItem[] = [
                 {
                     type: 'inserted',
@@ -101,17 +88,8 @@ describe('AASApiClientV3', function () {
             ]);
         });
 
-        it('updates a submodel', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push('Submodel updated.');
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 200;
-                stream.statusMessage = 'OK';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
+        it('updates a submodel', async () => {
+            http.put.mockResolvedValue('Submodel updated.');
             const diffs: DifferenceItem[] = [
                 {
                     type: 'changed',
@@ -123,17 +101,8 @@ describe('AASApiClientV3', function () {
             await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
         });
 
-        it('updates a submodel-element', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push('SubmodelElement updated.');
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 200;
-                stream.statusMessage = 'OK';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
+        it('updates a submodel-element', async () => {
+            http.put.mockResolvedValue('SubmodelElement updated.');
             const diffs: DifferenceItem[] = [
                 {
                     type: 'changed',
@@ -147,17 +116,8 @@ describe('AASApiClientV3', function () {
             await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
         });
 
-        it('deletes a submodel', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push('Submodel deleted.');
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 204;
-                stream.statusMessage = 'No Content';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
+        it('deletes a submodel', async () => {
+            http.delete.mockResolvedValue('Submodel deleted.');
             const diffs: DifferenceItem[] = [
                 {
                     type: 'deleted',
@@ -168,17 +128,8 @@ describe('AASApiClientV3', function () {
             await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
         });
 
-        it('deletes a submodel-element', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push('SubmodelElement deleted.');
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 204;
-                stream.statusMessage = 'No Content';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
+        it('deletes a submodel-element', async () => {
+            http.delete.mockResolvedValue('SubmodelElement deleted.');
             const diffs: DifferenceItem[] = [
                 {
                     type: 'deleted',
@@ -191,22 +142,14 @@ describe('AASApiClientV3', function () {
         });
     });
 
-    describe('invoke', function () {
-        it('invokes an operation synchronously', async function () {
+    describe('invoke', () => {
+        it('invokes an operation synchronously', async () => {
             const result: OperationResult = {
                 executionState: 'Completed',
                 success: true,
             };
 
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify(result));
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 204;
-                stream.statusMessage = 'No Content';
-                return new http.ClientRequest('http://localhost:1234');
-            });
+            http.post.mockResolvedValue(JSON.stringify(result));
 
             const operation: aas.Operation = {
                 idShort: 'noop',
@@ -220,44 +163,13 @@ describe('AASApiClientV3', function () {
             await expect(client.invoke(env, operation)).resolves.toEqual(operation);
         });
 
-        it('throws an error if the server returns with status code 500', async function () {
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 500;
-                stream.statusMessage = 'Internal server error.';
-                return new http.ClientRequest('http://localhost:1234');
-            });
-
-            const operation: aas.Operation = {
-                idShort: 'noop',
-                modelType: 'Operation',
-                parent: {
-                    type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
-                },
-            };
-
-            await expect(client.invoke(env, operation)).rejects.toThrowError();
-        });
-
-        it('throws an error if the operation fails', async function () {
+        it('throws an error if the operation fails', async () => {
             const result: OperationResult = {
-                messages: [{ messageType: 'Error', text: 'Operation failed.' }],
                 executionState: 'Failed',
                 success: false,
             };
 
-            jest.spyOn(http, 'request').mockImplementation((options, callback) => {
-                const stream = new IncomingMessage(new Socket());
-                stream.push(JSON.stringify(result));
-                stream.push(null);
-                (callback as (res: IncomingMessage) => void)(stream);
-                stream.statusCode = 204;
-                stream.statusMessage = 'No Content';
-                return new http.ClientRequest('http://localhost:1234');
-            });
+            http.post.mockResolvedValue(JSON.stringify(result));
 
             const operation: aas.Operation = {
                 idShort: 'noop',

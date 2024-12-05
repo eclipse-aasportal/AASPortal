@@ -3,11 +3,12 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./build",
-        "noImplicitAny": true,
+        "declaration": false,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "skipLibCheck": true,
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
-        "useUnknownInCatchVariables": false,
         "lib": [
             "ES2022"
         ],

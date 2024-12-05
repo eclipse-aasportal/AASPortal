@@ -36,7 +36,7 @@ export class HttpSubscription extends SocketSubscription {
         if (!this.timeoutId) {
             this.timeoutId = setTimeout(this.readValues.bind(this), 10);
         } else {
-            this.logger.debug(`The subscription ${this.server.url} is already open.`);
+            this.logger.debug(`The subscription ${this.server.endpoint} is already open.`);
         }
     }
 

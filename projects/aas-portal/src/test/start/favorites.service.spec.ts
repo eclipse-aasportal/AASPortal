@@ -91,51 +91,35 @@ describe('FavoritesService', () => {
     });
 
     describe('add', () => {
-        it('adds a new favorites list', (done: DoneFn) => {
-            service.add([], 'New Favorites').subscribe(() => {
-                expect(auth.setCookie).toHaveBeenCalledWith(
-                    '.Favorites',
-                    JSON.stringify([{ ...favorites[0] }, { name: 'New Favorites', documents: [] }] as FavoritesList[]),
-                );
-
-                done();
-            });
+        it('adds a new favorites list', () => {
+            service.add([], 'New Favorites');
+            expect(service.lists().map(item => item.name)).toEqual(['My Favorites', 'New Favorites']);
         });
 
-        it('renames a favorites list', (done: DoneFn) => {
-            service.add([], 'My Favorites', 'New Favorites').subscribe(() => {
-                expect(auth.setCookie).toHaveBeenCalledWith(
-                    '.Favorites',
-                    JSON.stringify([{ name: 'New Favorites', documents: favorites[0].documents }] as FavoritesList[]),
-                );
-
-                done();
-            });
+        it('renames a favorites list', () => {
+            service.add([], 'My Favorites', 'Renamed Favorites');
+            expect(service.lists().map(item => item.name)).toEqual(['Renamed Favorites']);
         });
     });
 
     describe('delete', () => {
-        it('deletes "My Favorites"', (done: DoneFn) => {
-            service.delete('My Favorites').subscribe(() => {
-                expect(auth.deleteCookie).toHaveBeenCalledWith('.Favorites');
-                done();
-            });
+        it('deletes "My Favorites"', () => {
+            service.delete('My Favorites');
+            expect(service.lists().length).toEqual(0);
         });
     });
 
     describe('remove', () => {
-        it('removes a favorite', (done: DoneFn) => {
-            service.remove([favorite], 'My Favorites').subscribe(() => {
-                expect(auth.setCookie).toHaveBeenCalledWith(
-                    '.Favorites',
-                    JSON.stringify([
-                        {
-                            name: 'My Favorites',
-                            documents: [],
-                        },
-                    ]),
-                );
+        it('removes a favorite', () => {
+            service.remove([favorite], 'My Favorites');
+            expect(service.lists().find(item => item.name === 'My Favorites')?.documents).toEqual([]);
+        });
+    });
 
+    describe('save', () => {
+        it('saves the current favorites lists', (done: DoneFn) => {
+            service.save().subscribe(() => {
+                expect(auth.setCookie).toHaveBeenCalledWith('.Favorites', JSON.stringify(favorites));
                 done();
             });
         });

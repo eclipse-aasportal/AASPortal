@@ -21,13 +21,13 @@ import { AASDocument, aas, noop } from 'aas-core';
 import { AASComponent } from '../../app/aas/aas.component';
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { DashboardPage, DashboardService } from '../../app/dashboard/dashboard.service';
-import { DashboardChartType } from '../../app/dashboard/dashboard.service';
 import { Router, provideRouter } from '@angular/router';
 import { Component, input, output, signal } from '@angular/core';
 import { AASApiService } from '../../app/aas/aas-api.service';
 import { ToolbarService } from '../../app/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
+import { DashboardService } from '../../app/dashboard/dashboard.service';
+import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.store';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -81,8 +81,8 @@ describe('AASComponent', () => {
         api = jasmine.createSpyObj<AASApiService>(['getDocument', 'putDocument']);
         download = jasmine.createSpyObj<DownloadService>(['downloadDocument', 'downloadFileAsync', 'uploadDocuments']);
         dashboard = jasmine.createSpyObj<DashboardService>(['add'], {
-            activePage: signal(pages[0]),
-            pages: signal(pages),
+            activePage: signal(pages[0].name),
+            pages: signal(pages.map(page => page.name)),
         });
 
         TestBed.configureTestingModule({
@@ -137,7 +137,7 @@ describe('AASComponent', () => {
         component = fixture.componentInstance;
         store = TestBed.inject(AASStore);
         router = TestBed.inject(Router);
-        store.setDocument(sampleDocument);
+        store.document$.set(sampleDocument);
         fixture.detectChanges();
     });
 

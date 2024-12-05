@@ -703,7 +703,7 @@ export class JsonReaderV3 extends AASReader {
         let dataSpecificationContent: aas.DataSpecificationContent;
         if (
             !source.dataSpecificationContent.modelType ||
-            source.dataSpecificationContent.modelType === 'DataSpecificationIec61360'
+            source.dataSpecificationContent.modelType === 'DataSpecificationIEC61360'
         ) {
             dataSpecificationContent = this.readDataSpecificationIEC61360(
                 source.dataSpecificationContent as aas.DataSpecificationIec61360,

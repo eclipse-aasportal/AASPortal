@@ -6,16 +6,22 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbCollapse, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASEndpoint, AASEndpointType, stringFormat } from 'aas-core';
+import { AASEndpoint, AASEndpointScheduleType, AASEndpointType, stringFormat } from 'aas-core';
+
+export interface HeaderItem {
+    id: string;
+    name: string;
+    value: string;
+}
 
 export interface EndpointItem {
-    name: string;
     type: AASEndpointType;
     value: string;
+    placeholder: string;
 }
 
 @Component({
@@ -23,53 +29,86 @@ export interface EndpointItem {
     templateUrl: './add-endpoint-form.component.html',
     styleUrls: ['./add-endpoint-form.component.scss'],
     standalone: true,
-    imports: [NgbToast, NgbDropdownModule, TranslateModule, FormsModule],
+    imports: [NgbToast, NgbDropdownModule, NgbCollapse, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEndpointFormComponent {
     private readonly endpoints = signal<AASEndpoint[]>([]);
-    public readonly _messages = signal<string[]>([]);
+    private readonly _messages = signal<string[]>([]);
+    private _selectedItemIndex = signal(0);
+    private readonly _items = signal<EndpointItem[]>([
+        {
+            type: 'AAS_API',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_HTTP',
+        },
+        {
+            type: 'OPC_UA',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_OPCUA',
+        },
+        {
+            type: 'WebDAV',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_WEBDAV',
+        },
+        {
+            type: 'FileSystem',
+            value: '',
+            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_FILE',
+        },
+    ]);
+
+    private readonly _selectedHeaderIndex = signal(-1);
+    private readonly _headers = signal<HeaderItem[]>([{ id: '1', name: '', value: '' }]);
 
     public constructor(
         private modal: NgbActiveModal,
         private translate: TranslateService,
     ) {}
 
-    public readonly messages = this._messages.asReadonly();
-
     public readonly name = signal('');
 
-    public readonly items = signal<EndpointItem[]>([
-        {
-            name: this.translate.instant('AASEndpointType.AAS_API'),
-            type: 'AAS_API',
-            value: 'http://',
-        },
-        {
-            name: this.translate.instant('AASEndpointType.OPC_UA'),
-            type: 'OPC_UA',
-            value: 'opc.tcp://',
-        },
-        {
-            name: this.translate.instant('AASEndpointType.WebDAV'),
-            type: 'WebDAV',
-            value: 'http://',
-        },
-        {
-            name: this.translate.instant('AASEndpointType.FileSystem'),
-            type: 'FileSystem',
-            value: 'file:///',
-        },
-    ]).asReadonly();
+    public readonly messages = this._messages.asReadonly();
 
-    public readonly item = signal(this.items()[0]);
+    public readonly items = this._items.asReadonly();
+
+    public readonly selectedItem = computed(() => this._items()[this._selectedItemIndex()]);
+
+    public readonly schedule = signal<AASEndpointScheduleType>('every');
+
+    public readonly minutes = signal(0);
+
+    public readonly hours = signal(1);
+
+    public readonly headers = this._headers.asReadonly();
+
+    public readonly isCollapsed = signal(true);
+
+    public readonly selectedHeader = computed(() =>
+        this._selectedHeaderIndex() < 0 ? undefined : this._headers()[this._selectedHeaderIndex()],
+    );
 
     public initialize(endpoints: AASEndpoint[]): void {
         this.endpoints.set(endpoints);
     }
 
-    public setItem(value: EndpointItem): void {
-        this.item.set(value);
+    public selectItem(value: EndpointItem): void {
+        this._selectedItemIndex.set(this._items().indexOf(value));
+        this.clearMessages();
+    }
+
+    public selectHeader(value: HeaderItem): void {
+        this._selectedHeaderIndex.update(state => {
+            const index = this._headers().indexOf(value);
+            if (state >= 0 && index === state) {
+                this.updateHeaders();
+                return -1;
+            }
+
+            return index;
+        });
+
         this.clearMessages();
     }
 
@@ -78,17 +117,39 @@ export class AddEndpointFormComponent {
     }
 
     public submit(): void {
+        const selectedItem = this.selectedItem();
+        if (selectedItem === undefined) {
+            return;
+        }
+
         this.clearMessages();
         const name = this.validateName();
-        const url = this.validateUrl(this.item().value.trim());
+        const url = this.validateUrl(selectedItem.value.trim(), selectedItem.type);
         if (name && url) {
             const version = url.searchParams.get('version');
             url.search = '';
-            const endpoint: AASEndpoint = { url: url.href, name, type: this.item().type };
+            const endpoint: AASEndpoint = { url: url.href, name, type: selectedItem.type };
             if (version) {
                 endpoint.version = version;
-            } else if (this.item().type === 'AAS_API') {
+            } else if (selectedItem.type === 'AAS_API') {
                 endpoint.version = 'v3';
+            }
+
+            switch (this.schedule()) {
+                case 'disabled':
+                case 'manual':
+                case 'once':
+                    endpoint.schedule = { type: this.schedule() };
+                    break;
+                default:
+                    endpoint.schedule = { type: 'every', values: [(this.hours() * 60 + this.minutes()) * 60000] };
+                    break;
+            }
+
+            const headers = this.headers().filter(header => header.name && header.value);
+            if (headers.length > 0) {
+                endpoint.headers = {};
+                headers.forEach(header => (endpoint.headers![header.name] = header.value));
             }
 
             this.modal.close(endpoint);
@@ -126,10 +187,10 @@ export class AddEndpointFormComponent {
         return name;
     }
 
-    private validateUrl(value: string): URL | undefined {
+    private validateUrl(value: string, type: AASEndpointType): URL | undefined {
         try {
             const url = new URL(value);
-            switch (this.item().type) {
+            switch (type) {
                 case 'AAS_API':
                     this.validateAASApiEndpoint(url);
                     break;
@@ -146,11 +207,7 @@ export class AddEndpointFormComponent {
 
             return url;
         } catch (error) {
-            this._messages.update(messages => [
-                ...messages,
-                this.createMessage('ERROR_INVALID_URL', this.item().value),
-            ]);
-
+            this._messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', value)]);
             return undefined;
         }
     }
@@ -162,6 +219,10 @@ export class AddEndpointFormComponent {
     private validateAASApiEndpoint(url: URL): void {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
             throw new Error('Protocol "http:" or "https:" expected.');
+        }
+
+        if (!url.hostname) {
+            throw new Error('Empty host name.');
         }
     }
 
@@ -184,8 +245,8 @@ export class AddEndpointFormComponent {
             throw new Error('Protocol "opc.tcp:" expected.');
         }
 
-        if (url.pathname === '//' || url.pathname === '/') {
-            throw new Error('Empty pathname.');
+        if (!url.hostname) {
+            throw new Error('Empty host name.');
         }
     }
 
@@ -194,8 +255,23 @@ export class AddEndpointFormComponent {
             throw new Error('Protocol "http:" or "https:" expected.');
         }
 
-        if (url.pathname === '/') {
-            throw new Error('Empty pathname.');
+        if (!url.hostname) {
+            throw new Error('Empty host name.');
         }
+    }
+
+    private updateHeaders(): void {
+        this._headers.update(state => {
+            let index = 1;
+            const items: HeaderItem[] = [];
+            for (const item of state) {
+                if (item.name || item.value) {
+                    items.push({ ...item, id: String(index++) });
+                }
+            }
+
+            items.push({ id: String(index++), name: '', value: '' });
+            return items;
+        });
     }
 }

@@ -8,40 +8,35 @@
 
 import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
-import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
+import { AASApiClient, AASLabel } from '../packages/aas-server/aas-api-client.js';
 import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
+import { PagedResult } from '../types/paged-result.js';
 
 export class AASServerScan extends AASResourceScan {
     private readonly logger: Logger;
-    private readonly server: AASApiClient;
+    private readonly client: AASApiClient;
 
     public constructor(logger: Logger, server: AASApiClient) {
         super();
 
         this.logger = logger;
-        this.server = server;
+        this.client = server;
     }
 
-    public async scanAsync(): Promise<AASDocument[]> {
-        try {
-            await this.server.openAsync();
-            const documents: AASDocument[] = [];
-            const ids = new Set(await this.server.getShellsAsync());
-            for (const id of ids) {
-                try {
-                    const aasPackage = new AASServerPackage(this.logger, this.server, id);
-                    const document = await aasPackage.createDocumentAsync();
-                    documents.push(document);
-                    this.emit('scanned', document);
-                } catch (error) {
-                    this.emit('error', error, this.server, id);
-                }
-            }
+    protected override open(): Promise<void> {
+        return this.client.openAsync();
+    }
+    protected override close(): Promise<void> {
+        return this.client.closeAsync();
+    }
 
-            return documents;
-        } finally {
-            await this.server.closeAsync();
-        }
+    protected override createDocument(id: AASLabel): Promise<AASDocument> {
+        const aasPackage = new AASServerPackage(this.logger, this.client, id.id, id.idShort);
+        return aasPackage.createDocumentAsync();
+    }
+
+    protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {
+        return this.client.getShellsAsync(cursor);
     }
 }

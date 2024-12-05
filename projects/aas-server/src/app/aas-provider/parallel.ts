@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
 
-import { ScanResultType, ScanResult } from './scan-result.js';
+import { ScanResultKind, ScanResult } from './scan-result.js';
 import { WorkerData } from './worker-data.js';
 import { Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
@@ -53,10 +53,13 @@ class WorkerTask extends EventEmitter {
 
     private workerOnMessage = (value: Uint8Array) => {
         const result: ScanResult = JSON.parse(Buffer.from(value).toString());
-        if (result.type === ScanResultType.End) {
-            this.emit('end', this, result);
-        } else {
-            this.emit('message', result);
+        switch (result.kind) {
+            case ScanResultKind.End:
+                this.emit('end', result, this);
+                break;
+            default:
+                this.emit('message', result);
+                break;
         }
     };
 
@@ -127,7 +130,7 @@ export class Parallel extends EventEmitter {
         this.emit('message', result);
     };
 
-    private taskOnEnd = (task: WorkerTask, result: ScanResult) => {
+    private taskOnEnd = (result: ScanResult, task: WorkerTask) => {
         this.emit('end', result);
 
         if (task) {

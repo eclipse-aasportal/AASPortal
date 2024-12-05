@@ -8,9 +8,8 @@
 
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { AASDocument, ApplicationError, stringFormat } from 'aas-core';
+import { AASDocument, stringFormat } from 'aas-core';
 import { FavoritesService } from '../favorites.service';
-import { from, mergeMap, of, tap } from 'rxjs';
 import { messageToString } from 'aas-lib';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -34,6 +33,7 @@ interface FavoritesItem {
 })
 export class FavoritesFormComponent {
     private _items = signal<FavoritesItem[]>([]);
+    private _messages = signal<string[]>([]);
 
     public constructor(
         private readonly modal: NgbActiveModal,
@@ -70,30 +70,34 @@ export class FavoritesFormComponent {
         this._items.set(items);
     }
 
-    public messages: string[] = [];
+    public readonly messages = this._messages.asReadonly();
 
     public documents: AASDocument[] = [];
 
     public readonly items = computed(() => this._items().filter(item => item.delete === false));
 
-    public get text(): string {
+    public readonly text = computed(() => {
         const selectedItem = this._items().find(item => item.selected);
-        if (!selectedItem || this.documents.length === 0) {
+        if (selectedItem === undefined) {
             return '';
         }
 
+        if (this.documents.length === 0) {
+            return stringFormat(this.translate.instant('FavoritesForm.COUNT'), selectedItem.length);
+        }
+
         if (this.documents.length === 1) {
-            return this.translate.instant('TEXT_ADD_FAVORITE', selectedItem.length);
+            return stringFormat(this.translate.instant('TEXT_ADD_FAVORITE'), selectedItem.length);
         }
 
         return stringFormat(this.translate.instant('TEXT_ADD_FAVORITES'), this.documents.length, selectedItem.length);
-    }
+    });
 
     public delete(item: FavoritesItem): void {
         if (item.added) {
             this._items.update(items => items.filter(value => value !== item));
         } else {
-            item.delete = true;
+            this._items.update(items => items.map(i => (i === item ? { ...i, delete: true } : i)));
         }
     }
 
@@ -120,37 +124,39 @@ export class FavoritesFormComponent {
     }
 
     public selected(target: EventTarget | null, item: FavoritesItem): void {
-        if (!item.selected) {
-            this._items().forEach(i => (i.selected = false));
-            item.selected = (target as HTMLInputElement).checked;
-        }
+        this._items.update(state =>
+            state.map(i => {
+                i.selected = i === item ? (target as HTMLInputElement).checked : false;
+                return i;
+            }),
+        );
     }
 
     public submit(): void {
         this.clearMessages();
+        this.checkNames();
+        if (this.messages.length > 0) {
+            return;
+        }
 
-        of(this._items())
-            .pipe(
-                tap(items => this.checkNames(items)),
-                mergeMap(items => from(items)),
-                mergeMap(item => {
-                    if (item.selected) {
-                        if (item.added || item.id === item.name) {
-                            return this.favorites.add(this.documents, item.name);
-                        } else {
-                            return this.favorites.add(this.documents, item.id, item.name);
-                        }
-                    } else if (item.delete) {
-                        return this.favorites.delete(item.name);
-                    }
+        for (const item of this._items()) {
+            if (item.delete) {
+                this.favorites.delete(item.name);
+            } else if (item.selected) {
+                if (item.id !== item.name) {
+                    this.favorites.add(this.documents, item.id, item.name);
+                } else if (this.documents.length > 0) {
+                    this.favorites.add(this.documents, item.id);
+                }
+            } else if (item.id !== item.name) {
+                this.favorites.add([], item.id, item.name);
+            }
+        }
 
-                    return of(void 0);
-                }),
-            )
-            .subscribe({
-                complete: () => this.modal.close(),
-                error: error => this.messages.push(messageToString(error, this.translate)),
-            });
+        this.favorites.save().subscribe({
+            complete: () => this.modal.close(),
+            error: error => this._messages.update(state => [...state, messageToString(error, this.translate)]),
+        });
     }
 
     public cancel(): void {
@@ -169,21 +175,25 @@ export class FavoritesFormComponent {
         throw new Error('Invalid operation.');
     }
 
-    private checkNames(items: FavoritesItem[]): void {
+    private checkNames(): void {
         const set = new Set<string>();
-        for (const item of items) {
+        for (const item of this._items()) {
             item.name = item.name.trim();
-
             if (!item.name) {
-                throw new ApplicationError(`Invalid empty name.`, 'ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME');
+                this._messages.update(state => [
+                    ...state,
+                    this.translate.instant('FavoritesForm.ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME'),
+                ]);
             }
 
             if (set.has(item.name)) {
-                throw new ApplicationError(
-                    `"${item.name}" is used several times.`,
-                    'ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES',
-                    item.name,
-                );
+                this._messages.update(state => [
+                    ...state,
+                    stringFormat(
+                        this.translate.instant('FavoritesForm.ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES'),
+                        item.name,
+                    ),
+                ]);
             }
 
             set.add(item.name);
@@ -191,8 +201,8 @@ export class FavoritesFormComponent {
     }
 
     private clearMessages(): void {
-        if (this.messages.length > 0) {
-            this.messages = [];
+        if (this._messages.length > 0) {
+            this._messages.set([]);
         }
     }
 }

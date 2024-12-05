@@ -7,12 +7,25 @@
  *****************************************************************************/
 
 import { RowDataPacket } from 'mysql2/promise';
-import { AASEndpoint, AASDocument } from 'aas-core';
+import { AASEndpointType } from 'aas-core';
 
-export interface MySqlEndpoint extends AASEndpoint, RowDataPacket {}
+export interface MySqlEndpoint extends RowDataPacket {
+    name: string;
+    url: string;
+    type: AASEndpointType;
+    version: string | null;
+    headers: string | null;
+    schedule: string | null;
+}
 
-export interface MySqlDocument extends AASDocument, RowDataPacket {
+export interface MySqlDocument extends RowDataPacket {
     uuid: string;
+    address: string;
+    crc32: number;
+    idShort: string;
+    assetId: string | null;
+    thumbnail: string | null;
+    timestamp: number;
 }
 
 export interface MySqlElement extends RowDataPacket {
@@ -27,5 +40,5 @@ export interface MySqlElement extends RowDataPacket {
 }
 
 export interface DocumentCount extends RowDataPacket {
-    count: number;
+    'COUNT(*)': number;
 }
