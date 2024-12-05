@@ -4,16 +4,22 @@
     "compilerOptions": {
         "baseUrl": "./",
         "target": "ES2022",
-        "useDefineForClassFields": false,
+        "module": "NodeNext",
+        "moduleResolution": "nodenext",
         "forceConsistentCasingInFileNames": true,
         "strict": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
         "noImplicitOverride": true,
+        "noImplicitReturns": true,
         "sourceMap": true,
         "downlevelIteration": true,
         "experimentalDecorators": true,
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
+        "useDefineForClassFields": false,
+        "useUnknownInCatchVariables": false,
     },
     "ts-node": {
         "esm": true
