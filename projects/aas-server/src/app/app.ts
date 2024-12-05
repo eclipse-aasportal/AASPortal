@@ -20,7 +20,6 @@ import { RegisterRoutes } from './routes/routes.js';
 import { ERRORS } from './errors.js';
 import { Variable } from './variable.js';
 import { Logger } from './logging/logger.js';
-import multer from 'multer';
 
 @singleton()
 export class App {
@@ -65,7 +64,7 @@ export class App {
             return res.send(swaggerUi.generateHTML(this.swaggerDoc));
         });
 
-        RegisterRoutes(this.app, { multer: multer({ dest: './temp' }) });
+        RegisterRoutes(this.app);
 
         this.app.get('/', this.getIndex);
         this.app.use(express.static(this.variable.WEB_ROOT));
