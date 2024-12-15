@@ -7,26 +7,32 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { nameplate } from './digital-nameplate-document';
-import { DigitalNameplateComponent } from '../../lib/digital-nameplate/digital-nameplate.component';
 import { Location } from '@angular/common';
+import { provideRouter } from '@angular/router';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-describe('DigitalNameplateComponent', () => {
-    let component: DigitalNameplateComponent;
-    let fixture: ComponentFixture<DigitalNameplateComponent>;
+import { DigitalPassportPortalComponent } from '../../lib/digital-passport-portal/digital-passport-portal.component';
+import { provideHttpClient } from '@angular/common/http';
+
+describe('DigitalPassportPortalComponent', () => {
+    let component: DigitalPassportPortalComponent;
+    let fixture: ComponentFixture<DigitalPassportPortalComponent>;
     let location: jasmine.SpyObj<Location>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         location = jasmine.createSpyObj<Location>(['getState']);
-        location.getState.and.returnValue({ data: JSON.stringify([nameplate]) });
+        location.getState.and.returnValue({});
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: Location,
                     useValue: location,
                 },
+                provideRouter([]),
+                provideHttpClient(),
+                provideHttpClientTesting(),
             ],
             imports: [
                 TranslateModule.forRoot({
@@ -36,18 +42,14 @@ describe('DigitalNameplateComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
-        fixture = TestBed.createComponent(DigitalNameplateComponent);
+        fixture = TestBed.createComponent(DigitalPassportPortalComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('provides a "ManufacturerName" property', function () {
-        expect(component.nameplates()[0].manufacturerName).toEqual('Muster AG');
     });
 });

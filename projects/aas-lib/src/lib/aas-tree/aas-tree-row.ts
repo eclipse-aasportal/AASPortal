@@ -15,6 +15,7 @@ import {
     extensionToMimeType,
     getAbbreviation,
     getLocaleValue,
+    getSemanticId,
     isAnnotatedRelationshipElement,
     isAssetAdministrationShell,
     isBlob,
@@ -37,10 +38,10 @@ import {
     toLocale,
 } from 'aas-core';
 
-import { resolveSemanticId, supportedSubmodelTemplates } from '../submodel-template/submodel-template';
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../convert';
 import { signal, WritableSignal } from '@angular/core';
+import { findRoute } from '../views/submodel-template';
 
 export class AASTreeRow extends TreeNode<aas.Referable> {
     public constructor(
@@ -377,7 +378,7 @@ class TreeInitialize {
         }
 
         if (isSubmodel(referable)) {
-            const sid = this.getSemanticId(referable);
+            const sid = getSemanticId(referable);
             return sid ? `Semantic ID: ${sid}` : '-';
         }
 
@@ -434,17 +435,17 @@ class TreeInitialize {
         return '-';
     }
 
-    private getSemanticId(hasSematics: aas.HasSemantics): string {
-        return this.referenceToString(hasSematics?.semanticId);
-    }
-
     private referenceToString(reference: aas.Reference | undefined): string {
         return reference?.keys.map(key => key.value).join('.') ?? '-';
     }
 
     private hasSpecificSemantic(submodel: aas.Submodel): boolean {
-        const sematicId = resolveSemanticId(submodel);
-        return sematicId != null && supportedSubmodelTemplates.has(sematicId);
+        const sematicId = getSemanticId(submodel);
+        if (sematicId === undefined) {
+            return false;
+        }
+
+        return findRoute(sematicId) !== undefined;
     }
 }
 

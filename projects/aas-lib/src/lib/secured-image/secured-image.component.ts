@@ -16,6 +16,7 @@ import { DomSanitizer } from '@angular/platform-browser';
     selector: 'fhg-img',
     templateUrl: './secured-image.component.html',
     styleUrls: ['./secured-image.component.scss'],
+    host: {},
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -35,7 +36,7 @@ export class SecuredImageComponent {
 
     public readonly alt = input<string | undefined>();
 
-    public readonly classname = input<string | undefined>();
+    public readonly class = input<string | undefined>();
 
     public readonly width = input<number | undefined>();
 

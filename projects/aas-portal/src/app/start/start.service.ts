@@ -17,6 +17,10 @@ import { FavoritesService } from './favorites.service';
 
 @Injectable()
 export class StartService {
+    private ignoreViewModeChange = false;
+    private ignoreActiveFavoritesChange = false;
+    private ignoreLimitChange = false;
+
     public constructor(
         private readonly store: StartStore,
         private readonly api: StartApiService,
@@ -24,37 +28,36 @@ export class StartService {
         private readonly translate: TranslateService,
     ) {}
 
-    public setActiveFavorites(name: string) {
-        this.store.activeFavorites$.set(name);
-        this.store.selected$.set([]);
-
-        const viewMode = this.store.viewMode;
-        if (viewMode === ViewMode.List) {
-            const name = this.store.activeFavorites;
-            const favorites = this.favorites.get(name);
-            if (favorites) {
-                this.getFavorites(favorites.name, favorites.documents);
-            } else {
-                this.getFirstPage();
-            }
-        } else if (viewMode === ViewMode.Tree) {
-            this.getTreeView(this.store.selected);
-        }
+    public restore(): void {
+        this.ignoreViewModeChange = this.ignoreActiveFavoritesChange = this.ignoreLimitChange = true;
     }
 
-    public setViewMode(viewMode: ViewMode) {
-        this.store.documents$.set([]);
-        this.store.viewMode$.set(viewMode);
-        if (viewMode === ViewMode.List) {
-            const name = this.store.activeFavorites;
-            const favorites = this.favorites.get(name);
-            if (favorites) {
-                this.getFavorites(favorites.name, favorites.documents);
-            } else {
-                this.getFirstPage();
-            }
-        } else if (viewMode === ViewMode.Tree) {
-            this.getTreeView(this.store.selected);
+    public vieModeChange(viewMode: ViewMode): void {
+        if (this.ignoreViewModeChange) {
+            this.ignoreViewModeChange = false;
+            return;
+        }
+
+        this.initialize(viewMode, this.store.activeFavorites);
+    }
+
+    public activeFavoritesChange(name: string): void {
+        if (this.ignoreActiveFavoritesChange) {
+            this.ignoreActiveFavoritesChange = false;
+            return;
+        }
+
+        this.initialize(this.store.viewMode, name);
+    }
+
+    public limitChange(limit: number): void {
+        if (this.ignoreLimitChange) {
+            this.ignoreLimitChange = false;
+            return;
+        }
+
+        if (!this.store.activeFavorites) {
+            this.refreshPage(limit);
         }
     }
 
@@ -142,7 +145,22 @@ export class StartService {
             .subscribe();
     }
 
-    public refreshPage(): void {
+    private initialize(viewMode: ViewMode, name: string): void {
+        if (viewMode === ViewMode.List) {
+            this.store.selected$.set([]);
+            const favorites = this.favorites.get(name);
+            if (favorites) {
+                this.getFavorites(favorites.name, favorites.documents);
+            } else {
+                this.getFirstPage();
+            }
+        } else if (viewMode === ViewMode.Tree) {
+            this.store.documents$.set([]);
+            this.getTreeView(this.store.selected);
+        }
+    }
+
+    private refreshPage(limit: number): void {
         if (this.store.documents.length === 0) {
             return;
         }
@@ -151,7 +169,7 @@ export class StartService {
             .getPage(
                 {
                     next: this.getId(this.store.documents[0]),
-                    limit: this.store.limit,
+                    limit,
                 },
                 this.store.filterText,
                 this.translate.currentLang,

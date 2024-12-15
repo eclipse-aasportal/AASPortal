@@ -6,5 +6,15 @@
  !
  !---------------------------------------------------------------------------->
 
-<img #image [src]="dataUrl()" [alt]="alt()" [class]="classname()" [width]="width()" [height]="height()"
+@if (width() !== undefined && height() !== undefined) {
+<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()" [height]="height()"
     onerror="this.src='assets/resources/aas.svg';" />
+} @else if (width() !== undefined) {
+<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()"
+    onerror="this.src='assets/resources/aas.svg';" />
+} @else if (height() !== undefined) {
+<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" [height]="height()"
+    onerror="this.src='assets/resources/aas.svg';" />
+} @else {
+<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" onerror="this.src='assets/resources/aas.svg';" />
+}

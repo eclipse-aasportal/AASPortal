@@ -664,12 +664,12 @@ export class AASProvider {
     }
 
     private async onRemoved(result: ScanEndpointResult): Promise<void> {
-        const document = result.document;
-        const endpoint = await this.index.findEndpoint(document.endpoint);
+        const endpoint = await this.index.findEndpoint(result.endpoint.name);
         if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
             return;
         }
 
+        const document = result.document;
         await this.index.remove(result.endpoint.name, document.id);
         this.cache.remove(document.endpoint, document.id);
         this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);

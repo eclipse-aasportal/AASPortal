@@ -137,27 +137,6 @@ export class ContainersController extends AASController {
     }
 
     /**
-     * @summary Gets the thumbnail of the specified AAS document.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
-     * @returns The thumbnail of the current AAS document.
-     */
-    @Get('{endpoint}/documents/{id}/thumbnail')
-    @Security('bearerAuth', ['guest'])
-    @OperationId('getDocumentThumbnail')
-    public async getDocumentThumbnail(
-        @Path() endpoint: string,
-        @Path() id: string,
-    ): Promise<NodeJS.ReadableStream | undefined> {
-        try {
-            this.logger.start('getDocumentThumbnail');
-            return await this.aasProvider.getThumbnailAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
-    }
-
-    /**
      * @summary Downloads the value of DataElement.
      * @param endpoint The URL of the AAS container (Base64Url encoded).
      * @param id The document or AAS identifier (Base64Url encoded).

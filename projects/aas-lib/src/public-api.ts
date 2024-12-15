@@ -32,13 +32,12 @@ export * from './lib/auth/register-form/register-form.component';
 
 export * from './lib/license-info/license-info.component';
 
-export * from './lib/submodel-template/submodel-template';
+export * from './lib/views/submodel-template';
 
 export * from './lib/types/aas-query-params';
 export * from './lib/types/message-entry';
 export * from './lib/types/online-state';
 export * from './lib/types/view-mode';
-export * from './lib/types/view-query-params';
 export * from './lib/types/environment';
 
 export * from './lib/aas-table/aas-table.component';
@@ -50,8 +49,8 @@ export * from './lib/aas-tree/aas-tree-row';
 export * from './lib/message-table/message-table.component';
 
 export * from './lib/digital-nameplate/digital-nameplate.component';
-
 export * from './lib/customer-feedback/customer-feedback.component';
+export * from './lib/digital-passport-portal/digital-passport-portal.component';
 
 export * from './lib/score/score.component';
 

@@ -591,7 +591,7 @@ export class MySqlIndex extends AASIndex {
             timestamp: Number(result.timestamp),
             content: null,
             onlineReady: true,
-            readonly: true,
+            readonly: false,
         };
 
         if (result.assetId) {

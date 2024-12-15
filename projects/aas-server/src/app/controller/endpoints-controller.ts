@@ -167,4 +167,25 @@ export class EndpointsController extends AASController {
             this.logger.stop();
         }
     }
+
+    /**
+     * @summary Gets the thumbnail of the specified AAS document.
+     * @param endpoint The endpoint name (Base64Url encoded).
+     * @param id The AAS identifier (Base64Url encoded).
+     * @returns The thumbnail of the current AAS document.
+     */
+    @Get('{endpoint}/documents/{id}/thumbnail')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getThumbnail')
+    public async getThumbnail(
+        @Path() endpoint: string,
+        @Path() id: string,
+    ): Promise<NodeJS.ReadableStream | undefined> {
+        try {
+            this.logger.start('getThumbnail');
+            return await this.aasProvider.getThumbnailAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+        } finally {
+            this.logger.stop();
+        }
+    }
 }

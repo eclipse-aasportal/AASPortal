@@ -8,7 +8,7 @@
 
 import { Injectable, signal, untracked } from '@angular/core';
 import { first, mergeMap, Observable } from 'rxjs';
-import { AASDocument, AASDocumentId, equalArray } from 'aas-core';
+import { AASDocument, AASDocumentId } from 'aas-core';
 import { AuthService, ViewMode } from 'aas-lib';
 
 type StartState = {
@@ -63,7 +63,7 @@ export class StartStore {
 
     public readonly viewMode$ = signal(initialState.viewMode);
 
-    public readonly documents$ = signal<AASDocument[]>(initialState.documents, { equal: (a, b) => equalArray(a, b) });
+    public readonly documents$ = signal<AASDocument[]>(initialState.documents);
 
     public readonly activeFavorites$ = signal(initialState.activeFavorites);
 
@@ -71,7 +71,7 @@ export class StartStore {
 
     public readonly filterText$ = signal(initialState.filterText);
 
-    public readonly selected$ = signal<AASDocument[]>(initialState.selected, { equal: (a, b) => equalArray(a, b) });
+    public readonly selected$ = signal<AASDocument[]>(initialState.selected);
 
     public readonly previous$ = signal<AASDocumentId | null>(initialState.previous);
 
