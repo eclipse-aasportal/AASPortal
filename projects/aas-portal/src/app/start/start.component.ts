@@ -6,27 +6,33 @@
  *
  *****************************************************************************/
 
-import { Router } from '@angular/router';
+import { Route, Router } from '@angular/router';
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, TemplateRef, computed, effect, viewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    TemplateRef,
+    computed,
+    effect,
+    signal,
+    viewChild,
+} from '@angular/core';
+
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
+import { AASEndpoint, QueryParser, stringFormat } from 'aas-core';
 import { catchError, EMPTY, first, from, map, mergeMap, Observable, of } from 'rxjs';
 import {
     AASTableComponent,
     AuthService,
-    ClipboardService,
-    CustomerFeedback,
     DownloadService,
     NotifyService,
-    SubmodelViewDescriptor,
     ViewMode,
-    ViewQuery,
     WindowService,
-    ZVEINameplate,
-    resolveSemanticId,
-    supportedSubmodelTemplates,
+    encodeBase64Url,
+    viewRoutes,
 } from 'aas-lib';
 
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
@@ -39,7 +45,6 @@ import { FavoritesFormComponent } from './favorites-form/favorites-form.componen
 import { StartStore } from './start.store';
 import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
 import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
-import { FormsModule } from '@angular/forms';
 import { StartService } from './start.service';
 
 @Component({
@@ -64,42 +69,31 @@ export class StartComponent implements OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
         private readonly download: DownloadService,
-        private readonly clipboard: ClipboardService,
         private readonly favorites: FavoritesService,
     ) {
         if (this.store.viewMode === ViewMode.Undefined) {
-            this.auth.ready.pipe(first(ready => ready)).subscribe({
-                next: () => this.viewMode.set(ViewMode.List),
-                error: error => this.notify.error(error),
-            });
+            this.auth.ready.pipe(first(ready => ready)).subscribe(() => this.viewMode.set(ViewMode.List));
+        } else {
+            this.service.restore();
         }
 
         effect(
             () => {
-                const name = this.activeFavorites();
-                if (this.viewMode() !== ViewMode.List) {
-                    this.viewMode.set(ViewMode.List);
-                } else {
-                    this.service.setActiveFavorites(name);
-                }
+                this.service.vieModeChange(this.store.viewMode$());
             },
             { allowSignalWrites: true },
         );
 
         effect(
             () => {
-                this.limit();
-                if (!this.store.activeFavorites) {
-                    this.service.refreshPage();
-                }
+                this.service.activeFavoritesChange(this.activeFavorites());
             },
             { allowSignalWrites: true },
         );
 
         effect(
             () => {
-                const viewMode = this.viewMode();
-                this.service.setViewMode(viewMode);
+                this.service.limitChange(this.limit());
             },
             { allowSignalWrites: true },
         );
@@ -136,21 +130,13 @@ export class StartComponent implements OnDestroy {
 
     public readonly isLastPage = computed(() => this.store.next$() === null);
 
-    public readonly documents = this.store.documents$;
+    public readonly documents = this.store.documents$.asReadonly();
 
     public readonly selected = this.store.selected$;
 
-    public readonly canDownloadDocument = computed(() => (this.store.selected$().length > 0 ? true : false));
+    public readonly someSelected = computed(() => this.store.selected$().length > 0);
 
-    public readonly canDeleteDocument = computed(() => this.store.selected$().length > 0);
-
-    public readonly canViewUserFeedback = computed(() =>
-        this.store.selected$().some(document => this.selectSubmodels(document, CustomerFeedback).length === 1),
-    );
-
-    public readonly canViewNameplate = computed(() =>
-        this.store.selected$().some(document => this.selectSubmodels(document, ZVEINameplate).length === 1),
-    );
+    public readonly views = signal(viewRoutes).asReadonly();
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
@@ -288,50 +274,21 @@ export class StartComponent implements OnDestroy {
         );
     }
 
-    public viewUserFeedback(): void {
-        const descriptor: SubmodelViewDescriptor = {
-            template: supportedSubmodelTemplates.get(CustomerFeedback),
-            submodels: [],
-        };
-
-        for (const document of this.store.selected) {
-            const submodels = this.selectSubmodels(document, CustomerFeedback);
-            if (submodels.length === 1) {
-                descriptor.submodels.push({
-                    id: document.id,
-                    endpoint: document.endpoint,
-                    idShort: submodels[0].idShort,
-                });
-            }
+    public openView(view: Route): Promise<boolean> {
+        const documents = this.store.selected;
+        if (documents.length === 1) {
+            return this.router.navigate([`/view/${view.path}`], {
+                queryParams: {
+                    endpoint: encodeBase64Url(documents[0].endpoint),
+                    id: encodeBase64Url(documents[0].id),
+                },
+                state: { data: JSON.stringify(this.store.selected) },
+            });
         }
 
-        if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
-            this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
-        }
-    }
-
-    public viewNameplate(): void {
-        const descriptor: SubmodelViewDescriptor = {
-            template: supportedSubmodelTemplates.get(ZVEINameplate),
-            submodels: [],
-        };
-
-        for (const document of this.store.selected) {
-            const submodels = this.selectSubmodels(document, ZVEINameplate);
-            if (submodels.length === 1) {
-                descriptor.submodels.push({
-                    id: document.id,
-                    endpoint: document.endpoint,
-                    idShort: submodels[0].idShort,
-                });
-            }
-        }
-
-        if (descriptor.submodels.length > 0) {
-            this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
-            this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
-        }
+        return this.router.navigate([`/view/${view.path}`], {
+            state: { data: JSON.stringify(documents) },
+        });
     }
 
     public setFilter(filter: string): void {
@@ -379,9 +336,5 @@ export class StartComponent implements OnDestroy {
                 this.selected.set([]);
             }),
         );
-    }
-
-    private selectSubmodels(document: AASDocument, semanticId: string): aas.Submodel[] {
-        return document.content?.submodels.filter(submodel => resolveSemanticId(submodel) === semanticId) ?? [];
     }
 }

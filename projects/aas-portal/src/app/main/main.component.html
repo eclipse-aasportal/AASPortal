@@ -20,8 +20,8 @@
                     <ul ngbNav #nav="ngbNav" [activeId]="route.fragment | async" class="navbar-nav me-auto">
                         @for (link of links(); track link) {
                         <li [ngbNavItem]="link.id">
-                            <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active"
-                                skipLocationChange="true">{{link.name | translate}}</a>
+                            <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active">{{link.name |
+                                translate}}</a>
                         </li>
                         }
                     </ul>
@@ -45,9 +45,18 @@
     </div>
     <div class="fhg-main-statusbar d-flex flex-row-reverse p-2">
         <div class="ts-x-small">© 2024 Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
-        <span class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0"
-            (keydown)="onKeyDown($event)">{{summary()}}</span>
+        <span class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
+            <span>{{documentCount()}}</span>
+            <span>&nbsp;</span>
+            <span translate>Main.SHELLS</span>
+            @if (changedDocuments() > 0) {
+            <span>&nbsp;</span>
+            <span>{{changedDocuments()}}</span>
+            }
+            <span>&nbsp;/&nbsp;</span>
+            <span>{{endpointCount()}}</span>
+            <span>&nbsp;</span>
+            <span translate>Main.ENDPOINTS</span>
+        </span>
     </div>
 </div>
-
-<ng-template #emptyToolbar></ng-template>

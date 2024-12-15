@@ -6,16 +6,23 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { first } from 'rxjs';
-import { noop } from 'aas-core';
-import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
+import { first, from, mergeMap } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { noop } from 'aas-core';
+import {
+    AuthComponent,
+    AuthService,
+    IndexChangeService,
+    LocalizeComponent,
+    NotifyComponent,
+    WindowService,
+} from 'aas-lib';
+
 import { ToolbarService } from '../toolbar.service';
-import { MainApiService } from './main-api.service';
 import { environment } from '../../environments/environment';
 
 export const enum LinkId {
@@ -55,13 +62,10 @@ export class MainComponent implements OnInit {
         public readonly route: ActivatedRoute,
         private readonly router: Router,
         private readonly window: WindowService,
-        private readonly api: MainApiService,
+        private readonly auth: AuthService,
         private readonly toolbar: ToolbarService,
         private readonly indexChange: IndexChangeService,
     ) {}
-
-    @ViewChild('emptyToolbar', { read: TemplateRef })
-    public emptyToolbar!: TemplateRef<unknown>;
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 
@@ -95,27 +99,31 @@ export class MainComponent implements OnInit {
 
     public readonly version = signal(environment.version).asReadonly();
 
-    public readonly summary = this.indexChange.summary;
+    public readonly endpointCount = this.indexChange.endpointCount;
+
+    public readonly documentCount = this.indexChange.documentCount;
+
+    public readonly changedDocuments = this.indexChange.changedDocuments;
 
     public ngOnInit(): void {
         const params = this.window.getQueryParams();
         const id = params.get('id');
+        const endpoint = params.get('endpoint');
         if (id) {
-            this.api
-                .getDocument(id)
-                .pipe(first())
-                .subscribe(document => {
-                    if (document) {
-                        this.router.navigate(['/aas'], {
-                            skipLocationChange: true,
-                            queryParams: { id: document.id, endpoint: document.endpoint },
-                        });
-                    } else {
-                        this.router.navigate(['/start'], { skipLocationChange: true });
-                    }
-                });
+            this.auth.ready
+                .pipe(
+                    first(ready => ready),
+                    mergeMap(() =>
+                        from(
+                            this.router.navigate(['/aas'], {
+                                queryParams: { id, endpoint },
+                            }),
+                        ),
+                    ),
+                )
+                .subscribe();
         } else {
-            this.router.navigate(['/start'], { skipLocationChange: true });
+            this.router.navigate(['/start']);
         }
     }
 

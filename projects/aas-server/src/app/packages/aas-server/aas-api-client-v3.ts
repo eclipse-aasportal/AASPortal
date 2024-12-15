@@ -8,7 +8,8 @@
 
 import FormData from 'form-data';
 import cloneDeep from 'lodash-es/cloneDeep.js';
-import { createReadStream } from 'fs';
+import fs from 'fs';
+import path from 'path';
 import {
     aas,
     AASEndpoint,
@@ -198,17 +199,22 @@ export class AASApiClientV3 extends AASApiClient {
         return await this.http.getResponse(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public postPackageAsync(file: Express.Multer.File): Promise<string> {
+    public async postPackageAsync(file: Express.Multer.File): Promise<string> {
         const formData = new FormData();
-        formData.append('file', createReadStream(file.path));
-        formData.append('fileName', file.filename);
-        return this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        const aasxFile = path.join(path.dirname(file.path), file.originalname);
+        if (fs.existsSync(aasxFile)) {
+            await fs.promises.unlink(aasxFile);
+        }
+
+        await fs.promises.rename(file.path, path.join(path.dirname(file.path), file.originalname));
+        formData.append('file', fs.createReadStream(aasxFile));
+        const result = await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        return result;
     }
 
-    public async deletePackageAsync(aasIdentifier: string): Promise<string> {
-        const aasId = encodeBase64Url(aasIdentifier);
+    public async deletePackageAsync(aasId: string): Promise<string> {
         const descriptors: PackageDescriptor[] = await this.http.get(
-            this.resolve(`packages?aasId=${aasId}`),
+            this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
             this.endpoint.headers,
         );
 

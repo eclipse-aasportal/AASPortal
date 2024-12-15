@@ -44,8 +44,6 @@
     "CMD_TOGGLE_MESSAGES": "Meldungen",
     "CMD_TOGGLE_PACKAGES": "Packages",
     "CMD_DELETE_USER": "Benutzerkonto löschen...",
-    "CMD_VIEW_USER_FEEDBACK": "Nutzer-Feedback",
-    "CMD_VIEW_NAMEPLATE": "Typenschild",
     "CMD_SHOW_LICENSE_TEXT": "Lizenztext anzeigen",
     "CMD_HIDE_LICENSE_TEXT": "Lizenztext verbergen",
     "COLUMN_VARIANT": "Variante",
@@ -168,7 +166,10 @@
         "UPDATE_ENDPOINT": "Bearbeiten...",
         "REMOVE_ENDPOINT": "Entfernen...",
         "EXTRAS": "Extras...",
-        "PLACEHOLDER_FILTER": "Filter"
+        "PLACEHOLDER_FILTER": "Filter",
+        "DigitalPassportPortal": "DPPPortal",
+        "CustomerFeedback": "Nutzer-Feedback",
+        "Nameplate": "Typenschild"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -262,7 +263,7 @@
         "TERM_EXPECTED": "Term erwartet an Position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
     },
-    "IndexChangeService": {
+    "Main": {
         "ENDPOINTS": "Endpunkte",
         "SHELLS": "Verwaltungsschalen"
     },
@@ -272,5 +273,12 @@
         "COUNT": "{0} Favorit(en)",
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
-        }
+    },
+    "DigitalPassportPortal": {
+        "EMPTY": "Ups...",
+        "BANNER": "Fraunhofer IOSB-INA DPPPortal",
+        "CAPTION": "Product Passport",
+        "TYPE": "Type",
+        "SERIAL_NUMBER": "Seriennummer"
+    }
 }

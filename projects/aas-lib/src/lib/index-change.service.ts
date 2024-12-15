@@ -7,18 +7,18 @@
  *****************************************************************************/
 
 import { computed, EventEmitter, Injectable, signal } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData, AASServerMessage } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, zip } from 'rxjs';
+import { first, map, mergeMap, Observable, zip } from 'rxjs';
+import { AuthService } from '../public-api';
 
-interface State {
+type State = {
     documentCount: number;
     endpointCount: number;
     changedDocuments: number;
-}
+};
 
 @Injectable({
     providedIn: 'root',
@@ -34,33 +34,26 @@ export class IndexChangeService {
     public constructor(
         private readonly http: HttpClient,
         private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly translate: TranslateService,
+        private readonly auth: AuthService,
     ) {
         this.subscribeIndexChanged();
 
-        zip(
-            this.http.get<{ count: number }>('/api/v1/endpoints/count'),
-            this.http.get<{ count: number }>('/api/v1/documents/count'),
-        )
+        this.auth.ready
             .pipe(
-                map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count]),
-                map(([endpointCount, documentCount]) =>
-                    this.state.update(state => ({ ...state, endpointCount, documentCount })),
+                first(ready => ready),
+                mergeMap(() =>
+                    zip(
+                        this.http.get<{ count: number }>('/api/v1/endpoints/count'),
+                        this.http.get<{ count: number }>('/api/v1/documents/count'),
+                    ).pipe(map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count])),
                 ),
             )
-            .subscribe();
+            .subscribe(([endpointCount, documentCount]) => {
+                this.state.update(state => ({ ...state, endpointCount, documentCount }));
+            });
     }
 
     public readonly reset = new EventEmitter();
-
-    public readonly summary = computed(() => {
-        const state = this.state();
-        if (state.changedDocuments === 0) {
-            return `${state.documentCount} ${this.translate.instant('IndexChangeService.SHELLS')} / ${state.endpointCount} ${this.translate.instant('IndexChangeService.ENDPOINTS')}`;
-        }
-
-        return `${state.documentCount} ${this.translate.instant('IndexChangeService.SHELLS')} (${state.changedDocuments}) / ${state.endpointCount} ${this.translate.instant('IndexChangeService.ENDPOINTS')}`;
-    });
 
     public readonly documentCount = computed(() => this.state().documentCount);
 

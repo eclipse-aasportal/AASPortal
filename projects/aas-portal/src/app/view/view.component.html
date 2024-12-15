@@ -7,17 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <div class="h-100">
-    @switch (template()) {
-    @case('Nameplate'){
-    <fhg-digital-nameplate [submodels]="submodels()"></fhg-digital-nameplate>
-    }
-    @case ('CustomerFeedback') {
-    <fhg-customer-feedback [submodels]="submodels()"></fhg-customer-feedback>
-    }
-    @default {
-    <div class="alert alert-info text-center" role="alert">{{'INFO_EMPTY_DISPLAY' | translate}}</div>
-    }
-    }
+    <router-outlet></router-outlet>
 </div>
 
 <ng-template #viewToolbar></ng-template>

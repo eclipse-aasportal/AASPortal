@@ -44,8 +44,6 @@
     "CMD_TOGGLE_MESSAGES": "Messages",
     "CMD_TOGGLE_PACKAGES": "Packages",
     "CMD_DELETE_USER": "Delete user account...",
-    "CMD_VIEW_USER_FEEDBACK": "User feedback",
-    "CMD_VIEW_NAMEPLATE": "Nameplate",
     "CMD_SHOW_LICENSE_TEXT": "Show license text",
     "CMD_HIDE_LICENSE_TEXT": "Hide license text",
     "COLUMN_NAME": "Name",
@@ -169,7 +167,10 @@
         "UPDATE_ENDPOINT": "Edit...",
         "REMOVE_ENDPOINT": "Remove...",
         "EXTRAS": "Extras...",
-        "PLACEHOLDER_FILTER": "Filter"
+        "PLACEHOLDER_FILTER": "Filter",
+        "DigitalPassportPortal": "DPPPortal",
+        "CustomerFeedback": "User feedback",
+        "Nameplate": "Nameplate"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Search"
@@ -263,7 +264,7 @@
         "TERM_EXPECTED": "Term expected at position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unexpected closing bracket at position ${0}."
     },
-    "IndexChangeService": {
+    "Main": {
         "ENDPOINTS": "Endpoints",
         "SHELLS": "Shells"
     },
@@ -273,6 +274,12 @@
         "COUNT": "{0} favorite(s)",
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
-        }
-
+    },
+    "DigitalPassportPortal": {
+        "EMPTY": "Ups...",
+        "BANNER": "Fraunhofer IOSB-INA DPPPortal",
+        "CAPTION": "Product Passport",
+        "TYPE": "Type",
+        "SERIAL_NUMBER": "Serial No."
+    }
 }

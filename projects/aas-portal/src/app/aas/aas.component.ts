@@ -25,11 +25,12 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, AASDocument, noop } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
     ClipboardService,
+    decodeBase64Url,
     DownloadService,
     NotifyService,
     SecuredImageComponent,
@@ -47,6 +48,7 @@ import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
 import { AASStore } from './aas.store';
 import { DashboardChartType } from '../dashboard/dashboard.store';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'fhg-aas',
@@ -60,6 +62,7 @@ export class AASComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly store: AASStore,
         private readonly router: Router,
+        private readonly location: Location,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
         private readonly notify: NotifyService,
@@ -103,7 +106,7 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public readonly thumbnail = computed(() => this.store.document$()?.thumbnail ?? '-');
 
-    public readonly readOnly = computed(() => this.store.document$()?.readonly ?? false);
+    public readonly readOnly = computed(() => !!this.store.document$()?.readonly);
 
     public readonly version = computed(() =>
         this.versionToString(head(this.store.document$()?.content?.assetAdministrationShells)?.administration),
@@ -161,18 +164,27 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public ngOnInit(): void {
         this.route.queryParams.pipe(first()).subscribe(params => {
-            if (params?.search) {
+            if (params.search) {
                 this.store.searchExpression$.set(params.search);
             }
 
-            if (params) {
-                const document: AASDocument = this.clipboard.get('AASDocument');
-                if (!document) {
-                    this.getDocument(params.id, params.endpoint);
-                } else if (!document.content) {
-                    this.getDocumentContent(document);
+            const state = this.location.getState() as Record<string, string>;
+            if (state.data) {
+                try {
+                    const document: AASDocument = JSON.parse(state.data);
+                    if (!document.content) {
+                        this.getDocumentContent(document);
+                    }
+                } catch {
+                    noop();
+                }
+            }
+
+            if (params.id) {
+                if (params.endpoint) {
+                    this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
                 } else {
-                    this.store.document$.set(document);
+                    this.getDocument(decodeBase64Url(params.id));
                 }
             }
         });
@@ -334,9 +346,10 @@ export class AASComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getDocument(id: string, endpoint: string): void {
+    private getDocument(id: string, endpoint?: string): void {
         this.api.getDocument(id, endpoint).subscribe({
             next: document => this.store.document$.set(document),
+            error: error => console.debug(error),
         });
     }
 

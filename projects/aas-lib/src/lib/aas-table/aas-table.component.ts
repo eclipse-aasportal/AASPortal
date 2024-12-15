@@ -29,6 +29,7 @@ import { ViewMode } from '../types/view-mode';
 import { AASTableStore } from './aas-table.store';
 import { MaxLengthPipe } from '../max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
+import { encodeBase64Url } from '../convert';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -111,13 +112,12 @@ export class AASTableComponent implements OnDestroy {
     }
 
     public open(row: AASTableRow): void {
-        this.clipboard.set('AASDocument', row.element);
         this.router.navigate(['/aas'], {
-            skipLocationChange: true,
             queryParams: {
-                id: row.id,
-                endpoint: row.endpoint,
+                endpoint: encodeBase64Url(row.endpoint),
+                id: encodeBase64Url(row.id),
             },
+            state: { data: JSON.stringify(row.element) },
         });
     }
 

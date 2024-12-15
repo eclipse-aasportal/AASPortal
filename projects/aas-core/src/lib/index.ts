@@ -168,6 +168,28 @@ export function isHasSemantics(value: unknown): value is HasSemantics {
 }
 
 /**
+ * Gets the semantic identifier of the specified AAS element.
+ * @param value The AAS element.
+ * @returns The semantic identifier or `undefined`.
+ */
+export function getSemanticId(value: HasSemantics | Reference): string | undefined {
+    let semanticId: string | undefined;
+    if (value) {
+        if (isReference(value)) {
+            if (value.keys.length > 0) {
+                return value.keys[0].value;
+            }
+        } else {
+            if (value.semanticId?.keys != null && value.semanticId.keys.length > 0) {
+                return value.semanticId.keys[0].value;
+            }
+        }
+    }
+
+    return semanticId;
+}
+
+/**
  * Determines whether the specified value represents a submodel element.
  * @param value The current value.
  * @returns `true` if the specified value represents a submodel element; otherwise, `false`.

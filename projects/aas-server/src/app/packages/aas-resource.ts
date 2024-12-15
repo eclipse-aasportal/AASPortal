@@ -67,10 +67,10 @@ export abstract class AASResource {
 
     /**
      * Delete an aasx package from the current source.
-     * @param aasIdentifier The AAS identifier.
+     * @param aasId The AAS identifier.
      * @param name The name of the package in the source.
      */
-    public abstract deletePackageAsync(aasIdentifier: string, name: string): Promise<string>;
+    public abstract deletePackageAsync(aasId: string, name: string): Promise<string>;
 
     /**
      * Invokes the specified operation synchronously.

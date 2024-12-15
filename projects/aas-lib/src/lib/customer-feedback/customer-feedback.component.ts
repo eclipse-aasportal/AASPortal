@@ -6,12 +6,11 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, Location } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { aas, getLocaleValue, getPreferredName } from 'aas-core';
-import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
+import { aas, AASDocument, getLocaleValue, getPreferredName, isReference } from 'aas-core';
 import { ScoreComponent } from '../score/score.component';
 
 export interface GeneralItem {
@@ -28,6 +27,7 @@ export interface FeedbackItem {
     subject: string;
     message: string;
 }
+const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
 
 @Component({
     selector: 'fhg-customer-feedback',
@@ -37,12 +37,16 @@ export interface FeedbackItem {
     imports: [ScoreComponent, DecimalPipe, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDestroy {
+export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     private static readonly maxStars = 5;
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
+    private readonly submodels = signal<[aas.Environment, aas.Submodel][]>([]);
 
-    public constructor(private readonly translate: TranslateService) {
+    public constructor(
+        private readonly location: Location,
+        private readonly translate: TranslateService,
+    ) {
         effect(
             () => {
                 this.init(this.submodels());
@@ -51,8 +55,6 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
         );
     }
 
-    public readonly submodels = input<DocumentSubmodelPair[] | null>(null);
-
     public readonly name = computed(() => {
         const submodels = this.submodels();
         if (!submodels) {
@@ -60,9 +62,8 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
         }
 
         const names = submodels.map(
-            item =>
-                getLocaleValue(getPreferredName(item.document.content!, item.submodel), this.translate.currentLang) ??
-                item.submodel.idShort,
+            ([env, submodel]) =>
+                getLocaleValue(getPreferredName(env, submodel), this.translate.currentLang) ?? submodel.idShort,
         );
 
         if (names.length <= 2) {
@@ -79,6 +80,12 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
     public readonly starClassNames = signal<string[]>([]);
 
     public ngOnInit(): void {
+        const state = this.location.getState() as Record<string, string>;
+        if (state.data) {
+            const documents: AASDocument[] = JSON.parse(state.data);
+            this.submodels.set([...this.filterSubmodels(documents)]);
+        }
+
         this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
                 this.init(this.submodels());
@@ -90,58 +97,84 @@ export class CustomerFeedbackComponent implements SubmodelTemplate, OnInit, OnDe
         this.subscription.unsubscribe();
     }
 
-    private init(submodels: DocumentSubmodelPair[] | null): void {
+    private init(submodels: [aas.Environment, aas.Submodel][]): void {
         this.map.clear();
         let count = 0;
         let stars = 0.0;
         const items: GeneralItem[] = [];
         const feedbacks: FeedbackItem[] = [];
-        let starClassNames: string[] | undefined;
         let sumStars = 0;
-        if (submodels) {
-            for (const pair of submodels) {
-                if (pair.submodel.submodelElements) {
-                    for (const feedback of pair.submodel.submodelElements.filter(
-                        item => item.modelType === 'SubmodelElementCollection',
-                    )) {
-                        const general = (feedback as aas.SubmodelElementCollection).value?.find(
-                            item => item.modelType === 'SubmodelElementCollection' && item.idShort === 'General',
-                        );
 
-                        if (general) {
-                            sumStars += this.getStars(feedback);
-                            this.buildItems(general, items);
-                            ++count;
-                        }
+        for (const [, submodel] of submodels) {
+            if (submodel.submodelElements) {
+                for (const feedback of submodel.submodelElements.filter(
+                    item => item.modelType === 'SubmodelElementCollection',
+                )) {
+                    const general = (feedback as aas.SubmodelElementCollection).value?.find(
+                        item => item.modelType === 'SubmodelElementCollection' && item.idShort === 'General',
+                    );
 
-                        feedbacks.push({
-                            stars: this.initStarClassNames(this.getStars(feedback)),
-                            createdAt: this.getCreatedAt(feedback),
-                            subject: pair.submodel.idShort,
-                            message: this.getMessage(feedback),
-                        });
+                    if (general) {
+                        sumStars += this.getStars(feedback);
+                        this.buildItems(general, items);
+                        ++count;
                     }
+
+                    feedbacks.push({
+                        stars: this.initStarClassNames(this.getStars(feedback)),
+                        createdAt: this.getCreatedAt(feedback),
+                        subject: submodel.idShort,
+                        message: this.getMessage(feedback),
+                    });
                 }
             }
+        }
 
-            if (count > 0) {
-                stars = sumStars / count;
-                items.forEach(item => {
-                    item.score = item.sum / item.count;
-                    item.like = item.score >= 0.0;
-                });
-            }
-
-            starClassNames = this.initStarClassNames(stars);
-        } else {
-            starClassNames = this.initStarClassNames(0);
+        if (count > 0) {
+            stars = sumStars / count;
+            items.forEach(item => {
+                item.score = item.sum / item.count;
+                item.like = item.score >= 0.0;
+            });
         }
 
         this.stars.set(stars);
         this.count.set(count);
-        this.starClassNames.set(starClassNames);
+        this.starClassNames.set(this.initStarClassNames(stars));
         this.items.set(items.filter(item => item.count > 0));
         this.feedbacks.set(feedbacks);
+    }
+
+    private *filterSubmodels(documents: AASDocument[]): Generator<[aas.Environment, aas.Submodel]> {
+        for (const document of documents) {
+            if (!document.content) {
+                continue;
+            }
+
+            for (const submodel of document.content.submodels) {
+                const semanticId = this.getSemanticId(submodel);
+                if (semanticId === CustomerFeedback) {
+                    yield [document.content, submodel];
+                }
+            }
+        }
+    }
+
+    private getSemanticId(value: aas.HasSemantics | aas.Reference): string | undefined {
+        let semanticId: string | undefined;
+        if (value) {
+            if (isReference(value)) {
+                if (value.keys.length > 0) {
+                    return value.keys[0].value;
+                }
+            } else {
+                if (value.semanticId?.keys != null && value.semanticId.keys.length > 0) {
+                    return value.semanticId.keys[0].value;
+                }
+            }
+        }
+
+        return semanticId;
     }
 
     private buildItems(general: aas.SubmodelElementCollection, items: GeneralItem[]): void {

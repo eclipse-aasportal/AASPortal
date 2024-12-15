@@ -6,20 +6,23 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnChanges, SimpleChanges, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     aas,
+    AASDocument,
     convertToString,
     getLocaleValue,
+    getSemanticId,
     isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
 } from 'aas-core';
 
-import { DocumentSubmodelPair, SubmodelTemplate } from '../submodel-template/submodel-template';
+import { Location } from '@angular/common';
 
-export interface DigitalNameplate {
+export type DigitalNameplate = {
+    id: string;
     serialNumber: string;
     productCountryOfOrigin: string;
     yearOfConstruction: string;
@@ -28,7 +31,11 @@ export interface DigitalNameplate {
     manufacturerName: string;
     cityTown: string;
     street: string;
-}
+};
+
+const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
+const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
+const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
 
 @Component({
     selector: 'fhg-digital-nameplate',
@@ -38,34 +45,35 @@ export interface DigitalNameplate {
     imports: [TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
-    public constructor(private readonly translate: TranslateService) {}
-
-    public readonly submodels = input<DocumentSubmodelPair[] | null>(null);
+export class DigitalNameplateComponent implements OnInit {
+    public constructor(
+        private readonly location: Location,
+        private readonly translate: TranslateService,
+    ) {}
 
     public readonly nameplates = signal<DigitalNameplate[]>([]);
 
-    public ngOnChanges(changes: SimpleChanges): void {
-        if (changes['submodels']) {
-            this.init();
+    public ngOnInit(): void {
+        const state = this.location.getState() as Record<string, string>;
+        if (state.data) {
+            this.init(JSON.parse(state.data));
         }
     }
 
-    private init() {
+    private init(documents: AASDocument[]) {
+        const submodels = [...this.filterSubmodels(documents)];
         this.nameplates.set(
-            this.submodels()?.map(pair => {
-                const submodel = pair.submodel;
-                return {
-                    serialNumber: this.getPropertyValue(submodel, ['SerialNumber']),
-                    productCountryOfOrigin: this.getPropertyValue(submodel, ['ProductCountryOfOrigin']),
-                    yearOfConstruction: this.getPropertyValue(submodel, ['YearOfConstruction']),
-                    manufacturerName: this.getPropertyValue(submodel, ['ManufacturerName']),
-                    countryCode: this.getPropertyValue(submodel, ['PhysicalAddress', 'CountryCode']),
-                    zip: this.getPropertyValue(submodel, ['PhysicalAddress', 'Zip']),
-                    cityTown: this.getPropertyValue(submodel, ['PhysicalAddress', 'CityTown']),
-                    street: this.getPropertyValue(submodel, ['PhysicalAddress', 'Street']),
-                };
-            }) ?? [],
+            submodels.map(submodel => ({
+                id: submodel.id,
+                serialNumber: this.getPropertyValue(submodel, ['SerialNumber']),
+                productCountryOfOrigin: this.getPropertyValue(submodel, ['ProductCountryOfOrigin']),
+                yearOfConstruction: this.getPropertyValue(submodel, ['YearOfConstruction']),
+                manufacturerName: this.getPropertyValue(submodel, ['ManufacturerName']),
+                countryCode: this.getPropertyValue(submodel, ['PhysicalAddress', 'CountryCode']),
+                zip: this.getPropertyValue(submodel, ['PhysicalAddress', 'Zip']),
+                cityTown: this.getPropertyValue(submodel, ['PhysicalAddress', 'CityTown']),
+                street: this.getPropertyValue(submodel, ['PhysicalAddress', 'Street']),
+            })),
         );
     }
 
@@ -87,5 +95,20 @@ export class DigitalNameplateComponent implements SubmodelTemplate, OnChanges {
         }
 
         return '';
+    }
+
+    private *filterSubmodels(documents: AASDocument[]): Generator<aas.Submodel> {
+        for (const document of documents) {
+            if (!document.content) {
+                continue;
+            }
+
+            for (const submodel of document.content.submodels) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId === ZVEINameplate || semanticId === FHGNameplate || semanticId === HSUNameplate) {
+                    yield submodel;
+                }
+            }
+        }
     }
 }

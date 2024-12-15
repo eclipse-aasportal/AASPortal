@@ -76,7 +76,7 @@ export abstract class AASResourceScan extends EventEmitter {
                         this.emit('add', value.document);
                     } else if (endOfEndpoint && value.reference) {
                         keys.push(value.reference.id);
-                        this.emit('remove', value.document);
+                        this.emit('remove', value.reference);
                     }
                 }
 
@@ -89,7 +89,7 @@ export abstract class AASResourceScan extends EventEmitter {
                 } else if (value.document) {
                     this.emit('add', value.document);
                 } else if (value.reference) {
-                    this.emit('remove', value.document);
+                    this.emit('remove', value.reference);
                 }
             }
         } finally {

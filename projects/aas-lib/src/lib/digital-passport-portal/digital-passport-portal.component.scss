@@ -5,13 +5,3 @@
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
-
-import { SubmodelViewDescriptor } from '../submodel-template/submodel-template';
-
-export interface ViewQueryParams {
-    format: string;
-}
-
-export interface ViewQuery {
-    descriptor: SubmodelViewDescriptor;
-}
