@@ -38,9 +38,9 @@ export class IndexChangeService {
     ) {
         this.subscribeIndexChanged();
 
-        this.auth.ready
+        this.auth.userId
             .pipe(
-                first(ready => ready),
+                first(userId => userId !== undefined),
                 mergeMap(() =>
                     zip(
                         this.http.get<{ count: number }>('/api/v1/endpoints/count'),

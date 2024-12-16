@@ -7,9 +7,10 @@
  *****************************************************************************/
 
 import { Injectable, signal } from '@angular/core';
-import { first, Observable, map, mergeMap } from 'rxjs';
+import { first, Observable, map, mergeMap, skipWhile } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService } from 'aas-lib';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface FavoritesList {
     name: string;
@@ -23,9 +24,10 @@ export class FavoritesService {
     private readonly lists$ = signal<FavoritesList[]>([]);
 
     public constructor(private readonly auth: AuthService) {
-        this.auth.ready
+        this.auth.userId
             .pipe(
-                first(ready => ready === true),
+                skipWhile(userId => userId === undefined),
+                takeUntilDestroyed(),
                 mergeMap(() => this.auth.getCookie('.Favorites')),
                 map(value => {
                     this.lists$.set(value ? (JSON.parse(value) as FavoritesList[]) : []);

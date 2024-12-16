@@ -68,7 +68,7 @@ describe('MainComponent', () => {
             changedDocuments: (() => 0) as Signal<number>,
         });
 
-        auth = jasmine.createSpyObj<AuthService>({}, { ready: of(true) });
+        auth = jasmine.createSpyObj<AuthService>({}, { userId: of('guest') });
 
         TestBed.configureTestingModule({
             providers: [

@@ -19,7 +19,6 @@ import {
     TemplateRef,
     computed,
     effect,
-    untracked,
     ChangeDetectionStrategy,
     viewChild,
     viewChildren,
@@ -28,11 +27,12 @@ import {
 
 import isNumber from 'lodash-es/isNumber';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
+import { first } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
-import { ClipboardService, LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
+import { LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { MoveLeftCommand } from './commands/move-left-command';
 import { MoveRightCommand } from './commands/move-right-command';
@@ -45,7 +45,6 @@ import { AddNewPageCommand } from './commands/add-new-page-command';
 import { DeleteItemCommand } from './commands/delete-item-command';
 import { SetChartTypeCommand } from './commands/set-chart-type-command';
 import { SetMinMaxCommand } from './commands/set-min-max-command';
-import { DashboardQuery, DashboardQueryParams } from '../types/dashboard-query-params';
 import { DashboardApiService } from './dashboard-api.service';
 import { ToolbarService } from '../toolbar.service';
 import {
@@ -57,20 +56,20 @@ import {
     DashboardStore,
 } from './dashboard.store';
 
-interface UpdateTuple {
+type UpdateTuple = {
     item: DashboardChart;
     dataset: ChartDataset;
-}
+};
 
-interface ChartConfigurationTuple {
+type ChartConfigurationTuple = {
     chart: Chart;
     configuration: ChartConfiguration;
-}
+};
 
-interface TimeSeries {
+type TimeSeries = {
     value: string[];
     timestamp: string[];
-}
+};
 
 @Component({
     selector: 'fhg-dashboard',
@@ -86,6 +85,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
     private selections = new Set<string>();
     private selectedSources = new Map<string, number>();
+    private live = false;
 
     public constructor(
         private readonly api: DashboardApiService,
@@ -97,19 +97,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly commandHandler: CommandHandlerService,
         private readonly window: WindowService,
-        private readonly clipboard: ClipboardService,
     ) {
-        effect(() => {
-            this.store.activePage$();
-            if (!untracked(this.editMode)) {
-                this.closeWebSocket();
-                this.charts.forEach(item => item.chart.destroy());
-                this.map.clear();
-            }
+        effect(
+            () => {
+                const activePage = this.store.activePage$();
+                if (!this.store.editMode) {
+                    this.leaveLiveMode();
+                }
 
-            this.selections.clear();
-            this.selectedSources.clear();
-        });
+                this.selections.clear();
+                this.selectedSources.clear();
+                this.activePage.set(activePage.name);
+
+                if (!this.store.editMode) {
+                    this.enterLiveMode();
+                }
+            },
+            { allowSignalWrites: true },
+        );
 
         effect(
             () => {
@@ -124,7 +129,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         effect(
             () => {
                 if (this.editMode()) {
-                    this.enterEditMode();
+                    this.leaveLiveMode();
                 } else {
                     this.enterLiveMode();
                 }
@@ -134,7 +139,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         effect(
             () => {
-                this.setPage(this.activePage());
+                const name = this.activePage();
+                const index = this.store.pages.findIndex(page => page.name === name);
+                if (this.store.index !== index) {
+                    this.store.updateState(state => ({ ...state, index }));
+                }
             },
             { allowSignalWrites: true },
         );
@@ -158,7 +167,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     public readonly activePage = signal(this.store.activePage$().name);
 
-    public readonly pages = computed(() => this.store.pages$().map(page => page.name));
+    public readonly pages = computed(() => {
+        return this.store.pages$().map(page => page.name);
+    });
 
     public readonly editMode = this.store.editMode$;
 
@@ -193,21 +204,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.commandHandler.clear();
 
-        let query: DashboardQuery | undefined;
-        const params = this.activeRoute.snapshot.queryParams as DashboardQueryParams;
-        if (params.format) {
-            query = this.clipboard.get(params.format);
-            if (query?.page) {
-                this.setPage(query.page);
+        this.activeRoute.queryParams.pipe(first()).subscribe(params => {
+            if (params.page) {
+                this.activePage.set(params.page);
             }
-        }
+        });
     }
 
     public ngOnDestroy(): void {
         this.store.save().subscribe();
         this.toolbar.clear();
-        this.closeWebSocket();
-        this.charts.forEach(item => item.chart.destroy());
+        this.leaveLiveMode();
     }
 
     public toggleSelection(column: DashboardColumn): void {
@@ -456,25 +463,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     }
 
-    private setPage(name: string): void {
-        const index = this.store.pages.findIndex(page => page.name === name);
-        if (this.store.index !== index) {
-            this.store.updateState(state => ({ ...state, index }));
+    private leaveLiveMode(): void {
+        if (!this.live) {
+            return;
         }
-    }
 
-    private enterEditMode(): void {
         this.closeWebSocket();
         this.charts.forEach(item => item.chart.destroy());
         this.map.clear();
+        this.live = false;
     }
 
     private enterLiveMode(): void {
+        if (this.live) {
+            return;
+        }
+
+        this.live = true;
         setTimeout(() => {
             try {
                 this.openWebSocket();
-                if (this.chartContainers()) {
-                    this.createCharts(this.chartContainers());
+                const chartContainers = this.chartContainers();
+                if (chartContainers) {
+                    this.createCharts(chartContainers);
                     if (this.webSocketSubject) {
                         for (const request of this.store.activePage.requests) {
                             this.webSocketSubject.next(this.createMessage(request));

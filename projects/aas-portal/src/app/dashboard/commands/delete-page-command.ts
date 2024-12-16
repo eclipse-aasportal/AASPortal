@@ -18,13 +18,8 @@ export class DeletePageCommand extends DashboardCommand {
     }
 
     protected executing(): void {
-        const pages = this.store.pages;
-        const index = pages.indexOf(this.page);
-        if (index < 0) {
-            return;
-        }
-
-        pages.splice(index, 1);
+        const index = this.store.pages.findIndex(page => page.name === this.page.name);
+        const pages = this.store.pages.filter(page => page.name !== this.page.name);
         if (pages.length === 0) {
             pages.push({ name: this.store.createPageName(), items: [], requests: [] });
         }

@@ -72,7 +72,9 @@ export class StartComponent implements OnDestroy {
         private readonly favorites: FavoritesService,
     ) {
         if (this.store.viewMode === ViewMode.Undefined) {
-            this.auth.ready.pipe(first(ready => ready)).subscribe(() => this.viewMode.set(ViewMode.List));
+            this.auth.userId
+                .pipe(first(userId => userId !== undefined))
+                .subscribe(() => this.viewMode.set(ViewMode.List));
         } else {
             this.service.restore();
         }

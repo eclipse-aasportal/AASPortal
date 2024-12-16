@@ -7,9 +7,10 @@
  *****************************************************************************/
 
 import { Injectable, signal, untracked } from '@angular/core';
-import { first, mergeMap, Observable } from 'rxjs';
+import { first, mergeMap, Observable, skipWhile } from 'rxjs';
 import { AASDocument, AASDocumentId } from 'aas-core';
 import { AuthService, ViewMode } from 'aas-lib';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 type StartState = {
     viewMode: ViewMode;
@@ -44,9 +45,10 @@ const initialState: StartState = {
 })
 export class StartStore {
     public constructor(private readonly auth: AuthService) {
-        this.auth.ready
+        this.auth.userId
             .pipe(
-                first(ready => ready === true),
+                skipWhile(userId => userId === undefined),
+                takeUntilDestroyed(),
                 mergeMap(() => this.auth.getCookie('.Start')),
             )
             .subscribe(value => {
