@@ -8,7 +8,7 @@
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { computed, Injectable, signal, untracked } from '@angular/core';
-import { first, map, mergeMap, Observable, of, zip } from 'rxjs';
+import { map, mergeMap, Observable, of, skipWhile, zip } from 'rxjs';
 import { aas, LiveNode, LiveRequest } from 'aas-core';
 import { AuthService } from 'aas-lib';
 import { SelectionMode } from '../types/selection-mode';
@@ -27,23 +27,23 @@ export enum DashboardChartType {
     TimeSeries = 'TimeSeries',
 }
 
-export interface DashboardSource {
+export type DashboardSource = {
     label: string;
     color: DashboardColor;
     element: aas.Property | aas.Blob;
     node: LiveNode | null;
     url?: string;
-}
+};
 
-export interface DashboardItemPosition {
+export type DashboardItemPosition = {
     x: number;
     y: number;
-}
+};
 
-export interface DashboardSelectable {
+export type DashboardSelectable = {
     selected: boolean;
     column: DashboardItem;
-}
+};
 
 export interface DashboardItem {
     type: DashboardItemType;
@@ -65,21 +65,21 @@ export interface DashboardGrid extends DashboardItem {
     items: DashboardItem[];
 }
 
-export interface DashboardPage {
+export type DashboardPage = {
     name: string;
     items: DashboardItem[];
     requests: LiveRequest[];
-}
+};
 
-export interface DashboardColumn {
+export type DashboardColumn = {
     id: string;
     item: DashboardItem;
     itemType: DashboardItemType;
-}
+};
 
-export interface DashboardRow {
+export type DashboardRow = {
     columns: DashboardColumn[];
-}
+};
 
 export type DashboardState = {
     pages: DashboardPage[];
@@ -98,9 +98,9 @@ export class DashboardStore {
     private readonly state$ = signal<DashboardState>(initialState);
 
     public constructor(private readonly auth: AuthService) {
-        this.auth.ready
+        this.auth.userId
             .pipe(
-                first(ready => ready === true),
+                skipWhile(userId => userId === undefined),
                 mergeMap(() =>
                     zip(this.auth.getCookie('.DashboardPage'), this.auth.getCookie('.DashboardPages')).pipe(
                         map(([value, data]) => {
@@ -162,6 +162,10 @@ export class DashboardStore {
     public readonly modified$ = signal(false);
 
     public editMode$ = signal(false);
+
+    public get editMode(): boolean {
+        return untracked(this.editMode$);
+    }
 
     public selectionMode$ = signal(SelectionMode.Single);
 

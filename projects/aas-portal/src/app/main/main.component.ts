@@ -110,9 +110,9 @@ export class MainComponent implements OnInit {
         const id = params.get('id');
         const endpoint = params.get('endpoint');
         if (id) {
-            this.auth.ready
+            this.auth.userId
                 .pipe(
-                    first(ready => ready),
+                    first(userId => userId !== undefined),
                     mergeMap(() =>
                         from(
                             this.router.navigate(['/aas'], {

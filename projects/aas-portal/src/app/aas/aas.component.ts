@@ -29,7 +29,6 @@ import { aas, isProperty, isNumberType, isBlob, AASDocument, noop } from 'aas-co
 import {
     AASTreeComponent,
     AuthService,
-    ClipboardService,
     decodeBase64Url,
     DownloadService,
     NotifyService,
@@ -44,7 +43,6 @@ import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
-import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
 import { AASStore } from './aas.store';
 import { DashboardChartType } from '../dashboard/dashboard.store';
@@ -72,7 +70,6 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
-        private readonly clipboard: ClipboardService,
     ) {
         effect(
             () => {
@@ -210,8 +207,7 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         this.dashboard.add(page, document, this.store.selectedElements, chartType as DashboardChartType);
-        this.clipboard.set('DashboardQuery', { page: this.dashboardPage() } as DashboardQuery);
-        this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
+        this.router.navigate(['/dashboard'], { queryParams: { page } });
     }
 
     public synchronize(): Observable<void> {

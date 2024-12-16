@@ -90,7 +90,7 @@ describe('AuthService', () => {
         it('should be created', () => {
             expect(service).toBeTruthy();
             expect(service.payload()).toBeTruthy();
-            expect(service.userId()).toBeUndefined();
+            expect(service.email()).toBeUndefined();
             expect(service.authenticated()).toBeFalse();
             expect(service.name()).toEqual('GUEST_USER');
             expect(service.role()).toEqual('guest');
@@ -124,7 +124,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.email()).toEqual('john.doe@email.com');
                         expect(service.authenticated()).toBeTrue();
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
@@ -151,7 +151,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.email()).toEqual('john.doe@email.com');
                         expect(service.authenticated()).toBeTrue();
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
@@ -179,7 +179,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.email()).toEqual('john.doe@email.com');
                         expect(service.authenticated()).toBeTrue();
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
@@ -206,7 +206,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.email()).toEqual('john.doe@email.com');
                         expect(service.authenticated()).toBeTrue();
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
@@ -293,7 +293,7 @@ describe('AuthService', () => {
         it('should be created', () => {
             expect(service).toBeTruthy();
             expect(service.payload()).toBeTruthy();
-            expect(service.userId()).toEqual('john.doe@email.com');
+            expect(service.email()).toEqual('john.doe@email.com');
             expect(service.authenticated()).toBeTrue();
             expect(service.name()).toEqual('John');
             expect(service.role()).toEqual('editor');
@@ -336,7 +336,7 @@ describe('AuthService', () => {
                     )
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toBeUndefined();
+                        expect(service.email()).toBeUndefined();
                         expect(service.authenticated()).toBeFalse();
                         expect(service.name()).toEqual('GUEST_USER');
                         expect(service.role()).toEqual('guest');
@@ -362,7 +362,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.email()).toEqual('john.doe@email.com');
                         expect(service.authenticated()).toBeTrue();
                         expect(service.name()).toEqual('John Doe');
                         expect(service.role()).toEqual('editor');
@@ -387,7 +387,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toEqual('john.doe@email.com');
+                        expect(service.email()).toEqual('john.doe@email.com');
                         expect(service.authenticated()).toBeTrue();
                         expect(service.name()).toEqual('John Doe');
                         expect(service.role()).toEqual('editor');
@@ -414,7 +414,7 @@ describe('AuthService', () => {
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
-                        expect(service.userId()).toBeUndefined();
+                        expect(service.email()).toBeUndefined();
                         expect(service.authenticated()).toBeFalse();
                         expect(service.name()).toEqual('GUEST_USER');
                         expect(service.role()).toEqual('guest');

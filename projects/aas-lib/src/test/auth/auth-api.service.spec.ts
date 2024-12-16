@@ -21,10 +21,10 @@ describe('AuthApiService', function () {
 
     beforeEach(function () {
         TestBed.configureTestingModule({
-    declarations: [],
-    imports: [],
-    providers: [AuthApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            declarations: [],
+            imports: [],
+            providers: [AuthApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+        });
 
         userId = 'john.doe@email.com';
         service = TestBed.inject(AuthApiService);
@@ -42,7 +42,7 @@ describe('AuthApiService', function () {
     describe('guest', function () {
         it('login guest', function () {
             const result: AuthResult = { token: getGuestToken() };
-            service.guest().subscribe((res) => {
+            service.guest().subscribe(res => {
                 expect(res).toEqual(result);
             });
 
@@ -55,7 +55,7 @@ describe('AuthApiService', function () {
     describe('login', function () {
         it('login John', function () {
             const result: AuthResult = { token: getToken('John') };
-            service.login({ id: 'john.doe@email.com', password: '1234.xyz' }).subscribe((res) => {
+            service.login({ id: 'john.doe@email.com', password: '1234.xyz' }).subscribe(res => {
                 expect(res).toEqual(result);
             });
 
@@ -68,10 +68,9 @@ describe('AuthApiService', function () {
     describe('register', function () {
         it('registers John as new user', function () {
             const result: AuthResult = { token: getToken('John') };
-            service.register({ id: 'john.doe@email.com', name: 'John', password: '1234.xyz' })
-                .subscribe((res) => {
-                    expect(res).toEqual(result);
-                });
+            service.register({ id: 'john.doe@email.com', name: 'John', password: '1234.xyz' }).subscribe(res => {
+                expect(res).toEqual(result);
+            });
 
             const req = httpTestingController.expectOne('/api/v1/register');
             expect(req.request.method).toEqual('POST');
@@ -91,8 +90,8 @@ describe('AuthApiService', function () {
         const cookies: Cookie[] = [
             {
                 name: 'Cookie1',
-                data: "Hello world."
-            }
+                data: 'Hello world.',
+            },
         ];
 
         service.getCookies(userId).subscribe(data => {
