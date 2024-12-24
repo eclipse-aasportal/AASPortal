@@ -585,7 +585,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                 value.name = basename(file.value);
                 const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
-                value.url = `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+                value.url = `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }
         }
 

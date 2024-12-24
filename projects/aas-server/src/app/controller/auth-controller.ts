@@ -8,24 +8,17 @@
 
 import { inject, injectable } from 'tsyringe';
 import { AuthResult, Cookie, Credentials, UserProfile } from 'aas-core';
-import { Body, Delete, Get, Hidden, OperationId, Path, Post, Put, Route, Security, Tags } from 'tsoa';
+import { Body, Controller, Delete, Get, Hidden, OperationId, Path, Post, Put, Route, Security, Tags } from 'tsoa';
 
 import { AuthService } from '../auth/auth-service.js';
-import { Logger } from '../logging/logger.js';
-import { AASController } from './aas-controller.js';
 import { decodeBase64Url } from '../convert.js';
-import { Variable } from '../variable.js';
 
 @injectable()
 @Route('/api/v1')
 @Tags('Authentication')
-export class AuthController extends AASController {
-    public constructor(
-        @inject('Logger') logger: Logger,
-        @inject(AuthService) auth: AuthService,
-        @inject(Variable) variable: Variable,
-    ) {
-        super(logger, auth, variable);
+export class AuthController extends Controller {
+    public constructor(@inject(AuthService) private readonly auth: AuthService) {
+        super();
     }
 
     /**

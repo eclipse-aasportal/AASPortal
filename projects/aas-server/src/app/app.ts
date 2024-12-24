@@ -9,7 +9,7 @@
 import path from 'path';
 import fs from 'fs';
 import { inject, singleton } from 'tsyringe';
-import express, { Express, NextFunction, Request, Response, json, urlencoded } from 'express';
+import express, { Express, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
@@ -23,7 +23,17 @@ import { Logger } from './logging/logger.js';
 
 @singleton()
 export class App {
-    private swaggerDoc?: JsonObject;
+    private _swaggerDoc?: JsonObject;
+
+    private get swaggerDoc(): JsonObject {
+        if (this._swaggerDoc === undefined) {
+            this._swaggerDoc = JSON.parse(
+                fs.readFileSync(path.join(this.variable.ASSETS, 'swagger.json')).toString(),
+            ) as JsonObject;
+        }
+
+        return this._swaggerDoc;
+    }
 
     public constructor(
         @inject('Logger') private readonly logger: Logger,
@@ -54,52 +64,38 @@ export class App {
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
         this.app.use(morgan('dev'));
-        this.app.use('/docs', swaggerUi.serve, async (_req: Request, res: Response) => {
-            if (this.swaggerDoc === undefined) {
-                this.swaggerDoc = JSON.parse(
-                    (await fs.promises.readFile(path.join(this.variable.ASSETS, 'swagger.json'))).toString(),
-                );
-            }
-
-            return res.send(swaggerUi.generateHTML(this.swaggerDoc));
-        });
+        this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(this.swaggerDoc));
 
         RegisterRoutes(this.app);
+        // RegisterRoutes(this.app, { multer: multer({ dest: os.tempDir() }) });
 
         this.app.get('/', this.getIndex);
         this.app.use(express.static(this.variable.WEB_ROOT));
-
         this.app.use(this.notFoundHandler);
         this.app.use(this.errorHandler);
     }
 
-    private errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction): Response | void => {
+    private errorHandler = (err: Error, _: Request, res: Response) => {
         if (err instanceof ValidateError) {
-            return res.status(422).json({
+            res.status(422).json({
                 message: 'Validation Failed',
                 details: err?.fields,
             });
-        }
-
-        if (err instanceof ApplicationError) {
+        } else if (err instanceof ApplicationError) {
             if (err.name === ERRORS.UnauthorizedAccess) {
-                return res.status(401).json({
+                res.status(401).json({
                     message: 'Unauthorized',
                 });
+            } else {
+                res.status(500).json({
+                    message: err.message,
+                });
             }
-
-            return res.status(500).json({
+        } else {
+            res.status(500).json({
                 message: err.message,
             });
         }
-
-        if (err instanceof Error) {
-            return res.status(500).json({
-                message: err.message,
-            });
-        }
-
-        next();
     };
 
     private notFoundHandler = (_req: Request, res: Response) => {

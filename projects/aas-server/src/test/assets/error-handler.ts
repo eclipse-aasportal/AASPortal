@@ -7,35 +7,29 @@
  *****************************************************************************/
 
 import { ApplicationError } from 'aas-core';
-import { NextFunction, Request, Response } from "express";
-import { ValidateError } from "tsoa";
-import { ERRORS } from "../../app/errors.js";
+import { Request, Response } from 'express';
+import { ValidateError } from 'tsoa';
+import { ERRORS } from '../../app/errors.js';
 
-export const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction): Response | void => {
+export const errorHandler = (err: Error, req: Request, res: Response): void => {
     if (err instanceof ValidateError) {
-        return res.status(422).json({
-            message: "Validation Failed",
+        res.status(422).json({
+            message: 'Validation Failed',
             details: err?.fields,
         });
-    }
-
-    if (err instanceof ApplicationError) {
+    } else if (err instanceof ApplicationError) {
         if (err.name === ERRORS.UnauthorizedAccess) {
-            return res.status(401).json({ 
-                message: 'Unauthorized' 
+            res.status(401).json({
+                message: 'Unauthorized',
             });
         }
 
-        return res.status(500).json({
-            message: "Internal Server Error",
+        res.status(500).json({
+            message: 'Internal Server Error',
+        });
+    } else {
+        res.status(500).json({
+            message: 'Internal Server Error',
         });
     }
-
-    if (err instanceof Error) {
-        return res.status(500).json({
-            message: "Internal Server Error",
-        });
-    }
-
-    next();
 };

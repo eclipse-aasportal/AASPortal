@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-export interface PagedResultPagingMetadata {
+export type PagedResultPagingMetadata = {
     cursor?: string;
-}
+};
 
-export interface PagedResult<T> {
+export type PagedResult<T> = {
     result: T[];
     paging_metadata: PagedResultPagingMetadata;
-}
+};

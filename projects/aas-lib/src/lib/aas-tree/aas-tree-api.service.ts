@@ -38,7 +38,7 @@ export class AASTreeApiService {
     public getValueAsync(endpoint: string, id: string, smId: string, path: string): Promise<string> {
         return new Promise<string>((result, reject) => {
             let data: string;
-            const url = `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${path}/value`;
+            const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${path}/value`;
             this.http.get<{ value: string }>(url).subscribe({
                 next: value => (data = value.value),
                 complete: () => result(data),

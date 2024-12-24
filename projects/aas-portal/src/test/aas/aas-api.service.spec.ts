@@ -37,14 +37,14 @@ describe('AASApiService', function () {
     });
 
     describe('getDocument', () => {
-        it('/api/v1/containers/:name/documents/:id}', function () {
+        it('/api/v1/endpoints/:name/documents/:id}', function () {
             const document = createDocument('document1');
 
             service.getDocument('document1', 'Samples').subscribe(value => {
                 expect(value).toEqual(document);
             });
 
-            const req = httpTestingController.expectOne('/api/v1/containers/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
+            const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
             expect(req.request.method).toEqual('GET');
             req.flush(document);
         });

@@ -7,11 +7,8 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Get, OperationId, Path, Query, Route, Security, Tags } from 'tsoa';
+import { Controller, Get, OperationId, Path, Query, Route, Security, Tags } from 'tsoa';
 import { Logger } from '../logging/logger.js';
-import { AASController } from './aas-controller.js';
-import { AuthService } from '../auth/auth-service.js';
-import { Variable } from '../variable.js';
 import { AASDocument, AASPagedResult } from 'aas-core';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
@@ -19,14 +16,12 @@ import { decodeBase64Url } from '../convert.js';
 @injectable()
 @Route('/api/v1/documents')
 @Tags('Documents')
-export class DocumentsController extends AASController {
+export class DocumentsController extends Controller {
     public constructor(
-        @inject('Logger') logger: Logger,
-        @inject(AuthService) auth: AuthService,
-        @inject(Variable) variable: Variable,
+        @inject('Logger') private readonly logger: Logger,
         @inject(AASProvider) private readonly aasProvider: AASProvider,
     ) {
-        super(logger, auth, variable);
+        super();
     }
 
     /**
