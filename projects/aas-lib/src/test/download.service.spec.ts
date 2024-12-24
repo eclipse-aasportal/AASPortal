@@ -46,11 +46,11 @@ describe('DownloadService', () => {
     });
 
     describe('uploadDocuments', function () {
-        it('POST: /api/v1/containers/:name/documents/:id', function () {
+        it('POST: /api/v1/endpoints/:name/documents/:id', function () {
             const file = jasmine.createSpyObj<File>(['arrayBuffer', 'slice', 'stream', 'text']);
 
             service.uploadDocuments('Samples', file).subscribe();
-            const req = httpTestingController.expectOne('/api/v1/containers/U2FtcGxlcw/packages');
+            const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/packages');
             expect(req.request.method).toEqual('POST');
             expect(req.request.body).toBeDefined();
         });

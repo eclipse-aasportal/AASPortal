@@ -11,9 +11,9 @@ import { basename, extname } from 'path/posix';
 import jszip from 'jszip';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
-import { AasxDirectory } from './aasx-directory.js';
 import { AASDocument, aas } from 'aas-core';
 
+import { AasxDirectory } from './aasx-directory.js';
 import { AASPackage } from '../aas-package.js';
 import { AASResource } from '../aas-resource.js';
 import { Logger } from '../../logging/logger.js';
@@ -146,7 +146,11 @@ export class AasxPackage extends AASPackage {
         if (this.originName === null) {
             const relationships = await this.getRelationshipsAsync('aasx/_rels/aasx-origin.rels');
             for (const relationship of relationships) {
-                if (relationship.getAttribute('Type') === 'http://www.admin-shell.io/aasx/relationships/aas-spec') {
+                const type = relationship.getAttribute('Type');
+                if (
+                    type === 'http://admin-shell.io/aasx/relationships/aas-spec' ||
+                    type === 'http://www.admin-shell.io/aasx/relationships/aas-spec'
+                ) {
                     this.originName = relationship.getAttribute('Target');
                     break;
                 }
@@ -163,8 +167,8 @@ export class AasxPackage extends AASPackage {
     private async getRelationshipsAsync(path: string): Promise<Element[]> {
         const xml = await this.getZipEntryAsync(path);
         const xmldoc = new DOMParser().parseFromString(xml);
-        const opnxml = xpath.useNamespaces({ opnxml: 'http://schemas.openxmlformats.org/package/2006/relationships' });
-        return opnxml('/opnxml:Relationships/opnxml:Relationship', xmldoc) as Element[];
+        const select = xpath.useNamespaces({ opnxml: 'http://schemas.openxmlformats.org/package/2006/relationships' });
+        return select('/opnxml:Relationships/opnxml:Relationship', xmldoc) as Element[];
     }
 
     private async getZipEntryAsync(path: string, contentType?: jszip.OutputType): Promise<string> {

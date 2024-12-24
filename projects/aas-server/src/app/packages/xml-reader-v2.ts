@@ -533,7 +533,7 @@ export class XmlReaderV2 extends AASReader {
         }
 
         const unitId = this.readReference(`./${this.iec61360}:unitId`, node);
-        if (unit) {
+        if (unitId) {
             dataSpecification.unitId = unitId;
         }
 

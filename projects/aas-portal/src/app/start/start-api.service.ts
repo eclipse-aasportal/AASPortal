@@ -58,7 +58,7 @@ export class StartApiService {
      * @returns An observable.
      */
     public delete(id: string, url: string): Observable<void> {
-        return this.http.delete<void>(`/api/v1/containers/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
+        return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
     }
 
     /**
@@ -88,7 +88,7 @@ export class StartApiService {
      */
     public getContent(endpoint: string, id: string): Observable<aas.Environment> {
         return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`,
+            `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`,
         );
     }
 
@@ -100,7 +100,7 @@ export class StartApiService {
      */
     public getHierarchy(endpointName: string, id: string): Observable<AASDocument[]> {
         return this.http.get<AASDocument[]>(
-            `/api/v1/containers/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`,
+            `/api/v1/endpoints/${encodeBase64Url(endpointName)}/documents/${encodeBase64Url(id)}/hierarchy`,
         );
     }
 }

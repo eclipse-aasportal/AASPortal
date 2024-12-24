@@ -10,21 +10,21 @@ import { AASDocument, AASEndpoint } from 'aas-core';
 
 export type LowDbElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
 
-export interface LowDbElement {
+export type LowDbElement = {
     uuid: string;
     modelType: string;
     id?: string;
     idShort: string;
     value?: string;
     valueType?: LowDbElementValueType;
-}
+};
 
 export interface LowDbDocument extends AASDocument {
     uuid: string;
 }
 
-export interface LowDbData {
+export type LowDbData = {
     endpoints: AASEndpoint[];
     documents: LowDbDocument[];
     elements: LowDbElement[];
-}
+};

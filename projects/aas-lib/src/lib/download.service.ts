@@ -52,7 +52,7 @@ export class DownloadService {
      */
     public downloadDocument(endpoint: string, id: string, name: string): Observable<void> {
         return this.http
-            .get(`/api/v1/containers/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`, {
+            .get(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`, {
                 responseType: 'blob',
             })
             .pipe(
@@ -79,7 +79,7 @@ export class DownloadService {
             data.append('files', file);
         }
 
-        return this.http.post(`/api/v1/containers/${encodeBase64Url(endpoint)}/packages`, data, {
+        return this.http.post(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages`, data, {
             reportProgress: true,
             observe: 'events',
         });

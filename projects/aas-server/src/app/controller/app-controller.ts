@@ -7,25 +7,20 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Get, OperationId, Route, Security, Tags } from 'tsoa';
+import { Controller, Get, OperationId, Route, Security, Tags } from 'tsoa';
 import { ApplicationInfo } from '../application-info.js';
 import { Logger } from '../logging/logger.js';
-import { AASController } from './aas-controller.js';
-import { AuthService } from '../auth/auth-service.js';
-import { Variable } from '../variable.js';
 import { Message, AppInfo } from 'aas-core';
 
 @injectable()
 @Route('/api/v1/app')
 @Tags('App')
-export class AppController extends AASController {
+export class AppController extends Controller {
     public constructor(
-        @inject('Logger') logger: Logger,
-        @inject(AuthService) auth: AuthService,
-        @inject(Variable) variable: Variable,
+        @inject('Logger') private readonly logger: Logger,
         @inject(ApplicationInfo) private readonly applicationInfo: ApplicationInfo,
     ) {
-        super(logger, auth, variable);
+        super();
     }
 
     /**

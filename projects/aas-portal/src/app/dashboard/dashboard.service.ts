@@ -167,7 +167,7 @@ export class DashboardService {
                             color: this.createRandomColor(),
                             element: blob,
                             node: null,
-                            url: `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`,
+                            url: `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`,
                         },
                     ],
                 };

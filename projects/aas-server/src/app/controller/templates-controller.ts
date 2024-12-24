@@ -7,12 +7,9 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Get, OperationId, Route, Security, Tags } from 'tsoa';
-import { Logger } from '../logging/logger.js';
-import { AASController } from './aas-controller.js';
-import { AuthService } from '../auth/auth-service.js';
-import { Variable } from '../variable.js';
+import { Controller, Get, OperationId, Route, Security, Tags } from 'tsoa';
 import { aas, TemplateDescriptor } from 'aas-core';
+import { Logger } from '../logging/logger.js';
 import { TemplateStorage } from '../template/template-storage.js';
 import { decodeBase64Url } from '../convert.js';
 
@@ -22,14 +19,12 @@ import { decodeBase64Url } from '../convert.js';
 @injectable()
 @Route('/api/v1/templates')
 @Tags('Templates')
-export class TemplatesController extends AASController {
+export class TemplatesController extends Controller {
     public constructor(
-        @inject('Logger') logger: Logger,
-        @inject(AuthService) auth: AuthService,
-        @inject(Variable) variable: Variable,
+        @inject('Logger') private readonly logger: Logger,
         @inject(TemplateStorage) private readonly templateStorage: TemplateStorage,
     ) {
-        super(logger, auth, variable);
+        super();
     }
 
     /**

@@ -1,12 +1,9 @@
 {
-    "entryFile": "src/app/aas-server.ts",
+    "entryFile": "src/app/app.ts",
     "noImplicitAdditionalProperties": "ignore",
     "controllerPathGlobs": [
-        "src/app/controller/**/*controller.ts"
+        "src/app/controller/*controller.ts"
     ],
-    "multerOpts": {
-        "dest": "./temp"
-    },
     "spec": {
         "outputDirectory": "./src/assets",
         "specVersion": 3,
