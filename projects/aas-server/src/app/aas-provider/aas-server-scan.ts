@@ -8,8 +8,8 @@
 
 import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
-import { AASApiClient, AASLabel } from '../packages/aas-server/aas-api-client.js';
-import { AASServerPackage } from '../packages/aas-server/aas-server-package.js';
+import { AASApiClient, AASLabel } from '../package/aas-api/aas-api-client.js';
+import { AASApiPackage } from '../package/aas-api/aas-api-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { PagedResult } from '../types/paged-result.js';
 
@@ -32,7 +32,7 @@ export class AASServerScan extends AASResourceScan {
     }
 
     protected override createDocument(id: AASLabel): Promise<AASDocument> {
-        const aasPackage = new AASServerPackage(this.logger, this.client, id.id, id.idShort);
+        const aasPackage = new AASApiPackage(this.logger, this.client, id.id, id.idShort);
         return aasPackage.createDocumentAsync();
     }
 

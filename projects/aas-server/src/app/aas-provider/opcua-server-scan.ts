@@ -9,12 +9,12 @@
 import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescription } from 'node-opcua';
 import { AASDocument, noop } from 'aas-core';
 import { Logger } from '../logging/logger.js';
-import { OpcuaDataTypeDictionary } from '../packages/opcua/opcua-data-type-dictionary.js';
-import { OpcuaClient } from '../packages/opcua/opcua-client.js';
-import { OpcuaPackage } from '../packages/opcua/opcua-package.js';
+import { OpcuaDataTypeDictionary } from '../package/opcua/opcua-data-type-dictionary.js';
+import { OpcuaClient } from '../package/opcua/opcua-client.js';
+import { OpcuaPackage } from '../package/opcua/opcua-package.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../packages/aas-server/aas-api-client.js';
+import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
 export class OpcuaServerScan extends AASResourceScan {
     private readonly logger: Logger;

@@ -11,7 +11,7 @@ import { aas, DefaultType, LiveRequest } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { AASApiClient } from '../../../app/packages/aas-server/aas-api-client.js';
+import { AASApiClient } from '../../../app/package/aas-api/aas-api-client.js';
 import env from '../../assets/aas-environment.js';
 import { createSpyObj, DoneFn } from 'fhg-jest'
 
