@@ -12,7 +12,7 @@ main();
 
 function main() {
     const aasCoreSummary = read('./reports/aas-core/coverage-summary.json');
-    const aasServerSummary = read('./reports/aas-server/coverage-summary.json');
+    const aasServerSummary = read('./reports/aas-node/coverage-summary.json');
     const aasLibSummary = read('./reports/aas-lib/coverage-summary.json');
     const aasPortalSummary = read('./reports/aas-portal/coverage-summary.json');
 

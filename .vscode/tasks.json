@@ -42,9 +42,9 @@
             }
         },
         {
-            "label": "build-aas-server",
+            "label": "build-aas-node",
             "type": "typescript",
-            "tsconfig": "projects/aas-server/tsconfig.app.json",
+            "tsconfig": "projects/aas-node/tsconfig.app.json",
             "problemMatcher": [
                 "$tsc"
             ],

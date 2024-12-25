@@ -34,5 +34,5 @@ jobs:
           name: code-coverage-report
           path: |
             reports/aas-portal.xml
-            reports/aas-server.xml
+            reports/aas-node.xml
             reports/common.xml

@@ -48,10 +48,10 @@ jobs:
           push: true
           tags: fraunhoferiosb/aasportal_aasportal:${{env.IMAGE_TAG}}
 
-      - name: Build and push AASServer (backend) image
+      - name: Build and push AASNode (backend) image
         uses: docker/build-push-action@v5
         with:
-          file: ./Dockerfile.aas-server
+          file: ./Dockerfile.aas-node
           context: .
           push: true
           tags: fraunhoferiosb/aasportal_aasserver:${{env.IMAGE_TAG}}

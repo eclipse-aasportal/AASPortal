@@ -10,25 +10,25 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "name": "Start aas-server",
+            "name": "Start aas-node",
             "type": "node",
             "args": ["--security-revert=CVE-2023-46809"],
             "request": "launch",
-            "preLaunchTask": "build-aas-server",
-            "program": "${workspaceFolder}/projects/aas-server/build/aas-server.js",
+            "preLaunchTask": "build-aas-node",
+            "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
             "cwd": "${workspaceFolder}",
             "outFiles": [
-                "${workspaceFolder}/projects/aas-server/build/**/*.js"
+                "${workspaceFolder}/projects/aas-node/build/**/*.js"
             ],
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "env": {
                 "NODE_ENV": "development",
-                "NODE_SERVER_PORT": "1337",
-                "CONTENT_ROOT": "projects/aas-server/build",
+                "AAS_NODE_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-node/build",
                 "WEB_ROOT": "projects/aas-portal/dist",
-                "ASSETS": "projects/aas-server/src/assets",
+                "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"file:///endpoints/samples?name=Samples\"]",
                 // "USER_STORAGE": "mongodb://aas-server:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users",
                 "TEMPLATE_STORAGE": "http://aas-server:5w0vmrkzrwDIDyZs@localhost:8080/templates",
@@ -36,20 +36,20 @@
             }
         },
         {
-            "name": "Run aas-server",
+            "name": "Run aas-node",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/projects/aas-server/dist/aas-server.js",
+            "program": "${workspaceFolder}/projects/aas-node/dist/aas-node.js",
             "cwd": "${workspaceFolder}",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "env": {
                 "NODE_ENV": "development",
-                "NODE_SERVER_PORT": "1337",
-                "CONTENT_ROOT": "projects/aas-server/dist",
+                "AAS_NODE_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-node/dist",
                 "WEB_ROOT": "projects/aas-portal/dist",
-                "ASSETS": "projects/aas-server/src/assets",
+                "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"file:///endpoints/samples?name=Samples\"]"
             }
         },
@@ -68,7 +68,7 @@
             "url": "http://localhost:9876/debug.html",
         },
         {
-            "name": "Test aas-server",
+            "name": "Test aas-node",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -77,11 +77,11 @@
                 "run-script",
                 "test",
                 "-w",
-                "aas-server"
+                "aas-node"
             ],
         },
         {
-            "name": "Debug aas-server test",
+            "name": "Debug aas-node test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -90,7 +90,7 @@
                 "run-script",
                 "test",
                 "-w",
-                "aas-server",
+                "aas-node",
                 "--testPathPattern",
                 "${fileBasename}"
             ],

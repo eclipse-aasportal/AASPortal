@@ -7,20 +7,20 @@
 
 *AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of four workspaces:
 - aas-portal: The browser app of *AASPortal*.
-- aas-server: The Node.js server app of *AASPortal*.
+- aas-node: The Node.js app of *AASPortal*.
 - aas-lib: UI components and services in an Angular library.
-- common: Types and functions used by aas-portal and aas-server.
+- common: Types and functions used by aas-portal and aas-node.
 
 ```txt
 aasportal
   ├── projects
-  │     ├── aas-portal
-  │     │     └── package.json
-  │     ├── aas-server
+  │     ├── aas-core
   │     │     └── package.json
   │     ├── aas-lib
   │     │     └── package.json
-  │     └── common
+  │     ├── aas-node
+  │     │     └── package.json
+  │     └── aas-portal
   │          └── package.json
   └── package.json
 
@@ -69,16 +69,16 @@ or the name (idShort) of the AAS
 
     http://localhost/?id=Bosch_NexoPistolGripNutrunner
 
-## AASServer 
-AASServer is a Node.js server application based on the Express framework. The main feature of AASServer is the provision of Asset Administration Shells from different data sources (AASX server, OPC UA server, file system). AASServer can read Asset Administration Shells in JSON, XML and OPC UA format. An Asset Administration Shell is always provided to a web client (AASPortal) in JSON version 3 format.
+## AASNode 
+AASNode is a Node.js server application based on the Express framework. The main feature of AASNode is the provision of Asset Administration Shells from different data sources (AASX server, OPC UA server, file system). AASNode can read Asset Administration Shells in JSON, XML and OPC UA format. An Asset Administration Shell is always provided to a web client (AASPortal) in JSON version 3 format.
 
-AASServer provides a user management. Authentication of a user is based on Json Web Token. 
+AASNode provides a user management. Authentication of a user is based on Json Web Token. 
 
 ## Environment Variables
 | Name             |                                                                       | default                                        |
 | ---------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
-| ASSETS           | AASServer root directory local endpoints and templates.               | './assets'                                     |
-| CONTENT_ROOT     | The root directory where AASServer is located.                        | './'                                           |
+| ASSETS           | AASNode root directory local endpoints and templates.               | './assets'                                     |
+| CONTENT_ROOT     | The root directory where AASNode is located.                        | './'                                           |
 | CORS_ORIGIN      |                                                                       | '*'                                            |
 | ENDPOINTS        | The URLs of the initial AAS container endpoints.                      | ['file:///samples']                            |
 | HTTPS_CERT_FILE  | Certification file to enable HTTPS.                                   |                                                |
@@ -87,7 +87,7 @@ AASServer provides a user management. Authentication of a user is based on Json 
 | JWT_PUBLIC_KEY   | Public key file for RS256 encryption.                                 |                                                |
 | JWT_SECRET       | Secret for HS256 encryption or private key file for RS256 encryption. | 'The quick brown fox jumps over the lazy dog.' |
 | MAX_WORKERS      | Number of background worker that scan AAS containers.                 | 8                                              |
-| NODE_SERVER_PORT | The port number where AASServer is listening.                         | 80                                             |
+| AAS_NODE_PORT | The port number where AASNode is listening.                         | 80                                             |
 | USER_STORAGE     | URL of the user database.                                             | './users'                                      |
 | TEMPLATE_STORAGE | URL of the template storage                                           |                                                |
 | TIMEOUT          | Timeout until a new scan starts (ms).                                 | 5000                                           |
@@ -119,7 +119,7 @@ templates
 ```
 
 ## OpenAPI (Swagger)
-The AASServer provides an OpenAPI-compliant REST API. The Swagger UI is accessible via the URL:
+The AASNode provides an OpenAPI-compliant REST API. The Swagger UI is accessible via the URL:
 
 `http://localhost/api-docs`
 

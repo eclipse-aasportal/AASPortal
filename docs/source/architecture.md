@@ -7,9 +7,9 @@ AASPortal is an Angular based WEB application. The UI is implemented with the Bo
 
 ![aas-portal-dependencies](./images/aas-portal-dependencies.png "AASPortal main dependencies")
 
-## AASServer
-AASServer is a Node.js WEB application. The REST API provided by AASServer is realized with the WEB framework *Express*. For authentication the concept JSON Web Tokens is used. The implementation uses the module *jsonwebtoken*. The AASServer provides an OpenAPI-compliant REST API. To create the living documentation of the REST API the module *swagger-ui-express* is used.
+## AASNode
+AASNode is a Node.js WEB application. The REST API provided by AASNode is realized with the WEB framework *Express*. For authentication the concept JSON Web Tokens is used. The implementation uses the module *jsonwebtoken*. The AASNode provides an OpenAPI-compliant REST API. To create the living documentation of the REST API the module *swagger-ui-express* is used.
 
 For the access to Asset Administration Shells in an OPC UA server the *node-opcua* framework is used.
 
-![aas-server-dependencies](./images/aas-server-dependencies.png "AASServer main dependencies")
+![aas-node-dependencies](./images/aas-node-dependencies.png "AASNode main dependencies")

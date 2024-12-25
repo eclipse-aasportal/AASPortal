@@ -42,8 +42,8 @@ temp
 *-audit.json
 swagger.json
 swagger.yaml
-/projects/aas-server/src/app/routes
-/projects/ass-server/src/assets/app-info.json
+/projects/aas-node/src/app/routes
+/projects/ass-node/src/assets/app-info.json
 
 # System files
 .DS_Store
