@@ -7,31 +7,23 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { OpcuaSubscription } from '../../../app/live/opcua/opcua-subscription.js';
-import { createSpyObj } from 'fhg-jest';
+import { OpcuaPackage } from '../../../app/package/opcua/opcua-package.js';
 import { Logger } from '../../../app/logging/logger.js';
-import { SocketClient } from '../../../app/live/socket-client.js';
+import { createSpyObj } from 'fhg-jest';
 import { OpcuaClient } from '../../../app/package/opcua/opcua-client.js';
 
-describe('OpcuaSubscription', function () {
-    let subscription: OpcuaSubscription;
+describe('OpcuaPackage', function () {
+    let aasPackage: OpcuaPackage;
     let logger: jest.Mocked<Logger>;
-    let client: jest.Mocked<SocketClient>;
     let server: jest.Mocked<OpcuaClient>;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        server = createSpyObj<OpcuaClient>(['getSession']);
-        subscription = new OpcuaSubscription(logger, client, server, [
-            {
-                nodeId: 'ns=1;i=42',
-                valueType: 'xs:integer',
-            },
-        ]);
+        server = createSpyObj<OpcuaClient>(['openAsync', 'closeAsync', 'getSession'], { isOpen: true });
+        aasPackage = new OpcuaPackage(logger, server, 'ns=1;i=42');
     });
 
     it('should be created', function () {
-        expect(subscription).toBeTruthy();
+        expect(aasPackage).toBeTruthy();
     });
 });

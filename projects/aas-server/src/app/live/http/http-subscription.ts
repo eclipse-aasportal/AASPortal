@@ -10,7 +10,7 @@ import { aas, changeType, LiveNode, LiveRequest, noop } from 'aas-core';
 import { HttpSocketItem } from './http-socket-item.js';
 import { Logger } from '../../logging/logger.js';
 import { SocketClient } from '../socket-client.js';
-import { AASApiClient } from '../../packages/aas-server/aas-api-client.js';
+import { AASApiClient } from '../../package/aas-api/aas-api-client.js';
 import { SocketSubscription } from '../socket-subscription.js';
 
 export class HttpSubscription extends SocketSubscription {

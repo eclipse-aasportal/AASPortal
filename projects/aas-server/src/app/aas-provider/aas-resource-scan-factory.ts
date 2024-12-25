@@ -13,12 +13,12 @@ import { Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
-import { OpcuaClient } from '../packages/opcua/opcua-client.js';
-import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
-import { AASApiClient } from '../packages/aas-server/aas-api-client.js';
-import { AASApiClientV3 } from '../packages/aas-server/aas-api-client-v3.js';
-import { AASApiClientV1 } from '../packages/aas-server/aas-api-client-v1.js';
-import { AASApiClientV0 } from '../packages/aas-server/aas-api-client-v0.js';
+import { OpcuaClient } from '../package/opcua/opcua-client.js';
+import { AasxDirectory } from '../package/file-system/aasx-directory.js';
+import { AASApiClient } from '../package/aas-api/aas-api-client.js';
+import { AASApiClientV3 } from '../package/aas-api/aas-api-client-v3.js';
+import { AASApiClientV1 } from '../package/aas-api/aas-api-client-v1.js';
+import { AASApiClientV0 } from '../package/aas-api/aas-api-client-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
 

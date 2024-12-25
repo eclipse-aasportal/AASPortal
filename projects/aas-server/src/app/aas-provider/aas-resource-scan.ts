@@ -10,7 +10,7 @@ import EventEmitter from 'events';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { AASIndex } from '../aas-index/aas-index.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../packages/aas-server/aas-api-client.js';
+import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
 /** Defines an automate to scan an AAS resource for Asset Administration Shells. */
 export abstract class AASResourceScan extends EventEmitter {

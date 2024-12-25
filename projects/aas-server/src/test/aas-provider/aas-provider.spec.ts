@@ -14,7 +14,7 @@ import { Logger } from '../../app/logging/logger.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { Parallel } from '../../app/aas-provider/parallel.js';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
-import { AASResourceFactory } from '../../app/packages/aas-resource-factory.js';
+import { AASClientFactory } from '../../app/package/aas-client-factory.js';
 import { createSpyObj } from 'fhg-jest'
 import { Variable } from '../../app/variable.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
@@ -29,7 +29,7 @@ describe('AASProvider', function () {
     const logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
     const parallel = createSpyObj<Parallel>(['execute', 'on']);
     // const wsServer = createSpyObj<WSServer>(['notify', 'close', 'on']);
-    const resourceFactory = createSpyObj<AASResourceFactory>(['create', 'testAsync']);
+    const resourceFactory = createSpyObj<AASClientFactory>(['create', 'testAsync']);
 
     beforeEach(function () {
         fileStorageFactory = createSpyObj<FileStorageProvider>(['get']);

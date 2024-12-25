@@ -34,7 +34,7 @@ import { ScanEndpointData } from './worker-data.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
-import { AASResourceFactory } from '../packages/aas-resource-factory.js';
+import { AASClientFactory } from '../package/aas-client-factory.js';
 import { Variable } from '../variable.js';
 import { WSServer } from '../ws-server.js';
 import { ERRORS } from '../errors.js';
@@ -53,7 +53,7 @@ export class AASProvider {
         @inject(Variable) private readonly variable: Variable,
         @inject('Logger') private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
-        @inject(AASResourceFactory) private readonly resourceFactory: AASResourceFactory,
+        @inject(AASClientFactory) private readonly resourceFactory: AASClientFactory,
         @inject('AASIndex') private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {

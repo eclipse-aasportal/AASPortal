@@ -8,11 +8,11 @@
 
 import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
-import { AasxPackage } from '../packages/file-system/aasx-package.js';
-import { AasxDirectory } from '../packages/file-system/aasx-directory.js';
+import { AasxPackage } from '../package/file-system/aasx-package.js';
+import { AasxDirectory } from '../package/file-system/aasx-directory.js';
 import { AASResourceScan } from './aas-resource-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../packages/aas-server/aas-api-client.js';
+import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
 export class DirectoryScan extends AASResourceScan {
     private readonly map = new Map<string, AASDocument>();
