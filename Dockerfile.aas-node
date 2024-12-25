@@ -1,12 +1,12 @@
-# Creates an all-in-one Docker image
+# Dockerfile to build server app
 FROM node:20.11.1-alpine AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN npm install
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
-RUN npm run build
+RUN npm run aas-node:build
 
-FROM node:20.11.1-alpine AS aasportal
+FROM node:20.11.1-alpine AS aas-node
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/projects/aas-node/package.json package.json
@@ -15,11 +15,11 @@ COPY --from=build /usr/src/app/projects/aas-node/src/assets assets/
 COPY --from=build /usr/src/app/projects/aas-node/dist/ .
 COPY --from=build /usr/src/app/projects/aas-core/dist/ node_modules/aas-core/dist/
 COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-core/package.json
-COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ wwwroot/
 ENV NODE_LOG=./log/debug.log
-ENV AAS_NODE_PORT=80
+ENV AAS_NODE_PORT=1337
 ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]
 ENV NODE_ENV=production
 
-EXPOSE 80
+EXPOSE 1337
 CMD ["node", "aas-node.js" ]
+    

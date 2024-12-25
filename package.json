@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "create-app-info": "node --no-warnings --loader ts-node/esm create-app-info.ts",
-        "tsoa": "npm run tsoa -w aas-server",
+        "tsoa": "npm run tsoa -w aas-node",
         "start": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
         "header": "node --no-warnings --loader ts-node/esm copyright-header.ts",
         "coverage": "node --no-warnings --loader ts-node/esm coverage-summary.ts",
@@ -20,9 +20,9 @@
         "lib:build:debug": "npm run build:debug -w aas-core -w aas-lib",
         "aas-portal:build": "npm run build -w aas-core -w aas-lib -w aas-portal",
         "aas-portal:build:debug": "npm run build:debug -w aas-core -w aas-lib -w aas-portal",
-        "aas-server:build": "npm run build -w aas-core -w aas-server",
-        "aas-server:build:debug": "npm run build:debug -w aas-core -w aas-server",
-        "serve": "npm run build && node --env-file projects/aas-server/.env projects/aas-server/dist/aas-server.js"
+        "aas-node:build": "npm run build -w aas-core -w aas-node",
+        "aas-node:build:debug": "npm run build:debug -w aas-core -w aas-node",
+        "serve": "npm run build && node --env-file projects/aas-node/.env projects/aas-node/dist/aas-node.js"
     },
     "repository": {
         "type": "git",
@@ -34,7 +34,7 @@
     "workspaces": [
         "projects/fhg-jest",
         "projects/aas-core",
-        "projects/aas-server",
+        "projects/aas-node",
         "projects/aas-lib",
         "projects/aas-portal"
     ],
