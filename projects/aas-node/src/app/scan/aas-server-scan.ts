@@ -13,7 +13,7 @@ import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
 /** Defines an automate to scan an AAS resource for Asset Administration Shells. */
-export abstract class AASResourceScan extends EventEmitter {
+export abstract class AASServerScan extends EventEmitter {
     /**
      * Gets all documents of the current container.
      * @param index The AAS index.

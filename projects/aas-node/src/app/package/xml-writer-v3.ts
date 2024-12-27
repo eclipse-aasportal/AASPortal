@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, convertToString } from 'aas-core';
+import { aas, convertToString, noop } from 'aas-core';
 import camelCase from 'lodash-es/camelCase.js';
 import { DOMImplementation, XMLSerializer } from '@xmldom/xmldom';
 import { AASWriter } from './aas-writer.js';
@@ -43,8 +43,6 @@ export class XmlWriterV3 extends AASWriter {
                 this.appendChild(conceptDescriptionsNode, 'conceptDescription'),
             );
         }
-
-        this.document;
 
         return new XMLSerializer().serializeToString(this.document);
     }
@@ -408,8 +406,9 @@ export class XmlWriterV3 extends AASWriter {
         this.writeTextNode(node, 'value', blob.value);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-    private writeCapability(capability: aas.Capability, node: Node) {}
+    private writeCapability(capability: aas.Capability, node: Node) {
+        noop(capability, node);
+    }
 
     private writeEntity(entity: aas.Entity, node: Node) {
         this.writeTextNode(node, 'entityType', entity.entityType);

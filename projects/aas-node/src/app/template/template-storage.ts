@@ -16,8 +16,8 @@ import { Variable } from '../variable.js';
 import { createJsonReader } from '../package/create-json-reader.js';
 import { createXmlReader } from '../package/create-xml-reader.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
-import { ScanTemplatesData } from '../aas-provider/worker-data.js';
-import { ScanResult, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { ScanTemplatesData } from '../types/worker-data.js';
+import { ScanResult, ScanTemplatesResult } from '../types/scan-result.js';
 import { Parallel } from '../aas-provider/parallel.js';
 import { Task, TaskHandler } from '../aas-provider/task-handler.js';
 

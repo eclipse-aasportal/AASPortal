@@ -52,7 +52,6 @@ import { Location } from '@angular/common';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    standalone: true,
     imports: [SecuredImageComponent, AASTreeComponent, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -71,24 +70,18 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
     ) {
-        effect(
-            () => {
-                const value = this.dashboardPage();
-                if (value !== untracked(this.dashboard.activePage)) {
-                    this.dashboard.setActivePage(value);
-                }
-            },
-            { allowSignalWrites: true },
-        );
-        effect(
-            () => {
-                const aasToolbar = this.aasToolbar();
-                if (aasToolbar !== undefined) {
-                    this.toolbar.set(aasToolbar);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const value = this.dashboardPage();
+            if (value !== untracked(this.dashboard.activePage)) {
+                this.dashboard.setActivePage(value);
+            }
+        });
+        effect(() => {
+            const aasToolbar = this.aasToolbar();
+            if (aasToolbar !== undefined) {
+                this.toolbar.set(aasToolbar);
+            }
+        });
     }
 
     public readonly aasToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');

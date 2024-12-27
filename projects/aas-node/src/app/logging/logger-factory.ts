@@ -44,7 +44,7 @@ export class LoggerFactory {
             if (file.isFile() && path.extname(file.name) === '.log' && file.name.startsWith('aas-node')) {
                 try {
                     fs.rmSync(path.join(dir, file.name));
-                } catch (error) {
+                } catch {
                     noop();
                 }
             }

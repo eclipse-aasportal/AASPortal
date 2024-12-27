@@ -16,7 +16,6 @@ import { AuthService } from './auth.service';
     selector: 'fhg-auth',
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
-    standalone: true,
     imports: [NgbModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

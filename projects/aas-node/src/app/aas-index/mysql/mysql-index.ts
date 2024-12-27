@@ -305,7 +305,7 @@ export class MySqlIndex extends AASIndex {
             await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE uuid = ?;', [uuid]);
             await connection.commit();
             return true;
-        } catch (error) {
+        } catch {
             await connection.rollback();
             return false;
         }

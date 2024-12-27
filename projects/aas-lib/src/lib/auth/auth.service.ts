@@ -307,7 +307,7 @@ export class AuthService {
         try {
             const value = jwtDecode(token) as JWTPayload;
             return value.exp == null || Date.now() / 1000 < value.exp;
-        } catch (error) {
+        } catch {
             return false;
         }
     }

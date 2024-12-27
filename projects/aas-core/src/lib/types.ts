@@ -57,14 +57,14 @@ export interface AASEndpointSchedule {
 export type AASEndpointType = 'FileSystem' | 'AAS_API' | 'OPC_UA' | 'WebDAV';
 
 /** The endpoint to an AAS container */
-export type AASEndpoint = {
+export interface AASEndpoint {
     name: string;
     url: string;
     type: AASEndpointType;
     schedule?: AASEndpointSchedule;
     version?: string;
     headers?: Record<string, string>;
-};
+}
 
 /** The unique identifier of an AAS. */
 export interface AASDocumentId {
@@ -164,14 +164,14 @@ export interface Library {
     homepage?: string;
 }
 
-export type DirEntry = {
+export interface DirEntry {
     type: 'file' | 'dir';
     name: string;
     dir: string;
     size: number;
     mtime: Date;
     url: string | null;
-};
+}
 
 /**  */
 export interface ErrorData {

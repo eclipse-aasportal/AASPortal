@@ -15,21 +15,17 @@ import { ToolbarService } from '../toolbar.service';
     selector: 'fhg-view',
     templateUrl: './view.component.html',
     styleUrls: ['./view.component.scss'],
-    standalone: true,
     imports: [RouterOutlet],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewComponent implements OnDestroy {
     public constructor(private readonly toolbar: ToolbarService) {
-        effect(
-            () => {
-                const viewToolbar = this.viewToolbar();
-                if (viewToolbar) {
-                    this.toolbar.set(viewToolbar);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const viewToolbar = this.viewToolbar();
+            if (viewToolbar) {
+                this.toolbar.set(viewToolbar);
+            }
+        });
     }
 
     public readonly viewToolbar = viewChild<TemplateRef<unknown>>('viewToolbar');

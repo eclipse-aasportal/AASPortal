@@ -21,7 +21,7 @@ export class MySqlQuery extends AASIndexQuery {
     public createSql(values: unknown[]): string {
         try {
             return this.evaluate(this.queryParser.ast, values);
-        } catch (error) {
+        } catch {
             return '';
         }
     }

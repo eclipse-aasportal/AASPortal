@@ -18,7 +18,6 @@ import { AASEndpoint } from 'aas-core';
     selector: 'fhg-upload-form',
     templateUrl: './upload-form.component.html',
     styleUrls: ['./upload-form.component.scss'],
-    standalone: true,
     imports: [FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

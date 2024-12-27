@@ -903,7 +903,7 @@ function toBigInt(value: unknown): bigint | undefined {
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         try {
             return BigInt(value);
-        } catch (error) {
+        } catch {
             return undefined;
         }
     }

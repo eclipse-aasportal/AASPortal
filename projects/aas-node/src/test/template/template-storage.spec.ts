@@ -17,7 +17,7 @@ import { FileStorageProvider } from '../../app/file-storage/file-storage-provide
 import { Variable } from '../../app/variable.js';
 import { TaskHandler } from '../../app/aas-provider/task-handler.js';
 import { Parallel } from '../../app/aas-provider/parallel.js';
-import { ScanResultKind, ScanTemplatesResult } from '../../app/aas-provider/scan-result.js';
+import { ScanResultKind, ScanTemplatesResult } from '../../app/types/scan-result.js';
 
 describe('TemplateStorage', () => {
     let templateStorage: TemplateStorage;

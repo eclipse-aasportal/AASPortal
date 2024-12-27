@@ -10,10 +10,10 @@ import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
 import { AASDocument } from 'aas-core';
-import { ScanEndpointData } from './aas-provider/worker-data.js';
-import { ScanEndpointResult, ScanResultKind } from './aas-provider/scan-result.js';
+import { ScanEndpointData } from './types/worker-data.js';
+import { ScanEndpointResult, ScanResultKind } from './types/scan-result.js';
 import { toUint8Array } from './convert.js';
-import { AASResourceScanFactory } from './aas-provider/aas-resource-scan-factory.js';
+import { AASServerScanFactory } from './scan/aas-server-scan-factory.js';
 import { Variable } from './variable.js';
 import { AASIndex } from './aas-index/aas-index.js';
 
@@ -24,13 +24,13 @@ export class EndpointScan {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject('AASIndex') private readonly index: AASIndex,
-        @inject(AASResourceScanFactory) private readonly resourceScanFactory: AASResourceScanFactory,
+        @inject(AASServerScanFactory) private readonly factory: AASServerScanFactory,
         @inject(Variable) private readonly variable: Variable,
     ) {}
 
     public async scanAsync(data: ScanEndpointData): Promise<void> {
         this.data = data;
-        const scan = this.resourceScanFactory.create(data.endpoint);
+        const scan = this.factory.create(data.endpoint);
         try {
             scan.on('compare', this.compare);
             scan.on('remove', this.postRemove);

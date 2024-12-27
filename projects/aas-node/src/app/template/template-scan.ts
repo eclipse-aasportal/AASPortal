@@ -17,9 +17,9 @@ import { Variable } from '../variable.js';
 import { createJsonReader } from '../package/create-json-reader.js';
 import { createXmlReader } from '../package/create-xml-reader.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
-import { ScanResultKind, ScanTemplatesResult } from '../aas-provider/scan-result.js';
+import { ScanResultKind, ScanTemplatesResult } from '../types/scan-result.js';
 import { toUint8Array } from '../convert.js';
-import { WorkerData } from '../aas-provider/worker-data.js';
+import { WorkerData } from '../types/worker-data.js';
 
 @singleton()
 export class TemplateScan {

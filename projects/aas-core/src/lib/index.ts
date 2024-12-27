@@ -44,7 +44,7 @@ export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function noop(...args: unknown[]) {}
 
 /**
@@ -98,7 +98,7 @@ export function stringFormat(format: string, ...args: unknown[]) {
                 return match;
             }
         });
-    } catch (error) {
+    } catch {
         return format;
     }
 }
@@ -112,7 +112,7 @@ export function stringFormat(format: string, ...args: unknown[]) {
 export function equalUrls(url1: string, url2: string): boolean {
     try {
         return url1 === url2 || equals(new URL(url1), new URL(url2));
-    } catch (_) {
+    } catch {
         return false;
     }
 

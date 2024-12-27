@@ -75,7 +75,6 @@ type TimeSeries = {
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
-    standalone: true,
     imports: [NgClass, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -98,65 +97,50 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private readonly commandHandler: CommandHandlerService,
         private readonly window: WindowService,
     ) {
-        effect(
-            () => {
-                const activePage = this.store.activePage$();
-                if (!this.store.editMode) {
-                    this.leaveLiveMode();
-                }
+        effect(() => {
+            const activePage = this.store.activePage$();
+            if (!this.store.editMode) {
+                this.leaveLiveMode();
+            }
 
-                this.selections.clear();
-                this.selectedSources.clear();
-                this.activePage.set(activePage.name);
+            this.selections.clear();
+            this.selectedSources.clear();
+            this.activePage.set(activePage.name);
 
-                if (!this.store.editMode) {
-                    this.enterLiveMode();
-                }
-            },
-            { allowSignalWrites: true },
-        );
+            if (!this.store.editMode) {
+                this.enterLiveMode();
+            }
+        });
 
-        effect(
-            () => {
-                const value = this.activePage();
-                if (value !== this.store.activePage.name) {
-                    this.store.setActivePage(value);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const value = this.activePage();
+            if (value !== this.store.activePage.name) {
+                this.store.setActivePage(value);
+            }
+        });
 
-        effect(
-            () => {
-                if (this.editMode()) {
-                    this.leaveLiveMode();
-                } else {
-                    this.enterLiveMode();
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            if (this.editMode()) {
+                this.leaveLiveMode();
+            } else {
+                this.enterLiveMode();
+            }
+        });
 
-        effect(
-            () => {
-                const name = this.activePage();
-                const index = this.store.pages.findIndex(page => page.name === name);
-                if (this.store.index !== index) {
-                    this.store.updateState(state => ({ ...state, index }));
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const name = this.activePage();
+            const index = this.store.pages.findIndex(page => page.name === name);
+            if (this.store.index !== index) {
+                this.store.updateState(state => ({ ...state, index }));
+            }
+        });
 
-        effect(
-            () => {
-                const dashboardToolbar = this.dashboardToolbar();
-                if (dashboardToolbar !== undefined) {
-                    this.toolbar.set(dashboardToolbar);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const dashboardToolbar = this.dashboardToolbar();
+            if (dashboardToolbar !== undefined) {
+                this.toolbar.set(dashboardToolbar);
+            }
+        });
     }
 
     public readonly chartContainers = viewChildren<ElementRef<HTMLCanvasElement>>('chart');

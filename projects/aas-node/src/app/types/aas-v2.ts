@@ -226,8 +226,7 @@ export interface Identifiable extends Referable {
     identification: Identifier;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataSpecificationContent {}
+export type DataSpecificationContent = object;
 
 /** Content of data specification template for concept descriptions for properties,
  * values and value lists conformant to IEC 61360. */
@@ -275,8 +274,7 @@ export interface ValueList {
     valueReferencePairTypes: ValueReferencePairType[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ValueReferencePairType extends ValueObject {}
+export type ValueReferencePairType = ValueObject;
 
 export interface EmbeddedDataSpecification {
     dataSpecification: Reference;
@@ -303,8 +301,7 @@ export interface SubmodelElementCollection extends SubmodelElement {
 }
 
 /** An event element. */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Event extends SubmodelElement {}
+export type Event = SubmodelElement;
 
 /** A basic event element. */
 export interface BasicEvent extends Event {
@@ -405,8 +402,7 @@ export interface Entity extends SubmodelElement {
 
 /** A capability is the implementation-independent description of the potential of an
  * asset to achieve a certain effect in the physical or virtual world.  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Capability extends SubmodelElement {}
+export type Capability = SubmodelElement;
 
 /** An operation variable is a submodel element that is used as input or output variable of an operation. */
 export interface OperationVariable {

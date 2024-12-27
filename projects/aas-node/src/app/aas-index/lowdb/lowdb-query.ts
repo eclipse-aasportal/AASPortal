@@ -20,7 +20,7 @@ export class LowDbQuery extends AASIndexQuery {
     public do(document: LowDbDocument, elements: LowDbElement[]): boolean {
         try {
             return this.evaluate(this.queryParser.ast, document, elements);
-        } catch (error) {
+        } catch {
             return false;
         }
     }

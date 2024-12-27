@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable, signal, untracked } from '@angular/core';
-import { first, mergeMap, Observable, skipWhile } from 'rxjs';
+import { mergeMap, Observable, skipWhile } from 'rxjs';
 import { AASDocument, AASDocumentId } from 'aas-core';
 import { AuthService, ViewMode } from 'aas-lib';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

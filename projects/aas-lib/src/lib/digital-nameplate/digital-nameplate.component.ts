@@ -41,7 +41,6 @@ const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
     selector: 'fhg-digital-nameplate',
     templateUrl: './digital-nameplate.component.html',
     styleUrls: ['./digital-nameplate.component.scss'],
-    standalone: true,
     imports: [TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

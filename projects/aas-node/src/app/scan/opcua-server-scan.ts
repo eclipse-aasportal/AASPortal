@@ -12,11 +12,11 @@ import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../package/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../package/opcua/opcua-client.js';
 import { OpcuaPackage } from '../package/opcua/opcua-package.js';
-import { AASResourceScan } from './aas-resource-scan.js';
+import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
-export class OpcuaServerScan extends AASResourceScan {
+export class OpcuaServerScan extends AASServerScan {
     private readonly logger: Logger;
     private readonly server: OpcuaClient;
     private readonly map = new Map<string, AASDocument>();
