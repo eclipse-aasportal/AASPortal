@@ -33,7 +33,6 @@ const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submo
     selector: 'fhg-customer-feedback',
     templateUrl: './customer-feedback.component.html',
     styleUrls: ['./customer-feedback.component.scss'],
-    standalone: true,
     imports: [ScoreComponent, DecimalPipe, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -47,12 +46,9 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         private readonly location: Location,
         private readonly translate: TranslateService,
     ) {
-        effect(
-            () => {
-                this.init(this.submodels());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.init(this.submodels());
+        });
     }
 
     public readonly name = computed(() => {

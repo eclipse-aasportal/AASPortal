@@ -10,11 +10,11 @@ import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { AasxPackage } from '../package/file-system/aasx-package.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
-import { AASResourceScan } from './aas-resource-scan.js';
+import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
-export class DirectoryScan extends AASResourceScan {
+export class DirectoryScan extends AASServerScan {
     private readonly map = new Map<string, AASDocument>();
 
     public constructor(

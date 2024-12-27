@@ -21,7 +21,6 @@ export interface EndpointSelect {
     selector: 'fhg-remove-endpoint',
     templateUrl: './remove-endpoint-form.component.html',
     styleUrls: ['./remove-endpoint-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

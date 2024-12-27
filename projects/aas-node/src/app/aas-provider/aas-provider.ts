@@ -27,10 +27,10 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AASIndex } from '../aas-index/aas-index.js';
-import { ScanResultKind, ScanResult, ScanEndpointResult } from './scan-result.js';
+import { ScanResultKind, ScanResult, ScanEndpointResult } from '../types/scan-result.js';
 import { Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
-import { ScanEndpointData } from './worker-data.js';
+import { ScanEndpointData } from '../types/worker-data.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
@@ -53,7 +53,7 @@ export class AASProvider {
         @inject(Variable) private readonly variable: Variable,
         @inject('Logger') private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
-        @inject(AASClientFactory) private readonly resourceFactory: AASClientFactory,
+        @inject(AASClientFactory) private readonly clientFactory: AASClientFactory,
         @inject('AASIndex') private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
@@ -143,7 +143,7 @@ export class AASProvider {
     public async getThumbnailAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
-        const resource = this.resourceFactory.create(endpoint);
+        const resource = this.clientFactory.create(endpoint);
         try {
             await resource.openAsync();
             return await resource.createPackage(document.address, document.idShort).getThumbnailAsync(id);
@@ -171,7 +171,7 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         let stream: NodeJS.ReadableStream;
-        const resource = this.resourceFactory.create(endpoint);
+        const resource = this.clientFactory.create(endpoint);
         try {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address, document.idShort);
@@ -223,7 +223,7 @@ export class AASProvider {
      * @param endpoint The endpoint to add.
      */
     public async addEndpointAsync(endpoint: AASEndpoint): Promise<void> {
-        await this.resourceFactory.testAsync(endpoint);
+        await this.clientFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
             type: 'AASServerMessage',
@@ -328,7 +328,7 @@ export class AASProvider {
             throw new Error(`The destination document ${id} is not available.`);
         }
 
-        const resource = this.resourceFactory.create(endpoint);
+        const resource = this.clientFactory.create(endpoint);
         try {
             await resource.openAsync();
             const pkg = resource.createPackage(document.address, document.idShort);
@@ -354,7 +354,7 @@ export class AASProvider {
     public async getPackageAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
-        const resource = this.resourceFactory.create(endpoint);
+        const resource = this.clientFactory.create(endpoint);
         try {
             await resource.openAsync();
             return await resource.getPackageAsync(id, document.address);
@@ -378,7 +378,7 @@ export class AASProvider {
             );
         }
 
-        const source = this.resourceFactory.create(endpoint);
+        const source = this.clientFactory.create(endpoint);
         try {
             await source.openAsync();
             for (const file of files) {
@@ -398,7 +398,7 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (document) {
-            const resource = this.resourceFactory.create(endpoint);
+            const resource = this.clientFactory.create(endpoint);
             try {
                 await resource.deletePackageAsync(document.id, document.address);
                 await this.index.remove(endpointName, id);
@@ -419,7 +419,7 @@ export class AASProvider {
     public async invoke(endpointName: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
-        const resource = this.resourceFactory.create(endpoint);
+        const resource = this.clientFactory.create(endpoint);
         try {
             await resource.openAsync();
             let env = document.content;
@@ -498,14 +498,14 @@ export class AASProvider {
         }
     }
 
-    private onClientMessage = async (data: WebSocketData, client: SocketClient): Promise<void> => {
+    private onClientMessage = async (data: WebSocketData, socket: SocketClient): Promise<void> => {
         try {
             switch (data.type) {
                 case 'LiveRequest':
-                    client.subscribe(data.type, await this.createSubscription(data.data as LiveRequest, client));
+                    socket.subscribe(data.type, await this.createSubscription(data.data as LiveRequest, socket));
                     break;
                 case 'IndexChange':
-                    client.subscribe(data.type, new EmptySubscription());
+                    socket.subscribe(data.type, new EmptySubscription());
                     break;
                 default:
                     throw new Error(`'${data.type}' is an unsupported Websocket message type.`);
@@ -515,18 +515,18 @@ export class AASProvider {
         }
     };
 
-    private async createSubscription(message: LiveRequest, client: SocketClient): Promise<SocketSubscription> {
+    private async createSubscription(message: LiveRequest, socket: SocketClient): Promise<SocketSubscription> {
         const endpoint = await this.index.getEndpoint(message.endpoint);
         const document = await this.index.get(message.endpoint, message.id);
-        const resource = this.resourceFactory.create(endpoint);
-        await resource.openAsync();
+        const client = this.clientFactory.create(endpoint);
+        await client.openAsync();
         let env = this.cache.get(document.endpoint, document.id);
         if (!env) {
-            env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
+            env = await client.createPackage(document.address, document.idShort).getEnvironmentAsync();
             this.cache.set(document.endpoint, document.id, env);
         }
 
-        return resource.createSubscription(client, message, env);
+        return client.createSubscription(socket, message, env);
     }
 
     private notify(data: AASServerMessage): void {
@@ -745,7 +745,7 @@ export class AASProvider {
         }
 
         const endpoint = await this.index.getEndpoint(document.endpoint);
-        const resource = this.resourceFactory.create(endpoint);
+        const resource = this.clientFactory.create(endpoint);
         try {
             await resource.openAsync();
             env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();

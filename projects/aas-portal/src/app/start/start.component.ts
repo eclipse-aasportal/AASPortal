@@ -51,7 +51,6 @@ import { StartService } from './start.service';
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrls: ['./start.component.scss'],
-    standalone: true,
     imports: [AASTableComponent, NgClass, TranslateModule, NgbModule, FormsModule],
     providers: [StartService],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,36 +78,24 @@ export class StartComponent implements OnDestroy {
             this.service.restore();
         }
 
-        effect(
-            () => {
-                this.service.vieModeChange(this.store.viewMode$());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.service.vieModeChange(this.store.viewMode$());
+        });
 
-        effect(
-            () => {
-                this.service.activeFavoritesChange(this.activeFavorites());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.service.activeFavoritesChange(this.activeFavorites());
+        });
 
-        effect(
-            () => {
-                this.service.limitChange(this.limit());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.service.limitChange(this.limit());
+        });
 
-        effect(
-            () => {
-                const startToolbar = this.startToolbar();
-                if (startToolbar) {
-                    this.toolbar.set(startToolbar);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const startToolbar = this.startToolbar();
+            if (startToolbar) {
+                this.toolbar.set(startToolbar);
+            }
+        });
     }
 
     public readonly startToolbar = viewChild<TemplateRef<unknown>>('startToolbar');

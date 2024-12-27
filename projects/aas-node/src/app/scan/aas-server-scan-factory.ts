@@ -8,10 +8,10 @@
 
 import { inject, singleton } from 'tsyringe';
 import { AASEndpoint } from 'aas-core';
-import { AASResourceScan } from './aas-resource-scan.js';
+import { AASServerScan } from './aas-server-scan.js';
 import { Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';
-import { AASServerScan } from './aas-server-scan.js';
+import { AASApiServerScan } from './aas-api-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
 import { OpcuaClient } from '../package/opcua/opcua-client.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
@@ -23,14 +23,14 @@ import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
 
 @singleton()
-export class AASResourceScanFactory {
+export class AASServerScanFactory {
     public constructor(
         @inject('Logger') private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
         @inject(HttpClient) private readonly http: HttpClient,
     ) {}
 
-    public create(endpoint: AASEndpoint): AASResourceScan {
+    public create(endpoint: AASEndpoint): AASServerScan {
         switch (endpoint.type) {
             case 'AAS_API': {
                 let source: AASApiClient;
@@ -48,7 +48,7 @@ export class AASResourceScanFactory {
                         throw new Error('Not implemented.');
                 }
 
-                return new AASServerScan(this.logger, source);
+                return new AASApiServerScan(this.logger, source);
             }
             case 'OPC_UA':
                 return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint));

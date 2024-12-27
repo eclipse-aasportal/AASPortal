@@ -57,7 +57,6 @@ import { AASTreeStore } from './aas-tree.store';
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    standalone: true,
     imports: [NgClass, NgStyle, TranslateModule],
     providers: [AASTreeSearch, AASTreeApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,23 +82,17 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
-        effect(
-            () => {
-                this.searching.start(this.searchExpression());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.searching.start(this.searchExpression());
+        });
 
-        effect(
-            () => {
-                const document = this.document();
-                if (!equalDocument(document, this.store.document)) {
-                    this.store.document = document;
-                    this.updateRows(document);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const document = this.document();
+            if (!equalDocument(document, this.store.document)) {
+                this.store.document = document;
+                this.updateRows(document);
+            }
+        });
 
         effect(() => {
             if (this.state() === 'online') {
@@ -113,28 +106,22 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             this.selected.emit(this.store.selectedElements$());
         });
 
-        effect(
-            () => {
-                const matchIndex = this.matchIndex();
-                if (matchIndex >= 0) {
-                    this.store.expandRow(matchIndex);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const matchIndex = this.matchIndex();
+            if (matchIndex >= 0) {
+                this.store.expandRow(matchIndex);
+            }
+        });
 
-        effect(
-            () => {
-                const row = this.matchRow();
-                if (!row) return;
+        effect(() => {
+            const row = this.matchRow();
+            if (!row) return;
 
-                setTimeout(() => {
-                    const element = this.dom.getElementById(row.id);
-                    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                });
-            },
-            { allowSignalWrites: true },
-        );
+            setTimeout(() => {
+                const element = this.dom.getElementById(row.id);
+                element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            });
+        });
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -453,7 +440,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         try {
             this.prepareOnline(this.store.rows.filter(row => row.selected));
             this.play();
-        } catch (error) {
+        } catch {
             this.stop();
         }
     }

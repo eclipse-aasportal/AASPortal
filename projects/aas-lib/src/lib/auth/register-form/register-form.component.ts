@@ -26,7 +26,6 @@ export interface RegisterFormResult {
     selector: 'fhg-register',
     templateUrl: './register-form.component.html',
     styleUrls: ['./register-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

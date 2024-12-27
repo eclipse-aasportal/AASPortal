@@ -15,7 +15,6 @@ import { SecuredImageComponent } from '../secured-image/secured-image.component'
     selector: 'fhg-show-image',
     templateUrl: './show-image-form.component.html',
     styleUrls: ['./show-image-form.component.scss'],
-    standalone: true,
     imports: [SecuredImageComponent, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

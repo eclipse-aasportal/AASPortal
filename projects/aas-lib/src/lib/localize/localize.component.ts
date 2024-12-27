@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { AsyncPipe } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -19,8 +18,7 @@ import { WindowService } from '../window.service';
     selector: 'fhg-localize',
     templateUrl: './localize.component.html',
     styleUrls: ['./localize.component.scss'],
-    standalone: true,
-    imports: [AsyncPipe, NgbModule, TranslateModule],
+    imports: [NgbModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocalizeComponent implements OnInit, OnDestroy {

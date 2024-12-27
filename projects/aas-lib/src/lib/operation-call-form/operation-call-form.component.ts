@@ -44,7 +44,6 @@ export interface VariableItem {
     selector: 'fhg-operation-call',
     templateUrl: './operation-call-form.component.html',
     styleUrls: ['./operation-call-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
     providers: [OperationCallFormApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,

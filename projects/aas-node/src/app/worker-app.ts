@@ -9,11 +9,11 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { Logger } from './logging/logger.js';
-import { ScanResult, ScanResultKind } from './aas-provider/scan-result.js';
+import { ScanResult, ScanResultKind } from './types/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { EndpointScan } from './endpoint-scan.js';
 import { TemplateScan } from './template/template-scan.js';
-import { WorkerData, isScanEndpointData, isScanTemplatesData } from './aas-provider/worker-data.js';
+import { WorkerData, isScanEndpointData, isScanTemplatesData } from './types/worker-data.js';
 
 @singleton()
 export class WorkerApp {

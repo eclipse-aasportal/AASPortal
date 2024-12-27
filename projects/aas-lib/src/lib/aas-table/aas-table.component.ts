@@ -23,7 +23,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTableRow } from './aas-table-row';
-import { ClipboardService } from '../clipboard.service';
 import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
 import { AASTableStore } from './aas-table.store';
@@ -35,7 +34,6 @@ import { encodeBase64Url } from '../convert';
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.component.html',
     styleUrls: ['./aas-table.component.scss'],
-    standalone: true,
     imports: [NgbTooltip, MaxLengthPipe, TranslateModule],
     providers: [AASTableStore],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,23 +45,16 @@ export class AASTableComponent implements OnDestroy {
     public constructor(
         private readonly router: Router,
         private readonly store: AASTableStore,
-        private readonly clipboard: ClipboardService,
         private readonly window: WindowService,
         private readonly translate: TranslateService,
     ) {
-        effect(
-            () => {
-                this.store.initialize(this.documents(), untracked(this.viewMode));
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.store.initialize(this.documents(), untracked(this.viewMode));
+        });
 
-        effect(
-            () => {
-                this.store.setSelected(this.selected(), untracked(this.viewMode));
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.store.setSelected(this.selected(), untracked(this.viewMode));
+        });
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);

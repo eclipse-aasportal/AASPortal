@@ -10,10 +10,10 @@ import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { AASApiClient, AASLabel } from '../package/aas-api/aas-api-client.js';
 import { AASApiPackage } from '../package/aas-api/aas-api-package.js';
-import { AASResourceScan } from './aas-resource-scan.js';
+import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
 
-export class AASServerScan extends AASResourceScan {
+export class AASApiServerScan extends AASServerScan {
     private readonly logger: Logger;
     private readonly client: AASApiClient;
 

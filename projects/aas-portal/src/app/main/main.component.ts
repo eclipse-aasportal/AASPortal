@@ -43,7 +43,6 @@ export interface LinkDescriptor {
     selector: 'fhg-main',
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.scss'],
-    standalone: true,
     imports: [
         RouterOutlet,
         RouterLink,

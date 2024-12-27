@@ -27,7 +27,6 @@ import { environment } from '../../environments/environment';
     selector: 'fhg-about',
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
-    standalone: true,
     imports: [LicenseInfoComponent, MessageTableComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -40,15 +39,12 @@ export class AboutComponent implements OnInit, OnDestroy {
         private api: AboutApiService,
         private toolbar: ToolbarService,
     ) {
-        effect(
-            () => {
-                const aboutToolbar = this.aboutToolbar();
-                if (aboutToolbar) {
-                    this.toolbar.set(aboutToolbar);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const aboutToolbar = this.aboutToolbar();
+            if (aboutToolbar) {
+                this.toolbar.set(aboutToolbar);
+            }
+        });
     }
 
     public readonly aboutToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');

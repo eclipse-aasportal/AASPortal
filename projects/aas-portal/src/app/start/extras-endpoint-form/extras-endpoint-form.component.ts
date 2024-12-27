@@ -24,7 +24,6 @@ export type ExtrasEndpointItem = {
 
 @Component({
     selector: 'fhg-extras-endpoint',
-    standalone: true,
     imports: [FormsModule, NgbToast, NgbCollapse, TranslateModule],
     providers: [ExtrasEndpointService],
     templateUrl: './extras-endpoint-form.component.html',

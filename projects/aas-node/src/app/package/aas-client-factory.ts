@@ -95,7 +95,7 @@ export class AASClientFactory {
                 default:
                     throw new Error('Not implemented.');
             }
-        } catch (error) {
+        } catch {
             throw new ApplicationError(
                 `"${endpoint.url}" addresses an invalid or not supported AAS resource.`,
                 ERRORS.InvalidContainerUrl,

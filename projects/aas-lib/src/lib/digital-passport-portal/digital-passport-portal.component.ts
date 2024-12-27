@@ -23,7 +23,6 @@ const HandoverDocumentationId = '0173-1#01-AHF578#003';
 
 @Component({
     selector: 'fhg-device-passport-portal',
-    standalone: true,
     providers: [DigitalPassportPortalService],
     imports: [TranslateModule, SecuredImageComponent],
     templateUrl: './digital-passport-portal.component.html',

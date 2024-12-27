@@ -27,7 +27,6 @@ interface FavoritesItem {
     selector: 'fhg-favorites-form',
     templateUrl: './favorites-form.component.html',
     styleUrls: ['./favorites-form.component.css'],
-    standalone: true,
     imports: [NgbToast, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

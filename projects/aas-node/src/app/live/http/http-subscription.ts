@@ -59,7 +59,7 @@ export class HttpSubscription extends SocketSubscription {
 
                 item.node.timeStamp = Date.now();
                 nodes.push(item.node);
-            } catch (error) {
+            } catch {
                 noop();
             }
         }

@@ -66,7 +66,7 @@ export async function resolveError(error: unknown, translate: TranslateService):
                 try {
                     const buffer = await error.error.arrayBuffer();
                     message = JSON.parse(new TextDecoder().decode(buffer));
-                } catch (_) {
+                } catch {
                     noop();
                 }
             }

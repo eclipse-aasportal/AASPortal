@@ -13,8 +13,8 @@ import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
 
-import { ScanResultKind, ScanResult } from './scan-result.js';
-import { WorkerData } from './worker-data.js';
+import { ScanResultKind, ScanResult } from '../types/scan-result.js';
+import { WorkerData } from '../types/worker-data.js';
 import { Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
 
@@ -170,7 +170,7 @@ export class Parallel extends EventEmitter {
                     this.waiting.splice(index, 1);
                 }
             }
-        } catch (error) {
+        } catch {
             noop();
         }
     };
