@@ -8,18 +8,18 @@
 
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { inject, singleton } from 'tsyringe';
 import express, { Express, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
-import { ApplicationError } from 'aas-core';
-import { ValidateError } from 'tsoa';
 
 import { RegisterRoutes } from './routes/routes.js';
-import { ERRORS } from './errors.js';
 import { Variable } from './variable.js';
 import { Logger } from './logging/logger.js';
+import multer from 'multer';
+import { errorHandler } from './error-handler.js';
 
 @singleton()
 export class App {
@@ -66,37 +66,13 @@ export class App {
         this.app.use(morgan('dev'));
         this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(this.swaggerDoc));
 
-        RegisterRoutes(this.app);
-        // RegisterRoutes(this.app, { multer: multer({ dest: os.tempDir() }) });
+        RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
         this.app.get('/', this.getIndex);
         this.app.use(express.static(this.variable.WEB_ROOT));
+        this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
-        this.app.use(this.errorHandler);
     }
-
-    private errorHandler = (err: Error, _: Request, res: Response) => {
-        if (err instanceof ValidateError) {
-            res.status(422).json({
-                message: 'Validation Failed',
-                details: err?.fields,
-            });
-        } else if (err instanceof ApplicationError) {
-            if (err.name === ERRORS.UnauthorizedAccess) {
-                res.status(401).json({
-                    message: 'Unauthorized',
-                });
-            } else {
-                res.status(500).json({
-                    message: err.message,
-                });
-            }
-        } else {
-            res.status(500).json({
-                message: err.message,
-            });
-        }
-    };
 
     private notFoundHandler = (_req: Request, res: Response) => {
         res.status(404).send({
