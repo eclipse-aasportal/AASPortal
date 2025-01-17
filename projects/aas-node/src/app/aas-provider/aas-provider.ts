@@ -143,12 +143,12 @@ export class AASProvider {
     public async getThumbnailAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
-        const resource = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await resource.openAsync();
-            return await resource.createPackage(document.address, document.idShort).getThumbnailAsync(id);
+            await client.openAsync();
+            return await client.createPackage(document.address, document.idShort).getThumbnailAsync(id);
         } finally {
-            await resource.closeAsync();
+            await client.closeAsync();
         }
     }
 
@@ -171,10 +171,10 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         let stream: NodeJS.ReadableStream;
-        const resource = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await resource.openAsync();
-            const pkg = resource.createPackage(document.address, document.idShort);
+            await client.openAsync();
+            const pkg = client.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = this.cache.get(document.endpoint, document.id);
                 if (!document.content) {
@@ -203,7 +203,7 @@ export class AASProvider {
                     }
                 }
             } else if (dataElement.modelType === 'Blob') {
-                const value = await resource.getBlobValueAsync(document.content, smId, path);
+                const value = await client.getBlobValueAsync(document.content, smId, path);
                 const readable = new Readable();
                 readable.push(JSON.stringify({ value }));
                 readable.push(null);
@@ -212,7 +212,7 @@ export class AASProvider {
                 throw new Error('Not implemented');
             }
         } finally {
-            await resource.closeAsync();
+            await client.closeAsync();
         }
 
         return stream;
@@ -328,10 +328,10 @@ export class AASProvider {
             throw new Error(`The destination document ${id} is not available.`);
         }
 
-        const resource = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await resource.openAsync();
-            const pkg = resource.createPackage(document.address, document.idShort);
+            await client.openAsync();
+            const pkg = client.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = await pkg.getEnvironmentAsync();
                 if (this.cache.has(document.endpoint, document.id)) {
@@ -341,7 +341,7 @@ export class AASProvider {
 
             return await pkg.setEnvironmentAsync(content, document.content);
         } finally {
-            await resource.closeAsync();
+            await client.closeAsync();
         }
     }
 
@@ -354,12 +354,12 @@ export class AASProvider {
     public async getPackageAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
-        const resource = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await resource.openAsync();
-            return await resource.getPackageAsync(id, document.address);
+            await client.openAsync();
+            return await client.getPackageAsync(id, document.address);
         } finally {
-            await resource.closeAsync();
+            await client.closeAsync();
         }
     }
 
@@ -398,13 +398,13 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (document) {
-            const resource = this.clientFactory.create(endpoint);
+            const client = this.clientFactory.create(endpoint);
             try {
-                await resource.deletePackageAsync(document.id, document.address);
+                await client.deletePackageAsync(document.id, document.address);
                 await this.index.remove(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
-                await resource.closeAsync();
+                await client.closeAsync();
             }
         }
     }
@@ -419,18 +419,18 @@ export class AASProvider {
     public async invoke(endpointName: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
-        const resource = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await resource.openAsync();
+            await client.openAsync();
             let env = document.content;
             if (!env) {
-                env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
+                env = await client.createPackage(document.address, document.idShort).getEnvironmentAsync();
                 this.cache.set(document.endpoint, document.id, env);
             }
 
-            return await resource.invoke(env, operation);
+            return await client.invoke(env, operation);
         } finally {
-            await resource.closeAsync();
+            await client.closeAsync();
         }
     }
 
@@ -745,14 +745,14 @@ export class AASProvider {
         }
 
         const endpoint = await this.index.getEndpoint(document.endpoint);
-        const resource = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await resource.openAsync();
-            env = await resource.createPackage(document.address, document.idShort).getEnvironmentAsync();
+            await client.openAsync();
+            env = await client.createPackage(document.address, document.idShort).getEnvironmentAsync();
             this.cache.set(document.endpoint, document.id, env);
             return env;
         } finally {
-            await resource.closeAsync();
+            await client.closeAsync();
         }
     }
 

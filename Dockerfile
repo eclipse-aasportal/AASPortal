@@ -6,7 +6,7 @@ RUN npm install
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
 RUN npm run build
 
-FROM node:20.11.1-alpine AS aasportal
+FROM node:22.12.0-alpine AS aasportal
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/projects/aas-node/package.json package.json

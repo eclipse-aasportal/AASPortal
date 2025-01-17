@@ -21,13 +21,13 @@ export class AASApiPackage extends AASPackage {
     /**
      * Creates a new AAS-Registry package.
      * @param logger The logger service.
-     * @param resource The handle.
+     * @param client The client.
      * @param id The identifier of the AAS.
      */
-    public constructor(logger: Logger, resource: AASClient, id: string, idShort: string) {
+    public constructor(logger: Logger, client: AASClient, id: string, idShort: string) {
         super(logger);
 
-        this.server = resource as AASApiClient;
+        this.server = client as AASApiClient;
         this.id = id;
         this.idShort = idShort;
     }

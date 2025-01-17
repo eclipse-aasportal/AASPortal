@@ -15,7 +15,7 @@ import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { Parallel } from '../../app/aas-provider/parallel.js';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
 import { AASClientFactory } from '../../app/package/aas-client-factory.js';
-import { createSpyObj } from 'fhg-jest'
+import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
 import { AASIndex } from '../../app/aas-index/aas-index.js';
@@ -29,7 +29,7 @@ describe('AASProvider', function () {
     const logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
     const parallel = createSpyObj<Parallel>(['execute', 'on']);
     // const wsServer = createSpyObj<WSServer>(['notify', 'close', 'on']);
-    const resourceFactory = createSpyObj<AASClientFactory>(['create', 'testAsync']);
+    const clientFactory = createSpyObj<AASClientFactory>(['create', 'testAsync']);
 
     beforeEach(function () {
         fileStorageFactory = createSpyObj<FileStorageProvider>(['get']);
@@ -37,10 +37,10 @@ describe('AASProvider', function () {
             new LocalFileStorage('file:///endpoints/samples', './src/test/assets/samples'),
         );
 
-        resourceFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
+        clientFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
         variable = createSpyObj<Variable>({}, { ENDPOINTS: [] });
         index = createSpyObj<AASIndex>(['getEndpoints']);
-        aasProvider = new AASProvider(variable, logger, parallel, resourceFactory, index, new TaskHandler());
+        aasProvider = new AASProvider(variable, logger, parallel, clientFactory, index, new TaskHandler());
     });
 
     describe('getEndpoints', () => {
