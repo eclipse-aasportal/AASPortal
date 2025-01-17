@@ -94,7 +94,7 @@ export class HttpClient {
     }
 
     /**
-     * Checks the connection to resource with the specified URL.
+     * Checks the connection to an endpoint with the specified URL.
      * @param url The current URL.
      */
     public checkUrlExist(url: string): Promise<void> {

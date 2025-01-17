@@ -57,7 +57,7 @@ export class AASClientFactory {
     }
 
     /**
-     * Tests whether the specified URL is a valid and supported AAS resource.
+     * Tests whether the specified URL is a valid and supported AAS endpoint.
      * @param logger The logger.
      * @param url The current URL.
      */
@@ -97,7 +97,7 @@ export class AASClientFactory {
             }
         } catch {
             throw new ApplicationError(
-                `"${endpoint.url}" addresses an invalid or not supported AAS resource.`,
+                `"${endpoint.url}" addresses an invalid or not supported AAS endpoint.`,
                 ERRORS.InvalidContainerUrl,
                 endpoint.url,
             );

@@ -12,7 +12,7 @@ import { AASIndex } from '../aas-index/aas-index.js';
 import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
-/** Defines an automate to scan an AAS resource for Asset Administration Shells. */
+/** Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells. */
 export abstract class AASServerScan extends EventEmitter {
     /**
      * Gets all documents of the current container.

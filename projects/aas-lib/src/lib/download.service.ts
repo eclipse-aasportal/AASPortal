@@ -18,7 +18,7 @@ export class DownloadService {
     public constructor(private readonly http: HttpClient) {}
 
     /**
-     * Download a file from the specified URL.
+     * Downloads a file from the specified URL.
      * @param url The URL to the file resource.
      * @param filename The file name.
      */
