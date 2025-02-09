@@ -6,19 +6,21 @@
  *
  *****************************************************************************/
 
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASDocument, WebSocketData } from 'aas-core';
 import { Subject } from 'rxjs';
+
 import { AASTreeComponent } from '../../lib/aas-tree/aas-tree.component';
 import { sampleDocument } from '../assets/sample-document';
 import { NotifyService } from '../../lib/notify/notify.service';
-import { DownloadService } from '../../lib/download.service';
 import { WindowService } from '../../lib/window.service';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../assets/test-web-socket-factory.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { AuthService } from '../../lib/auth/auth.service';
 
 describe('AASTreeComponent', () => {
     let component: AASTreeComponent;
@@ -45,12 +47,8 @@ describe('AASTreeComponent', () => {
                     useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
                 },
                 {
-                    provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>([
-                        'downloadFileAsync',
-                        'downloadDocument',
-                        'uploadDocuments',
-                    ]),
+                    provide: AuthService,
+                    useValue: jasmine.createSpyObj<AuthService>({}, { token: signal('Token') }),
                 },
                 {
                     provide: WindowService,

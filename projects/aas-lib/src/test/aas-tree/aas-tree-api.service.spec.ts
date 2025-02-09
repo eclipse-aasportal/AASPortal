@@ -12,12 +12,12 @@ import { AuthService } from '../../lib/auth/auth.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AASTreeApiService } from '../../lib/aas-tree/aas-tree-api.service';
 
-describe('AASTreeApiService', function () {
+describe('AASTreeApiService', () => {
     let service: AASTreeApiService;
     let httpTestingController: HttpTestingController;
     let auth: jasmine.SpyObj<AuthService>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         auth = jasmine.createSpyObj<AuthService>(['login']);
         TestBed.configureTestingModule({
             declarations: [],
@@ -41,7 +41,7 @@ describe('AASTreeApiService', function () {
         httpTestingController.verify();
     });
 
-    it('should created', function () {
+    it('should created', () => {
         expect(service).toBeTruthy();
     });
 });

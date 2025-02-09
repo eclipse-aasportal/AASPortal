@@ -15,18 +15,6 @@ import { encodeBase64Url } from '../convert';
 @Injectable()
 export class AASTreeApiService {
     public constructor(private readonly http: HttpClient) {}
-
-    public getTokenAsync(url: string): Promise<string> {
-        return new Promise<string>((result, reject) => {
-            let data: AuthResult;
-            this.http.post<AuthResult>('/api/v1/login', { id: url }).subscribe({
-                next: value => (data = value),
-                complete: () => result(data.token),
-                error: error => reject(error),
-            });
-        });
-    }
-
     /**
      * Reads the value of an data element like `File` or `Blob`.
      * @param endpoint The endpoint name

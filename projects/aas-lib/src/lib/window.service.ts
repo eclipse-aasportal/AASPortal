@@ -6,12 +6,21 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken } from '@angular/core';
 
+export const WINDOW = new InjectionToken<Window>('Global window object', {
+    factory: () => window,
+});
+
+/** @deprecated */
 @Injectable({
     providedIn: 'root',
 })
 export class WindowService {
+    public get location(): URL {
+        return new URL(window.location.toString());
+    }
+
     /**
      * Opens a new browser window for the specified URL.
      * @param url The URL.

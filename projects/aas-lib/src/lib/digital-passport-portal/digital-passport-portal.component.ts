@@ -6,27 +6,42 @@
  *
  *****************************************************************************/
 
-import { Component, computed, effect, ElementRef, OnInit, viewChild } from '@angular/core';
 import { aas, AASDocument, getIdShortPath, getSemanticId, selectSubmodel } from 'aas-core';
-import { Location } from '@angular/common';
-import QRCode from 'qrcode';
-import { CarbonFootprint, ZVEINameplate } from '../views/submodel-template';
-import { TranslateModule } from '@ngx-translate/core';
-import { DigitalProductPassportStore } from './digital-passport-portal.store';
-import { SecuredImageComponent } from '../secured-image/secured-image.component';
-import { basename, decodeBase64Url, encodeBase64Url } from '../convert';
 import { ActivatedRoute } from '@angular/router';
 import { first } from 'rxjs';
+import { Location } from '@angular/common';
+import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
+import QRCode from 'qrcode';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    ElementRef,
+    Inject,
+    OnInit,
+    signal,
+    viewChild,
+} from '@angular/core';
+
+import { CarbonFootprint, ZVEINameplate } from '../views/submodel-template';
+import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-passport-portal.store';
+import { SecuredImageComponent } from '../secured-image/secured-image.component';
+import { basename, decodeBase64Url, encodeBase64Url } from '../convert';
 import { DigitalPassportPortalService } from './digital-passport-portal.service';
+import { WINDOW } from '../window.service';
+import { AuthService } from '../auth/auth.service';
 
 const HandoverDocumentationId = '0173-1#01-AHF578#003';
 
 @Component({
     selector: 'fhg-device-passport-portal',
-    providers: [DigitalPassportPortalService],
-    imports: [TranslateModule, SecuredImageComponent],
     templateUrl: './digital-passport-portal.component.html',
     styleUrl: './digital-passport-portal.component.scss',
+    providers: [DigitalPassportPortalService],
+    imports: [TranslateModule, SecuredImageComponent, NgbAccordionModule, NgbPaginationModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalPassportPortalComponent implements OnInit {
     public constructor(
@@ -34,12 +49,14 @@ export class DigitalPassportPortalComponent implements OnInit {
         private readonly location: Location,
         private readonly store: DigitalProductPassportStore,
         private readonly api: DigitalPassportPortalService,
+        @Inject(WINDOW) private readonly window: Window,
+        private readonly auth: AuthService,
     ) {
         effect(() => {
             const qrCode = this.qrCode();
-            const uriOfTheProduct = this.uriOfTheProduct();
+            const url = this.window.location.toString();
             if (qrCode) {
-                QRCode.toCanvas(qrCode!.nativeElement, uriOfTheProduct);
+                QRCode.toCanvas(qrCode.nativeElement, url);
             }
         });
     }
@@ -48,20 +65,17 @@ export class DigitalPassportPortalComponent implements OnInit {
 
     public readonly viewData = this.store.viewData$.asReadonly();
 
-    public readonly uriOfTheProduct = computed(() => this.store.getNameplateString(['URIOfTheProduct']));
+    public readonly hazardStatement = computed(() => {
+        const nameplate = this.store.viewData$()?.nameplate;
+        if (nameplate === undefined) {
+            return '-';
+        }
 
-    public readonly manufacturerProductType = computed(() =>
-        this.store.getNameplateString(['ManufacturerProductType']),
-    );
+        return this.store.getPropertyValue(nameplate, 'AssetSpecificProperties.DppHazardStatement_01');
+    });
 
-    public readonly serialNumber = computed(() => this.store.getNameplateString(['SerialNumber']));
-
-    public readonly dppHazardStatement = computed(() =>
-        this.store.getNameplateString(['AssetSpecificProperties', 'DppHazardStatement_01']),
-    );
-
-    public readonly dppHazardSymbol = computed(() =>
-        this.resolveFile(this.store.getNameplateFile(['AssetSpecificProperties', 'DppHazardSymbol'])),
+    public readonly hazardSymbol = computed(() =>
+        this.resolveFile(this.store.getNameplateFile('AssetSpecificProperties.DppHazardSymbol')),
     );
 
     public readonly thumbnail = computed(() => {
@@ -72,6 +86,45 @@ export class DigitalPassportPortalComponent implements OnInit {
 
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
     });
+
+    public readonly mainData = this.store.mainData;
+
+    public readonly nameplateItems = computed(() => {
+        const item = this.store.nameplateItems() as unknown as Record<string, string>;
+        const items: NameValue[] = [];
+        for (const name in item) {
+            const value = item[name];
+            if (typeof value === 'string') {
+                items.push({ name: 'DigitalPassportPortal.' + name, value });
+            }
+        }
+
+        return items;
+    });
+
+    public readonly totalPCFCO2eq = this.store.totalPCFCO2eq;
+
+    public readonly carbonFootprintItems = computed(() => {
+        const items: NameValue[] = [];
+        const item = this.store.carbonFootprintItems()[this.carbonFootprintIndex() - 1] as unknown as Record<
+            string,
+            unknown
+        >;
+        for (const name in item) {
+            const value = item[name];
+            if (typeof value === 'string') {
+                items.push({ name: 'DigitalPassportPortal.' + name, value });
+            }
+        }
+
+        return items;
+    });
+
+    public readonly carbonFootprintIndex = signal(1);
+
+    public readonly carbonFootprintSize = computed(() => this.store.carbonFootprintItems().length);
+
+    public readonly documentationData = this.store.documentationData;
 
     public ngOnInit(): void {
         const state = this.location.getState() as Record<string, string>;
@@ -91,6 +144,18 @@ export class DigitalPassportPortalComponent implements OnInit {
                 }
             });
         }
+    }
+
+    public downloadDocumentation($event: MouseEvent, item: DocumentationItem) {
+        const document = this.store.viewData$()?.document;
+        if (document === undefined) {
+            return;
+        }
+
+        const { url } = this.resolveFile(item.file);
+        const token = this.auth.token();
+        this.window.open(url + '?access_token=' + token);
+        $event.stopPropagation();
     }
 
     private getDocument(id: string, endpoint?: string): void {

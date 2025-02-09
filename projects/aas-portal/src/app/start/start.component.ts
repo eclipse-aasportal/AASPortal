@@ -227,7 +227,7 @@ export class StartComponent implements OnDestroy {
     public downloadDocument(): Observable<void> {
         return from(this.store.selected).pipe(
             mergeMap(document =>
-                this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx'),
+                this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
             catchError(error => this.notify.error(error)),
         );

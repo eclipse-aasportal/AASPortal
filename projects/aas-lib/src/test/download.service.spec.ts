@@ -9,8 +9,9 @@
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { DOCUMENT } from '@angular/common';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY } from 'rxjs';
+import { EMPTY, first, of } from 'rxjs';
 
 import { DownloadService } from '../lib/download.service';
 
@@ -29,7 +30,14 @@ describe('DownloadService', () => {
                     },
                 }),
             ],
-            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+            providers: [
+                {
+                    provide: DOCUMENT,
+                    useValue: jasmine.createSpyObj<Document>(['createElement']),
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
         });
 
         service = TestBed.inject(DownloadService);
@@ -45,21 +53,21 @@ describe('DownloadService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('uploadDocuments', function () {
-        it('POST: /api/v1/endpoints/:name/documents/:id', function () {
+    describe('uploadPackages', () => {
+        it('POST: /api/v1/endpoints/:name/documents/:id', () => {
             const file = jasmine.createSpyObj<File>(['arrayBuffer', 'slice', 'stream', 'text']);
 
-            service.uploadDocuments('Samples', file).subscribe();
+            service.uploadPackages('Samples', file).subscribe();
             const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/packages');
             expect(req.request.method).toEqual('POST');
             expect(req.request.body).toBeDefined();
         });
     });
 
-    describe('downloadDocument', function () {
-        it('downloads an AASX package file', function () {
+    describe('downloadPackage', () => {
+        it('downloads an AASX package file', () => {
             const spy = spyOn(httpClient, 'get').and.returnValue(EMPTY);
-            service.downloadDocument(
+            service.downloadPackage(
                 'Samples',
                 'https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237',
                 'Test.aasx',
@@ -69,10 +77,10 @@ describe('DownloadService', () => {
         });
     });
 
-    describe('downloadFileAsync', function () {
-        it('downloads a file resource', async function () {
+    describe('download', () => {
+        it('downloads a file resource', () => {
             const spy = spyOn(httpClient, 'get').and.returnValue(EMPTY);
-            await expectAsync(service.downloadFileAsync('http://localhost/folder/file', 'Test.txt')).toBeResolved();
+            service.download('http://localhost/folder/file', 'Test.txt');
             expect(spy).toHaveBeenCalled();
         });
     });

@@ -7,7 +7,8 @@
  *****************************************************************************/
 
 import { HttpClient, HttpEvent } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { encodeBase64Url } from './convert';
 
@@ -15,33 +16,30 @@ import { encodeBase64Url } from './convert';
     providedIn: 'root',
 })
 export class DownloadService {
-    public constructor(private readonly http: HttpClient) {}
+    public constructor(
+        private readonly http: HttpClient,
+        @Inject(DOCUMENT) private readonly document: Document,
+    ) {}
 
     /**
      * Downloads a file from the specified URL.
      * @param url The URL to the file resource.
      * @param filename The file name.
      */
-    public async downloadFileAsync(url: string, filename: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            this.http
-                .get(url, {
-                    responseType: 'blob',
-                })
-                .pipe(
-                    map(blob => {
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(blob);
-                        a.setAttribute('download', filename);
-                        a.click();
-                        URL.revokeObjectURL(a.href);
-                    }),
-                )
-                .subscribe({
-                    error: error => reject(error),
-                    complete: () => resolve(),
-                });
-        });
+    public download(url: string, filename: string): Observable<void> {
+        return this.http
+            .get(url, {
+                responseType: 'blob',
+            })
+            .pipe(
+                map(blob => {
+                    const a = this.document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.setAttribute('download', filename);
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }),
+            );
     }
 
     /**
@@ -50,14 +48,14 @@ export class DownloadService {
      * @param id The AAS identifier.
      * @param name The file name.
      */
-    public downloadDocument(endpoint: string, id: string, name: string): Observable<void> {
+    public downloadPackage(endpoint: string, id: string, name: string): Observable<void> {
         return this.http
             .get(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`, {
                 responseType: 'blob',
             })
             .pipe(
                 map(blob => {
-                    const a = document.createElement('a');
+                    const a = this.document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.setAttribute('download', name);
                     a.click();
@@ -71,7 +69,7 @@ export class DownloadService {
      * @param file A file.
      * @param endpoint The name of the destination endpoint.
      */
-    public uploadDocuments(endpoint: string, file: File | File[]): Observable<HttpEvent<object>> {
+    public uploadPackages(endpoint: string, file: File | File[]): Observable<HttpEvent<object>> {
         const data = new FormData();
         if (Array.isArray(file)) {
             file.forEach(item => data.append('files', item));

@@ -9,13 +9,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AASDocument, aas } from 'aas-core';
-import { Observable } from 'rxjs';
+import { first, mergeMap, Observable } from 'rxjs';
 import { encodeBase64Url } from '../convert';
+import { AuthService } from '../auth/auth.service';
 
-/** The client side AAS provider service. */
+/** The API of the digital passport portal. */
 @Injectable()
 export class DigitalPassportPortalService {
-    public constructor(private readonly http: HttpClient) {}
+    public constructor(
+        private readonly http: HttpClient,
+        private readonly auth: AuthService,
+    ) {}
 
     /**
      * Gets the AAS document with the specified identifier.
@@ -24,13 +28,16 @@ export class DigitalPassportPortalService {
      * @returns The requested AAS document.
      */
     public getDocument(id: string, endpoint?: string): Observable<AASDocument> {
-        if (endpoint) {
-            return this.http.get<AASDocument>(
-                `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`,
-            );
-        }
+        return this.auth.userId.pipe(
+            first(userId => userId !== undefined),
+            mergeMap(() => {
+                const url = endpoint
+                    ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`
+                    : `/api/v1/documents/${encodeBase64Url(id)}`;
 
-        return this.http.get<AASDocument>(`/api/v1/documents/${encodeBase64Url(id)}`);
+                return this.http.get<AASDocument>(url);
+            }),
+        );
     }
 
     /**

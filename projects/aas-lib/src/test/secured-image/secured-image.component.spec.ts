@@ -11,6 +11,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { AuthService } from '../../lib/auth/auth.service';
+import { of } from 'rxjs';
 
 describe('SecuredImageComponent', () => {
     let component: SecuredImageComponent;
@@ -18,9 +20,16 @@ describe('SecuredImageComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [],
+            providers: [
+                {
+                    provide: AuthService,
+                    useValue: jasmine.createSpyObj<AuthService>({}, { userId: of('guest') }),
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
         fixture = TestBed.createComponent(SecuredImageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
