@@ -14,11 +14,9 @@ import { of, Subject } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import {
     AuthComponent,
-    AuthService,
     IndexChangeService,
     LocalizeComponent,
     NotifyComponent,
-    WindowService,
 } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
@@ -51,16 +49,12 @@ describe('MainComponent', () => {
     let component: MainComponent;
     let fixture: ComponentFixture<MainComponent>;
     let documentSubject: Subject<AASDocument | null>;
-    let window: jasmine.SpyObj<WindowService>;
     let toolbar: jasmine.SpyObj<ToolbarService>;
     let indexChange: jasmine.SpyObj<IndexChangeService>;
-    let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
-        window = jasmine.createSpyObj<WindowService>(['getQueryParams']);
-        window.getQueryParams.and.returnValue(new URLSearchParams());
         toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
         indexChange = jasmine.createSpyObj<IndexChangeService>(['clear'], {
             documentCount: (() => 42) as Signal<number>,
@@ -68,14 +62,8 @@ describe('MainComponent', () => {
             changedDocuments: (() => 0) as Signal<number>,
         });
 
-        auth = jasmine.createSpyObj<AuthService>({}, { userId: of('guest') });
-
         TestBed.configureTestingModule({
             providers: [
-                {
-                    provide: WindowService,
-                    useValue: window,
-                },
                 {
                     provide: ToolbarService,
                     useValue: toolbar,
@@ -83,10 +71,6 @@ describe('MainComponent', () => {
                 {
                     provide: IndexChangeService,
                     useValue: indexChange,
-                },
-                {
-                    provide: AuthService,
-                    useValue: auth,
                 },
                 provideRouter([]),
             ],

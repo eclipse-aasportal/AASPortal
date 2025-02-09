@@ -11,11 +11,13 @@
     <div class="d-flex flex-column">
         <div class="bg-primary text-center py-2 my-2 fs-5" translate>DigitalPassportPortal.BANNER</div>
         <div class="text-center fw-bold fs-4 mb-2" translate>DigitalPassportPortal.CAPTION</div>
-        <div class="text-center mb-2">{{uriOfTheProduct()}}</div>
-        <div class="text-center mb-2"><span class="fw-medium" translate>DigitalPassportPortal.TYPE</span><span
-                class="fw-medium">:&nbsp;</span><span>{{manufacturerProductType()}}</span><span>,&nbsp;
-            </span><span class="fw-medium" translate>DigitalPassportPortal.SERIAL_NUMBER</span><span
-                class="fw-medium">:&nbsp;</span><span>{{serialNumber()}}</span>
+        <div class="text-center mb-2">{{mainData().uriOfTheProduct}}</div>
+        <div class="text-center mb-2"><span class="fw-medium" translate>DigitalPassportPortal.TYPE</span>
+            <span class="fw-medium">:&nbsp;</span>
+            <span>{{mainData().productType}}</span>
+            <span>,&nbsp;</span>
+            <span class="fw-medium" translate>DigitalPassportPortal.SERIAL_NUMBER</span>
+            <span class="fw-medium">:&nbsp;</span><span>{{mainData().serialNumber}}</span>
         </div>
         <div class="d-flex flex-row justify-content-around align-items-center mb-2">
             <fhg-img class="img-fluid" [src]="thumbnail()" alt="thumbnail"></fhg-img>
@@ -23,9 +25,88 @@
                 <canvas #qrCode></canvas>
             </div>
         </div>
-        <div class="text-center fs-3 fw-bold mb-2">{{dppHazardStatement()}}</div>
+        <div class="text-center fs-3 fw-bold mb-2">{{hazardStatement()}}</div>
         <div class="d-flex flex-row justify-content-center">
-            <fhg-img class="img-fluid" [src]="dppHazardSymbol().url" alt="DPP hazard symbol" [width]="96"></fhg-img>
+            <fhg-img class="img-fluid" [src]="hazardSymbol().url" alt="DPP hazard symbol" [width]="96"></fhg-img>
+        </div>
+        <div class="mt-3" ngbAccordion>
+            <div ngbAccordionItem>
+                <h2 ngbAccordionHeader>
+                    <button ngbAccordionButton translate>DigitalPassportPortal.NAMEPLATE_DATA</button>
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            <table class="table table-sm table-striped table-borderless">
+                                <tbody>
+                                    @for (item of nameplateItems(); track item.name ) {
+                                    <tr>
+                                        <td class="text-nowrap align-middle">{{item.name | translate}}</td>
+                                        <td>{{item.value}}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+            <div ngbAccordionItem>
+                <h2 ngbAccordionHeader>
+                    <button ngbAccordionButton>
+                        <span translate>DigitalPassportPortal.CARBON_FOOTPRINT_DATA</span>
+                        <span class="ms-2 fs-4 fw-bold">{{totalPCFCO2eq()}}&nbsp;kg</span>
+                        <span class="ms-2 fs-6 fw-bold" translate>DigitalPassportPortal.TOTAL_PSFCO2EQ</span>
+                    </button>
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            <ngb-pagination [collectionSize]="carbonFootprintSize()" [(page)]="carbonFootprintIndex"
+                                [pageSize]="1" [directionLinks]="carbonFootprintSize() > 5" />
+
+                            <table class="table table-sm table-striped table-borderless">
+                                <tbody>
+                                    @for (item of carbonFootprintItems(); track item.name) {
+                                    <tr>
+                                        <td class="text-nowrap align-middle">{{item.name | translate}}</td>
+                                        <td>{{item.value}}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+            <div ngbAccordionItem>
+                <h2 ngbAccordionHeader>
+                    <button ngbAccordionButton translate>DigitalPassportPortal.DOCUMENTATION</button>
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            <table class="table table-sm table-striped table-borderless">
+                                <tbody>
+                                    @for (item of documentationData().items; track item.title) {
+                                    <tr>
+                                        @if (item.version) {
+                                        <td>{{item.title}}&nbsp;({{item.version}})</td>
+                                        } @else {
+                                        <td>{{item.title}}</td>
+                                        }
+                                        <td>
+                                            <a href="javascript:void(0)"
+                                                (click)="downloadDocumentation($event, item)">{{item.filename}}</a>
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

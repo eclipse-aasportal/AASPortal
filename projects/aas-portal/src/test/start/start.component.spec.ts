@@ -110,7 +110,7 @@ describe('StartComponent', () => {
                 },
                 {
                     provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>(['downloadDocument']),
+                    useValue: jasmine.createSpyObj<DownloadService>(['downloadPackage']),
                 },
                 {
                     provide: ToolbarService,

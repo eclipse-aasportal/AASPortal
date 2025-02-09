@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY, first, map, of, skipWhile } from 'rxjs';
 
-import { WindowService } from '../../lib/window.service';
+import { WINDOW } from '../../lib/window.service';
 import { NotifyService } from '../../lib/notify/notify.service';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
@@ -24,7 +24,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('AuthService', () => {
     let service: AuthService;
-    let window: jasmine.SpyObj<WindowService>;
+    let window: jasmine.SpyObj<Window>;
     let api: jasmine.SpyObj<AuthApiService>;
     let modal: NgbModal;
 
@@ -48,40 +48,43 @@ describe('AuthService', () => {
             api.guest.and.returnValue(of({ token }));
             api.getCookies.and.returnValue(EMPTY);
 
-            window = jasmine.createSpyObj<WindowService>([
-                'getLocalStorageItem',
-                'setLocalStorageItem',
-                'removeLocalStorageItem',
-                'clearLocalStorage',
+            const localStorage = jasmine.createSpyObj<Storage>([
+                'getItem',
+                'setItem',
+                'removeItem',
+                'clear',
             ]);
 
-            window.getLocalStorageItem.and.returnValue(null);
+            localStorage.getItem.and.returnValue(null);
+            window = jasmine.createSpyObj<Window>(['confirm'], { localStorage })
 
             TestBed.configureTestingModule({
-    declarations: [],
-    imports: [TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useClass: TranslateFakeLoader,
-            },
-        })],
-    providers: [
-        {
-            provide: WindowService,
-            useValue: window,
-        },
-        {
-            provide: NotifyService,
-            useValue: jasmine.createSpyObj<NotifyService>(['error']),
-        },
-        {
-            provide: AuthApiService,
-            useValue: api,
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-});
+                declarations: [],
+                imports: [
+                    TranslateModule.forRoot({
+                        loader: {
+                            provide: TranslateLoader,
+                            useClass: TranslateFakeLoader,
+                        },
+                    }),
+                ],
+                providers: [
+                    {
+                        provide: WINDOW,
+                        useValue: window,
+                    },
+                    {
+                        provide: NotifyService,
+                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    },
+                    {
+                        provide: AuthApiService,
+                        useValue: api,
+                    },
+                    provideHttpClient(withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            });
 
             service = TestBed.inject(AuthService);
             modal = TestBed.inject(NgbModal);
@@ -248,43 +251,46 @@ describe('AuthService', () => {
 
             api.getProfile.and.returnValue(of({ id: 'john.doe@email.com', name: 'John Doe' }));
 
-            window = jasmine.createSpyObj<WindowService>([
-                'getLocalStorageItem',
-                'setLocalStorageItem',
-                'removeLocalStorageItem',
-                'clearLocalStorage',
-                'confirm',
+            const localStorage = jasmine.createSpyObj<Storage>([
+                'getItem',
+                'setItem',
+                'removeItem',
+                'clear',
             ]);
 
-            window.getLocalStorageItem.and.callFake(name => {
+            localStorage.getItem.and.callFake(name => {
                 return name === '.StayLoggedIn' ? 'true' : token;
             });
 
+            window = jasmine.createSpyObj<Window>(['confirm'], { localStorage })
+            
             TestBed.configureTestingModule({
-    declarations: [],
-    imports: [TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useClass: TranslateFakeLoader,
-            },
-        })],
-    providers: [
-        {
-            provide: WindowService,
-            useValue: window,
-        },
-        {
-            provide: NotifyService,
-            useValue: jasmine.createSpyObj<NotifyService>(['error']),
-        },
-        {
-            provide: AuthApiService,
-            useValue: api,
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-});
+                declarations: [],
+                imports: [
+                    TranslateModule.forRoot({
+                        loader: {
+                            provide: TranslateLoader,
+                            useClass: TranslateFakeLoader,
+                        },
+                    }),
+                ],
+                providers: [
+                    {
+                        provide: WINDOW,
+                        useValue: window,
+                    },
+                    {
+                        provide: NotifyService,
+                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    },
+                    {
+                        provide: AuthApiService,
+                        useValue: api,
+                    },
+                    provideHttpClient(withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            });
 
             service = TestBed.inject(AuthService);
             modal = TestBed.inject(NgbModal);

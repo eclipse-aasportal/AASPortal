@@ -49,7 +49,7 @@ export class UploadFormComponent {
         if (!this.uploading && endpoint) {
             this.uploading = true;
             const file = this.files![0];
-            this.download.uploadDocuments(endpoint.name, [file]).subscribe({
+            this.download.uploadPackages(endpoint.name, [file]).subscribe({
                 next: (event: HttpEvent<unknown>) => {
                     switch (event.type) {
                         case HttpEventType.Sent:

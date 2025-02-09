@@ -159,6 +159,10 @@ export class AasxPackage extends AASPackage {
             if (this.originName === null) {
                 throw new Error('Unable to determine origin name.');
             }
+
+            if (this.originName.charAt(0) === '/') {
+                this.originName = this.originName.slice(1);
+            }
         }
 
         return this.originName;
@@ -166,9 +170,9 @@ export class AasxPackage extends AASPackage {
 
     private async getRelationshipsAsync(path: string): Promise<Element[]> {
         const xml = await this.getZipEntryAsync(path);
-        const xmldoc = new DOMParser().parseFromString(xml);
+        const document = new DOMParser().parseFromString(xml);
         const select = xpath.useNamespaces({ opnxml: 'http://schemas.openxmlformats.org/package/2006/relationships' });
-        return select('/opnxml:Relationships/opnxml:Relationship', xmldoc) as Element[];
+        return select('/opnxml:Relationships/opnxml:Relationship', document) as Element[];
     }
 
     private async getZipEntryAsync(path: string, contentType?: jszip.OutputType): Promise<string> {
