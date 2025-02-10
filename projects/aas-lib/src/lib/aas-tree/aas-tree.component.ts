@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
 
 import {
     aas,
@@ -42,9 +42,7 @@ import { ShowVideoFormComponent } from '../show-video-form/show-video-form.compo
 import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../convert';
-import { WindowService } from '../window.service';
 import { DocumentService } from '../document.service';
-import { DownloadService } from '../download.service';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
@@ -53,6 +51,7 @@ import { findRoute } from '../views/submodel-template';
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
 import { AuthService } from '../auth/auth.service';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -75,7 +74,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly searching: AASTreeSearch,
         private readonly router: Router,
         private readonly modal: NgbModal,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
         private readonly dom: DocumentService,
         private readonly auth: AuthService,
         private readonly translate: TranslateService,
