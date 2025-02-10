@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, model, signal } from '@angular/core';
-import { WindowService, ViewMode, AuthService, NotifyService, DownloadService, AASTableComponent } from 'aas-lib';
+import { WINDOW, ViewMode, AuthService, NotifyService, DownloadService, AASTableComponent } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AASDocument, aas } from 'aas-core';
@@ -32,7 +32,8 @@ class TestAASTableComponent {
 }
 
 describe('StartComponent', () => {
-    let window: jasmine.SpyObj<WindowService>;
+    let window: jasmine.SpyObj<Window>;
+    let localStorage: jasmine.SpyObj<Storage>;
     let api: jasmine.SpyObj<StartApiService>;
     let component: StartComponent;
     let fixture: ComponentFixture<StartComponent>;
@@ -40,14 +41,15 @@ describe('StartComponent', () => {
     let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
-        window = jasmine.createSpyObj<WindowService>([
-            'addEventListener',
-            'confirm',
-            'getLocalStorageItem',
-            'setLocalStorageItem',
-            'removeEventListener',
-            'removeLocalStorageItem',
+        localStorage = jasmine.createSpyObj<Storage>([
+            'getItem',
+            'setItem',
+            'removeItem',
+            'clear',
         ]);
+
+        localStorage.getItem.and.returnValue(null);
+        window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage })
 
         api = jasmine.createSpyObj<StartApiService>([
             'addEndpoint',
@@ -93,7 +95,7 @@ describe('StartComponent', () => {
                     useValue: api,
                 },
                 {
-                    provide: WindowService,
+                    provide: WINDOW,
                     useValue: window,
                 },
                 {

@@ -693,7 +693,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "ENTITY",
                         "definition": [
@@ -730,7 +730,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -765,7 +765,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -800,7 +800,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING_TRANSLATABLE",
                         "definition": [
@@ -835,7 +835,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -879,7 +879,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -923,7 +923,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -978,7 +978,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -1017,7 +1017,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1061,7 +1061,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1105,7 +1105,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "DATE",
                         "definition": [
@@ -1140,7 +1140,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "STRING",
                         "definition": [
@@ -1175,7 +1175,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "FILE",
                         "definition": [
@@ -1210,7 +1210,7 @@ export default {
                         "keys": []
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "de",
@@ -1265,7 +1265,7 @@ export default {
                         "keys": []
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",
@@ -1315,7 +1315,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -1370,7 +1370,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
                         "dataType": "REAL_MEASURE",
                         "definition": [
@@ -1415,7 +1415,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "DE",
@@ -1459,7 +1459,7 @@ export default {
                         ]
                     },
                     "dataSpecificationContent": {
-                        "modelType": "DataSpecificationIEC61360",
+                        "modelType": "DataSpecificationIec61360",
                         "preferredName": [
                             {
                                 "language": "EN",

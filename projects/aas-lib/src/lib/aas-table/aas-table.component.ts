@@ -9,6 +9,7 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    Inject,
     OnDestroy,
     computed,
     effect,
@@ -23,12 +24,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTableRow } from './aas-table-row';
-import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
 import { AASTableStore } from './aas-table.store';
 import { MaxLengthPipe } from '../max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
 import { encodeBase64Url } from '../convert';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -45,7 +46,7 @@ export class AASTableComponent implements OnDestroy {
     public constructor(
         private readonly router: Router,
         private readonly store: AASTableStore,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
         private readonly translate: TranslateService,
     ) {
         effect(() => {

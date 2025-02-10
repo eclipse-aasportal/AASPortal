@@ -15,12 +15,12 @@ import { Subject } from 'rxjs';
 import { AASTreeComponent } from '../../lib/aas-tree/aas-tree.component';
 import { sampleDocument } from '../assets/sample-document';
 import { NotifyService } from '../../lib/notify/notify.service';
-import { WindowService } from '../../lib/window.service';
 import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../assets/test-web-socket-factory.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthService } from '../../lib/auth/auth.service';
+import { WINDOW } from '../../public-api';
 
 describe('AASTreeComponent', () => {
     let component: AASTreeComponent;
@@ -51,8 +51,8 @@ describe('AASTreeComponent', () => {
                     useValue: jasmine.createSpyObj<AuthService>({}, { token: signal('Token') }),
                 },
                 {
-                    provide: WindowService,
-                    useValue: jasmine.createSpyObj<WindowService>(['addEventListener', 'open', 'removeEventListener']),
+                    provide: WINDOW,
+                    useValue: jasmine.createSpyObj<Window>(['addEventListener', 'open', 'removeEventListener']),
                 },
                 {
                     provide: WebSocketFactoryService,
