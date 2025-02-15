@@ -312,7 +312,7 @@ export class EditElementFormComponent {
     }
 
     private referenceToString(reference?: aas.Reference): string {
-        return reference ? reference.keys.map(key => key.value).join('/') : '-';
+        return reference ? reference.keys.map(key => key.value).join('.') : '-';
     }
 
     private pushMessage(message: string): void {
