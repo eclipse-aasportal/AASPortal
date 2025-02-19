@@ -9,10 +9,10 @@
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
 
 import { CultureInfo } from './culture-info';
-import { WindowService } from '../window.service';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-localize',
@@ -27,7 +27,7 @@ export class LocalizeComponent implements OnInit, OnDestroy {
 
     public constructor(
         private readonly translate: TranslateService,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
     ) {}
 
     public readonly languages = input<string[]>(['en-us']);
@@ -46,12 +46,12 @@ export class LocalizeComponent implements OnInit, OnDestroy {
 
     public setCulture(value: CultureInfo): void {
         this.translate.use(value.localeId);
-        this.window.setLocalStorageItem('.localeId', value.localeId);
+        this.window.localStorage.setItem('.localeId', value.localeId);
     }
 
     public ngOnInit(): void {
         this.subscription.add(this.translate.onLangChange.subscribe(this.onLangChange));
-        const localeId = this.window.getLocalStorageItem('.localeId');
+        const localeId = this.window.localStorage.getItem('.localeId');
         if (localeId && this.translate.currentLang !== localeId) {
             this.translate.use(localeId);
         }

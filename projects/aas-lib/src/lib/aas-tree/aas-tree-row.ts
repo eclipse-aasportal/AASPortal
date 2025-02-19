@@ -175,62 +175,6 @@ class TreeInitialize {
         }
     }
 
-    private hasChildren(referable: aas.Referable): boolean {
-        switch (referable.modelType) {
-            case 'AssetAdministrationShell': {
-                const shell = referable as aas.AssetAdministrationShell;
-                return shell.submodels != null && shell.submodels.length > 0;
-            }
-            case 'Submodel': {
-                const submodel = referable as aas.Submodel;
-                return submodel.submodelElements != null && submodel.submodelElements.length > 0;
-            }
-            case 'SubmodelElementCollection': {
-                const collection = referable as aas.SubmodelElementCollection;
-                return collection.value != null && collection.value.length > 0;
-            }
-            case 'SubmodelElementList': {
-                const list = referable as aas.SubmodelElementList;
-                return list.value != null && list.value.length > 0;
-            }
-            case 'Entity': {
-                const entity = referable as aas.Entity;
-                return entity.statements != null && entity.statements.length > 0;
-            }
-            case 'AnnotatedRelationshipElement': {
-                const relationship = referable as aas.AnnotatedRelationshipElement;
-                return relationship.annotations != null && relationship.annotations.length > 0;
-            }
-            case 'Operation': {
-                const operation = referable as aas.Operation;
-                if (
-                    operation.inputVariables &&
-                    operation.inputVariables.some(variable => isSubmodelElement(variable.value))
-                ) {
-                    return true;
-                }
-
-                if (
-                    operation.inoutputVariables &&
-                    operation.inoutputVariables.some(variable => isSubmodelElement(variable.value))
-                ) {
-                    return true;
-                }
-
-                if (
-                    operation.outputVariables &&
-                    operation.outputVariables.some(variable => isSubmodelElement(variable.value))
-                ) {
-                    return true;
-                }
-
-                return false;
-            }
-            default:
-                return false;
-        }
-    }
-
     private getChildren(referable: aas.Referable): aas.Referable[] {
         switch (referable.modelType) {
             case 'AnnotatedRelationshipElement':

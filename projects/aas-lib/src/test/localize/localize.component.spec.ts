@@ -10,20 +10,30 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { LocalizeComponent } from '../../lib/localize/localize.component';
-import { WindowService } from '../../lib/window.service';
+import { WINDOW } from '../../public-api';
 
 describe('LocalizeComponent', () => {
     let component: LocalizeComponent;
     let fixture: ComponentFixture<LocalizeComponent>;
-    let window: jasmine.SpyObj<WindowService>;
+    let window: jasmine.SpyObj<Window>;
+    let localStorage: jasmine.SpyObj<Storage>;
 
     beforeEach(() => {
-        window = jasmine.createSpyObj<WindowService>(['getLocalStorageItem', 'setLocalStorageItem']);
+
+        localStorage = jasmine.createSpyObj<Storage>([
+            'getItem',
+            'setItem',
+            'removeItem',
+            'clear',
+        ]);
+
+        localStorage.getItem.and.returnValue(null);
+        window = jasmine.createSpyObj<Window>(['confirm'], { localStorage })
 
         TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: WindowService,
+                    provide: WINDOW,
                     useValue: window,
                 },
             ],
@@ -49,7 +59,7 @@ describe('LocalizeComponent', () => {
     });
 
     it('provides a list of supported languages', () => {
-        window.getLocalStorageItem.and.returnValue(null);
+        localStorage.getItem.and.returnValue(null);
         expect(component.cultures().map(item => item.localeId)).toEqual(['en-us', 'de-de']);
     });
 

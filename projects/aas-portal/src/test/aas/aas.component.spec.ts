@@ -79,7 +79,7 @@ describe('AASComponent', () => {
         pages = [{ name: 'Dashboard 1', items: [], requests: [] }];
 
         api = jasmine.createSpyObj<AASApiService>(['getDocument', 'putDocument']);
-        download = jasmine.createSpyObj<DownloadService>(['downloadDocument', 'downloadFileAsync', 'uploadDocuments']);
+        download = jasmine.createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
         dashboard = jasmine.createSpyObj<DashboardService>(['add'], {
             activePage: signal(pages[0].name),
             pages: signal(pages.map(page => page.name)),

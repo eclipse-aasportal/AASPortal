@@ -23,6 +23,7 @@ import {
     viewChild,
     viewChildren,
     signal,
+    Inject,
 } from '@angular/core';
 
 import isNumber from 'lodash-es/isNumber';
@@ -30,7 +31,7 @@ import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { first } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
-import { LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
+import { LogType, NotifyService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -95,7 +96,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
         private readonly commandHandler: CommandHandlerService,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
     ) {
         effect(() => {
             const activePage = this.store.activePage$();
