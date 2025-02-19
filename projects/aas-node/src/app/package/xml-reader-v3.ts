@@ -49,21 +49,21 @@ export class XmlReaderV3 extends AASReader {
     }
 
     private readAssetInformation(node: Node): aas.AssetInformation {
-        const asset = this.selectNode('/aas:assetInformation', node);
+        const asset = this.selectNode('./aas:assetInformation', node);
         if (!asset) {
             return { assetKind: 'Instance' };
         }
 
         const value: aas.AssetInformation = {
-            assetKind: this.getTextContent('./aas:kind', asset) as aas.AssetKind,
+            assetKind: this.getTextContent('./aas:assetKind', asset) as aas.AssetKind,
         };
 
-        const globalAssetId = this.selectTextContent('./aas:identification', asset);
+        const globalAssetId = this.selectTextContent('./aas:globalAssetId', asset);
         if (globalAssetId) {
             value.globalAssetId = globalAssetId;
         }
 
-        const assetType = this.selectTextContent('./aas:assetKind', asset);
+        const assetType = this.selectTextContent('./aas:assetType', asset);
         if (assetType) {
             value.assetType = assetType;
         }
@@ -493,6 +493,11 @@ export class XmlReaderV3 extends AASReader {
             property.value = value;
         }
 
+        const valueId = this.readReference(this.selectNode('./aas:valueId', node));
+        if (valueId) {
+            property.valueId = valueId;
+        }
+
         return property;
     }
 
@@ -684,6 +689,16 @@ export class XmlReaderV3 extends AASReader {
             referable.category = category;
         }
 
+        const description = this.readLangStrings('./aas:description/aas:langStringTextType', node);
+        if (description) {
+            referable.description = description;
+        }
+
+        const displayName = this.readLangStrings('./aas:displayName/aas:langStringTextType', node);
+        if (displayName) {
+            referable.displayName = displayName;
+        }
+
         return referable;
     }
 
@@ -746,7 +761,15 @@ export class XmlReaderV3 extends AASReader {
     private readEmbeddedDataSpecification(node: Node): aas.EmbeddedDataSpecification {
         let dataSpecification = this.readReference(this.selectNode('./aas:dataSpecification', node));
         if (!dataSpecification) {
-            dataSpecification = { type: 'ModelReference', keys: [] };
+            dataSpecification = {
+                type: 'ExternalReference',
+                keys: [
+                    {
+                        type: 'GlobalReference',
+                        value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                    },
+                ],
+            };
         }
 
         const dataSpecificationContent = this.readDataSpecificationContent(node);
@@ -922,7 +945,7 @@ export class XmlReaderV3 extends AASReader {
             qualifier.value = value;
         }
 
-        const valueId = this.readReference(this.selectNode('./valueId', node));
+        const valueId = this.readReference(this.selectNode('./aas:valueId', node));
         if (valueId) {
             qualifier.valueId = valueId;
         }
@@ -991,6 +1014,10 @@ export class XmlReaderV3 extends AASReader {
                 language: this.getTextContent('./aas:language', child, ''),
                 text: this.getTextContent('./aas:text', child, ''),
             });
+        }
+
+        if (values.length === 0) {
+            return undefined;
         }
 
         return values;

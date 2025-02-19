@@ -6,21 +6,13 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { first, from, mergeMap } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
-import {
-    AuthComponent,
-    AuthService,
-    IndexChangeService,
-    LocalizeComponent,
-    NotifyComponent,
-    WindowService,
-} from 'aas-lib';
+import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent } from 'aas-lib';
 
 import { ToolbarService } from '../toolbar.service';
 import { environment } from '../../environments/environment';
@@ -46,6 +38,7 @@ export interface LinkDescriptor {
     imports: [
         RouterOutlet,
         RouterLink,
+        RouterLinkActive,
         AsyncPipe,
         NgbNavModule,
         NgTemplateOutlet,
@@ -56,12 +49,9 @@ export interface LinkDescriptor {
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainComponent implements OnInit {
+export class MainComponent {
     public constructor(
         public readonly route: ActivatedRoute,
-        private readonly router: Router,
-        private readonly window: WindowService,
-        private readonly auth: AuthService,
         private readonly toolbar: ToolbarService,
         private readonly indexChange: IndexChangeService,
     ) {}
@@ -103,28 +93,6 @@ export class MainComponent implements OnInit {
     public readonly documentCount = this.indexChange.documentCount;
 
     public readonly changedDocuments = this.indexChange.changedDocuments;
-
-    public ngOnInit(): void {
-        const params = this.window.getQueryParams();
-        const id = params.get('id');
-        const endpoint = params.get('endpoint');
-        if (id) {
-            this.auth.userId
-                .pipe(
-                    first(userId => userId !== undefined),
-                    mergeMap(() =>
-                        from(
-                            this.router.navigate(['/aas'], {
-                                queryParams: { id, endpoint },
-                            }),
-                        ),
-                    ),
-                )
-                .subscribe();
-        } else {
-            this.router.navigate(['/start']);
-        }
-    }
 
     public clear(): void {
         this.indexChange.clear().subscribe();

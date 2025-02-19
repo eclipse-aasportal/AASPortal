@@ -10,23 +10,24 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
-import { noop } from 'aas-core';
-import { AuthService } from 'aas-lib';
+import { AASDocument } from 'aas-core';
+import { AuthService } from '../../lib/auth/auth.service';
+import { DigitalPassportPortalService } from '../../lib/digital-passport-portal/digital-passport-portal.service';
 
-import { createDocument } from '../assets/test-document';
-import { AASApiService } from '../../app/aas/aas-api.service';
+import sample from '../assets/dpp-portal-sample.json';
 
-describe('AASApiService', function () {
-    let service: AASApiService;
+describe('DigitalPassportPortalService', () => {
+    let service: DigitalPassportPortalService;
     let httpTestingController: HttpTestingController;
     let auth: jasmine.SpyObj<AuthService>;
 
-    beforeEach(function () {
-        auth = jasmine.createSpyObj<AuthService>({}, { userId: of('guest') });
-
+    beforeEach(() => {
+        auth = jasmine.createSpyObj<AuthService>(['login'], { userId: of('guest') });
         TestBed.configureTestingModule({
+            declarations: [],
             imports: [],
             providers: [
+                DigitalPassportPortalService,
                 {
                     provide: AuthService,
                     useValue: auth,
@@ -36,7 +37,7 @@ describe('AASApiService', function () {
             ],
         });
 
-        service = TestBed.inject(AASApiService);
+        service = TestBed.inject(DigitalPassportPortalService);
         httpTestingController = TestBed.inject(HttpTestingController);
     });
 
@@ -44,41 +45,31 @@ describe('AASApiService', function () {
         httpTestingController.verify();
     });
 
-    it('should created', function () {
+    it('should created', () => {
         expect(service).toBeTruthy();
     });
 
     describe('getDocument', () => {
-        it('/api/v1/endpoints/:name/documents/:id}', function () {
-            const document = createDocument('document1');
-
+        it('/api/v1/endpoints/:name/documents/:id}', () => {
             service.getDocument('document1', 'Samples').subscribe(value => {
-                expect(value).toEqual(document);
+                expect(value).toEqual(sample as AASDocument);
             });
 
             const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
             expect(req.request.method).toEqual('GET');
-            req.flush(document);
+            req.flush(sample);
         });
+    });
 
-        it('/api/v1/documents/:id', function () {
-            const document = createDocument('document1');
-
-            service.getDocument('document1').subscribe(value => {
-                expect(value).toEqual(document);
+    describe('getContent', () => {
+        it('/api/v1/endpoints/:name/documents/:id/content}', () => {
+            service.getContent('document1', 'Samples').subscribe(value => {
+                expect(value).toEqual((sample as AASDocument).content!);
             });
 
-            const req = httpTestingController.expectOne('/api/v1/documents/ZG9jdW1lbnQx');
+            const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx/content');
             expect(req.request.method).toEqual('GET');
-            req.flush(document);
+            req.flush(sample.content);
         });
-    });
-
-    describe('getTemplates', () => {
-        it('ToDo', () => noop());
-    });
-
-    describe('putDocument', () => {
-        it('ToDo', () => noop());
     });
 });

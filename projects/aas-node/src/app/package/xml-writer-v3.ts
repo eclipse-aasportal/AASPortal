@@ -175,7 +175,7 @@ export class XmlWriterV3 extends AASWriter {
         this.writeReference(embeddedDataSpecification.dataSpecification, this.appendChild(node, 'dataSpecification'));
         const contentNode = this.appendChild(node, 'dataSpecificationContent');
         const content = embeddedDataSpecification.dataSpecificationContent;
-        if (content.modelType === 'DataSpecificationIEC61360') {
+        if (content.modelType === 'DataSpecificationIec61360') {
             this.writeDataSpecificationIec61360(
                 content as aas.DataSpecificationIec61360,
                 this.appendChild(contentNode, 'dataSpecificationIec61360'),
@@ -445,7 +445,8 @@ export class XmlWriterV3 extends AASWriter {
 
     private writeOperationVariable(variable: aas.OperationVariable, node: Node): void {
         const valueNode = this.appendChild(node, 'value');
-        this.writeSubmodelElement(variable.value, valueNode);
+        const modelTypeNode = this.appendChild(valueNode, this.getLocalNameFromModelType(variable.value.modelType));
+        this.writeSubmodelElement(variable.value, modelTypeNode);
     }
 
     private writeOperation(operation: aas.Operation, node: Node) {
@@ -549,7 +550,7 @@ export class XmlWriterV3 extends AASWriter {
         this.writeHasDataSpecification(conceptDescription, node);
 
         if (conceptDescription.isCaseOf) {
-            const isCaseOfNode = this.appendChild(node, 'isCaseOfNode');
+            const isCaseOfNode = this.appendChild(node, 'isCaseOf');
             for (const reference of conceptDescription.isCaseOf) {
                 this.writeReference(reference, this.appendChild(isCaseOfNode, 'reference'));
             }
@@ -564,5 +565,9 @@ export class XmlWriterV3 extends AASWriter {
 
     private appendChild(parent: Node, localName: string): Element {
         return parent.appendChild(this.document.createElement(localName));
+    }
+
+    private getLocalNameFromModelType(modelType: aas.ModelType): string {
+        return modelType.charAt(0).toLowerCase() + modelType.substring(1);
     }
 }

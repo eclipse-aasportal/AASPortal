@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import {
     ChangeDetectionStrategy,
     Component,
+    Inject,
     OnDestroy,
     TemplateRef,
     computed,
@@ -30,7 +31,7 @@ import {
     DownloadService,
     NotifyService,
     ViewMode,
-    WindowService,
+    WINDOW,
     encodeBase64Url,
     viewRoutes,
 } from 'aas-lib';
@@ -63,7 +64,7 @@ export class StartComponent implements OnDestroy {
         private readonly router: Router,
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
         private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
@@ -227,7 +228,7 @@ export class StartComponent implements OnDestroy {
     public downloadDocument(): Observable<void> {
         return from(this.store.selected).pipe(
             mergeMap(document =>
-                this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx'),
+                this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
             catchError(error => this.notify.error(error)),
         );

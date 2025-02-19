@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
 
 import {
     aas,
@@ -42,9 +42,7 @@ import { ShowVideoFormComponent } from '../show-video-form/show-video-form.compo
 import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../convert';
-import { WindowService } from '../window.service';
 import { DocumentService } from '../document.service';
-import { DownloadService } from '../download.service';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
@@ -52,6 +50,8 @@ import { findRoute } from '../views/submodel-template';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
+import { AuthService } from '../auth/auth.service';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -74,9 +74,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly searching: AASTreeSearch,
         private readonly router: Router,
         private readonly modal: NgbModal,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
         private readonly dom: DocumentService,
-        private readonly download: DownloadService,
+        private readonly auth: AuthService,
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
@@ -310,22 +310,17 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async openFile(file: aas.File): Promise<void> {
-        if (!file.value || this.state() === 'online') return;
-
-        const { name, url } = this.resolveFile(file);
-        if (name && url) {
-            if (file.contentType.startsWith('image/')) {
-                await this.showImageAsync(name, url);
-            } else if (file.contentType.startsWith('video/')) {
-                await this.showVideoAsync(name, url);
-            } else if (file.contentType.endsWith('/pdf')) {
-                const token = await this.api.getTokenAsync(url);
-                this.window.open(url + '?access_token=' + token);
-            } else if (file) {
-                await this.downloadFileAsync(name, url);
-            }
+    private openFile(file: aas.File): void {
+        if (!file.value || this.state() === 'online') {
+            return;
         }
+
+        const { url } = this.resolveFile(file);
+        if (url === undefined) {
+            return;
+        }
+
+        this.window.open(url + '?access_token=' + this.auth.token());
     }
 
     private async openBlob(blob: aas.Blob): Promise<void> {
@@ -425,14 +420,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             if (error) {
                 this.notify.error(error);
             }
-        }
-    }
-
-    private async downloadFileAsync(name: string, url: string): Promise<void> {
-        try {
-            this.download.downloadFileAsync(url, name);
-        } catch (error) {
-            this.notify.error(error);
         }
     }
 

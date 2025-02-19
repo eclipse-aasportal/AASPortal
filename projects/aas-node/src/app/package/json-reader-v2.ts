@@ -646,7 +646,7 @@ export class JsonReaderV2 extends AASReader {
         }
 
         const iec61360: aas.DataSpecificationIec61360 = {
-            modelType: 'DataSpecificationIEC61360',
+            modelType: 'DataSpecificationIec61360',
             preferredName: this.readLangStringSet(source.preferredName),
         };
 

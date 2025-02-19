@@ -304,7 +304,7 @@ export class AASComponent implements OnInit, OnDestroy {
                     return EMPTY;
                 }
 
-                return this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx');
+                return this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx');
             }),
             catchError(error => this.notify.error(error)),
         );

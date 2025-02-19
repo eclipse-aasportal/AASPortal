@@ -628,7 +628,7 @@ export class JsonWriterV3 extends AASWriter {
         }
 
         let dataSpecificationContent: aas.DataSpecificationContent;
-        if (source.dataSpecificationContent.modelType === 'DataSpecificationIEC61360') {
+        if (source.dataSpecificationContent.modelType === 'DataSpecificationIec61360') {
             dataSpecificationContent = this.writeDataSpecificationIEC61360(
                 source.dataSpecificationContent as aas.DataSpecificationIec61360,
             );

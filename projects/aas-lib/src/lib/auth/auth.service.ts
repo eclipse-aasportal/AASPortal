@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Injectable, computed, signal } from '@angular/core';
+import { Inject, Injectable, computed, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
@@ -28,12 +28,13 @@ import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-fo
 import { ProfileFormComponent, ProfileFormResult } from '../auth/profile-form/profile-form.component';
 import { RegisterFormComponent, RegisterFormResult } from '../auth/register-form/register-form.component';
 import { AuthApiService } from './auth-api.service';
-import { WindowService } from '../window.service';
+import { WINDOW } from '../window.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthService {
+    private readonly token$ = signal<string | undefined>(undefined);
     private readonly payload$ = signal<JWTPayload>({ role: 'guest' });
     private readonly userId$ = new BehaviorSubject<string | undefined>(undefined);
 
@@ -42,10 +43,10 @@ export class AuthService {
         private translate: TranslateService,
         private api: AuthApiService,
         private notify: NotifyService,
-        private window: WindowService,
+        @Inject(WINDOW) private window: Window,
     ) {
-        const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
-        const token = this.window.getLocalStorageItem('.Token');
+        const stayLoggedIn = toBoolean(this.window.localStorage.getItem('.StayLoggedIn'));
+        const token = this.window.localStorage.getItem('.Token');
         if (stayLoggedIn && token && this.isValid(token)) {
             const payload = jwtDecode(token) as JWTPayload;
             if (payload && payload.sub) {
@@ -75,8 +76,11 @@ export class AuthService {
         return payload.sub != null && (payload.role === 'editor' || payload.role === 'admin');
     });
 
-    /** The current active JSON web token. */
+    /** The current active payload. */
     public readonly payload = this.payload$.asReadonly();
+
+    /** The current JSON web token. */
+    public readonly token = this.token$.asReadonly();
 
     /**
      * User login.
@@ -89,8 +93,8 @@ export class AuthService {
 
         return of(this.modal.open(LoginFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
             mergeMap(modalRef => {
-                const stayLoggedIn = toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'));
-                const token = this.window.getLocalStorageItem('.Token');
+                const stayLoggedIn = toBoolean(this.window.localStorage.getItem('.StayLoggedIn'));
+                const token = this.window.localStorage.getItem('.Token');
                 if (stayLoggedIn && token) {
                     modalRef.componentInstance.stayLoggedIn.set(stayLoggedIn);
                 }
@@ -101,9 +105,9 @@ export class AuthService {
                 if (result?.token) {
                     this.setPayload(result.token);
                     if (result.stayLoggedIn) {
-                        this.window.setLocalStorageItem('.StayLoggedIn', 'true');
-                    } else if (toBoolean(this.window.getLocalStorageItem('.StayLoggedIn'))) {
-                        this.window.removeLocalStorageItem('.StayLoggedIn');
+                        this.window.localStorage.setItem('.StayLoggedIn', 'true');
+                    } else if (toBoolean(this.window.localStorage.getItem('.StayLoggedIn'))) {
+                        this.window.localStorage.removeItem('.StayLoggedIn');
                     }
                 } else if (result?.action === 'register') {
                     return this.register();
@@ -156,9 +160,9 @@ export class AuthService {
                 if (result) {
                     this.setPayload(result.token);
                     if (result.stayLoggedIn) {
-                        this.window.setLocalStorageItem('.StayLoggedIn', 'true');
+                        this.window.localStorage.setItem('.StayLoggedIn', 'true');
                     } else {
-                        this.window.removeLocalStorageItem('.StayLoggedIn');
+                        this.window.localStorage.removeItem('.StayLoggedIn');
                     }
                 }
             }),
@@ -231,7 +235,7 @@ export class AuthService {
                     return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie != null));
                 }
 
-                return of(this.window.getLocalStorageItem(name) != null);
+                return of(this.window.localStorage.getItem(name) != null);
             }),
         );
     }
@@ -248,7 +252,7 @@ export class AuthService {
                     return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
                 }
 
-                return of(this.window.getLocalStorageItem(name) ?? undefined);
+                return of(this.window.localStorage.getItem(name) ?? undefined);
             }),
         );
     }
@@ -264,7 +268,7 @@ export class AuthService {
             const id = payload.sub;
             return this.api.setCookie(id, { name, data });
         } else {
-            this.window.setLocalStorageItem(name, data);
+            this.window.localStorage.setItem(name, data);
             return of(void 0);
         }
     }
@@ -279,7 +283,7 @@ export class AuthService {
             const id = payload.sub;
             return this.api.deleteCookie(id, name);
         } else {
-            this.window.removeLocalStorageItem(name);
+            this.window.localStorage.removeItem(name);
             return of(void 0);
         }
     }
@@ -292,8 +296,8 @@ export class AuthService {
     }
 
     private loginGuest(): Observable<void> {
-        this.window.removeLocalStorageItem('.Token');
-        this.window.removeLocalStorageItem('.StayLoggedIn');
+        this.window.localStorage.removeItem('.Token');
+        this.window.localStorage.removeItem('.StayLoggedIn');
         return this.api.guest().pipe(
             map(result => this.setPayload(result.token)),
             catchError(error => {
@@ -313,7 +317,8 @@ export class AuthService {
     }
 
     private setPayload(token: string): void {
-        this.window.setLocalStorageItem('.Token', token);
+        this.window.localStorage.setItem('.Token', token);
+        this.token$.set(token);
         const payload = jwtDecode(token) as JWTPayload;
         this.payload$.set(payload);
         this.userId$.next(payload.sub || payload.role);
