@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -26,7 +26,7 @@ export abstract class AASPackage {
      * Gets the thumbnail of the current Asset Administration Shell.
      * @param id The identifier of AAS.
      */
-    public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
+    public abstract getThumbnail(id: string): Promise<NodeJS.ReadableStream>;
 
     /**
      * Returns a read-only stream of a file in a package with the specified path.
@@ -34,12 +34,12 @@ export abstract class AASPackage {
      * @param file The File element.
      * @returns A readable stream.
      */
-    public abstract openReadStreamAsync(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream>;
+    public abstract openReadStream(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream>;
 
     /**
      * Gets the AAS environment from the package.
      * */
-    public abstract getEnvironmentAsync(): Promise<aas.Environment>;
+    public abstract getEnvironment(): Promise<aas.Environment>;
 
     /**
      * Applies the state of the source document into the destination document.

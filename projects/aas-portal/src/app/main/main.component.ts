@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,17 +12,17 @@ import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
-import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent } from 'aas-lib';
+import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
-import { ToolbarService } from '../toolbar.service';
 import { environment } from '../../environments/environment';
 
 export const enum LinkId {
     START = 0,
-    AAS = 1,
-    VIEW = 2,
-    DASHBOARD = 3,
-    ABOUT = 4,
+    SHELLS = 1,
+    AAS = 2,
+    VIEW = 3,
+    DASHBOARD = 4,
+    ABOUT = 5,
 }
 
 export interface LinkDescriptor {
@@ -61,27 +61,32 @@ export class MainComponent {
     public readonly links = signal<LinkDescriptor[]>([
         {
             id: LinkId.START,
-            name: 'CAPTION_START',
+            name: 'Main.START',
             url: '/start',
         },
         {
+            id: LinkId.SHELLS,
+            name: 'Main.SHELLS',
+            url: '/shells',
+        },
+        {
             id: LinkId.AAS,
-            name: 'CAPTION_AAS',
+            name: 'Main.AAS',
             url: '/aas',
         },
         {
             id: LinkId.VIEW,
-            name: 'CAPTION_VIEW',
+            name: 'Main.VIEW',
             url: '/view',
         },
         {
             id: LinkId.DASHBOARD,
-            name: 'CAPTION_DASHBOARD',
+            name: 'Main.DASHBOARD',
             url: '/dashboard',
         },
         {
             id: LinkId.ABOUT,
-            name: 'CAPTION_ABOUT',
+            name: 'Main.ABOUT',
             url: '/about',
         },
     ]).asReadonly();

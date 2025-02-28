@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -18,9 +18,8 @@ import {
 } from '@angular/core';
 
 import { Library, Message } from 'aas-core';
-import { LicenseInfoComponent, MessageTableComponent } from 'aas-lib';
+import { LicenseInfoComponent, MessageTableComponent, ToolbarService } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
-import { ToolbarService } from '../toolbar.service';
 import { environment } from '../../environments/environment';
 
 @Component({

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -24,11 +24,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTableRow } from './aas-table-row';
-import { ViewMode } from '../types/view-mode';
+import { ViewMode } from '../types';
 import { AASTableStore } from './aas-table.store';
 import { MaxLengthPipe } from '../max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
-import { encodeBase64Url } from '../convert';
+import { encodeBase64Url } from '../utilities';
 import { WINDOW } from '../window.service';
 
 @Component({

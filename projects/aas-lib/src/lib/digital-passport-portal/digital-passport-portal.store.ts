@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -20,7 +20,7 @@ import {
     isSubmodelElementCollection,
 } from 'aas-core';
 
-import { basename } from '../convert';
+import { basename } from '../utilities';
 
 type ViewData = {
     document: AASDocument;
@@ -28,40 +28,6 @@ type ViewData = {
     carbonFootprint: aas.Submodel;
     handoverDocumentation: aas.Submodel;
 };
-
-type CarbonFootprint =
-    | 'PCFCO2eq'
-    | 'PCFLifeCyclePhase1'
-    | 'PCFLifeCyclePhase2'
-    | 'PCFCalculationMethod'
-    | 'PublicationDate'
-    | 'PCFGoodsAddressHandover.Street'
-    | 'PCFGoodsAddressHandover.HouseNumber'
-    | 'PCFGoodsAddressHandover.ZipCode'
-    | 'PCFGoodsAddressHandover.CityTown'
-    | 'PCFGoodsAddressHandover.Country';
-
-type Nameplate =
-    | 'URIOfTheProduct'
-    | 'ManufacturerProductFamily'
-    | 'ManufacturerProductType'
-    | 'ManufacturerProductDesignation'
-    | 'OrderCodeOfManufacturer'
-    | 'SerialNumber'
-    | 'DateOfManufacture'
-    | 'ManufacturerName'
-    | 'ContactInformation.FirstName'
-    | 'ContactInformation.NameOfContact'
-    | 'ContactInformation.Language'
-    | 'ContactInformation.Phone.TelephoneNumber'
-    | 'ContactInformation.Email.EmailAddress'
-    | 'ContactInformation.Company'
-    | 'ContactInformation.Street'
-    | 'ContactInformation.Zipcode'
-    | 'ContactInformation.CityTown'
-    | 'ContactInformation.StateCounty'
-    | 'ContactInformation.NationalCode'
-    | 'ContactInformation.TimeZone';
 
 export type NameValue = { name: string; value: string };
 

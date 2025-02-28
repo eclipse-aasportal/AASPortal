@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -32,20 +32,20 @@ export class AASApiPackage extends AASPackage {
         this.idShort = idShort;
     }
 
-    public getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
-        return this.client.getThumbnailAsync(id);
+    public getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
+        return this.client.getThumbnail(id);
     }
 
-    public openReadStreamAsync(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public openReadStream(env: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
         if (!file) {
             throw new Error('Invalid operation.');
         }
 
-        return this.client.openFileAsync(env.assetAdministrationShells[0], file);
+        return this.client.openFile(env.assetAdministrationShells[0], file);
     }
 
     public async createDocumentAsync(): Promise<AASDocument> {
-        const environment = await this.client.readEnvironmentAsync({ id: this.id, idShort: this.idShort });
+        const environment = await this.client.readEnvironment({ id: this.id, idShort: this.idShort });
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
             endpoint: this.client.endpoint.name,
@@ -67,8 +67,8 @@ export class AASApiPackage extends AASPackage {
         return document;
     }
 
-    public override getEnvironmentAsync(): Promise<aas.Environment> {
-        return this.client.readEnvironmentAsync({ id: this.id, idShort: this.idShort });
+    public override getEnvironment(): Promise<aas.Environment> {
+        return this.client.readEnvironment({ id: this.id, idShort: this.idShort });
     }
 
     public async setEnvironmentAsync(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {
@@ -76,7 +76,7 @@ export class AASApiPackage extends AASPackage {
         if (reference && content) {
             const diffs = await diffAsync(content, reference);
             if (diffs.length > 0) {
-                messages = await this.client.commitAsync(content, reference, diffs);
+                messages = await this.client.commit(content, reference, diffs);
             }
         }
 
@@ -85,7 +85,7 @@ export class AASApiPackage extends AASPackage {
 
     private async createThumbnail(id: string): Promise<string | undefined> {
         try {
-            const input = await this.client.getThumbnailAsync(id);
+            const input = await this.client.getThumbnail(id);
             const output = await ImageProcessing.resizeAsync(input, 40, 40);
             return await this.streamToBase64(output);
         } catch {

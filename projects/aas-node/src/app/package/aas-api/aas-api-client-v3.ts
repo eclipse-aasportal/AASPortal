@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -20,6 +20,7 @@ import {
     isSubmodel,
     isSubmodelElement,
     selectSubmodel,
+    getConceptDescriptionIds,
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
@@ -67,7 +68,7 @@ export class AASApiClientV3 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>> {
+    public override async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
         const searchParams: Record<string, string | number> = { limit: 100 };
         if (cursor) {
             searchParams.cursor = cursor;
@@ -84,55 +85,47 @@ export class AASApiClientV3 extends AASApiClient {
         };
     }
 
-    public async readEnvironmentAsync(id: AASLabel): Promise<aas.Environment> {
+    public async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
             this.endpoint.headers,
         );
 
+        const submodels = await this.readSubmodels(aasId, shell.submodels);
+        const conceptDescriptions: aas.ConceptDescription[] = [];
+        for (const submodel of submodels) {
+            for (const conceptDescriptionId of getConceptDescriptionIds(submodel)) {
+                try {
+                    conceptDescriptions.push(
+                        await this.http.get<aas.ConceptDescription>(
+                            this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescriptionId)}`),
+                            this.endpoint.headers,
+                        ),
+                    );
+                } catch (error) {
+                    this.logger.error(`Unable to read ConceptDescription "${conceptDescriptionId}": ${error?.message}`);
+                }
+            }
+        }
+
         const env: aas.Environment = {
             assetAdministrationShells: [shell],
-            submodels: await this.readSubmodels(aasId, shell.submodels),
-            conceptDescriptions: [],
+            submodels,
+            conceptDescriptions,
         };
 
         return new JsonReaderV3(env).readEnvironment();
     }
 
-    public async readConceptDescriptionsAsync(): Promise<aas.ConceptDescription[]> {
-        const conceptDescriptions: aas.ConceptDescription[] = [];
-        let cursor: string | undefined;
-        const searchParams: Record<string, string | number> = { limit: 100 };
-        do {
-            if (cursor) {
-                searchParams.cursor = cursor;
-            }
-
-            const pagedResult = await this.http.get<PagedResult<aas.ConceptDescription>>(
-                this.resolve(`concept-descriptions`),
-                this.endpoint.headers,
-            );
-
-            conceptDescriptions.push(...pagedResult.result);
-            cursor = pagedResult.paging_metadata.cursor;
-        } while (cursor);
-
-        return conceptDescriptions;
-    }
-
-    public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+    public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
         return this.http.getResponse(
             this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
             this.endpoint.headers,
         );
     }
 
-    public async commitAsync(
-        source: aas.Environment,
-        target: aas.Environment,
-        diffs: DifferenceItem[],
-    ): Promise<string[]> {
+    public async commit(source: aas.Environment, target: aas.Environment, diffs: DifferenceItem[]): Promise<string[]> {
         const messages: string[] = [];
         const aasId = encodeBase64Url(target.assetAdministrationShells[0].id);
         for (const diff of diffs) {
@@ -173,7 +166,7 @@ export class AASApiClientV3 extends AASApiClient {
         return messages;
     }
 
-    public async openFileAsync(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(shell.id);
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);

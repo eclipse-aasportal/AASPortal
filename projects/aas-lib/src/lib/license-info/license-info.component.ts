@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -48,7 +48,7 @@ export class LicenseInfoComponent {
             } else if (value.length > 1) {
                 text += 'The following npm packages may be included in this product:\n\n';
                 for (const item of value) {
-                    text += ` - ${item.name}@${value[0].version}\n`;
+                    text += ` - ${item.name}@${item.version}\n`;
                 }
 
                 text += '\nThese packages each contain the following license and notice below:\n\n';

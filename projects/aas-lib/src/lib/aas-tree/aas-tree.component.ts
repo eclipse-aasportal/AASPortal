@@ -1,18 +1,28 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { NgClass, NgStyle } from '@angular/common';
+import { DOCUMENT, NgClass, NgStyle } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    Inject,
+    OnDestroy,
+    OnInit,
+    computed,
+    effect,
+    input,
+    output,
+} from '@angular/core';
 
 import {
     aas,
@@ -36,13 +46,12 @@ import {
 } from 'aas-core';
 
 import { AASTree, AASTreeRow } from './aas-tree-row';
-import { OnlineState } from '../types/online-state';
+import { OnlineState } from '../types';
 import { ShowImageFormComponent } from '../show-image-form/show-image-form.component';
 import { ShowVideoFormComponent } from '../show-video-form/show-video-form.component';
 import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
-import { basename, encodeBase64Url } from '../convert';
-import { DocumentService } from '../document.service';
+import { basename, encodeBase64Url } from '../utilities';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
@@ -75,7 +84,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly router: Router,
         private readonly modal: NgbModal,
         @Inject(WINDOW) private readonly window: Window,
-        private readonly dom: DocumentService,
+        @Inject(DOCUMENT) private readonly dom: Document,
         private readonly auth: AuthService,
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,

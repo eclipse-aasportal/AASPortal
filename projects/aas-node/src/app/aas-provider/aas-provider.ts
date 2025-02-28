@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -23,6 +23,8 @@ import {
     getChildren,
     isReferenceElement,
     AASEndpointSchedule,
+    isFile,
+    isBlob,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -145,10 +147,10 @@ export class AASProvider {
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
         try {
-            await client.openAsync();
-            return await client.createPackage(document.address, document.idShort).getThumbnailAsync(id);
+            await client.open();
+            return await client.createPackage(document.address, document.idShort).getThumbnail(id);
         } finally {
-            await client.closeAsync();
+            await client.close();
         }
     }
 
@@ -157,15 +159,15 @@ export class AASProvider {
      * @param endpointName The endpoint name.
      * @param id The AAS identifier.
      * @param smId The Submodel identifier.
-     * @param path The idShort path.
+     * @param idShortPath The idShort path.
      * @param options Additional options.
      * @returns A readable stream.
      */
-    public async getDataElementValueAsync(
+    public async getDataElementValue(
         endpointName: string,
         id: string,
         smId: string,
-        path: string,
+        idShortPath: string,
         options?: object,
     ): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
@@ -173,27 +175,26 @@ export class AASProvider {
         let stream: NodeJS.ReadableStream;
         const client = this.clientFactory.create(endpoint);
         try {
-            await client.openAsync();
+            await client.open();
             const pkg = client.createPackage(document.address, document.idShort);
             if (!document.content) {
                 document.content = this.cache.get(document.endpoint, document.id);
                 if (!document.content) {
-                    document.content = await pkg.getEnvironmentAsync();
+                    document.content = await pkg.getEnvironment();
                     this.cache.set(document.endpoint, document.id, document.content);
                 }
             }
 
-            const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, path);
+            const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, idShortPath);
             if (!dataElement) {
                 throw new Error('DataElement not found.');
             }
 
-            if (dataElement.modelType === 'File') {
-                const file = dataElement as aas.File;
-                stream = await pkg.openReadStreamAsync(document.content, file);
-                const extension = file.value ? extname(file.value).toLowerCase() : '';
+            if (isFile(dataElement)) {
+                stream = await pkg.openReadStream(document.content, dataElement);
+                const extension = dataElement.value ? extname(dataElement.value).toLowerCase() : '';
                 const imageOptions = options as { width?: number; height?: number };
-                if (file.contentType.startsWith('image/')) {
+                if (dataElement.contentType.startsWith('image/')) {
                     if (imageOptions?.width || imageOptions?.height) {
                         stream = await ImageProcessing.resizeAsync(stream, imageOptions.width, imageOptions.height);
                     }
@@ -202,8 +203,8 @@ export class AASProvider {
                         stream = await ImageProcessing.convertAsync(stream);
                     }
                 }
-            } else if (dataElement.modelType === 'Blob') {
-                const value = await client.getBlobValueAsync(document.content, smId, path);
+            } else if (isBlob(dataElement)) {
+                const value = await client.getBlobValueAsync(document.content, smId, idShortPath);
                 const readable = new Readable();
                 readable.push(JSON.stringify({ value }));
                 readable.push(null);
@@ -212,7 +213,7 @@ export class AASProvider {
                 throw new Error('Not implemented');
             }
         } finally {
-            await client.closeAsync();
+            await client.close();
         }
 
         return stream;
@@ -330,10 +331,10 @@ export class AASProvider {
 
         const client = this.clientFactory.create(endpoint);
         try {
-            await client.openAsync();
+            await client.open();
             const pkg = client.createPackage(document.address, document.idShort);
             if (!document.content) {
-                document.content = await pkg.getEnvironmentAsync();
+                document.content = await pkg.getEnvironment();
                 if (this.cache.has(document.endpoint, document.id)) {
                     this.cache.set(document.endpoint, document.id, document.content);
                 }
@@ -341,7 +342,7 @@ export class AASProvider {
 
             return await pkg.setEnvironmentAsync(content, document.content);
         } finally {
-            await client.closeAsync();
+            await client.close();
         }
     }
 
@@ -356,10 +357,10 @@ export class AASProvider {
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
         try {
-            await client.openAsync();
+            await client.open();
             return await client.getPackageAsync(id, document.address);
         } finally {
-            await client.closeAsync();
+            await client.close();
         }
     }
 
@@ -380,12 +381,12 @@ export class AASProvider {
 
         const source = this.clientFactory.create(endpoint);
         try {
-            await source.openAsync();
+            await source.open();
             for (const file of files) {
                 await source.postPackageAsync(file);
             }
         } finally {
-            await source.closeAsync();
+            await source.close();
         }
     }
 
@@ -404,7 +405,7 @@ export class AASProvider {
                 await this.index.remove(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
-                await client.closeAsync();
+                await client.close();
             }
         }
     }
@@ -421,16 +422,16 @@ export class AASProvider {
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
         try {
-            await client.openAsync();
+            await client.open();
             let env = document.content;
             if (!env) {
-                env = await client.createPackage(document.address, document.idShort).getEnvironmentAsync();
+                env = await client.createPackage(document.address, document.idShort).getEnvironment();
                 this.cache.set(document.endpoint, document.id, env);
             }
 
             return await client.invoke(env, operation);
         } finally {
-            await client.closeAsync();
+            await client.close();
         }
     }
 
@@ -519,10 +520,10 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(message.endpoint);
         const document = await this.index.get(message.endpoint, message.id);
         const client = this.clientFactory.create(endpoint);
-        await client.openAsync();
+        await client.open();
         let env = this.cache.get(document.endpoint, document.id);
         if (!env) {
-            env = await client.createPackage(document.address, document.idShort).getEnvironmentAsync();
+            env = await client.createPackage(document.address, document.idShort).getEnvironment();
             this.cache.set(document.endpoint, document.id, env);
         }
 
@@ -747,12 +748,12 @@ export class AASProvider {
         const endpoint = await this.index.getEndpoint(document.endpoint);
         const client = this.clientFactory.create(endpoint);
         try {
-            await client.openAsync();
-            env = await client.createPackage(document.address, document.idShort).getEnvironmentAsync();
+            await client.open();
+            env = await client.createPackage(document.address, document.idShort).getEnvironment();
             this.cache.set(document.endpoint, document.id, env);
             return env;
         } finally {
-            await client.closeAsync();
+            await client.close();
         }
     }
 

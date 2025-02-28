@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -56,7 +56,7 @@ export class OpcuaPackage extends AASPackage {
         return document;
     }
 
-    public override async getEnvironmentAsync(): Promise<aas.Environment> {
+    public override async getEnvironment(): Promise<aas.Environment> {
         const component = await this.crawlAsync();
         const reader = new OpcuaReader(this.logger, component, this.dataTypes);
         return await reader.readEnvironment();
@@ -66,11 +66,11 @@ export class OpcuaPackage extends AASPackage {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+    public override getThumbnail(): Promise<NodeJS.ReadableStream> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public async openReadStreamAsync(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async openReadStream(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
         const session = this.server.getSession();
         if (!file.nodeId) {
             throw new Error('Invalid operation.');

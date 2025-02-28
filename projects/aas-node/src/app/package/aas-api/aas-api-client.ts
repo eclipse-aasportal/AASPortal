@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -48,7 +48,7 @@ export abstract class AASApiClient extends AASClient {
     }
 
     /** Tests the connection to the endpoint. */
-    public async testAsync(): Promise<void> {
+    public async test(): Promise<void> {
         if (this.reentry === 0) {
             await this.http.checkUrlExist(this.endpoint.url);
         }
@@ -59,22 +59,22 @@ export abstract class AASApiClient extends AASClient {
      * @param label The AAS label.
      * @returns An AAS environment.
      */
-    public abstract readEnvironmentAsync(label: AASLabel): Promise<aas.Environment>;
+    public abstract readEnvironment(label: AASLabel): Promise<aas.Environment>;
 
     /**
      * Gets the thumbnail of the AAS with the specified identifier.
      * @param id The identifier of the current AAS.
      */
-    public abstract getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream>;
+    public abstract getThumbnail(id: string): Promise<NodeJS.ReadableStream>;
 
     /** Opens a connection to the AAS endpoint. */
-    public override openAsync(): Promise<void> {
+    public override open(): Promise<void> {
         ++this.reentry;
         return Promise.resolve();
     }
 
     /** Closes the connection to the AAS endpoint. */
-    public override closeAsync(): Promise<void> {
+    public override close(): Promise<void> {
         return new Promise(resolve => {
             if (this.reentry > 0) {
                 --this.reentry;
@@ -112,7 +112,7 @@ export abstract class AASApiClient extends AASClient {
      * Gets the names of the Asset Administration Shells contained in the current AASX server.
      * @returns The names of the AASs contained in the current AASX server.
      */
-    public abstract getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>>;
+    public abstract getShells(cursor?: string): Promise<PagedResult<AASLabel>>;
 
     /**
      * ToDo
@@ -120,7 +120,7 @@ export abstract class AASApiClient extends AASClient {
      * @param destination The destination
      * @param diffs
      */
-    public abstract commitAsync(
+    public abstract commit(
         source: aas.Environment,
         destination: aas.Environment,
         diffs: DifferenceItem[],
@@ -132,7 +132,7 @@ export abstract class AASApiClient extends AASClient {
      * @param address The file.
      * @returns A readable stream.
      */
-    public abstract openFileAsync(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream>;
+    public abstract openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream>;
 
     /**
      * Reads the current value from a submodel element.
@@ -140,7 +140,7 @@ export abstract class AASApiClient extends AASClient {
      * @param valueType The
      * @returns The current value.
      */
-    public async readValueAsync(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
+    public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
         const property = await this.http.get<PropertyValue>(new URL(url), this.endpoint.headers);
         return convertFromString(property.value, valueType);
     }

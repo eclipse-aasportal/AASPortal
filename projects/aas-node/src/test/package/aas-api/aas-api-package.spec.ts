@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -21,7 +21,7 @@ describe('AASApiPackage', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = createSpyObj<AASApiClient>(['readEnvironmentAsync'], {
+        server = createSpyObj<AASApiClient>(['readEnvironment'], {
             endpoint: { name: 'Test', type: 'AAS_API', url: 'http:/localhost:1234' },
         });
 
@@ -41,7 +41,7 @@ describe('AASApiPackage', () => {
     });
 
     it('creates a document', async () => {
-        server.readEnvironmentAsync.mockResolvedValue(env);
+        server.readEnvironment.mockResolvedValue(env);
         await expect(aasPackage.createDocumentAsync()).resolves.toBeTruthy();
     });
 });

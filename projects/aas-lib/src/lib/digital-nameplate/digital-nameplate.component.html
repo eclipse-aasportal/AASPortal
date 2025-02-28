@@ -1,35 +1,60 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
+<div class="container h-100">
+    <div class="d-flex flex-column text-center">
+        <div class="bg-primary text-center py-2 my-2 fs-5">{{title()}}</div>
+        <div class="d-flex flex-row justify-content-around align-items-center mb-2">
+            <div>
+                <fhg-img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height"></fhg-img>
+            </div>
+            <div>
+                <canvas #qrCode></canvas>
+            </div>
+        </div>
+    </div>
+    <div ngbAccordion>
+        @for (group of nameplateGroups(); track group.idShort; let i = $index) {
+        <div ngbAccordionItem [collapsed]="i !== 0">
+            <h2 ngbAccordionHeader>
+                <button ngbAccordionButton>{{group.name}}</button>
+            </h2>
+            <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                    <ng-template>
+                        <table class="table table-sm table-striped table-borderless">
+                            <tbody>
+                                @for (item of group.items; track item.idShort) {
+                                <tr>
+                                    <td class="text-nowrap align-middle">{{item.name | translate}}</td>
+                                    @if (item.type === 'link') {
+                                    <td>
+                                        <a href="javascript:void(0)" (click)="open($event, item)">{{item.value}}</a>
+                                    </td>
+                                    } @else {
+                                    <td>{{item.value}}</td>
+                                    }
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
 
-@for (nameplate of nameplates(); track nameplate.id) {
-  <div class="container border rounded">
-    <div class="row">
-      <div class="col">
-        <span>{{nameplate.serialNumber}}</span>
-      </div>
-      <div class="col">
-        <span>{{nameplate.productCountryOfOrigin}}</span><span>-</span><span>{{nameplate.yearOfConstruction}}</span>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <span>{{nameplate.manufacturerName}}</span>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <span>{{nameplate.street}}</span>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <span>{{nameplate.countryCode}}</span><span>-</span><span>{{nameplate.zip}}</span><span>&nbsp;</span><span>{{nameplate.cityTown}}</span>
-      </div>
-    </div>
-  </div>
-}
+<ng-template #nameplateToolbar>
+    @if (nameplateSize() >= 2) {
+    <ngb-pagination class="my-2" [collectionSize]="nameplateSize()" [(page)]="nameplateIndex" [pageSize]="1"
+        [directionLinks]="nameplateSize() > 5" [ellipses]="true" />
+    } @else {
+    <div class="my-2"></div>
+    }
+</ng-template>

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -51,7 +51,7 @@ describe('OpcuaClient', function () {
             client.connect.mockImplementation(() => new Promise<void>(resolve => resolve()));
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
             jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
-            await expect(server.testAsync()).resolves.toBeUndefined();
+            await expect(server.test()).resolves.toBeUndefined();
         });
 
         it('throws an Error for an invalid URL', async function () {
@@ -61,7 +61,7 @@ describe('OpcuaClient', function () {
 
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
             jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
-            await expect(server.testAsync()).rejects.toThrowError();
+            await expect(server.test()).rejects.toThrowError();
         });
     });
 
@@ -78,9 +78,9 @@ describe('OpcuaClient', function () {
             client.connect.mockImplementation(() => new Promise<void>(resolve => resolve()));
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
             jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
-            await expect(server.openAsync()).resolves.toBeUndefined();
+            await expect(server.open()).resolves.toBeUndefined();
             expect(server.isOpen).toBeTruthy();
-            await expect(server.closeAsync()).resolves.toBeUndefined();
+            await expect(server.close()).resolves.toBeUndefined();
             expect(server.isOpen).toBeFalsy();
         });
     });
@@ -98,9 +98,9 @@ describe('OpcuaClient', function () {
         });
 
         it('returns the current session', async function () {
-            await server.openAsync();
+            await server.open();
             expect(server.getSession()).toBe(session);
-            await server.closeAsync();
+            await server.close();
         });
 
         it('throws an Error if no connection is established', function () {
@@ -198,9 +198,9 @@ describe('OpcuaClient', function () {
                 },
             };
 
-            await server.openAsync();
+            await server.open();
             await expect(server.invoke(env, operation)).resolves.toEqual(operation);
-            await server.closeAsync();
+            await server.close();
         });
 
         it('throw an Error if the call result is not "Good"', async function () {
@@ -240,9 +240,9 @@ describe('OpcuaClient', function () {
                 },
             };
 
-            await server.openAsync();
+            await server.open();
             await expect(server.invoke(env, operation)).rejects.toThrowError();
-            await server.closeAsync();
+            await server.close();
         });
     });
 });

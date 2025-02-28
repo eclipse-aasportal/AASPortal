@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -25,10 +25,10 @@ export class AASApiServerScan extends AASServerScan {
     }
 
     protected override open(): Promise<void> {
-        return this.client.openAsync();
+        return this.client.open();
     }
     protected override close(): Promise<void> {
-        return this.client.closeAsync();
+        return this.client.close();
     }
 
     protected override createDocument(id: AASLabel): Promise<AASDocument> {
@@ -37,6 +37,6 @@ export class AASApiServerScan extends AASServerScan {
     }
 
     protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {
-        return this.client.getShellsAsync(cursor);
+        return this.client.getShells(cursor);
     }
 }

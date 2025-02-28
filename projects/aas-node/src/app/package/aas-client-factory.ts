@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -67,20 +67,20 @@ export class AASClientFactory {
                 case 'AAS_API':
                     switch (endpoint.version) {
                         case 'v3':
-                            await new AASApiClientV3(this.logger, this.http, endpoint).testAsync();
+                            await new AASApiClientV3(this.logger, this.http, endpoint).test();
                             break;
                         case 'v1':
-                            await new AASApiClientV1(this.logger, this.http, endpoint).testAsync();
+                            await new AASApiClientV1(this.logger, this.http, endpoint).test();
                             break;
                         case 'v0':
-                            await new AASApiClientV0(this.logger, this.http, endpoint).testAsync();
+                            await new AASApiClientV0(this.logger, this.http, endpoint).test();
                             break;
                         default:
                             throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                     }
                     break;
                 case 'OPC_UA':
-                    await new OpcuaClient(this.logger, endpoint).testAsync();
+                    await new OpcuaClient(this.logger, endpoint).test();
                     break;
                 case 'WebDAV':
                 case 'FileSystem':
@@ -89,7 +89,7 @@ export class AASClientFactory {
                             this.logger,
                             this.fileStorageProvider.get(endpoint.url),
                             endpoint,
-                        ).testAsync();
+                        ).test();
                     }
                     break;
                 default:

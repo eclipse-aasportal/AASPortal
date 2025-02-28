@@ -1,13 +1,8 @@
 {
-    "CAPTION_START": "Start",
-    "CAPTION_VIEW": "View",
-    "CAPTION_AAS": "AAS",
-    "CAPTION_ABOUT": "About",
     "CAPTION_LOGIN": "Login",
     "CAPTION_PROFILE": "Profile",
     "CAPTION_REGISTRATION": "Registration",
     "CAPTION_PASSWORD_FORGOTTEN": "Password forgotten?",
-    "CAPTION_DASHBOARD": "Dashboard",
     "CAPTION_INPUT_ARGUMENTS": "Input arguments",
     "CAPTION_OUTPUT_ARGUMENTS": "Output arguments",
     "CAPTION_INOUTPUT_ARGUMENTS": "In/Output arguments",
@@ -160,6 +155,15 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
+    "Main": {
+        "ENDPOINTS": "Endpoints",
+        "START": "Start",
+        "SHELLS": "Shells",
+        "AAS": "AAS",
+        "VIEW": "View",
+        "DASHBOARD": "Dashboard",
+        "ABOUT": "About"
+    },
     "Start": {
         "FAVORITES": "All shells",
         "ENDPOINT": "Endpoint",
@@ -263,10 +267,6 @@
         "MODEL_TYPE_EXPECTED": "Model type abbreviation expected at position {0}.",
         "TERM_EXPECTED": "Term expected at position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unexpected closing bracket at position ${0}."
-    },
-    "Main": {
-        "ENDPOINTS": "Endpoints",
-        "SHELLS": "Shells"
     },
     "FavoritesForm": {
         "CAPTION": "Favorites",

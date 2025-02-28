@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,8 +9,8 @@
 import isElement from 'lodash-es/isElement';
 import { Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { resolveError } from '../convert';
-import { MessageEntry } from '../types/message-entry';
+import { resolveError } from '../utilities';
+import { MessageEntry } from '../types';
 import { stringFormat } from 'aas-core';
 
 export enum LogType {

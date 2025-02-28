@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -71,7 +71,7 @@ export class AASApiClientV1 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>> {
+    public async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
         const result = await this.http.get<aasv2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
@@ -85,7 +85,7 @@ export class AASApiClientV1 extends AASApiClient {
         };
     }
 
-    public async readEnvironmentAsync(id: AASLabel): Promise<aas.Environment> {
+    public async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aasv2.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
@@ -130,18 +130,14 @@ export class AASApiClientV1 extends AASApiClient {
         return new JsonReaderV2(sourceEnv).readEnvironment();
     }
 
-    public override getThumbnailAsync(id: string): Promise<NodeJS.ReadableStream> {
+    public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
         return this.http.getResponse(
             this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
             this.endpoint.headers,
         );
     }
 
-    public async commitAsync(
-        source: aas.Environment,
-        target: aas.Environment,
-        diffs: DifferenceItem[],
-    ): Promise<string[]> {
+    public async commit(source: aas.Environment, target: aas.Environment, diffs: DifferenceItem[]): Promise<string[]> {
         const messages: string[] = [];
         const aasId = encodeBase64Url(target.assetAdministrationShells[0].id);
         for (const diff of diffs) {
@@ -182,7 +178,7 @@ export class AASApiClientV1 extends AASApiClient {
         return messages;
     }
 
-    public async openFileAsync(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async openFile(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);
         const url = this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}/attachment`);

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -27,8 +27,8 @@ import {
     isReferenceElement,
 } from 'aas-core';
 
-import { messageToString } from '../convert';
-import { ERRORS } from '../types/errors';
+import { messageToString } from '../utilities';
+import { ERRORS } from '../errors';
 import { OperationCallFormApiService } from './operation-call-form-api.service';
 
 export interface VariableItem {

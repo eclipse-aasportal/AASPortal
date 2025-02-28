@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 
 import { RegisterFormComponent, RegisterFormResult } from '../../lib/auth/register-form/register-form.component';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
-import { ERRORS } from '../../lib/types/errors';
+import { ERRORS } from '../../lib/errors';
 import { getToken } from '../assets/json-web-token';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 

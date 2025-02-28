@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AASDocument, aas } from 'aas-core';
 import { first, mergeMap, Observable } from 'rxjs';
-import { encodeBase64Url } from '../convert';
+import { encodeBase64Url } from '../utilities';
 import { AuthService } from '../auth/auth.service';
 
 /** The API of the digital passport portal. */

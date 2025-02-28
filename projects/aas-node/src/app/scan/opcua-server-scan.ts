@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -30,12 +30,12 @@ export class OpcuaServerScan extends AASServerScan {
 
     protected override open(): Promise<void> {
         this.map.clear();
-        return this.server.openAsync();
+        return this.server.open();
     }
 
     protected override close(): Promise<void> {
         this.map.clear();
-        return this.server.closeAsync();
+        return this.server.close();
     }
 
     protected override createDocument(id: AASLabel): Promise<AASDocument> {

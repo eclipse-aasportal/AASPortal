@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -64,7 +64,7 @@ describe('EndpointsController', function () {
             'getDocumentAsync',
             'addPackagesAsync',
             'deletePackageAsync',
-            'getDataElementValueAsync',
+            'getDataElementValue',
             'invoke',
         ]);
 
@@ -253,7 +253,7 @@ describe('EndpointsController', function () {
 
     describe('getDataElementValue: /api/v1/endpoints/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', () => {
         it('gets the value of a File that represents an image', async () => {
-            aasProvider.getDataElementValueAsync.mockReturnValue(
+            aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
                     s.push('Hello World!');
@@ -269,11 +269,11 @@ describe('EndpointsController', function () {
                 .set('Authorization', `Bearer ${getToken()}`);
 
             expect(response.statusCode).toBe(200);
-            expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
+            expect(aasProvider.getDataElementValue).toHaveBeenCalled();
         });
 
         it('gets the value of a File', async () => {
-            aasProvider.getDataElementValueAsync.mockReturnValue(
+            aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
                     s.push('Hello World!');
@@ -290,11 +290,11 @@ describe('EndpointsController', function () {
 
             expect(response.statusCode).toBe(200);
             expect(response.text).toEqual('Hello World!');
-            expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
+            expect(aasProvider.getDataElementValue).toHaveBeenCalled();
         });
 
         it('gets the value of a Blob', async () => {
-            aasProvider.getDataElementValueAsync.mockReturnValue(
+            aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
                     s.push(Buffer.from('Hello world!').toString('base64'));
@@ -311,7 +311,7 @@ describe('EndpointsController', function () {
 
             expect(response.statusCode).toBe(200);
             expect(response.text).toEqual(Buffer.from('Hello world!').toString('base64'));
-            expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
+            expect(aasProvider.getDataElementValue).toHaveBeenCalled();
         });
     });
 

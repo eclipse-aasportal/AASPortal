@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -11,7 +11,7 @@ import jwt from 'jsonwebtoken';
 
 export const guestPayload: JWTPayload = { role: 'guest' };
 
-export const editorPayload = { id: 'john.doe@email.com', name: 'John', role: 'editor' };
+export const editorPayload: JWTPayload = { sub: 'john.doe@email.com', name: 'John', role: 'editor' };
 
 export function getToken(name?: string): string {
     return name

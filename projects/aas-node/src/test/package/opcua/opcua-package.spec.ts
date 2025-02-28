@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -19,7 +19,7 @@ describe('OpcuaPackage', function () {
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
-        server = createSpyObj<OpcuaClient>(['openAsync', 'closeAsync', 'getSession'], { isOpen: true });
+        server = createSpyObj<OpcuaClient>(['open', 'close', 'getSession'], { isOpen: true });
         aasPackage = new OpcuaPackage(logger, server, 'ns=1;i=42');
     });
 

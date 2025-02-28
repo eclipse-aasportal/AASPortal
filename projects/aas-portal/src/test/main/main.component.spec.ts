@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -20,7 +20,7 @@ import {
 } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
-import { ToolbarService } from '../../app/toolbar.service';
+import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 
 @Component({
     selector: 'fhg-auth',
@@ -104,6 +104,6 @@ describe('MainComponent', () => {
 
     it('provides a list of route links', function () {
         expect(component.links()).toBeDefined();
-        expect(component.links().map(link => link.url)).toEqual(['/start', '/aas', '/view', '/dashboard', '/about']);
+        expect(component.links().map(link => link.url)).toEqual(['/start', '/shells', '/aas', '/view', '/dashboard', '/about']);
     });
 });
