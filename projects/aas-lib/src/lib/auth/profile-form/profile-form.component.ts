@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,8 +12,8 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'aas-core';
-import { messageToString } from '../../convert';
-import { ERRORS } from '../../types/errors';
+import { messageToString } from '../../utilities';
+import { ERRORS } from '../../errors';
 import { AuthApiService } from '../auth-api.service';
 
 export interface ProfileFormResult {

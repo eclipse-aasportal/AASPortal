@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -18,7 +18,7 @@ import { pages } from './test-pages';
 import { SelectionMode } from '../../app/types/selection-mode';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { ToolbarService } from '../../app/toolbar.service';
+import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { DashboardChart } from '../../app/dashboard/dashboard.store';
 
 describe('DashboardComponent', () => {

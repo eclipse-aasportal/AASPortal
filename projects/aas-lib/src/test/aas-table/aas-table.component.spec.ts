@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,7 +13,7 @@ import { AASDocument } from 'aas-core';
 import { AASTableComponent } from '../../lib/aas-table/aas-table.component';
 import { NotifyService } from '../../lib/notify/notify.service';
 import { createDocument } from '../assets/test-document';
-import { ViewMode } from '../../lib/types/view-mode';
+import { ViewMode } from '../../lib/types';
 
 describe('AASTableComponent', () => {
     let component: AASTableComponent;

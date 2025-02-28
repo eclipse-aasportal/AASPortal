@@ -1,20 +1,20 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
 @if (width() !== undefined && height() !== undefined) {
-<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()" [height]="height()"
+<img [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()" [height]="height()"
     onerror="this.src='assets/resources/aas.svg';" />
 } @else if (width() !== undefined) {
-<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()"
+<img [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()"
     onerror="this.src='assets/resources/aas.svg';" />
 } @else if (height() !== undefined) {
-<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" [height]="height()"
+<img [src]="dataUrl()" [alt]="alt()" [class]="class()" [height]="height()"
     onerror="this.src='assets/resources/aas.svg';" />
 } @else {
-<img #image [src]="dataUrl()" [alt]="alt()" [class]="class()" onerror="this.src='assets/resources/aas.svg';" />
+<img [src]="dataUrl()" [alt]="alt()" [class]="class()" onerror="this.src='assets/resources/aas.svg';" />
 }

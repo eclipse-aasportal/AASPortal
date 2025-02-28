@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -31,7 +31,7 @@ import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { first } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
-import { LogType, NotifyService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { LogType, NotifyService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -47,7 +47,6 @@ import { DeleteItemCommand } from './commands/delete-item-command';
 import { SetChartTypeCommand } from './commands/set-chart-type-command';
 import { SetMinMaxCommand } from './commands/set-min-max-command';
 import { DashboardApiService } from './dashboard-api.service';
-import { ToolbarService } from '../toolbar.service';
 import {
     DashboardChart,
     DashboardChartType,

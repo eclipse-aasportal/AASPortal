@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Injectable, computed } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { aas, Endpoint, TemplateDescriptor } from 'aas-core';
-import { encodeBase64Url } from './convert';
+import { encodeBase64Url } from './utilities';
 
 interface TemplateServiceState {
     templates: TemplateDescriptor[];

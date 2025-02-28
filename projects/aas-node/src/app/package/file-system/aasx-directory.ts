@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -52,17 +52,17 @@ export class AasxDirectory extends AASClient {
         return { result: files, paging_metadata: {} };
     }
 
-    public async testAsync(): Promise<void> {
+    public async test(): Promise<void> {
         if (this.reentry === 0) {
             try {
-                await this.openAsync();
+                await this.open();
             } finally {
-                await this.closeAsync();
+                await this.close();
             }
         }
     }
 
-    public async openAsync(): Promise<void> {
+    public async open(): Promise<void> {
         if (this.reentry === 0) {
             if (!(await this.fileStorage.exists(this.root))) {
                 throw new Error(`The directory '${this.endpoint}' does not exist.`);
@@ -72,7 +72,7 @@ export class AasxDirectory extends AASClient {
         }
     }
 
-    public closeAsync(): Promise<void> {
+    public close(): Promise<void> {
         return new Promise(resolve => {
             if (this.reentry > 0) {
                 --this.reentry;

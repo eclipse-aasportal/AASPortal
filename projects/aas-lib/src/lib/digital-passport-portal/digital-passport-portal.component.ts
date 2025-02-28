@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -28,7 +28,7 @@ import {
 import { CarbonFootprint, ZVEINameplate } from '../views/submodel-template';
 import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-passport-portal.store';
 import { SecuredImageComponent } from '../secured-image/secured-image.component';
-import { basename, decodeBase64Url, encodeBase64Url } from '../convert';
+import { decodeBase64Url, encodeBase64Url } from '../utilities';
 import { DigitalPassportPortalService } from './digital-passport-portal.service';
 import { WINDOW } from '../window.service';
 import { AuthService } from '../auth/auth.service';
@@ -75,7 +75,7 @@ export class DigitalPassportPortalComponent implements OnInit {
     });
 
     public readonly hazardSymbol = computed(() =>
-        this.resolveFile(this.store.getNameplateFile('AssetSpecificProperties.DppHazardSymbol')),
+        this.getUrl(this.store.getNameplateFile('AssetSpecificProperties.DppHazardSymbol')),
     );
 
     public readonly thumbnail = computed(() => {
@@ -90,10 +90,8 @@ export class DigitalPassportPortalComponent implements OnInit {
     public readonly mainData = this.store.mainData;
 
     public readonly nameplateItems = computed(() => {
-        const item = this.store.nameplateItems() as unknown as Record<string, string>;
         const items: NameValue[] = [];
-        for (const name in item) {
-            const value = item[name];
+        for (const [name, value] of Object.entries(this.store.nameplateItems())) {
             if (typeof value === 'string') {
                 items.push({ name: 'DigitalPassportPortal.' + name, value });
             }
@@ -152,7 +150,7 @@ export class DigitalPassportPortalComponent implements OnInit {
             return;
         }
 
-        const { url } = this.resolveFile(item.file);
+        const url = this.getUrl(item.file);
         const token = this.auth.token();
         this.window.open(url + '?access_token=' + token);
         $event.stopPropagation();
@@ -194,28 +192,25 @@ export class DigitalPassportPortalComponent implements OnInit {
         }
     }
 
-    private resolveFile(file: aas.File | undefined): { url: string; name: string } {
-        const value: { url: string; name: string } = { url: '', name: '' };
+    private getUrl(file: aas.File | undefined): string {
         if (file === undefined || file.value === undefined) {
-            return value;
+            return '';
         }
 
         const document = this.store.viewData$()?.document;
         if (!document?.content) {
-            return value;
+            return '';
         }
 
         const submodel = selectSubmodel(document.content, file);
         if (submodel === undefined) {
-            return value;
+            return '';
         }
 
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(file);
-        value.name = basename(file.value);
         const name = encodeBase64Url(document.endpoint);
         const id = encodeBase64Url(document.id);
-        value.url = `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
-        return value;
+        return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
     }
 }

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -33,6 +33,7 @@ import {
     DownloadService,
     NotifyService,
     SecuredImageComponent,
+    ToolbarService,
 } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -43,7 +44,6 @@ import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
-import { ToolbarService } from '../toolbar.service';
 import { AASStore } from './aas.store';
 import { DashboardChartType } from '../dashboard/dashboard.store';
 import { Location } from '@angular/common';

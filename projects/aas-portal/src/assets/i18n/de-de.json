@@ -1,13 +1,8 @@
 {
-    "CAPTION_START": "Start",
-    "CAPTION_VIEW": "Sicht",
-    "CAPTION_AAS": "VWS",
-    "CAPTION_ABOUT": "Über",
     "CAPTION_LOGIN": "Anmeldung",
     "CAPTION_PROFILE": "Profil",
     "CAPTION_REGISTRATION": "Registrierung",
     "CAPTION_PASSWORD_FORGOTTEN": "Passwort vergessen?",
-    "CAPTION_DASHBOARD": "Dashboard",
     "CAPTION_INPUT_ARGUMENTS": "Eingangsargumente",
     "CAPTION_OUTPUT_ARGUMENTS": "Ausgangsargumente",
     "CAPTION_INOUTPUT_ARGUMENTS": "Ein/Ausgangsargumente",
@@ -159,6 +154,15 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
+    "Main": {
+        "ENDPOINTS": "Endpunkte",
+        "SHELLS": "Verwaltungsschalen",
+        "START": "Start",
+        "VIEW": "Sicht",
+        "AAS": "VWS",
+        "DASHBOARD": "Dashboard",
+        "ABOUT": "Über"
+    },
     "Start": {
         "FAVORITES": "Alle Verwaltungsschalen",
         "ENDPOINT": "Endpunkt",
@@ -262,10 +266,6 @@
         "MODEL_TYPE_EXPECTED": "Modelltypabkürzung an Position {0} erwartet.",
         "TERM_EXPECTED": "Term erwartet an Position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
-    },
-    "Main": {
-        "ENDPOINTS": "Endpunkte",
-        "SHELLS": "Verwaltungsschalen"
     },
     "FavoritesForm": {
         "CAPTION": "Favoriten",

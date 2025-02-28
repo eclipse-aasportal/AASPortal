@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,6 +9,7 @@
 import isEqual from 'lodash-es/isEqual.js';
 import * as aas from './aas.js';
 import { AASDocument, AASAbbreviation } from './types.js';
+import { isHasSemantics } from './index.js';
 
 /** Represents a difference. */
 export interface DifferenceItem {
@@ -109,52 +110,30 @@ export function normalize<T>(
 }
 
 /**
- * Iterates over all descendants of the specified element and the element itself.
- * @param referable The start element.
+ * Flattens the specified element and all its descendants.
+ * @param root The root element.
  * @returns All descendants of the specified element and the element itself.
  */
-export function* traverse(root: aas.Referable): Generator<[string, [aas.Referable | undefined, aas.Referable]]> {
-    yield ['/', [undefined, root]];
-
-    for (const item of traverseChildren(root, '/' + root.idShort)) {
-        yield item;
+export function flat(root: aas.Referable): aas.Referable[] {
+    const stack: aas.Referable[][] = [];
+    const result: aas.Referable[] = [];
+    result.push(root);
+    let children = getChildren(root);
+    if (children.length > 0) {
+        stack.push(children);
     }
 
-    function* traverseChildren(
-        parent: aas.Referable,
-        path: string,
-    ): Generator<[string, [aas.Referable, aas.Referable]]> {
-        for (const child of getChildren(parent)) {
-            const childPath = path + child.idShort;
-            yield [path + child.idShort, [parent, child]];
-
-            for (const item of traverseChildren(child, childPath)) {
-                yield item;
+    while (stack.length) {
+        stack.pop()!.forEach(child => {
+            result.push(child);
+            children = getChildren(child);
+            if (children.length > 0) {
+                stack.push(children);
             }
-        }
-    }
-}
-
-/**
- *
- * @param root
- */
-export function* flat(root: aas.Referable): Generator<aas.Referable> {
-    yield root;
-
-    for (const item of flatChildren(root)) {
-        yield item;
+        });
     }
 
-    function* flatChildren(parent: aas.Referable): Generator<aas.Referable> {
-        for (const child of getChildren(parent)) {
-            yield child;
-
-            for (const item of flatChildren(child)) {
-                yield item;
-            }
-        }
-    }
+    return result;
 }
 
 /**
@@ -262,6 +241,28 @@ export function diff(sourceEnv: aas.Environment, targetEnv: aas.Environment): Di
         inserted = normalize(sourceEnv, inserted, item => item.sourceElement as aas.Referable);
 
         return [...deleted, ...inserted, ...moved, ...changed];
+    }
+
+    function* traverse(root: aas.Referable): Generator<[string, [aas.Referable | undefined, aas.Referable]]> {
+        yield ['/', [undefined, root]];
+
+        for (const item of traverseChildren(root, '/' + root.idShort)) {
+            yield item;
+        }
+
+        function* traverseChildren(
+            parent: aas.Referable,
+            path: string,
+        ): Generator<[string, [aas.Referable, aas.Referable]]> {
+            for (const child of getChildren(parent)) {
+                const childPath = path + child.idShort;
+                yield [path + child.idShort, [parent, child]];
+
+                for (const item of traverseChildren(child, childPath)) {
+                    yield item;
+                }
+            }
+        }
     }
 
     function twins(a?: aas.Referable, b?: aas.Referable): boolean {
@@ -1046,10 +1047,10 @@ export function resolveReference(env: aas.Environment, reference: aas.Reference)
 }
 
 /**
- *
- * @param env
- * @param referable
- * @returns
+ * Gets the data specification content of the specified referable.
+ * @param env The AAS environment.
+ * @param referable The current referable.
+ * @returns The data specification content of the specified referable or `undefined`.
  */
 export function getIEC61360Content(
     env: aas.Environment,
@@ -1059,7 +1060,7 @@ export function getIEC61360Content(
     if (hasDataSpecification.embeddedDataSpecifications) {
         for (const item of hasDataSpecification.embeddedDataSpecifications) {
             if (
-                item.dataSpecification.keys[0].value ===
+                getPath(item.dataSpecification) ===
                 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360'
             ) {
                 return item.dataSpecificationContent as aas.DataSpecificationIec61360;
@@ -1079,19 +1080,20 @@ export function getIEC61360Content(
 }
 
 /**
- *
- * @param env
- * @param referable
+ * Gets the unit.
+ * @param env The AAS environment.
+ * @param referable The current referable.
+ * @returns The unit of the specified referable.
  */
 export function getUnit(env: aas.Environment, referable: aas.Referable): string | undefined {
     return getIEC61360Content(env, referable)?.unit;
 }
 
 /**
- *
- * @param env
- * @param referable
- * @returns
+ * Gets the preferred name of the specified referable.
+ * @param env The AAS environment.
+ * @param referable The current referable.
+ * @returns The preferred name of the specified referable.
  */
 export function getPreferredName(env: aas.Environment, referable: aas.Referable): aas.LangString[] | undefined {
     return getIEC61360Content(env, referable)?.preferredName;
@@ -1118,6 +1120,12 @@ export function getChildren(parent: aas.Referable, env?: aas.Environment): aas.R
                 return (parent as aas.Entity).statements ?? [];
             case 'AnnotatedRelationshipElement':
                 return (parent as aas.AnnotatedRelationshipElement).annotations ?? [];
+            case 'Operation':
+                return [
+                    ...((parent as aas.Operation).inputVariables?.map(variable => variable.value) ?? []),
+                    ...((parent as aas.Operation).inoutputVariables?.map(variable => variable.value) ?? []),
+                    ...((parent as aas.Operation).outputVariables?.map(variable => variable.value) ?? []),
+                ];
         }
     }
 
@@ -1160,25 +1168,64 @@ export function getIdShortPath(referable: aas.Referable): string {
     return idShortPath;
 }
 
-function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
-    if (a && b) {
-        if (a === b) {
-            return true;
-        }
+/**
+ * Gets the path of the specified reference.
+ * @param reference The current reference.
+ * @returns A path that represents the specified reference.
+ */
+export function getPath(reference: aas.Reference): string {
+    return reference.keys.map(key => key.value).join('.');
+}
 
-        if (
-            a.keys.length === b.keys.length &&
-            a.type === b.type &&
-            equalReference(a.referredSemanticId, b.referredSemanticId)
-        ) {
-            for (let i = 0; i < a.keys.length; i++) {
-                if (a.keys[i].type !== b.keys[i].type || a.keys[i].value === b.keys[i].value) {
-                    return false;
+/**
+ * Gets all concept description identifiers that are available in the specified referable and its descendants.
+ * @param referable The current referable.
+ * @returns The available semantic identifiers.
+ */
+export function getConceptDescriptionIds(referable: aas.Referable): string[] {
+    const result = new Set<string>();
+    for (const element of flat(referable)) {
+        if (isHasSemantics(element)) {
+            const semanticId = element.semanticId;
+            if (semanticId && semanticId.type === 'ExternalReference') {
+                const key = semanticId.keys.at(0);
+                if (key && key.type === 'GlobalReference') {
+                    result.add(key.value);
                 }
             }
-
-            return true;
         }
+    }
+
+    return [...result.values()];
+}
+
+/**
+ * Compares two AAS references for equality.
+ * @param a The first reference.
+ * @param b The second reference.
+ * @returns `true` if both references are equal; otherwise, `false`.
+ */
+export function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
+    if (a === b) {
+        return true;
+    }
+
+    if (!a || !b) {
+        return false;
+    }
+
+    if (
+        a.keys.length === b.keys.length &&
+        a.type === b.type &&
+        equalReference(a.referredSemanticId, b.referredSemanticId)
+    ) {
+        for (let i = 0; i < a.keys.length; i++) {
+            if (a.keys[i].type !== b.keys[i].type || a.keys[i].value === b.keys[i].value) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     return false;

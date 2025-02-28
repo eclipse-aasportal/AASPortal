@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -26,12 +26,12 @@ export class DirectoryScan extends AASServerScan {
 
     protected override open(): Promise<void> {
         this.map.clear();
-        return this.source.openAsync();
+        return this.source.open();
     }
 
     protected override close(): Promise<void> {
         this.map.clear();
-        return this.source.closeAsync();
+        return this.source.close();
     }
 
     protected override createDocument(id: AASLabel): Promise<AASDocument> {

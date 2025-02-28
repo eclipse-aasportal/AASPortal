@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -53,7 +53,7 @@ export class HttpSubscription extends SocketSubscription {
         for (const item of this.items) {
             try {
                 item.node.value = changeType(
-                    await this.server.readValueAsync(item.url, item.node.valueType),
+                    await this.server.readValue(item.url, item.node.valueType),
                     item.node.valueType,
                 );
 
