@@ -9,8 +9,11 @@
 <div id="start-page" class="overflow-auto h-100 px-2">
     <div class="d-flex flex-wrap">
         @for (item of items(); track item; let i = $index) {
-        <div class="m-2">
-            <ng-container [ngComponentOutlet]="item.component" [ngComponentOutletInputs]="item.property"></ng-container>
+        <div class="p-2 rounded" [class.bg-warning-subtle]="item.selected()">
+            <div class="card" (click)="toggleSelected($event, item)" tabindex="0">
+                <ng-container [ngComponentOutlet]="item.component"
+                    [ngComponentOutletInputs]="item.property"></ng-container>
+            </div>
         </div>
         }
     </div>
@@ -18,8 +21,8 @@
 
 <ng-template #startToolbar>
     <div class="input-group me-2 my-1">
-        <button class="btn btn-outline-primary" type="button">
-            <i class="bi bi-plus"></i>
+        <button class="btn btn-primary" type="button" (click)="remove().subscribe()">
+            <i class="bi bi-trash"></i>
         </button>
     </div>
 </ng-template>
