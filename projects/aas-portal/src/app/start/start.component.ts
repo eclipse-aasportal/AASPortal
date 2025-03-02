@@ -16,14 +16,19 @@ import {
     Type,
     viewChild,
     computed,
+    WritableSignal,
+    signal,
 } from '@angular/core';
 
-import { StartService, ToolbarService } from 'aas-lib';
+import { StartService, StartTile, ToolbarService } from 'aas-lib';
+import { EMPTY, Observable } from 'rxjs';
 
 export type StartTileItem = {
     id: string;
     component: Type<unknown>;
     property: Record<string, string>;
+    selected: WritableSignal<boolean>;
+    tile: StartTile;
 };
 
 @Component({
@@ -60,6 +65,8 @@ export class StartComponent implements OnDestroy {
                 id: `${type.name}.${tile.endpoint}.${tile.id}`,
                 component: type.component,
                 property: { endpoint: tile.endpoint, id: tile.id },
+                selected: signal(false),
+                tile,
             });
         }
 
@@ -68,5 +75,20 @@ export class StartComponent implements OnDestroy {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
+    }
+
+    public toggleSelected($event: MouseEvent, item: StartTileItem): void {
+        item.selected.update(state => !state);
+        $event.stopPropagation();
+    }
+
+    public remove(): Observable<void> {
+        const selectedItems = this.items().filter(item => item.selected());
+        if (selectedItems.length === 0) {
+            return EMPTY;
+        }
+
+        selectedItems.forEach(item => this.start.remove(item.tile));
+        return this.start.save();
     }
 }

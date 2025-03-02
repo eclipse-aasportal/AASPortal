@@ -1,8 +1,18 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { AASDocument, getLocaleValue } from 'aas-core';
 import { StartTileComponent } from '../../types';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
-import { AASDocument } from 'projects/aas-core/dist/types';
 import { FavoriteApiService } from './favorite-api.service';
+import { encodeBase64Url } from '../../utilities';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-favorite',
@@ -15,8 +25,12 @@ import { FavoriteApiService } from './favorite-api.service';
 })
 export class FavoriteComponent implements StartTileComponent {
     private readonly document$ = signal<AASDocument | undefined>(undefined);
+    private readonly aas$ = computed(() => this.document$()?.content?.assetAdministrationShells.at(0));
 
-    public constructor(private readonly api: FavoriteApiService) {
+    public constructor(
+        private readonly translate: TranslateService,
+        private readonly api: FavoriteApiService,
+    ) {
         effect(() => {
             const endpoint = this.endpoint();
             const id = this.id();
@@ -30,16 +44,50 @@ export class FavoriteComponent implements StartTileComponent {
 
     public readonly id = input('');
 
-    public readonly address = computed(() => this.document$()?.address ?? '-');
+    public readonly idShort = computed(() => {
+        return this.aas$()?.idShort ?? '-';
+    });
 
-    public readonly idShort = computed(() => this.document$()?.idShort ?? '-');
+    public readonly displayName = computed(() => {
+        const displayName = this.aas$()?.displayName;
+        if (displayName === undefined) {
+            return undefined;
+        }
 
-    public readonly assetId = computed(() => this.document$()?.assetId ?? '-');
+        return getLocaleValue(displayName, this.translate.currentLang);
+    });
 
-    public readonly thumbnail = computed(() => this.document$()?.thumbnail ?? '-');
+    public readonly description = computed(() => {
+        const description = this.aas$()?.description;
+        if (description === undefined) {
+            return undefined;
+        }
+
+        return getLocaleValue(description, this.translate.currentLang);
+    });
+
+    public readonly assetId = computed(() => this.aas$()?.assetInformation.globalAssetId ?? '-');
+
+    public readonly thumbnail = computed(() => {
+        const document = this.document$();
+        if (document === undefined) {
+            return '';
+        }
+
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
+    });
+
+    public readonly href = computed(() => {
+        const document = this.document$();
+        if (document === undefined) {
+            return 'javascript:void(0)';
+        }
+
+        return `/aas?endpoint=${encodeBase64Url(document.endpoint)}&id=${encodeBase64Url(document.id)}`;
+    });
 
     public readonly version = computed(() => {
-        const administration = this.document$()?.content?.assetAdministrationShells?.at(0)?.administration;
+        const administration = this.aas$()?.administration;
         if (administration === undefined) {
             return '-';
         }
@@ -58,13 +106,6 @@ export class FavoriteComponent implements StartTileComponent {
 
         return '-';
     });
-
-    private getDocumentContent(document: AASDocument): void {
-        this.api.getContent(document.id, document.endpoint).subscribe({
-            next: content => this.document$.set({ ...document, content }),
-            error: () => this.document$.set(document),
-        });
-    }
 
     private getDocument(id: string, endpoint?: string): void {
         this.api.getDocument(id, endpoint).subscribe({
