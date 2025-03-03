@@ -9,8 +9,8 @@
 <div id="start-page" class="overflow-auto h-100 px-2">
     <div class="d-flex flex-wrap">
         @for (item of items(); track item; let i = $index) {
-        <div class="p-2 rounded" [class.bg-warning-subtle]="item.selected()">
-            <div class="card" (click)="toggleSelected($event, item)" tabindex="0">
+        <div class="p-2 rounded" [class.bg-info-subtle]="item.selected()">
+            <div class="card fhg-card" (click)="toggleSelected($event, item)" tabindex="0">
                 <ng-container [ngComponentOutlet]="item.component"
                     [ngComponentOutletInputs]="item.property"></ng-container>
             </div>

@@ -310,5 +310,9 @@
         "PCFCO2eq": "PCFCO2eq",
         "PCFLifeCyclePhase1": "Life cycle phase 1",
         "PCFLifeCyclePhase2": "Life cycle phase 2"
+    },
+    "Favorite": {
+        "ENDPOINT": "Endpoint",
+        "VERSION": "Version"
     }
 }
