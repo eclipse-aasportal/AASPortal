@@ -1,17 +1,17 @@
-<div class="p-2">
-    <fhg-img [height]="128" [src]="thumbnail()" alt="assets/resources/aas.svg" />
-</div>
+<h5 class="card-header text-truncate">{{displayName() ?? idShort()}}</h5>
 <div class="card-body">
+    <fhg-img [height]="128" [src]="thumbnail()" alt="assets/resources/aas.svg" />
     @if (displayName()) {
-    <h5 class="card-title">{{displayName()}}</h5>
-    } @else {
-    <h5 class="card-title">{{idShort()}}</h5>
+    <h5 class="mt-2">{{idShort()}}</h5>
     }
-    <h6 class="card-subtitle mb-2 text-body-secondary">{{endpoint()}}</h6>
-    <h6 class="card-subtitle mb-2 text-body-secondary">{{id()}}</h6>
-    <h6 class="card-subtitle mb-2 text-body-secondary">Version:&nbsp;{{version()}}</h6>
+    <div class="row row-col-2 card-subtitle mt-2 text-nowrap text-body-secondary">
+        <h6 class="col-4" translate>Favorite.ENDPOINT</h6>
+        <h6 class="col-8">{{endpoint()}}</h6>
+        <h6 class="col-4" translate>Favorite.VERSION</h6>
+        <h6 class="col-8">{{version()}}</h6>
+    </div>
     @if(description()) {
-    <p class="card-text">{{description()}}</p>
+    <p class="card-text mb-2">{{description()}}</p>
     }
-    <a [href]="href()" class="card-link">open</a>
+    <a [href]="href()" class="card-link"><div class="text-truncate">{{id()}}</div></a>
 </div>
