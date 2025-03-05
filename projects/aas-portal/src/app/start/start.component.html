@@ -7,6 +7,9 @@
  !---------------------------------------------------------------------------->
 
 <div id="start-page" class="overflow-auto h-100 px-2">
+    @if (isEmpty()){
+        <div class="alert alert-info text-center mt-2" role="alert" translate>Start.EMPTY</div>
+    } @else {
     <div class="d-flex flex-wrap">
         @for (item of items(); track item; let i = $index) {
         <div class="p-2 rounded" [class.bg-info-subtle]="item.selected()">
@@ -17,6 +20,7 @@
         </div>
         }
     </div>
+    }
 </div>
 
 <ng-template #startToolbar>

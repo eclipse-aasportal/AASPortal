@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { EMPTY, Observable } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
@@ -21,12 +22,11 @@ import {
 } from '@angular/core';
 
 import { StartService, StartTile, ToolbarService } from 'aas-lib';
-import { EMPTY, Observable } from 'rxjs';
 
 export type StartTileItem = {
     id: string;
     component: Type<unknown>;
-    property: Record<string, string>;
+    property: Record<string, unknown>;
     selected: WritableSignal<boolean>;
     tile: StartTile;
 };
@@ -53,6 +53,8 @@ export class StartComponent implements OnDestroy {
 
     public readonly startToolbar = viewChild<TemplateRef<unknown>>('startToolbar');
 
+    public readonly isEmpty = computed(() => this.items().length === 0);
+
     public readonly items = computed(() => {
         const items: StartTileItem[] = [];
         for (const tile of this.start.tiles()) {
@@ -62,9 +64,9 @@ export class StartComponent implements OnDestroy {
             }
 
             items.push({
-                id: `${type.name}.${tile.endpoint}.${tile.id}`,
+                id: tile.id,
                 component: type.component,
-                property: { endpoint: tile.endpoint, id: tile.id },
+                property: tile.property,
                 selected: signal(false),
                 tile,
             });

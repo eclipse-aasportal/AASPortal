@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASDocument, getLocaleValue } from 'aas-core';
-import { StartTileComponent } from '../../types';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 import { FavoriteApiService } from './favorite-api.service';
 import { encodeBase64Url } from '../../utilities';
@@ -18,12 +17,11 @@ import { encodeBase64Url } from '../../utilities';
     selector: 'fhg-favorite',
     templateUrl: './favorite.component.html',
     styleUrl: './favorite.component.scss',
-    standalone: true,
-    imports: [SecuredImageComponent],
+    imports: [TranslateModule, SecuredImageComponent],
     providers: [FavoriteApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FavoriteComponent implements StartTileComponent {
+export class FavoriteComponent {
     private readonly document$ = signal<AASDocument | undefined>(undefined);
     private readonly aas$ = computed(() => this.document$()?.content?.assetAdministrationShells.at(0));
 
