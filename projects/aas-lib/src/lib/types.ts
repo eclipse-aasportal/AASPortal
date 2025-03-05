@@ -31,11 +31,6 @@ export interface MessageEntry {
 
 export type OnlineState = 'offline' | 'online';
 
-export interface StartTileComponent {
-    endpoint: InputSignal<string>;
-    id: InputSignal<string>;
-}
-
 export enum ViewMode {
     Undefined = '',
     List = 'list',

@@ -41,7 +41,12 @@ describe('FavoriteComponent', () => {
         api = jasmine.createSpyObj<FavoriteApiService>(['getDocument']);
 
         await TestBed.configureTestingModule({
-            providers: [],
+            providers: [
+                {
+                    provide: AuthService,
+                    useValue: auth,
+                }
+            ],
             imports: [
                 TranslateModule.forRoot({
                     loader: {

@@ -164,6 +164,9 @@
         "ABOUT": "Über"
     },
     "Start": {
+        "EMPTY": "Die START-Seite ist leer."
+    },
+    "Shells": {
         "FAVORITES": "Alle Verwaltungsschalen",
         "ENDPOINT": "Endpunkt",
         "ADD_ENDPOINT": "Hinzufügen...",
@@ -313,5 +316,12 @@
     "Favorite": {
         "ENDPOINT": "Endpunkt",
         "VERSION": "Version"
+    },
+    "About": {
+        "STATISTIC": "Statistik",
+        "NUMBER_OF_ENDPOINTS": "Endpunkte",
+        "NUMBER_OF_SHELLS": "Verwaltungsschalen",
+        "NUMBER_OF_SUBMODELS": "Submodelle",
+        "NUMBER_OF_CONCEPT_DESCRIPTIONS": "Konzeptbeschreibungen"
     }
 }

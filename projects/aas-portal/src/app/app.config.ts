@@ -14,6 +14,7 @@ import { AuthInterceptor, FavoriteComponent, START_TILE_TYPES, StartTileType } f
 
 import { HttpLoaderFactory } from './http-loader-factory';
 import { routes } from './app.routes';
+import { AboutComponent } from './about/about.component';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -37,6 +38,10 @@ export const appConfig: ApplicationConfig = {
                     name: 'Favorite',
                     component: FavoriteComponent,
                 },
+                {
+                    name: 'About',
+                    component: AboutComponent,
+                }
             ] satisfies StartTileType[],
         },
     ],

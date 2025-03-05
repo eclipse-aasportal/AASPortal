@@ -165,6 +165,9 @@
         "ABOUT": "About"
     },
     "Start": {
+        "EMPTY": "The START page is empty."
+    },
+    "Shells": {
         "FAVORITES": "All shells",
         "ENDPOINT": "Endpoint",
         "ADD_ENDPOINT": "Add...",
@@ -250,7 +253,7 @@
         "Interaction": "Interaction",
         "Structure": "Structure",
         "Hacptics": "Haptics",
-        "Acustics": "Acustics",
+        "Acustics": "Acoustics",
         "Assembly_Installation": "Assembly & Installation",
         "Material": "Material"
     },
@@ -314,5 +317,12 @@
     "Favorite": {
         "ENDPOINT": "Endpoint",
         "VERSION": "Version"
+    },
+    "About": {
+        "STATISTIC": "Statistic",
+        "NUMBER_OF_ENDPOINTS": "Endpoints",
+        "NUMBER_OF_SHELLS": "Shells",
+        "NUMBER_OF_SUBMODELS": "Submodels",
+        "NUMBER_OF_CONCEPT_DESCRIPTIONS": "Concept descriptions"
     }
 }

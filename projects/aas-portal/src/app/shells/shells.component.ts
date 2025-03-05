@@ -332,7 +332,10 @@ export class ShellsComponent implements OnDestroy {
 
     public addToStart(): Observable<void> {
         for (const document of this.store.selected) {
-            this.start.add('Favorite', document);
+            this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
+                id: document.id,
+                endpoint: document.endpoint,
+            });
         }
 
         return this.start.save();

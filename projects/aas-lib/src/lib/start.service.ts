@@ -8,20 +8,18 @@
 
 import { Inject, Injectable, InjectionToken, signal, Type } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { map, mergeMap, Observable, skipWhile } from 'rxjs';
-import { AASDocument } from 'aas-core';
-import { StartTileComponent } from './types';
+import { catchError, EMPTY, map, mergeMap, Observable, of, skipWhile } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 
 export type StartTileType = {
     name: string;
-    component: Type<StartTileComponent>;
+    component: Type<unknown>;
 };
 
 export type StartTile = {
-    endpoint: string;
     id: string;
     type: string;
+    property: Record<string, unknown>;
 };
 
 export const START_TILE_TYPES = new InjectionToken<StartTileType[]>('Start tile component types');
@@ -42,7 +40,14 @@ export class StartService {
                 takeUntilDestroyed(),
                 mergeMap(() => this.auth.getCookie('.StartTiles')),
                 map(value => {
-                    this.tiles$.set(value ? (JSON.parse(value) as StartTile[]) : []);
+                    let values: StartTile[];
+                    try {
+                        values = value ? (JSON.parse(value) as StartTile[]) : [];
+                    } catch {
+                        values = [];
+                    }
+
+                    this.tiles$.set(values);
                 }),
             )
             .subscribe();
@@ -54,12 +59,17 @@ export class StartService {
         return this.types.find(item => item.name === name);
     }
 
-    public add(typeName: string, document: AASDocument): void {
+    public add(typeName: string, id: string, property: Record<string, unknown>): boolean {
         if (this.getType(typeName) === undefined) {
-            return;
+            return false;
         }
 
-        this.tiles$.update(state => [...state, { endpoint: document.endpoint, id: document.id, type: typeName }]);
+        if (this.tiles$().some(tile => tile.id === id)) {
+            return false;
+        }
+
+        this.tiles$.update(state => [...state, { id, property, type: typeName }]);
+        return true;
     }
 
     public remove(tile: StartTile): void {
@@ -67,10 +77,13 @@ export class StartService {
     }
 
     public save(): Observable<void> {
-        if (this.tiles$().length === 0) {
-            return this.auth.deleteCookie('.StartTiles');
-        }
-
-        return this.auth.setCookie('.StartTiles', JSON.stringify(this.tiles$()));
+        return of(this.tiles$()).pipe(
+            map(tiles => JSON.stringify(tiles)),
+            catchError(error => {
+                console.error(error);
+                return EMPTY;
+            }),
+            mergeMap(value => this.auth.setCookie('.StartTiles', value)),
+        );
     }
 }
