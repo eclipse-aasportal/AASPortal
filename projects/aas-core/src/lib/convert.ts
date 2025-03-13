@@ -626,27 +626,25 @@ export function getDefaultValue(type: DataTypeDefXsd): DefaultType {
  * @returns The locale value.
  */
 export function getLocaleValue(value?: LangString[], localeId?: string): string | undefined {
-    let localeValue: string | undefined;
-    if (value) {
-        if (localeId) {
-            const language = getLanguage(localeId);
-            for (const item of value) {
-                const lcid = item.language.toLowerCase();
-                if (lcid === localeId || lcid === language) {
-                    localeValue = item.text;
-                    break;
-                } else if (!localeValue && getLanguage(item.language) === language) {
-                    localeValue = item.text;
-                }
-            }
-        }
+    if (value === undefined) {
+        return undefined;
+    }
 
-        if (!localeValue && value.length > 0) {
-            localeValue = value[0].text;
+    let localeValue: string | undefined;
+    if (localeId) {
+        const language = getLanguage(localeId);
+        for (const item of value) {
+            const lcid = item.language.toLowerCase();
+            if (lcid === localeId || lcid === language) {
+                localeValue = item.text;
+                break;
+            } else if (!localeValue && getLanguage(item.language) === language) {
+                localeValue = item.text;
+            }
         }
     }
 
-    return localeValue;
+    return localeValue ?? value.at(0)?.text;
 
     function getLanguage(value: string): string {
         return value.split('-')[0].toLowerCase();

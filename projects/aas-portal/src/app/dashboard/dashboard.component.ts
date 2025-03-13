@@ -28,10 +28,10 @@ import {
 
 import isNumber from 'lodash-es/isNumber';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
-import { first } from 'rxjs';
+import { EMPTY, first, Observable } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
-import { LogType, NotifyService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { LogType, NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -94,6 +94,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private readonly webServiceFactory: WebSocketFactoryService,
         private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
         private readonly commandHandler: CommandHandlerService,
         @Inject(WINDOW) private readonly window: Window,
     ) {
@@ -136,16 +137,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            const dashboardToolbar = this.dashboardToolbar();
-            if (dashboardToolbar !== undefined) {
-                this.toolbar.set(dashboardToolbar);
+            const template = this.toolbarTemplate();
+            if (template !== undefined) {
+                this.toolbar.set(template);
             }
         });
     }
 
     public readonly chartContainers = viewChildren<ElementRef<HTMLCanvasElement>>('chart');
 
-    public readonly dashboardToolbar = viewChild<TemplateRef<unknown>>('dashboardToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('dashboardToolbar');
 
     public readonly isEmpty = computed(() => this.store.activePage$().items.length === 0);
 
@@ -445,6 +446,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.canRedo()) {
             this.commandHandler.redo();
         }
+    }
+
+    public addToStart(): Observable<void> {
+        if (!this.start.add('Dashboard', 'Dashboard', {})) {
+            return EMPTY;
+        }
+
+        return this.start.save();
     }
 
     private leaveLiveMode(): void {

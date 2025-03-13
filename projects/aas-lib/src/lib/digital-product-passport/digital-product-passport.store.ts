@@ -57,10 +57,9 @@ export type NameplateItem = {
 
 export type CarbonFootprintItem = {
     value: number;
-    idShort: string;
+    Name: string;
     PCFCO2eq: string;
-    PCFLifeCyclePhase1: string;
-    PCFLifeCyclePhase2: string;
+    PCFLifeCyclePhase: [string, string][];
     PCFCalculationMethod: string;
     PCFGoodsAddressHandover: string;
 };
@@ -102,13 +101,31 @@ const emptyNameplate: NameplateItem = {
 
 const emptyCarbonFootprintItem: CarbonFootprintItem = {
     value: 0,
-    idShort: '-',
+    Name: '-',
     PCFCO2eq: '-',
-    PCFLifeCyclePhase1: '-',
-    PCFLifeCyclePhase2: '-',
+    PCFLifeCyclePhase: [],
     PCFCalculationMethod: '-',
     PCFGoodsAddressHandover: '-',
 };
+
+const PCFLifeCyclePhaseIds: [string, string][] = [
+    ['0173-1#07-ABU208#001', '1'],
+    ['0173-1#07-ABU209#001', '2'],
+    ['0173-1#07-ABU210#001', '3'],
+    ['0173-1#07-ABU211#001', '4'],
+    ['0173-1#07-ABU212#001', '5'],
+    ['0173-1#07-ABV498#001', '6'],
+    ['0173-1#07-ABV497#001', '7'],
+    ['0173-1#07-ABV499#001', '8'],
+    ['0173-1#07-ABV500#001', '9'],
+    ['0173-1#07-ABV501#001', '10'],
+    ['0173-1#07-ABV502#001', '11'],
+    ['0173-1#07-ABU213#001', '12'],
+    ['0173-1#07-ABV503#001', '13'],
+    ['0173-1#07-ABV504#001', '14'],
+    ['0173-1#07-ABU214#001', '15'],
+    ['0173-1#07-ABZ789#001', '16'],
+];
 
 @Injectable({ providedIn: 'root' })
 export class DigitalProductPassportStore {
@@ -285,15 +302,36 @@ export class DigitalProductPassportStore {
         const country = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFGoodsAddressHandover.Country`);
         const item: CarbonFootprintItem = {
             value,
-            idShort: smc.idShort,
+            Name: this.getDisplayName(smc),
             PCFCO2eq: `${convertToString(value, this.translate.currentLang)} kg, ${valueId}`,
-            PCFLifeCyclePhase1: this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFLifeCyclePhase1`),
-            PCFLifeCyclePhase2: this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFLifeCyclePhase2`),
+            PCFLifeCyclePhase: this.getArray(smc, PCFLifeCyclePhaseIds),
             PCFCalculationMethod: `${calculationMethod}, ${publicationDate}`,
             PCFGoodsAddressHandover: `${street} ${houseNumber}, ${country}-${zipCode} ${cityTown}`,
         };
 
         return item;
+    }
+
+    private getArray(smc: aas.SubmodelElementCollection, valueIds: [string, string][]): [string, string][] {
+        const values: [string, string][] = [];
+        if (!smc.value) {
+            return values;
+        }
+
+        const map = new Map(valueIds);
+        for (const sme of smc.value) {
+            if (isProperty(sme) && sme.value) {
+                const valueId = sme.valueId?.keys.at(0)?.value;
+                if (valueId) {
+                    const index = map.get(valueId);
+                    if (index) {
+                        values.push([index, sme.value]);
+                    }
+                }
+            }
+        }
+
+        return values;
     }
 
     private browseForDocumentation(
@@ -329,5 +367,9 @@ export class DigitalProductPassportStore {
         }
 
         return referable;
+    }
+
+    private getDisplayName(element: aas.SubmodelElement): string {
+        return getLocaleValue(element.displayName, this.translate.currentLang) ?? element.idShort;
     }
 }

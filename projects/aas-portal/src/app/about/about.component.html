@@ -6,7 +6,6 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (visualState() === 'Page') {
 <div class="overflow-auto h-100 p-2">
     <h1>AASPortal</h1>
     <p>The AASPortal is a web portal for the visualization and management of Asset Administration Shells (AAS) licensed
@@ -25,10 +24,6 @@
         <h6 class="col-6">{{endpoints()}}</h6>
         <h6 class="col-6" translate>About.NUMBER_OF_SHELLS</h6>
         <h6 class="col-6">{{shells()}}</h6>
-        <h6 class="col-6" translate>About.NUMBER_OF_SUBMODELS</h6>
-        <h6 class="col-6">{{submodels()}}</h6>
-        <h6 class="col-6" translate>About.NUMBER_OF_CONCEPT_DESCRIPTIONS</h6>
-        <h6 class="col-6">{{conceptDescriptions()}}</h6>
     </div>
 
     <h2>Third-party Libraries</h2>
@@ -36,22 +31,6 @@
         apply.</p>
     <fhg-license-info [libraries]="libraries()"></fhg-license-info>
 </div>
-} @else {
-<div class="card-header">AASPortal</div>
-<div class="card-body">
-    <img src="assets/resources/aas.svg" height="128" class="card-img-top">
-    <div class="row row-col-2 card-subtitle mt-2 text-nowrap text-body-secondary">
-        <h6 class="col-6" translate>About.NUMBER_OF_ENDPOINTS</h6>
-        <h6 class="col-6">{{endpoints()}}</h6>
-        <h6 class="col-6" translate>About.NUMBER_OF_SHELLS</h6>
-        <h6 class="col-6">{{shells()}}</h6>
-        <h6 class="col-6" translate>About.NUMBER_OF_SUBMODELS</h6>
-        <h6 class="col-6">{{submodels()}}</h6>
-        <h6 class="col-6" translate>About.NUMBER_OF_CONCEPT_DESCRIPTIONS</h6>
-        <h6 class="col-6">{{conceptDescriptions()}}</h6>
-    </div>
-</div>
-}
 
 <ng-template #aboutToolbar>
     <div class="input-group me-2 my-1">

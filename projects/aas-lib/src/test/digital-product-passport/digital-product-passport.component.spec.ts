@@ -14,13 +14,15 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { DigitalPassportPortalComponent } from '../../lib/digital-passport-portal/digital-passport-portal.component';
+import { DigitalProductPassportComponent } from '../../lib/digital-product-passport/digital-product-passport.component';
 import { WINDOW } from '../../lib/window.service';
-import { DigitalPassportPortalService } from '../../lib/digital-passport-portal/digital-passport-portal.service';
+import { DigitalProductPassportService } from '../../lib/digital-product-passport/digital-product-passport.service';
 import { AuthService } from '../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
 
-import sample from '../assets/dpp-portal-sample.json';
+import sample from '../assets/dpp-sample.json';
+import { ToolbarService } from '../../lib/toolbar.service';
+import { StartService } from '../../lib/start.service';
 
 @Component({
     selector: 'fhg-img',
@@ -37,19 +39,21 @@ export class TestSecuredImageComponent {
     public readonly height = input<number | undefined>();
 }
 
-describe('DigitalPassportPortalComponent', () => {
-    let component: DigitalPassportPortalComponent;
-    let fixture: ComponentFixture<DigitalPassportPortalComponent>;
+describe('DigitalProductPassportComponent', () => {
+    let component: DigitalProductPassportComponent;
+    let fixture: ComponentFixture<DigitalProductPassportComponent>;
     let location: jasmine.SpyObj<NgLocation>;
     let window: jasmine.SpyObj<Window>;
-    let api: jasmine.SpyObj<DigitalPassportPortalService>;
+    let api: jasmine.SpyObj<DigitalProductPassportService>;
     let auth: jasmine.SpyObj<AuthService>;
+    let start: jasmine.SpyObj<StartService>;
 
     beforeEach(async () => {
         location = jasmine.createSpyObj<NgLocation>(['getState']);
         location.getState.and.returnValue({ data: JSON.stringify([sample]) });
-        api = jasmine.createSpyObj<DigitalPassportPortalService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<DigitalProductPassportService>(['getDocument', 'getContent']);
         auth = jasmine.createSpyObj<AuthService>({}, { token: signal<string | undefined>('Token').asReadonly() });
+        start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<Window>(['open'], {
             location: { toString: () => 'https://www.fraunhofer.de' } as Location,
         });
@@ -68,6 +72,14 @@ describe('DigitalPassportPortalComponent', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([]),
@@ -82,15 +94,15 @@ describe('DigitalPassportPortalComponent', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(DigitalPassportPortalComponent, {
-            remove: { providers: [DigitalPassportPortalService], imports: [SecuredImageComponent] },
+        TestBed.overrideComponent(DigitalProductPassportComponent, {
+            remove: { providers: [DigitalProductPassportService], imports: [SecuredImageComponent] },
             add: {
-                providers: [{ provide: DigitalPassportPortalService, useValue: api }],
+                providers: [{ provide: DigitalProductPassportService, useValue: api }],
                 imports: [TestSecuredImageComponent],
             },
         });
 
-        fixture = TestBed.createComponent(DigitalPassportPortalComponent);
+        fixture = TestBed.createComponent(DigitalProductPassportComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
@@ -117,7 +129,7 @@ describe('DigitalPassportPortalComponent', () => {
         expect(component.hazardSymbol).toBeTruthy();
     });
 
-    it ('nameplate data', () => {
+    it('nameplate data', () => {
         expect(component.nameplateItems().length).toEqual(15);
     });
 
@@ -125,12 +137,12 @@ describe('DigitalPassportPortalComponent', () => {
         expect(component.totalPCFCO2eq()).toBeCloseTo(1.23 + 4.56);
     });
 
-    it ('carbon footprint items', () => {
+    it('carbon footprint items', () => {
         expect(component.carbonFootprintSize()).toEqual(2);
-        expect(component.carbonFootprintItems().length).toEqual(6);
+        expect(component.carbonFootprintItems().length).toEqual(4);
         expect(component.carbonFootprintIndex()).toEqual(1);
         expect(component.carbonFootprintItems()[0].value).toEqual('ProductCarbonFootprint_CradleToGate');
-        
+
         component.carbonFootprintIndex.set(2);
         expect(component.carbonFootprintItems()[0].value).toEqual('ProductCarbonFootprint_CooperativeAssembly');
     });

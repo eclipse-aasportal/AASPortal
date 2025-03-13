@@ -15,13 +15,14 @@ import { AppInfo } from 'aas-core';
 import { AboutComponent } from '../../app/about/about.component';
 import { AboutApiService } from '../../app/about/about-api.service';
 import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
-import { StartService } from 'aas-lib';
+import { IndexChangeService, StartService } from 'aas-lib';
 
 describe('AboutComponent', () => {
     let component: AboutComponent;
     let fixture: ComponentFixture<AboutComponent>;
     let api: jasmine.SpyObj<AboutApiService>;
     let start: jasmine.SpyObj<StartService>;
+    let indexChange: jasmine.SpyObj<IndexChangeService>;
 
     beforeEach(() => {
         const info: AppInfo = {
@@ -35,9 +36,15 @@ describe('AboutComponent', () => {
         };
 
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        start.save.and.returnValue(of(void 0))
+
         api = jasmine.createSpyObj<AboutApiService>(['getInfo', 'getMessages']);
         api.getInfo.and.returnValue(of(info));
         api.getMessages.and.returnValue(of([]));
+        indexChange = jasmine.createSpyObj<IndexChangeService>(
+            {},
+            { documentCount: signal(42), endpointCount: signal(2) },
+        );
 
         TestBed.configureTestingModule({
             providers: [
@@ -52,6 +59,10 @@ describe('AboutComponent', () => {
                 {
                     provide: StartService,
                     useValue: start,
+                },
+                {
+                    provide: IndexChangeService,
+                    useValue: indexChange,
                 },
             ],
             imports: [

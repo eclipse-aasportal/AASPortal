@@ -6,8 +6,6 @@
  *
  *****************************************************************************/
 
-import { InputSignal } from '@angular/core';
-
 export interface AASQueryParams {
     format?: string;
     id?: string;

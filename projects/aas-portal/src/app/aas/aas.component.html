@@ -40,6 +40,11 @@
 </div>
 
 <ng-template #aasToolbar>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
     <div class="btn-group me-2 my-1">
         <button type="button" class="btn btn-primary" (click)="play()" [disabled]="canPlay() === false">
             <i class="bi bi-play-fill"></i>

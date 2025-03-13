@@ -8,7 +8,7 @@
 
 import { aas, AASDocument, getIdShortPath, getSemanticId, selectSubmodel } from 'aas-core';
 import { ActivatedRoute } from '@angular/router';
-import { first } from 'rxjs';
+import { EMPTY, first, Observable } from 'rxjs';
 import { Location } from '@angular/common';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
@@ -20,38 +20,51 @@ import {
     effect,
     ElementRef,
     Inject,
+    OnDestroy,
     OnInit,
     signal,
+    TemplateRef,
     viewChild,
 } from '@angular/core';
 
 import { CarbonFootprint, ZVEINameplate } from '../views/submodel-template';
-import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-passport-portal.store';
+import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
 import { SecuredImageComponent } from '../secured-image/secured-image.component';
 import { decodeBase64Url, encodeBase64Url } from '../utilities';
-import { DigitalPassportPortalService } from './digital-passport-portal.service';
+import { DigitalProductPassportService } from './digital-product-passport.service';
 import { WINDOW } from '../window.service';
 import { AuthService } from '../auth/auth.service';
+import { ToolbarService } from '../toolbar.service';
+import { StartService } from '../start.service';
 
 const HandoverDocumentationId = '0173-1#01-AHF578#003';
 
 @Component({
     selector: 'fhg-device-passport-portal',
-    templateUrl: './digital-passport-portal.component.html',
-    styleUrl: './digital-passport-portal.component.scss',
-    providers: [DigitalPassportPortalService],
+    templateUrl: './digital-product-passport.component.html',
+    styleUrl: './digital-product-passport.component.scss',
+    providers: [DigitalProductPassportService],
     imports: [TranslateModule, SecuredImageComponent, NgbAccordionModule, NgbPaginationModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DigitalPassportPortalComponent implements OnInit {
+export class DigitalProductPassportComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly route: ActivatedRoute,
         private readonly location: Location,
+        private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
         private readonly store: DigitalProductPassportStore,
-        private readonly api: DigitalPassportPortalService,
+        private readonly api: DigitalProductPassportService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
     ) {
+        effect(() => {
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
+            }
+        });
+
         effect(() => {
             const qrCode = this.qrCode();
             const url = this.window.location.toString();
@@ -60,6 +73,8 @@ export class DigitalPassportPortalComponent implements OnInit {
             }
         });
     }
+
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('dppToolbar');
 
     public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
 
@@ -93,7 +108,7 @@ export class DigitalPassportPortalComponent implements OnInit {
         const items: NameValue[] = [];
         for (const [name, value] of Object.entries(this.store.nameplateItems())) {
             if (typeof value === 'string') {
-                items.push({ name: 'DigitalPassportPortal.' + name, value });
+                items.push({ name: 'DigitalProductPassport.' + name, value });
             }
         }
 
@@ -111,7 +126,11 @@ export class DigitalPassportPortalComponent implements OnInit {
         for (const name in item) {
             const value = item[name];
             if (typeof value === 'string') {
-                items.push({ name: 'DigitalPassportPortal.' + name, value });
+                items.push({ name: 'DigitalProductPassport.' + name, value });
+            } else if (Array.isArray(value)) {
+                for (const tuple of value) {
+                    items.push({ name: `DigitalProductPassport.${name}${tuple[0]}`, value: tuple[1] });
+                }
             }
         }
 
@@ -142,6 +161,22 @@ export class DigitalPassportPortalComponent implements OnInit {
                 }
             });
         }
+    }
+
+    public ngOnDestroy(): void {
+        this.toolbar.clear();
+    }
+
+    public addToStart(): Observable<void> {
+        const document = this.viewData()?.document;
+        if (document === undefined) {
+            return EMPTY;
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        this.start.add('DigitalProductPassport', `DPP#${endpoint}#${id}`, { endpoint, id });
+        return this.start.save();
     }
 
     public downloadDocumentation($event: MouseEvent, item: DocumentationItem) {
