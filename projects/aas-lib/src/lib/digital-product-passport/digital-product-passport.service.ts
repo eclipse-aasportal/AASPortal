@@ -15,7 +15,7 @@ import { AuthService } from '../auth/auth.service';
 
 /** The API of the digital passport portal. */
 @Injectable()
-export class DigitalPassportPortalService {
+export class DigitalProductPassportService {
     public constructor(
         private readonly http: HttpClient,
         private readonly auth: AuthService,

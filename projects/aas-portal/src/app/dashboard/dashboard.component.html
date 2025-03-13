@@ -76,6 +76,11 @@
 
 <ng-template #dashboardToolbar>
     <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
+    <div class="input-group me-2 my-1">
         <select #select class="form-select" [(ngModel)]="activePage">
             @for (page of pages(); track page) {
             <option [ngValue]="page">{{page}}</option>

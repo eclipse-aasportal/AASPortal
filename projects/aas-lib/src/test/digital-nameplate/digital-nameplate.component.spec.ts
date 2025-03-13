@@ -18,6 +18,7 @@ import { AuthService } from '../../lib/auth/auth.service';
 import { of } from 'rxjs';
 import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
 import { DigitalNameplateService } from '../../lib/digital-nameplate/digital-nameplate.service';
+import { StartService } from '../../lib/start.service';
 
 @Component({
     selector: 'fhg-img',
@@ -40,12 +41,14 @@ describe('DigitalNameplateComponent', () => {
     let location: jasmine.SpyObj<Location>;
     let auth: jasmine.SpyObj<AuthService>;
     let api: jasmine.SpyObj<DigitalNameplateService>;
+    let start: jasmine.SpyObj<StartService>;
 
     beforeEach(() => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
         api = jasmine.createSpyObj<DigitalNameplateService>(['getDocument', 'getContent']);
         location = jasmine.createSpyObj<Location>(['getState']);
         location.getState.and.returnValue({ data: JSON.stringify([nameplate]) });
+        start = jasmine.createSpyObj<StartService>(['add', 'save']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -61,7 +64,10 @@ describe('DigitalNameplateComponent', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
-
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
                 provideRouter([]),
             ],
             imports: [

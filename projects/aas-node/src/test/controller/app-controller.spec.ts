@@ -35,19 +35,12 @@ describe('AppController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>([
-            'hasUserAsync',
-            'loginAsync',
-            'getCookieAsync',
-            'getCookiesAsync',
-            'setCookieAsync',
-            'deleteCookieAsync',
-        ]);
+        auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
 
         applicationInfo = createSpyObj<ApplicationInfo>(['getAsync', 'getMessages']);
 
-        authentication = createSpyObj<Authentication>(['checkAsync']);
-        authentication.checkAsync.mockResolvedValue(guestPayload);
+        authentication = createSpyObj<Authentication>(['check']);
+        authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance('Logger', logger);

@@ -9,7 +9,7 @@
 import { Route } from '@angular/router';
 import { CustomerFeedbackComponent } from '../customer-feedback/customer-feedback.component';
 import { DigitalNameplateComponent } from '../digital-nameplate/digital-nameplate.component';
-import { DigitalPassportPortalComponent } from '../digital-passport-portal/digital-passport-portal.component';
+import { DigitalProductPassportComponent } from '../digital-product-passport/digital-product-passport.component';
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
 
@@ -35,8 +35,8 @@ export const viewRoutes: Route[] = [
         },
     },
     {
-        path: 'DigitalPassportPortal',
-        component: DigitalPassportPortalComponent,
+        path: 'DigitalProductPassport',
+        component: DigitalProductPassportComponent,
     },
 ];
 

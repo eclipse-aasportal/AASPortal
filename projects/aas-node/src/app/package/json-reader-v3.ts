@@ -324,6 +324,10 @@ export class JsonReaderV3 extends AASReader {
             property.value = source.value;
         }
 
+        if (source.valueId) {
+            property.valueId = this.readReference(source.valueId);
+        }
+
         if (ancestors && (!property.category || property.category === 'VARIABLE')) {
             const smId = encodeBase64Url((ancestors[0] as aas.Submodel).id);
             property.nodeId = `${smId}.${[...ancestors, property].map(item => item.idShort).join('/')}`;
@@ -634,6 +638,10 @@ export class JsonReaderV3 extends AASReader {
 
         if (source.category) {
             referable.category = source.category;
+        }
+
+        if (source.displayName) {
+            referable.displayName = cloneDeep(source.displayName);
         }
 
         if (source.description) {

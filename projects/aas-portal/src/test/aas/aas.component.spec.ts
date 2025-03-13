@@ -15,6 +15,7 @@ import {
     NotifyService,
     OnlineState,
     SecuredImageComponent,
+    StartService,
 } from 'aas-lib';
 
 import { AASDocument, aas, noop } from 'aas-core';
@@ -28,6 +29,7 @@ import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.store';
+import { of } from 'rxjs';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -73,6 +75,7 @@ describe('AASComponent', () => {
     let store: AASStore;
     let api: jasmine.SpyObj<AASApiService>;
     let download: jasmine.SpyObj<DownloadService>;
+    let start: jasmine.SpyObj<StartService>;
     let pages: DashboardPage[];
 
     beforeEach(() => {
@@ -84,6 +87,9 @@ describe('AASComponent', () => {
             activePage: signal(pages[0].name),
             pages: signal(pages.map(page => page.name)),
         });
+
+        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        start.save.and.returnValue(of(void 0))
 
         TestBed.configureTestingModule({
             providers: [
@@ -111,7 +117,11 @@ describe('AASComponent', () => {
                     provide: AuthService,
                     useValue: jasmine.createSpyObj<AuthService>(['ensureAuthorized']),
                 },
-                provideHttpClientTesting(),
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
+                 provideHttpClientTesting(),
                 provideRouter([]),
             ],
             imports: [

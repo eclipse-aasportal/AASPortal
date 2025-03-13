@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+import { EMPTY, Observable } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import {
     Component,
     OnDestroy,
@@ -15,13 +17,10 @@ import {
     ChangeDetectionStrategy,
     viewChild,
     effect,
-    input,
 } from '@angular/core';
 
-import { EMPTY, Observable } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
 import { Library } from 'aas-core';
-import { LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
+import { IndexChangeService, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
 import { environment } from '../../environments/environment';
 
@@ -33,45 +32,39 @@ import { environment } from '../../environments/environment';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy {
-    private readonly _serverVersion = signal('');
-    private readonly _libraries = signal<Library[]>([]);
+    private readonly version$ = signal('');
+    private readonly libraries$ = signal<Library[]>([]);
 
     public constructor(
         private api: AboutApiService,
         private toolbar: ToolbarService,
         private start: StartService,
+        private readonly indexChange: IndexChangeService,
     ) {
         effect(() => {
-            const visualState = this.visualState();
-            const aboutToolbar = this.aboutToolbar();
-            if (aboutToolbar && visualState === 'Page') {
-                this.toolbar.set(aboutToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
     }
 
-    public readonly aboutToolbar = viewChild<TemplateRef<unknown>>('aboutToolbar');
-
-    public readonly visualState = input<'Page'| 'Card'>('Page');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('aboutToolbar');
 
     public readonly author = signal(environment.author).asReadonly();
 
     public readonly homepage = signal(environment.homepage).asReadonly();
 
-    public readonly libraries = this._libraries.asReadonly();
+    public readonly libraries = this.libraries$.asReadonly();
 
-    public readonly endpoints = signal(42);
+    public readonly endpoints = this.indexChange.endpointCount;
 
-    public readonly shells = signal(42);
-
-    public readonly submodels = signal(42);
-
-    public readonly conceptDescriptions = signal(42);
+    public readonly shells = this.indexChange.documentCount;
 
     public ngOnInit(): void {
         this.api.getInfo().subscribe(info => {
-            this._serverVersion.set(info.version);
-            this._libraries.set(info.libraries ?? []);
+            this.version$.set(info.version);
+            this.libraries$.set(info.libraries ?? []);
         });
     }
 
@@ -80,7 +73,7 @@ export class AboutComponent implements OnInit, OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        if (this.start.add('About', 'About', { visualState: 'Card' })) {
+        if (this.start.add('About', 'About', {})) {
             return this.start.save();
         }
 

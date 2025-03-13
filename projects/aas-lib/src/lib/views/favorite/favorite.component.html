@@ -1,3 +1,11 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
 <h5 class="card-header text-truncate">{{displayName() ?? idShort()}}</h5>
 <div class="card-body">
     <fhg-img [height]="128" [src]="thumbnail()" alt="assets/resources/aas.svg" />
@@ -13,5 +21,5 @@
     @if(description()) {
     <p class="card-text mb-2">{{description()}}</p>
     }
-    <a [href]="href()" class="card-link"><div class="text-truncate">{{id()}}</div></a>
+    <a [href]="href()" class="card-link"><div class="text-truncate"translate>Favorite.SHOW</div></a>
 </div>

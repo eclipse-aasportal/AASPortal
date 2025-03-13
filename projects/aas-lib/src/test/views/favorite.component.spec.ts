@@ -14,6 +14,7 @@ import { FavoriteComponent } from '../../lib/views/favorite/favorite.component';
 import { FavoriteApiService } from '../../lib/views/favorite/favorite-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
+import { StartService } from '../../lib/start.service';
 
 @Component({
     selector: 'fhg-img',
@@ -35,17 +36,19 @@ describe('FavoriteComponent', () => {
     let fixture: ComponentFixture<FavoriteComponent>;
     let api: jasmine.SpyObj<FavoriteApiService>;
     let auth: jasmine.SpyObj<AuthService>;
+    let start: jasmine.SpyObj<StartService>;
 
     beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
         api = jasmine.createSpyObj<FavoriteApiService>(['getDocument']);
+        start = jasmine.createSpyObj<StartService>(['add', 'save']);
 
         await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: AuthService,
                     useValue: auth,
-                }
+                },
             ],
             imports: [
                 TranslateModule.forRoot({

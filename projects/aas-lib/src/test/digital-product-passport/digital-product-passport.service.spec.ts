@@ -12,12 +12,12 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService } from '../../lib/auth/auth.service';
-import { DigitalPassportPortalService } from '../../lib/digital-passport-portal/digital-passport-portal.service';
+import { DigitalProductPassportService } from '../../lib/digital-product-passport/digital-product-passport.service';
 
-import sample from '../assets/dpp-portal-sample.json';
+import sample from '../assets/dpp-sample.json';
 
-describe('DigitalPassportPortalService', () => {
-    let service: DigitalPassportPortalService;
+describe('DigitalProductPassportService', () => {
+    let service: DigitalProductPassportService;
     let httpTestingController: HttpTestingController;
     let auth: jasmine.SpyObj<AuthService>;
 
@@ -27,7 +27,7 @@ describe('DigitalPassportPortalService', () => {
             declarations: [],
             imports: [],
             providers: [
-                DigitalPassportPortalService,
+                DigitalProductPassportService,
                 {
                     provide: AuthService,
                     useValue: auth,
@@ -37,7 +37,7 @@ describe('DigitalPassportPortalService', () => {
             ],
         });
 
-        service = TestBed.inject(DigitalPassportPortalService);
+        service = TestBed.inject(DigitalProductPassportService);
         httpTestingController = TestBed.inject(HttpTestingController);
     });
 

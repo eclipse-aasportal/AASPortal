@@ -6,12 +6,24 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    computed,
+    effect,
+    signal,
+    viewChild,
+} from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DecimalPipe, Location } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { EMPTY, Observable, Subscription } from 'rxjs';
 import { aas, AASDocument, getLocaleValue, getPreferredName, isReference } from 'aas-core';
 import { ScoreComponent } from '../score/score.component';
+import { ToolbarService } from '../toolbar.service';
+import { StartService } from '../start.service';
 
 export interface GeneralItem {
     name: string;
@@ -45,11 +57,22 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly location: Location,
         private readonly translate: TranslateService,
+        private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
     ) {
+        effect(() => {
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
+            }
+        });
+
         effect(() => {
             this.init(this.submodels());
         });
     }
+
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('customerFeedbackToolbar');
 
     public readonly name = computed(() => {
         const submodels = this.submodels();
@@ -91,6 +114,15 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
+        this.toolbar.clear();
+    }
+
+    public addToStart(): Observable<void> {
+        if (!this.start.add('CustomerFeedback', 'CustomerFeedback', {})) {
+            return EMPTY;
+        }
+
+        return this.start.save();
     }
 
     private init(submodels: [aas.Environment, aas.Submodel][]): void {

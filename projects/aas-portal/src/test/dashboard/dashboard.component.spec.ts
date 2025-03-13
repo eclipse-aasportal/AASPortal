@@ -10,14 +10,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AuthService, NotifyService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
+import { AuthService, NotifyService, StartService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { pages } from './test-pages';
 import { SelectionMode } from '../../app/types/selection-mode';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-import { WebSocketSubject } from 'rxjs/webSocket';
 import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { DashboardChart } from '../../app/dashboard/dashboard.store';
 
@@ -27,6 +27,7 @@ describe('DashboardComponent', () => {
     let webSocketSubject: WebSocketSubject<WebSocketData>;
     let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
     let auth: jasmine.SpyObj<AuthService>;
+    let start: jasmine.SpyObj<StartService>;
     const chart1 = '42';
     const chart2 = '4711';
     // const chart3 = '0815';
@@ -35,6 +36,7 @@ describe('DashboardComponent', () => {
         webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
         webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
         webSocketFactory.create.and.returnValue(webSocketSubject);
+        start = jasmine.createSpyObj<StartService>(['add', 'save']);
 
         auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { userId: of('guest') });
         auth.checkCookie.and.returnValue(of(true));
@@ -72,6 +74,10 @@ describe('DashboardComponent', () => {
                 {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
                 },
                 provideRouter([]),
             ],

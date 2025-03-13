@@ -33,6 +33,7 @@ import {
     DownloadService,
     NotifyService,
     SecuredImageComponent,
+    StartService,
     ToolbarService,
 } from 'aas-lib';
 
@@ -68,6 +69,7 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly download: DownloadService,
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
         private readonly auth: AuthService,
     ) {
         effect(() => {
@@ -308,6 +310,21 @@ export class AASComponent implements OnInit, OnDestroy {
             }),
             catchError(error => this.notify.error(error)),
         );
+    }
+
+    public addToStart(): Observable<void> {
+        const document = this.document();
+        if (
+            document &&
+            this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
+                endpoint: document.endpoint,
+                id: document.id,
+            })
+        ) {
+            return this.start.save();
+        }
+
+        return EMPTY;
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

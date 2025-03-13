@@ -11,7 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import QRCode from 'qrcode';
 import { ActivatedRoute } from '@angular/router';
-import { first } from 'rxjs';
+import { EMPTY, first, Observable } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -19,6 +19,7 @@ import {
     effect,
     ElementRef,
     Inject,
+    OnDestroy,
     OnInit,
     signal,
     TemplateRef,
@@ -46,6 +47,7 @@ import { AuthService } from '../auth/auth.service';
 import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../utilities';
 import { SecuredImageComponent } from '../secured-image/secured-image.component';
 import { DigitalNameplateService } from './digital-nameplate.service';
+import { StartService } from '../start.service';
 
 export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
 
@@ -71,20 +73,21 @@ const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, SecuredImageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DigitalNameplateComponent implements OnInit {
+export class DigitalNameplateComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly route: ActivatedRoute,
         private readonly location: Location,
         private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
         private readonly api: DigitalNameplateService,
     ) {
         effect(() => {
-            const nameplateToolbar = this.nameplateToolbar();
-            if (nameplateToolbar) {
-                this.toolbar.set(nameplateToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
 
@@ -104,7 +107,7 @@ export class DigitalNameplateComponent implements OnInit {
         });
     }
 
-    public readonly nameplateToolbar = viewChild<TemplateRef<unknown>>('nameplateToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('nameplateToolbar');
 
     public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
 
@@ -196,6 +199,10 @@ export class DigitalNameplateComponent implements OnInit {
         }
     }
 
+    public ngOnDestroy(): void {
+        this.toolbar.clear();
+    }
+
     public open($event: MouseEvent, item: NameplateItem): void {
         if (item.url) {
             const token = this.auth.token();
@@ -203,6 +210,21 @@ export class DigitalNameplateComponent implements OnInit {
         }
 
         $event.stopPropagation();
+    }
+
+    public addToStart(): Observable<void> {
+        const nameplate = this.nameplate();
+        if (nameplate === undefined) {
+            return EMPTY;
+        }
+
+        const endpoint = nameplate[0].endpoint;
+        const id = nameplate[0].id;
+        if (!this.start.add('DigitalNameplate', `DNP#${endpoint}#${id}`, { endpoint, id })) {
+            return EMPTY;
+        }
+
+        return this.start.save();
     }
 
     private getDocument(id: string, endpoint?: string): void {
