@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Injectable, signal, untracked } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { mergeMap, Observable, skipWhile } from 'rxjs';
 import { AASDocument, AASDocumentId } from 'aas-core';
@@ -14,30 +14,16 @@ import { AuthService, ViewMode } from 'aas-lib';
 
 type ShellsState = {
     viewMode: ViewMode;
-    documents: AASDocument[];
-    activeFavorites: string;
     limit: number;
     filterText: string;
-    selected: AASDocument[];
-    previous: AASDocumentId | null;
-    next: AASDocumentId | null;
 };
 
-type ShellsCookie = {
-    activeFavorites: string;
-    limit: number;
-    filterText: string;
-};
+const cookieName = 'v1.Shells';
 
 const initialState: ShellsState = {
     viewMode: ViewMode.Undefined,
-    documents: [],
-    activeFavorites: '',
     limit: 10,
     filterText: '',
-    selected: [],
-    previous: null,
-    next: null,
 };
 
 @Injectable({
@@ -49,75 +35,42 @@ export class ShellsStore {
             .pipe(
                 skipWhile(userId => userId === undefined),
                 takeUntilDestroyed(),
-                mergeMap(() => this.auth.getCookie('.Start')),
+                mergeMap(() => this.auth.getCookie(cookieName)),
             )
             .subscribe(value => {
-                if (value === undefined) {
-                    return;
+                if (value) {
+                    this.state$.set(JSON.parse(value));
+                } else {
+                    this.state$.update(state => ({ ...state, viewMode: ViewMode.List }));
                 }
-
-                const cookie: ShellsCookie = JSON.parse(value);
-                this.activeFavorites$.set(cookie.activeFavorites);
-                this.limit$.set(cookie.limit);
-                this.filterText$.set(cookie.filterText);
             });
     }
 
-    public readonly viewMode$ = signal(initialState.viewMode);
+    public readonly state$ = signal(initialState);
 
-    public readonly documents$ = signal<AASDocument[]>(initialState.documents);
+    public readonly viewMode$ = computed(() => this.state$().viewMode);
 
-    public readonly activeFavorites$ = signal(initialState.activeFavorites);
+    public readonly limit$ = computed(() => this.state$().limit);
 
-    public readonly limit$ = signal(initialState.limit);
+    public readonly filterText$ = computed(() => this.state$().filterText);
 
-    public readonly filterText$ = signal(initialState.filterText);
+    public readonly documents$ = signal<AASDocument[]>([]);
 
-    public readonly selected$ = signal<AASDocument[]>(initialState.selected);
+    public readonly selected$ = signal<AASDocument[]>([]);
 
-    public readonly previous$ = signal<AASDocumentId | null>(initialState.previous);
+    public readonly previous$ = signal<AASDocumentId | null>(null);
 
-    public readonly next$ = signal<AASDocumentId | null>(initialState.next);
+    public readonly next$ = signal<AASDocumentId | null>(null);
 
-    public get viewMode(): ViewMode {
-        return untracked(this.viewMode$);
+    public setLimit(limit: number): void {
+        this.state$.update(state => ({ ...state, limit }));
     }
 
-    public get documents(): AASDocument[] {
-        return untracked(this.documents$);
-    }
-
-    public get activeFavorites(): string {
-        return untracked(this.activeFavorites$);
-    }
-
-    public get limit(): number {
-        return untracked(this.limit$);
-    }
-
-    public get filterText(): string {
-        return untracked(this.filterText$);
-    }
-
-    public get selected(): AASDocument[] {
-        return untracked(this.selected$);
-    }
-
-    public get previous(): AASDocumentId | null {
-        return untracked(this.previous$);
-    }
-
-    public get next(): AASDocumentId | null {
-        return untracked(this.next$);
+    public setViewMode(viewMode: ViewMode): void {
+        this.state$.update(state => ({ ...state, viewMode }));
     }
 
     public save(): Observable<void> {
-        const cookie: ShellsCookie = {
-            activeFavorites: this.activeFavorites,
-            limit: this.limit,
-            filterText: this.filterText,
-        };
-
-        return this.auth.setCookie('.Start', JSON.stringify(cookie));
+        return this.auth.setCookie(cookieName, JSON.stringify(this.state$()));
     }
 }
