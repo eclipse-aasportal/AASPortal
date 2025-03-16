@@ -8,10 +8,10 @@
 
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { AuthService } from 'aas-lib';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
-import { AASDocument } from 'projects/aas-core/dist/types';
+import { AuthService } from 'aas-lib';
+import { AASDocument } from 'aas-core';
+import { FavoritesList, FavoritesService, FavoritesState } from '../../app/shells/favorites.service';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;
@@ -33,9 +33,14 @@ describe('FavoritesService', () => {
         },
     ];
 
+    const state: FavoritesState = {
+        active: '',
+        items: favorites,
+    };
+
     beforeEach(() => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        auth.getCookie.and.returnValue(of(JSON.stringify(favorites)));
+        auth.getCookie.and.returnValue(of(JSON.stringify(state)));
         auth.setCookie.and.returnValue(of(void 0));
         auth.deleteCookie.and.returnValue(of(void 0));
 
@@ -64,9 +69,15 @@ describe('FavoritesService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('lists', () => {
+    describe('items', () => {
         it('provides all favorites lists', () => {
-            expect(service.lists()).toEqual(favorites);
+            expect(service.items()).toEqual(favorites);
+        });
+    });
+
+    describe('active', () => {
+        it('provides an active favorite list', () => {
+            expect(service.active()).toEqual('');
         });
     });
 
@@ -93,33 +104,33 @@ describe('FavoritesService', () => {
     describe('add', () => {
         it('adds a new favorites list', () => {
             service.add([], 'New Favorites');
-            expect(service.lists().map(item => item.name)).toEqual(['My Favorites', 'New Favorites']);
+            expect(service.items().map(item => item.name)).toEqual(['My Favorites', 'New Favorites']);
         });
 
         it('renames a favorites list', () => {
             service.add([], 'My Favorites', 'Renamed Favorites');
-            expect(service.lists().map(item => item.name)).toEqual(['Renamed Favorites']);
+            expect(service.items().map(item => item.name)).toEqual(['Renamed Favorites']);
         });
     });
 
     describe('delete', () => {
         it('deletes "My Favorites"', () => {
             service.delete('My Favorites');
-            expect(service.lists().length).toEqual(0);
+            expect(service.items().length).toEqual(0);
         });
     });
 
     describe('remove', () => {
         it('removes a favorite', () => {
             service.remove([favorite], 'My Favorites');
-            expect(service.lists().find(item => item.name === 'My Favorites')?.documents).toEqual([]);
+            expect(service.items().find(item => item.name === 'My Favorites')?.documents).toEqual([]);
         });
     });
 
     describe('save', () => {
         it('saves the current favorites lists', (done: DoneFn) => {
             service.save().subscribe(() => {
-                expect(auth.setCookie).toHaveBeenCalledWith('.Favorites', JSON.stringify(favorites));
+                expect(auth.setCookie).toHaveBeenCalledWith('v2.Favorites', JSON.stringify(state));
                 done();
             });
         });

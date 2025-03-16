@@ -21,7 +21,8 @@ describe('FavoritesFormComponent', () => {
 
     beforeEach(() => {
         service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save'], {
-            lists: signal<FavoritesList[]>([]),
+            active: signal(''),
+            items: signal<FavoritesList[]>([]),
         });
 
         TestBed.configureTestingModule({

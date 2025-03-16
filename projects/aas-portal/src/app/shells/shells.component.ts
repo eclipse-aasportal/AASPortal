@@ -23,8 +23,8 @@ import {
 
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { catchError, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
 import { AASEndpoint, QueryParser, stringFormat } from 'aas-core';
-import { catchError, EMPTY, first, from, map, mergeMap, Observable, of } from 'rxjs';
 import {
     AASTableComponent,
     AuthService,
@@ -73,47 +73,27 @@ export class ShellsComponent implements OnDestroy {
         private readonly favorites: FavoritesService,
         private readonly start: StartService,
     ) {
-        if (this.store.viewMode === ViewMode.Undefined) {
-            this.auth.userId
-                .pipe(first(userId => userId !== undefined))
-                .subscribe(() => this.viewMode.set(ViewMode.List));
-        } else {
-            this.service.restore();
-        }
-
         effect(() => {
-            this.service.vieModeChange(this.store.viewMode$());
-        });
-
-        effect(() => {
-            this.service.activeFavoritesChange(this.activeFavorites());
-        });
-
-        effect(() => {
-            this.service.limitChange(this.limit());
-        });
-
-        effect(() => {
-            const startToolbar = this.shellsToolbar();
-            if (startToolbar) {
-                this.toolbar.set(startToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
     }
 
-    public readonly shellsToolbar = viewChild<TemplateRef<unknown>>('shellsToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('shellsToolbar');
 
-    public readonly activeFavorites = this.store.activeFavorites$;
+    public readonly activeFavorites = this.favorites.active;
 
     public readonly limit = this.store.limit$;
 
     public readonly viewMode = this.store.viewMode$;
 
-    public readonly favoritesLists = computed(() => ['', ...this.favorites.lists().map(list => list.name)]);
+    public readonly favoritesLists = computed(() => ['', ...this.favorites.items().map(list => list.name)]);
 
     public readonly filter = computed(() => {
         const filterText = this.store.filterText$();
-        return this.store.activeFavorites$() ? filterText : '';
+        return this.favorites.active() ? filterText : '';
     });
 
     public readonly filterText = this.store.filterText$;
@@ -133,6 +113,19 @@ export class ShellsComponent implements OnDestroy {
     public ngOnDestroy(): void {
         this.toolbar.clear();
         this.store.save().subscribe();
+    }
+
+    public setActiveFavorites(name: string): void {
+        this.favorites.setActive(name);
+        this.favorites.save().subscribe();
+    }
+
+    public setLimit(value: number): void {
+        this.store.setLimit(value);
+    }
+
+    public setViewMode(value: ViewMode): void {
+        this.store.setViewMode(value);
     }
 
     public addEndpoint(): Observable<void> {
@@ -228,7 +221,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public downloadDocument(): Observable<void> {
-        return from(this.store.selected).pipe(
+        return from(this.store.selected$()).pipe(
             mergeMap(document =>
                 this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
@@ -237,27 +230,30 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public deleteDocument(): Observable<void> {
-        if (this.store.selected.length === 0) {
+        if (this.store.selected$().length === 0) {
             return EMPTY;
         }
 
-        return of(this.store.activeFavorites).pipe(
+        return of(this.favorites.active()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.store.selected, activeFavorites);
-                    this.service.removeFavorites([...this.store.selected]);
-                    return of(void 0);
+                    this.favorites.remove(this.store.selected$(), activeFavorites);
+                    this.service.removeFavorites([...this.store.selected$()]);
+                    return this.favorites.save();
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
                         map(() =>
                             this.window.confirm(
                                 stringFormat(
                                     this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                                    this.store.selected.map(item => item.idShort).join(', '),
+                                    this.store
+                                        .selected$()
+                                        .map(item => item.idShort)
+                                        .join(', '),
                                 ),
                             ),
                         ),
-                        mergeMap(result => from(result ? this.store.selected : [])),
+                        mergeMap(result => from(result ? this.store.selected$() : [])),
                         mergeMap(document => this.api.delete(document.id, document.endpoint)),
                         catchError(error => this.notify.error(error)),
                     );
@@ -267,14 +263,14 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public openView(view: Route): Promise<boolean> {
-        const documents = this.store.selected;
+        const documents = this.store.selected$();
         if (documents.length === 1) {
             return this.router.navigate([`/view/${view.path}`], {
                 queryParams: {
                     endpoint: encodeBase64Url(documents[0].endpoint),
                     id: encodeBase64Url(documents[0].id),
                 },
-                state: { data: JSON.stringify(this.store.selected) },
+                state: { data: JSON.stringify(this.store.selected$()) },
             });
         }
 
@@ -292,10 +288,10 @@ export class ShellsComponent implements OnDestroy {
                 filter = '';
             }
 
-            if (!this.store.activeFavorites) {
+            if (!this.favorites.active()) {
                 this.service.getFirstPage(filter);
             } else {
-                this.store.filterText$.set(filter);
+                this.store.state$.update(state => ({ ...state, filter }));
             }
         } catch (error) {
             this.notify.error(error);
@@ -321,7 +317,7 @@ export class ShellsComponent implements OnDestroy {
     public addToFavorites(): Observable<void> {
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this.store.selected];
+                modalRef.componentInstance.documents = [...this.store.selected$()];
                 return from(modalRef.result);
             }),
             map(() => {
@@ -331,7 +327,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        for (const document of this.store.selected) {
+        for (const document of this.store.selected$()) {
             this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
                 id: document.id,
                 endpoint: document.endpoint,

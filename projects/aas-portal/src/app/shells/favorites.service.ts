@@ -6,117 +6,135 @@
  *
  *****************************************************************************/
 
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, map, mergeMap, skipWhile } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService } from 'aas-lib';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-export interface FavoritesList {
+export type FavoritesList = {
     name: string;
     documents: AASDocument[];
-}
+};
+
+export type FavoritesState = { active: string; items: FavoritesList[] };
+
+const cookieName = 'v2.Favorites';
 
 @Injectable({
     providedIn: 'root',
 })
 export class FavoritesService {
-    private readonly lists$ = signal<FavoritesList[]>([]);
+    private readonly state$ = signal<FavoritesState>({ active: '', items: [] });
 
     public constructor(private readonly auth: AuthService) {
         this.auth.userId
             .pipe(
                 skipWhile(userId => userId === undefined),
                 takeUntilDestroyed(),
-                mergeMap(() => this.auth.getCookie('.Favorites')),
+                mergeMap(() => this.auth.getCookie(cookieName)),
                 map(value => {
-                    this.lists$.set(value ? (JSON.parse(value) as FavoritesList[]) : []);
+                    if (value) {
+                        this.state$.set(JSON.parse(value));
+                    }
                 }),
             )
             .subscribe();
     }
 
-    public readonly lists = this.lists$.asReadonly();
+    public readonly items = computed(() => this.state$().items);
+
+    public readonly active = computed(() => this.state$().active);
 
     public has(name: string): boolean {
-        return this.lists$().some(list => list.name === name);
+        return this.state$().items.some(list => list.name === name);
     }
 
     public get(name: string): FavoritesList | undefined {
-        return this.lists$().find(list => list.name === name);
+        return this.state$().items.find(list => list.name === name);
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): void {
-        return this.lists$.update(state => this.addFavorites(state, documents, name, newName));
+        return this.state$.update(state => this.addFavorites(state, documents, name, newName));
     }
 
     public remove(documents: AASDocument[], name: string): void {
-        this.lists$.update(state => this.removeFavorites(state, documents, name));
+        this.state$.update(state => this.removeFavorites(state, documents, name));
     }
 
     public delete(name: string): void {
-        this.lists$.update(state => this.deleteFavoritesList(state, name));
+        this.state$.update(state => this.deleteFavoritesList(state, name));
+    }
+
+    public setActive(name: string): void {
+        this.state$.update(state => ({ ...state, active: name }));
     }
 
     public save(): Observable<void> {
-        if (this.lists$().length === 0) {
-            return this.auth.deleteCookie('.Favorites');
+        if (this.state$().items.length === 0) {
+            return this.auth.deleteCookie(cookieName);
         }
 
-        return this.auth.setCookie('.Favorites', JSON.stringify(this.lists$()));
+        return this.auth.setCookie(cookieName, JSON.stringify(this.state$()));
     }
 
     private addFavorites(
-        lists: FavoritesList[],
+        state: FavoritesState,
         documents: AASDocument[],
         name: string,
         newName: string | undefined,
-    ): FavoritesList[] {
-        const i = lists.findIndex(list => list.name === name);
-        let list: FavoritesList;
+    ): FavoritesState {
+        const i = state.items.findIndex(list => list.name === name);
+        let item: FavoritesList;
         if (i < 0) {
-            list = { name: newName || name, documents: documents.map(document => ({ ...document, content: null })) };
-            return [...lists, list];
+            item = { name: newName || name, documents: documents.map(document => ({ ...document, content: null })) };
+            return { ...state, items: [...state.items, item] };
         }
 
-        lists = [...lists];
-        list = lists[i];
-        list = { ...list, documents: [...list.documents] };
-        lists[i] = list;
+        const items = [...state.items];
+        item = items[i];
+        item = { ...item, documents: [...item.documents] };
+        items[i] = item;
 
         if (newName) {
-            list.name = newName;
+            item.name = newName;
         }
 
         for (const document of documents) {
-            if (!list.documents.some(item => item.endpoint === document.endpoint && item.id === document.id)) {
-                list.documents.push({ ...document, content: null });
+            if (!item.documents.some(item => item.endpoint === document.endpoint && item.id === document.id)) {
+                item.documents.push({ ...document, content: null });
             }
         }
 
-        return lists;
+        return { ...state, items };
     }
 
-    private removeFavorites(lists: FavoritesList[], documents: AASDocument[], name: string): FavoritesList[] {
-        return lists.map(list => {
-            if (list.name !== name) {
-                return list;
-            }
+    private removeFavorites(state: FavoritesState, documents: AASDocument[], name: string): FavoritesState {
+        return {
+            ...state,
+            items: state.items.map(list => {
+                if (list.name !== name) {
+                    return list;
+                }
 
-            return {
-                ...list,
-                documents: list.documents.filter(favorite =>
-                    documents.every(document => !this.equal(document, favorite)),
-                ),
-            };
-        });
+                return {
+                    ...list,
+                    documents: list.documents.filter(favorite =>
+                        documents.every(document => !this.equal(document, favorite)),
+                    ),
+                };
+            }),
+        };
+    }
+
+    private deleteFavoritesList(state: FavoritesState, name: string): FavoritesState {
+        return {
+            items: state.items.filter(list => list.name !== name),
+            active: state.active === name ? '' : state.active,
+        };
     }
 
     private equal(a: AASDocument, b: AASDocument): boolean {
         return a === b || (a.endpoint === b.endpoint && a.id === b.id);
-    }
-
-    private deleteFavoritesList(lists: FavoritesList[], name: string): FavoritesList[] {
-        return lists.filter(list => list.name !== name);
     }
 }

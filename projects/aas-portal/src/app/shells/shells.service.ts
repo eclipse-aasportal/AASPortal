@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
+import { effect, untracked, Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, catchError, concat, from, map, mergeMap, of } from 'rxjs';
 import { ViewMode } from 'aas-lib';
@@ -17,52 +17,27 @@ import { FavoritesService } from './favorites.service';
 
 @Injectable()
 export class ShellsService {
-    private ignoreViewModeChange = false;
-    private ignoreActiveFavoritesChange = false;
-    private ignoreLimitChange = false;
-
     public constructor(
         private readonly store: ShellsStore,
         private readonly api: ShellsApiService,
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
-    ) {}
+    ) {
+        effect(() => {
+            this.refreshPage(this.store.limit$());
+        });
 
-    public restore(): void {
-        this.ignoreViewModeChange = this.ignoreActiveFavoritesChange = this.ignoreLimitChange = true;
-    }
+        effect(() => {
+            this.setViewMode(this.store.viewMode$());
+        });
 
-    public vieModeChange(viewMode: ViewMode): void {
-        if (this.ignoreViewModeChange) {
-            this.ignoreViewModeChange = false;
-            return;
-        }
-
-        this.initialize(viewMode, this.store.activeFavorites);
-    }
-
-    public activeFavoritesChange(name: string): void {
-        if (this.ignoreActiveFavoritesChange) {
-            this.ignoreActiveFavoritesChange = false;
-            return;
-        }
-
-        this.initialize(this.store.viewMode, name);
-    }
-
-    public limitChange(limit: number): void {
-        if (this.ignoreLimitChange) {
-            this.ignoreLimitChange = false;
-            return;
-        }
-
-        if (!this.store.activeFavorites) {
-            this.refreshPage(limit);
-        }
+        effect(() => {
+            this.setActiveFavorites(this.favorites.active());
+        });
     }
 
     public removeFavorites(favorites: AASDocument[]): void {
-        if (!this.store.activeFavorites) {
+        if (!this.favorites.active()) {
             return;
         }
 
@@ -77,14 +52,14 @@ export class ShellsService {
 
     public getFirstPage(filter?: string, limit?: number): void {
         if (filter === undefined) {
-            filter = this.store.filterText;
+            filter = untracked(this.store.filterText$);
         }
 
         this.api
             .getPage(
                 {
                     previous: null,
-                    limit: limit ?? this.store.limit,
+                    limit: limit ?? untracked(this.store.limit$),
                 },
                 filter,
                 this.translate.currentLang,
@@ -94,7 +69,7 @@ export class ShellsService {
     }
 
     public getNextPage(): void {
-        const documents = this.store.documents;
+        const documents = untracked(this.store.documents$);
         if (documents.length === 0) {
             return;
         }
@@ -102,24 +77,24 @@ export class ShellsService {
         this.api
             .getPage(
                 {
-                    next: this.store.next,
-                    limit: this.store.limit,
+                    next: untracked(this.store.next$),
+                    limit: untracked(this.store.limit$),
                 },
-                this.store.filterText,
+                untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
             .subscribe();
     }
 
-    public getLastPage() {
+    public getLastPage(): void {
         this.api
             .getPage(
                 {
                     next: null,
-                    limit: this.store.limit,
+                    limit: untracked(this.store.limit$),
                 },
-                this.store.filterText,
+                untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
@@ -127,7 +102,7 @@ export class ShellsService {
     }
 
     public getPreviousPage(): void {
-        const documents = this.store.documents;
+        const documents = untracked(this.store.documents$);
         if (documents.length === 0) {
             return;
         }
@@ -135,53 +110,61 @@ export class ShellsService {
         this.api
             .getPage(
                 {
-                    previous: this.store.previous,
-                    limit: this.store.limit,
+                    previous: untracked(this.store.previous$),
+                    limit: untracked(this.store.limit$),
                 },
-                this.store.filterText,
+                untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
             .subscribe();
     }
 
-    private initialize(viewMode: ViewMode, name: string): void {
+    private setViewMode(viewMode: ViewMode): void {
         if (viewMode === ViewMode.List) {
             this.store.selected$.set([]);
-            const favorites = this.favorites.get(name);
+            const favorites = this.favorites.get(this.favorites.active());
             if (favorites) {
-                this.getFavorites(favorites.name, favorites.documents);
+                this.getFavorites(favorites.documents);
             } else {
                 this.getFirstPage();
             }
         } else if (viewMode === ViewMode.Tree) {
             this.store.documents$.set([]);
-            this.getTreeView(this.store.selected);
+            this.getTreeView(this.store.selected$());
+        }
+    }
+
+    private setActiveFavorites(name: string): void {
+        this.store.selected$.set([]);
+        const favorites = this.favorites.get(name);
+        if (favorites) {
+            this.getFavorites(favorites.documents);
+        } else {
+            this.getFirstPage();
         }
     }
 
     private refreshPage(limit: number): void {
-        if (this.store.documents.length === 0) {
+        if (untracked(this.store.documents$).length === 0) {
             return;
         }
 
         this.api
             .getPage(
                 {
-                    next: this.getId(this.store.documents[0]),
+                    next: this.getId(untracked(this.store.documents$)[0]),
                     limit,
                 },
-                this.store.filterText,
+                untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
             .subscribe();
     }
 
-    private getFavorites(activeFavorites: string, documents: AASDocument[]): void {
-        this.store.activeFavorites$.set(activeFavorites);
+    private getFavorites(documents: AASDocument[]): void {
         this.store.documents$.set(documents);
-        this.store.viewMode$.set(ViewMode.List);
         from(documents)
             .pipe(
                 mergeMap(document =>
@@ -222,18 +205,16 @@ export class ShellsService {
     }
 
     private setPage(page: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
-        this.store.viewMode$.set(ViewMode.List);
-        this.store.activeFavorites$.set('');
         this.store.documents$.set(page.documents);
         this.store.previous$.set(page.previous);
         this.store.next$.set(page.next);
-        if (limit !== undefined) {
-            this.store.limit$.set(limit);
-        }
-
-        if (filter !== undefined) {
-            this.store.filterText$.set(filter);
-        }
+        this.store.state$.update(state => {
+            return {
+                ...state,
+                limit: limit ?? state.limit,
+                filterText: filter ?? state.filterText,
+            };
+        });
     }
 
     private addTreeAndLoadContents(documents: AASDocument[]): Observable<void> {

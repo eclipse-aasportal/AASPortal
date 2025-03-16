@@ -8,6 +8,9 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, model, signal } from '@angular/core';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { of } from 'rxjs';
+import { AASDocument, aas } from 'aas-core';
 import {
     WINDOW,
     ViewMode,
@@ -17,9 +20,6 @@ import {
     AASTableComponent,
     StartService,
 } from 'aas-lib';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
-import { AASDocument, aas } from 'aas-core';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
 import { ShellsApiService } from '../../app/shells/shells-api.service';
@@ -83,7 +83,8 @@ describe('ShellsComponent', () => {
         );
 
         favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
-            lists: signal<FavoritesList[]>([]),
+            active: signal(''),
+            items: signal<FavoritesList[]>([]),
         });
 
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
