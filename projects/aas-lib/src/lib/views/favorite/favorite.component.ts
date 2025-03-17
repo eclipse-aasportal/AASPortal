@@ -64,8 +64,6 @@ export class FavoriteComponent {
         return getLocaleValue(description, this.translate.currentLang);
     });
 
-    public readonly assetId = computed(() => this.aas$()?.assetInformation.globalAssetId ?? '-');
-
     public readonly thumbnail = computed(() => {
         const document = this.document$();
         if (document === undefined) {
@@ -104,6 +102,8 @@ export class FavoriteComponent {
 
         return '-';
     });
+
+    public readonly submodelCount = computed(() => this.aas$()?.submodels?.length ?? 0);
 
     private getDocument(id: string, endpoint?: string): void {
         this.api.getDocument(id, endpoint).subscribe({

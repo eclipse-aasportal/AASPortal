@@ -331,8 +331,10 @@
         "PCFLifeCyclePhase16": "Life cycle phase A1-A3"
     },
     "Favorite": {
+        "ID_SHORT": "ID short",
         "ENDPOINT": "Endpoint",
         "VERSION": "Version",
+        "SUBMODEL_COUNT": "Submodels",
         "SHOW": "Show..."
     },
     "About": {

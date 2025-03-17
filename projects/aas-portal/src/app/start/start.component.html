@@ -8,12 +8,12 @@
 
 <div id="start-page" class="overflow-auto h-100 px-2">
     @if (isEmpty()){
-        <div class="alert alert-info text-center mt-2" role="alert" translate>Start.EMPTY</div>
+    <div class="alert alert-info text-center mt-2" role="alert" translate>Start.EMPTY</div>
     } @else {
     <div class="d-flex flex-wrap align-items-stretch">
         @for (item of items(); track item; let i = $index) {
         <div class="p-2 rounded" [class.bg-info-subtle]="item.selected()">
-            <div class="card fhg-card h-100" (click)="toggleSelected($event, item)" tabindex="0">
+            <div class="card fhg-card" (click)="toggleSelected($event, item)" tabindex="0">
                 <ng-container [ngComponentOutlet]="item.component"
                     [ngComponentOutletInputs]="item.property"></ng-container>
             </div>
