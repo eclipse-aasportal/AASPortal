@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -29,13 +29,13 @@ export abstract class AASClient {
     public abstract readonly onlineReady: boolean;
 
     /** Tests the connection to the AAS source. */
-    public abstract testAsync(): Promise<void>;
+    public abstract test(): Promise<void>;
 
     /** Opens the container. */
-    public abstract openAsync(): Promise<void>;
+    public abstract open(): Promise<void>;
 
     /** Closes the container. */
-    public abstract closeAsync(): Promise<void>;
+    public abstract close(): Promise<void>;
 
     /** Creates a package from the specified address. */
     public abstract createPackage(...args: string[]): AASPackage;

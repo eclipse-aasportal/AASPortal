@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -133,9 +133,9 @@ export class TemplateScan {
         let source: AasxDirectory | undefined;
         try {
             source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
-            await source.openAsync();
+            await source.open();
             const pkg = source.createPackage(file);
-            const env = await pkg.getEnvironmentAsync();
+            const env = await pkg.getEnvironment();
             if (env.submodels.length === 0) {
                 return undefined;
             }
@@ -151,7 +151,7 @@ export class TemplateScan {
         } catch {
             return undefined;
         } finally {
-            await source?.closeAsync();
+            await source?.close();
         }
     }
 }

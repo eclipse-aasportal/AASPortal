@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -32,23 +32,23 @@ describe('AasxPackage', function () {
     describe('createDocumentAsync', function () {
         it('creates a document from a xml origin', async () => {
             try {
-                await source.openAsync();
+                await source.open();
                 const aasxPackage = new AasxPackage(logger, source, 'xml-origin.aasx');
                 const document = await aasxPackage.createDocumentAsync();
                 expect(document).toBeDefined();
             } finally {
-                await source.closeAsync();
+                await source.close();
             }
         });
 
         it('creates a document from a json origin', async () => {
             try {
-                await source.openAsync();
+                await source.open();
                 const aasxPackage = new AasxPackage(logger, source, 'json-origin.aasx');
                 const document = await aasxPackage.createDocumentAsync();
                 expect(document).toBeDefined();
             } finally {
-                await source.closeAsync();
+                await source.close();
             }
         });
     });

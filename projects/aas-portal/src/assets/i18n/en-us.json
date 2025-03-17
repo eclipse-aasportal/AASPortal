@@ -1,13 +1,8 @@
 {
-    "CAPTION_START": "Start",
-    "CAPTION_VIEW": "View",
-    "CAPTION_AAS": "AAS",
-    "CAPTION_ABOUT": "About",
     "CAPTION_LOGIN": "Login",
     "CAPTION_PROFILE": "Profile",
     "CAPTION_REGISTRATION": "Registration",
     "CAPTION_PASSWORD_FORGOTTEN": "Password forgotten?",
-    "CAPTION_DASHBOARD": "Dashboard",
     "CAPTION_INPUT_ARGUMENTS": "Input arguments",
     "CAPTION_OUTPUT_ARGUMENTS": "Output arguments",
     "CAPTION_INOUTPUT_ARGUMENTS": "In/Output arguments",
@@ -160,7 +155,19 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
+    "Main": {
+        "ENDPOINTS": "Endpoints",
+        "START": "Start",
+        "SHELLS": "Shells",
+        "AAS": "AAS",
+        "VIEW": "View",
+        "DASHBOARD": "Dashboard",
+        "ABOUT": "About"
+    },
     "Start": {
+        "EMPTY": "The START page is empty."
+    },
+    "Shells": {
         "FAVORITES": "All shells",
         "ENDPOINT": "Endpoint",
         "ADD_ENDPOINT": "Add...",
@@ -168,7 +175,7 @@
         "REMOVE_ENDPOINT": "Remove...",
         "EXTRAS": "Extras...",
         "PLACEHOLDER_FILTER": "Filter",
-        "DigitalPassportPortal": "DPPPortal",
+        "DigitalProductPassport": "Product passport",
         "CustomerFeedback": "User feedback",
         "Nameplate": "Nameplate"
     },
@@ -246,7 +253,7 @@
         "Interaction": "Interaction",
         "Structure": "Structure",
         "Hacptics": "Haptics",
-        "Acustics": "Acustics",
+        "Acustics": "Acoustics",
         "Assembly_Installation": "Assembly & Installation",
         "Material": "Material"
     },
@@ -264,10 +271,6 @@
         "TERM_EXPECTED": "Term expected at position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unexpected closing bracket at position ${0}."
     },
-    "Main": {
-        "ENDPOINTS": "Endpoints",
-        "SHELLS": "Shells"
-    },
     "FavoritesForm": {
         "CAPTION": "Favorites",
         "ADD_NEW": "New favorites list",
@@ -275,14 +278,16 @@
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
     },
-    "DigitalPassportPortal": {
+    "DigitalProductPassport": {
         "EMPTY": "Ups...",
+        "Name": "Name",
+        "Description": "Description",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
         "CAPTION": "Product Passport",
         "TYPE": "Type",
         "SERIAL_NUMBER": "Serial No.",
-        "NAMEPLATE_DATA": "Nameplate data",
-        "CARBON_FOOTPRINT_DATA": "Carbon footprint data",
+        "NAMEPLATE_DATA": "Nameplate",
+        "CARBON_FOOTPRINT_DATA": "Carbon footprint",
         "TOTAL_PSFCO2EQ": "CO2-eq GWP100",
         "DOCUMENTATION": "Documentation",
         "ManufacturerProductFamily": "Product family",
@@ -307,8 +312,36 @@
         "TimeZone": "Time zone",
         "PCFGoodsAddressHandover": "Handover address",
         "PCFCalculationMethod": "Calculation method",
-        "PCFCO2eq": "PCFCO2eq",
-        "PCFLifeCyclePhase1": "Life cycle phase 1",
-        "PCFLifeCyclePhase2": "Life cycle phase 2"
+        "PCFCO2eq": "CO2 equivalent",
+        "PCFLifeCyclePhase1": "Life cycle phase A1",
+        "PCFLifeCyclePhase2": "Life cycle phase A2",
+        "PCFLifeCyclePhase3": "Life cycle phase A3",
+        "PCFLifeCyclePhase4": "Life cycle phase A4",
+        "PCFLifeCyclePhase5": "Life cycle phase B1",
+        "PCFLifeCyclePhase6": "Life cycle phase B2",
+        "PCFLifeCyclePhase7": "Life cycle phase B3",
+        "PCFLifeCyclePhase8": "Life cycle phase B5",
+        "PCFLifeCyclePhase9": "Life cycle phase B6",
+        "PCFLifeCyclePhase10": "Life cycle phase B7",
+        "PCFLifeCyclePhase11": "Life cycle phase C1",
+        "PCFLifeCyclePhase12": "Life cycle phase C2",
+        "PCFLifeCyclePhase13": "Life cycle phase C3",
+        "PCFLifeCyclePhase14": "Life cycle phase C4",
+        "PCFLifeCyclePhase15": "Life cycle phase D",
+        "PCFLifeCyclePhase16": "Life cycle phase A1-A3"
+    },
+    "Favorite": {
+        "ID_SHORT": "ID short",
+        "ENDPOINT": "Endpoint",
+        "VERSION": "Version",
+        "SUBMODEL_COUNT": "Submodels",
+        "SHOW": "Show..."
+    },
+    "About": {
+        "STATISTIC": "Statistic",
+        "VERSION": "Version",
+        "NUMBER_OF_ENDPOINTS": "Endpoints",
+        "NUMBER_OF_SHELLS": "Shells",
+        "ABOUT": "About..."
     }
 }
