@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -35,18 +35,11 @@ describe('TemplateController', () => {
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>([
-            'hasUserAsync',
-            'loginAsync',
-            'getCookieAsync',
-            'getCookiesAsync',
-            'setCookieAsync',
-            'deleteCookieAsync',
-        ]);
+        auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
 
         templateStorage = createSpyObj<TemplateStorage>(['getTemplatesAsync', 'readTemplateAsync']);
-        authentication = createSpyObj<Authentication>(['checkAsync']);
-        authentication.checkAsync.mockResolvedValue(guestPayload);
+        authentication = createSpyObj<Authentication>(['check']);
+        authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance('Logger', logger);

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -45,7 +45,7 @@ describe('AASApiClientV0', function () {
     describe('getShellsAsync', () => {
         it('returns the AAS list', async () => {
             http.get.mockResolvedValue(listaas);
-            const result = await client.getShellsAsync();
+            const result = await client.getShells();
             expect(result.result).toEqual([
                 {
                     id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:AssistanceSystem:Dte',
@@ -85,7 +85,7 @@ describe('AASApiClientV0', function () {
             });
 
             await expect(
-                client.readEnvironmentAsync({ id: 'http://aas/CunaCup_Becher1', idShort: 'CunaCup_Becher1' }),
+                client.readEnvironment({ id: 'http://aas/CunaCup_Becher1', idShort: 'CunaCup_Becher1' }),
             ).resolves.toBeTruthy();
         });
     });
@@ -109,7 +109,7 @@ describe('AASApiClientV0', function () {
 
             http.getResponse.mockResolvedValue(stream);
             await expect(
-                client.openFileAsync(
+                client.openFile(
                     aasEnvironment.assetAdministrationShells[0],
                     selectElement(aasEnvironment, 'Documentation', 'OperatingManual', 'DigitalFile_PDF')!,
                 ),
@@ -120,7 +120,7 @@ describe('AASApiClientV0', function () {
     describe('readValueAsync', () => {
         it('reads the current value of a data element', async () => {
             http.get.mockResolvedValue({ value: '42' });
-            await expect(client.readValueAsync('http://localhost:1234', 'xs:int')).resolves.toBe(42);
+            await expect(client.readValue('http://localhost:1234', 'xs:int')).resolves.toBe(42);
         });
     });
 

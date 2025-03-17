@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -33,6 +33,8 @@ import {
     DownloadService,
     NotifyService,
     SecuredImageComponent,
+    StartService,
+    ToolbarService,
 } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -43,7 +45,6 @@ import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
-import { ToolbarService } from '../toolbar.service';
 import { AASStore } from './aas.store';
 import { DashboardChartType } from '../dashboard/dashboard.store';
 import { Location } from '@angular/common';
@@ -68,6 +69,7 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly download: DownloadService,
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
         private readonly auth: AuthService,
     ) {
         effect(() => {
@@ -308,6 +310,21 @@ export class AASComponent implements OnInit, OnDestroy {
             }),
             catchError(error => this.notify.error(error)),
         );
+    }
+
+    public addToStart(): Observable<void> {
+        const document = this.document();
+        if (
+            document &&
+            this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
+                endpoint: document.endpoint,
+                id: document.id,
+            })
+        ) {
+            return this.start.save();
+        }
+
+        return EMPTY;
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

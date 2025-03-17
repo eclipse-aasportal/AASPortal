@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -58,20 +58,20 @@ describe('AuthService', function () {
     describe('loginAsync', function () {
         it('returns a user token.', async function () {
             userStorage.readAsync.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
-            const result = await auth.loginAsync({ id: 'john.doe@email.com', password: '6iu3hbcc' });
+            const result = await auth.login({ id: 'john.doe@email.com', password: '6iu3hbcc' });
             expect(result?.token).toBeDefined();
         });
 
         it('returns a guest token.', async function () {
             userStorage.readAsync.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
-            const result = await auth.loginAsync();
+            const result = await auth.login();
             expect(result?.token).toBeDefined();
         });
 
         it('throws an UnknownUser error.', async function () {
             try {
                 userStorage.readAsync.mockReturnValue(new Promise<undefined>(result => result(undefined)));
-                await auth.loginAsync({ id: 'unknown@iosb-ina.fraunhofer.de', password: '6iu3hbcc' });
+                await auth.login({ id: 'unknown@iosb-ina.fraunhofer.de', password: '6iu3hbcc' });
             } catch (error) {
                 expect(error instanceof ApplicationError).toBeTruthy();
                 expect(error.name).toEqual(ERRORS.UnknownUser);
@@ -81,7 +81,7 @@ describe('AuthService', function () {
         it('throws an InvalidPassword error.', async function () {
             try {
                 userStorage.readAsync.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
-                await auth.loginAsync({ id: 'john.doe@email.com', password: 'invalid' });
+                await auth.login({ id: 'john.doe@email.com', password: 'invalid' });
             } catch (error) {
                 expect(error instanceof ApplicationError).toBeTruthy();
                 expect(error.name).toEqual(ERRORS.InvalidPassword);
@@ -111,13 +111,13 @@ describe('AuthService', function () {
             };
 
             userStorage.readAsync.mockReturnValue(new Promise<UserData>(result => result(monikaData)));
-            const result = await auth.updateProfileAsync('monika.mustermann@email.com', profile);
+            const result = await auth.updateProfile('monika.mustermann@email.com', profile);
             expect(result.token).toBeDefined();
         });
 
         it('throws an error if user is unknown or not authenticated', async function () {
             userStorage.readAsync.mockReturnValue(new Promise<UserData | undefined>(result => result(undefined)));
-            await expect(auth.updateProfileAsync('unknown', profile)).rejects.toThrowError();
+            await expect(auth.updateProfile('unknown', profile)).rejects.toThrowError();
         });
     });
 
@@ -134,7 +134,7 @@ describe('AuthService', function () {
 
         it('registers a new user', async function () {
             userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(false)));
-            await expect(auth.registerUserAsync(johnDoeProfile)).resolves.toBeDefined();
+            await expect(auth.registerUser(johnDoeProfile)).resolves.toBeDefined();
         });
 
         // it('registers a new user, password is send via e-mail', async function () {
@@ -152,13 +152,13 @@ describe('AuthService', function () {
 
         it('throws an error if e-mail already registered', async function () {
             userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(true)));
-            await expect(auth.registerUserAsync(johnDoeProfile)).rejects.toThrowError();
+            await expect(auth.registerUser(johnDoeProfile)).rejects.toThrowError();
         });
 
         it('throws an error if e-mail is invalid', async function () {
             userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(false)));
             await expect(
-                auth.registerUserAsync({
+                auth.registerUser({
                     id: 'invalid',
                     name: 'John Doe',
                     password: '12345678',
@@ -169,7 +169,7 @@ describe('AuthService', function () {
         it('throws an error if password is invalid', async function () {
             userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(false)));
             await expect(
-                auth.registerUserAsync({
+                auth.registerUser({
                     id: 'john.doe@email.com',
                     name: 'John Doe',
                     password: '1',
@@ -182,7 +182,7 @@ describe('AuthService', function () {
         it('sends a new password via e-mail', async function () {
             userStorage.readAsync.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
             mailer.sendNewPassword = jest.fn();
-            await expect(auth.resetPasswordAsync('john.doe@email.com')).resolves.toBeUndefined();
+            await expect(auth.resetPassword('john.doe@email.com')).resolves.toBeUndefined();
             expect(mailer.sendNewPassword).toHaveBeenCalled();
         });
     });
@@ -202,12 +202,12 @@ describe('AuthService', function () {
     describe('hasUserAsync', function () {
         it('authorizes John Doe', async function () {
             userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(true)));
-            await expect(auth.hasUserAsync('john.doe@email.com')).resolves.toBe(true);
+            await expect(auth.hasUser('john.doe@email.com')).resolves.toBe(true);
         });
 
         it('does not authorize a guest', async function () {
             userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(false)));
-            await expect(auth.hasUserAsync('unknown')).resolves.toBe(false);
+            await expect(auth.hasUser('unknown')).resolves.toBe(false);
         });
     });
 });

@@ -1,11 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
+import { EMPTY, Observable } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import {
     Component,
     OnDestroy,
@@ -17,56 +19,64 @@ import {
     effect,
 } from '@angular/core';
 
-import { Library, Message } from 'aas-core';
-import { LicenseInfoComponent, MessageTableComponent } from 'aas-lib';
+import { Library } from 'aas-core';
+import { IndexChangeService, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
-import { ToolbarService } from '../toolbar.service';
 import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'fhg-about',
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
-    imports: [LicenseInfoComponent, MessageTableComponent],
+    imports: [TranslateModule, LicenseInfoComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy {
-    private readonly _serverVersion = signal('');
-    private readonly _libraries = signal<Library[]>([]);
-    private readonly _messages = signal<Message[]>([]);
+    private readonly version$ = signal('');
+    private readonly libraries$ = signal<Library[]>([]);
 
     public constructor(
         private api: AboutApiService,
         private toolbar: ToolbarService,
+        private start: StartService,
+        private readonly indexChange: IndexChangeService,
     ) {
         effect(() => {
-            const aboutToolbar = this.aboutToolbar();
-            if (aboutToolbar) {
-                this.toolbar.set(aboutToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
     }
 
-    public readonly aboutToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('aboutToolbar');
 
     public readonly author = signal(environment.author).asReadonly();
 
     public readonly homepage = signal(environment.homepage).asReadonly();
 
-    public readonly libraries = this._libraries.asReadonly();
+    public readonly libraries = this.libraries$.asReadonly();
 
-    public readonly messages = this._messages.asReadonly();
+    public readonly endpoints = this.indexChange.endpointCount;
+
+    public readonly shells = this.indexChange.documentCount;
 
     public ngOnInit(): void {
         this.api.getInfo().subscribe(info => {
-            this._serverVersion.set(info.version);
-            this._libraries.set(info.libraries ?? []);
+            this.version$.set(info.version);
+            this.libraries$.set(info.libraries ?? []);
         });
-
-        this.api.getMessages().subscribe(messages => this._messages.set(messages));
     }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
+    }
+
+    public addToStart(): Observable<void> {
+        if (this.start.add('About', 'About', {})) {
+            return this.start.save();
+        }
+
+        return EMPTY;
     }
 }

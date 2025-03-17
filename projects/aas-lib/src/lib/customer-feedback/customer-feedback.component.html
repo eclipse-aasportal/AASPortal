@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -46,3 +46,11 @@
     </div>
   }
 </div>
+
+<ng-template #customerFeedbackToolbar>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
+</ng-template>

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -39,17 +39,17 @@ export class Authentication {
             Authentication.instance = container.resolve(Authentication);
         }
 
-        return Authentication.instance.checkAsync(token, role);
+        return Authentication.instance.check(token, role);
     }
 
-    public async checkAsync(token: string, role: UserRole): Promise<JWTPayload> {
+    public async check(token: string, role: UserRole): Promise<JWTPayload> {
         const payload = jwt.verify(token, this.publicKey) as JWTPayload;
         if (!payload.role) {
             throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
         }
 
         if (payload.role === 'admin' || payload.role === 'editor') {
-            if (!payload.sub || !(await this.auth.hasUserAsync(payload.sub))) {
+            if (!payload.sub || !(await this.auth.hasUser(payload.sub))) {
                 throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
             }
         } else if (payload.role !== 'guest') {

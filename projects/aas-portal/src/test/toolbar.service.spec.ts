@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,7 @@
 import { TestBed } from '@angular/core/testing';
 import { TemplateRef } from '@angular/core';
 
-import { ToolbarService } from '../app/toolbar.service';
+import { ToolbarService } from '../../../aas-lib/src/lib/toolbar.service';
 
 describe('ToolbarService', () => {
     let service: ToolbarService;

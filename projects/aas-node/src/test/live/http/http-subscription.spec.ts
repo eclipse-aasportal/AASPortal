@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,12 +8,12 @@
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { aas, DefaultType, LiveRequest } from 'aas-core';
+import { createSpyObj, DoneFn } from 'fhg-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { AASApiClient } from '../../../app/package/aas-api/aas-api-client.js';
 import env from '../../assets/aas-environment.js';
-import { createSpyObj, DoneFn } from 'fhg-jest'
 
 describe('HttpSubscription', function () {
     let aasxServer: jest.Mocked<AASApiClient>;
@@ -24,13 +24,7 @@ describe('HttpSubscription', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        aasxServer = createSpyObj<AASApiClient>([
-            'getShellsAsync',
-            'commitAsync',
-            'openFileAsync',
-            'readValueAsync',
-            'resolveNodeId',
-        ]);
+        aasxServer = createSpyObj<AASApiClient>(['getShells', 'commit', 'openFile', 'readValue', 'resolveNodeId']);
 
         const reference: aas.Reference = {
             type: 'ModelReference',
@@ -66,7 +60,7 @@ describe('HttpSubscription', function () {
 
     it('open/close subscription', (done: DoneFn) => {
         jest.useFakeTimers();
-        aasxServer.readValueAsync.mockReturnValue(
+        aasxServer.readValue.mockReturnValue(
             new Promise<DefaultType>(result => {
                 expect(true).toBeTruthy();
                 result(42);
