@@ -7,9 +7,10 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { StartComponent } from '../../app/start/start.component';
-import { StartService, ToolbarService } from 'aas-lib';
 import { signal } from '@angular/core';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { StartService, ToolbarService } from 'aas-lib';
+import { StartComponent } from '../../app/start/start.component';
 
 describe('StartComponent', () => {
     let component: StartComponent;
@@ -32,7 +33,14 @@ describe('StartComponent', () => {
                     useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
             ],
-            imports: [],
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(StartComponent);
