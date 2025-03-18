@@ -336,7 +336,7 @@ export class LowDbIndex extends AASIndex {
         return {
             previous: null,
             documents: documents.slice(0, limit),
-            next: documents.length >= 0 ? this.toDocumentId(documents[limit]) : null,
+            next: documents.length >= n ? this.toDocumentId(documents[limit]) : null,
         };
     }
 

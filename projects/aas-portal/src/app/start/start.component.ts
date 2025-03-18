@@ -8,6 +8,7 @@
 
 import { EMPTY, Observable } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -35,7 +36,7 @@ export type StartTileItem = {
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrl: './start.component.scss',
-    imports: [NgComponentOutlet],
+    imports: [NgComponentOutlet, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy {
@@ -44,14 +45,14 @@ export class StartComponent implements OnDestroy {
         private readonly start: StartService,
     ) {
         effect(() => {
-            const startToolbar = this.startToolbar();
-            if (startToolbar) {
-                this.toolbar.set(startToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
     }
 
-    public readonly startToolbar = viewChild<TemplateRef<unknown>>('startToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
 
     public readonly isEmpty = computed(() => this.items().length === 0);
 
