@@ -10,7 +10,7 @@
     @if (isEmpty()){
     <div class="alert alert-info text-center mt-2" role="alert" translate>Start.EMPTY</div>
     } @else {
-    <div class="d-flex flex-wrap align-items-stretch">
+    <div class="d-flex flex-wrap">
         @for (item of items(); track item; let i = $index) {
         <div class="p-2 rounded" [class.bg-info-subtle]="item.selected()">
             <div class="card fhg-card" (click)="toggleSelected($event, item)" tabindex="0">
@@ -25,8 +25,14 @@
 
 <ng-template #startToolbar>
     <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="remove().subscribe()">
+        <button class="btn btn-primary" type="button" (click)="remove().subscribe()" [disabled]="!hasSelected()">
             <i class="bi bi-trash"></i>
         </button>
-    </div>
+        <button class="btn btn-primary" type="button" (click)="moveLeft().subscribe()" [disabled]="!canMoveLeft()">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <button class="btn btn-primary" type="button" (click)="moveRight().subscribe()" [disabled]="!canMoveRight()">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+   </div>
 </ng-template>
