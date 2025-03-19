@@ -17,6 +17,8 @@ import {
     DigitalProductPassportCardComponent,
     FavoriteComponent,
     START_TILE_TYPES,
+    START_TILES,
+    StartTile,
     StartTileType,
 } from 'aas-lib';
 
@@ -68,6 +70,16 @@ export const appConfig: ApplicationConfig = {
                     component: DashboardCardComponent,
                 },
             ] satisfies StartTileType[],
+        },
+        {
+            provide: START_TILES,
+            useValue: [
+                {
+                    type: 'About',
+                    id: '395d511d-93ef-443a-b961-0ebdf7d2c55b',
+                    property: {},
+                } satisfies StartTile,
+            ],
         },
     ],
 };

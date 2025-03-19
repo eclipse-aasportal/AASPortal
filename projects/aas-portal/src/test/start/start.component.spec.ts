@@ -19,7 +19,7 @@ describe('StartComponent', () => {
 
     beforeEach(async () => {
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save'], {
-            tiles: signal([]).asReadonly(),
+            tiles: signal([]),
         });
 
         await TestBed.configureTestingModule({
