@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import {
@@ -20,17 +20,16 @@ import {
     computed,
     WritableSignal,
     signal,
+    untracked,
 } from '@angular/core';
 
 import { StartService, StartTile, ToolbarService } from 'aas-lib';
 
-export type StartTileItem = {
-    id: string;
+export interface StartTileItem extends StartTile {
     component: Type<unknown>;
-    property: Record<string, unknown>;
     selected: WritableSignal<boolean>;
     tile: StartTile;
-};
+}
 
 @Component({
     selector: 'fhg-start',
@@ -40,6 +39,8 @@ export type StartTileItem = {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy {
+    private readonly items$ = signal<StartTileItem[]>([]);
+
     public constructor(
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
@@ -50,30 +51,61 @@ export class StartComponent implements OnDestroy {
                 this.toolbar.set(template);
             }
         });
+
+        effect(() => {
+            const tiles = this.start.tiles();
+            this.items$.update(state => {
+                const map = new Map(state.map(item => [item.tile, item]));
+                const newState: StartTileItem[] = [];
+                for (const tile of tiles) {
+                    const item = map.get(tile);
+                    if (item !== undefined) {
+                        newState.push(item);
+                    } else {
+                        const type = this.start.getType(tile.type);
+                        if (type === undefined) {
+                            continue;
+                        }
+
+                        newState.push({
+                            ...tile,
+                            tile,
+                            component: type.component,
+                            selected: signal(false),
+                        });
+                    }
+                }
+
+                return newState;
+            });
+        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
 
+    public readonly items = this.items$.asReadonly();
+
     public readonly isEmpty = computed(() => this.items().length === 0);
 
-    public readonly items = computed(() => {
-        const items: StartTileItem[] = [];
-        for (const tile of this.start.tiles()) {
-            const type = this.start.getType(tile.type);
-            if (type === undefined) {
-                continue;
-            }
+    public readonly hasSelected = computed(() => this.items().some(item => item.selected()));
 
-            items.push({
-                id: tile.id,
-                component: type.component,
-                property: tile.property,
-                selected: signal(false),
-                tile,
-            });
-        }
+    public readonly canMoveLeft = computed(() => {
+        const indexes = this.items()
+            .map((item, index) => ({ item, index }))
+            .filter(({ item, index }) => item.selected())
+            .map(({ index }) => index);
 
-        return items;
+        return indexes.length === 1 && indexes[0] > 0;
+    });
+
+    public readonly canMoveRight = computed(() => {
+        const length = this.items().length;
+        const indexes = this.items()
+            .map((item, index) => ({ item, index }))
+            .filter(({ item, index }) => item.selected())
+            .map(({ index }) => index);
+
+        return indexes.length === 1 && indexes[0] < length - 1;
     });
 
     public ngOnDestroy(): void {
@@ -92,6 +124,40 @@ export class StartComponent implements OnDestroy {
         }
 
         selectedItems.forEach(item => this.start.remove(item.tile));
+        return this.start.save();
+    }
+
+    public moveLeft(): Observable<void> {
+        const index = this.items().findIndex(item => item.selected());
+        if (index === -1 || index === 0) {
+            return EMPTY;
+        }
+
+        this.start.tiles.update(state => {
+            const newState = [...state];
+            const temp = newState[index];
+            newState[index] = newState[index - 1];
+            newState[index - 1] = temp;
+            return newState;
+        });
+
+        return this.start.save();
+    }
+
+    public moveRight(): Observable<void> {
+        const index = this.items().findIndex(item => item.selected());
+        if (index === -1 || index === this.items().length - 1) {
+            return EMPTY;
+        }
+
+        this.start.tiles.update(state => {
+            const newState = [...state];
+            const temp = newState[index];
+            newState[index] = newState[index + 1];
+            newState[index + 1] = temp;
+            return newState;
+        });
+
         return this.start.save();
     }
 }
