@@ -140,6 +140,7 @@ export class DigitalProductPassportStore {
         if (nameplate === undefined) {
             return emptyMainData;
         }
+
         return {
             uriOfTheProduct: this.getPropertyValue(nameplate, 'URIOfTheProduct'),
             productType: this.getPropertyValue(nameplate, 'ManufacturerProductType'),

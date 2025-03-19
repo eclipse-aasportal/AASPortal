@@ -16,44 +16,49 @@ export type StartTileType = {
     component: Type<unknown>;
 };
 
-export type StartTile = {
+export interface StartTile {
     id: string;
     type: string;
     property: Record<string, unknown>;
-};
+}
 
+/** The provided component types that represent a tile or card on the START page. */
 export const START_TILE_TYPES = new InjectionToken<StartTileType[]>('Start tile component types');
+
+/** The initial set of tiles or cards on the START page. */
+export const START_TILES = new InjectionToken<StartTile[]>('Start tiles');
+
+const cookieName = 'v1.StartTiles';
 
 @Injectable({
     providedIn: 'root',
 })
 export class StartService {
-    private readonly tiles$ = signal<StartTile[]>([]);
-
     public constructor(
         private readonly auth: AuthService,
         @Inject(START_TILE_TYPES) private readonly types: StartTileType[],
+        @Inject(START_TILES) tiles: StartTile[],
     ) {
         this.auth.userId
             .pipe(
                 skipWhile(userId => userId === undefined),
                 takeUntilDestroyed(),
-                mergeMap(() => this.auth.getCookie('.StartTiles')),
-                map(value => {
-                    let values: StartTile[];
-                    try {
-                        values = value ? (JSON.parse(value) as StartTile[]) : [];
-                    } catch {
-                        values = [];
-                    }
-
-                    this.tiles$.set(values);
-                }),
+                mergeMap(() => this.auth.getCookie(cookieName)),
             )
-            .subscribe();
+            .subscribe(data => {
+                if (data === undefined) {
+                    this.tiles.set(tiles);
+                } else {
+                    try {
+                        this.tiles.set(JSON.parse(data) as StartTile[]);
+                    } catch {
+                        this.tiles.set(tiles);
+                    }
+                }
+            });
     }
 
-    public readonly tiles = this.tiles$.asReadonly();
+    public readonly tiles = signal<StartTile[]>([]);
 
     public getType(name: string): StartTileType | undefined {
         return this.types.find(item => item.name === name);
@@ -64,26 +69,26 @@ export class StartService {
             return false;
         }
 
-        if (this.tiles$().some(tile => tile.id === id)) {
+        if (this.tiles().some(tile => tile.id === id)) {
             return false;
         }
 
-        this.tiles$.update(state => [...state, { id, property, type: typeName }]);
+        this.tiles.update(state => [...state, { id, property, type: typeName }]);
         return true;
     }
 
     public remove(tile: StartTile): void {
-        this.tiles$.update(state => state.filter(item => item !== tile));
+        this.tiles.update(state => state.filter(item => item !== tile));
     }
 
     public save(): Observable<void> {
-        return of(this.tiles$()).pipe(
+        return of(this.tiles()).pipe(
             map(tiles => JSON.stringify(tiles)),
             catchError(error => {
                 console.error(error);
                 return EMPTY;
             }),
-            mergeMap(value => this.auth.setCookie('.StartTiles', value)),
+            mergeMap(value => this.auth.setCookie(cookieName, value)),
         );
     }
 }

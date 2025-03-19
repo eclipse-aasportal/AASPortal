@@ -73,7 +73,7 @@ export class AboutComponent implements OnInit, OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        if (this.start.add('About', 'About', {})) {
+        if (this.start.add('About', '395d511d-93ef-443a-b961-0ebdf7d2c55b', {})) {
             return this.start.save();
         }
 
