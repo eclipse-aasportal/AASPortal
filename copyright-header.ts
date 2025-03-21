@@ -35,7 +35,7 @@ const htmlHeader = [
 
 checkFilesAsync([
     './projects/aas-portal/src',
-    './projects/aas-server/src',
+    './projects/aas-node/src',
     './projects/aas-lib/src',
     './projects/aas-core/src',
 ]);

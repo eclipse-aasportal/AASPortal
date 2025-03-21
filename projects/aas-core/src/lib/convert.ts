@@ -45,7 +45,7 @@ const mimeTypes = new Map<string, string>([
     ['image/vnd.microsoft.icon', '.ico'],
     ['text/calendar', '.ics'],
     ['application/java-archive', '.jar'],
-    ['image/jpeg', '.jar'],
+    ['image/jpeg', '.jpg'],
     ['text/javascript', '.js'],
     ['application/json', '.json'],
     ['application/ld+json', '.jsonld'],
@@ -903,7 +903,7 @@ function toBigInt(value: unknown): bigint | undefined {
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         try {
             return BigInt(value);
-        } catch (error) {
+        } catch {
             return undefined;
         }
     }

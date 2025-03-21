@@ -46,7 +46,7 @@ export class AASTableFilter {
             }
 
             return this.evaluate(this.queryParser.ast, document, [...this.traverseEnvironment(env)]);
-        } catch (error) {
+        } catch {
             return false;
         }
     }

@@ -25,11 +25,11 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, AASDocument, noop } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
-    ClipboardService,
+    decodeBase64Url,
     DownloadService,
     NotifyService,
     SecuredImageComponent,
@@ -43,16 +43,15 @@ import { NewElementCommand } from './commands/new-element-command';
 import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
-import { DashboardQuery } from '../types/dashboard-query-params';
 import { ToolbarService } from '../toolbar.service';
 import { AASStore } from './aas.store';
 import { DashboardChartType } from '../dashboard/dashboard.store';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    standalone: true,
     imports: [SecuredImageComponent, AASTreeComponent, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,6 +59,7 @@ export class AASComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly store: AASStore,
         private readonly router: Router,
+        private readonly location: Location,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
         private readonly notify: NotifyService,
@@ -69,26 +69,19 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
-        private readonly clipboard: ClipboardService,
     ) {
-        effect(
-            () => {
-                const value = this.dashboardPage();
-                if (value !== untracked(this.dashboard.activePage)) {
-                    this.dashboard.setActivePage(value);
-                }
-            },
-            { allowSignalWrites: true },
-        );
-        effect(
-            () => {
-                const aasToolbar = this.aasToolbar();
-                if (aasToolbar !== undefined) {
-                    this.toolbar.set(aasToolbar);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const value = this.dashboardPage();
+            if (value !== untracked(this.dashboard.activePage)) {
+                this.dashboard.setActivePage(value);
+            }
+        });
+        effect(() => {
+            const aasToolbar = this.aasToolbar();
+            if (aasToolbar !== undefined) {
+                this.toolbar.set(aasToolbar);
+            }
+        });
     }
 
     public readonly aasToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
@@ -103,7 +96,7 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public readonly thumbnail = computed(() => this.store.document$()?.thumbnail ?? '-');
 
-    public readonly readOnly = computed(() => this.store.document$()?.readonly ?? false);
+    public readonly readOnly = computed(() => !!this.store.document$()?.readonly);
 
     public readonly version = computed(() =>
         this.versionToString(head(this.store.document$()?.content?.assetAdministrationShells)?.administration),
@@ -161,18 +154,27 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public ngOnInit(): void {
         this.route.queryParams.pipe(first()).subscribe(params => {
-            if (params?.search) {
+            if (params.search) {
                 this.store.searchExpression$.set(params.search);
             }
 
-            if (params) {
-                const document: AASDocument = this.clipboard.get('AASDocument');
-                if (!document) {
-                    this.getDocument(params.id, params.endpoint);
-                } else if (!document.content) {
-                    this.getDocumentContent(document);
+            const state = this.location.getState() as Record<string, string>;
+            if (state.data) {
+                try {
+                    const document: AASDocument = JSON.parse(state.data);
+                    if (!document.content) {
+                        this.getDocumentContent(document);
+                    }
+                } catch {
+                    noop();
+                }
+            }
+
+            if (params.id) {
+                if (params.endpoint) {
+                    this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
                 } else {
-                    this.store.document$.set(document);
+                    this.getDocument(decodeBase64Url(params.id));
                 }
             }
         });
@@ -198,8 +200,7 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         this.dashboard.add(page, document, this.store.selectedElements, chartType as DashboardChartType);
-        this.clipboard.set('DashboardQuery', { page: this.dashboardPage() } as DashboardQuery);
-        this.router.navigateByUrl('/dashboard?format=DashboardQuery', { skipLocationChange: true });
+        this.router.navigate(['/dashboard'], { queryParams: { page } });
     }
 
     public synchronize(): Observable<void> {
@@ -303,7 +304,7 @@ export class AASComponent implements OnInit, OnDestroy {
                     return EMPTY;
                 }
 
-                return this.download.downloadDocument(document.endpoint, document.id, document.idShort + '.aasx');
+                return this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx');
             }),
             catchError(error => this.notify.error(error)),
         );
@@ -334,9 +335,10 @@ export class AASComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getDocument(id: string, endpoint: string): void {
+    private getDocument(id: string, endpoint?: string): void {
         this.api.getDocument(id, endpoint).subscribe({
             next: document => this.store.document$.set(document),
+            error: error => console.debug(error),
         });
     }
 

@@ -18,9 +18,7 @@ export interface SortEvent {
 }
 
 @Directive({
-    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: 'th[sortable]',
-    // eslint-disable-next-line @angular-eslint/no-host-metadata-property
     host: {
         '[class.asc]': 'direction === "asc"',
         '[class.desc]': 'direction === "desc"',

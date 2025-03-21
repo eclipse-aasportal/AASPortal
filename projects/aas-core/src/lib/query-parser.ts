@@ -57,7 +57,7 @@ export class QueryParser {
 
     public constructor(
         expression: string,
-        private readonly language: string = 'en',
+        private readonly language = 'en',
     ) {
         this.expression = expression.trim();
     }
@@ -164,7 +164,7 @@ export class QueryParser {
         this.endTerm(current.orExpressions);
     }
 
-    private getText(leaveQuotationMarks: boolean = false): string {
+    private getText(leaveQuotationMarks = false): string {
         const c = this.expression[this.currentPosition];
         if (c === '"' || c === "'") {
             const i = this.expression.indexOf(c, this.currentPosition + 1);

@@ -15,7 +15,6 @@ import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
     selector: 'fhg-notify',
     templateUrl: './notify.component.html',
     styleUrls: ['./notify.component.scss'],
-    standalone: true,
     imports: [NgbToast],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

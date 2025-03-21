@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, effect, input, output } from '@angular/core';
 
 import {
     aas,
@@ -32,6 +32,7 @@ import {
     isOperation,
     isSubmodel,
     equalDocument,
+    getSemanticId,
 } from 'aas-core';
 
 import { AASTree, AASTreeRow } from './aas-tree-row';
@@ -41,27 +42,21 @@ import { ShowVideoFormComponent } from '../show-video-form/show-video-form.compo
 import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../convert';
-import { ViewQuery } from '../types/view-query-params';
-import { WindowService } from '../window.service';
 import { DocumentService } from '../document.service';
-import { DownloadService } from '../download.service';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import {
-    SubmodelViewDescriptor,
-    resolveSemanticId,
-    supportedSubmodelTemplates,
-} from '../submodel-template/submodel-template';
+import { findRoute } from '../views/submodel-template';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
+import { AuthService } from '../auth/auth.service';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    standalone: true,
     imports: [NgClass, NgStyle, TranslateModule],
     providers: [AASTreeSearch, AASTreeApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,31 +74,25 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly searching: AASTreeSearch,
         private readonly router: Router,
         private readonly modal: NgbModal,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
         private readonly dom: DocumentService,
-        private readonly download: DownloadService,
+        private readonly auth: AuthService,
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
-        effect(
-            () => {
-                this.searching.start(this.searchExpression());
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.searching.start(this.searchExpression());
+        });
 
-        effect(
-            () => {
-                const document = this.document();
-                if (!equalDocument(document, this.store.document)) {
-                    this.store.document = document;
-                    this.updateRows(document);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const document = this.document();
+            if (!equalDocument(document, this.store.document)) {
+                this.store.document = document;
+                this.updateRows(document);
+            }
+        });
 
         effect(() => {
             if (this.state() === 'online') {
@@ -117,28 +106,22 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             this.selected.emit(this.store.selectedElements$());
         });
 
-        effect(
-            () => {
-                const matchIndex = this.matchIndex();
-                if (matchIndex >= 0) {
-                    this.store.expandRow(matchIndex);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const matchIndex = this.matchIndex();
+            if (matchIndex >= 0) {
+                this.store.expandRow(matchIndex);
+            }
+        });
 
-        effect(
-            () => {
-                const row = this.matchRow();
-                if (!row) return;
+        effect(() => {
+            const row = this.matchRow();
+            if (!row) return;
 
-                setTimeout(() => {
-                    const element = this.dom.getElementById(row.id);
-                    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                });
-            },
-            { allowSignalWrites: true },
-        );
+            setTimeout(() => {
+                const element = this.dom.getElementById(row.id);
+                element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            });
+        });
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -284,7 +267,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         } else if (isOperation(node.element)) {
             this.openOperation(node.element);
         } else if (isSubmodel(node.element)) {
-            this.openSubmodel(node.element);
+            this.openView(node.element);
         }
     }
 
@@ -327,22 +310,17 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async openFile(file: aas.File): Promise<void> {
-        if (!file.value || this.state() === 'online') return;
-
-        const { name, url } = this.resolveFile(file);
-        if (name && url) {
-            if (file.contentType.startsWith('image/')) {
-                await this.showImageAsync(name, url);
-            } else if (file.contentType.startsWith('video/')) {
-                await this.showVideoAsync(name, url);
-            } else if (file.contentType.endsWith('/pdf')) {
-                const token = await this.api.getTokenAsync(url);
-                this.window.open(url + '?access_token=' + token);
-            } else if (file) {
-                await this.downloadFileAsync(name, url);
-            }
+    private openFile(file: aas.File): void {
+        if (!file.value || this.state() === 'online') {
+            return;
         }
+
+        const { url } = this.resolveFile(file);
+        if (url === undefined) {
+            return;
+        }
+
+        this.window.open(url + '?access_token=' + this.auth.token());
     }
 
     private async openBlob(blob: aas.Blob): Promise<void> {
@@ -396,29 +374,29 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private openSubmodel(submodel: aas.Submodel | undefined): void {
-        if (!submodel || this.state() === 'online') return;
-
-        const semanticId = resolveSemanticId(submodel);
-        if (semanticId) {
-            const document = this.document();
-            const template = supportedSubmodelTemplates.get(semanticId);
-            if (template && document) {
-                const descriptor: SubmodelViewDescriptor = {
-                    template,
-                    submodels: [
-                        {
-                            id: document.id,
-                            endpoint: document.endpoint,
-                            idShort: submodel.idShort,
-                        },
-                    ],
-                };
-
-                this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
-                this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
-            }
+    private openView(submodel: aas.Submodel | undefined): Promise<boolean> {
+        const document = this.document();
+        if (submodel === undefined || this.state() === 'online' || document === null) {
+            return Promise.resolve(false);
         }
+
+        const semanticId = getSemanticId(submodel);
+        if (semanticId === undefined) {
+            return Promise.resolve(false);
+        }
+
+        const route = findRoute(semanticId);
+        if (route === undefined) {
+            return Promise.resolve(false);
+        }
+
+        return this.router.navigate([`/view/${route.path}`], {
+            queryParams: {
+                endpoint: encodeBase64Url(document.endpoint),
+                id: encodeBase64Url(document.id),
+            },
+            state: { data: JSON.stringify([document]) },
+        });
     }
 
     private async showImageAsync(name: string, src: string): Promise<void> {
@@ -445,19 +423,11 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async downloadFileAsync(name: string, url: string): Promise<void> {
-        try {
-            this.download.downloadFileAsync(url, name);
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
     private goOnline(): void {
         try {
             this.prepareOnline(this.store.rows.filter(row => row.selected));
             this.play();
-        } catch (error) {
+        } catch {
             this.stop();
         }
     }
@@ -504,13 +474,12 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private openDocumentByAssetId(assetId: string): void {
-        if (assetId) {
+    private openDocumentByAssetId(id: string): void {
+        if (id) {
             this.clipboard.clear('AASDocument');
             this.router.navigate(['/aas'], {
-                skipLocationChange: true,
                 onSameUrlNavigation: 'reload',
-                queryParams: { id: assetId },
+                queryParams: { id: encodeBase64Url(id) },
             });
         }
     }
@@ -518,9 +487,8 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private openExternalReference(reference: aas.Reference): void {
         this.clipboard.clear('AASDocument');
         this.router.navigate(['/aas'], {
-            skipLocationChange: true,
             onSameUrlNavigation: 'reload',
-            queryParams: { id: reference.keys[0].value },
+            queryParams: { id: encodeBase64Url(reference.keys[0].value) },
         });
     }
 
@@ -536,9 +504,8 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         } else if (reference.keys[0].type === 'AssetAdministrationShell') {
             this.clipboard.clear('AASDocument');
             this.router.navigate(['/aas'], {
-                skipLocationChange: true,
                 onSameUrlNavigation: 'reload',
-                queryParams: { id: reference.keys[0].value },
+                queryParams: { id: encodeBase64Url(reference.keys[0].value) },
             });
         }
     }
@@ -592,7 +559,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                 value.name = basename(file.value);
                 const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
-                value.url = `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+                value.url = `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }
         }
 

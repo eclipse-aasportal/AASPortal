@@ -10,7 +10,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AuthService, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
+import { AuthService, NotifyService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 import { WebSocketData } from 'aas-core';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
@@ -36,7 +36,7 @@ describe('DashboardComponent', () => {
         webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
         webSocketFactory.create.and.returnValue(webSocketSubject);
 
-        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { ready: of(true) });
+        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { userId: of('guest') });
         auth.checkCookie.and.returnValue(of(true));
         auth.setCookie.and.returnValue(of(void 0));
         auth.getCookie.and.callFake(name => {
@@ -66,8 +66,8 @@ describe('DashboardComponent', () => {
                     useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
                 },
                 {
-                    provide: WindowService,
-                    useValue: jasmine.createSpyObj<WindowService>(['prompt']),
+                    provide: WINDOW,
+                    useValue: jasmine.createSpyObj<Window>(['prompt']),
                 },
                 {
                     provide: ToolbarService,

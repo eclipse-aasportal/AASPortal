@@ -9,6 +9,7 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    Inject,
     OnDestroy,
     computed,
     effect,
@@ -23,18 +24,17 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTableRow } from './aas-table-row';
-import { ClipboardService } from '../clipboard.service';
-import { WindowService } from '../window.service';
 import { ViewMode } from '../types/view-mode';
 import { AASTableStore } from './aas-table.store';
 import { MaxLengthPipe } from '../max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
+import { encodeBase64Url } from '../convert';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.component.html',
     styleUrls: ['./aas-table.component.scss'],
-    standalone: true,
     imports: [NgbTooltip, MaxLengthPipe, TranslateModule],
     providers: [AASTableStore],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,23 +46,16 @@ export class AASTableComponent implements OnDestroy {
     public constructor(
         private readonly router: Router,
         private readonly store: AASTableStore,
-        private readonly clipboard: ClipboardService,
-        private readonly window: WindowService,
+        @Inject(WINDOW) private readonly window: Window,
         private readonly translate: TranslateService,
     ) {
-        effect(
-            () => {
-                this.store.initialize(this.documents(), untracked(this.viewMode));
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.store.initialize(this.documents(), untracked(this.viewMode));
+        });
 
-        effect(
-            () => {
-                this.store.setSelected(this.selected(), untracked(this.viewMode));
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            this.store.setSelected(this.selected(), untracked(this.viewMode));
+        });
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -111,13 +104,12 @@ export class AASTableComponent implements OnDestroy {
     }
 
     public open(row: AASTableRow): void {
-        this.clipboard.set('AASDocument', row.element);
         this.router.navigate(['/aas'], {
-            skipLocationChange: true,
             queryParams: {
-                id: row.id,
-                endpoint: row.endpoint,
+                endpoint: encodeBase64Url(row.endpoint),
+                id: encodeBase64Url(row.id),
             },
+            state: { data: JSON.stringify(row.element) },
         });
     }
 

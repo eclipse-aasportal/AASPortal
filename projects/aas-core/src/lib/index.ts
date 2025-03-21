@@ -44,7 +44,7 @@ export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function noop(...args: unknown[]) {}
 
 /**
@@ -98,7 +98,7 @@ export function stringFormat(format: string, ...args: unknown[]) {
                 return match;
             }
         });
-    } catch (error) {
+    } catch {
         return format;
     }
 }
@@ -112,7 +112,7 @@ export function stringFormat(format: string, ...args: unknown[]) {
 export function equalUrls(url1: string, url2: string): boolean {
     try {
         return url1 === url2 || equals(new URL(url1), new URL(url2));
-    } catch (_) {
+    } catch {
         return false;
     }
 
@@ -165,6 +165,28 @@ export function isHasSemantics(value: unknown): value is HasSemantics {
         isReference((value as HasSemantics).semanticId) ||
         Array.isArray((value as HasSemantics).supplementalSemanticIds)
     );
+}
+
+/**
+ * Gets the semantic identifier of the specified AAS element.
+ * @param value The AAS element.
+ * @returns The semantic identifier or `undefined`.
+ */
+export function getSemanticId(value: HasSemantics | Reference): string | undefined {
+    let semanticId: string | undefined;
+    if (value) {
+        if (isReference(value)) {
+            if (value.keys.length > 0) {
+                return value.keys[0].value;
+            }
+        } else {
+            if (value.semanticId?.keys != null && value.semanticId.keys.length > 0) {
+                return value.semanticId.keys[0].value;
+            }
+        }
+    }
+
+    return semanticId;
 }
 
 /**

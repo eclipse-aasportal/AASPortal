@@ -27,7 +27,7 @@
         </tr>
     </thead>
     <tbody>
-        @for (message of messages(); track message) {
+        @for (message of messages(); track message.text) {
         <tr>
             <td>
                 @if (message.type === 'Info') {

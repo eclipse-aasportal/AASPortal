@@ -29,7 +29,6 @@ export interface LoginFormResult {
     selector: 'fhg-login',
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -8,21 +8,33 @@
 
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { of } from 'rxjs';
+import { noop } from 'aas-core';
+import { AuthService } from 'aas-lib';
 
 import { createDocument } from '../assets/test-document';
 import { AASApiService } from '../../app/aas/aas-api.service';
-import { noop } from 'lodash-es';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AASApiService', function () {
     let service: AASApiService;
     let httpTestingController: HttpTestingController;
+    let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(function () {
+        auth = jasmine.createSpyObj<AuthService>({}, { userId: of('guest') });
+
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [],
+            providers: [
+                {
+                    provide: AuthService,
+                    useValue: auth,
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
 
         service = TestBed.inject(AASApiService);
         httpTestingController = TestBed.inject(HttpTestingController);
@@ -37,14 +49,14 @@ describe('AASApiService', function () {
     });
 
     describe('getDocument', () => {
-        it('/api/v1/containers/:name/documents/:id}', function () {
+        it('/api/v1/endpoints/:name/documents/:id}', function () {
             const document = createDocument('document1');
 
             service.getDocument('document1', 'Samples').subscribe(value => {
                 expect(value).toEqual(document);
             });
 
-            const req = httpTestingController.expectOne('/api/v1/containers/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
+            const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
             expect(req.request.method).toEqual('GET');
             req.flush(document);
         });

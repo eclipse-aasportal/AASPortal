@@ -18,7 +18,6 @@ import { SortEvent, SortableHeaderDirective } from '../sortable-header.directive
     selector: 'fhg-message-table',
     templateUrl: './message-table.component.html',
     styleUrls: ['./message-table.component.scss'],
-    standalone: true,
     imports: [SortableHeaderDirective, NgbPagination, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

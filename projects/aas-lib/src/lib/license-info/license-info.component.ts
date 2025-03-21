@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { NgbCollapseModule, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { Library } from 'aas-core';
 
@@ -15,8 +15,7 @@ import { Library } from 'aas-core';
     selector: 'fhg-license-info',
     templateUrl: './license-info.component.html',
     styleUrls: ['./license-info.component.scss'],
-    standalone: true,
-    imports: [NgbPagination, NgbCollapseModule, TranslateModule],
+    imports: [NgbCollapseModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LicenseInfoComponent {
