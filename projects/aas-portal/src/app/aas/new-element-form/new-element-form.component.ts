@@ -8,18 +8,16 @@
 
 import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { TemplateService } from 'aas-lib';
 import { TemplateDescriptor, aas, getChildren, isEnvironment } from 'aas-core';
-import { FormsModule } from '@angular/forms';
-import { AsyncPipe } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'fhg-new-element',
     templateUrl: './new-element-form.component.html',
     styleUrls: ['./new-element-form.component.scss'],
-    standalone: true,
-    imports: [NgbToast, FormsModule, AsyncPipe, TranslateModule],
+    imports: [NgbToast, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewElementFormComponent {

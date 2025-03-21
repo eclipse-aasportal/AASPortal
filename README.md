@@ -10,8 +10,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 
 ## Prerequisites
 - Visual Studio Code
-- Node.js v18.10.0
-- GIT 2.36.0.windows
+- Node.js v22.12.0
 - Docker Desktop 4.x  
 
 ## Getting Started

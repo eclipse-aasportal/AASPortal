@@ -22,7 +22,6 @@ export interface LangStringRow extends aas.LangString {
     selector: 'fhg-edit-element',
     templateUrl: './edit-element-form.component.html',
     styleUrls: ['./edit-element-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -164,7 +163,7 @@ export class EditElementFormComponent {
     public setLanguage(langString: LangStringRow, value: string): void {
         try {
             langString.language = Intl.getCanonicalLocales(value)[0];
-        } catch (err) {
+        } catch {
             this.pushMessage(`${value} is an invalid locale ID.`);
         }
     }
@@ -313,7 +312,7 @@ export class EditElementFormComponent {
     }
 
     private referenceToString(reference?: aas.Reference): string {
-        return reference ? reference.keys.map(key => key.value).join('/') : '-';
+        return reference ? reference.keys.map(key => key.value).join('.') : '-';
     }
 
     private pushMessage(message: string): void {

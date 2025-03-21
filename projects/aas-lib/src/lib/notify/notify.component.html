@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-@for (message of messages(); track message) {
+@for (message of messages(); track message.text) {
   <ngb-toast [class]="message.classname" [autohide]="message.autohide"
   [delay]="message.delay" (hidden)="remove(message)" header="{{message.header}}">{{message.text}}</ngb-toast>
 }

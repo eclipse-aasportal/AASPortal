@@ -13,7 +13,6 @@ import { MainComponent } from './main/main.component';
     selector: 'fhg-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
-    standalone: true,
     imports: [MainComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

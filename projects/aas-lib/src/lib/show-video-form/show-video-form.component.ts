@@ -14,7 +14,6 @@ import { TranslateModule } from '@ngx-translate/core';
     selector: 'fhg-show-video',
     templateUrl: './show-video-form.component.html',
     styleUrls: ['./show-video-form.component.scss'],
-    standalone: true,
     imports: [TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

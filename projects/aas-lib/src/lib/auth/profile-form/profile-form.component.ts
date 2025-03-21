@@ -25,7 +25,6 @@ export interface ProfileFormResult {
     selector: 'fhg-profile',
     templateUrl: './profile-form.component.html',
     styleUrls: ['./profile-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, FormsModule, NgbCollapse, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
