@@ -1230,3 +1230,22 @@ export function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
 
     return false;
 }
+
+/**
+ * Gets the referable that that is a descendant of the specified submodel.
+ * @param submodel The current submodel.
+ * @param idShortPath The idShort path of the referable.
+ * @returns The corresponding referable or `undefined`.
+ */
+export function getReferable(submodel: aas.Submodel, idShortPath: string): aas.Referable | undefined {
+    let referable: aas.Referable | undefined = submodel;
+    for (const idShort of idShortPath.split('.')) {
+        const children = getChildren(referable);
+        referable = children.find(child => child.idShort === idShort);
+        if (referable === undefined) {
+            return undefined;
+        }
+    }
+
+    return referable;
+}
