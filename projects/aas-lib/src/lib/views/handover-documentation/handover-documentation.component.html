@@ -21,7 +21,7 @@
     <table class="table table-sm table-striped table-borderless caption-top">
         <tbody>
             @if (documentationItems().length === 0) {
-            <caption class="" translate>HandoverDocumentation.EMPTY</caption>
+            <caption class="text-nowrap" translate>HandoverDocumentation.EMPTY</caption>
             }
             @for (item of documentationItems(); track item.title) {
             <tr>
