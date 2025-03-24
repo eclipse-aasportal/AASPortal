@@ -176,7 +176,8 @@
         "PLACEHOLDER_FILTER": "Filter",
         "DigitalProductPassport": "Produktpass",
         "CustomerFeedback": "Nutzer-Feedback",
-        "Nameplate": "Typenschild"
+        "Nameplate": "Typenschild",
+        "HandoverDocumentation": "Übergabedokumentation"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -342,5 +343,14 @@
         "NUMBER_OF_ENDPOINTS": "Endpunkte",
         "NUMBER_OF_SHELLS": "Verwaltungsschalen",
         "ABOUT": "Info über..."
+    },
+    "HandoverDocumentation": {
+    },
+    "DigitalNameplate": {
+        "ManufacturerName": "Hersteller",
+        "ManufacturerProductType": "Typ",
+        "ManufacturerProductFamily": "Familie",
+        "ProductArticleNumberOfManufacturer": "Art.-Nr.",
+        "SerialNumber":"Serien-Nr."
     }
 }

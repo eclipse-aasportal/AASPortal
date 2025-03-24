@@ -7,17 +7,22 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
-import { Location } from '@angular/common';
+import { Location as NgLocation } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { nameplate } from './digital-nameplate-document';
-import { DigitalNameplateComponent } from '../../lib/digital-nameplate/digital-nameplate.component';
-import { ToolbarService } from '../../lib/toolbar.service';
-import { AuthService } from '../../lib/auth/auth.service';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
+
+import { WINDOW } from '../../lib/window.service';
+import { AuthService } from '../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
-import { DigitalNameplateService } from '../../lib/digital-nameplate/digital-nameplate.service';
+import { HandoverDocumentationComponent } from '../../lib/views/handover-documentation/handover-documentation.component';
+import { HandoverDocumentationService } from '../../lib/views/handover-documentation/handover-documentation.service';
+
+import sample from '../assets/dpp-sample.json';
+import { ToolbarService } from '../../lib/toolbar.service';
 import { StartService } from '../../lib/start.service';
 
 @Component({
@@ -35,25 +40,30 @@ export class TestSecuredImageComponent {
     public readonly height = input<number | undefined>();
 }
 
-describe('DigitalNameplateComponent', () => {
-    let component: DigitalNameplateComponent;
-    let fixture: ComponentFixture<DigitalNameplateComponent>;
-    let location: jasmine.SpyObj<Location>;
+describe('HandoverDocumentationComponent', () => {
+    let component: HandoverDocumentationComponent;
+    let fixture: ComponentFixture<HandoverDocumentationComponent>;
+
+    let location: jasmine.SpyObj<NgLocation>;
+    let window: jasmine.SpyObj<Window>;
+    let api: jasmine.SpyObj<HandoverDocumentationService>;
     let auth: jasmine.SpyObj<AuthService>;
-    let api: jasmine.SpyObj<DigitalNameplateService>;
     let start: jasmine.SpyObj<StartService>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        location = jasmine.createSpyObj<NgLocation>(['getState']);
+        location.getState.and.returnValue({ data: JSON.stringify([sample]) });
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<DigitalNameplateService>(['getDocument', 'getContent']);
-        location = jasmine.createSpyObj<Location>(['getState']);
-        location.getState.and.returnValue({ data: JSON.stringify([nameplate]) });
+        api = jasmine.createSpyObj<HandoverDocumentationService>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
+        window = jasmine.createSpyObj<Window>(['open'], {
+            location: { toString: () => 'https://www.fraunhofer.de' } as Location,
+        });
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: Location,
+                    provide: NgLocation,
                     useValue: location,
                 },
                 {
@@ -65,9 +75,15 @@ describe('DigitalNameplateComponent', () => {
                     useValue: auth,
                 },
                 {
+                    provide: WINDOW,
+                    useValue: window,
+                },
+                {
                     provide: StartService,
                     useValue: start,
                 },
+                provideHttpClient(),
+                provideHttpClientTesting(),
                 provideRouter([]),
             ],
             imports: [
@@ -78,26 +94,22 @@ describe('DigitalNameplateComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
-        TestBed.overrideComponent(DigitalNameplateComponent, {
-            remove: { providers: [DigitalNameplateService], imports: [SecuredImageComponent] },
+        TestBed.overrideComponent(HandoverDocumentationComponent, {
+            remove: { providers: [HandoverDocumentationService], imports: [SecuredImageComponent] },
             add: {
-                providers: [{ provide: DigitalNameplateService, useValue: api }],
+                providers: [{ provide: HandoverDocumentationService, useValue: api }],
                 imports: [TestSecuredImageComponent],
             },
         });
 
-        fixture = TestBed.createComponent(DigitalNameplateComponent);
+        fixture = TestBed.createComponent(HandoverDocumentationComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('provides a "title"', () => {
-        expect(component.title()).toEqual('Nameplate');
     });
 });

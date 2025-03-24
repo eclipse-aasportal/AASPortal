@@ -50,7 +50,7 @@ export class StartService {
                     this.tiles.set(tiles);
                 } else {
                     try {
-                        this.tiles.set(JSON.parse(data) as StartTile[]);
+                        this.tiles.set((JSON.parse(data) as StartTile[]).filter(item => this.getType(item.type)));
                     } catch {
                         this.tiles.set(tiles);
                     }

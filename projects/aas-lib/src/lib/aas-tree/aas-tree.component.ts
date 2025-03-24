@@ -55,7 +55,7 @@ import { basename, encodeBase64Url } from '../utilities';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import { findRoute } from '../views/submodel-template';
+import { findRoute } from '../views/views';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';

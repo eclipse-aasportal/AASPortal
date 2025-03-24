@@ -7,18 +7,19 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DigitalNameplateCardComponent } from '../../lib/digital-nameplate/digital-nameplate-card.component';
 
-describe('DigitalNameplateCardComponent', () => {
-    let component: DigitalNameplateCardComponent;
-    let fixture: ComponentFixture<DigitalNameplateCardComponent>;
+import { CustomerFeedbackCardComponent } from '../../../lib/views/customer-feedback/customer-feedback-card.component';
+
+describe('CustomerFeedbackCardComponent', () => {
+    let component: CustomerFeedbackCardComponent;
+    let fixture: ComponentFixture<CustomerFeedbackCardComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(DigitalNameplateCardComponent);
+        fixture = TestBed.createComponent(CustomerFeedbackCardComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
