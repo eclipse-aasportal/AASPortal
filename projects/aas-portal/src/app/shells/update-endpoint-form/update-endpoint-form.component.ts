@@ -62,7 +62,23 @@ export class UpdateEndpointFormComponent {
     ) {
         effect(() => {
             const endpoint = this.endpoint();
-            this.schedule.set(endpoint.schedule?.type || 'every');
+            if (endpoint.schedule) {
+                this.schedule.set(endpoint.schedule.type);
+                if (endpoint.schedule.type === 'every') {
+                    const values = endpoint.schedule.values;
+                    if (Array.isArray(values) && values.length > 0) {
+                        if (typeof values[0] === 'number') {
+                            const minutes = values[0] / 60000;
+                            this.hours.set(Math.trunc(minutes / 60));
+                            this.minutes.set(minutes % 60);
+                        }
+                    }
+                }
+            } else {
+                this.schedule.set('every');
+                this.hours.set(1);
+                this.minutes.set(0);
+            }
 
             if (endpoint.headers) {
                 const items: HeaderItem[] = [];

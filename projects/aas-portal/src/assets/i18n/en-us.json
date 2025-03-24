@@ -346,6 +346,7 @@
         "ABOUT": "About..."
     },
     "HandoverDocumentation": {
+        "EMPTY": "No handover documents available."
     },
     "DigitalNameplate": {
         "ManufacturerName": "Manufacturer",
