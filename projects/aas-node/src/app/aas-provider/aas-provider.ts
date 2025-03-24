@@ -260,7 +260,7 @@ export class AASProvider {
         if (oldType !== newType) {
             if (newType === 'disabled') {
                 await this.index.clear(endpoint.name);
-            } else if (oldType === 'manual') {
+            } else if (oldType === 'manual' || oldType === 'disabled') {
                 setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         }
@@ -571,7 +571,7 @@ export class AASProvider {
         return this.variable.SCAN_ENDPOINT_TIMEOUT;
     }
 
-    private scanEndpoint = async (task: Task, endpoint: AASEndpoint) => {
+    private scanEndpoint = (task: Task, endpoint: AASEndpoint) => {
         const data: ScanEndpointData = {
             type: 'ScanEndpointData',
             taskId: task.id,
