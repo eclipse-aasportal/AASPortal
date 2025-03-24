@@ -10,6 +10,7 @@ import head from 'lodash-es/head';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
+import { Location } from '@angular/common';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
@@ -35,6 +36,7 @@ import {
     SecuredImageComponent,
     StartService,
     ToolbarService,
+    encodeBase64Url,
 } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -47,7 +49,6 @@ import { NewElementFormComponent } from './new-element-form/new-element-form.com
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AASStore } from './aas.store';
 import { DashboardChartType } from '../dashboard/dashboard.store';
-import { Location } from '@angular/common';
 
 @Component({
     selector: 'fhg-aas',
@@ -319,6 +320,7 @@ export class AASComponent implements OnInit, OnDestroy {
             this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
                 endpoint: document.endpoint,
                 id: document.id,
+                href: `/aas?endpoint=${encodeBase64Url(document.endpoint)}&id=${encodeBase64Url(document.id)}`,
             })
         ) {
             return this.start.save();

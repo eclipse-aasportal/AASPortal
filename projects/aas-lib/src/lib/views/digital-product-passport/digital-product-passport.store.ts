@@ -12,15 +12,15 @@ import {
     aas,
     AASDocument,
     convertToString,
-    getChildren,
     getLocaleValue,
+    getReferable,
     isFile,
     isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
 } from 'aas-core';
 
-import { basename } from '../utilities';
+import { basename } from '../../utilities';
 
 type ViewData = {
     document: AASDocument;
@@ -228,7 +228,7 @@ export class DigitalProductPassportStore {
     });
 
     public getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
-        const referable = this.getReferable(submodel, idShortPath);
+        const referable = getReferable(submodel, idShortPath);
         if (isProperty(referable)) {
             switch (referable.valueType) {
                 case 'xs:double':
@@ -254,7 +254,7 @@ export class DigitalProductPassportStore {
             return undefined;
         }
 
-        const referable = this.getReferable(submodel, idShortPath);
+        const referable = getReferable(submodel, idShortPath);
         if (isFile(referable)) {
             return referable;
         }
@@ -263,7 +263,7 @@ export class DigitalProductPassportStore {
     }
 
     private getPropertyValueAsNumber(submodel: aas.Submodel, idShortPath: string): number {
-        const referable = this.getReferable(submodel, idShortPath);
+        const referable = getReferable(submodel, idShortPath);
         if (isProperty(referable)) {
             if (referable.valueType === 'xs:double') {
                 return Number(referable.value);
@@ -274,7 +274,7 @@ export class DigitalProductPassportStore {
     }
 
     private getPropertyValueId(submodel: aas.Submodel, idShortPath: string): string {
-        const referable = this.getReferable(submodel, idShortPath);
+        const referable = getReferable(submodel, idShortPath);
         if (isProperty(referable)) {
             if (referable.valueId) {
                 return referable.valueId.keys.at(0)?.value ?? '-';
@@ -355,19 +355,6 @@ export class DigitalProductPassportStore {
                 });
             }
         }
-    }
-
-    private getReferable(submodel: aas.Submodel, idShortPath: string): aas.Referable | undefined {
-        let referable: aas.Referable | undefined = submodel;
-        for (const idShort of idShortPath.split('.')) {
-            const children = getChildren(referable);
-            referable = children.find(child => child.idShort === idShort);
-            if (referable === undefined) {
-                return undefined;
-            }
-        }
-
-        return referable;
     }
 
     private getDisplayName(element: aas.SubmodelElement): string {

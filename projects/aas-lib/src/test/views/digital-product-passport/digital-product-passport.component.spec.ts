@@ -14,15 +14,15 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { DigitalProductPassportComponent } from '../../lib/digital-product-passport/digital-product-passport.component';
-import { WINDOW } from '../../lib/window.service';
-import { DigitalProductPassportService } from '../../lib/digital-product-passport/digital-product-passport.service';
-import { AuthService } from '../../lib/auth/auth.service';
-import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
+import { DigitalProductPassportComponent } from '../../../lib/views/digital-product-passport/digital-product-passport.component';
+import { WINDOW } from '../../../lib/window.service';
+import { DigitalProductPassportService } from '../../../lib/views/digital-product-passport/digital-product-passport.service';
+import { AuthService } from '../../../lib/auth/auth.service';
+import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
 
-import sample from '../assets/dpp-sample.json';
-import { ToolbarService } from '../../lib/toolbar.service';
-import { StartService } from '../../lib/start.service';
+import sample from '../../assets/dpp-sample.json';
+import { ToolbarService } from '../../../lib/toolbar.service';
+import { StartService } from '../../../lib/start.service';
 
 @Component({
     selector: 'fhg-img',

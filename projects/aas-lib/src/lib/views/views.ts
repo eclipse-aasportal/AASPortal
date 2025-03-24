@@ -7,16 +7,17 @@
  *****************************************************************************/
 
 import { Route } from '@angular/router';
-import { CustomerFeedbackComponent } from '../customer-feedback/customer-feedback.component';
-import { DigitalNameplateComponent } from '../digital-nameplate/digital-nameplate.component';
-import { DigitalProductPassportComponent } from '../digital-product-passport/digital-product-passport.component';
+import { CustomerFeedbackComponent } from './customer-feedback/customer-feedback.component';
+import { DigitalNameplateComponent } from './digital-nameplate/digital-nameplate.component';
+import { DigitalProductPassportComponent } from './digital-product-passport/digital-product-passport.component';
+import { HandoverDocumentationComponent } from './handover-documentation/handover-documentation.component';
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
 
 export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
 export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
 export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
-
+export const HandoverDocumentation = '0173-1#01-AHF578#003';
 export const CarbonFootprint = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 
 export const viewRoutes: Route[] = [
@@ -37,6 +38,13 @@ export const viewRoutes: Route[] = [
     {
         path: 'DigitalProductPassport',
         component: DigitalProductPassportComponent,
+    },
+    {
+        path: 'HandoverDocumentation',
+        component: HandoverDocumentationComponent,
+        data: {
+            semanticIds: [HandoverDocumentation],
+        },
     },
 ];
 

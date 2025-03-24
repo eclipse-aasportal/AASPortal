@@ -33,6 +33,7 @@ import {
     getIdShortPath,
     getLocaleValue,
     getPreferredName,
+    getReferable,
     getSemanticId,
     isFile,
     isMultiLanguageProperty,
@@ -41,13 +42,13 @@ import {
     isSubmodelElementList,
 } from 'aas-core';
 
-import { ToolbarService } from '../toolbar.service';
-import { WINDOW } from '../window.service';
-import { AuthService } from '../auth/auth.service';
-import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../utilities';
-import { SecuredImageComponent } from '../secured-image/secured-image.component';
+import { ToolbarService } from '../../toolbar.service';
+import { WINDOW } from '../../window.service';
+import { AuthService } from '../../auth/auth.service';
+import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../../utilities';
+import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 import { DigitalNameplateService } from './digital-nameplate.service';
-import { StartService } from '../start.service';
+import { StartService } from '../../start.service';
 
 export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
 
@@ -117,7 +118,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
             return '-';
         }
 
-        return this.getPreferredName(tuple[0].content, tuple[1]);
+        return this.getDisplayName(tuple[1], tuple[0].content);
     });
 
     private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
@@ -151,7 +152,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
                 if (items.length > 0) {
                     groups.push({
                         idShort: element.idShort,
-                        name: this.getPreferredName(document.content, element),
+                        name: this.getDisplayName(element, document.content),
                         items,
                     });
                 }
@@ -160,7 +161,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
                 if (items.length > 0) {
                     groups.push({
                         idShort: element.idShort,
-                        name: this.getPreferredName(document.content, element),
+                        name: this.getDisplayName(element, document.content),
                         items,
                     });
                 }
@@ -220,11 +221,75 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
 
         const endpoint = nameplate[0].endpoint;
         const id = nameplate[0].id;
-        if (!this.start.add('DigitalNameplate', `DNP#${endpoint}#${id}`, { endpoint, id })) {
+        const details = this.getFavoriteDetails(nameplate[1]);
+        const notes = this.getFavoriteNotes(nameplate[1]);
+        const href = `/view/Nameplate?endpoint=${encodeBase64Url(endpoint)}&id=${encodeBase64Url(id)}`;
+        if (!this.start.add('Favorite', `DNP#${endpoint}#${id}`, { endpoint, id, details, notes, href })) {
             return EMPTY;
         }
 
         return this.start.save();
+    }
+
+    private getFavoriteDetails(nameplate: aas.Submodel): { name: string; value: string }[] {
+        const details: { name: string; value: string }[] = [];
+        const manufacturerName = this.getPropertyValue(nameplate, 'ManufacturerName');
+        if (manufacturerName) {
+            details.push({ name: 'DigitalNameplate.ManufacturerName', value: manufacturerName });
+        }
+
+        const productType = this.getPropertyValue(nameplate, 'ManufacturerProductType');
+        if (productType) {
+            details.push({ name: 'DigitalNameplate.ManufacturerProductType', value: productType });
+        }
+
+        const productFamily = this.getPropertyValue(nameplate, 'ManufacturerProductFamily');
+        if (productFamily) {
+            details.push({ name: 'DigitalNameplate.ManufacturerProductFamily', value: productFamily });
+        }
+
+        const articleNumber = this.getPropertyValue(nameplate, 'ProductArticleNumberOfManufacturer');
+        if (articleNumber) {
+            details.push({ name: 'DigitalNameplate.ProductArticleNumberOfManufacturer', value: articleNumber });
+        }
+
+        const serialNumber = this.getPropertyValue(nameplate, 'SerialNumber');
+        if (serialNumber) {
+            details.push({ name: 'DigitalNameplate.SerialNumber', value: serialNumber });
+        }
+
+        return details;
+    }
+
+    private getFavoriteNotes(submodel: aas.Submodel): string[] {
+        const notes: string[] = [];
+        const designation = this.getPropertyValue(submodel, 'ManufacturerProductDesignation');
+        if (designation) {
+            notes.push(designation);
+        }
+
+        return notes;
+    }
+
+    private getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
+        const referable = getReferable(submodel, idShortPath);
+        if (isProperty(referable)) {
+            switch (referable.valueType) {
+                case 'xs:double':
+                case 'xs:integer':
+                    return convertToString(referable.value, this.translate.currentLang);
+                case 'xs:string':
+                    return referable.value ?? '';
+                default:
+                    return referable.value ?? '-';
+            }
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            return getLocaleValue(referable.value, this.translate.currentLang) ?? '-';
+        }
+
+        return '-';
     }
 
     private getDocument(id: string, endpoint?: string): void {
@@ -249,7 +314,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
 
         const items: NameplateItem[] = [];
         values.forEach(value => {
-            const name = this.getPreferredName(document.content, value);
+            const name = this.getDisplayName(value, document.content);
             if (isProperty(value)) {
                 if (!value.value) {
                     return;
@@ -313,7 +378,14 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
         }
     }
 
-    private getPreferredName(env: aas.Environment | null | undefined, referable: aas.Referable): string {
+    private getDisplayName(referable: aas.Referable, env?: aas.Environment | null): string {
+        if (referable.displayName) {
+            const value = getLocaleValue(referable.displayName, this.translate.currentLang);
+            if (value) {
+                return value;
+            }
+        }
+
         if (env) {
             const values = getPreferredName(env, referable);
             if (values) {

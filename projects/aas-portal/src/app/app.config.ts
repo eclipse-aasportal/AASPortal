@@ -13,8 +13,6 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import {
     AuthInterceptor,
     CustomerFeedbackCardComponent,
-    DigitalNameplateCardComponent,
-    DigitalProductPassportCardComponent,
     FavoriteComponent,
     START_TILE_TYPES,
     START_TILES,
@@ -52,14 +50,6 @@ export const appConfig: ApplicationConfig = {
                 {
                     name: 'About',
                     component: AboutCardComponent,
-                },
-                {
-                    name: 'DigitalNameplate',
-                    component: DigitalNameplateCardComponent,
-                },
-                {
-                    name: 'DigitalProductPassport',
-                    component: DigitalProductPassportCardComponent,
                 },
                 {
                     name: 'CustomerFeedback',
