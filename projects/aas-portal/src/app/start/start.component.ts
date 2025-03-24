@@ -91,7 +91,7 @@ export class StartComponent implements OnDestroy {
     public readonly canMoveLeft = computed(() => {
         const indexes = this.items()
             .map((item, index) => ({ item, index }))
-            .filter(({ item, }) => item.selected())
+            .filter(({ item }) => item.selected())
             .map(({ index }) => index);
 
         return indexes.length === 1 && indexes[0] > 0;
@@ -101,7 +101,7 @@ export class StartComponent implements OnDestroy {
         const length = this.items().length;
         const indexes = this.items()
             .map((item, index) => ({ item, index }))
-            .filter(({ item, }) => item.selected())
+            .filter(({ item }) => item.selected())
             .map(({ index }) => index);
 
         return indexes.length === 1 && indexes[0] < length - 1;

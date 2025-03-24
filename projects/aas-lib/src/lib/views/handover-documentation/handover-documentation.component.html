@@ -18,24 +18,25 @@
             </div>
         </div>
     </div>
-    <div ngbAccordion>
-        <table class="table table-sm table-striped table-borderless">
-            <tbody>
-                @for (item of documentationItems(); track item.title) {
-                <tr>
-                    @if (item.version) {
-                    <td>{{item.title}}&nbsp;({{item.version}})</td>
-                    } @else {
-                    <td>{{item.title}}</td>
-                    }
-                    <td>
-                        <a href="javascript:void(0)" (click)="downloadDocumentation($event, item)">{{item.filename}}</a>
-                    </td>
-                </tr>
+    <table class="table table-sm table-striped table-borderless caption-top">
+        <tbody>
+            @if (documentationItems().length === 0) {
+            <caption class="" translate>HandoverDocumentation.EMPTY</caption>
+            }
+            @for (item of documentationItems(); track item.title) {
+            <tr>
+                @if (item.version) {
+                <td>{{item.title}}&nbsp;({{item.version}})</td>
+                } @else {
+                <td>{{item.title}}</td>
                 }
-            </tbody>
-        </table>
-    </div>
+                <td>
+                    <a href="javascript:void(0)" (click)="downloadDocumentation($event, item)">{{item.filename}}</a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 <ng-template #handoverDocumentationToolbar>

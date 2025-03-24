@@ -8,7 +8,7 @@
 
 import { Location } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import QRCode from 'qrcode';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, Observable } from 'rxjs';
@@ -64,7 +64,7 @@ export type DocumentationItem = {
     templateUrl: './handover-documentation.component.html',
     styleUrls: ['./handover-documentation.component.scss'],
     providers: [HandoverDocumentationService],
-    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, SecuredImageComponent],
+    imports: [TranslateModule, NgbPaginationModule, SecuredImageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HandoverDocumentationComponent implements OnInit, OnDestroy {
