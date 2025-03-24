@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -28,7 +28,7 @@ export class AASApiClientV0 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShellsAsync(cursor?: string): Promise<PagedResult<AASLabel>> {
+    public async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
         noop(cursor);
         const result = await this.http.get<AASList>(this.resolve('/server/listaas'));
         return {
@@ -40,7 +40,7 @@ export class AASApiClientV0 extends AASApiClient {
         };
     }
 
-    public override async readEnvironmentAsync(id: AASLabel): Promise<aas.Environment> {
+    public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const sourceEnv = await this.http.get<aasV2.AssetAdministrationShellEnvironment>(
             this.resolve(`/aas/${id.idShort}/aasenv`),
         );
@@ -48,11 +48,11 @@ export class AASApiClientV0 extends AASApiClient {
         return new JsonReaderV2(sourceEnv).readEnvironment();
     }
 
-    public override getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+    public override getThumbnail(): Promise<NodeJS.ReadableStream> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override async commitAsync(
+    public override async commit(
         source: aas.Environment,
         destination: aas.Environment,
         diffs: DifferenceItem[],
@@ -105,7 +105,7 @@ export class AASApiClientV0 extends AASApiClient {
         return this.resolve(`/aas/${shell.idShort}/submodels/${items[0]}/elements/${path}/value`).href;
     }
 
-    public async openFileAsync(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
         const url = await this.getFileUrlAsync(shell.idShort, file.value!);
         return await this.http.getResponse(url, this.endpoint.headers);
     }

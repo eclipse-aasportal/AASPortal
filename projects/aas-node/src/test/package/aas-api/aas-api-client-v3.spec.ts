@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -69,7 +69,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
         });
 
         it('inserts a submodel-element', async () => {
@@ -83,7 +83,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual([
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual([
                 'SubmodelElement inserted.',
             ]);
         });
@@ -98,7 +98,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
         });
 
         it('updates a submodel-element', async () => {
@@ -113,7 +113,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
         });
 
         it('deletes a submodel', async () => {
@@ -125,7 +125,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
         });
 
         it('deletes a submodel-element', async () => {
@@ -138,7 +138,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commitAsync(source, destination, diffs)).resolves.toEqual(['SubmodelElement deleted.']);
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['SubmodelElement deleted.']);
         });
     });
 

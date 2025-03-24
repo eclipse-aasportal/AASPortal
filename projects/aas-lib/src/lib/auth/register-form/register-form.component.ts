@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -14,8 +14,8 @@ import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFr
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthApiService } from '../auth-api.service';
-import { ERRORS } from '../../types/errors';
-import { messageToString } from '../../convert';
+import { ERRORS } from '../../errors';
+import { messageToString } from '../../utilities';
 
 export interface RegisterFormResult {
     stayLoggedIn: boolean;

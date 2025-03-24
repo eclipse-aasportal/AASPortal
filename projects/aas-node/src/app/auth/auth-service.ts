@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -48,7 +48,7 @@ export class AuthService {
         }
     }
 
-    public async loginAsync(credentials?: Credentials): Promise<AuthResult> {
+    public async login(credentials?: Credentials): Promise<AuthResult> {
         let token: string;
         if (credentials?.id) {
             if (credentials.password) {
@@ -57,7 +57,7 @@ export class AuthService {
                     throw new ApplicationError(`Unknown user ${credentials.id}.`, ERRORS.UnknownUser, credentials.id);
                 }
 
-                await this.checkPasswordAsync(credentials.password, data.password);
+                await this.checkPassword(credentials.password, data.password);
                 token = this.generateToken(data.id, data.name, data.role);
                 data.lastLoggedIn = new Date();
                 await this.userStorage.writeAsync(credentials.id, data);
@@ -71,7 +71,7 @@ export class AuthService {
         return { token };
     }
 
-    public async getProfileAsync(id: string): Promise<UserProfile> {
+    public async getProfile(id: string): Promise<UserProfile> {
         const data = await this.userStorage.readAsync(id);
         if (data == null) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
@@ -80,7 +80,7 @@ export class AuthService {
         return { id: data.id, name: data.name } as UserProfile;
     }
 
-    public async updateProfileAsync(id: string, profile: UserProfile): Promise<AuthResult> {
+    public async updateProfile(id: string, profile: UserProfile): Promise<AuthResult> {
         const data = await this.userStorage.readAsync(id);
         if (data == null) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
@@ -116,7 +116,7 @@ export class AuthService {
         return { token };
     }
 
-    public async registerUserAsync(profile: UserProfile): Promise<AuthResult> {
+    public async registerUser(profile: UserProfile): Promise<AuthResult> {
         if (!isValidEMail(profile.id)) {
             throw new ApplicationError(`'${profile.id}' is not a valid e-mail.`, ERRORS.InvalidEMail);
         }
@@ -152,7 +152,7 @@ export class AuthService {
         return { token };
     }
 
-    public async resetPasswordAsync(id: string): Promise<void> {
+    public async resetPassword(id: string): Promise<void> {
         const data = await this.userStorage.readAsync(id);
         if (data == null) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
@@ -170,23 +170,23 @@ export class AuthService {
         }
     }
 
-    public getCookieAsync(id: string, name: string): Promise<Cookie | undefined> {
+    public getCookie(id: string, name: string): Promise<Cookie | undefined> {
         return this.userStorage.getCookieAsync(id, name);
     }
 
-    public getCookiesAsync(id: string): Promise<Cookie[]> {
+    public getCookies(id: string): Promise<Cookie[]> {
         return this.userStorage.getCookiesAsync(id);
     }
 
-    public setCookieAsync(id: string, name: string, data: string): Promise<void> {
+    public setCookie(id: string, name: string, data: string): Promise<void> {
         return this.userStorage.setCookieAsync(id, name, data);
     }
 
-    public deleteCookieAsync(id: string, name: string): Promise<void> {
+    public deleteCookie(id: string, name: string): Promise<void> {
         return this.userStorage.deleteCookieAsync(id, name);
     }
 
-    public hasUserAsync(id: string): Promise<boolean> {
+    public hasUser(id: string): Promise<boolean> {
         return this.userStorage.existAsync(id);
     }
 
@@ -216,7 +216,7 @@ export class AuthService {
         });
     }
 
-    private async checkPasswordAsync(password: string, hash: string) {
+    private async checkPassword(password: string, hash: string) {
         if (!(await bcrypt.compare(password, hash))) {
             throw new ApplicationError('Invalid password.', ERRORS.InvalidPassword);
         }

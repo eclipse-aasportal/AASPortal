@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -68,7 +68,7 @@ export class AasxPackage extends AASPackage {
         return document;
     }
 
-    public override async getEnvironmentAsync(): Promise<aas.Environment> {
+    public override async getEnvironment(): Promise<aas.Environment> {
         return (await this.createReaderAsync()).readEnvironment();
     }
 
@@ -81,7 +81,7 @@ export class AasxPackage extends AASPackage {
         return [`${this.file} successfully written.`];
     }
 
-    public override async openReadStreamAsync(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public override async openReadStream(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
         if (!file.value) {
             throw new Error('Invalid operation.');
         }
@@ -95,7 +95,7 @@ export class AasxPackage extends AASPackage {
         return stream;
     }
 
-    public override async getThumbnailAsync(): Promise<NodeJS.ReadableStream> {
+    public override async getThumbnail(): Promise<NodeJS.ReadableStream> {
         let stream: NodeJS.ReadableStream | undefined;
         const relationships = await this.getRelationshipsAsync('_rels/.rels');
         for (const relationship of relationships) {
@@ -231,7 +231,7 @@ export class AasxPackage extends AASPackage {
 
     private async createThumbnail(): Promise<string | undefined> {
         try {
-            const input = await this.getThumbnailAsync();
+            const input = await this.getThumbnail();
             const output = await ImageProcessing.resizeAsync(input, 40, 40);
             return await this.streamToBase64(output);
         } catch {
