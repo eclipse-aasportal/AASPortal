@@ -10,12 +10,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AASDocument, aas } from 'aas-core';
 import { first, mergeMap, Observable } from 'rxjs';
-import { encodeBase64Url } from '../utilities';
-import { AuthService } from '../auth/auth.service';
+import { encodeBase64Url } from '../../utilities';
+import { AuthService } from '../../auth/auth.service';
 
 /** The API of the digital passport portal. */
 @Injectable()
-export class DigitalProductPassportService {
+export class HandoverDocumentationService {
     public constructor(
         private readonly http: HttpClient,
         private readonly auth: AuthService,

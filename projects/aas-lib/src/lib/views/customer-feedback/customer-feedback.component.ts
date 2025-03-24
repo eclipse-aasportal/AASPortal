@@ -21,9 +21,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DecimalPipe, Location } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import { aas, AASDocument, getLocaleValue, getPreferredName, isReference } from 'aas-core';
-import { ScoreComponent } from '../score/score.component';
-import { ToolbarService } from '../toolbar.service';
-import { StartService } from '../start.service';
+import { ScoreComponent } from '../../score/score.component';
+import { ToolbarService } from '../../toolbar.service';
+import { StartService } from '../../start.service';
 
 export interface GeneralItem {
     name: string;

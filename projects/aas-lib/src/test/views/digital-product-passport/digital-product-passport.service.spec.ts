@@ -11,10 +11,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
-import { AuthService } from '../../lib/auth/auth.service';
-import { DigitalProductPassportService } from '../../lib/digital-product-passport/digital-product-passport.service';
+import { AuthService } from '../../../lib/auth/auth.service';
+import { DigitalProductPassportService } from '../../../lib/views/digital-product-passport/digital-product-passport.service';
 
-import sample from '../assets/dpp-sample.json';
+import sample from '../../assets/dpp-sample.json';
 
 describe('DigitalProductPassportService', () => {
     let service: DigitalProductPassportService;

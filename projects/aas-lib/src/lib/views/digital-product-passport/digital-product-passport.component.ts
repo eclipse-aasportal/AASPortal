@@ -27,17 +27,15 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { CarbonFootprint, ZVEINameplate } from '../views/submodel-template';
+import { CarbonFootprint, HandoverDocumentation, ZVEINameplate } from '../views';
 import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
-import { SecuredImageComponent } from '../secured-image/secured-image.component';
-import { decodeBase64Url, encodeBase64Url } from '../utilities';
+import { SecuredImageComponent } from '../../secured-image/secured-image.component';
+import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { DigitalProductPassportService } from './digital-product-passport.service';
-import { WINDOW } from '../window.service';
-import { AuthService } from '../auth/auth.service';
-import { ToolbarService } from '../toolbar.service';
-import { StartService } from '../start.service';
-
-const HandoverDocumentationId = '0173-1#01-AHF578#003';
+import { WINDOW } from '../../window.service';
+import { AuthService } from '../../auth/auth.service';
+import { ToolbarService } from '../../toolbar.service';
+import { StartService } from '../../start.service';
 
 @Component({
     selector: 'fhg-device-passport-portal',
@@ -175,7 +173,8 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
-        this.start.add('DigitalProductPassport', `DPP#${endpoint}#${id}`, { endpoint, id });
+        const href = `/view/DigitalProductPassport?endpoint=${encodeBase64Url(endpoint)}&id=${encodeBase64Url(id)}`;
+        this.start.add('Favorite', `DPP#${endpoint}#${id}`, { endpoint, id, href });
         return this.start.save();
     }
 
@@ -213,7 +212,7 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
                     nameplate = submodel;
                 } else if (semanticId === CarbonFootprint) {
                     carbonFootprint = submodel;
-                } else if (semanticId === HandoverDocumentationId) {
+                } else if (semanticId === HandoverDocumentation) {
                     handoverDocumentation = submodel;
                 }
             }

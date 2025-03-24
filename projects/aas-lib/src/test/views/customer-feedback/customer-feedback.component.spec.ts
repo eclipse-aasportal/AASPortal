@@ -10,9 +10,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { CustomerFeedbackComponent } from '../../lib/customer-feedback/customer-feedback.component';
-import { ToolbarService } from '../../lib/toolbar.service';
-import { StartService } from '../../lib/start.service';
+import { CustomerFeedbackComponent } from '../../../lib/views/customer-feedback/customer-feedback.component';
+import { ToolbarService } from '../../../lib/toolbar.service';
+import { StartService } from '../../../lib/start.service';
 
 describe('CustomerFeedbackComponent', () => {
     let component: CustomerFeedbackComponent;
