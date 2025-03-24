@@ -39,7 +39,7 @@ describe('DashboardApiService', () => {
         const id = encodeBase64Url('http://localhost/document');
         const smId = encodeBase64Url('http://localhost/submodel');
         const path = 'Blob';
-        const url = `/api/v1/containers/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
+        const url = `/api/v1/endpoints/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
         const value = window.btoa('Hello World!');
 
         service.getBlobValue(url).subscribe(value => {

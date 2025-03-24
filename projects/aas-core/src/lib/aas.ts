@@ -117,7 +117,7 @@ export type ModelType =
     | 'Blob'
     | 'Capability'
     | 'ConceptDescription'
-    | 'DataSpecificationIEC61360'
+    | 'DataSpecificationIec61360'
     | 'Entity'
     | 'File'
     | 'MultiLanguageProperty'
@@ -225,11 +225,11 @@ export interface Entity extends SubmodelElement {
     statements?: SubmodelElement[];
 }
 
-export interface Environment {
+export type Environment = {
     assetAdministrationShells: AssetAdministrationShell[];
     conceptDescriptions: ConceptDescription[];
     submodels: Submodel[];
-}
+};
 
 export type EventElement = SubmodelElement;
 

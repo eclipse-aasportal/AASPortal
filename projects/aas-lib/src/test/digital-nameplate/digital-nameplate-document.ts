@@ -28,6 +28,15 @@ const data: object = {
                 modelType: 'Submodel',
                 id: 'www.example.com/ids/sm/1225_9020_5022_1974',
                 kind: 'Instance',
+                semanticId: {
+                    type: 'ModelReference',
+                    keys: [
+                        {
+                            type: 'Submodel',
+                            value: 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate',
+                        },
+                    ],
+                },
                 submodelElements: [
                     {
                         idShort: 'ManufacturerName',

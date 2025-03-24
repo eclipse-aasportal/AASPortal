@@ -28,7 +28,6 @@ export interface EndpointItem {
     selector: 'fhg-add-endpoint',
     templateUrl: './add-endpoint-form.component.html',
     styleUrls: ['./add-endpoint-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, NgbDropdownModule, NgbCollapse, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -206,7 +205,7 @@ export class AddEndpointFormComponent {
             }
 
             return url;
-        } catch (error) {
+        } catch {
             this._messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', value)]);
             return undefined;
         }

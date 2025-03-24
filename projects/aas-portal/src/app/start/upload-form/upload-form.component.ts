@@ -18,7 +18,6 @@ import { AASEndpoint } from 'aas-core';
     selector: 'fhg-upload-form',
     templateUrl: './upload-form.component.html',
     styleUrls: ['./upload-form.component.scss'],
-    standalone: true,
     imports: [FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -50,7 +49,7 @@ export class UploadFormComponent {
         if (!this.uploading && endpoint) {
             this.uploading = true;
             const file = this.files![0];
-            this.download.uploadDocuments(endpoint.name, [file]).subscribe({
+            this.download.uploadPackages(endpoint.name, [file]).subscribe({
                 next: (event: HttpEvent<unknown>) => {
                     switch (event.type) {
                         case HttpEventType.Sent:

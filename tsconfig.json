@@ -4,6 +4,7 @@
     "compilerOptions": {
         "baseUrl": "./",
         "target": "ES2022",
+        "downlevelIteration": true,
         "module": "NodeNext",
         "moduleResolution": "nodenext",
         "forceConsistentCasingInFileNames": true,
@@ -13,10 +14,8 @@
         "noImplicitOverride": true,
         "noImplicitReturns": true,
         "sourceMap": true,
-        "downlevelIteration": true,
         "experimentalDecorators": true,
         "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "useDefineForClassFields": false,
         "useUnknownInCatchVariables": false,

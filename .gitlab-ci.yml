@@ -41,15 +41,15 @@ test:
   artifacts:
     paths:
       - reports/aas-portal.xml
-      - reports/aas-server.xml
+      - reports/aas-node.xml
       - reports/aas-core.xml
     reports:
-      junit: [reports/aas-portal.xml, reports/aas-server.xml, reports/aas-core.xml]
+      junit: [reports/aas-portal.xml, reports/aas-node.xml, reports/aas-core.xml]
       coverage_report:
         coverage_format: cobertura
         path: reports/**/cobertura-coverage.xml
 
-deploy_aas-server-app:
+deploy_aas-node-app:
   stage: deploy
   only:
     refs:
@@ -66,7 +66,7 @@ deploy_aas-server-app:
     - >-
       /kaniko/executor
       --context "${CI_PROJECT_DIR}"
-      --dockerfile "${CI_PROJECT_DIR}/Dockerfile.aas-server"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile.aas-node"
       --destination "${CI_REGISTRY_IMAGE}:node.${CI_COMMIT_BRANCH}"
 
 deploy_aas-web-app:

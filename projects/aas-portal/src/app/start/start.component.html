@@ -68,11 +68,11 @@
             <i class="bi bi-upload"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="downloadDocument().subscribe()"
-            [disabled]="!canDownloadDocument()">
+            [disabled]="someSelected() === false">
             <i class="bi bi-download"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="deleteDocument().subscribe()"
-            [disabled]="!canDeleteDocument()">
+            [disabled]="someSelected() === false">
             <i class="bi bi-trash"></i>
         </button>
     </div>
@@ -85,7 +85,7 @@
         <input type="radio" [value]="'tree'" class="btn-check" id="viewModeTree" name="viewModeGroup" autocomplete="off"
             [(ngModel)]="viewMode">
         <label class=" btn btn-primary" for="viewModeTree">
-        <i class="bi bi-diagram-3"></i>
+            <i class="bi bi-diagram-3"></i>
         </label>
     </div>
     <div class="btn-group me-2 my-1">
@@ -93,10 +93,10 @@
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints"
                 translate>LABEL_VIEWS</button>
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                <button ngbDropdownItem (click)="viewUserFeedback()" [disabled]="!canViewUserFeedback()"
-                    translate>CMD_VIEW_USER_FEEDBACK</button>
-                <button ngbDropdownItem (click)="viewNameplate()" [disabled]="!canViewNameplate()"
-                    translate>CMD_VIEW_NAMEPLATE</button>
+                @for (view of views(); track view.path) {
+                <button ngbDropdownItem (click)="openView(view)" [disabled]="someSelected() === false">{{'Start.' +
+                    view.path | translate}}</button>
+                }
             </div>
         </div>
     </div>
