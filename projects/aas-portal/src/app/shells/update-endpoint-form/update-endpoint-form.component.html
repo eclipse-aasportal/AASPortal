@@ -69,10 +69,10 @@
             @if (schedule() === 'every') {
             <div class="input-group mt-2">
                 <input #inputHours type="number" class="form-control awp-number-input" min="0" max="99"
-                    aria-label="Hours" [value]="hours()" (input)="hours.set(inputHours.valueAsNumber)">
+                    aria-label="Hours" [(ngModel)]="hours" name="hours">
                 <span class="input-group-text" translate>UpdateEndpointForm.HOURS</span>
                 <input #inputMinutes type="number" class="form-control awp-number-input" min="0" max="59"
-                    aria-label="Minutes" [value]="minutes()" (input)="minutes.set(inputMinutes.valueAsNumber)">
+                    aria-label="Minutes" [(ngModel)]="minutes" name="minutes">
                 <span class="input-group-text" translate>UpdateEndpointForm.MINUTES</span>
             </div>
             }
