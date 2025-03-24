@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, jest } from '@jest/globals';
 
-type Func = (...args: any[]) => any;
+type Func = () => any;
 
 export type SpyObjMethodNames<T = undefined> = T extends undefined
     ? ReadonlyArray<string> | { [methodName: string]: any }
@@ -41,7 +41,7 @@ export function createSpyObj<T extends object>(
     return obj as jest.Mocked<T>;
 }
 
-export type DoneFn = (...args: any[]) => void;
+export type DoneFn = () => void;
 
 export function fail() {
     expect(false).toBe(true);

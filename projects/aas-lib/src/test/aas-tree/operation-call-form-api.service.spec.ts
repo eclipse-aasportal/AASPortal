@@ -53,7 +53,7 @@ describe('OperationCallFormApiService', function () {
                 done();
             });
 
-            const url = `/api/v1/containers/U2FtcGxlcw/documents/aHR0cDovL2xvY2FsaG9zdC9hYXM/invoke`;
+            const url = `/api/v1/endpoints/U2FtcGxlcw/documents/aHR0cDovL2xvY2FsaG9zdC9hYXM/invoke`;
             const req = httpTesting.expectOne(url);
             req.flush(operation);
         });

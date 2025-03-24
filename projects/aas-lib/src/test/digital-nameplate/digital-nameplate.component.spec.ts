@@ -8,16 +8,26 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { selectElement } from 'aas-core';
 import { nameplate } from './digital-nameplate-document';
 import { DigitalNameplateComponent } from '../../lib/digital-nameplate/digital-nameplate.component';
+import { Location } from '@angular/common';
 
 describe('DigitalNameplateComponent', () => {
     let component: DigitalNameplateComponent;
     let fixture: ComponentFixture<DigitalNameplateComponent>;
+    let location: jasmine.SpyObj<Location>;
 
     beforeEach(() => {
+        location = jasmine.createSpyObj<Location>(['getState']);
+        location.getState.and.returnValue({ data: JSON.stringify([nameplate]) });
+
         TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: Location,
+                    useValue: location,
+                },
+            ],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
@@ -30,10 +40,6 @@ describe('DigitalNameplateComponent', () => {
 
         fixture = TestBed.createComponent(DigitalNameplateComponent);
         component = fixture.componentInstance;
-        fixture.componentRef.setInput('submodels', [
-            { document: nameplate, submodel: selectElement(nameplate.content!, 'Nameplate')! },
-        ]);
-
         fixture.detectChanges();
     });
 

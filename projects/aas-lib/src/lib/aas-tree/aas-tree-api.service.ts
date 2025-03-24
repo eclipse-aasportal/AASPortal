@@ -15,18 +15,6 @@ import { encodeBase64Url } from '../convert';
 @Injectable()
 export class AASTreeApiService {
     public constructor(private readonly http: HttpClient) {}
-
-    public getTokenAsync(url: string): Promise<string> {
-        return new Promise<string>((result, reject) => {
-            let data: AuthResult;
-            this.http.post<AuthResult>('/api/v1/login', { id: url }).subscribe({
-                next: value => (data = value),
-                complete: () => result(data.token),
-                error: error => reject(error),
-            });
-        });
-    }
-
     /**
      * Reads the value of an data element like `File` or `Blob`.
      * @param endpoint The endpoint name
@@ -38,7 +26,7 @@ export class AASTreeApiService {
     public getValueAsync(endpoint: string, id: string, smId: string, path: string): Promise<string> {
         return new Promise<string>((result, reject) => {
             let data: string;
-            const url = `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${path}/value`;
+            const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${path}/value`;
             this.http.get<{ value: string }>(url).subscribe({
                 next: value => (data = value.value),
                 complete: () => result(data),

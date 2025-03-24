@@ -6,16 +6,15 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { first } from 'rxjs';
-import { noop } from 'aas-core';
-import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, WindowService } from 'aas-lib';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { noop } from 'aas-core';
+import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent } from 'aas-lib';
+
 import { ToolbarService } from '../toolbar.service';
-import { MainApiService } from './main-api.service';
 import { environment } from '../../environments/environment';
 
 export const enum LinkId {
@@ -36,10 +35,10 @@ export interface LinkDescriptor {
     selector: 'fhg-main',
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.scss'],
-    standalone: true,
     imports: [
         RouterOutlet,
         RouterLink,
+        RouterLinkActive,
         AsyncPipe,
         NgbNavModule,
         NgTemplateOutlet,
@@ -50,18 +49,12 @@ export interface LinkDescriptor {
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainComponent implements OnInit {
+export class MainComponent {
     public constructor(
         public readonly route: ActivatedRoute,
-        private readonly router: Router,
-        private readonly window: WindowService,
-        private readonly api: MainApiService,
         private readonly toolbar: ToolbarService,
         private readonly indexChange: IndexChangeService,
     ) {}
-
-    @ViewChild('emptyToolbar', { read: TemplateRef })
-    public emptyToolbar!: TemplateRef<unknown>;
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 
@@ -95,29 +88,11 @@ export class MainComponent implements OnInit {
 
     public readonly version = signal(environment.version).asReadonly();
 
-    public readonly summary = this.indexChange.summary;
+    public readonly endpointCount = this.indexChange.endpointCount;
 
-    public ngOnInit(): void {
-        const params = this.window.getQueryParams();
-        const id = params.get('id');
-        if (id) {
-            this.api
-                .getDocument(id)
-                .pipe(first())
-                .subscribe(document => {
-                    if (document) {
-                        this.router.navigate(['/aas'], {
-                            skipLocationChange: true,
-                            queryParams: { id: document.id, endpoint: document.endpoint },
-                        });
-                    } else {
-                        this.router.navigate(['/start'], { skipLocationChange: true });
-                    }
-                });
-        } else {
-            this.router.navigate(['/start'], { skipLocationChange: true });
-        }
-    }
+    public readonly documentCount = this.indexChange.documentCount;
+
+    public readonly changedDocuments = this.indexChange.changedDocuments;
 
     public clear(): void {
         this.indexChange.clear().subscribe();

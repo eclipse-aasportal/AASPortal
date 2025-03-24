@@ -28,7 +28,6 @@ export interface EndpointItem {
     selector: 'fhg-update-endpoint',
     templateUrl: './update-endpoint-form.component.html',
     styleUrls: ['./update-endpoint-form.component.scss'],
-    standalone: true,
     imports: [NgbToast, NgbDropdownModule, TranslateModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -61,23 +60,20 @@ export class UpdateEndpointFormComponent {
         private modal: NgbActiveModal,
         private translate: TranslateService,
     ) {
-        effect(
-            () => {
-                const endpoint = this.endpoint();
-                this.schedule.set(endpoint.schedule?.type || 'every');
+        effect(() => {
+            const endpoint = this.endpoint();
+            this.schedule.set(endpoint.schedule?.type || 'every');
 
-                if (endpoint.headers) {
-                    const items: HeaderItem[] = [];
-                    let i = 1;
-                    for (const name in endpoint.headers) {
-                        items.push({ id: String(i++), name, value: endpoint.headers[name] });
-                    }
-
-                    this._headers.set(items);
+            if (endpoint.headers) {
+                const items: HeaderItem[] = [];
+                let i = 1;
+                for (const name in endpoint.headers) {
+                    items.push({ id: String(i++), name, value: endpoint.headers[name] });
                 }
-            },
-            { allowSignalWrites: true },
-        );
+
+                this._headers.set(items);
+            }
+        });
     }
 
     public readonly endpoints = this._endpoints.asReadonly();
@@ -208,7 +204,7 @@ export class UpdateEndpointFormComponent {
             }
 
             return url;
-        } catch (error) {
+        } catch {
             this._messages.update(messages => [...messages, this.createMessage('ERROR_INVALID_URL', value)]);
             return undefined;
         }

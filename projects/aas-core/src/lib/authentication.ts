@@ -13,7 +13,7 @@ export type UserRole = 'guest' | 'editor' | 'admin';
 export const priority: UserRole[] = ['guest', 'editor', 'admin'];
 
 /** The user roles. */
-export const USER_ROLES: { [key: string]: string } = {
+export const USER_ROLES: Record<string, string> = {
     admin: 'admin',
     editor: 'editor',
     guest: 'guest',
