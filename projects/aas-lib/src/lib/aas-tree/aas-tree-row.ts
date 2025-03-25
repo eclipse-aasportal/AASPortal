@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -39,9 +39,9 @@ import {
 } from 'aas-core';
 
 import { Tree, TreeNode } from '../tree';
-import { basename, normalize } from '../convert';
+import { basename, normalize } from '../utilities';
 import { signal, WritableSignal } from '@angular/core';
-import { findRoute } from '../views/submodel-template';
+import { findRoute } from '../views/views';
 
 export class AASTreeRow extends TreeNode<aas.Referable> {
     public constructor(

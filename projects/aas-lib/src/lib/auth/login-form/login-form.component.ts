@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,10 +13,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'aas-core';
 import isEmpty from 'lodash-es/isEmpty';
 
-import { messageToString } from '../../convert';
-import { ERRORS } from '../../types/errors';
-import { INFO } from '../../types/info';
-import { MessageEntry } from '../../types/message-entry';
+import { messageToString } from '../../utilities';
+import { ERRORS } from '../../errors';
+import { INFO } from '../../info';
+import { MessageEntry } from '../../types';
 import { AuthApiService } from '../auth-api.service';
 
 export interface LoginFormResult {

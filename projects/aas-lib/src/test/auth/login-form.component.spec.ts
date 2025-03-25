@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,8 +13,8 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { of, throwError } from 'rxjs';
 
 import { AuthApiService } from '../../lib/auth/auth-api.service';
-import { ERRORS } from '../../lib/types/errors';
-import { INFO } from '../../lib/types/info';
+import { ERRORS } from '../../lib/errors';
+import { INFO } from '../../lib/info';
 import { LoginFormComponent, LoginFormResult } from '../../lib/auth/login-form/login-form.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
