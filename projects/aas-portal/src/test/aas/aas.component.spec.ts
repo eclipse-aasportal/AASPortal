@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -15,6 +15,7 @@ import {
     NotifyService,
     OnlineState,
     SecuredImageComponent,
+    StartService,
 } from 'aas-lib';
 
 import { AASDocument, aas, noop } from 'aas-core';
@@ -24,10 +25,11 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Component, input, output, signal } from '@angular/core';
 import { AASApiService } from '../../app/aas/aas-api.service';
-import { ToolbarService } from '../../app/toolbar.service';
+import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.store';
+import { of } from 'rxjs';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -73,6 +75,7 @@ describe('AASComponent', () => {
     let store: AASStore;
     let api: jasmine.SpyObj<AASApiService>;
     let download: jasmine.SpyObj<DownloadService>;
+    let start: jasmine.SpyObj<StartService>;
     let pages: DashboardPage[];
 
     beforeEach(() => {
@@ -84,6 +87,9 @@ describe('AASComponent', () => {
             activePage: signal(pages[0].name),
             pages: signal(pages.map(page => page.name)),
         });
+
+        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        start.save.and.returnValue(of(void 0))
 
         TestBed.configureTestingModule({
             providers: [
@@ -111,7 +117,11 @@ describe('AASComponent', () => {
                     provide: AuthService,
                     useValue: jasmine.createSpyObj<AuthService>(['ensureAuthorized']),
                 },
-                provideHttpClientTesting(),
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
+                 provideHttpClientTesting(),
                 provideRouter([]),
             ],
             imports: [

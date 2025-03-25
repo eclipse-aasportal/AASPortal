@@ -1,13 +1,8 @@
 {
-    "CAPTION_START": "Start",
-    "CAPTION_VIEW": "Sicht",
-    "CAPTION_AAS": "VWS",
-    "CAPTION_ABOUT": "Über",
     "CAPTION_LOGIN": "Anmeldung",
     "CAPTION_PROFILE": "Profil",
     "CAPTION_REGISTRATION": "Registrierung",
     "CAPTION_PASSWORD_FORGOTTEN": "Passwort vergessen?",
-    "CAPTION_DASHBOARD": "Dashboard",
     "CAPTION_INPUT_ARGUMENTS": "Eingangsargumente",
     "CAPTION_OUTPUT_ARGUMENTS": "Ausgangsargumente",
     "CAPTION_INOUTPUT_ARGUMENTS": "Ein/Ausgangsargumente",
@@ -159,7 +154,19 @@
     "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
+    "Main": {
+        "ENDPOINTS": "Endpunkte",
+        "SHELLS": "Verwaltungsschalen",
+        "START": "Start",
+        "VIEW": "Sicht",
+        "AAS": "VWS",
+        "DASHBOARD": "Dashboard",
+        "ABOUT": "Über"
+    },
     "Start": {
+        "EMPTY": "Die START-Seite ist leer."
+    },
+    "Shells": {
         "FAVORITES": "Alle Verwaltungsschalen",
         "ENDPOINT": "Endpunkt",
         "ADD_ENDPOINT": "Hinzufügen...",
@@ -167,9 +174,10 @@
         "REMOVE_ENDPOINT": "Entfernen...",
         "EXTRAS": "Extras...",
         "PLACEHOLDER_FILTER": "Filter",
-        "DigitalPassportPortal": "DPPPortal",
+        "DigitalProductPassport": "Produktpass",
         "CustomerFeedback": "Nutzer-Feedback",
-        "Nameplate": "Typenschild"
+        "Nameplate": "Typenschild",
+        "HandoverDocumentation": "Übergabedokumentation"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -263,10 +271,6 @@
         "TERM_EXPECTED": "Term erwartet an Position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
     },
-    "Main": {
-        "ENDPOINTS": "Endpunkte",
-        "SHELLS": "Verwaltungsschalen"
-    },
     "FavoritesForm": {
         "CAPTION": "Favoriten",
         "ADD_NEW": "Neue Favoritenliste",
@@ -274,14 +278,16 @@
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
     },
-    "DigitalPassportPortal": {
+    "DigitalProductPassport": {
         "EMPTY": "Ups...",
+        "Name": "Name",
+        "Description": "Beschreibung",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
         "CAPTION": "Product Passport",
         "TYPE": "Type",
         "SERIAL_NUMBER": "Seriennummer",
-        "NAMEPLATE_DATA": "Typenschild-Daten",
-        "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck-Daten",
+        "NAMEPLATE_DATA": "Typenschild",
+        "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
         "TOTAL_PSFCO2EQ": "CO2-eq GWP100",
         "DOCUMENTATION": "Dokumentation",
         "ManufacturerProductFamily": "Produktfamilie",
@@ -306,8 +312,46 @@
         "TimeZone": "Zeitzone",
         "PCFGoodsAddressHandover": "Übergabeadresse",
         "PCFCalculationMethod": "Berechnungsmethode",
-        "PCFCO2eq": "PCFCO2eq",
-        "PCFLifeCyclePhase1": "Lebenszyklus Phase 1",
-        "PCFLifeCyclePhase2": "Lebenszyklus Phase 2"
+        "PCFCO2eq": "CO2-Äquivalent",
+        "PCFLifeCyclePhase1": "Lebenszyklusphase A1",
+        "PCFLifeCyclePhase2": "Lebenszyklusphase A2",
+        "PCFLifeCyclePhase3": "Lebenszyklusphase A3",
+        "PCFLifeCyclePhase4": "Lebenszyklusphase A4",
+        "PCFLifeCyclePhase5": "Lebenszyklusphase B1",
+        "PCFLifeCyclePhase6": "Lebenszyklusphase B2",
+        "PCFLifeCyclePhase7": "Lebenszyklusphase B3",
+        "PCFLifeCyclePhase8": "Lebenszyklusphase B5",
+        "PCFLifeCyclePhase9": "Lebenszyklusphase B6",
+        "PCFLifeCyclePhase10": "Lebenszyklusphase B7",
+        "PCFLifeCyclePhase11": "Lebenszyklusphase C1",
+        "PCFLifeCyclePhase12": "Lebenszyklusphase C2",
+        "PCFLifeCyclePhase13": "Lebenszyklusphase C3",
+        "PCFLifeCyclePhase14": "Lebenszyklusphase C4",
+        "PCFLifeCyclePhase15": "Lebenszyklusphase D",
+        "PCFLifeCyclePhase16": "Lebenszyklusphase A1-A3"
+    },
+    "Favorite": {
+        "ID_SHORT": "ID-Short",
+        "ENDPOINT": "Endpunkt",
+        "VERSION": "Version",
+        "SUBMODEL_COUNT": "Submodelle",
+        "SHOW": "Anzeigen..."
+    },
+    "About": {
+        "STATISTIC": "Statistik",
+        "VERSION": "Version",
+        "NUMBER_OF_ENDPOINTS": "Endpunkte",
+        "NUMBER_OF_SHELLS": "Verwaltungsschalen",
+        "ABOUT": "Info über..."
+    },
+    "HandoverDocumentation": {
+        "EMPTY": "Keine Übergabedokumente verfügbar."
+    },
+    "DigitalNameplate": {
+        "ManufacturerName": "Hersteller",
+        "ManufacturerProductType": "Typ",
+        "ManufacturerProductFamily": "Familie",
+        "ProductArticleNumberOfManufacturer": "Art.-Nr.",
+        "SerialNumber":"Serien-Nr."
     }
 }

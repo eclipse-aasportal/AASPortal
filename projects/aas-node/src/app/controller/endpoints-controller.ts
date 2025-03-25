@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -314,7 +314,7 @@ export class EndpointsController extends Controller {
     ): Promise<NodeJS.ReadableStream> {
         try {
             this.logger.start('getDataElementValue');
-            return await this.aasProvider.getDataElementValueAsync(
+            return await this.aasProvider.getDataElementValue(
                 decodeBase64Url(endpoint),
                 decodeBase64Url(id),
                 decodeBase64Url(smId),

@@ -1,0 +1,44 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (ngSubmit)="submit()">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-trash"></i>
+            <span class="ms-2" translate>RemoveEndpointForm.CAPTION</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="cancel()"> </button>
+    </div>
+    <div class="modal-body">
+        @for (message of messages(); track message) {
+        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
+            <div class="d-flex">
+                <div class="flex-grow-1">{{ message }}</div>
+            </div>
+        </ngb-toast>
+        }
+        <ul class="list-group">
+            @for (item of endpoints(); track item.name) {
+            <li class="list-group-item">
+                <div class="d-flex flex-row align-items-center">
+                    <input class="form-check-input me-2" type="checkbox" [id]="'input' + item.name"
+                        [(ngModel)]="item.selected" name="selected" (change)="inputChange()">
+                    <div class="d-flex flex-column flex-grow-1">
+                        <div>{{item.name}}</div>
+                        <div class="ts-small">{{item.url}}</div>
+                    </div>
+                </div>
+            </li>
+            }
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
+    </div>
+</form>

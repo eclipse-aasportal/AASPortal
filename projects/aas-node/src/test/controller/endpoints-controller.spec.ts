@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -40,14 +40,7 @@ describe('EndpointsController', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>([
-            'hasUserAsync',
-            'loginAsync',
-            'getCookieAsync',
-            'getCookiesAsync',
-            'setCookieAsync',
-            'deleteCookieAsync',
-        ]);
+        auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
 
         aasProvider = createSpyObj<AASProvider>([
             'getEndpoints',
@@ -64,12 +57,12 @@ describe('EndpointsController', function () {
             'getDocumentAsync',
             'addPackagesAsync',
             'deletePackageAsync',
-            'getDataElementValueAsync',
+            'getDataElementValue',
             'invoke',
         ]);
 
-        authentication = createSpyObj<Authentication>(['checkAsync']);
-        authentication.checkAsync.mockResolvedValue(guestPayload);
+        authentication = createSpyObj<Authentication>(['check']);
+        authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance('Logger', logger);
@@ -123,7 +116,7 @@ describe('EndpointsController', function () {
     it('POST: /api/v1/endpoints/{name}', async () => {
         const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'FileSystem' };
         aasProvider.addEndpointAsync.mockResolvedValue();
-        auth.hasUserAsync.mockResolvedValue(true);
+        auth.hasUser.mockResolvedValue(true);
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxlcw')
             .set('Authorization', `Bearer ${getToken('John')}`)
@@ -142,7 +135,7 @@ describe('EndpointsController', function () {
         };
 
         aasProvider.updateEndpointAsync.mockResolvedValue();
-        auth.hasUserAsync.mockResolvedValue(true);
+        auth.hasUser.mockResolvedValue(true);
         const response = await request(app)
             .put('/api/v1/endpoints/U2FtcGxlcw')
             .set('Authorization', `Bearer ${getToken('John')}`)
@@ -154,7 +147,7 @@ describe('EndpointsController', function () {
 
     it('DELETE: /api/v1/endpoints/{name}', async () => {
         aasProvider.removeEndpointAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .delete('/api/v1/endpoints/U2FtcGxlcw')
             .set('Authorization', `Bearer ${getToken('John')}`);
@@ -164,7 +157,7 @@ describe('EndpointsController', function () {
     });
 
     it('DELETE: /api/v1/endpoints', async () => {
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         aasProvider.resetAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
         const response = await request(app)
             .delete('/api/v1/endpoints')
@@ -175,7 +168,7 @@ describe('EndpointsController', function () {
     });
 
     it('PUT: /api/v1/endpoints/{name}/scan', async () => {
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         aasProvider.startEndpointScan.mockReturnValue(new Promise<void>(resolve => resolve()));
         const response = await request(app)
             .put('/api/v1/endpoints/U2FtcGxlcw/scan')
@@ -205,7 +198,7 @@ describe('EndpointsController', function () {
     });
 
     it('POST: /api/v1/endpoints/:endpoint/packages', async () => {
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxl/packages')
             .set('Authorization', `Bearer ${getToken('John')}`)
@@ -216,7 +209,7 @@ describe('EndpointsController', function () {
     });
 
     it('DELETE: /api/v1/endpoints/:endpoint/packages/:id', async () => {
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .delete('/api/v1/endpoints/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken('John')}`);
@@ -253,7 +246,7 @@ describe('EndpointsController', function () {
 
     describe('getDataElementValue: /api/v1/endpoints/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', () => {
         it('gets the value of a File that represents an image', async () => {
-            aasProvider.getDataElementValueAsync.mockReturnValue(
+            aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
                     s.push('Hello World!');
@@ -269,11 +262,11 @@ describe('EndpointsController', function () {
                 .set('Authorization', `Bearer ${getToken()}`);
 
             expect(response.statusCode).toBe(200);
-            expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
+            expect(aasProvider.getDataElementValue).toHaveBeenCalled();
         });
 
         it('gets the value of a File', async () => {
-            aasProvider.getDataElementValueAsync.mockReturnValue(
+            aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
                     s.push('Hello World!');
@@ -290,11 +283,11 @@ describe('EndpointsController', function () {
 
             expect(response.statusCode).toBe(200);
             expect(response.text).toEqual('Hello World!');
-            expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
+            expect(aasProvider.getDataElementValue).toHaveBeenCalled();
         });
 
         it('gets the value of a Blob', async () => {
-            aasProvider.getDataElementValueAsync.mockReturnValue(
+            aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
                     const s = new Readable();
                     s.push(Buffer.from('Hello world!').toString('base64'));
@@ -311,13 +304,13 @@ describe('EndpointsController', function () {
 
             expect(response.statusCode).toBe(200);
             expect(response.text).toEqual(Buffer.from('Hello world!').toString('base64'));
-            expect(aasProvider.getDataElementValueAsync).toHaveBeenCalled();
+            expect(aasProvider.getDataElementValue).toHaveBeenCalled();
         });
     });
 
     it('PUT: /api/v1/endpoints/{endpoint}/documents/{id}', async () => {
         aasProvider.updateDocumentAsync.mockReturnValue(Promise.resolve([]));
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
         const endpoint = Buffer.from('Endpoint 1').toString('base64url');
         const id = Buffer.from('http://localhost/document').toString('base64url');
@@ -337,7 +330,7 @@ describe('EndpointsController', function () {
         };
 
         aasProvider.invoke.mockReturnValue(Promise.resolve(operation));
-        auth.hasUserAsync.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
+        auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
         const url = Buffer.from('http://localhost/container').toString('base64url');
         const id = Buffer.from('http://localhost/document').toString('base64url');

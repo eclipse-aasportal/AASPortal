@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -35,17 +35,17 @@ describe('AuthController', () => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>([
-            'hasUserAsync',
-            'loginAsync',
-            'getProfileAsync',
-            'getCookieAsync',
-            'getCookiesAsync',
-            'setCookieAsync',
-            'deleteCookieAsync',
+            'hasUser',
+            'login',
+            'getProfile',
+            'getCookie',
+            'getCookies',
+            'setCookie',
+            'deleteCookie',
         ]);
 
-        authentication = createSpyObj<Authentication>(['checkAsync']);
-        authentication.checkAsync.mockResolvedValue(guestPayload);
+        authentication = createSpyObj<Authentication>(['check']);
+        authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance('Logger', logger);
@@ -65,7 +65,7 @@ describe('AuthController', () => {
     describe('guest', () => {
         it('creates a guest account', async () => {
             const token = getToken();
-            auth.loginAsync.mockResolvedValue({ token });
+            auth.login.mockResolvedValue({ token });
 
             const response = await request(app).post('/api/v1/guest');
 
@@ -77,7 +77,7 @@ describe('AuthController', () => {
     describe('login', () => {
         it('login a registered user', async () => {
             const token = getToken('John');
-            auth.loginAsync.mockResolvedValue({ token });
+            auth.login.mockResolvedValue({ token });
 
             const response = await request(app)
                 .post('/api/v1/login')
@@ -90,8 +90,8 @@ describe('AuthController', () => {
 
     describe('getCookie', () => {
         it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
-            auth.hasUserAsync.mockResolvedValue(true);
-            auth.getCookieAsync.mockResolvedValue({ name: 'Cookie1', data: 'Hello World!' });
+            auth.hasUser.mockResolvedValue(true);
+            auth.getCookie.mockResolvedValue({ name: 'Cookie1', data: 'Hello World!' });
 
             const response = await request(app)
                 .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
@@ -102,7 +102,7 @@ describe('AuthController', () => {
         });
 
         it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
-            authentication.checkAsync.mockRejectedValue(
+            authentication.check.mockRejectedValue(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
 
@@ -113,8 +113,8 @@ describe('AuthController', () => {
 
     describe('getCookies', () => {
         it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async () => {
-            auth.hasUserAsync.mockResolvedValue(true);
-            auth.getCookiesAsync.mockResolvedValue([
+            auth.hasUser.mockResolvedValue(true);
+            auth.getCookies.mockResolvedValue([
                 { name: 'Cookie1', data: 'Hello World!' },
                 { name: 'Cookie2', data: '42' },
             ]);
@@ -131,7 +131,7 @@ describe('AuthController', () => {
         });
 
         it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async () => {
-            authentication.checkAsync.mockRejectedValue(
+            authentication.check.mockRejectedValue(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
 
@@ -142,7 +142,7 @@ describe('AuthController', () => {
 
     describe('setCookie', () => {
         it('POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
-            auth.hasUserAsync.mockResolvedValue(true);
+            auth.hasUser.mockResolvedValue(true);
             const response = await request(app)
                 .post('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
                 .send({ name: 'Cookie1', data: 'Hello World!' } as Cookie)
@@ -150,11 +150,11 @@ describe('AuthController', () => {
                 .set('Accept', 'application/json');
 
             expect(response.statusCode).toBe(204);
-            expect(auth.setCookieAsync).toHaveBeenCalled();
+            expect(auth.setCookie).toHaveBeenCalled();
         });
 
         it('Unauthenticated user: POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
-            authentication.checkAsync.mockRejectedValue(
+            authentication.check.mockRejectedValue(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
 
@@ -169,17 +169,17 @@ describe('AuthController', () => {
 
     describe('deleteCookie', () => {
         it('DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
-            auth.hasUserAsync.mockResolvedValue(true);
+            auth.hasUser.mockResolvedValue(true);
             const response = await request(app)
                 .delete('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
                 .set('Authorization', `Bearer ${getToken('John')}`);
 
             expect(response.statusCode).toBe(204);
-            expect(auth.deleteCookieAsync).toHaveBeenCalled();
+            expect(auth.deleteCookie).toHaveBeenCalled();
         });
 
         it('Unauthenticated user: DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
-            authentication.checkAsync.mockRejectedValue(
+            authentication.check.mockRejectedValue(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
 
@@ -190,17 +190,17 @@ describe('AuthController', () => {
 
     describe('getProfile', () => {
         it('GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t', async () => {
-            auth.getProfileAsync.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
+            auth.getProfile.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
             const response = await request(app)
                 .get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t')
                 .set('Authorization', `Bearer ${getToken('John')}`);
 
             expect(response.statusCode).toBe(200);
-            expect(auth.getProfileAsync).toHaveBeenCalled();
+            expect(auth.getProfile).toHaveBeenCalled();
         });
 
         it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t', async () => {
-            authentication.checkAsync.mockRejectedValue(
+            authentication.check.mockRejectedValue(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
 
