@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { aas, AASDocument } from 'aas-core';
-import { encodeBase64Url } from '../convert';
+import { encodeBase64Url } from '../utilities';
 import { Observable } from 'rxjs';
 
 /** The client side AAS provider service. */
@@ -26,6 +26,6 @@ export class OperationCallFormApiService {
     public invoke(document: AASDocument, operation: aas.Operation): Observable<aas.Operation> {
         const endpoint = encodeBase64Url(document.endpoint);
         const id = encodeBase64Url(document.id);
-        return this.http.post<aas.Operation>(`/api/v1/containers/${endpoint}/documents/${id}/invoke`, operation);
+        return this.http.post<aas.Operation>(`/api/v1/endpoints/${endpoint}/documents/${id}/invoke`, operation);
     }
 }

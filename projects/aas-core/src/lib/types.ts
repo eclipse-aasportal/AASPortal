@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -45,20 +45,25 @@ export type AASAbbreviation =
     | 'SME'
     | 'SML';
 
+export type AASEndpointScheduleType = 'disabled' | 'manual' | 'once' | 'every' | 'daily' | 'weekly';
+
+/** The schedule type. */
+export interface AASEndpointSchedule {
+    type: AASEndpointScheduleType;
+    values?: (string | number)[];
+}
+
 /** The kind of AAS container or server. */
 export type AASEndpointType = 'FileSystem' | 'AAS_API' | 'OPC_UA' | 'WebDAV';
 
 /** The endpoint to an AAS container */
-export type AASEndpoint = {
+export interface AASEndpoint {
     name: string;
     url: string;
     type: AASEndpointType;
+    schedule?: AASEndpointSchedule;
     version?: string;
-};
-
-/** Represents a server (AASX, OPC-UA) or file directory (AASX package files). */
-export interface AASContainer extends AASEndpoint {
-    documents?: AASDocument[];
+    headers?: Record<string, string>;
 }
 
 /** The unique identifier of an AAS. */
@@ -97,7 +102,7 @@ export interface AASDocument extends AASDocumentId {
 }
 
 /** Represents a page of AAS documents from the total set. */
-export interface AASPage {
+export interface AASPagedResult {
     previous: AASDocumentId | null;
     next: AASDocumentId | null;
     documents: AASDocument[];
@@ -159,14 +164,14 @@ export interface Library {
     homepage?: string;
 }
 
-export type DirEntry = {
+export interface DirEntry {
     type: 'file' | 'dir';
     name: string;
     dir: string;
     size: number;
     mtime: Date;
     url: string | null;
-};
+}
 
 /**  */
 export interface ErrorData {

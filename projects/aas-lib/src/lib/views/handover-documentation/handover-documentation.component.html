@@ -1,0 +1,54 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="container h-100">
+    <div class="d-flex flex-column text-center">
+        <div class="bg-primary text-center py-2 my-2 fs-5">{{title()}}</div>
+        <div class="d-flex flex-row justify-content-around align-items-center mb-2">
+            <div>
+                <fhg-img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height"></fhg-img>
+            </div>
+            <div>
+                <canvas #qrCode></canvas>
+            </div>
+        </div>
+    </div>
+    <table class="table table-sm table-striped table-borderless caption-top">
+        <tbody>
+            @if (documentationItems().length === 0) {
+            <caption class="text-nowrap" translate>HandoverDocumentation.EMPTY</caption>
+            }
+            @for (item of documentationItems(); track item.title) {
+            <tr>
+                @if (item.version) {
+                <td>{{item.title}}&nbsp;({{item.version}})</td>
+                } @else {
+                <td>{{item.title}}</td>
+                }
+                <td>
+                    <a href="javascript:void(0)" (click)="downloadDocumentation($event, item)">{{item.filename}}</a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<ng-template #handoverDocumentationToolbar>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
+    @if (handoverDocumentationSize() >= 2) {
+    <div class="input-group my-1">
+        <ngb-pagination [collectionSize]="handoverDocumentationSize()" [(page)]="handoverDocumentationIndex"
+            [pageSize]="1" [directionLinks]="handoverDocumentationSize() > 5" [ellipses]="true" />
+    </div>
+    }
+</ng-template>

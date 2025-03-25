@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,15 +9,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AASDocument, aas } from 'aas-core';
-import { Observable } from 'rxjs';
-import { encodeBase64Url } from 'aas-lib';
+import { first, mergeMap, Observable } from 'rxjs';
+import { AuthService, encodeBase64Url } from 'aas-lib';
 
 /** The client side AAS provider service. */
 @Injectable({
     providedIn: 'root',
 })
 export class AASApiService {
-    public constructor(private readonly http: HttpClient) {}
+    public constructor(
+        private readonly http: HttpClient,
+        private readonly auth: AuthService,
+    ) {}
 
     /**
      * Gets the AAS document with the specified identifier.
@@ -26,13 +29,16 @@ export class AASApiService {
      * @returns The requested AAS document.
      */
     public getDocument(id: string, endpoint?: string): Observable<AASDocument> {
-        if (endpoint) {
-            return this.http.get<AASDocument>(
-                `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`,
-            );
-        }
+        return this.auth.userId.pipe(
+            first(userId => userId !== undefined),
+            mergeMap(() => {
+                const url = endpoint
+                    ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`
+                    : `/api/v1/documents/${encodeBase64Url(id)}`;
 
-        return this.http.get<AASDocument>(`/api/v1/documents/${encodeBase64Url(id)}`);
+                return this.http.get<AASDocument>(url);
+            }),
+        );
     }
 
     /**
@@ -43,7 +49,7 @@ export class AASApiService {
      */
     public getContent(id: string, endpoint: string): Observable<aas.Environment> {
         return this.http.get<aas.Environment>(
-            `/api/v1/containers/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`,
+            `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`,
         );
     }
 
@@ -55,7 +61,7 @@ export class AASApiService {
         const formData = new FormData();
         formData.append('content', new Blob([JSON.stringify(document.content)]));
         return this.http.put<string[]>(
-            `/api/v1/containers/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}`,
+            `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}`,
             formData,
         );
     }

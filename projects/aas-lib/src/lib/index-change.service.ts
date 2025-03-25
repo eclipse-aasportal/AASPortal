@@ -1,24 +1,24 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { computed, EventEmitter, Injectable, signal } from '@angular/core';
-import { WebSocketData, AASServerMessage } from 'aas-core';
 import { WebSocketSubject } from 'rxjs/webSocket';
+import { WebSocketData, AASServerMessage } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
-import { NotifyService } from '../public-api';
+import { HttpClient } from '@angular/common/http';
+import { first, map, mergeMap, Observable, zip } from 'rxjs';
+import { AuthService } from '../public-api';
 
-interface State {
-    addedDocuments: number;
+type State = {
+    documentCount: number;
+    endpointCount: number;
     changedDocuments: number;
-    removedDocuments: number;
-    addedEndpoints: number;
-    removedEndpoints: number;
-}
+};
 
 @Injectable({
     providedIn: 'root',
@@ -26,52 +26,51 @@ interface State {
 export class IndexChangeService {
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
     private readonly state = signal<State>({
-        addedDocuments: 0,
+        documentCount: 0,
+        endpointCount: 0,
         changedDocuments: 0,
-        removedDocuments: 0,
-        addedEndpoints: 0,
-        removedEndpoints: 0,
     });
 
     public constructor(
+        private readonly http: HttpClient,
         private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly notify: NotifyService,
+        private readonly auth: AuthService,
     ) {
         this.subscribeIndexChanged();
+
+        this.auth.userId
+            .pipe(
+                first(userId => userId !== undefined),
+                mergeMap(() =>
+                    zip(
+                        this.http.get<{ count: number }>('/api/v1/endpoints/count'),
+                        this.http.get<{ count: number }>('/api/v1/documents/count'),
+                    ).pipe(map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count])),
+                ),
+            )
+            .subscribe(([endpointCount, documentCount]) => {
+                this.state.update(state => ({ ...state, endpointCount, documentCount }));
+            });
     }
 
     public readonly reset = new EventEmitter();
 
-    public readonly count = computed(() => {
-        const state = this.state();
-        return (
-            state.addedDocuments +
-            state.addedEndpoints +
-            state.changedDocuments +
-            state.removedDocuments +
-            state.removedEndpoints
-        );
-    });
+    public readonly documentCount = computed(() => this.state().documentCount);
 
-    public readonly summary = computed(() => {
-        const state = this.state();
-        return `+${state.addedDocuments}/${state.changedDocuments}/-${state.removedDocuments}; +${state.addedEndpoints}/-${state.removedEndpoints}`;
-    });
+    public readonly endpointCount = computed(() => this.state().endpointCount);
 
-    public readonly addedDocuments = computed(() => this.state().addedDocuments);
-    public readonly addedEndpoints = computed(() => this.state().addedEndpoints);
     public readonly changedDocuments = computed(() => this.state().changedDocuments);
-    public readonly removedDocuments = computed(() => this.state().removedDocuments);
-    public readonly removedEndpoints = computed(() => this.state().removedEndpoints);
 
-    public clear(): void {
-        this.state.set({
-            addedDocuments: 0,
-            changedDocuments: 0,
-            removedDocuments: 0,
-            addedEndpoints: 0,
-            removedEndpoints: 0,
-        });
+    public clear(): Observable<void> {
+        return zip(
+            this.http.get<{ count: number }>('/api/v1/endpoints/count'),
+            this.http.get<{ count: number }>('/api/v1/documents/count'),
+        ).pipe(
+            map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count]),
+            map(([endpointCount, documentCount]) =>
+                this.state.set({ endpointCount, documentCount, changedDocuments: 0 }),
+            ),
+        );
     }
 
     private subscribeIndexChanged = (): void => {
@@ -105,8 +104,8 @@ export class IndexChangeService {
             case 'Removed':
                 this.documentRemoved();
                 break;
-            case 'Changed':
-                this.documentChanged();
+            case 'Update':
+                this.documentUpdate();
                 break;
             case 'EndpointAdded':
                 this.endpointAdded();
@@ -116,27 +115,28 @@ export class IndexChangeService {
                 break;
             case 'Reset':
                 this.reset.emit();
+                this.state.set({ changedDocuments: 0, documentCount: 0, endpointCount: 0 });
                 break;
         }
     }
 
     private documentAdded(): void {
-        this.state.update(state => ({ ...state, addedDocuments: state.addedDocuments + 1 }));
+        this.state.update(state => ({ ...state, documentCount: state.documentCount + 1 }));
     }
 
     private documentRemoved(): void {
-        this.state.update(state => ({ ...state, removedDocuments: state.removedDocuments + 1 }));
+        this.state.update(state => ({ ...state, documentCount: state.documentCount - 1 }));
     }
 
-    private documentChanged(): void {
+    private documentUpdate(): void {
         this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + 1 }));
     }
 
     private endpointAdded(): void {
-        this.state.update(state => ({ ...state, addedEndpoints: state.addedEndpoints + 1 }));
+        this.state.update(state => ({ ...state, endpointCount: state.endpointCount + 1 }));
     }
 
     private endpointRemoved(): void {
-        this.state.update(state => ({ ...state, removedEndpoints: state.removedEndpoints + 1 }));
+        this.state.update(state => ({ ...state, endpointCount: state.endpointCount - 1 }));
     }
 }

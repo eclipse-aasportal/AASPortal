@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -85,7 +85,7 @@ export class DeleteCommand extends Command {
             }
         }
 
-        this.store.applyDocument(this.document);
+        this.store.document$.set({ ...this.document, modified: true });
     }
 
     private deleteFromShells(element: aas.Submodel) {
@@ -103,11 +103,11 @@ export class DeleteCommand extends Command {
     }
 
     protected onUndo(): void {
-        this.store.applyDocument(this.memento);
+        this.store.document$.set({ ...this.memento, modified: true });
     }
 
     protected onRedo(): void {
-        this.store.applyDocument(this.document);
+        this.store.document$.set({ ...this.document, modified: true });
     }
 
     protected onAbort(): void {

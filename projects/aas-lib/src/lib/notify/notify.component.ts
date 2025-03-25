@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { MessageEntry } from '../types/message-entry';
+import { MessageEntry } from '../types';
 import { NotifyService } from './notify.service';
 import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
 
@@ -15,7 +15,6 @@ import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
     selector: 'fhg-notify',
     templateUrl: './notify.component.html',
     styleUrls: ['./notify.component.scss'],
-    standalone: true,
     imports: [NgbToast],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

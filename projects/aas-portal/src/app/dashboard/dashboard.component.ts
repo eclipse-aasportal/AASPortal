@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,31 +9,31 @@
 import 'chart.js/auto';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { ActivatedRoute } from '@angular/router';
-import { AsyncPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-    AfterViewInit,
     Component,
     ElementRef,
     OnDestroy,
     OnInit,
-    QueryList,
     TemplateRef,
-    ViewChild,
-    ViewChildren,
     computed,
     effect,
-    untracked,
     ChangeDetectionStrategy,
+    viewChild,
+    viewChildren,
+    signal,
+    Inject,
 } from '@angular/core';
 
 import isNumber from 'lodash-es/isNumber';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
+import { EMPTY, first, Observable } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, convertToString, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
-import { ClipboardService, LogType, NotifyService, WebSocketFactoryService, WindowService } from 'aas-lib';
+import { LogType, NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { SelectionMode } from '../types/selection-mode';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommandHandlerService } from '../aas/command-handler.service';
 import { MoveLeftCommand } from './commands/move-left-command';
 import { MoveRightCommand } from './commands/move-right-command';
@@ -46,109 +46,123 @@ import { AddNewPageCommand } from './commands/add-new-page-command';
 import { DeleteItemCommand } from './commands/delete-item-command';
 import { SetChartTypeCommand } from './commands/set-chart-type-command';
 import { SetMinMaxCommand } from './commands/set-min-max-command';
-import { DashboardQuery, DashboardQueryParams } from '../types/dashboard-query-params';
 import { DashboardApiService } from './dashboard-api.service';
-import { ToolbarService } from '../toolbar.service';
 import {
     DashboardChart,
     DashboardChartType,
     DashboardColumn,
     DashboardItem,
     DashboardItemType,
-    DashboardPage,
-    DashboardService,
-} from './dashboard.service';
+    DashboardStore,
+} from './dashboard.store';
 
-interface UpdateTuple {
+type UpdateTuple = {
     item: DashboardChart;
     dataset: ChartDataset;
-}
+};
 
-interface ChartConfigurationTuple {
+type ChartConfigurationTuple = {
     chart: Chart;
     configuration: ChartConfiguration;
-}
+};
 
-interface TimeSeries {
+type TimeSeries = {
     value: string[];
     timestamp: string[];
-}
+};
 
 @Component({
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
-    standalone: true,
-    imports: [NgClass, AsyncPipe, FormsModule, TranslateModule],
+    imports: [NgClass, FormsModule, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DashboardComponent implements OnInit, OnDestroy {
     private readonly map = new Map<string, UpdateTuple>();
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
     private selections = new Set<string>();
     private selectedSources = new Map<string, number>();
+    private live = false;
 
     public constructor(
         private readonly api: DashboardApiService,
+        private readonly store: DashboardStore,
         private readonly activeRoute: ActivatedRoute,
         private readonly translate: TranslateService,
         private readonly webServiceFactory: WebSocketFactoryService,
-        private readonly dashboard: DashboardService,
         private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
+        private readonly start: StartService,
         private readonly commandHandler: CommandHandlerService,
-        private readonly window: WindowService,
-        private readonly clipboard: ClipboardService,
+        @Inject(WINDOW) private readonly window: Window,
     ) {
         effect(() => {
-            this.dashboard.activePage();
-            if (!untracked(this.editMode)) {
-                this.closeWebSocket();
-                this.charts.forEach(item => item.chart.destroy());
-                this.map.clear();
+            const activePage = this.store.activePage$();
+            if (!this.store.editMode) {
+                this.leaveLiveMode();
             }
 
             this.selections.clear();
             this.selectedSources.clear();
+            this.activePage.set(activePage.name);
+
+            if (!this.store.editMode) {
+                this.enterLiveMode();
+            }
+        });
+
+        effect(() => {
+            const value = this.activePage();
+            if (value !== this.store.activePage.name) {
+                this.store.setActivePage(value);
+            }
         });
 
         effect(() => {
             if (this.editMode()) {
-                this.enterEditMode();
+                this.leaveLiveMode();
             } else {
-                this.leafEditMode();
+                this.enterLiveMode();
+            }
+        });
+
+        effect(() => {
+            const name = this.activePage();
+            const index = this.store.pages.findIndex(page => page.name === name);
+            if (this.store.index !== index) {
+                this.store.updateState(state => ({ ...state, index }));
+            }
+        });
+
+        effect(() => {
+            const template = this.toolbarTemplate();
+            if (template !== undefined) {
+                this.toolbar.set(template);
             }
         });
     }
 
-    @ViewChildren('chart')
-    public chartContainers: QueryList<ElementRef<HTMLCanvasElement>> | null = null;
+    public readonly chartContainers = viewChildren<ElementRef<HTMLCanvasElement>>('chart');
 
-    @ViewChild('dashboardToolbar', { read: TemplateRef })
-    public dashboardToolbar: TemplateRef<unknown> | null = null;
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('dashboardToolbar');
 
-    public readonly isEmpty = computed(() => this.dashboard.activePage().items.length === 0);
+    public readonly isEmpty = computed(() => this.store.activePage$().items.length === 0);
 
-    public readonly activePage = this.dashboard.activePage;
+    public readonly activePage = signal(this.store.activePage$().name);
 
-    public readonly pages = this.dashboard.pages;
+    public readonly pages = computed(() => {
+        return this.store.pages$().map(page => page.name);
+    });
 
-    public readonly editMode = this.dashboard.editMode;
+    public readonly editMode = this.store.editMode$;
 
-    public readonly rows = computed(() =>
-        this.dashboard.getGrid(this.dashboard.activePage()).map(rows => ({
-            columns: rows.map(row => ({
-                id: row.id,
-                item: row,
-                itemType: row.type,
-            })),
-        })),
-    );
+    public readonly rows = this.store.rows$;
 
     public get selectedItem(): DashboardItem | null {
         if (this.selections.size === 1) {
-            return this.findItem(this.selections.values().next().value) ?? null;
+            return this.findItem(this.selections.values().next().value!) ?? null;
         }
 
         return null;
@@ -166,7 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         return selectedItems;
     }
 
-    public readonly selectionMode = this.dashboard.selectionMode.asReadonly();
+    public readonly selectionMode = this.store.selectionMode$.asReadonly();
 
     public readonly canUndo = computed(() => this.editMode() && this.commandHandler.canUndo());
 
@@ -175,27 +189,17 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     public ngOnInit(): void {
         this.commandHandler.clear();
 
-        let query: DashboardQuery | undefined;
-        const params = this.activeRoute.snapshot.queryParams as DashboardQueryParams;
-        if (params.format) {
-            query = this.clipboard.get(params.format);
-            if (query?.page) {
-                this.dashboard.setPage(query.page);
+        this.activeRoute.queryParams.pipe(first()).subscribe(params => {
+            if (params.page) {
+                this.activePage.set(params.page);
             }
-        }
+        });
     }
 
     public ngOnDestroy(): void {
-        this.dashboard.save().subscribe();
+        this.store.save().subscribe();
         this.toolbar.clear();
-        this.closeWebSocket();
-        this.charts.forEach(item => item.chart.destroy());
-    }
-
-    public ngAfterViewInit(): void {
-        if (this.dashboardToolbar) {
-            this.toolbar.set(this.dashboardToolbar);
-        }
+        this.leaveLiveMode();
     }
 
     public toggleSelection(column: DashboardColumn): void {
@@ -244,7 +248,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public addNew(): void {
         try {
-            this.commandHandler.execute(new AddNewPageCommand(this.dashboard));
+            this.commandHandler.execute(new AddNewPageCommand(this.store));
         } catch (error) {
             this.notify.error(error);
         }
@@ -254,7 +258,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         try {
             const name = this.window.prompt(this.translate.instant('PROMPT_DASHBOARD_NAME'));
             if (name) {
-                this.commandHandler.execute(new RenamePageCommand(this.dashboard, this.activePage(), name));
+                this.commandHandler.execute(new RenamePageCommand(this.store, this.store.activePage, name));
             }
         } catch (error) {
             this.notify.error(error);
@@ -265,7 +269,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         try {
             if (this.selectedItems.length > 0) {
                 this.commandHandler.execute(
-                    new DeleteItemCommand(this.dashboard, this.activePage(), this.selectedItems),
+                    new DeleteItemCommand(this.store, this.store.activePage, this.selectedItems),
                 );
 
                 this.selectedItems.forEach(item => {
@@ -273,7 +277,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.selectedSources.delete(item.id);
                 });
             } else {
-                this.commandHandler.execute(new DeletePageCommand(this.dashboard, this.activePage()));
+                this.commandHandler.execute(new DeletePageCommand(this.store, this.store.activePage));
                 this.selections.clear();
                 this.selectedSources.clear();
             }
@@ -284,12 +288,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public canMoveLeft(): boolean {
         const selectedItem = this.selectedItem;
-        return this.editMode() && selectedItem != null && this.dashboard.canMoveLeft(this.activePage(), selectedItem);
+        return this.editMode() && selectedItem != null && this.store.canMoveLeft(this.store.activePage, selectedItem);
     }
 
     public moveLeft(): void {
         try {
-            this.commandHandler.execute(new MoveLeftCommand(this.dashboard, this.activePage(), this.selectedItem!));
+            this.commandHandler.execute(new MoveLeftCommand(this.store, this.store.activePage, this.selectedItem!));
         } catch (error) {
             this.notify.error(error);
         }
@@ -297,12 +301,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public canMoveRight(): boolean {
         const selectedItem = this.selectedItem;
-        return this.editMode() && selectedItem != null && this.dashboard.canMoveRight(this.activePage(), selectedItem);
+        return this.editMode() && selectedItem != null && this.store.canMoveRight(this.store.activePage, selectedItem);
     }
 
     public moveRight(): void {
         try {
-            this.commandHandler.execute(new MoveRightCommand(this.dashboard, this.activePage(), this.selectedItem!));
+            this.commandHandler.execute(new MoveRightCommand(this.store, this.store.activePage, this.selectedItem!));
         } catch (error) {
             this.notify.error(error);
         }
@@ -310,12 +314,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public canMoveUp(): boolean {
         const selectedItem = this.selectedItem;
-        return this.editMode() && selectedItem != null && this.dashboard.canMoveUp(this.activePage(), selectedItem);
+        return this.editMode() && selectedItem != null && this.store.canMoveUp(this.store.activePage, selectedItem);
     }
 
     public moveUp(): void {
         try {
-            this.commandHandler.execute(new MoveUpCommand(this.dashboard, this.activePage(), this.selectedItem!));
+            this.commandHandler.execute(new MoveUpCommand(this.store, this.store.activePage, this.selectedItem!));
         } catch (error) {
             this.notify.error(error);
         }
@@ -323,19 +327,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public canMoveDown(): boolean {
         const selectedItem = this.selectedItem;
-        return this.editMode() && selectedItem != null && this.dashboard.canMoveDown(this.activePage(), selectedItem);
+        return this.editMode() && selectedItem != null && this.store.canMoveDown(this.store.activePage, selectedItem);
     }
 
     public moveDown(): void {
         try {
-            this.commandHandler.execute(new MoveDownCommand(this.dashboard, this.activePage(), this.selectedItem!));
+            this.commandHandler.execute(new MoveDownCommand(this.store, this.store.activePage, this.selectedItem!));
         } catch (error) {
             this.notify.error(error);
         }
-    }
-
-    public setPage(page: DashboardPage): void {
-        this.dashboard.setPage(page);
     }
 
     public getColor(column: DashboardColumn) {
@@ -360,8 +360,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         try {
             this.commandHandler.execute(
                 new SetColorCommand(
-                    this.dashboard,
-                    this.activePage(),
+                    this.store,
+                    this.store.activePage,
                     column.item,
                     this.selectedSources.get(column.id) ?? 0,
                     color,
@@ -375,7 +375,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     public changeChartType(column: DashboardColumn, value: string): void {
         try {
             this.commandHandler.execute(
-                new SetChartTypeCommand(this.dashboard, this.activePage(), column.item, value as DashboardChartType),
+                new SetChartTypeCommand(this.store, this.store.activePage, column.item, value as DashboardChartType),
             );
         } catch (error) {
             this.notify.error(error);
@@ -397,8 +397,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         try {
             this.commandHandler.execute(
                 new SetMinMaxCommand(
-                    this.dashboard,
-                    this.activePage(),
+                    this.store,
+                    this.store.activePage,
                     column.item as DashboardChart,
                     Number(value),
                     undefined,
@@ -424,8 +424,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         try {
             this.commandHandler.execute(
                 new SetMinMaxCommand(
-                    this.dashboard,
-                    this.activePage(),
+                    this.store,
+                    this.store.activePage,
                     column.item as DashboardChart,
                     undefined,
                     Number(value),
@@ -448,20 +448,39 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    private enterEditMode(): void {
+    public addToStart(): Observable<void> {
+        if (!this.start.add('Dashboard', 'Dashboard', {})) {
+            return EMPTY;
+        }
+
+        return this.start.save();
+    }
+
+    private leaveLiveMode(): void {
+        if (!this.live) {
+            return;
+        }
+
         this.closeWebSocket();
         this.charts.forEach(item => item.chart.destroy());
         this.map.clear();
+        this.live = false;
     }
 
-    private leafEditMode(): void {
+    private enterLiveMode(): void {
+        if (this.live) {
+            return;
+        }
+
+        this.live = true;
         setTimeout(() => {
             try {
                 this.openWebSocket();
-                if (this.chartContainers) {
-                    this.createCharts(this.chartContainers);
+                const chartContainers = this.chartContainers();
+                if (chartContainers) {
+                    this.createCharts(chartContainers);
                     if (this.webSocketSubject) {
-                        for (const request of this.activePage().requests) {
+                        for (const request of this.store.activePage.requests) {
                             this.webSocketSubject.next(this.createMessage(request));
                         }
                     }
@@ -473,11 +492,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private findItem(id: string): DashboardItem | undefined {
-        return this.activePage().items.find(item => item.id === id);
+        return this.store.activePage.items.find(item => item.id === id);
     }
 
     private openWebSocket(): void {
-        const page = this.activePage();
+        const page = this.store.activePage;
         if (page && page.requests && page.requests.length > 0) {
             this.webSocketSubject = this.webServiceFactory.create();
             this.webSocketSubject.subscribe({
@@ -494,9 +513,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    private createCharts(query: QueryList<ElementRef<HTMLCanvasElement>>): void {
+    private createCharts(query: ReadonlyArray<ElementRef<HTMLCanvasElement>>): void {
         this.charts.clear();
-        this.activePage().items.forEach(item => {
+        this.store.activePage.items.forEach(item => {
             if (this.isChart(item)) {
                 const canvas = query.find(element => element.nativeElement.id === item.id);
                 if (canvas) {
@@ -536,6 +555,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
                 datasets: [],
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         min: item.min,
@@ -581,6 +601,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             options: {
                 indexAxis: 'x',
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         min: item.min,
@@ -620,6 +641,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             options: {
                 indexAxis: 'y',
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         min: item.min,
@@ -658,6 +680,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
                 datasets: [],
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         min: item.min,

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -45,7 +45,7 @@ const mimeTypes = new Map<string, string>([
     ['image/vnd.microsoft.icon', '.ico'],
     ['text/calendar', '.ics'],
     ['application/java-archive', '.jar'],
-    ['image/jpeg', '.jar'],
+    ['image/jpeg', '.jpg'],
     ['text/javascript', '.js'],
     ['application/json', '.json'],
     ['application/ld+json', '.jsonld'],
@@ -384,7 +384,7 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
                     getSeconds(timeTuple?.items),
                 );
             } else {
-                date = new Date(NaN);
+                date = new Date(0);
             }
         } else {
             date = new Date(s);
@@ -497,6 +497,54 @@ export function parseDate(s: string, localeId?: string): Date | undefined {
 }
 
 /**
+ * Indicates whether the specified date is valid.
+ * @param value The date value.
+ * @returns `true` if the date value is valid; otherwise, `false`.
+ */
+export function isValidDate(value: Date | undefined): boolean {
+    if (value === undefined) {
+        return false;
+    }
+
+    const year = value.getFullYear();
+    if (year < 1970 || year > 3000) {
+        return false;
+    }
+
+    const month = value.getMonth();
+    if (month < 0 || month > 11) {
+        return false;
+    }
+
+    const day = value.getDay();
+    if (day < 1 || day > 31) {
+        return false;
+    }
+
+    const hours = value.getHours();
+    if (hours < 0 || hours > 23) {
+        return false;
+    }
+
+    const minutes = value.getMinutes();
+    if (minutes < 0 || minutes > 59) {
+        return false;
+    }
+
+    const seconds = value.getSeconds();
+    if (seconds < 0 || seconds > 59) {
+        return false;
+    }
+
+    const ms = value.getMilliseconds();
+    if (ms < 0 || ms > 999) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Determines the data type from the specified string expression.
  * @param value The value or a string expression.
  * @returns The data type.
@@ -578,27 +626,25 @@ export function getDefaultValue(type: DataTypeDefXsd): DefaultType {
  * @returns The locale value.
  */
 export function getLocaleValue(value?: LangString[], localeId?: string): string | undefined {
-    let localeValue: string | undefined;
-    if (value) {
-        if (localeId) {
-            const language = getLanguage(localeId);
-            for (const item of value) {
-                const lcid = item.language.toLowerCase();
-                if (lcid === localeId || lcid === language) {
-                    localeValue = item.text;
-                    break;
-                } else if (!localeValue && getLanguage(item.language) === language) {
-                    localeValue = item.text;
-                }
-            }
-        }
+    if (value === undefined) {
+        return undefined;
+    }
 
-        if (!localeValue && value.length > 0) {
-            localeValue = value[0].text;
+    let localeValue: string | undefined;
+    if (localeId) {
+        const language = getLanguage(localeId);
+        for (const item of value) {
+            const lcid = item.language.toLowerCase();
+            if (lcid === localeId || lcid === language) {
+                localeValue = item.text;
+                break;
+            } else if (!localeValue && getLanguage(item.language) === language) {
+                localeValue = item.text;
+            }
         }
     }
 
-    return localeValue;
+    return localeValue ?? value.at(0)?.text;
 
     function getLanguage(value: string): string {
         return value.split('-')[0].toLowerCase();
@@ -855,7 +901,7 @@ function toBigInt(value: unknown): bigint | undefined {
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         try {
             return BigInt(value);
-        } catch (error) {
+        } catch {
             return undefined;
         }
     }

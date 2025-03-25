@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -42,7 +42,7 @@ describe('SetValueCommand', function () {
         });
 
         store = TestBed.inject(AASStore);
-        store.setDocument(document);
+        store.document$.set(document);
     });
 
     beforeEach(function () {
@@ -51,7 +51,7 @@ describe('SetValueCommand', function () {
     });
 
     it('can be executed', () => {
-        const document = store.document();
+        const document = store.document$();
         const value: aas.Property = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed')!;
         expect(value.value).toEqual('42');
     });
@@ -59,14 +59,14 @@ describe('SetValueCommand', function () {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document();
+            const document = store.document$();
             const value: aas.Property = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed')!;
             expect(value.value).toEqual('5000');
         }
 
         {
             command.redo();
-            const document = store.document();
+            const document = store.document$();
             store;
             const value: aas.Property = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed')!;
             expect(value.value).toEqual('42');

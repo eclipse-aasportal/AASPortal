@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -78,7 +78,7 @@ describe('MessageTableComponent', () => {
     });
 
     it('supports 3 sortable headers', () => {
-        expect(component.headers?.length).toEqual(3);
+        expect(component.headers()?.length).toEqual(3);
     });
 
     describe('show only errors', () => {

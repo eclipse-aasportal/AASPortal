@@ -1,103 +1,27 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import {
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    ViewChild,
-    signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
-import { ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
-import { EMPTY, from, mergeMap, of, Subscription, toArray, zip } from 'rxjs';
-
-import { ToolbarService } from '../toolbar.service';
-import { ViewApiService } from './view-api.service';
-import {
-    ClipboardService,
-    CustomerFeedbackComponent,
-    DigitalNameplateComponent,
-    DocumentSubmodelPair,
-    SubmodelViewDescriptor,
-    ViewQuery,
-    ViewQueryParams,
-} from 'aas-lib';
+import { ToolbarService } from 'aas-lib';
 
 @Component({
     selector: 'fhg-view',
     templateUrl: './view.component.html',
     styleUrls: ['./view.component.scss'],
-    standalone: true,
-    imports: [DigitalNameplateComponent, CustomerFeedbackComponent, TranslateModule],
+    imports: [RouterOutlet],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewComponent implements OnInit, AfterViewInit, OnDestroy {
-    private readonly subscription = new Subscription();
-    private _template = signal<string | undefined>(undefined);
-    private _submodels = signal<DocumentSubmodelPair[]>([]);
-
-    public constructor(
-        private readonly route: ActivatedRoute,
-        private readonly api: ViewApiService,
-        private readonly clipboard: ClipboardService,
-        private readonly toolbar: ToolbarService,
-    ) {}
-
-    @ViewChild('viewToolbar', { read: TemplateRef })
-    public viewToolbar: TemplateRef<unknown> | null = null;
-
-    public readonly template = this._template.asReadonly();
-
-    public readonly submodels = this._submodels.asReadonly();
-
-    public ngOnInit(): void {
-        let query: ViewQuery | undefined;
-        const params = this.route.snapshot.queryParams as ViewQueryParams;
-        if (params.format) {
-            query = this.clipboard.get(params.format);
-        }
-
-        if (query?.descriptor) {
-            const descriptor: SubmodelViewDescriptor = query.descriptor;
-            zip(
-                of(descriptor.template),
-                from(descriptor.submodels).pipe(
-                    mergeMap(item => zip(this.api.getDocument(item.endpoint, item.id), of(item.idShort))),
-                    mergeMap(tuple => {
-                        const submodel = tuple[0].content?.submodels.find(item => item.idShort === tuple[1]);
-                        if (submodel?.modelType === 'Submodel') {
-                            return of({ document: tuple[0], submodel } as DocumentSubmodelPair);
-                        }
-
-                        return EMPTY;
-                    }),
-                    toArray(),
-                ),
-            ).subscribe(tuple => {
-                this._submodels.set(tuple[1]);
-                this._template.set(tuple[0]);
-            });
-        }
-    }
-
-    public ngAfterViewInit(): void {
-        if (this.viewToolbar) {
-            this.toolbar.set(this.viewToolbar);
-        }
-    }
+export class ViewComponent implements OnDestroy {
+    public constructor(private readonly toolbar: ToolbarService) {}
 
     public ngOnDestroy(): void {
-        this.subscription.unsubscribe();
         this.toolbar.clear();
     }
 }

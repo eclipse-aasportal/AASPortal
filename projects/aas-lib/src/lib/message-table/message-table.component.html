@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -27,7 +27,7 @@
         </tr>
     </thead>
     <tbody>
-        @for (message of messages(); track message) {
+        @for (message of messages(); track message.text) {
         <tr>
             <td>
                 @if (message.type === 'Info') {

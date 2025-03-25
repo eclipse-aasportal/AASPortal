@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -39,7 +39,7 @@ describe('NewElementCommand', function () {
         });
 
         store = TestBed.inject(AASStore);
-        store.setDocument(document);
+        store.document$.set(document);
     });
 
     beforeEach(function () {
@@ -48,7 +48,7 @@ describe('NewElementCommand', function () {
     });
 
     it('can be executed', () => {
-        const document = store.document();
+        const document = store.document$();
         const element = selectElement(document!.content!, 'TechnicalData');
         expect(element).toBeDefined();
     });
@@ -56,14 +56,14 @@ describe('NewElementCommand', function () {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document();
+            const document = store.document$();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
         }
 
         {
             command.redo();
-            const document = store.document();
+            const document = store.document$();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeDefined();
         }

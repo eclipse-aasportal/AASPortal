@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { normalize } from '../convert';
+import { normalize } from '../utilities';
 import {
     AASDocument,
     aas,
@@ -22,6 +22,8 @@ import {
     parseDate,
     toBoolean,
     flat,
+    getModelTypeFromAbbreviation,
+    AASAbbreviation,
 } from 'aas-core';
 
 export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
@@ -44,7 +46,7 @@ export class AASTableFilter {
             }
 
             return this.evaluate(this.queryParser.ast, document, [...this.traverseEnvironment(env)]);
-        } catch (error) {
+        } catch {
             return false;
         }
     }
@@ -110,7 +112,7 @@ export class AASTableFilter {
     }
 
     private any(element: aas.Referable, query: AASQuery): boolean {
-        if (element.modelType === query.modelType) {
+        if (element.modelType === getModelTypeFromAbbreviation(query.modelType as AASAbbreviation)) {
             if (this.containsString(element.idShort, query.name)) {
                 if (!element || !query.value) {
                     return true;

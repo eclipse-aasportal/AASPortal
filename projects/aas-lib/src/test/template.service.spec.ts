@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -23,9 +23,13 @@ describe('TemplateService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [{ provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [],
+            providers: [
+                { provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
 
         http = TestBed.inject(HttpClient);
         service = TestBed.inject(TemplateService);

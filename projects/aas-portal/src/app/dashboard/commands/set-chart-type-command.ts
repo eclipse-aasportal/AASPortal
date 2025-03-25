@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,22 +8,17 @@
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DashboardCommand } from './dashboard-command';
-import {
-    DashboardChart,
-    DashboardChartType,
-    DashboardItem,
-    DashboardPage,
-    DashboardService,
-} from '../dashboard.service';
+import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from '../dashboard.store';
+import { DashboardStore } from '../dashboard.store';
 
 export class SetChartTypeCommand extends DashboardCommand {
     public constructor(
-        dashboard: DashboardService,
+        store: DashboardStore,
         private page: DashboardPage,
         private item: DashboardItem,
         private chartType: DashboardChartType,
     ) {
-        super('Set chart type', dashboard);
+        super('Set chart type', store);
     }
 
     protected executing(): void {
@@ -32,7 +27,7 @@ export class SetChartTypeCommand extends DashboardCommand {
 
         if (this.isChart(item)) {
             item.chartType = this.chartType;
-            this.dashboard.update(page);
+            this.store.update(page);
         } else {
             throw new Error('Not implemented.');
         }

@@ -60,7 +60,7 @@ const replacements = new Map<string, string>([
     ['@ngx-translate/http-loader', 'oss/@ngx-translate/http-loader/LICENSE.txt'],
 ]);
 
-const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-server', 'fhg-jest']);
+const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'fhg-jest']);
 
 await main();
 
@@ -85,7 +85,7 @@ async function main(): Promise<void> {
         libraries: await readLibrariesAsync(project),
     };
 
-    const file = join(__dirname, 'projects/aas-server/src/assets/app-info.json');
+    const file = join(__dirname, 'projects/aas-node/src/assets/app-info.json');
     try {
         await writeFile(file, JSON.stringify(appInfo, undefined, 2));
         console.info(`File ${file} read.`);

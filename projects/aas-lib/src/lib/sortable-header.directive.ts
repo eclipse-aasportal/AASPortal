@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -18,9 +18,7 @@ export interface SortEvent {
 }
 
 @Directive({
-    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: 'th[sortable]',
-    // eslint-disable-next-line @angular-eslint/no-host-metadata-property
     host: {
         '[class.asc]': 'direction === "asc"',
         '[class.desc]': 'direction === "desc"',

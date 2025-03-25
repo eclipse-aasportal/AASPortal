@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -18,9 +18,9 @@ describe('DashboardApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    imports: [],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [],
+            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+        });
 
         service = TestBed.inject(DashboardApiService);
         httpTestingController = TestBed.inject(HttpTestingController);
@@ -39,7 +39,7 @@ describe('DashboardApiService', () => {
         const id = encodeBase64Url('http://localhost/document');
         const smId = encodeBase64Url('http://localhost/submodel');
         const path = 'Blob';
-        const url = `/api/v1/containers/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
+        const url = `/api/v1/endpoints/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
         const value = window.btoa('Hello World!');
 
         service.getBlobValue(url).subscribe(value => {

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -37,7 +37,7 @@ export class AASTableRow extends TreeNode<AASDocument> {
     }
 
     public get thumbnail(): string {
-        return this.element.thumbnail ?? '/assets/resources/aas.32.png';
+        return this.element.thumbnail || '/assets/resources/aas.32.png';
     }
 
     public get endpoint(): string {

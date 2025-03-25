@@ -1,27 +1,27 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { NgClass, NgStyle } from '@angular/common';
+import { DOCUMENT, NgClass, NgStyle } from '@angular/common';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
+    Inject,
     OnDestroy,
     OnInit,
     computed,
     effect,
     input,
     output,
-    signal,
 } from '@angular/core';
 
 import {
@@ -31,7 +31,6 @@ import {
     WebSocketData,
     AASDocument,
     convertToString,
-    toLocale,
     selectSubmodel,
     getIdShortPath,
     mimeTypeToExtension,
@@ -42,72 +41,67 @@ import {
     isReferenceElement,
     isOperation,
     isSubmodel,
+    equalDocument,
+    getSemanticId,
 } from 'aas-core';
 
-import { AASTreeRow } from './aas-tree-row';
-import { OnlineState } from '../types/online-state';
+import { AASTree, AASTreeRow } from './aas-tree-row';
+import { OnlineState } from '../types';
 import { ShowImageFormComponent } from '../show-image-form/show-image-form.component';
 import { ShowVideoFormComponent } from '../show-video-form/show-video-form.component';
 import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
-import { basename, encodeBase64Url } from '../convert';
-import { ViewQuery } from '../types/view-query-params';
-import { WindowService } from '../window.service';
-import { DocumentService } from '../document.service';
-import { DownloadService } from '../download.service';
+import { basename, encodeBase64Url } from '../utilities';
 import { WebSocketFactoryService } from '../web-socket-factory.service';
 import { ClipboardService } from '../clipboard.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import {
-    SubmodelViewDescriptor,
-    resolveSemanticId,
-    supportedSubmodelTemplates,
-} from '../submodel-template/submodel-template';
+import { findRoute } from '../views/views';
 
 import { AASTreeApiService } from './aas-tree-api.service';
-import { AASTreeService } from './aas-tree.service';
-
-interface PropertyValue {
-    property: aas.Property;
-    value: BehaviorSubject<string | boolean>;
-}
+import { AASTreeStore } from './aas-tree.store';
+import { AuthService } from '../auth/auth.service';
+import { WINDOW } from '../window.service';
 
 @Component({
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    standalone: true,
     imports: [NgClass, NgStyle, TranslateModule],
-    providers: [AASTreeSearch, AASTreeService, AASTreeApiService],
+    providers: [AASTreeSearch, AASTreeApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTreeComponent implements OnInit, OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
-    private readonly map = new Map<string, PropertyValue>();
+    private readonly map = new Map<string, AASTreeRow>();
     private readonly subscription = new Subscription();
-    private readonly _expanded = signal(false);
-    private shiftKey = false;
-    private altKey = false;
 
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor(
-        private readonly service: AASTreeService,
-        private readonly router: Router,
+        private readonly store: AASTreeStore,
         private readonly api: AASTreeApiService,
         private readonly searching: AASTreeSearch,
+        private readonly router: Router,
         private readonly modal: NgbModal,
-        private readonly window: WindowService,
-        private readonly dom: DocumentService,
-        private readonly download: DownloadService,
+        @Inject(WINDOW) private readonly window: Window,
+        @Inject(DOCUMENT) private readonly dom: Document,
+        private readonly auth: AuthService,
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly clipboard: ClipboardService,
     ) {
-        effect(() => this.searching.start(this.searchExpression()), { allowSignalWrites: true });
+        effect(() => {
+            this.searching.start(this.searchExpression());
+        });
 
-        effect(() => this.service.updateRows(this.document()), { allowSignalWrites: true });
+        effect(() => {
+            const document = this.document();
+            if (!equalDocument(document, this.store.document)) {
+                this.store.document = document;
+                this.updateRows(document);
+            }
+        });
 
         effect(() => {
             if (this.state() === 'online') {
@@ -117,30 +111,26 @@ export class AASTreeComponent implements OnInit, OnDestroy {
             }
         });
 
-        effect(() => this.selected.emit(this.service.selectedElements()));
+        effect(() => {
+            this.selected.emit(this.store.selectedElements$());
+        });
 
-        effect(
-            () => {
-                const matchIndex = this.service.matchIndex();
-                if (matchIndex >= 0) {
-                    this.service.expandRow(matchIndex);
-                }
-            },
-            { allowSignalWrites: true },
-        );
+        effect(() => {
+            const matchIndex = this.matchIndex();
+            if (matchIndex >= 0) {
+                this.store.expandRow(matchIndex);
+            }
+        });
 
-        effect(
-            () => {
-                const row = this.service.matchRow();
-                if (!row) return;
+        effect(() => {
+            const row = this.matchRow();
+            if (!row) return;
 
-                setTimeout(() => {
-                    const element = this.dom.getElementById(row.id);
-                    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                });
-            },
-            { allowSignalWrites: true },
-        );
+            setTimeout(() => {
+                const element = this.dom.getElementById(row.id);
+                element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            });
+        });
 
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
@@ -161,24 +151,27 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     public readonly modified = computed(() => this.document()?.modified ?? false);
 
     public readonly someSelected = computed(() => {
-        const rows = this.service.rows();
+        const rows = this.store.state$().rows;
         return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
     });
 
     public readonly everySelected = computed(() => {
-        const rows = this.service.rows();
+        const rows = this.store.state$().rows;
         return rows.length > 0 && rows.every(row => row.selected);
     });
 
-    public readonly nodes = this.service.nodes;
+    public readonly nodes = computed(() => this.store.state$().nodes);
 
-    public readonly rows = this.service.rows;
+    public readonly rows = computed(() => this.store.state$().rows);
 
-    public readonly expanded = this._expanded.asReadonly();
+    public readonly expanded = computed(() => this.store.state$().expanded);
 
-    public readonly matchIndex = this.service.matchIndex;
+    public readonly matchIndex = computed(() => this.store.state$().matchIndex);
 
-    public readonly matchRow = this.service.matchRow;
+    public readonly matchRow = computed(() => {
+        const state = this.store.state$();
+        return state.matchIndex >= 0 ? state.rows[state.matchIndex] : undefined;
+    });
 
     public readonly message = computed(() => {
         const document = this.document();
@@ -199,7 +192,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
-                this.service.updateRows(this.document());
+                this.updateRows(this.document());
             }),
         );
     }
@@ -225,51 +218,34 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         return state;
     }
 
-    public getValue(node: AASTreeRow): string | boolean | undefined {
-        if (this.state() === 'online' && node.element.modelType === 'Property') {
-            const property = node.element as aas.Property;
-            let value: string | boolean;
-            const item = property.nodeId && this.map.get(property.nodeId);
-            if (item) {
-                value = item.value.getValue();
-            } else {
-                value = this.getPropertyValue(property);
-            }
-
-            return value;
-        } else {
-            return node.value;
-        }
-    }
-
     public expand(node?: AASTreeRow): void {
         if (node) {
             if (!node.expanded) {
-                this.service.expandRow(node);
+                this.store.expandRow(node);
             }
         } else {
-            this.service.expand();
-            this._expanded.set(true);
+            this.store.expand();
+            this.store.state$.update(state => ({ ...state, expanded: true }));
         }
     }
 
     public collapse(node?: AASTreeRow): void {
         if (node) {
             if (node.expanded) {
-                this.service.collapseRow(node);
+                this.store.collapseRow(node);
             }
         } else {
-            this.service.collapse();
-            this._expanded.set(false);
+            this.store.collapse();
+            this.store.state$.update(state => ({ ...state, expanded: false }));
         }
     }
 
     public toggleSelections(): void {
-        this.service.toggleSelections();
+        this.store.toggleSelections();
     }
 
     public toggleSelection(node: AASTreeRow): void {
-        this.service.toggleSelected(node, this.altKey, this.shiftKey);
+        this.store.toggleSelected(node, this.store.altKey, this.store.shiftKey);
     }
 
     public openReference(reference: aas.Reference | string | undefined): void {
@@ -300,7 +276,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         } else if (isOperation(node.element)) {
             this.openOperation(node.element);
         } else if (isSubmodel(node.element)) {
-            this.openSubmodel(node.element);
+            this.openView(node.element);
         }
     }
 
@@ -320,22 +296,40 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         return value.keys.map(key => key.value).join('.');
     }
 
-    private async openFile(file: aas.File): Promise<void> {
-        if (!file.value || this.state() === 'online') return;
-
-        const { name, url } = this.resolveFile(file);
-        if (name && url) {
-            if (file.contentType.startsWith('image/')) {
-                await this.showImageAsync(name, url);
-            } else if (file.contentType.startsWith('video/')) {
-                await this.showVideoAsync(name, url);
-            } else if (file.contentType.endsWith('/pdf')) {
-                const token = await this.api.getTokenAsync(url);
-                this.window.open(url + '?access_token=' + token);
-            } else if (file) {
-                await this.downloadFileAsync(name, url);
+    private updateRows(document: AASDocument | null): void {
+        try {
+            if (document) {
+                const tree = AASTree.from(document, this.translate.currentLang);
+                this.store.state$.update(state => ({
+                    ...state,
+                    matchIndex: -1,
+                    rows: tree.nodes,
+                    nodes: tree.expanded,
+                }));
+            } else {
+                this.store.state$.update(state => ({
+                    ...state,
+                    matchIndex: -1,
+                    rows: [],
+                    nodes: [],
+                }));
             }
+        } catch (error) {
+            this.notify.error(error);
         }
+    }
+
+    private openFile(file: aas.File): void {
+        if (!file.value || this.state() === 'online') {
+            return;
+        }
+
+        const { url } = this.resolveFile(file);
+        if (url === undefined) {
+            return;
+        }
+
+        this.window.open(url + '?access_token=' + this.auth.token());
     }
 
     private async openBlob(blob: aas.Blob): Promise<void> {
@@ -357,7 +351,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                     getIdShortPath(blob),
                 );
 
-                this.service.update(blob, value);
+                this.store.update(blob, value);
             } catch (error) {
                 this.notify.error(error);
                 return;
@@ -389,29 +383,29 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private openSubmodel(submodel: aas.Submodel | undefined): void {
-        if (!submodel || this.state() === 'online') return;
-
-        const semanticId = resolveSemanticId(submodel);
-        if (semanticId) {
-            const document = this.document();
-            const template = supportedSubmodelTemplates.get(semanticId);
-            if (template && document) {
-                const descriptor: SubmodelViewDescriptor = {
-                    template,
-                    submodels: [
-                        {
-                            id: document.id,
-                            endpoint: document.endpoint,
-                            idShort: submodel.idShort,
-                        },
-                    ],
-                };
-
-                this.clipboard.set('ViewQuery', { descriptor } as ViewQuery);
-                this.router.navigateByUrl('/view?format=ViewQuery', { skipLocationChange: true });
-            }
+    private openView(submodel: aas.Submodel | undefined): Promise<boolean> {
+        const document = this.document();
+        if (submodel === undefined || this.state() === 'online' || document === null) {
+            return Promise.resolve(false);
         }
+
+        const semanticId = getSemanticId(submodel);
+        if (semanticId === undefined) {
+            return Promise.resolve(false);
+        }
+
+        const route = findRoute(semanticId);
+        if (route === undefined) {
+            return Promise.resolve(false);
+        }
+
+        return this.router.navigate([`/view/${route.path}`], {
+            queryParams: {
+                endpoint: encodeBase64Url(document.endpoint),
+                id: encodeBase64Url(document.id),
+            },
+            state: { data: JSON.stringify([document]) },
+        });
     }
 
     private async showImageAsync(name: string, src: string): Promise<void> {
@@ -438,27 +432,11 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async downloadFileAsync(name: string, url: string): Promise<void> {
-        try {
-            this.download.downloadFileAsync(url, name);
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
-    private getPropertyValue(property: aas.Property): string | boolean {
-        if (typeof property.value === 'boolean') {
-            return property.value;
-        } else {
-            return toLocale(property.value, property.valueType, this.translate.currentLang) ?? '-';
-        }
-    }
-
     private goOnline(): void {
         try {
-            this.prepareOnline(this.service.rows().filter(row => row.selected));
+            this.prepareOnline(this.store.rows.filter(row => row.selected));
             this.play();
-        } catch (error) {
+        } catch {
             this.stop();
         }
     }
@@ -499,20 +477,18 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                         valueType: property.valueType ?? 'undefined',
                     });
 
-                    const subject = new BehaviorSubject<string | boolean>(this.getPropertyValue(property));
-                    this.map.set(property.nodeId, { property: property, value: subject });
+                    this.map.set(property.nodeId, row);
                 }
             }
         }
     }
 
-    private openDocumentByAssetId(assetId: string): void {
-        if (assetId) {
+    private openDocumentByAssetId(id: string): void {
+        if (id) {
             this.clipboard.clear('AASDocument');
             this.router.navigate(['/aas'], {
-                skipLocationChange: true,
                 onSameUrlNavigation: 'reload',
-                queryParams: { id: assetId },
+                queryParams: { id: encodeBase64Url(id) },
             });
         }
     }
@@ -520,9 +496,8 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private openExternalReference(reference: aas.Reference): void {
         this.clipboard.clear('AASDocument');
         this.router.navigate(['/aas'], {
-            skipLocationChange: true,
             onSameUrlNavigation: 'reload',
-            queryParams: { id: reference.keys[0].value },
+            queryParams: { id: encodeBase64Url(reference.keys[0].value) },
         });
     }
 
@@ -538,9 +513,8 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         } else if (reference.keys[0].type === 'AssetAdministrationShell') {
             this.clipboard.clear('AASDocument');
             this.router.navigate(['/aas'], {
-                skipLocationChange: true,
                 onSameUrlNavigation: 'reload',
-                queryParams: { id: reference.keys[0].value },
+                queryParams: { id: encodeBase64Url(reference.keys[0].value) },
             });
         }
     }
@@ -555,14 +529,16 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     private onMessage = (data: WebSocketData): void => {
         if (data.type === 'LiveNode[]') {
             for (const node of data.data as LiveNode[]) {
-                const item = this.map.get(node.nodeId);
-                if (item) {
-                    item.value.next(
-                        typeof node.value === 'boolean'
-                            ? node.value
-                            : convertToString(node.value, this.translate.currentLang),
-                    );
+                const row = this.map.get(node.nodeId);
+                if (row === undefined) {
+                    continue;
                 }
+
+                row.value.set(
+                    typeof node.value === 'boolean'
+                        ? node.value
+                        : convertToString(node.value, this.translate.currentLang),
+                );
             }
         }
     };
@@ -572,13 +548,13 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     };
 
     private keyup = () => {
-        this.shiftKey = false;
-        this.altKey = false;
+        this.store.shiftKey = false;
+        this.store.altKey = false;
     };
 
     private keydown = (event: KeyboardEvent) => {
-        this.shiftKey = event.shiftKey;
-        this.altKey = event.altKey;
+        this.store.shiftKey = event.shiftKey;
+        this.store.altKey = event.altKey;
     };
 
     private resolveFile(file: aas.File): { url?: string; name?: string } {
@@ -592,7 +568,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
                 value.name = basename(file.value);
                 const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
-                value.url = `/api/v1/containers/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+                value.url = `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
             }
         }
 

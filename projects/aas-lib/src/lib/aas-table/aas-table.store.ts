@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,15 +9,29 @@
 import { Injectable, signal, untracked } from '@angular/core';
 import findLastIndex from 'lodash-es/findLastIndex';
 import { AASDocument } from 'aas-core';
-import { ViewMode } from '../types/view-mode';
+import { ViewMode } from '../types';
 import { AASTableRow, AASTableTree } from './aas-table-row';
+
+type AASTableState = {
+    documents: AASDocument[];
+    totalRows: AASTableRow[];
+    rows: AASTableRow[];
+};
+
+const initialState: AASTableState = {
+    documents: [],
+    totalRows: [],
+    rows: [],
+};
 
 @Injectable()
 export class AASTableStore {
-    private readonly _totalRows = signal<AASTableRow[]>([]);
-    private readonly _rows = signal<AASTableRow[]>([]);
+    private readonly _totalRows = signal<AASTableRow[]>(initialState.totalRows);
+    private readonly _rows = signal<AASTableRow[]>(initialState.rows);
 
     public readonly rows = this._rows.asReadonly();
+
+    public readonly documents = signal<AASDocument[]>(initialState.documents);
 
     public setSelected(documents: AASDocument[], viewMode: ViewMode): void {
         const tree = new AASTableTree(untracked(this._totalRows));

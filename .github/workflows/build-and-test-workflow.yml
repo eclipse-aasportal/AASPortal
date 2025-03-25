@@ -15,7 +15,7 @@ jobs:
     # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]
 #
     steps:
       - uses: actions/checkout@v3
@@ -34,5 +34,5 @@ jobs:
           name: code-coverage-report
           path: |
             reports/aas-portal.xml
-            reports/aas-server.xml
+            reports/aas-node.xml
             reports/common.xml

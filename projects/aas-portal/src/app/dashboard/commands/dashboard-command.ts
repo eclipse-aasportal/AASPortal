@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,13 +8,13 @@
 
 import { Command } from '../../types/command';
 import {
-    DashboardService,
     DashboardChart,
     DashboardItem,
     DashboardItemType,
     DashboardRow,
     DashboardState,
-} from '../dashboard.service';
+    DashboardStore,
+} from '../dashboard.store';
 
 export abstract class DashboardCommand extends Command {
     private preState!: DashboardState;
@@ -22,29 +22,29 @@ export abstract class DashboardCommand extends Command {
 
     protected constructor(
         name: string,
-        protected readonly dashboard: DashboardService,
+        protected readonly store: DashboardStore,
     ) {
         super(name);
     }
 
     protected onExecute(): void {
-        this.preState = this.dashboard.state;
+        this.preState = this.store.memento;
         this.executing();
-        this.postState = this.dashboard.state;
+        this.postState = this.store.memento;
     }
 
     protected abstract executing(): void;
 
     protected onUndo(): void {
-        this.dashboard.state = this.preState;
+        this.store.memento = this.preState;
     }
 
     protected onRedo(): void {
-        this.dashboard.state = this.postState;
+        this.store.memento = this.postState;
     }
 
     protected onAbort(): void {
-        this.dashboard.state = this.preState;
+        this.store.memento = this.preState;
     }
 
     protected isChart(item: DashboardItem): item is DashboardChart {

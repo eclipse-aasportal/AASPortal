@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -14,7 +14,6 @@ import { TranslateModule } from '@ngx-translate/core';
     selector: 'fhg-show-video',
     templateUrl: './show-video-form.component.html',
     styleUrls: ['./show-video-form.component.scss'],
-    standalone: true,
     imports: [TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

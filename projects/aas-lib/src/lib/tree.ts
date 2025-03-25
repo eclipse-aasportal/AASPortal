@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2024 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -27,12 +27,13 @@ export abstract class TreeNode<TElement> {
 
 export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
     public get expanded(): TNode[] {
-        const root = this.getNodes().find(node => node.level === 0);
-        if (!root) {
-            return [];
+        const nodes: TNode[] = [];
+        for (const root of this.getNodes().filter(node => node.level === 0)) {
+            nodes.push(root);
+            this.traverseNodes(root, nodes);
         }
 
-        return this.traverseNodes(root, [root]);
+        return nodes;
     }
 
     public get selectedElements(): TElement[] {
@@ -228,7 +229,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
         this.setNodes(nodes);
     }
 
-    private traverseNodes(node: TNode, expanded: TNode[]): TNode[] {
+    private traverseNodes(node: TNode, expanded: TNode[]): void {
         const nodes = this.getNodes();
         if (node.firstChild >= 0 && node.expanded) {
             let child = nodes[node.firstChild];
@@ -240,8 +241,6 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
                 this.traverseNodes(child, expanded);
             }
         }
-
-        return expanded;
     }
 
     private clone(node: TNode, selected: boolean): TNode {
