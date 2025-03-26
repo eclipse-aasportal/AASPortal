@@ -99,6 +99,8 @@ export class MainComponent {
 
     public readonly changedDocuments = this.indexChange.changedDocuments;
 
+    public readonly year = signal(new Date().getFullYear());
+
     public clear(): void {
         this.indexChange.clear().subscribe();
     }
