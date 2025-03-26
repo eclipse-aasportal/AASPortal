@@ -17,6 +17,7 @@ export interface Task {
     state: 'idle' | 'inProgress';
     start: number;
     end: number;
+    handle?: NodeJS.Timeout;
 }
 
 @singleton()
@@ -41,6 +42,10 @@ export class TaskHandler {
         const task = this._tasks.get(taskId);
         if (task === undefined) {
             return;
+        }
+
+        if (task.handle) {
+            clearTimeout(task.handle);
         }
 
         this._tasks.delete(taskId);
