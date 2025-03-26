@@ -208,3 +208,23 @@ export interface WebSocketData {
     /** The data. */
     data: unknown;
 }
+
+/** Defines the message types. */
+export type AASNodeMessageType =
+    | 'Added'
+    | 'Removed'
+    | 'Update'
+    | 'Offline'
+    | 'EndpointAdded'
+    | 'EndpointRemoved'
+    | 'Reset';
+
+/** Server message. */
+export interface AASNodeMessage {
+    /** The type of change. */
+    type: AASNodeMessageType;
+    /** The endpoint if type `EndpointAdded`, `EndpointRemoved`. */
+    endpoint?: AASEndpoint;
+    /** The document if type `Added`, `Removed` or `Changed` */
+    document?: AASDocument;
+}

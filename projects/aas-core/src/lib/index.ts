@@ -36,7 +36,6 @@ export * from './document.js';
 export * from './types.js';
 export * from './authentication.js';
 export * from './convert.js';
-export * from './server-message.js';
 export * as aas from './aas.js';
 export * from './application-error.js';
 export * from './multi-key-map.js';

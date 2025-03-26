@@ -6,22 +6,25 @@
  *
  *****************************************************************************/
 
-import { effect, untracked, Injectable } from '@angular/core';
+import { effect, untracked, Injectable, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, catchError, concat, from, map, mergeMap, of } from 'rxjs';
-import { ViewMode } from 'aas-lib';
+import { EMPTY, Observable, Subscription, catchError, concat, from, map, mergeMap, of } from 'rxjs';
+import { IndexChangeService, ViewMode } from 'aas-lib';
 import { AASDocument, AASDocumentId, AASPagedResult, aas } from 'aas-core';
 import { ShellsApiService } from './shells-api.service';
 import { ShellsStore } from './shells.store';
 import { FavoritesService } from './favorites.service';
 
 @Injectable()
-export class ShellsService {
+export class ShellsService implements OnDestroy {
+    private readonly subscription = new Subscription();
+
     public constructor(
         private readonly store: ShellsStore,
         private readonly api: ShellsApiService,
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
+        private readonly indexChange: IndexChangeService,
     ) {
         effect(() => {
             this.refreshPage(this.store.limit$());
@@ -34,6 +37,12 @@ export class ShellsService {
         effect(() => {
             this.setActiveFavorites(this.favorites.active());
         });
+
+        this.subscription.add(indexChange.message.subscribe(this.updatePage));
+    }
+
+    public ngOnDestroy(): void {
+        this.subscription.unsubscribe();
     }
 
     public removeFavorites(favorites: AASDocument[]): void {
@@ -64,7 +73,7 @@ export class ShellsService {
                 filter,
                 this.translate.currentLang,
             )
-            .pipe(mergeMap(page => this.setPageAndLoadContents(page, limit, filter)))
+            .pipe(mergeMap(result => this.setPageAndLoadContents(result, limit, filter)))
             .subscribe();
     }
 
@@ -83,7 +92,7 @@ export class ShellsService {
                 untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
-            .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
+            .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
     }
 
@@ -97,7 +106,7 @@ export class ShellsService {
                 untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
-            .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
+            .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
     }
 
@@ -116,7 +125,7 @@ export class ShellsService {
                 untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
-            .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
+            .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
     }
 
@@ -159,8 +168,47 @@ export class ShellsService {
                 untracked(this.store.filterText$),
                 this.translate.currentLang,
             )
-            .pipe(mergeMap(page => this.setPageAndLoadContents(page)))
+            .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
+    }
+
+    private readonly updatePage = () => {
+        const documents = untracked(this.store.documents$);
+        if (documents.length === 0) {
+            return;
+        }
+
+        this.api
+            .getPage(
+                {
+                    next: this.getId(documents[0]),
+                    limit: untracked(this.store.limit$),
+                },
+                untracked(this.store.filterText$),
+                this.translate.currentLang,
+            )
+            .pipe(
+                mergeMap(result => {
+                    return this.equal(documents, result.documents) ? EMPTY : this.setPageAndLoadContents(result);
+                }),
+            )
+            .subscribe();
+    };
+
+    private equal(a: AASDocument[], b: AASDocument[]): boolean {
+        if (b.length !== a.length) {
+            return false;
+        }
+
+        let i = 0;
+        for (const reference of b) {
+            const document = a[i++];
+            if (document.endpoint !== reference.endpoint || document.id !== reference.id) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private getFavorites(documents: AASDocument[]): void {
@@ -190,13 +238,13 @@ export class ShellsService {
         return { id: document.id, endpoint: document.endpoint };
     }
 
-    private setPageAndLoadContents(page: AASPagedResult, limit?: number, filter?: string): Observable<void> {
+    private setPageAndLoadContents(result: AASPagedResult, limit?: number, filter?: string): Observable<void> {
         return concat(
-            of(this.setPage(page, limit, filter)),
-            from(page.documents).pipe(
+            of(this.setPage(result, limit, filter)),
+            from(result.documents).pipe(
                 mergeMap(document =>
                     this.api.getContent(document.endpoint, document.id).pipe(
-                        catchError(() => of(undefined)),
+                        catchError(() => of(void 0)),
                         map(content => this.setContent(document, content)),
                     ),
                 ),
@@ -204,10 +252,10 @@ export class ShellsService {
         );
     }
 
-    private setPage(page: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
-        this.store.documents$.set(page.documents);
-        this.store.previous$.set(page.previous);
-        this.store.next$.set(page.next);
+    private setPage(result: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
+        this.store.documents$.set(result.documents);
+        this.store.previous$.set(result.previous);
+        this.store.next$.set(result.next);
         this.store.state$.update(state => {
             return {
                 ...state,
