@@ -10,7 +10,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, model, signal } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { AASDocument, aas } from 'aas-core';
+import { AASDocument, WebSocketData, aas } from 'aas-core';
 import {
     WINDOW,
     ViewMode,
@@ -19,6 +19,7 @@ import {
     DownloadService,
     AASTableComponent,
     StartService,
+    IndexChangeService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
@@ -48,6 +49,7 @@ describe('ShellsComponent', () => {
     let favorites: jasmine.SpyObj<FavoritesService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
+    let indexChange: jasmine.SpyObj<IndexChangeService>;
 
     beforeEach(() => {
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -94,6 +96,16 @@ describe('ShellsComponent', () => {
         auth.getCookie.and.returnValue(of(undefined));
         auth.setCookie.and.returnValue(of(undefined));
 
+        indexChange = jasmine.createSpyObj<IndexChangeService>(
+            {},
+            {
+                message: of({
+                    type: 'IndexChange',
+                    data: null,
+                } satisfies WebSocketData),
+            },
+        );
+
         TestBed.configureTestingModule({
             providers: [
                 {
@@ -127,7 +139,11 @@ describe('ShellsComponent', () => {
                 {
                     provide: StartService,
                     useValue: start,
-                }
+                },
+                {
+                    provide: IndexChangeService,
+                    useValue: indexChange,
+                },
             ],
             imports: [
                 TranslateModule.forRoot({
