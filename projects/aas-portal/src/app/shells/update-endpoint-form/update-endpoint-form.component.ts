@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import cloneDeep from 'lodash-es/cloneDeep';
-import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -89,6 +89,12 @@ export class UpdateEndpointFormComponent {
 
                 this._headers.set(items);
             }
+        });
+
+        effect(() => {
+            const endpoint = this.endpoint();
+            const items = untracked(this._items);
+            this._selectedItemIndex.set(items.findIndex(item => item.type === endpoint.type));
         });
     }
 
