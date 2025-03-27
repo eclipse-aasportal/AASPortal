@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { computed, EventEmitter, Injectable, signal } from '@angular/core';
+import { computed, EventEmitter, Injectable, OnDestroy, signal } from '@angular/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { WebSocketData, AASServerMessage } from 'aas-core';
+import { AASNodeMessage, WebSocketData } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
 import { HttpClient } from '@angular/common/http';
-import { first, map, mergeMap, Observable, zip } from 'rxjs';
+import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
 import { AuthService } from '../public-api';
 
 type State = {
@@ -23,8 +23,8 @@ type State = {
 @Injectable({
     providedIn: 'root',
 })
-export class IndexChangeService {
-    private webSocketSubject?: WebSocketSubject<WebSocketData>;
+export class IndexChangeService implements OnDestroy {
+    private subscription?: Subscription;
     private readonly state = signal<State>({
         documentCount: 0,
         endpointCount: 0,
@@ -36,7 +36,20 @@ export class IndexChangeService {
         private readonly webSocketFactory: WebSocketFactoryService,
         private readonly auth: AuthService,
     ) {
-        this.subscribeIndexChanged();
+        const message = this.webSocketFactory.create();
+        this.subscription = message.subscribe({
+            next: (data: WebSocketData): void => {
+                if (data.type === 'AASNodeMessage') {
+                    this.update(data.data as AASNodeMessage);
+                }
+            },
+            error: (error): void => {
+                console.error(error);
+            },
+        });
+
+        message.next(this.createMessage());
+        this.message = message.asObservable();
 
         this.auth.userId
             .pipe(
@@ -54,6 +67,8 @@ export class IndexChangeService {
     }
 
     public readonly reset = new EventEmitter();
+
+    public readonly message: Observable<WebSocketData>;
 
     public readonly documentCount = computed(() => this.state().documentCount);
 
@@ -73,30 +88,18 @@ export class IndexChangeService {
         );
     }
 
-    private subscribeIndexChanged = (): void => {
-        this.webSocketSubject = this.webSocketFactory.create();
-        this.webSocketSubject.subscribe({
-            next: (data: WebSocketData): void => {
-                if (data.type === 'AASServerMessage') {
-                    this.update(data.data as AASServerMessage);
-                }
-            },
-            error: (): void => {
-                setTimeout(this.subscribeIndexChanged, 2000);
-            },
-        });
-
-        this.webSocketSubject.next(this.createMessage());
-    };
+    public ngOnDestroy(): void {
+        this.subscription?.unsubscribe();
+    }
 
     private createMessage(): WebSocketData {
         return {
             type: 'IndexChange',
             data: null,
-        } as WebSocketData;
+        } satisfies WebSocketData;
     }
 
-    private update(data: AASServerMessage): void {
+    private update(data: AASNodeMessage): void {
         switch (data.type) {
             case 'Added':
                 this.documentAdded();

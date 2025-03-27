@@ -13,7 +13,7 @@ import {
     AASDocument,
     LiveRequest,
     WebSocketData,
-    AASServerMessage,
+    AASNodeMessage,
     aas,
     selectElement,
     AASCursor,
@@ -227,11 +227,11 @@ export class AASProvider {
         await this.clientFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
+            type: 'AASNodeMessage',
             data: {
                 type: 'EndpointAdded',
                 endpoint: endpoint,
-            } as AASServerMessage,
+            } as AASNodeMessage,
         });
 
         const type = endpoint.schedule?.type;
@@ -239,7 +239,8 @@ export class AASProvider {
             return;
         }
 
-        setTimeout(this.scanEndpoint, 0, this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint'), endpoint);
+        const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
+        task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
     }
 
     /**
@@ -251,7 +252,12 @@ export class AASProvider {
         const old = await this.index.updateEndpoint(endpoint);
 
         let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
-        if (task === undefined) {
+        if (task) {
+            if (task.handle) {
+                clearTimeout(task.handle);
+                delete task.handle;
+            }
+        } else {
             task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
         }
 
@@ -261,7 +267,7 @@ export class AASProvider {
             if (newType === 'disabled') {
                 await this.index.clear(endpoint.name);
             } else if (oldType === 'manual' || oldType === 'disabled') {
-                setTimeout(this.scanEndpoint, 0, task, endpoint);
+                task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         }
     }
@@ -281,11 +287,11 @@ export class AASProvider {
 
             this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
             this.wsServer.notify('IndexChange', {
-                type: 'AASServerMessage',
+                type: 'AASNodeMessage',
                 data: {
                     type: 'EndpointRemoved',
                     endpoint: endpoint,
-                } as AASServerMessage,
+                } as AASNodeMessage,
             });
         }
     }
@@ -308,10 +314,10 @@ export class AASProvider {
         }
 
         this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
+            type: 'AASNodeMessage',
             data: {
                 type: 'Reset',
-            } as AASServerMessage,
+            } as AASNodeMessage,
         });
     }
 
@@ -467,7 +473,7 @@ export class AASProvider {
             throw new Error(`Scanning endpoint ${name} is already in progress.`);
         }
 
-        setTimeout(this.scanEndpoint, 0, task, endpoint);
+        task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
     }
 
     public destroy(): void {
@@ -489,11 +495,11 @@ export class AASProvider {
             for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
                 await this.index.addEndpoint(endpoint);
                 this.wsServer.notify('IndexChange', {
-                    type: 'AASServerMessage',
+                    type: 'AASNodeMessage',
                     data: {
                         type: 'EndpointAdded',
                         endpoint: endpoint,
-                    } as AASServerMessage,
+                    } as AASNodeMessage,
                 });
             }
         }
@@ -530,9 +536,9 @@ export class AASProvider {
         return client.createSubscription(socket, message, env);
     }
 
-    private notify(data: AASServerMessage): void {
+    private notify(data: AASNodeMessage): void {
         this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
+            type: 'AASNodeMessage',
             data: data,
         });
     }
@@ -547,7 +553,7 @@ export class AASProvider {
 
                 const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
                 this.taskHandler.set(task);
-                setTimeout(this.scanEndpoint, 0, task, endpoint);
+                task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         } catch (error) {
             this.logger.error(error);
@@ -623,7 +629,12 @@ export class AASProvider {
                 return;
             }
 
-            setTimeout(this.scanEndpoint, this.computeTimeout(endpoint.schedule, task.start, task.end), task, endpoint);
+            task.handle = setTimeout(
+                this.scanEndpoint,
+                this.computeTimeout(endpoint.schedule, task.start, task.end),
+                task,
+                endpoint,
+            );
         }
 
         if (result.messages) {
@@ -677,9 +688,9 @@ export class AASProvider {
         this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
     }
 
-    private sendMessage(data: AASServerMessage) {
+    private sendMessage(data: AASNodeMessage) {
         this.wsServer.notify('IndexChange', {
-            type: 'AASServerMessage',
+            type: 'AASNodeMessage',
             data: data,
         });
     }
