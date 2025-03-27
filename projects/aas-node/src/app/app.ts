@@ -68,7 +68,22 @@ export class App {
 
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
-        this.app.get('/', this.getIndex);
+        this.app.get(
+            [
+                '/',
+                '/start',
+                '/shells',
+                '/aas',
+                '/view',
+                '/dashboard',
+                '/about',
+                '/view/CustomerFeedback',
+                '/view/Nameplate',
+                '/view/DigitalProductPassport',
+                '/view/HandoverDocumentation',
+            ],
+            this.getIndex,
+        );
         this.app.use(express.static(this.variable.WEB_ROOT));
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
