@@ -68,6 +68,13 @@ export class AASApiClientV3 extends AASApiClient {
 
     public readonly onlineReady = true;
 
+    public override async test(): Promise<void> {
+        await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+            this.resolve('shells', { limit: 10 }),
+            this.endpoint.headers,
+        );
+    }
+
     public override async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
         const searchParams: Record<string, string | number> = { limit: 100 };
         if (cursor) {
@@ -85,7 +92,7 @@ export class AASApiClientV3 extends AASApiClient {
         };
     }
 
-    public async readEnvironment(id: AASLabel): Promise<aas.Environment> {
+    public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
