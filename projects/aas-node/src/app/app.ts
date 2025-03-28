@@ -84,6 +84,7 @@ export class App {
             ],
             this.getIndex,
         );
+
         this.app.use(express.static(this.variable.WEB_ROOT));
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
