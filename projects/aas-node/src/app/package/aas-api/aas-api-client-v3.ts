@@ -21,6 +21,8 @@ import {
     isSubmodelElement,
     selectSubmodel,
     getConceptDescriptionIds,
+    noop,
+    isConceptDescription,
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
@@ -68,6 +70,13 @@ export class AASApiClientV3 extends AASApiClient {
 
     public readonly onlineReady = true;
 
+    public override async test(): Promise<void> {
+        await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+            this.resolve('shells', { limit: 10 }),
+            this.endpoint.headers,
+        );
+    }
+
     public override async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
         const searchParams: Record<string, string | number> = { limit: 100 };
         if (cursor) {
@@ -85,7 +94,7 @@ export class AASApiClientV3 extends AASApiClient {
         };
     }
 
-    public async readEnvironment(id: AASLabel): Promise<aas.Environment> {
+    public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
@@ -97,14 +106,16 @@ export class AASApiClientV3 extends AASApiClient {
         for (const submodel of submodels) {
             for (const conceptDescriptionId of getConceptDescriptionIds(submodel)) {
                 try {
-                    conceptDescriptions.push(
-                        await this.http.get<aas.ConceptDescription>(
-                            this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescriptionId)}`),
-                            this.endpoint.headers,
-                        ),
+                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
+                        this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescriptionId)}`),
+                        this.endpoint.headers,
                     );
-                } catch (error) {
-                    this.logger.error(`Unable to read ConceptDescription "${conceptDescriptionId}": ${error?.message}`);
+
+                    if (isConceptDescription(conceptDescription)) {
+                        conceptDescriptions.push(conceptDescription);
+                    }
+                } catch {
+                    noop();
                 }
             }
         }

@@ -12,6 +12,8 @@ import { AASIndex } from '../aas-index/aas-index.js';
 import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/aas-api/aas-api-client.js';
 
+type ScanTuple = { reference?: AASDocument; document?: AASDocument; error?: Error };
+
 /** Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells. */
 export abstract class AASServerScan extends EventEmitter {
     /**
@@ -22,7 +24,7 @@ export abstract class AASServerScan extends EventEmitter {
     public async scanAsync(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
         try {
             await this.open();
-            const map = new Map<string, { reference?: AASDocument; document?: AASDocument }>();
+            const map = new Map<string, ScanTuple>();
             let indexCursor: string | undefined;
             let endpointCursor: string | undefined;
             let endOfIndex = false;
@@ -56,7 +58,11 @@ export abstract class AASServerScan extends EventEmitter {
                         }
 
                         if (value.document === undefined) {
-                            value.document = await this.createDocument(item);
+                            try {
+                                value.document = await this.createDocument(item);
+                            } catch (error) {
+                                value.error = error;
+                            }
                         }
                     }
 
@@ -68,7 +74,11 @@ export abstract class AASServerScan extends EventEmitter {
 
                 const keys: string[] = [];
                 for (const value of map.values()) {
-                    if (value.reference && value.document) {
+                    if (value.error) {
+                        if (value.reference) {
+                            keys.push(value.reference.id);
+                        }
+                    } else if (value.reference && value.document) {
                         keys.push(value.reference.id);
                         this.emit('compare', value.reference, value.document);
                     } else if (endOfIndex && value.document) {
@@ -84,6 +94,10 @@ export abstract class AASServerScan extends EventEmitter {
             } while (!endOfIndex || !endOfEndpoint);
 
             for (const value of map.values()) {
+                if (value.error) {
+                    continue;
+                }
+
                 if (value.reference && value.document) {
                     this.emit('compare', value.reference, value.document);
                 } else if (value.document) {

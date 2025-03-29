@@ -43,12 +43,12 @@ export abstract class AASApiClient extends AASClient {
     protected readonly http: HttpClient;
 
     /** Indicates whether a connection to an AAS endpoint exits. */
-    public get isOpen(): boolean {
+    public override get isOpen(): boolean {
         return this.reentry > 0;
     }
 
     /** Tests the connection to the endpoint. */
-    public async test(): Promise<void> {
+    public override async test(): Promise<void> {
         if (this.reentry === 0) {
             await this.http.checkUrlExist(this.endpoint.url);
         }

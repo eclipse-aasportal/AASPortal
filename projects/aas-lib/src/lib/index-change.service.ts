@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { computed, EventEmitter, Injectable, OnDestroy, signal } from '@angular/core';
-import { WebSocketSubject } from 'rxjs/webSocket';
 import { AASNodeMessage, WebSocketData } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
 import { HttpClient } from '@angular/common/http';

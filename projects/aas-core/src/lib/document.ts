@@ -1187,9 +1187,9 @@ export function getConceptDescriptionIds(referable: aas.Referable): string[] {
     for (const element of flat(referable)) {
         if (isHasSemantics(element)) {
             const semanticId = element.semanticId;
-            if (semanticId && semanticId.type === 'ExternalReference') {
+            if (semanticId) {
                 const key = semanticId.keys.at(0);
-                if (key && key.type === 'GlobalReference') {
+                if (key && key.type === 'ConceptDescription') {
                     result.add(key.value);
                 }
             }

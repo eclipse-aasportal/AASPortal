@@ -250,7 +250,6 @@ export class AASProvider {
      */
     public async updateEndpointAsync(endpoint: AASEndpoint): Promise<void> {
         const old = await this.index.updateEndpoint(endpoint);
-
         let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
         if (task) {
             if (task.handle) {
@@ -263,13 +262,16 @@ export class AASProvider {
 
         const oldType = old.schedule?.type;
         const newType = endpoint.schedule?.type;
-        if (oldType !== newType) {
-            if (newType === 'disabled') {
-                await this.index.clear(endpoint.name);
-            } else if (oldType === 'manual' || oldType === 'disabled') {
-                task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
-            }
+        if (oldType !== newType && newType === 'disabled') {
+            await this.index.clear(endpoint.name);
+            return;
         }
+
+        if (newType === 'manual') {
+            return;
+        }
+
+        task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
     }
 
     /**
@@ -552,7 +554,6 @@ export class AASProvider {
                 }
 
                 const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
-                this.taskHandler.set(task);
                 task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         } catch (error) {
@@ -569,7 +570,7 @@ export class AASProvider {
         if (schedule.type === 'every') {
             const values = schedule.values;
             if (values && values.length > 0 && typeof values[0] === 'number') {
-                const timeout = end - start - values[0];
+                const timeout = values[0] - (end - start);
                 return timeout >= 0 ? timeout : values[0];
             }
         }
