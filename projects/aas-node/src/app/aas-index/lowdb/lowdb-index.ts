@@ -45,6 +45,10 @@ export class LowDbIndex extends AASIndex {
         return Promise.resolve();
     }
 
+    public override hack(): Promise<void> {
+        return this.db.read();
+    }
+
     public override getCount(endpoint?: string): Promise<number> {
         return new Promise<number>(resolve => {
             if (endpoint === undefined) {

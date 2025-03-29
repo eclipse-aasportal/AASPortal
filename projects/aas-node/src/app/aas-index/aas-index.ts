@@ -80,6 +80,10 @@ export abstract class AASIndex {
 
     public abstract destroy(): Promise<void>;
 
+    public hack(): Promise<void> {
+        return Promise.resolve();
+    }
+
     protected toAbbreviation(referable: aas.Referable): string {
         return getAbbreviation(referable.modelType)!.toLowerCase();
     }
