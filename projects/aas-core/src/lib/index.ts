@@ -12,6 +12,7 @@ import {
     AnnotatedRelationshipElement,
     AssetAdministrationShell,
     Blob,
+    ConceptDescription,
     DataElement,
     Entity,
     Environment,
@@ -386,7 +387,16 @@ export function isOperation(referable: unknown): referable is Operation {
  * @returns `true` if the specified referable represents a `Range`; otherwise, `false`.
  */
 export function isRange(referable: unknown): referable is Range {
-    return (referable as Range)?.modelType === 'Range';
+    return (referable as Referable)?.modelType === 'Range';
+}
+
+/**
+ * Determines whether the specified referable represents a concept description.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `ConceptDescription`; otherwise, `false`.
+ */
+export function isConceptDescription(referable: unknown): referable is ConceptDescription {
+    return (referable as Referable)?.modelType === 'ConceptDescription';
 }
 
 /**

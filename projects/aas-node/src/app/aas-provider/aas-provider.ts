@@ -554,7 +554,6 @@ export class AASProvider {
                 }
 
                 const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
-                this.taskHandler.set(task);
                 task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         } catch (error) {
@@ -571,7 +570,7 @@ export class AASProvider {
         if (schedule.type === 'every') {
             const values = schedule.values;
             if (values && values.length > 0 && typeof values[0] === 'number') {
-                const timeout = end - start - values[0];
+                const timeout = values[0] - (end - start);
                 return timeout >= 0 ? timeout : values[0];
             }
         }
