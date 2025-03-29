@@ -72,9 +72,7 @@ export class TemplateStorage {
     }
 
     private startScan = () => {
-        const task = this.taskHandler.createTask('TemplateStorage', this, 'ScanTemplates');
-        this.taskHandler.set(task);
-        this.scanTemplates(task);
+        this.scanTemplates(this.taskHandler.createTask('TemplateStorage', this, 'ScanTemplates'));
     };
 
     private scanTemplates = async (task: Task) => {
@@ -128,7 +126,7 @@ export class TemplateStorage {
 
         task.state = 'idle';
         task.end = Date.now();
-        setTimeout(this.scanTemplates, this.timeout, task);
+        task.handle = setTimeout(this.scanTemplates, this.timeout, task);
 
         if (result.messages) {
             this.logger.start(`scan ${task?.endpointName ?? 'undefined'}`);

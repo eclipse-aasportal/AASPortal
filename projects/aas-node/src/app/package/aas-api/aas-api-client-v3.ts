@@ -21,6 +21,8 @@ import {
     isSubmodelElement,
     selectSubmodel,
     getConceptDescriptionIds,
+    noop,
+    isConceptDescription,
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
@@ -104,14 +106,16 @@ export class AASApiClientV3 extends AASApiClient {
         for (const submodel of submodels) {
             for (const conceptDescriptionId of getConceptDescriptionIds(submodel)) {
                 try {
-                    conceptDescriptions.push(
-                        await this.http.get<aas.ConceptDescription>(
-                            this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescriptionId)}`),
-                            this.endpoint.headers,
-                        ),
+                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
+                        this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescriptionId)}`),
+                        this.endpoint.headers,
                     );
-                } catch (error) {
-                    this.logger.error(`Unable to read ConceptDescription "${conceptDescriptionId}": ${error?.message}`);
+
+                    if (isConceptDescription(conceptDescription)) {
+                        conceptDescriptions.push(conceptDescription);
+                    }
+                } catch {
+                    noop();
                 }
             }
         }
