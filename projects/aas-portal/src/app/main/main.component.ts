@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapse, NgbCollapseModule, NgbModule, NgbNav, NgbNavConfig, NgbNavContent, NgbNavItem, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
@@ -41,8 +41,9 @@ export interface LinkDescriptor {
         RouterLink,
         RouterLinkActive,
         AsyncPipe,
-        NgbNavModule,
         NgTemplateOutlet,
+        NgbNavModule,
+        NgbCollapseModule,
         TranslateModule,
         NotifyComponent,
         LocalizeComponent,
@@ -101,7 +102,7 @@ export class MainComponent {
     public readonly documentCount = this.indexChange.documentCount;
 
     public readonly changedDocuments = this.indexChange.changedDocuments;
-
+    public readonly isMenuCollapsed = signal(true);
     public readonly year = signal(new Date().getFullYear());
 
     public clear(): void {
