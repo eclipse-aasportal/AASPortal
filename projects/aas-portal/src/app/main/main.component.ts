@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
 import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
@@ -36,6 +36,7 @@ export interface LinkDescriptor {
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.scss'],
     imports: [
+        CommonModule,
         RouterOutlet,
         RouterLink,
         RouterLinkActive,
@@ -90,6 +91,8 @@ export class MainComponent {
             url: '/about',
         },
     ]).asReadonly();
+
+    public readonly languages = signal(['en-us', 'de-de']).asReadonly();
 
     public readonly version = signal(environment.version).asReadonly();
 

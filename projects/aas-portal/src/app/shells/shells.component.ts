@@ -85,28 +85,28 @@ export class ShellsComponent implements OnDestroy {
 
     public readonly activeFavorites = this.favorites.active;
 
-    public readonly limit = this.store.limit$;
+    public readonly limit = this.store.limit;
 
-    public readonly viewMode = this.store.viewMode$;
+    public readonly viewMode = this.store.viewMode;
 
     public readonly favoritesLists = computed(() => ['', ...this.favorites.items().map(list => list.name)]);
 
     public readonly filter = computed(() => {
-        const filterText = this.store.filterText$();
+        const filterText = this.filterText();
         return this.favorites.active() ? filterText : '';
     });
 
-    public readonly filterText = this.store.filterText$;
+    public readonly filterText = this.store.filterText;
 
-    public readonly isFirstPage = computed(() => this.store.previous$() === null);
+    public readonly isFirstPage = computed(() => this.store.previous() === null);
 
-    public readonly isLastPage = computed(() => this.store.next$() === null);
+    public readonly isLastPage = computed(() => this.store.next() === null);
 
-    public readonly documents = this.store.documents$.asReadonly();
+    public readonly documents = this.store.documents.asReadonly();
 
-    public readonly selected = this.store.selected$;
+    public readonly selected = this.store.selected;
 
-    public readonly someSelected = computed(() => this.store.selected$().length > 0);
+    public readonly someSelected = computed(() => this.store.selected().length > 0);
 
     public readonly views = signal(viewRoutes).asReadonly();
 
@@ -221,7 +221,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public downloadDocument(): Observable<void> {
-        return from(this.store.selected$()).pipe(
+        return from(this.store.selected()).pipe(
             mergeMap(document =>
                 this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
@@ -230,15 +230,15 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public deleteDocument(): Observable<void> {
-        if (this.store.selected$().length === 0) {
+        if (this.store.selected().length === 0) {
             return EMPTY;
         }
 
         return of(this.favorites.active()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.store.selected$(), activeFavorites);
-                    this.service.removeFavorites([...this.store.selected$()]);
+                    this.favorites.remove(this.store.selected(), activeFavorites);
+                    this.service.removeFavorites([...this.store.selected()]);
                     return this.favorites.save();
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
@@ -247,13 +247,13 @@ export class ShellsComponent implements OnDestroy {
                                 stringFormat(
                                     this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
                                     this.store
-                                        .selected$()
+                                        .selected()
                                         .map(item => item.idShort)
                                         .join(', '),
                                 ),
                             ),
                         ),
-                        mergeMap(result => from(result ? this.store.selected$() : [])),
+                        mergeMap(result => from(result ? this.store.selected() : [])),
                         mergeMap(document => this.api.delete(document.id, document.endpoint)),
                         catchError(error => this.notify.error(error)),
                     );
@@ -263,14 +263,14 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public openView(view: Route): Promise<boolean> {
-        const documents = this.store.selected$();
+        const documents = this.store.selected();
         if (documents.length === 1) {
             return this.router.navigate([`/view/${view.path}`], {
                 queryParams: {
                     endpoint: encodeBase64Url(documents[0].endpoint),
                     id: encodeBase64Url(documents[0].id),
                 },
-                state: { data: JSON.stringify(this.store.selected$()) },
+                state: { data: JSON.stringify(this.store.selected()) },
             });
         }
 
@@ -288,10 +288,9 @@ export class ShellsComponent implements OnDestroy {
                 filter = '';
             }
 
+            this.store.setFilterText(filter);
             if (!this.favorites.active()) {
                 this.service.getFirstPage(filter);
-            } else {
-                this.store.state$.update(state => ({ ...state, filter }));
             }
         } catch (error) {
             this.notify.error(error);
@@ -317,7 +316,7 @@ export class ShellsComponent implements OnDestroy {
     public addToFavorites(): Observable<void> {
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this.store.selected$()];
+                modalRef.componentInstance.documents = [...this.store.selected()];
                 return from(modalRef.result);
             }),
             map(() => {
@@ -327,7 +326,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        for (const document of this.store.selected$()) {
+        for (const document of this.store.selected()) {
             this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
                 id: document.id,
                 endpoint: document.endpoint,
