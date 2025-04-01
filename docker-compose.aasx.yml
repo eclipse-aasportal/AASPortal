@@ -1,0 +1,18 @@
+services:
+  aas-portal:
+    container_name: aas-portal
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    environment:
+      "ENDPOINTS": "[\"http://aasx-server:5001?name=AASX%20Server\"]"
+    ports:
+      - 80:80
+
+  aasx-server:
+    image: adminshellio/aasx-server-blazor-for-demo:main
+    container_name: aasx-server
+    restart: always
+    ports:
+      - 5001:5001
