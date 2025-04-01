@@ -27,18 +27,18 @@ export class ShellsService implements OnDestroy {
         private readonly indexChange: IndexChangeService,
     ) {
         effect(() => {
-            this.refreshPage(this.store.limit$());
+            this.refreshPage(this.store.limit());
         });
 
         effect(() => {
-            this.setViewMode(this.store.viewMode$());
+            this.setViewMode(this.store.viewMode());
         });
 
         effect(() => {
             this.setActiveFavorites(this.favorites.active());
         });
 
-        this.subscription.add(indexChange.message.subscribe(this.updatePage));
+        this.subscription.add(this.indexChange.message.subscribe(this.updatePage));
     }
 
     public ngOnDestroy(): void {
@@ -51,24 +51,24 @@ export class ShellsService implements OnDestroy {
         }
 
         const documents = this.store
-            .documents$()
+            .documents()
             .filter(document =>
                 favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
             );
 
-        this.store.documents$.set(documents);
+        this.store.documents.set(documents);
     }
 
     public getFirstPage(filter?: string, limit?: number): void {
         if (filter === undefined) {
-            filter = untracked(this.store.filterText$);
+            filter = untracked(this.store.filterText);
         }
 
         this.api
             .getPage(
                 {
                     previous: null,
-                    limit: limit ?? untracked(this.store.limit$),
+                    limit: limit ?? untracked(this.store.limit),
                 },
                 filter,
                 this.translate.currentLang,
@@ -78,7 +78,7 @@ export class ShellsService implements OnDestroy {
     }
 
     public getNextPage(): void {
-        const documents = untracked(this.store.documents$);
+        const documents = untracked(this.store.documents);
         if (documents.length === 0) {
             return;
         }
@@ -86,10 +86,10 @@ export class ShellsService implements OnDestroy {
         this.api
             .getPage(
                 {
-                    next: untracked(this.store.next$),
-                    limit: untracked(this.store.limit$),
+                    next: untracked(this.store.next),
+                    limit: untracked(this.store.limit),
                 },
-                untracked(this.store.filterText$),
+                untracked(this.store.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -101,9 +101,9 @@ export class ShellsService implements OnDestroy {
             .getPage(
                 {
                     next: null,
-                    limit: untracked(this.store.limit$),
+                    limit: untracked(this.store.limit),
                 },
-                untracked(this.store.filterText$),
+                untracked(this.store.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -111,7 +111,7 @@ export class ShellsService implements OnDestroy {
     }
 
     public getPreviousPage(): void {
-        const documents = untracked(this.store.documents$);
+        const documents = untracked(this.store.documents);
         if (documents.length === 0) {
             return;
         }
@@ -119,10 +119,10 @@ export class ShellsService implements OnDestroy {
         this.api
             .getPage(
                 {
-                    previous: untracked(this.store.previous$),
-                    limit: untracked(this.store.limit$),
+                    previous: untracked(this.store.previous),
+                    limit: untracked(this.store.limit),
                 },
-                untracked(this.store.filterText$),
+                untracked(this.store.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -131,7 +131,7 @@ export class ShellsService implements OnDestroy {
 
     private setViewMode(viewMode: ViewMode): void {
         if (viewMode === ViewMode.List) {
-            this.store.selected$.set([]);
+            this.store.selected.set([]);
             const favorites = this.favorites.get(this.favorites.active());
             if (favorites) {
                 this.getFavorites(favorites.documents);
@@ -139,13 +139,13 @@ export class ShellsService implements OnDestroy {
                 this.getFirstPage();
             }
         } else if (viewMode === ViewMode.Tree) {
-            this.store.documents$.set([]);
-            this.getTreeView(this.store.selected$());
+            this.store.documents.set([]);
+            this.getTreeView(this.store.selected());
         }
     }
 
     private setActiveFavorites(name: string): void {
-        this.store.selected$.set([]);
+        this.store.selected.set([]);
         const favorites = this.favorites.get(name);
         if (favorites) {
             this.getFavorites(favorites.documents);
@@ -155,17 +155,17 @@ export class ShellsService implements OnDestroy {
     }
 
     private refreshPage(limit: number): void {
-        if (untracked(this.store.documents$).length === 0) {
+        if (untracked(this.store.documents).length === 0) {
             return;
         }
 
         this.api
             .getPage(
                 {
-                    next: this.getId(untracked(this.store.documents$)[0]),
+                    next: this.getId(untracked(this.store.documents)[0]),
                     limit,
                 },
-                untracked(this.store.filterText$),
+                untracked(this.store.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -173,7 +173,7 @@ export class ShellsService implements OnDestroy {
     }
 
     private readonly updatePage = () => {
-        const documents = untracked(this.store.documents$);
+        const documents = untracked(this.store.documents);
         if (documents.length === 0) {
             return;
         }
@@ -182,9 +182,9 @@ export class ShellsService implements OnDestroy {
             .getPage(
                 {
                     next: this.getId(documents[0]),
-                    limit: untracked(this.store.limit$),
+                    limit: untracked(this.store.limit),
                 },
-                untracked(this.store.filterText$),
+                untracked(this.store.filterText),
                 this.translate.currentLang,
             )
             .pipe(
@@ -212,7 +212,7 @@ export class ShellsService implements OnDestroy {
     }
 
     private getFavorites(documents: AASDocument[]): void {
-        this.store.documents$.set(documents);
+        this.store.documents.set(documents);
         from(documents)
             .pipe(
                 mergeMap(document =>
@@ -253,20 +253,14 @@ export class ShellsService implements OnDestroy {
     }
 
     private setPage(result: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
-        this.store.documents$.set(result.documents);
-        this.store.previous$.set(result.previous);
-        this.store.next$.set(result.next);
-        this.store.state$.update(state => {
-            return {
-                ...state,
-                limit: limit ?? state.limit,
-                filterText: filter ?? state.filterText,
-            };
-        });
+        this.store.documents.set(result.documents);
+        this.store.previous.set(result.previous);
+        this.store.next.set(result.next);
+        this.store.update(limit, filter);
     }
 
     private addTreeAndLoadContents(documents: AASDocument[]): Observable<void> {
-        this.store.documents$.update(state => [...state, ...documents]);
+        this.store.documents.update(state => [...state, ...documents]);
         return from(documents).pipe(
             mergeMap(document =>
                 this.api
@@ -277,7 +271,7 @@ export class ShellsService implements OnDestroy {
     }
 
     private setContent(document: AASDocument, content: aas.Environment | null | undefined): void {
-        this.store.documents$.update(state => {
+        this.store.documents.update(state => {
             const documents = [...state];
             const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
             if (index >= 0) {

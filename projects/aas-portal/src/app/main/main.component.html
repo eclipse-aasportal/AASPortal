@@ -13,11 +13,11 @@
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
                     <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="">
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#AID_navbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navbar">
-                    <ul ngbNav #nav="ngbNav" [activeId]="route.fragment | async" class="navbar-nav me-auto">
+                <div class="collapse navbar-collapse" id="AID_navbar">
+                    <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
                         @for (link of links(); track link) {
                         <li [ngbNavItem]="link.id">
                             <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active">{{link.name |
@@ -25,7 +25,7 @@
                         </li>
                         }
                     </ul>
-                    <fhg-localize class="text-primary" [languages]="['en-us', 'de-de']"></fhg-localize>
+                    <fhg-localize class="text-primary" [languages]="languages()"></fhg-localize>
                     <fhg-auth class="text-primary me-2"></fhg-auth>
                     <div class="ms-2">
                         <img class="object-fit-contain" src="/assets/aas-portal.svg" width="67" height="40" alt="AASPortal">
@@ -43,19 +43,16 @@
     <div class="fhg-main-content">
         <router-outlet></router-outlet>
     </div>
-    <div class="fhg-main-statusbar d-flex flex-row-reverse p-2">
+    <div class="fhg-main-statusbar">
         <div class="ts-x-small">© {{year()}} Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
         <span class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
             <span>{{documentCount()}}</span>
             <span>&nbsp;</span>
             <span translate>Main.SHELLS</span>
             @if (changedDocuments() > 0) {
-            <span>&nbsp;</span>
-            <span>{{changedDocuments()}}</span>
+            <span>&nbsp;{{changedDocuments()}}</span>
             }
-            <span>&nbsp;/&nbsp;</span>
-            <span>{{endpointCount()}}</span>
-            <span>&nbsp;</span>
+            <span>&nbsp;/&nbsp;{{endpointCount()}}&nbsp;</span>
             <span translate>Main.ENDPOINTS</span>
         </span>
     </div>
