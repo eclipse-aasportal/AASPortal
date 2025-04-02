@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NgbCollapse, NgbCollapseModule, NgbModule, NgbNav, NgbNavConfig, NgbNavContent, NgbNavItem, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
@@ -61,36 +61,12 @@ export class MainComponent {
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 
     public readonly links = signal<LinkDescriptor[]>([
-        {
-            id: LinkId.START,
-            name: 'Main.START',
-            url: '/start',
-        },
-        {
-            id: LinkId.SHELLS,
-            name: 'Main.SHELLS',
-            url: '/shells',
-        },
-        {
-            id: LinkId.AAS,
-            name: 'Main.AAS',
-            url: '/aas',
-        },
-        {
-            id: LinkId.VIEW,
-            name: 'Main.VIEW',
-            url: '/view',
-        },
-        {
-            id: LinkId.DASHBOARD,
-            name: 'Main.DASHBOARD',
-            url: '/dashboard',
-        },
-        {
-            id: LinkId.ABOUT,
-            name: 'Main.ABOUT',
-            url: '/about',
-        },
+        { id: LinkId.START, name: 'Main.START', url: '/start' },
+        { id: LinkId.SHELLS, name: 'Main.SHELLS', url: '/shells' },
+        { id: LinkId.AAS, name: 'Main.AAS', url: '/aas' },
+        { id: LinkId.VIEW, name: 'Main.VIEW', url: '/view' },
+        { id: LinkId.DASHBOARD, name: 'Main.DASHBOARD', url: '/dashboard' },
+        { id: LinkId.ABOUT, name: 'Main.ABOUT', url: '/about' },
     ]).asReadonly();
 
     public readonly languages = signal(['en-us', 'de-de']).asReadonly();
@@ -102,7 +78,9 @@ export class MainComponent {
     public readonly documentCount = this.indexChange.documentCount;
 
     public readonly changedDocuments = this.indexChange.changedDocuments;
+
     public readonly isMenuCollapsed = signal(true);
+
     public readonly year = signal(new Date().getFullYear());
 
     public clear(): void {
