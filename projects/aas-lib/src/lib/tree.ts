@@ -83,7 +83,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
         if (nodes.length === 0) {
             return;
         }
-        
+
         if (arg === undefined) {
             nodes.filter(node => !node.isLeaf && !node.expanded).forEach(node => this.expandNode(node, nodes));
         } else {
