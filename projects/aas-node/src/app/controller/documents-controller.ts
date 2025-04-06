@@ -44,7 +44,7 @@ export class DocumentsController extends Controller {
                 filter = decodeBase64Url(filter);
             }
 
-            return await this.aasProvider.getDocumentsAsync(JSON.parse(decodeBase64Url(cursor)), filter, language);
+            return await this.aasProvider.getDocuments(JSON.parse(decodeBase64Url(cursor)), filter, language);
         } finally {
             this.logger.stop();
         }
@@ -61,7 +61,7 @@ export class DocumentsController extends Controller {
     public async getCount(): Promise<{ count: number }> {
         try {
             this.logger.start('getCount');
-            return { count: await this.aasProvider.getCountAsync() };
+            return { count: await this.aasProvider.getCount() };
         } finally {
             this.logger.stop();
         }
@@ -78,7 +78,7 @@ export class DocumentsController extends Controller {
     public async getDocument(@Path() id: string): Promise<AASDocument> {
         try {
             this.logger.start('getDocument');
-            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id));
+            return await this.aasProvider.getDocument(decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }

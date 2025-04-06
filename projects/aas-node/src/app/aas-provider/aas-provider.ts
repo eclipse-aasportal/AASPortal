@@ -95,7 +95,7 @@ export class AASProvider {
      * @param language The current language.
      * @returns A page of documents.
      */
-    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPagedResult> {
+    public getDocuments(cursor: AASCursor, filter?: string, language?: string): Promise<AASPagedResult> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
             return this.index.getDocuments(cursor, filter, language ?? 'en');
@@ -109,7 +109,7 @@ export class AASProvider {
      * @param endpoint The endpoint name.
      * @returns The total count of documents.
      */
-    public getCountAsync(endpoint?: string): Promise<number> {
+    public getCount(endpoint?: string): Promise<number> {
         return this.index.getCount(endpoint);
     }
 
@@ -119,7 +119,7 @@ export class AASProvider {
      * @param endpointName The endpoint name.
      * @returns The AAS document with the specified identifier.
      */
-    public async getDocumentAsync(id: string, endpointName?: string): Promise<AASDocument> {
+    public async getDocument(id: string, endpointName?: string): Promise<AASDocument> {
         const document = await this.index.get(endpointName, id);
         document.content = await this.getDocumentContentAsync(document);
         return document;
@@ -131,7 +131,7 @@ export class AASProvider {
      * @param id The AAS identifier.
      * @returns The AAS environment.
      */
-    public async getContentAsync(endpointName: string, id: string): Promise<aas.Environment> {
+    public async getContent(endpointName: string, id: string): Promise<aas.Environment> {
         const document = await this.index.get(endpointName, id);
         return this.getDocumentContentAsync(document);
     }
@@ -142,7 +142,7 @@ export class AASProvider {
      * @param id The AAS identifier.
      * @returns A readable stream.
      */
-    public async getThumbnailAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
+    public async getThumbnail(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
@@ -223,7 +223,7 @@ export class AASProvider {
      * Adds a new endpoint.
      * @param endpoint The endpoint to add.
      */
-    public async addEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+    public async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.clientFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
@@ -248,7 +248,7 @@ export class AASProvider {
      * @param endpointName The old endpoint name.
      * @param endpoint The endpoint to update.
      */
-    public async updateEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+    public async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
         const old = await this.index.updateEndpoint(endpoint);
         let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
         if (task) {
@@ -278,7 +278,7 @@ export class AASProvider {
      * Removes the endpoint with the specified name.
      * @param endpointName The name of the registry to remove.
      */
-    public async removeEndpointAsync(endpointName: string): Promise<void> {
+    public async removeEndpoint(endpointName: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
             await this.index.removeEndpoint(endpoint.name);
@@ -301,7 +301,7 @@ export class AASProvider {
     /**
      * Restores the default AAS server configuration.
      */
-    public async resetAsync(): Promise<void> {
+    public async reset(): Promise<void> {
         if (this.resetRequested) {
             return;
         }
@@ -330,7 +330,7 @@ export class AASProvider {
      * @param content The new document content.
      * @returns
      */
-    public async updateDocumentAsync(endpointName: string, id: string, content: aas.Environment): Promise<string[]> {
+    public async updateDocument(endpointName: string, id: string, content: aas.Environment): Promise<string[]> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (!document) {
@@ -360,7 +360,7 @@ export class AASProvider {
      * @param id The AAS identifier.
      * @returns A readable stream.
      */
-    public async getPackageAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
+    public async getPackage(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
@@ -377,7 +377,7 @@ export class AASProvider {
      * @param endpointName The name of the destination endpoint.
      * @param files A list of AASX package files.
      */
-    public async addPackagesAsync(endpointName: string, files: Express.Multer.File[]): Promise<void> {
+    public async addPackages(endpointName: string, files: Express.Multer.File[]): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (!endpoint) {
             throw new ApplicationError(
@@ -403,7 +403,7 @@ export class AASProvider {
      * @param endpointName The endpoint name.
      * @param id The AAS identification.
      */
-    public async deletePackageAsync(endpointName: string, id: string): Promise<void> {
+    public async deletePackage(endpointName: string, id: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (document) {
@@ -444,20 +444,21 @@ export class AASProvider {
     }
 
     /**
-     *
-     * @param endpointName The endpoint name.
-     * @param id The AAS identifier.
-     * @returns
+     * Gets all AAS documents of a hierarchy.
+     * @param endpoint The endpoint name of the root document.
+     * @param id The AAS identifier of the root document.
+     * @returns All AAS documents of a hierarchy.
      */
-    public async getHierarchyAsync(endpointName: string, id: string): Promise<AASDocument[]> {
-        const document = await this.index.get(endpointName, id);
+    public async getHierarchy(endpoint: string, id: string): Promise<AASDocument[]> {
+        const document = await this.index.get(endpoint, id);
         const root: AASDocument = { ...document, parentId: null, content: null };
         const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
         return nodes;
     }
 
-    /** Starts a scan of the AAS endpoint with the specified name.
+    /**
+     * Starts a scan of the AAS endpoint with the specified name.
      * @param name The name of the endpoint.
      */
     public async startEndpointScan(name: string): Promise<void> {

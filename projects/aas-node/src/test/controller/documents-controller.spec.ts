@@ -72,19 +72,19 @@ describe('DocumentsController', function () {
     });
 
     it('getDocument: /api/v1/documents/:id', async function () {
-        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
+        aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
-        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.getDocument).toHaveBeenCalled();
     });
 
     it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
         const page: AASPagedResult = { previous: null, documents: [sampleDocument], next: null };
-        aasProvider.getDocumentsAsync.mockResolvedValue(page);
+        aasProvider.getDocuments.mockResolvedValue(page);
         const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
         const filter = encodeBase64Url('#prop:Name=Value');
         const response = await request(app)
@@ -93,6 +93,6 @@ describe('DocumentsController', function () {
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(page);
-        expect(aasProvider.getDocumentsAsync).toHaveBeenCalled();
+        expect(aasProvider.getDocuments).toHaveBeenCalled();
     });
 });
