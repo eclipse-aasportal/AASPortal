@@ -14,7 +14,7 @@
     left: 0;
     right: 0;
     grid-template-columns: auto;
-    grid-template-rows: auto min-content 1fr min-content;
+    grid-template-rows: min-content min-content 1fr min-content;
     grid-template-areas: "navbar" "toolbar" "content" "statusbar";
  }
  
@@ -26,7 +26,6 @@
 .fhg-main-toolbar {
     grid-area: toolbar;
     overflow: visible;
-    height: 100%;
 }
 
 .fhg-main-content {
@@ -37,6 +36,9 @@
 .fhg-main-statusbar {
     grid-area: statusbar;
     overflow: hidden;
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 0.5rem;
 }
 
 .fhg-pointer {

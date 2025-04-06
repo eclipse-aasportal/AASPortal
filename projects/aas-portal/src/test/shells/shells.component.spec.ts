@@ -20,10 +20,11 @@ import {
     AASTableComponent,
     StartService,
     IndexChangeService,
+    DocumentsService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
-import { ShellsApiService } from '../../app/shells/shells-api.service';
+import { EndpointsService } from '../../../../aas-lib/src/lib/services/endpoints.service';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
 import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 
@@ -43,7 +44,8 @@ class TestAASTableComponent {
 describe('ShellsComponent', () => {
     let window: jasmine.SpyObj<Window>;
     let localStorage: jasmine.SpyObj<Storage>;
-    let api: jasmine.SpyObj<ShellsApiService>;
+    let endpoints: jasmine.SpyObj<EndpointsService>;
+    let documents: jasmine.SpyObj<DocumentsService>;
     let component: ShellsComponent;
     let fixture: ComponentFixture<ShellsComponent>;
     let favorites: jasmine.SpyObj<FavoritesService>;
@@ -58,17 +60,21 @@ describe('ShellsComponent', () => {
         localStorage.getItem.and.returnValue(null);
         window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage });
 
-        api = jasmine.createSpyObj<ShellsApiService>([
+        endpoints = jasmine.createSpyObj<EndpointsService>([
             'addEndpoint',
             'delete',
-            'getContent',
             'getEndpoints',
-            'getHierarchy',
-            'getPage',
             'removeEndpoint',
         ]);
 
-        api.getPage.and.returnValue(
+        
+        documents = jasmine.createSpyObj<DocumentsService>([
+            'getContent',
+            'getHierarchy',
+            'getPage',
+        ]);
+
+        documents.getPage.and.returnValue(
             of({
                 previous: null,
                 next: null,
@@ -76,7 +82,7 @@ describe('ShellsComponent', () => {
             }),
         );
 
-        api.getContent.and.returnValue(
+        documents.getContent.and.returnValue(
             of({
                 assetAdministrationShells: [],
                 submodels: [],
@@ -109,8 +115,12 @@ describe('ShellsComponent', () => {
         TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: ShellsApiService,
-                    useValue: api,
+                    provide: EndpointsService,
+                    useValue: endpoints,
+                },
+                {
+                    provide: DocumentsService,
+                    useValue: documents,
                 },
                 {
                     provide: WINDOW,
@@ -172,16 +182,4 @@ describe('ShellsComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
-    // it('initial view mode is "list"', function (done: DoneFn) {
-    //     component.viewMode.pipe(first()).subscribe(value => {
-    //         expect(value).toEqual(ViewMode.List);
-    //         done();
-    //     });
-    // });
-
-    // it('sets "tree" view mode', function () {
-    //     component.setViewMode(ViewMode.Tree);
-    //     store.subscribe(state => expect(state.start.viewMode).toEqual(ViewMode.Tree));
-    // });
 });

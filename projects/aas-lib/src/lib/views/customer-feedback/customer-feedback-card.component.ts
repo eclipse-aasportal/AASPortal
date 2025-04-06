@@ -6,14 +6,31 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { ScoreComponent } from '../../score/score.component';
+import { GeneralItem } from './customer-feedback.store';
 
 @Component({
     selector: 'fhg-customer-feedback-card',
     templateUrl: './customer-feedback-card.component.html',
     styleUrl: './customer-feedback-card.component.scss',
     standalone: true,
-    imports: [],
+    imports: [ScoreComponent, DecimalPipe, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerFeedbackCardComponent {}
+export class CustomerFeedbackCardComponent {
+    public readonly count = input(0);
+
+    public readonly stars = input(0.0);
+
+    public readonly overallRating = input(0);
+
+    public readonly items = input<GeneralItem[]>([]);
+
+    public readonly starClassNames = input<string[]>([]);
+
+    public readonly href = input('');
+}

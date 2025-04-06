@@ -8,21 +8,24 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location as NgLocation } from '@angular/common';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 
 import { DigitalProductPassportComponent } from '../../../lib/views/digital-product-passport/digital-product-passport.component';
 import { WINDOW } from '../../../lib/window.service';
-import { DigitalProductPassportService } from '../../../lib/views/digital-product-passport/digital-product-passport.service';
+import { DocumentsService } from '../../../lib/services/documents.service';
 import { AuthService } from '../../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
 
 import sample from '../../assets/dpp-sample.json';
 import { ToolbarService } from '../../../lib/toolbar.service';
 import { StartService } from '../../../lib/start.service';
+import { encodeBase64Url } from '../../../lib/utilities';
+import { AASDocument } from 'projects/aas-core/dist/types';
 
 @Component({
     selector: 'fhg-img',
@@ -42,27 +45,32 @@ export class TestSecuredImageComponent {
 describe('DigitalProductPassportComponent', () => {
     let component: DigitalProductPassportComponent;
     let fixture: ComponentFixture<DigitalProductPassportComponent>;
-    let location: jasmine.SpyObj<NgLocation>;
     let window: jasmine.SpyObj<Window>;
-    let api: jasmine.SpyObj<DigitalProductPassportService>;
+    let api: jasmine.SpyObj<DocumentsService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
+    let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(async () => {
-        location = jasmine.createSpyObj<NgLocation>(['getState']);
-        location.getState.and.returnValue({ data: JSON.stringify([sample]) });
-        api = jasmine.createSpyObj<DigitalProductPassportService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         auth = jasmine.createSpyObj<AuthService>({}, { token: signal<string | undefined>('Token').asReadonly() });
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<Window>(['open'], {
             location: { toString: () => 'https://www.fraunhofer.de' } as Location,
         });
 
+        route = jasmine.createSpyObj<ActivatedRoute>(
+            {},
+            { queryParams: of({ endpoint: encodeBase64Url(sample.endpoint), id: encodeBase64Url(sample.id) }) },
+        );
+
+        api.getDocument.and.returnValue(of(sample as AASDocument));
+
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: NgLocation,
-                    useValue: location,
+                    provide: ActivatedRoute,
+                    useValue: route,
                 },
                 {
                     provide: WINDOW,
@@ -80,9 +88,12 @@ describe('DigitalProductPassportComponent', () => {
                     provide: StartService,
                     useValue: start,
                 },
+                {
+                    provide: DocumentsService,
+                    useValue: api,
+                },
                 provideHttpClient(),
                 provideHttpClientTesting(),
-                provideRouter([]),
             ],
             imports: [
                 TranslateModule.forRoot({
@@ -95,9 +106,8 @@ describe('DigitalProductPassportComponent', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(DigitalProductPassportComponent, {
-            remove: { providers: [DigitalProductPassportService], imports: [SecuredImageComponent] },
+            remove: { imports: [SecuredImageComponent] },
             add: {
-                providers: [{ provide: DigitalProductPassportService, useValue: api }],
                 imports: [TestSecuredImageComponent],
             },
         });

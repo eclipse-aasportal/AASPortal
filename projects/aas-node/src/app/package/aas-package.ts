@@ -60,9 +60,9 @@ export abstract class AASPackage {
     }
 
     protected async streamToBase64(stream: NodeJS.ReadableStream): Promise<string> {
-        const chunks = [];
+        const chunks: Buffer[] = [];
         for await (const chunk of stream) {
-            chunks.push(Buffer.from(chunk));
+            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk, 'utf-8') : Buffer.from(chunk));
         }
 
         return 'data:image/png;base64,' + Buffer.concat(chunks).toString('base64');

@@ -7,10 +7,9 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { NotifyService } from 'aas-lib';
+import { DocumentsService, NotifyService } from 'aas-lib';
 
 import { AASStore } from '../../app/aas/aas.store';
-import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('AASStoreService', () => {
     let service: AASStore;
@@ -23,8 +22,8 @@ describe('AASStoreService', () => {
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AASApiService,
-                    useValue: jasmine.createSpyObj<AASApiService>(['getContent', 'getDocument', 'putDocument']),
+                    provide: DocumentsService,
+                    useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
             ],
         });
