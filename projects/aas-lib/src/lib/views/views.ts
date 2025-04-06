@@ -13,7 +13,6 @@ import { DigitalProductPassportComponent } from './digital-product-passport/digi
 import { HandoverDocumentationComponent } from './handover-documentation/handover-documentation.component';
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
-
 export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
 export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
 export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';

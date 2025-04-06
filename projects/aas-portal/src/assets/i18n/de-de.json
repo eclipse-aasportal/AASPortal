@@ -255,7 +255,9 @@
         "Hacptics": "Haptik",
         "Acustics": "Akustik",
         "Assembly_Installation": "Montage & Installation",
-        "Material": "Material"
+        "Material": "Material",
+        "TITLE": "Nutzer-Feedback",
+        "SHOW": "Anzeigen..."
     },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
@@ -352,6 +354,6 @@
         "ManufacturerProductType": "Typ",
         "ManufacturerProductFamily": "Familie",
         "ProductArticleNumberOfManufacturer": "Art.-Nr.",
-        "SerialNumber":"Serien-Nr."
+        "SerialNumber": "Serien-Nr."
     }
 }

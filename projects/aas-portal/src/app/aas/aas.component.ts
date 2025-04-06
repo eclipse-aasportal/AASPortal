@@ -37,6 +37,7 @@ import {
     StartService,
     ToolbarService,
     encodeBase64Url,
+    DocumentsService,
 } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -44,7 +45,6 @@ import { EditElementFormComponent } from './edit-element-form/edit-element-form.
 import { UpdateElementCommand } from './commands/update-element-command';
 import { DeleteCommand } from './commands/delete-command';
 import { NewElementCommand } from './commands/new-element-command';
-import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AASStore } from './aas.store';
@@ -66,7 +66,7 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly modal: NgbModal,
         private readonly notify: NotifyService,
         private readonly dashboard: DashboardService,
-        private readonly api: AASApiService,
+        private readonly api: DocumentsService,
         private readonly download: DownloadService,
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,

@@ -31,8 +31,8 @@
                 "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"http://localhost:5001?name=AASX%20Server\"]",
                 "USER_STORAGE": "mongodb://aas-server:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users",
-                // "TEMPLATE_STORAGE": "http://aas-server:5w0vmrkzrwDIDyZs@localhost:8080/templates",
-                // "AAS_INDEX": "mysql://aas-server:60PYRe6Vd8C99u4n@localhost:3306",
+                "TEMPLATE_STORAGE": "http://aas-server:5w0vmrkzrwDIDyZs@localhost:8080/templates",
+                "AAS_INDEX": "mysql://aas-server:60PYRe6Vd8C99u4n@localhost:3306",
             }
         },
         {

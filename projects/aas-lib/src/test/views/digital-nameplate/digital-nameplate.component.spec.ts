@@ -8,17 +8,18 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
-import { Location } from '@angular/common';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { of } from 'rxjs';
+
 import { nameplate } from './digital-nameplate-document';
 import { DigitalNameplateComponent } from '../../../lib/views/digital-nameplate/digital-nameplate.component';
 import { ToolbarService } from '../../../lib/toolbar.service';
 import { AuthService } from '../../../lib/auth/auth.service';
-import { of } from 'rxjs';
 import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
-import { DigitalNameplateService } from '../../../lib/views/digital-nameplate/digital-nameplate.service';
+import { DocumentsService } from '../../../lib/services/documents.service';
 import { StartService } from '../../../lib/start.service';
+import { encodeBase64Url } from '../../../lib/utilities';
 
 @Component({
     selector: 'fhg-img',
@@ -38,23 +39,28 @@ export class TestSecuredImageComponent {
 describe('DigitalNameplateComponent', () => {
     let component: DigitalNameplateComponent;
     let fixture: ComponentFixture<DigitalNameplateComponent>;
-    let location: jasmine.SpyObj<Location>;
     let auth: jasmine.SpyObj<AuthService>;
-    let api: jasmine.SpyObj<DigitalNameplateService>;
+    let api: jasmine.SpyObj<DocumentsService>;
     let start: jasmine.SpyObj<StartService>;
+    let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(() => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<DigitalNameplateService>(['getDocument', 'getContent']);
-        location = jasmine.createSpyObj<Location>(['getState']);
-        location.getState.and.returnValue({ data: JSON.stringify([nameplate]) });
+        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
+
+        route = jasmine.createSpyObj<ActivatedRoute>(
+            {},
+            { queryParams: of({ endpoint: encodeBase64Url(nameplate.endpoint), id: encodeBase64Url(nameplate.id) }) },
+        );
+
+        api.getDocument.and.returnValue(of(nameplate));
 
         TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: Location,
-                    useValue: location,
+                    provide: ActivatedRoute,
+                    useValue: route,
                 },
                 {
                     provide: ToolbarService,
@@ -68,7 +74,10 @@ describe('DigitalNameplateComponent', () => {
                     provide: StartService,
                     useValue: start,
                 },
-                provideRouter([]),
+                {
+                    provide: DocumentsService,
+                    useValue: api,
+                },
             ],
             imports: [
                 TranslateModule.forRoot({
@@ -81,9 +90,8 @@ describe('DigitalNameplateComponent', () => {
         });
 
         TestBed.overrideComponent(DigitalNameplateComponent, {
-            remove: { providers: [DigitalNameplateService], imports: [SecuredImageComponent] },
+            remove: { imports: [SecuredImageComponent] },
             add: {
-                providers: [{ provide: DigitalNameplateService, useValue: api }],
                 imports: [TestSecuredImageComponent],
             },
         });

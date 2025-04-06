@@ -11,10 +11,10 @@ import { of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { FavoriteComponent } from '../lib/favorite/favorite.component';
-import { FavoriteApiService } from '../lib/favorite/favorite-api.service';
 import { AuthService } from '../lib/auth/auth.service';
 import { SecuredImageComponent } from '../lib/secured-image/secured-image.component';
 import { StartService } from '../lib/start.service';
+import { DocumentsService } from '../lib/services/documents.service';
 
 @Component({
     selector: 'fhg-img',
@@ -34,13 +34,13 @@ export class TestSecuredImageComponent {
 describe('FavoriteComponent', () => {
     let component: FavoriteComponent;
     let fixture: ComponentFixture<FavoriteComponent>;
-    let api: jasmine.SpyObj<FavoriteApiService>;
+    let api: jasmine.SpyObj<DocumentsService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
 
     beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<FavoriteApiService>(['getDocument']);
+        api = jasmine.createSpyObj<DocumentsService>(['getDocument']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
 
         await TestBed.configureTestingModule({
@@ -48,6 +48,10 @@ describe('FavoriteComponent', () => {
                 {
                     provide: AuthService,
                     useValue: auth,
+                },
+                {
+                    provide: DocumentsService,
+                    useValue: api,
                 },
             ],
             imports: [
@@ -61,9 +65,9 @@ describe('FavoriteComponent', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(FavoriteComponent, {
-            remove: { providers: [FavoriteApiService], imports: [SecuredImageComponent] },
+            remove: { imports: [SecuredImageComponent] },
             add: {
-                providers: [{ provide: FavoriteApiService, useValue: api }],
+                providers: [],
                 imports: [TestSecuredImageComponent],
             },
         });

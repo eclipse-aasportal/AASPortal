@@ -43,7 +43,7 @@ describe('StartService', () => {
                 },
                 {
                     provide: START_TILES,
-                    useValue: [{ id: 'test', type: 'TestCard', property: {} } satisfies StartTile],
+                    useValue: [{ id: 'test', type: 'TestCard', inputs: {} } satisfies StartTile],
                 },
                 {
                     provide: AuthService,
@@ -101,7 +101,7 @@ describe('StartService', () => {
         });
 
         it('should not remove a tile with an unknown id', () => {
-            service.remove({ id: 'unknown', type: 'TestCard', property: {} });
+            service.remove({ id: 'unknown', type: 'TestCard', inputs: {} });
             expect(service.tiles().length).toBe(1);
         });
     });
