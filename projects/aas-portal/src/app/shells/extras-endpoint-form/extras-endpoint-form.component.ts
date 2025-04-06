@@ -9,11 +9,11 @@
 import { Component, Signal, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { from, map, mergeMap, toArray } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASEndpointScheduleType, convertToString } from 'aas-core';
 import { ExtrasEndpointService } from './extras-endpoint.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { from, map, mergeMap, toArray } from 'rxjs';
 
 export type ExtrasEndpointItem = {
     name: string;

@@ -8,12 +8,12 @@
 
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-
-import { ShellsApiService } from '../../app/shells/shells-api.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
-describe('ShellsApiService', () => {
-    let service: ShellsApiService;
+import { EndpointsService } from '../../lib/services/endpoints.service';
+
+describe('EndpointsService', () => {
+    let service: EndpointsService;
     let httpTestingController: HttpTestingController;
 
     beforeEach(() => {
@@ -23,7 +23,7 @@ describe('ShellsApiService', () => {
             providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
         });
 
-        service = TestBed.inject(ShellsApiService);
+        service = TestBed.inject(EndpointsService);
         httpTestingController = TestBed.inject(HttpTestingController);
     });
 

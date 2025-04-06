@@ -19,7 +19,7 @@ export type StartTileType = {
 export interface StartTile {
     id: string;
     type: string;
-    property: Record<string, unknown>;
+    inputs: Record<string, unknown>;
 }
 
 /** The provided component types that represent a tile or card on the START page. */
@@ -64,7 +64,7 @@ export class StartService {
         return this.types.find(item => item.name === name);
     }
 
-    public add(typeName: string, id: string, property: Record<string, unknown>): boolean {
+    public add(typeName: string, id: string, inputs: Record<string, unknown>): boolean {
         if (this.getType(typeName) === undefined) {
             return false;
         }
@@ -73,7 +73,7 @@ export class StartService {
             return false;
         }
 
-        this.tiles.update(state => [...state, { id, property, type: typeName }]);
+        this.tiles.update(state => [...state, { id, inputs, type: typeName }]);
         return true;
     }
 

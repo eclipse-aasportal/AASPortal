@@ -12,8 +12,7 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { UpdateElementCommand } from '../../app/aas/commands/update-element-command';
 import { sampleDocument } from '../../test/assets/sample-document';
 import { AASStore } from '../../app/aas/aas.store';
-import { NotifyService } from 'aas-lib';
-import { AASApiService } from '../../app/aas/aas-api.service';
+import { DocumentsService, NotifyService } from 'aas-lib';
 
 describe('SetValueCommand', function () {
     let command: UpdateElementCommand;
@@ -35,8 +34,8 @@ describe('SetValueCommand', function () {
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AASApiService,
-                    useValue: jasmine.createSpyObj<AASApiService>(['getContent', 'getDocument', 'putDocument']),
+                    provide: DocumentsService,
+                    useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
             ],
         });

@@ -11,7 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import QRCode from 'qrcode';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, first, Observable } from 'rxjs';
+import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -47,7 +47,7 @@ import { WINDOW } from '../../window.service';
 import { AuthService } from '../../auth/auth.service';
 import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../../utilities';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
-import { DigitalNameplateService } from './digital-nameplate.service';
+import { DocumentsService } from '../../services/documents.service';
 import { StartService } from '../../start.service';
 
 export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
@@ -70,7 +70,6 @@ const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
     selector: 'fhg-digital-nameplate',
     templateUrl: './digital-nameplate.component.html',
     styleUrls: ['./digital-nameplate.component.scss'],
-    providers: [DigitalNameplateService],
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, SecuredImageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -83,7 +82,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
         private readonly start: StartService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
-        private readonly api: DigitalNameplateService,
+        private readonly api: DocumentsService,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();
@@ -182,22 +181,29 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
     });
 
     public ngOnInit(): void {
-        const state = this.location.getState() as Record<string, string>;
-        if (state.data) {
-            this.init(JSON.parse(state.data));
-        } else {
-            this.route.queryParams.pipe(first()).subscribe(params => {
-                if (params.endpoint && params.id) {
+        this.route.queryParams
+            .pipe(
+                first(),
+                mergeMap(params => {
                     if (params.id) {
-                        if (params.endpoint) {
-                            this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
-                        } else {
-                            this.getDocument(decodeBase64Url(params.id));
-                        }
+                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
                     }
-                }
+
+                    if (!params.docs) {
+                        return of([]);
+                    }
+
+                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+                    return from(docs).pipe(
+                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                        toArray(),
+                    );
+                }),
+            )
+            .subscribe(documents => {
+                this.initialize(documents);
             });
-        }
     }
 
     public ngOnDestroy(): void {
@@ -292,14 +298,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
         return '-';
     }
 
-    private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument(id, endpoint).subscribe({
-            next: document => this.init([document]),
-            error: error => console.debug(error),
-        });
-    }
-
-    private init(documents: AASDocument[]) {
+    private initialize(documents: AASDocument[]) {
         this.nameplates.set([...this.filterSubmodels(documents)]);
     }
 
