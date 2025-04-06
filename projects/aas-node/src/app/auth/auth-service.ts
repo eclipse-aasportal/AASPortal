@@ -52,7 +52,7 @@ export class AuthService {
         let token: string;
         if (credentials?.id) {
             if (credentials.password) {
-                const data = await this.userStorage.readAsync(credentials.id);
+                const data = await this.userStorage.read(credentials.id);
                 if (!data) {
                     throw new ApplicationError(`Unknown user ${credentials.id}.`, ERRORS.UnknownUser, credentials.id);
                 }
@@ -60,7 +60,7 @@ export class AuthService {
                 await this.checkPassword(credentials.password, data.password);
                 token = this.generateToken(data.id, data.name, data.role);
                 data.lastLoggedIn = new Date();
-                await this.userStorage.writeAsync(credentials.id, data);
+                await this.userStorage.write(credentials.id, data);
             } else {
                 token = this.generateExternalToken(credentials.id);
             }
@@ -72,7 +72,7 @@ export class AuthService {
     }
 
     public async getProfile(id: string): Promise<UserProfile> {
-        const data = await this.userStorage.readAsync(id);
+        const data = await this.userStorage.read(id);
         if (data == null) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
         }
@@ -81,7 +81,7 @@ export class AuthService {
     }
 
     public async updateProfile(id: string, profile: UserProfile): Promise<AuthResult> {
-        const data = await this.userStorage.readAsync(id);
+        const data = await this.userStorage.read(id);
         if (data == null) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
         }
@@ -97,9 +97,9 @@ export class AuthService {
         data.name = isEmpty(profile.name) ? getUserNameFromEMail(profile.id) : profile.name;
 
         if (profile.id && id.toLowerCase() === profile.id.toLowerCase()) {
-            await this.userStorage.writeAsync(id, data);
+            await this.userStorage.write(id, data);
         } else {
-            if (await this.userStorage.existAsync(profile.id)) {
+            if (await this.userStorage.exist(profile.id)) {
                 throw new ApplicationError(
                     `An account already exists for this e-mail '${profile.id}'.`,
                     ERRORS.UserAlreadyExists,
@@ -107,8 +107,8 @@ export class AuthService {
                 );
             }
 
-            await this.userStorage.writeAsync(profile.id, data);
-            await this.userStorage.deleteAsync(id);
+            await this.userStorage.write(profile.id, data);
+            await this.userStorage.delete(id);
         }
 
         const token = this.generateToken(data.id, data.name, data.role);
@@ -121,7 +121,7 @@ export class AuthService {
             throw new ApplicationError(`'${profile.id}' is not a valid e-mail.`, ERRORS.InvalidEMail);
         }
 
-        if (await this.userStorage.existAsync(profile.id)) {
+        if (await this.userStorage.exist(profile.id)) {
             throw new ApplicationError(
                 `An account already exists for this e-mail '${profile.id}'.`,
                 ERRORS.UserAlreadyExists,
@@ -148,12 +148,12 @@ export class AuthService {
         };
 
         const token = this.generateToken(data.id, data.name, data.role);
-        await this.userStorage.writeAsync(profile.id, data);
+        await this.userStorage.write(profile.id, data);
         return { token };
     }
 
     public async resetPassword(id: string): Promise<void> {
-        const data = await this.userStorage.readAsync(id);
+        const data = await this.userStorage.read(id);
         if (data == null) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
         }
@@ -161,33 +161,33 @@ export class AuthService {
         const password = this.createPassword();
         this.mailer.sendNewPassword(id, password);
         data.password = await bcrypt.hash(password, 10);
-        await this.userStorage.writeAsync(id, data);
+        await this.userStorage.write(id, data);
     }
 
     public async deleteUserAsync(id: string): Promise<void> {
-        if (!(await this.userStorage.deleteAsync(id))) {
+        if (!(await this.userStorage.delete(id))) {
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
         }
     }
 
     public getCookie(id: string, name: string): Promise<Cookie | undefined> {
-        return this.userStorage.getCookieAsync(id, name);
+        return this.userStorage.getCookie(id, name);
     }
 
     public getCookies(id: string): Promise<Cookie[]> {
-        return this.userStorage.getCookiesAsync(id);
+        return this.userStorage.getCookies(id);
     }
 
     public setCookie(id: string, name: string, data: string): Promise<void> {
-        return this.userStorage.setCookieAsync(id, name, data);
+        return this.userStorage.setCookie(id, name, data);
     }
 
     public deleteCookie(id: string, name: string): Promise<void> {
-        return this.userStorage.deleteCookieAsync(id, name);
+        return this.userStorage.deleteCookie(id, name);
     }
 
     public hasUser(id: string): Promise<boolean> {
-        return this.userStorage.existAsync(id);
+        return this.userStorage.exist(id);
     }
 
     private generateToken(subject: string, name: string, role: UserRole): string {
