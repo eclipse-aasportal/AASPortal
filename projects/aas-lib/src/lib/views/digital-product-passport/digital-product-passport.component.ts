@@ -8,7 +8,7 @@
 
 import { aas, AASDocument, getIdShortPath, getSemanticId, selectSubmodel } from 'aas-core';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, first, Observable } from 'rxjs';
+import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import { Location } from '@angular/common';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
@@ -31,7 +31,7 @@ import { CarbonFootprint, HandoverDocumentation, ZVEINameplate } from '../views'
 import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
-import { DigitalProductPassportService } from './digital-product-passport.service';
+import { DocumentsService } from '../../services/documents.service';
 import { WINDOW } from '../../window.service';
 import { AuthService } from '../../auth/auth.service';
 import { ToolbarService } from '../../toolbar.service';
@@ -41,7 +41,6 @@ import { StartService } from '../../start.service';
     selector: 'fhg-device-passport-portal',
     templateUrl: './digital-product-passport.component.html',
     styleUrl: './digital-product-passport.component.scss',
-    providers: [DigitalProductPassportService],
     imports: [TranslateModule, SecuredImageComponent, NgbAccordionModule, NgbPaginationModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -52,7 +51,7 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
         private readonly store: DigitalProductPassportStore,
-        private readonly api: DigitalProductPassportService,
+        private readonly api: DocumentsService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
     ) {
@@ -142,23 +141,29 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
     public readonly documentationData = this.store.documentationData;
 
     public ngOnInit(): void {
-        const state = this.location.getState() as Record<string, string>;
-        if (state.data) {
-            const documents: AASDocument[] = JSON.parse(state.data);
-            this.initialize(documents);
-        } else {
-            this.route.queryParams.pipe(first()).subscribe(params => {
-                if (params.endpoint && params.id) {
+        this.route.queryParams
+            .pipe(
+                first(),
+                mergeMap(params => {
                     if (params.id) {
-                        if (params.endpoint) {
-                            this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
-                        } else {
-                            this.getDocument(decodeBase64Url(params.id));
-                        }
+                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
                     }
-                }
+
+                    if (!params.docs) {
+                        return of([]);
+                    }
+
+                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+                    return from(docs).pipe(
+                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                        toArray(),
+                    );
+                }),
+            )
+            .subscribe(documents => {
+                this.initialize(documents);
             });
-        }
     }
 
     public ngOnDestroy(): void {

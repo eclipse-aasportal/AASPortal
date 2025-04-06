@@ -11,6 +11,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import {
     AASTreeComponent,
     AuthService,
+    DocumentsService,
     DownloadService,
     NotifyService,
     OnlineState,
@@ -24,7 +25,6 @@ import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Component, input, output, signal } from '@angular/core';
-import { AASApiService } from '../../app/aas/aas-api.service';
 import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
@@ -73,7 +73,7 @@ describe('AASComponent', () => {
     let dashboard: jasmine.SpyObj<DashboardService>;
     let router: Router;
     let store: AASStore;
-    let api: jasmine.SpyObj<AASApiService>;
+    let api: jasmine.SpyObj<DocumentsService>;
     let download: jasmine.SpyObj<DownloadService>;
     let start: jasmine.SpyObj<StartService>;
     let pages: DashboardPage[];
@@ -81,7 +81,7 @@ describe('AASComponent', () => {
     beforeEach(() => {
         pages = [{ name: 'Dashboard 1', items: [], requests: [] }];
 
-        api = jasmine.createSpyObj<AASApiService>(['getDocument', 'putDocument']);
+        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'putDocument']);
         download = jasmine.createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
         dashboard = jasmine.createSpyObj<DashboardService>(['add'], {
             activePage: signal(pages[0].name),
@@ -94,7 +94,7 @@ describe('AASComponent', () => {
         TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: AASApiService,
+                    provide: DocumentsService,
                     useValue: api,
                 },
                 {

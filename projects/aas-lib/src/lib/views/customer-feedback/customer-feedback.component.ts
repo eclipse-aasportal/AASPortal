@@ -6,6 +6,9 @@
  *
  *****************************************************************************/
 
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { DecimalPipe } from '@angular/common';
+import { EMPTY, first, from, mergeMap, Observable, of, Subscription, toArray } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -17,29 +20,17 @@ import {
     signal,
     viewChild,
 } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DecimalPipe, Location } from '@angular/common';
-import { EMPTY, Observable, Subscription } from 'rxjs';
-import { aas, AASDocument, getLocaleValue, getPreferredName, isReference } from 'aas-core';
+
+import { aas, getLocaleValue, getPreferredName } from 'aas-core';
 import { ScoreComponent } from '../../score/score.component';
 import { ToolbarService } from '../../toolbar.service';
 import { StartService } from '../../start.service';
+import { CustomerFeedbackStore, FeedbackItem, GeneralItem } from './customer-feedback.store';
+import { ActivatedRoute } from '@angular/router';
+import { decodeBase64Url, encodeBase64Url } from '../../utilities';
+import { DocumentsService } from '../../services/documents.service';
 
-export interface GeneralItem {
-    name: string;
-    score: number;
-    sum: number;
-    count: number;
-    like: boolean;
-}
-
-export interface FeedbackItem {
-    stars: string[];
-    createdAt: string;
-    subject: string;
-    message: string;
-}
-const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
+const maxStars = 5;
 
 @Component({
     selector: 'fhg-customer-feedback',
@@ -49,16 +40,21 @@ const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submo
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerFeedbackComponent implements OnInit, OnDestroy {
-    private static readonly maxStars = 5;
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
-    private readonly submodels = signal<[aas.Environment, aas.Submodel][]>([]);
+    private readonly stars$ = signal(0.0);
+    private readonly count$ = signal(0);
+    private readonly items$ = signal<GeneralItem[]>([]);
+    private readonly feedbacks$ = signal<FeedbackItem[]>([]);
+    private readonly starClassNames$ = signal<string[]>([]);
 
     public constructor(
-        private readonly location: Location,
+        private readonly route: ActivatedRoute,
         private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
+        private readonly store: CustomerFeedbackStore,
+        private readonly api: DocumentsService,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();
@@ -68,14 +64,14 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            this.init(this.submodels());
+            this.initialize(this.store.submodels());
         });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('customerFeedbackToolbar');
 
     public readonly name = computed(() => {
-        const submodels = this.submodels();
+        const submodels = this.store.submodels();
         if (!submodels) {
             return '';
         }
@@ -92,22 +88,48 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         return `${names[0]}, ..., ${names[names.length - 1]} (${names.length})`;
     });
 
-    public readonly stars = signal(0.0);
-    public readonly count = signal(0);
-    public readonly items = signal<GeneralItem[]>([]);
-    public readonly feedbacks = signal<FeedbackItem[]>([]);
-    public readonly starClassNames = signal<string[]>([]);
+    public readonly stars = this.stars$.asReadonly();
+
+    public readonly overallRating = this.count$.asReadonly();
+
+    public readonly items = this.items$.asReadonly();
+
+    public readonly feedbacks = this.feedbacks$.asReadonly();
+
+    public readonly starClassNames = this.starClassNames$.asReadonly();
 
     public ngOnInit(): void {
-        const state = this.location.getState() as Record<string, string>;
-        if (state.data) {
-            const documents: AASDocument[] = JSON.parse(state.data);
-            this.submodels.set([...this.filterSubmodels(documents)]);
-        }
+        this.route.queryParams
+            .pipe(
+                first(),
+                mergeMap(params => {
+                    if (params.id) {
+                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+                    }
+
+                    if (!params.docs) {
+                        return of([]);
+                    }
+
+                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+                    return from(docs).pipe(
+                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                        toArray(),
+                    );
+                }),
+            )
+            .subscribe(documents => {
+                if (documents.length > 0) {
+                    this.store.documents.set(documents);
+                } else {
+                    this.initialize(this.store.submodels());
+                }
+            });
 
         this.subscription.add(
             this.translate.onLangChange.subscribe(() => {
-                this.init(this.submodels());
+                this.initialize(this.store.submodels());
             }),
         );
     }
@@ -118,14 +140,36 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        if (!this.start.add('CustomerFeedback', 'CustomerFeedback', {})) {
+        const documents = this.store.documents();
+        if (documents.length === 0) {
+            return EMPTY;
+        }
+
+        let href: string;
+        if (documents.length === 1) {
+            href = `/view/CustomerFeedback?endpoint=${encodeBase64Url(documents[0].endpoint)}&id=${encodeBase64Url(documents[0].id)}`;
+        } else {
+            href = `/view/CustomerFeedback?docs=${encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id])))}`;
+        }
+
+        const property: Record<string, unknown> = {
+            count: documents.length,
+            stars: this.stars(),
+            overallRating: this.overallRating(),
+            items: this.items$(),
+            feedbacks: this.feedbacks(),
+            starClassNames: this.starClassNames(),
+            href,
+        };
+
+        if (!this.start.add('CustomerFeedback', 'CustomerFeedback', property)) {
             return EMPTY;
         }
 
         return this.start.save();
     }
 
-    private init(submodels: [aas.Environment, aas.Submodel][]): void {
+    private initialize(submodels: [aas.Environment, aas.Submodel][]): void {
         this.map.clear();
         let count = 0;
         let stars = 0.0;
@@ -166,43 +210,11 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
             });
         }
 
-        this.stars.set(stars);
-        this.count.set(count);
-        this.starClassNames.set(this.initStarClassNames(stars));
-        this.items.set(items.filter(item => item.count > 0));
-        this.feedbacks.set(feedbacks);
-    }
-
-    private *filterSubmodels(documents: AASDocument[]): Generator<[aas.Environment, aas.Submodel]> {
-        for (const document of documents) {
-            if (!document.content) {
-                continue;
-            }
-
-            for (const submodel of document.content.submodels) {
-                const semanticId = this.getSemanticId(submodel);
-                if (semanticId === CustomerFeedback) {
-                    yield [document.content, submodel];
-                }
-            }
-        }
-    }
-
-    private getSemanticId(value: aas.HasSemantics | aas.Reference): string | undefined {
-        let semanticId: string | undefined;
-        if (value) {
-            if (isReference(value)) {
-                if (value.keys.length > 0) {
-                    return value.keys[0].value;
-                }
-            } else {
-                if (value.semanticId?.keys != null && value.semanticId.keys.length > 0) {
-                    return value.semanticId.keys[0].value;
-                }
-            }
-        }
-
-        return semanticId;
+        this.stars$.set(stars);
+        this.count$.set(count);
+        this.starClassNames$.set(this.initStarClassNames(stars));
+        this.items$.set(items.filter(item => item.count > 0));
+        this.feedbacks$.set(feedbacks);
     }
 
     private buildItems(general: aas.SubmodelElementCollection, items: GeneralItem[]): void {
@@ -210,13 +222,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
             for (const element of general.value.filter(child => child.modelType === 'SubmodelElementCollection')) {
                 let item = this.map.get(element.idShort);
                 if (!item) {
-                    item = {
-                        name: this.getName(element),
-                        score: 0,
-                        sum: 0.0,
-                        count: 0,
-                        like: false,
-                    };
+                    item = { name: this.getName(element), score: 0, sum: 0.0, count: 0, like: false };
 
                     this.map.set(element.idShort, item);
                     items.push(item);
@@ -262,7 +268,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
 
     private initStarClassNames(stars: number): string[] {
         const starClassNames: string[] = [];
-        for (let i = 0; i < CustomerFeedbackComponent.maxStars; i++) {
+        for (let i = 0; i < maxStars; i++) {
             let className: string;
             const n = stars - i;
             if (n > 0.0) {

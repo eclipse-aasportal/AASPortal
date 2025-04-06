@@ -29,6 +29,7 @@ import {
     AASTableComponent,
     AuthService,
     DownloadService,
+    EndpointsService,
     NotifyService,
     StartService,
     ToolbarService,
@@ -41,7 +42,6 @@ import {
 import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
 import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
 import { UploadFormComponent } from './upload-form/upload-form.component';
-import { ShellsApiService } from './shells-api.service';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { ShellsStore } from './shells.store';
@@ -61,7 +61,7 @@ export class ShellsComponent implements OnDestroy {
     public constructor(
         private readonly service: ShellsService,
         private readonly store: ShellsStore,
-        private readonly api: ShellsApiService,
+        private readonly api: EndpointsService,
         private readonly router: Router,
         private readonly modal: NgbModal,
         private readonly translate: TranslateService,
@@ -264,18 +264,23 @@ export class ShellsComponent implements OnDestroy {
 
     public openView(view: Route): Promise<boolean> {
         const documents = this.store.selected();
+        if (documents.length === 0) {
+            return Promise.resolve(false);
+        }
+
         if (documents.length === 1) {
             return this.router.navigate([`/view/${view.path}`], {
                 queryParams: {
                     endpoint: encodeBase64Url(documents[0].endpoint),
                     id: encodeBase64Url(documents[0].id),
                 },
-                state: { data: JSON.stringify(this.store.selected()) },
             });
         }
 
         return this.router.navigate([`/view/${view.path}`], {
-            state: { data: JSON.stringify(documents) },
+            queryParams: {
+                docs: encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id]))),
+            },
         });
     }
 
