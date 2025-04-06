@@ -15,7 +15,7 @@
         <div class="p-2 rounded" [class.bg-info-subtle]="item.selected()">
             <div class="card fhg-card" (click)="toggleSelected($event, item)" tabindex="0">
                 <ng-container [ngComponentOutlet]="item.component"
-                    [ngComponentOutletInputs]="item.property"></ng-container>
+                    [ngComponentOutletInputs]="item.inputs"></ng-container>
             </div>
         </div>
         }

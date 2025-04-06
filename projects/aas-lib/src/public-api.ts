@@ -21,6 +21,8 @@ export * from './lib/views/customer-feedback/customer-feedback.component';
 export * from './lib/views/customer-feedback/customer-feedback-card.component';
 export * from './lib/views/digital-nameplate/digital-nameplate.component';
 export * from './lib/views/digital-product-passport/digital-product-passport.component';
+export * from './lib/services/documents.service';
+export * from './lib/services/endpoints.service';
 export * from './lib/download.service';
 export * from './lib/index-change.service';
 export * from './lib/license-info/license-info.component';

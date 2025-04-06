@@ -9,9 +9,8 @@
 import { effect, untracked, Injectable, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { EMPTY, Observable, Subscription, catchError, concat, from, map, mergeMap, of } from 'rxjs';
-import { IndexChangeService, ViewMode } from 'aas-lib';
+import { DocumentsService, IndexChangeService, ViewMode } from 'aas-lib';
 import { AASDocument, AASDocumentId, AASPagedResult, aas } from 'aas-core';
-import { ShellsApiService } from './shells-api.service';
 import { ShellsStore } from './shells.store';
 import { FavoritesService } from './favorites.service';
 
@@ -21,7 +20,7 @@ export class ShellsService implements OnDestroy {
 
     public constructor(
         private readonly store: ShellsStore,
-        private readonly api: ShellsApiService,
+        private readonly api: DocumentsService,
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
         private readonly indexChange: IndexChangeService,
@@ -216,7 +215,7 @@ export class ShellsService implements OnDestroy {
         from(documents)
             .pipe(
                 mergeMap(document =>
-                    this.api.getContent(document.endpoint, document.id).pipe(
+                    this.api.getContent(document.id, document.endpoint).pipe(
                         catchError(() => of(undefined)),
                         map(content => this.setContent(document, content)),
                     ),
@@ -228,7 +227,7 @@ export class ShellsService implements OnDestroy {
     private getTreeView(documents: AASDocument[]): void {
         from(documents)
             .pipe(
-                mergeMap(document => this.api.getHierarchy(document.endpoint, document.id)),
+                mergeMap(document => this.api.getHierarchy(document.id, document.endpoint)),
                 mergeMap(nodes => this.addTreeAndLoadContents(nodes)),
             )
             .subscribe();
@@ -243,7 +242,7 @@ export class ShellsService implements OnDestroy {
             of(this.setPage(result, limit, filter)),
             from(result.documents).pipe(
                 mergeMap(document =>
-                    this.api.getContent(document.endpoint, document.id).pipe(
+                    this.api.getContent(document.id, document.endpoint).pipe(
                         catchError(() => of(void 0)),
                         map(content => this.setContent(document, content)),
                     ),

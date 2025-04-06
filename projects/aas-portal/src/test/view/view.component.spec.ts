@@ -10,6 +10,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { ViewComponent } from '../../app/view/view.component';
+import { ToolbarService } from 'aas-lib';
+import { signal } from '@angular/core';
 
 describe('ViewComponent', () => {
     let component: ViewComponent;
@@ -17,6 +19,12 @@ describe('ViewComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                },
+            ],
             imports: [
                 TranslateModule.forRoot({
                     loader: {

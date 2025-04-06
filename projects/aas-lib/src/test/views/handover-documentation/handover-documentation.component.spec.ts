@@ -15,15 +15,15 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
-import { WINDOW } from '../../lib/window.service';
-import { AuthService } from '../../lib/auth/auth.service';
-import { SecuredImageComponent } from '../../lib/secured-image/secured-image.component';
-import { HandoverDocumentationComponent } from '../../lib/views/handover-documentation/handover-documentation.component';
-import { HandoverDocumentationService } from '../../lib/views/handover-documentation/handover-documentation.service';
+import { WINDOW } from '../../../lib/window.service';
+import { AuthService } from '../../../lib/auth/auth.service';
+import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
+import { HandoverDocumentationComponent } from '../../../lib/views/handover-documentation/handover-documentation.component';
+import { ToolbarService } from '../../../lib/toolbar.service';
+import { StartService } from '../../../lib/start.service';
+import { DocumentsService } from '../../../lib/services/documents.service';
 
-import sample from '../assets/dpp-sample.json';
-import { ToolbarService } from '../../lib/toolbar.service';
-import { StartService } from '../../lib/start.service';
+import sample from '../../assets/dpp-sample.json';
 
 @Component({
     selector: 'fhg-img',
@@ -46,7 +46,7 @@ describe('HandoverDocumentationComponent', () => {
 
     let location: jasmine.SpyObj<NgLocation>;
     let window: jasmine.SpyObj<Window>;
-    let api: jasmine.SpyObj<HandoverDocumentationService>;
+    let api: jasmine.SpyObj<DocumentsService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
 
@@ -54,7 +54,7 @@ describe('HandoverDocumentationComponent', () => {
         location = jasmine.createSpyObj<NgLocation>(['getState']);
         location.getState.and.returnValue({ data: JSON.stringify([sample]) });
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<HandoverDocumentationService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<Window>(['open'], {
             location: { toString: () => 'https://www.fraunhofer.de' } as Location,
@@ -82,6 +82,10 @@ describe('HandoverDocumentationComponent', () => {
                     provide: StartService,
                     useValue: start,
                 },
+                {
+                    provide: DocumentsService,
+                    useValue: api,
+                },
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([]),
@@ -97,9 +101,9 @@ describe('HandoverDocumentationComponent', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(HandoverDocumentationComponent, {
-            remove: { providers: [HandoverDocumentationService], imports: [SecuredImageComponent] },
+            remove: { imports: [SecuredImageComponent] },
             add: {
-                providers: [{ provide: HandoverDocumentationService, useValue: api }],
+                providers: [],
                 imports: [TestSecuredImageComponent],
             },
         });

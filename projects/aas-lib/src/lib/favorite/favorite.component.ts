@@ -10,8 +10,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, signal } f
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getLocaleValue } from 'aas-core';
 import { SecuredImageComponent } from '../secured-image/secured-image.component';
-import { FavoriteApiService } from './favorite-api.service';
 import { encodeBase64Url } from '../utilities';
+import { DocumentsService } from '../services/documents.service';
 
 export type FavoriteDetail = {
     name: string;
@@ -23,7 +23,6 @@ export type FavoriteDetail = {
     templateUrl: './favorite.component.html',
     styleUrl: './favorite.component.scss',
     imports: [TranslateModule, SecuredImageComponent],
-    providers: [FavoriteApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoriteComponent {
@@ -34,7 +33,7 @@ export class FavoriteComponent {
 
     public constructor(
         private readonly translate: TranslateService,
-        private readonly api: FavoriteApiService,
+        private readonly api: DocumentsService,
     ) {
         effect(() => {
             const endpoint = this.endpoint();

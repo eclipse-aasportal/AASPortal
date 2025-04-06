@@ -256,7 +256,9 @@
         "Hacptics": "Haptics",
         "Acustics": "Acoustics",
         "Assembly_Installation": "Assembly & Installation",
-        "Material": "Material"
+        "Material": "Material",
+        "TITLE": "User feedback",
+        "SHOW": "Show..."
     },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel element name expected at position {0}.",

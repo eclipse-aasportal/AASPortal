@@ -9,11 +9,10 @@
 import { TestBed } from '@angular/core/testing';
 import { aas, AASDocument, selectElement } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { NotifyService } from 'aas-lib';
+import { DocumentsService, NotifyService } from 'aas-lib';
 import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
 import { AASStore } from '../../app/aas/aas.store';
-import { AASApiService } from '../../app/aas/aas-api.service';
 
 describe('NewElementCommand', function () {
     let command: NewElementCommand;
@@ -32,8 +31,8 @@ describe('NewElementCommand', function () {
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AASApiService,
-                    useValue: jasmine.createSpyObj<AASApiService>(['getContent', 'getDocument', 'putDocument']),
+                    provide: DocumentsService,
+                    useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
             ],
         });
