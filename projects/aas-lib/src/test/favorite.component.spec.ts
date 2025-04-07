@@ -13,7 +13,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { FavoriteComponent } from '../lib/favorite/favorite.component';
 import { AuthService } from '../lib/auth/auth.service';
 import { SecuredImageComponent } from '../lib/secured-image/secured-image.component';
-import { StartService } from '../lib/start.service';
+import { StartService } from '../lib/services/start.service';
 import { DocumentsService } from '../lib/services/documents.service';
 
 @Component({

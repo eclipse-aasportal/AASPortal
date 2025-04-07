@@ -29,7 +29,7 @@ import { AASTableStore } from './aas-table.store';
 import { MaxLengthPipe } from '../max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
 import { encodeBase64Url } from '../utilities';
-import { WINDOW } from '../window.service';
+import { WINDOW } from '../services/window.service';
 
 @Component({
     selector: 'fhg-aas-table',

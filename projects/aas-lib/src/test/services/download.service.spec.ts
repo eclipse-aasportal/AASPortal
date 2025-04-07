@@ -11,9 +11,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, of } from 'rxjs';
+import { EMPTY } from 'rxjs';
 
-import { DownloadService } from '../lib/download.service';
+import { DownloadService } from '../../lib/services/download.service';
 
 describe('DownloadService', () => {
     let service: DownloadService;

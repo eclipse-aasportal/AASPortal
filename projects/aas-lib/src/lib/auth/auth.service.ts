@@ -28,7 +28,7 @@ import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-fo
 import { ProfileFormComponent, ProfileFormResult } from '../auth/profile-form/profile-form.component';
 import { RegisterFormComponent, RegisterFormResult } from '../auth/register-form/register-form.component';
 import { AuthApiService } from './auth-api.service';
-import { WINDOW } from '../window.service';
+import { WINDOW } from '../services/window.service';
 
 @Injectable({
     providedIn: 'root',

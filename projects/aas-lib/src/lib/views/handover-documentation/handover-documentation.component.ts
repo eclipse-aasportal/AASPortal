@@ -43,12 +43,12 @@ import {
     selectSubmodel,
 } from 'aas-core';
 
-import { ToolbarService } from '../../toolbar.service';
-import { WINDOW } from '../../window.service';
+import { ToolbarService } from '../../services/toolbar.service';
+import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../auth/auth.service';
 import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../../utilities';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
-import { StartService } from '../../start.service';
+import { StartService } from '../../services/start.service';
 import { HandoverDocumentation } from '../views';
 import { DocumentsService } from '../../services/documents.service';
 
@@ -71,7 +71,6 @@ export class HandoverDocumentationComponent implements OnInit, OnDestroy {
 
     public constructor(
         private readonly route: ActivatedRoute,
-        private readonly location: Location,
         private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
