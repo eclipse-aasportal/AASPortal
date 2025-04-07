@@ -14,8 +14,8 @@ import { of } from 'rxjs';
 
 import { AASDocument } from 'aas-core';
 import { CustomerFeedbackComponent } from '../../../lib/views/customer-feedback/customer-feedback.component';
-import { ToolbarService } from '../../../lib/toolbar.service';
-import { StartService } from '../../../lib/start.service';
+import { ToolbarService } from '../../../lib/services/toolbar.service';
+import { StartService } from '../../../lib/services/start.service';
 import { DocumentsService } from '../../../lib/services/documents.service';
 import { encodeBase64Url } from '../../../lib/utilities';
 

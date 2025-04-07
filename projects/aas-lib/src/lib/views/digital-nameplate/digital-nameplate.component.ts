@@ -42,13 +42,13 @@ import {
     isSubmodelElementList,
 } from 'aas-core';
 
-import { ToolbarService } from '../../toolbar.service';
-import { WINDOW } from '../../window.service';
+import { ToolbarService } from '../../services/toolbar.service';
+import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../auth/auth.service';
 import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../../utilities';
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 import { DocumentsService } from '../../services/documents.service';
-import { StartService } from '../../start.service';
+import { StartService } from '../../services/start.service';
 
 export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
 

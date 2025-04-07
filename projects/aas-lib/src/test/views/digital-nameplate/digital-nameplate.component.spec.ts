@@ -14,11 +14,11 @@ import { of } from 'rxjs';
 
 import { nameplate } from './digital-nameplate-document';
 import { DigitalNameplateComponent } from '../../../lib/views/digital-nameplate/digital-nameplate.component';
-import { ToolbarService } from '../../../lib/toolbar.service';
+import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { AuthService } from '../../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
 import { DocumentsService } from '../../../lib/services/documents.service';
-import { StartService } from '../../../lib/start.service';
+import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
 
 @Component({
@@ -48,7 +48,6 @@ describe('DigitalNameplateComponent', () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
         api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
-
         route = jasmine.createSpyObj<ActivatedRoute>(
             {},
             { queryParams: of({ endpoint: encodeBase64Url(nameplate.endpoint), id: encodeBase64Url(nameplate.id) }) },
