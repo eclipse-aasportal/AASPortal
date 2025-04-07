@@ -11,7 +11,7 @@ import { AASNodeMessage, WebSocketData } from 'aas-core';
 import { WebSocketFactoryService } from './web-socket-factory.service';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
-import { AuthService } from '../public-api';
+import { AuthService } from '../auth/auth.service';
 
 type State = {
     documentCount: number;

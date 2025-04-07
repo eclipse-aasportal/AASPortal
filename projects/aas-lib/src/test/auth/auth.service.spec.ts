@@ -10,17 +10,17 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY, first, map, of, skipWhile } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
-import { WINDOW } from '../../lib/window.service';
+import { WINDOW } from '../../lib/services/window.service';
 import { NotifyService } from '../../lib/notify/notify.service';
 import { AuthApiService } from '../../lib/auth/auth-api.service';
 import { AuthService } from '../../lib/auth/auth.service';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { getGuestToken, getToken } from '../assets/json-web-token';
 import { LoginFormResult } from '../../lib/auth/login-form/login-form.component';
 import { RegisterFormResult } from '../../lib/auth/register-form/register-form.component';
 import { ProfileFormResult } from '../../lib/auth/profile-form/profile-form.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthService', () => {
     let service: AuthService;

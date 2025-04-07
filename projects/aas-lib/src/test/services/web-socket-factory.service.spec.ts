@@ -7,10 +7,10 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { WebSocketData } from 'aas-core';
 import { WebSocketSubject } from 'rxjs/webSocket';
+import { WebSocketData } from 'aas-core';
 
-import { WebSocketFactoryService } from '../lib/web-socket-factory.service';
+import { WebSocketFactoryService } from '../../lib/services/web-socket-factory.service';
 
 describe('WebSocketFactoryService', () => {
     let service: WebSocketFactoryService;

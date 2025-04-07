@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import { AASTreeComponent } from '../../lib/aas-tree/aas-tree.component';
 import { sampleDocument } from '../assets/sample-document';
 import { NotifyService } from '../../lib/notify/notify.service';
-import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
+import { WebSocketFactoryService } from '../../lib/services/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../assets/test-web-socket-factory.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

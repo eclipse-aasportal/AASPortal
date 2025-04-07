@@ -52,15 +52,14 @@ import { ShowVideoFormComponent } from '../show-video-form/show-video-form.compo
 import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../utilities';
-import { WebSocketFactoryService } from '../web-socket-factory.service';
-import { ClipboardService } from '../clipboard.service';
+import { WebSocketFactoryService } from '../services/web-socket-factory.service';
 import { LogType, NotifyService } from '../notify/notify.service';
 import { findRoute } from '../views/views';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
 import { AuthService } from '../auth/auth.service';
-import { WINDOW } from '../window.service';
+import { WINDOW } from '../services/window.service';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -89,7 +88,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly clipboard: ClipboardService,
     ) {
         effect(() => {
             this.searching.start(this.searchExpression());
@@ -485,7 +483,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     private openDocumentByAssetId(id: string): void {
         if (id) {
-            this.clipboard.clear('AASDocument');
             this.router.navigate(['/aas'], {
                 onSameUrlNavigation: 'reload',
                 queryParams: { id: encodeBase64Url(id) },
@@ -494,7 +491,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     }
 
     private openExternalReference(reference: aas.Reference): void {
-        this.clipboard.clear('AASDocument');
         this.router.navigate(['/aas'], {
             onSameUrlNavigation: 'reload',
             queryParams: { id: encodeBase64Url(reference.keys[0].value) },
@@ -511,7 +507,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         if (referable) {
             this.searching.find(referable);
         } else if (reference.keys[0].type === 'AssetAdministrationShell') {
-            this.clipboard.clear('AASDocument');
             this.router.navigate(['/aas'], {
                 onSameUrlNavigation: 'reload',
                 queryParams: { id: encodeBase64Url(reference.keys[0].value) },

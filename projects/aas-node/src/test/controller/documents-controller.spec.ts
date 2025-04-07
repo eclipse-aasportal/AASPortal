@@ -40,16 +40,16 @@ describe('DocumentsController', function () {
         auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
 
         aasProvider = createSpyObj<AASProvider>([
-            'updateDocumentAsync',
-            'getContentAsync',
-            'getPackageAsync',
-            'getDocumentAsync',
-            'getDocumentsAsync',
-            'addPackagesAsync',
-            'deletePackageAsync',
+            'updateDocument',
+            'getContent',
+            'getPackage',
+            'getDocument',
+            'getDocuments',
+            'addPackages',
+            'deletePackage',
             'getDataElementValue',
             'invoke',
-            'resetAsync',
+            'reset',
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
