@@ -9,9 +9,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AASCursor, AASDocument, AASPagedResult, aas } from 'aas-core';
-import { first, mergeMap, Observable } from 'rxjs';
+import { first, mergeMap, Observable, of, switchMap, tap } from 'rxjs';
 import { encodeBase64Url } from '../utilities';
 import { AuthService } from '../auth/auth.service';
+import { CacheService } from './cache.service';
 
 /** The API of the digital nameplate. */
 @Injectable({ providedIn: 'root' })
@@ -19,6 +20,7 @@ export class DocumentsService {
     public constructor(
         private readonly http: HttpClient,
         private readonly auth: AuthService,
+        private readonly cache: CacheService,
     ) {}
 
     /**
@@ -35,7 +37,12 @@ export class DocumentsService {
                     ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`
                     : `/api/v1/documents/${encodeBase64Url(id)}`;
 
-                return this.http.get<AASDocument>(url);
+                const document: AASDocument | undefined = this.cache.get(url);
+                if (document === undefined) {
+                    return this.http.get<AASDocument>(url).pipe(tap(data => this.cache.set(url, data)));
+                }
+
+                return of(document);
             }),
         );
     }
@@ -47,9 +54,13 @@ export class DocumentsService {
      * @returns The root of the element structure.
      */
     public getContent(id: string, endpoint: string): Observable<aas.Environment> {
-        return this.http.get<aas.Environment>(
-            `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`,
-        );
+        const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`;
+        const env: aas.Environment | undefined = this.cache.get(url);
+        if (env === undefined) {
+            return this.http.get<aas.Environment>(url).pipe(tap(data => this.cache.set(url, data)));
+        }
+
+        return of(env);
     }
 
     /**
@@ -81,7 +92,12 @@ export class DocumentsService {
             }
         }
 
-        return this.http.get<AASPagedResult>(url);
+        const result: AASPagedResult | undefined = this.cache.get(url);
+        if (result === undefined) {
+            return this.http.get<AASPagedResult>(url).pipe(tap(data => this.cache.set(url, data)));
+        }
+
+        return of(result);
     }
 
     /**
@@ -91,8 +107,12 @@ export class DocumentsService {
      * @returns The descendants of the root AAS document and the root itself.
      */
     public getHierarchy(id: string, endpoint: string): Observable<AASDocument[]> {
-        return this.http.get<AASDocument[]>(
-            `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/hierarchy`,
-        );
+        const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/hierarchy`;
+        const documents: AASDocument[] | undefined = this.cache.get(url);
+        if (documents === undefined) {
+            return this.http.get<AASDocument[]>(url).pipe(tap(data => this.cache.set(url, data)));
+        }
+
+        return of(documents);
     }
 }

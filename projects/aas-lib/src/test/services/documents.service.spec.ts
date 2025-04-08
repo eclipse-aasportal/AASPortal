@@ -13,6 +13,7 @@ import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService } from '../../lib/auth/auth.service';
 import { DocumentsService } from '../../lib/services/documents.service';
+import { CacheService } from '../../lib/services/cache.service';
 
 import sample from '../assets/dpp-sample.json';
 
@@ -20,14 +21,21 @@ describe('DocumentsService', () => {
     let service: DocumentsService;
     let httpTestingController: HttpTestingController;
     let auth: jasmine.SpyObj<AuthService>;
+    let cache: jasmine.SpyObj<CacheService>;
 
     beforeEach(() => {
         auth = jasmine.createSpyObj<AuthService>(['login'], { userId: of('guest') });
+        cache = jasmine.createSpyObj<CacheService>(['get', 'set']);
+        cache.get.and.returnValue(undefined);
+        
         TestBed.configureTestingModule({
             declarations: [],
             imports: [],
             providers: [
-                DocumentsService,
+                {
+                    provide: CacheService,
+                    useValue: cache,
+                },
                 {
                     provide: AuthService,
                     useValue: auth,

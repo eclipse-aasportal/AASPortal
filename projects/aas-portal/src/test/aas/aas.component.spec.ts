@@ -8,6 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { of } from 'rxjs';
 import {
     AASTreeComponent,
     AuthService,
@@ -17,6 +18,7 @@ import {
     OnlineState,
     SecuredImageComponent,
     StartService,
+    ToolbarService,
 } from 'aas-lib';
 
 import { AASDocument, aas, noop } from 'aas-core';
@@ -25,11 +27,9 @@ import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Component, input, output, signal } from '@angular/core';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.store';
-import { of } from 'rxjs';
 
 @Component({
     selector: 'fhg-aas-tree',
