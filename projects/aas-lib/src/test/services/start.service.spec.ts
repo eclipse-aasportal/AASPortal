@@ -10,8 +10,14 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
-import { START_TILE_TYPES, START_TILES, StartService, StartTile, StartTileType } from '../lib/start.service';
-import { AuthService } from '../lib/auth/auth.service';
+import { AuthService } from '../../lib/auth/auth.service';
+import {
+    START_TILE_TYPES,
+    START_TILES,
+    StartService,
+    StartTile,
+    StartTileType,
+} from '../../lib/services/start.service';
 
 @Component({
     selector: 'fhg-test-card',

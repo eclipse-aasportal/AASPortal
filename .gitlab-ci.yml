@@ -1,5 +1,5 @@
 variables:
-  NODE_IMAGE: node:20.11.1-alpine
+  NODE_IMAGE: node:22.12.0-alpine
 
 stages:
   - tag

@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { WebSocketData } from 'aas-core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { WebSocketData } from 'aas-core';
 
 @Injectable({
     providedIn: 'root',

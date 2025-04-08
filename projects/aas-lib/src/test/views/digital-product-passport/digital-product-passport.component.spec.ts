@@ -7,8 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Location as NgLocation } from '@angular/common';
-import { ActivatedRoute, provideRouter } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -16,14 +15,14 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
 import { DigitalProductPassportComponent } from '../../../lib/views/digital-product-passport/digital-product-passport.component';
-import { WINDOW } from '../../../lib/window.service';
+import { WINDOW } from '../../../lib/services/window.service';
 import { DocumentsService } from '../../../lib/services/documents.service';
 import { AuthService } from '../../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
 
 import sample from '../../assets/dpp-sample.json';
-import { ToolbarService } from '../../../lib/toolbar.service';
-import { StartService } from '../../../lib/start.service';
+import { ToolbarService } from '../../../lib/services/toolbar.service';
+import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
 import { AASDocument } from 'projects/aas-core/dist/types';
 

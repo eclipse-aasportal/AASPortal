@@ -8,8 +8,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { TemplateRef } from '@angular/core';
-
-import { ToolbarService } from '../../../aas-lib/src/lib/toolbar.service';
+import { ToolbarService } from '../../lib/services/toolbar.service';
 
 describe('ToolbarService', () => {
     let service: ToolbarService;

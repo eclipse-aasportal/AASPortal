@@ -9,6 +9,7 @@
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, first, from, mergeMap, Observable, of, Subscription, toArray } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -23,10 +24,9 @@ import {
 
 import { aas, getLocaleValue, getPreferredName } from 'aas-core';
 import { ScoreComponent } from '../../score/score.component';
-import { ToolbarService } from '../../toolbar.service';
-import { StartService } from '../../start.service';
+import { ToolbarService } from '../../services/toolbar.service';
+import { StartService } from '../../services/start.service';
 import { CustomerFeedbackStore, FeedbackItem, GeneralItem } from './customer-feedback.store';
-import { ActivatedRoute } from '@angular/router';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { DocumentsService } from '../../services/documents.service';
 

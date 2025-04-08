@@ -10,12 +10,11 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { AppInfo } from 'aas-core';
 
+import { AppInfo } from 'aas-core';
+import { IndexChangeService, StartService, ToolbarService } from 'aas-lib';
 import { AboutComponent } from '../../app/about/about.component';
 import { AboutApiService } from '../../app/about/about-api.service';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
-import { IndexChangeService, StartService } from 'aas-lib';
 
 describe('AboutComponent', () => {
     let component: AboutComponent;

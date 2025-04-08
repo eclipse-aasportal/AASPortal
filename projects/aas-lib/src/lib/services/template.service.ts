@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Injectable, computed } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { aas, Endpoint, TemplateDescriptor } from 'aas-core';
-import { encodeBase64Url } from './utilities';
+import { encodeBase64Url } from '../utilities';
 
 interface TemplateServiceState {
     templates: TemplateDescriptor[];
