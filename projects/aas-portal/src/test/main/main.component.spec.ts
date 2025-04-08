@@ -17,10 +17,10 @@ import {
     IndexChangeService,
     LocalizeComponent,
     NotifyComponent,
+    ToolbarService,
 } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 
 @Component({
     selector: 'fhg-auth',

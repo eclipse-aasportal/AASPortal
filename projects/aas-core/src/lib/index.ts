@@ -43,6 +43,7 @@ export * from './multi-key-map.js';
 export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
+export * from './cache.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function noop(...args: unknown[]) {}
