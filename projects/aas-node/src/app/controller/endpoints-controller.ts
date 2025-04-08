@@ -85,7 +85,7 @@ export class EndpointsController extends Controller {
     public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
         try {
             this.logger.start('getCount');
-            return { count: await this.aasProvider.getCountAsync(decodeBase64Url(name)) };
+            return { count: await this.aasProvider.getCount(decodeBase64Url(name)) };
         } finally {
             this.logger.stop();
         }
@@ -106,7 +106,7 @@ export class EndpointsController extends Controller {
                 throw new Error('Invalid URL.');
             }
 
-            await this.aasProvider.addEndpointAsync(endpoint);
+            await this.aasProvider.addEndpoint(endpoint);
         } finally {
             this.logger.stop();
         }
@@ -127,7 +127,7 @@ export class EndpointsController extends Controller {
                 throw new Error('Invalid URL.');
             }
 
-            await this.aasProvider.updateEndpointAsync(endpoint);
+            await this.aasProvider.updateEndpoint(endpoint);
         } finally {
             this.logger.stop();
         }
@@ -143,7 +143,7 @@ export class EndpointsController extends Controller {
     public async deleteEndpoint(@Path() name: string): Promise<void> {
         try {
             this.logger.start('removeEndpoint');
-            await this.aasProvider.removeEndpointAsync(decodeBase64Url(name));
+            await this.aasProvider.removeEndpoint(decodeBase64Url(name));
         } finally {
             this.logger.stop();
         }
@@ -158,7 +158,7 @@ export class EndpointsController extends Controller {
     public async reset(): Promise<void> {
         try {
             this.logger.start('reset');
-            await this.aasProvider.resetAsync();
+            await this.aasProvider.reset();
         } finally {
             this.logger.stop();
         }
@@ -195,7 +195,7 @@ export class EndpointsController extends Controller {
     ): Promise<NodeJS.ReadableStream | undefined> {
         try {
             this.logger.start('getThumbnail');
-            return await this.aasProvider.getThumbnailAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+            return await this.aasProvider.getThumbnail(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -213,7 +213,7 @@ export class EndpointsController extends Controller {
     public async getPackage(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
         try {
             this.logger.start('getDocument');
-            return await this.aasProvider.getPackageAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+            return await this.aasProvider.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -230,7 +230,7 @@ export class EndpointsController extends Controller {
     public async addPackages(@Path() endpoint: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
         try {
             this.logger.start('addPackages');
-            await this.aasProvider.addPackagesAsync(decodeBase64Url(endpoint), files);
+            await this.aasProvider.addPackages(decodeBase64Url(endpoint), files);
         } finally {
             this.logger.stop();
         }
@@ -247,7 +247,7 @@ export class EndpointsController extends Controller {
     public async deletePackage(@Path() endpoint: string, @Path() id: string): Promise<void> {
         try {
             this.logger.start('deletePackage');
-            await this.aasProvider.deletePackageAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+            await this.aasProvider.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -265,7 +265,7 @@ export class EndpointsController extends Controller {
     public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
         try {
             this.logger.start('getDocument');
-            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id), decodeBase64Url(endpoint));
+            return await this.aasProvider.getDocument(decodeBase64Url(id), decodeBase64Url(endpoint));
         } finally {
             this.logger.stop();
         }
@@ -286,7 +286,7 @@ export class EndpointsController extends Controller {
     ): Promise<aas.Environment | undefined> {
         try {
             this.logger.start('getDocumentContent');
-            return await this.aasProvider.getContentAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+            return await this.aasProvider.getContent(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }
@@ -345,7 +345,7 @@ export class EndpointsController extends Controller {
             this.logger.start('updateDocument');
             const buffer = await fs.promises.readFile(file.path);
             const env: aas.Environment = JSON.parse(buffer.toString());
-            return await this.aasProvider.updateDocumentAsync(decodeBase64Url(endpoint), decodeBase64Url(id), env);
+            return await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
         } finally {
             this.logger.stop();
         }
@@ -386,7 +386,7 @@ export class EndpointsController extends Controller {
     public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
         try {
             this.logger.start('getHierarchy');
-            return await this.aasProvider.getHierarchyAsync(decodeBase64Url(endpoint), decodeBase64Url(id));
+            return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));
         } finally {
             this.logger.stop();
         }

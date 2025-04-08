@@ -12,8 +12,8 @@ import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/
 import { of } from 'rxjs';
 import { TemplateDescriptor, aas } from 'aas-core';
 
-import { TemplateService } from '../lib/template.service';
-import { NotifyService } from '../public-api';
+import { NotifyService } from '../../lib/notify/notify.service';
+import { TemplateService } from '../../lib/services/template.service';
 
 describe('TemplateService', () => {
     let service: TemplateService;

@@ -12,7 +12,7 @@ import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-transla
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
 
 import { CultureInfo } from './culture-info';
-import { WINDOW } from '../window.service';
+import { WINDOW } from '../services/window.service';
 
 @Component({
     selector: 'fhg-localize',

@@ -12,13 +12,12 @@ import { of, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
-import { AuthService, NotifyService, StartService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { AuthService, NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService } from 'aas-lib';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { pages } from './test-pages';
 import { SelectionMode } from '../../app/types/selection-mode';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 import { DashboardChart } from '../../app/dashboard/dashboard.store';
 
 describe('DashboardComponent', () => {

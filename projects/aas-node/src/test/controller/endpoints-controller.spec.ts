@@ -45,18 +45,18 @@ describe('EndpointsController', function () {
         aasProvider = createSpyObj<AASProvider>([
             'getEndpoints',
             'getEndpointCount',
-            'addEndpointAsync',
-            'updateEndpointAsync',
-            'removeEndpointAsync',
-            'getCountAsync',
-            'resetAsync',
+            'addEndpoint',
+            'updateEndpoint',
+            'removeEndpoint',
+            'getCount',
+            'reset',
             'startEndpointScan',
-            'updateDocumentAsync',
-            'getContentAsync',
-            'getPackageAsync',
-            'getDocumentAsync',
-            'addPackagesAsync',
-            'deletePackageAsync',
+            'updateDocument',
+            'getContent',
+            'getPackage',
+            'getDocument',
+            'addPackages',
+            'deletePackage',
             'getDataElementValue',
             'invoke',
         ]);
@@ -103,19 +103,19 @@ describe('EndpointsController', function () {
     });
 
     it('GET: /api/v1/endpoints/{name}/documents/count', async () => {
-        aasProvider.getCountAsync.mockResolvedValue(42);
+        aasProvider.getCount.mockResolvedValue(42);
         const response = await request(app)
             .get('/api/v1/endpoints/U2FtcGxlcw/documents/count')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual({ count: 42 });
-        expect(aasProvider.getCountAsync).toHaveBeenCalledWith('Samples');
+        expect(aasProvider.getCount).toHaveBeenCalledWith('Samples');
     });
 
     it('POST: /api/v1/endpoints/{name}', async () => {
         const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'FileSystem' };
-        aasProvider.addEndpointAsync.mockResolvedValue();
+        aasProvider.addEndpoint.mockResolvedValue();
         auth.hasUser.mockResolvedValue(true);
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxlcw')
@@ -123,7 +123,7 @@ describe('EndpointsController', function () {
             .send(endpoint);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.addEndpointAsync).toHaveBeenCalled();
+        expect(aasProvider.addEndpoint).toHaveBeenCalled();
     });
 
     it('PUT: /api/v1/endpoints/{name}', async () => {
@@ -134,7 +134,7 @@ describe('EndpointsController', function () {
             schedule: { type: 'manual' },
         };
 
-        aasProvider.updateEndpointAsync.mockResolvedValue();
+        aasProvider.updateEndpoint.mockResolvedValue();
         auth.hasUser.mockResolvedValue(true);
         const response = await request(app)
             .put('/api/v1/endpoints/U2FtcGxlcw')
@@ -142,29 +142,29 @@ describe('EndpointsController', function () {
             .send(endpoint);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.updateEndpointAsync).toHaveBeenCalledWith(endpoint);
+        expect(aasProvider.updateEndpoint).toHaveBeenCalledWith(endpoint);
     });
 
     it('DELETE: /api/v1/endpoints/{name}', async () => {
-        aasProvider.removeEndpointAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
+        aasProvider.removeEndpoint.mockReturnValue(new Promise<void>(resolve => resolve()));
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .delete('/api/v1/endpoints/U2FtcGxlcw')
             .set('Authorization', `Bearer ${getToken('John')}`);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.removeEndpointAsync).toHaveBeenCalledWith('Samples');
+        expect(aasProvider.removeEndpoint).toHaveBeenCalledWith('Samples');
     });
 
     it('DELETE: /api/v1/endpoints', async () => {
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
-        aasProvider.resetAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
+        aasProvider.reset.mockReturnValue(new Promise<void>(resolve => resolve()));
         const response = await request(app)
             .delete('/api/v1/endpoints')
             .set('Authorization', `Bearer ${getToken('John')}`);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.resetAsync).toHaveBeenCalled();
+        expect(aasProvider.reset).toHaveBeenCalled();
     });
 
     it('PUT: /api/v1/endpoints/{name}/scan', async () => {
@@ -179,7 +179,7 @@ describe('EndpointsController', function () {
     });
 
     it('GET: /api/v1/endpoints/:endpoint/packages/:id', async () => {
-        aasProvider.getPackageAsync.mockReturnValue(
+        aasProvider.getPackage.mockReturnValue(
             new Promise<NodeJS.ReadableStream>(resolve => {
                 const s = new Readable();
                 s.push('Hello World!');
@@ -194,7 +194,7 @@ describe('EndpointsController', function () {
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toBeTruthy();
-        expect(aasProvider.getPackageAsync).toHaveBeenCalled();
+        expect(aasProvider.getPackage).toHaveBeenCalled();
     });
 
     it('POST: /api/v1/endpoints/:endpoint/packages', async () => {
@@ -205,7 +205,7 @@ describe('EndpointsController', function () {
             .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.addPackagesAsync).toHaveBeenCalled();
+        expect(aasProvider.addPackages).toHaveBeenCalled();
     });
 
     it('DELETE: /api/v1/endpoints/:endpoint/packages/:id', async () => {
@@ -215,22 +215,22 @@ describe('EndpointsController', function () {
             .set('Authorization', `Bearer ${getToken('John')}`);
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.deletePackageAsync).toHaveBeenCalled();
+        expect(aasProvider.deletePackage).toHaveBeenCalled();
     });
 
     it('GET: /api/v1/endpoints/:endpoint/documents/:id', async () => {
-        aasProvider.getDocumentAsync.mockResolvedValue(sampleDocument);
+        aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/endpoints/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
-        expect(aasProvider.getDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.getDocument).toHaveBeenCalled();
     });
 
     it('GET: /api/v1/endpoints/:url/documents/:id/content', async () => {
-        aasProvider.getContentAsync.mockReturnValue(
+        aasProvider.getContent.mockReturnValue(
             new Promise<aas.Environment>(resolve => {
                 resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
             }),
@@ -241,7 +241,7 @@ describe('EndpointsController', function () {
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
-        expect(aasProvider.getContentAsync).toHaveBeenCalled();
+        expect(aasProvider.getContent).toHaveBeenCalled();
     });
 
     describe('getDataElementValue: /api/v1/endpoints/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', () => {
@@ -309,7 +309,7 @@ describe('EndpointsController', function () {
     });
 
     it('PUT: /api/v1/endpoints/{endpoint}/documents/{id}', async () => {
-        aasProvider.updateDocumentAsync.mockReturnValue(Promise.resolve([]));
+        aasProvider.updateDocument.mockReturnValue(Promise.resolve([]));
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
         const endpoint = Buffer.from('Endpoint 1').toString('base64url');
@@ -320,7 +320,7 @@ describe('EndpointsController', function () {
             .attach('file', resolve('./src/test/assets/aas-example.json'));
 
         expect(response.statusCode).toBe(200);
-        expect(aasProvider.updateDocumentAsync).toHaveBeenCalled();
+        expect(aasProvider.updateDocument).toHaveBeenCalled();
     });
 
     it('invokeOperation: /api/v1/endpoints/:url/documents/:id/invoke', async () => {

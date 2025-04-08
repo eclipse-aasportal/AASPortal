@@ -15,12 +15,12 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
-import { WINDOW } from '../../../lib/window.service';
+import { WINDOW } from '../../../lib/services/window.service';
 import { AuthService } from '../../../lib/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/secured-image/secured-image.component';
 import { HandoverDocumentationComponent } from '../../../lib/views/handover-documentation/handover-documentation.component';
-import { ToolbarService } from '../../../lib/toolbar.service';
-import { StartService } from '../../../lib/start.service';
+import { ToolbarService } from '../../../lib/services/toolbar.service';
+import { StartService } from '../../../lib/services/start.service';
 import { DocumentsService } from '../../../lib/services/documents.service';
 
 import sample from '../../assets/dpp-sample.json';

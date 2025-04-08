@@ -19,6 +19,9 @@
         "esModuleInterop": true,
         "useDefineForClassFields": false,
         "useUnknownInCatchVariables": false,
+        "paths": {
+            "lib/*": ["./src/lib/*"]
+        },
     },
     "ts-node": {
         "esm": true

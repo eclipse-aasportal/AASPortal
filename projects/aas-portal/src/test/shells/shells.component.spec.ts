@@ -21,12 +21,12 @@ import {
     StartService,
     IndexChangeService,
     DocumentsService,
+    ToolbarService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
 import { EndpointsService } from '../../../../aas-lib/src/lib/services/endpoints.service';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
 
 @Component({
     selector: 'fhg-aas-table',

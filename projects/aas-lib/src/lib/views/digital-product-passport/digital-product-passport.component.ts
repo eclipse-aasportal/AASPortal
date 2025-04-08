@@ -32,10 +32,10 @@ import { DigitalProductPassportStore, DocumentationItem, NameValue } from './dig
 import { SecuredImageComponent } from '../../secured-image/secured-image.component';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { DocumentsService } from '../../services/documents.service';
-import { WINDOW } from '../../window.service';
+import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../auth/auth.service';
-import { ToolbarService } from '../../toolbar.service';
-import { StartService } from '../../start.service';
+import { ToolbarService } from '../../services/toolbar.service';
+import { StartService } from '../../services/start.service';
 
 @Component({
     selector: 'fhg-device-passport-portal',

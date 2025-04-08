@@ -10,7 +10,7 @@ import { HttpClient, HttpEvent } from '@angular/common/http';
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { encodeBase64Url } from './utilities';
+import { encodeBase64Url } from '../utilities';
 
 @Injectable({
     providedIn: 'root',
