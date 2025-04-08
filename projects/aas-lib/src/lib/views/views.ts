@@ -11,6 +11,7 @@ import { CustomerFeedbackComponent } from './customer-feedback/customer-feedback
 import { DigitalNameplateComponent } from './digital-nameplate/digital-nameplate.component';
 import { DigitalProductPassportComponent } from './digital-product-passport/digital-product-passport.component';
 import { HandoverDocumentationComponent } from './handover-documentation/handover-documentation.component';
+import { BrowserComponent } from './browser/browser.component';
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
 export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
@@ -45,6 +46,7 @@ export const viewRoutes: Route[] = [
             semanticIds: [HandoverDocumentation],
         },
     },
+    { path: '**', component: BrowserComponent },
 ];
 
 /**
