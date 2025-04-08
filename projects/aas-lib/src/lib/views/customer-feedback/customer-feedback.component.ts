@@ -27,7 +27,7 @@ import { ScoreComponent } from '../../score/score.component';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { CustomerFeedbackStore, FeedbackItem, GeneralItem } from './customer-feedback.store';
-import { decodeBase64Url, encodeBase64Url } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url, hashCode } from '../../utilities';
 import { DocumentsService } from '../../services/documents.service';
 
 const maxStars = 5;
@@ -152,7 +152,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
             href = `/view/CustomerFeedback?docs=${encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id])))}`;
         }
 
-        const property: Record<string, unknown> = {
+        const inputs: Record<string, unknown> = {
             count: documents.length,
             stars: this.stars(),
             overallRating: this.overallRating(),
@@ -162,7 +162,8 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
             href,
         };
 
-        if (!this.start.add('CustomerFeedback', 'CustomerFeedback', property)) {
+        const hc = hashCode(documents.map(item => `${item.endpoint}#${item.id}`).join());
+        if (!this.start.add('CustomerFeedback', `CustomerFeedback#${hc}`, inputs)) {
             return EMPTY;
         }
 
