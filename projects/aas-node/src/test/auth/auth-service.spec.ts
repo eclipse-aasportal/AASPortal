@@ -28,14 +28,14 @@ describe('AuthService', function () {
     beforeEach(function () {
         mailer = createSpyObj<Mailer>(['sendPassword', 'sendNewPassword']);
         userStorage = createSpyObj<UserStorage>([
-            'existAsync',
-            'readAsync',
-            'writeAsync',
-            'deleteAsync',
-            'checkCookieAsync',
-            'getCookieAsync',
-            'setCookieAsync',
-            'deleteCookieAsync',
+            'exist',
+            'read',
+            'write',
+            'delete',
+            'checkCookie',
+            'getCookie',
+            'setCookie',
+            'deleteCookie',
         ]);
 
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecret', JWT_EXPIRES_IN: 60 });
