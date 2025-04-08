@@ -1,0 +1,37 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+@if (isEmpty() === false) {
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        @for (item of path(); track item) {
+        <li class="breadcrumb-item">
+            <a href="javascript:void(0)" (click)="goUp(item)">{{item.idShort}}</a>
+        </li>
+        }
+        <li class="breadcrumb-item active" aria-current="page">{{current()?.idShort}}</li>
+    </ol>
+</nav>
+
+} @else {
+<div class="alert alert-info text-center mt-2" role="alert" translate>Browser.EMPTY</div>
+}
+
+<ng-template #browserToolbar>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
+    @if (documentSize() >= 2) {
+    <div class="input-group my-1">
+        <ngb-pagination [collectionSize]="documentSize()" [(page)]="documentIndex" [pageSize]="1"
+            [directionLinks]="documentSize() > 5" [ellipses]="true" />
+    </div>
+    }
+</ng-template>

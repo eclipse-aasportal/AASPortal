@@ -244,3 +244,24 @@ export function toDisplayName(name: string): string {
         return false;
     }
 }
+
+/**
+ * Computes a has code of the specified string value.
+ * @param value The current value.
+ * @returns The has code of the specified value.
+ */
+export function hashCode(value: string): number {
+    let hash = 0;
+    if (value.length === 0) {
+        return hash;
+    }
+
+    for (let i = 0; i < value.length; i++) {
+        const char = value.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0;
+    }
+
+    return hash >= 0 ? hash : 4294967296 + hash;
+}
+
