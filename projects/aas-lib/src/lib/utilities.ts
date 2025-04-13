@@ -8,7 +8,7 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import { ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'aas-core';
+import {aas,  ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'aas-core';
 
 /**
  * Converts a message to a localized text.
@@ -265,3 +265,17 @@ export function hashCode(value: string): number {
     return hash >= 0 ? hash : 4294967296 + hash;
 }
 
+
+export function referenceToString(value: aas.Reference): string {
+    return value.keys.map(key => key.value).join('.');
+}
+
+export function isLangString(value: unknown): value is aas.LangString[] {
+    if (!Array.isArray(value) || value.length === 0) {
+        return false;
+    }
+
+    const langString = value[0] as aas.LangString;
+
+    return typeof langString.language === 'string' && typeof langString.text === 'string';
+}
