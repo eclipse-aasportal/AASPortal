@@ -11,20 +11,66 @@
     <ol class="breadcrumb">
         @for (item of path(); track item) {
         <li class="breadcrumb-item">
-            <a href="javascript:void(0)" (click)="goUp(item)">{{item.idShort}}</a>
+            <a href="javascript:void(0)" (click)="goUp(item)">{{item.name}}</a>
         </li>
         }
-        <li class="breadcrumb-item active" aria-current="page">{{current()?.idShort}}</li>
+        <li class="breadcrumb-item active" aria-current="page">{{current()?.name}}</li>
     </ol>
 </nav>
-
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (property of properties(); track property) {
+        <tr>
+            <td>{{property.name}}</td>
+            @if (property.kind === 'link') {
+            <td>
+                <a href="javascript:void(0)" (click)="open($event, property)">{{property.value}}</a>
+            </td>
+            } @else {
+            <td>{{property.value}}</td>
+            }
+        </tr>
+        }
+        @if (children().length > 0) {
+        <tr>
+            <td colspan="4">
+                <table class="table table-sm table-striped mb-0 caption-top">
+                    <caption>{{collection()}}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 48px">#</th>
+                            <th scope="col" style="width: 48px"></th>
+                            <th scope="col">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (child of children(); track child; let i = $index) {
+                        <tr>
+                            <th scope="row">{{i + 1 }}</th>
+                            <td class="text-info fw-bold">{{child.abbreviation}}</td>
+                            <td><a href="javascript:void(0);" (click)="goDown(child)">{{child.name}}</a></td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
 } @else {
 <div class="alert alert-info text-center mt-2" role="alert" translate>Browser.EMPTY</div>
 }
 
 <ng-template #browserToolbar>
     <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+        <button class="btn btn-primary" type="button">
             <i class="bi bi-house-add"></i>
         </button>
     </div>

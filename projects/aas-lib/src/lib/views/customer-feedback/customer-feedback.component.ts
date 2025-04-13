@@ -157,7 +157,6 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
             stars: this.stars(),
             overallRating: this.overallRating(),
             items: this.items$(),
-            feedbacks: this.feedbacks(),
             starClassNames: this.starClassNames(),
             href,
         };
