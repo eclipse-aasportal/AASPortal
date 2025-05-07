@@ -7,14 +7,8 @@
  *****************************************************************************/
 
 import { Command } from '../../types/command';
-import {
-    DashboardChart,
-    DashboardItem,
-    DashboardItemType,
-    DashboardRow,
-    DashboardState,
-    DashboardStore,
-} from '../dashboard.store';
+import { DashboardChart, DashboardItem, DashboardItemType, DashboardRow, DashboardState } from '../dashboard-types';
+import { DashboardService } from '../dashboard.service';
 
 export abstract class DashboardCommand extends Command {
     private preState!: DashboardState;
@@ -22,29 +16,29 @@ export abstract class DashboardCommand extends Command {
 
     protected constructor(
         name: string,
-        protected readonly store: DashboardStore,
+        protected readonly service: DashboardService,
     ) {
         super(name);
     }
 
     protected onExecute(): void {
-        this.preState = this.store.memento;
+        this.preState = this.service.memento;
         this.executing();
-        this.postState = this.store.memento;
+        this.postState = this.service.memento;
     }
 
     protected abstract executing(): void;
 
     protected onUndo(): void {
-        this.store.memento = this.preState;
+        this.service.memento = this.preState;
     }
 
     protected onRedo(): void {
-        this.store.memento = this.postState;
+        this.service.memento = this.postState;
     }
 
     protected onAbort(): void {
-        this.store.memento = this.preState;
+        this.service.memento = this.preState;
     }
 
     protected isChart(item: DashboardItem): item is DashboardChart {
@@ -63,8 +57,8 @@ export abstract class DashboardCommand extends Command {
 
     protected validateItems(grid: DashboardItem[][]): void {
         grid.forEach((row, y) => {
-            row.forEach((item, x) => (item.positions[0].x = x));
-            row.forEach(item => (item.positions[0].y = y));
+            row.forEach((item, x) => (item.position.x = x));
+            row.forEach(item => (item.position.y = y));
         });
     }
 }

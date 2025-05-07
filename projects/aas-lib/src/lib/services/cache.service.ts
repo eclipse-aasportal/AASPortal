@@ -20,7 +20,7 @@ export class CacheService extends Cache<string, unknown> implements OnDestroy {
     public constructor(private readonly indexChange: IndexChangeService) {
         super(100);
 
-        this.subscription = this.indexChange.message.subscribe(message => {
+        this.subscription = this.indexChange.message.subscribe(() => {
             this.clear();
         });
     }

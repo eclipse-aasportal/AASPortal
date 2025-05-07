@@ -6,31 +6,19 @@
  *
  *****************************************************************************/
 
-import { DashboardPage, DashboardStore } from '../dashboard.store';
+import { DashboardPage } from '../dashboard-types';
+import { DashboardService } from '../dashboard.service';
 import { DashboardCommand } from './dashboard-command';
 
 export class DeletePageCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
-        private page: DashboardPage,
+        service: DashboardService,
+        private readonly page: DashboardPage,
     ) {
-        super('Delete page', store);
+        super('Delete page', service);
     }
 
     protected executing(): void {
-        const index = this.store.pages.findIndex(page => page.name === this.page.name);
-        const pages = this.store.pages.filter(page => page.name !== this.page.name);
-        if (pages.length === 0) {
-            pages.push({ name: this.store.createPageName(), items: [], requests: [] });
-        }
-
-        let selectedIndex = this.store.index;
-        if (index === selectedIndex) {
-            selectedIndex = Math.min(pages.length - 1, index);
-        } else if (index < selectedIndex) {
-            --selectedIndex;
-        }
-
-        this.store.setState({ pages, index: selectedIndex });
+        this.service.deletePage(this.page);
     }
 }

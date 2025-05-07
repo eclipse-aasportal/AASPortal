@@ -8,17 +8,17 @@
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DashboardCommand } from './dashboard-command';
-import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from '../dashboard.store';
-import { DashboardStore } from '../dashboard.store';
+import { DashboardService } from '../dashboard.service';
+import { DashboardChart, DashboardChartType, DashboardItem, DashboardPage } from '../dashboard-types';
 
 export class SetChartTypeCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private page: DashboardPage,
         private item: DashboardItem,
         private chartType: DashboardChartType,
     ) {
-        super('Set chart type', store);
+        super('Set chart type', service);
     }
 
     protected executing(): void {
@@ -27,7 +27,7 @@ export class SetChartTypeCommand extends DashboardCommand {
 
         if (this.isChart(item)) {
             item.chartType = this.chartType;
-            this.store.update(page);
+            this.service.updatePage(page);
         } else {
             throw new Error('Not implemented.');
         }

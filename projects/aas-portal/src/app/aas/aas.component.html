@@ -54,9 +54,9 @@
         </button>
     </div>
     <div class="input-group me-2 my-1">
-        <select class="form-select" [(ngModel)]="dashboardPage">
+        <select class="form-select" [ngModel]="dashboardPage()" (ngModelChange)="setDashboardPage($event)">
             @for (page of dashboardPages(); track page) {
-            <option [ngValue]="page">{{page}}</option>
+            <option [ngValue]="page">{{page.name}}</option>
             }
         </select>
         <button type="button" class="btn btn-primary" (click)="addToDashboard('Line')"

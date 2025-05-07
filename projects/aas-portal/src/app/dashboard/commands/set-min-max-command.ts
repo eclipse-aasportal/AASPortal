@@ -8,17 +8,18 @@
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DashboardCommand } from './dashboard-command';
-import { DashboardChart, DashboardPage, DashboardStore } from '../dashboard.store';
+import { DashboardService } from '../dashboard.service';
+import { DashboardChart, DashboardPage } from '../dashboard-types';
 
 export class SetMinMaxCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private page: DashboardPage,
         private chart: DashboardChart,
         private min?: number,
         private max?: number,
     ) {
-        super('Set min/max', store);
+        super('Set min/max', service);
     }
 
     protected executing(): void {
@@ -32,6 +33,6 @@ export class SetMinMaxCommand extends DashboardCommand {
             chart.max = Number.isNaN(this.max) ? undefined : this.max;
         }
 
-        this.store.update(page);
+        this.service.updatePage(page);
     }
 }
