@@ -16,9 +16,8 @@ import { AuthService, NotifyService, StartService, WebSocketFactoryService, WIND
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { pages } from './test-pages';
-import { SelectionMode } from '../../app/types/selection-mode';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-import { DashboardChart } from '../../app/dashboard/dashboard.store';
+import { DashboardChart } from '../../app/dashboard/dashboard-types';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -100,7 +99,7 @@ describe('DashboardComponent', () => {
     });
 
     it('shows the Test page', () => {
-        expect(component.activePage()).toEqual('Test');
+        expect(component.activePage()?.name).toEqual('Test');
     });
 
     it('displays two rows', () => {
@@ -108,10 +107,6 @@ describe('DashboardComponent', () => {
     });
 
     describe('single selection', () => {
-        it('supports single mode selection', () => {
-            expect(component.selectionMode()).toEqual(SelectionMode.Single);
-        });
-
         it('indicates no item selected', () => {
             expect(component.selectedItem).toBeNull();
             expect(component.selectedItems.length).toEqual(0);

@@ -187,9 +187,10 @@ export class AASApiClientV3 extends AASApiClient {
 
     public resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
         const aasId = encodeBase64Url(shell.id);
-        const items = nodeId.split('.');
-        const path = items[1].split('/').slice(1).join('.');
-        return this.resolve(`shells/${aasId}/submodels/${items[0]}/submodel-elements/${path}`).href;
+        const index = nodeId.indexOf('#');
+        const smId = nodeId.substring(0, index);
+        const idShortPath = nodeId.substring(index + 1);
+        return this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}`).href;
     }
 
     public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
