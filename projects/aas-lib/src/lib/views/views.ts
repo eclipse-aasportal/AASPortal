@@ -46,7 +46,10 @@ export const viewRoutes: Route[] = [
             semanticIds: [HandoverDocumentation],
         },
     },
-    { path: '**', component: BrowserComponent },
+    {
+        path: 'Browser',
+        component: BrowserComponent,
+    },
 ];
 
 /**
@@ -61,5 +64,6 @@ export function findRoute(semanticId: string): Route | undefined {
             return route;
         }
     }
-    return undefined;
+
+    return viewRoutes.at(-1);
 }

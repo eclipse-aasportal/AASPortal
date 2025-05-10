@@ -285,7 +285,7 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
     },
     "DigitalProductPassport": {
-        "EMPTY": "Ups...",
+        "EMPTY": "No product passport available.",
         "Name": "Name",
         "Description": "Description",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
@@ -359,5 +359,9 @@
         "ManufacturerProductFamily": "Family",
         "ProductArticleNumberOfManufacturer": "Art. Nr.",
         "SerialNumber":"Serial Nr."
+    },
+    "Browser": {
+        "EMPTY": "No Asset Administration Shell available.",
+        "TITLE": "AAS browser"
     }
 }
