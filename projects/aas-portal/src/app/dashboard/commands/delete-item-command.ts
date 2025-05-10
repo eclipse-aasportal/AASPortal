@@ -8,22 +8,23 @@
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DashboardCommand } from './dashboard-command';
-import { DashboardItem, DashboardPage, DashboardStore } from '../dashboard.store';
+import { DashboardService } from '../dashboard.service';
+import { DashboardItem, DashboardPage } from '../dashboard-types';
 
 export class DeleteItemCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private page: DashboardPage,
         private items: DashboardItem[],
     ) {
-        super('Delete item', store);
+        super('Delete item', service);
     }
 
     protected executing(): void {
         const page = cloneDeep(this.page);
         page.items = page.items.filter(item => this.items.find(i => i.id === item.id) == null);
-        const grid = this.store.getGrid(page);
+        const grid = this.service.getGrid(page);
         this.validateItems(grid);
-        this.store.update(page);
+        this.service.updatePage(page);
     }
 }
