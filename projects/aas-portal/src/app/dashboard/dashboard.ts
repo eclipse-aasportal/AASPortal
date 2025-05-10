@@ -62,7 +62,7 @@ export abstract class Dashboard {
         };
     }
 
-    protected isChart(value?: DashboardItem | null): value is DashboardChart {
+    protected isDashboardChart(value?: DashboardItem | null): value is DashboardChart {
         return value?.type === DashboardItemType.Chart;
     }
 

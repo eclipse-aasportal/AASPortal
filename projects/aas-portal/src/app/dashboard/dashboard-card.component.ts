@@ -9,11 +9,11 @@
 import { ChangeDetectionStrategy, Component, effect, ElementRef, input, viewChild } from '@angular/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 
-import { LiveNode, WebSocketData } from 'aas-core';
+import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { Dashboard } from './dashboard';
 import { DashboardApiService } from './dashboard-api.service';
 import { WebSocketFactoryService } from 'aas-lib';
-import { ChartConfigurationTuple, DashboardCard } from './dashboard-types';
+import { ChartConfigurationTuple, DashboardChart } from './dashboard-types';
 
 @Component({
     selector: 'fhg-dashboard-card',
@@ -24,7 +24,8 @@ import { ChartConfigurationTuple, DashboardCard } from './dashboard-types';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardCardComponent extends Dashboard {
-    private chart?: [string, ChartConfigurationTuple];
+    private configuration?: ChartConfigurationTuple;
+    private requests: LiveRequest[] = [];
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
 
     public constructor(
@@ -41,10 +42,10 @@ export class DashboardCardComponent extends Dashboard {
 
     public readonly chartContainer = viewChild<ElementRef<HTMLCanvasElement>>('chartContainer');
 
-    public readonly item = input<DashboardCard>();
+    public readonly item = input<DashboardChart>();
 
-    private enterLiveMode(item: DashboardCard): void {
-        if (this.chart) {
+    private enterLiveMode(item: DashboardChart): void {
+        if (this.configuration) {
             return;
         }
 
@@ -52,10 +53,10 @@ export class DashboardCardComponent extends Dashboard {
             try {
                 this.openWebSocket();
                 const chartContainer = this.chartContainer();
-                if (chartContainer && this.isChart(item.item)) {
-                    this.chart = [item.item.id, this.createChart(item.item, chartContainer.nativeElement)]
+                if (chartContainer && this.isDashboardChart(item)) {
+                    this.configuration = this.createChart(item, chartContainer.nativeElement);
                     if (this.webSocketSubject) {
-                        for (const request of item.requests) {
+                        for (const request of this.requests) {
                             this.webSocketSubject.next(this.createMessage(request));
                         }
                     }
@@ -67,19 +68,19 @@ export class DashboardCardComponent extends Dashboard {
     }
 
     private leaveLiveMode(): void {
-        if (!this.chart) {
+        if (!this.configuration) {
             return;
         }
 
         this.closeWebSocket();
-        this.chart[1].chart.destroy();
+        this.configuration.chart.destroy();
         this.map.clear();
-        this.chart = undefined;
+        this.configuration = undefined;
     }
 
     private openWebSocket(): void {
         const item = this.item();
-        if (item && item.requests && item.requests.length > 0) {
+        if (item && this.requests.length > 0) {
             this.webSocketSubject = this.webServiceFactory.create();
             this.webSocketSubject.subscribe({
                 next: this.socketOnMessage,
@@ -96,7 +97,7 @@ export class DashboardCardComponent extends Dashboard {
     }
 
     private socketOnMessage = (data: WebSocketData): void => {
-        if (!this.chart){
+        if (!this.configuration){
             return;
         }
 
@@ -107,7 +108,7 @@ export class DashboardCardComponent extends Dashboard {
                     continue;
                 }
 
-                this.updateChart(node, tuple, this.chart[1]);
+                this.updateChart(node, tuple, this.configuration);
             }
         }
     };
