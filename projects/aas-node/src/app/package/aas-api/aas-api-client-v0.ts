@@ -100,9 +100,10 @@ export class AASApiClientV0 extends AASApiClient {
     }
 
     public resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
-        const items = nodeId.split('.')[1].split('/');
-        const path = items.slice(1).join('/');
-        return this.resolve(`/aas/${shell.idShort}/submodels/${items[0]}/elements/${path}/value`).href;
+        const index = nodeId.indexOf('#');
+        const smId = nodeId.substring(0, index);
+        const idShortPath = nodeId.substring(index + 1);
+        return this.resolve(`/aas/${shell.idShort}/submodels/${smId}/elements/${idShortPath}/value`).href;
     }
 
     public async openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {

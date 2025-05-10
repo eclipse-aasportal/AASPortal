@@ -61,8 +61,6 @@ export class DashboardService {
 
     public readonly activePage = computed(() => this.pages$().find(page => page.active)!);
 
-    public readonly selectionMode = signal(SelectionMode.Single);
-
     public readonly editMode = signal(false);
 
     public readonly rows = computed(() => {
@@ -80,11 +78,11 @@ export class DashboardService {
         }));
     });
 
-    public get (): DashboardState {
+    public getMemento(): DashboardState {
         return cloneDeep(untracked(this.pages$));
     }
 
-    public set memento(value: DashboardState) {
+    public setMemento(value: DashboardState) {
         this.pages$.set(cloneDeep(value));
     }
 
