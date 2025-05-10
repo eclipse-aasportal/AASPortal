@@ -6,15 +6,18 @@
  *
  *****************************************************************************/
 
+import upperFirst from 'lodash-es/upperFirst';
 import { ActivatedRoute } from '@angular/router';
-import { first, from, mergeMap, of, toArray } from 'rxjs';
+import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import QRCode from 'qrcode';
 import {
     ChangeDetectionStrategy,
     Component,
     computed,
     effect,
+    ElementRef,
     Inject,
     OnDestroy,
     OnInit,
@@ -29,7 +32,6 @@ import {
     getAbbreviation,
     getChildren,
     getIdShortPath,
-    isAssetAdministrationShell,
     isFile,
     isReference,
     selectSubmodel,
@@ -39,6 +41,8 @@ import { DocumentsService } from '../../services/documents.service';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../auth/auth.service';
+import { SecuredImageComponent } from '../../secured-image/secured-image.component';
+import { StartService } from '../../services/start.service';
 
 export type BrowserProperty = {
     name: string;
@@ -76,7 +80,7 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
     selector: 'fhg-browser',
     templateUrl: './browser.component.html',
     styleUrl: './browser.component.scss',
-    imports: [TranslateModule, NgbPaginationModule],
+    imports: [TranslateModule, NgbPaginationModule, SecuredImageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BrowserComponent implements OnInit, OnDestroy {
@@ -87,6 +91,7 @@ export class BrowserComponent implements OnInit, OnDestroy {
         private readonly api: DocumentsService,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
+        private readonly start: StartService,
         @Inject(WINDOW) private readonly window: Window,
     ) {
         effect(() => {
@@ -112,9 +117,36 @@ export class BrowserComponent implements OnInit, OnDestroy {
             const aas = env.assetAdministrationShells[0];
             this.current.set(this.createElement(aas, env));
         });
+
+        effect(() => {
+            const qrCode = this.qrCode();
+            const url = new URL(this.window.location.toString());
+            const document = this.document();
+            if (document) {
+                url.searchParams.set('endpoint', encodeBase64Url(document.endpoint));
+                url.searchParams.set('id', encodeBase64Url(document.id));
+            }
+
+            if (qrCode) {
+                QRCode.toCanvas(qrCode.nativeElement, url.toString());
+            }
+        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('browserToolbar');
+    
+    public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
+
+    public readonly title = signal('Browser.TITLE').asReadonly();
+
+    public readonly thumbnail = computed(() => {
+        const document = this.document();
+        if (document === undefined) {
+            return '';
+        }
+
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
+    });
 
     public readonly isEmpty = computed(() => this.documents().length === 0);
 
@@ -189,6 +221,22 @@ export class BrowserComponent implements OnInit, OnDestroy {
         $event.stopPropagation();
     }
 
+    public addToStart(): Observable<void> {
+        const document = this.document();
+        if (document === undefined) {
+            return EMPTY;
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        const href = `/view/Browser?endpoint=${encodeBase64Url(endpoint)}&id=${encodeBase64Url(id)}`;
+        if (!this.start.add('Favorite', `B#${endpoint}#${id}`, { endpoint, id, href })) {
+            return EMPTY;
+        }
+
+        return this.start.save();
+    }
+
     private initialize(documents: AASDocument[]) {
         this.documents.set(documents);
     }
@@ -198,7 +246,7 @@ export class BrowserComponent implements OnInit, OnDestroy {
             name: referable.idShort,
             referable,
             properties: this.createProperties(referable),
-            collection: collectionNames[referable.modelType],
+            collection: upperFirst(collectionNames[referable.modelType]),
             children: getChildren(referable, env).map(child => ({
                 name: child.idShort,
                 abbreviation: getAbbreviation(child.modelType) ?? '',
@@ -221,8 +269,9 @@ export class BrowserComponent implements OnInit, OnDestroy {
     }
 
     private createProperty(referable: aas.Referable, name: string, value: unknown): BrowserProperty[] {
+        name = upperFirst(name);
         if (typeof value === 'string') {
-            if (isFile(referable) && name === 'value') {
+            if (isFile(referable) && name === 'Value') {
                 return [{ name, value, kind: 'link' }];
             }
 
@@ -246,7 +295,7 @@ export class BrowserComponent implements OnInit, OnDestroy {
         if (typeof value === 'object' && !Array.isArray(value)) {
             const items: BrowserProperty[] = [];
             for (const [k, v] of Object.entries(value as object)) {
-                items.push(...this.createProperty(referable, `${name}.${k}`, v));
+                items.push(...this.createProperty(referable, `${name}.${upperFirst(k)}`, v));
             }
 
             return items;
