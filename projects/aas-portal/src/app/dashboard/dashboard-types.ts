@@ -94,10 +94,3 @@ export type TimeSeries = {
     value: string[];
     timestamp: string[];
 };
-
-
-export type DashboardCard = {
-    name: string;
-    item: DashboardItem;
-    requests: LiveRequest[];
-};

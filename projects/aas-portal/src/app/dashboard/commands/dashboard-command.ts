@@ -22,23 +22,23 @@ export abstract class DashboardCommand extends Command {
     }
 
     protected onExecute(): void {
-        this.preState = this.service.memento;
+        this.preState = this.service.getMemento();
         this.executing();
-        this.postState = this.service.memento;
+        this.postState = this.service.getMemento();
     }
 
     protected abstract executing(): void;
 
     protected onUndo(): void {
-        this.service.memento = this.preState;
+        this.service.setMemento(this.preState);
     }
 
     protected onRedo(): void {
-        this.service.memento = this.postState;
+        this.service.setMemento(this.postState);
     }
 
     protected onAbort(): void {
-        this.service.memento = this.preState;
+        this.service.setMemento(this.preState);
     }
 
     protected isChart(item: DashboardItem): item is DashboardChart {

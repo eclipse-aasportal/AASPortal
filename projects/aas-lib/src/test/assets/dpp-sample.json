@@ -98,7 +98,7 @@
                         ],
                         "valueType": "xs:string",
                         "value": "https://smartfactory-owl.de/3dl/__turtle/__00000001",
-                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/URIOfTheProduct"
+                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#URIOfTheProduct"
                     },
                     {
                         "idShort": "ManufacturerName",
@@ -217,7 +217,7 @@
                                 ],
                                 "valueType": "xs:string",
                                 "value": "0173-1#07-AAS931#001",
-                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/ContactInformation/RoleOfContactPerson"
+                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#ContactInformation.RoleOfContactPerson"
                             },
                             {
                                 "idShort": "NationalCode",
@@ -278,7 +278,7 @@
                                 ],
                                 "valueType": "xs:string",
                                 "value": "de",
-                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/ContactInformation/Language"
+                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#ContactInformation.Language"
                             },
                             {
                                 "idShort": "TimeZone",
@@ -307,7 +307,7 @@
                                 ],
                                 "valueType": "xs:string",
                                 "value": "CET",
-                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/ContactInformation/TimeZone"
+                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#ContactInformation.TimeZone"
                             },
                             {
                                 "idShort": "CityTown",
@@ -462,7 +462,7 @@
                                         ],
                                         "valueType": "xs:string",
                                         "value": "florian.pethig@iosb-ina.fraunhofer.de",
-                                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/ContactInformation/Email/EmailAddress"
+                                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#ContactInformation.Email.EmailAddress"
                                     }
                                 ]
                             },
@@ -765,7 +765,7 @@
                         ],
                         "valueType": "xs:string",
                         "value": "00000001",
-                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/SerialNumber"
+                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#SerialNumber"
                     },
                     {
                         "idShort": "YearOfConstruction",
@@ -794,7 +794,7 @@
                         ],
                         "valueType": "xs:string",
                         "value": "__yyyy",
-                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/YearOfConstruction"
+                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#YearOfConstruction"
                     },
                     {
                         "idShort": "DateOfManufacture",
@@ -823,7 +823,7 @@
                         ],
                         "valueType": "xs:date",
                         "value": "__yyyy-mm-dd",
-                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/DateOfManufacture"
+                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#DateOfManufacture"
                     },
                     {
                         "idShort": "CountryOfOrigin",
@@ -852,7 +852,7 @@
                         ],
                         "valueType": "xs:string",
                         "value": "DE",
-                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/CountryOfOrigin"
+                        "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#CountryOfOrigin"
                     },
                     {
                         "idShort": "CompanyLogo",
@@ -951,7 +951,7 @@
                                 ],
                                 "valueType": "xs:string",
                                 "value": "Choking Hazard!",
-                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl.DigitalNameplate/AssetSpecificProperties/DppHazardStatement_01"
+                                "nodeId": "aHR0cHM6Ly9zbWFydGZhY3Rvcnktb3dsLmRlL2lkcy9zbS84MDAwXzExNzJfOTA0Ml80MzE5X2RpZ2l0YWxfbmFtZXBsYXRl#AssetSpecificProperties/DppHazardStatement_01"
                             },
                             {
                                 "idShort": "DppHazardSymbol",
