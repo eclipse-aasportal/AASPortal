@@ -281,11 +281,11 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
     },
     "DigitalProductPassport": {
-        "EMPTY": "Ups...",
+        "EMPTY": "Kein Productpass verfügbar.",
         "Name": "Name",
         "Description": "Beschreibung",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
-        "CAPTION": "Product Passport",
+        "CAPTION": "Produktpass",
         "TYPE": "Type",
         "SERIAL_NUMBER": "Seriennummer",
         "NAMEPLATE_DATA": "Typenschild",
@@ -355,5 +355,9 @@
         "ManufacturerProductFamily": "Familie",
         "ProductArticleNumberOfManufacturer": "Art.-Nr.",
         "SerialNumber": "Serien-Nr."
+    },
+    "Browser": {
+        "TITLE": "AAS-Browser",
+        "EMPTY": "Keine Verwalungsschale verfügbar."
     }
 }

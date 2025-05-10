@@ -11,14 +11,10 @@
     <div class="d-flex flex-column">
         <div class="d-flex flex-row mb-2">
             <fhg-img [height]="128" [src]="thumbnail()" alt="assets/resources/aas.svg" />
-            <div class="d-flex flex-column mx-2 fw-medium text-nowrap overflow-hidden">
+            <div class="d-flex flex-column ms-2">
                 @for (detail of detailItems(); track detail) {
-                <div class="text-truncate">{{detail.name | translate}}</div>
-                }
-            </div>
-            <div class="d-flex flex-column overflow-hidden text-nowrap">
-                @for (detail of detailItems(); track detail) {
-                <div class="text-truncate">{{detail.value}}</div>
+                <div class="fs-8 text-body-secondary text-nowrap text-truncate overflow-hidden">{{detail.name | translate}}</div>
+                <div class="mb-1 mt-n1 text-truncate text-nowrap overflow-hidden">{{detail.value}}</div>
                 }
             </div>
         </div>
