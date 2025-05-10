@@ -11,8 +11,8 @@
     @for (row of rows(); track row) {
     <div class="row">
         @for (column of row.columns; track column.id) {
-        <div [ngClass]="'col border border-3 rounded m-1 ' + (selected(column) ? 'border-primary' : 'border-secondary')"
-            (click)="toggleSelection(column)" (keydown.enter)="toggleSelection(column)" tabindex="0">
+        <div [ngClass]="'col border border-3 rounded m-1 ' + (isSelected(column) ? 'border-primary' : 'border-secondary')"
+            (click)="toggleSelection(column, $event)" (keydown.enter)="toggleSelection(column)" tabindex="0">
             @if (!editMode()) {
             <div class="fhg-chart-container">
                 <canvas #chart [id]="column.id"></canvas>
@@ -20,7 +20,7 @@
             }
             @else {
             <div class="row mb-2 pt-2">
-                <div class="col-sm-2 col-form-lable text-nowrap" translate>LABEL_NAME</div>
+                <div class="col-sm-2 col-form-lable text-nowrap" translate>Dashboard.LABEL_NAME</div>
                 <div class="col-sm-10">
                     <select #sourceSelect class="form-select" (change)="changeSource(column, sourceSelect.value)">
                         @for (source of getSources(column); track source) {
@@ -30,35 +30,35 @@
                 </div>
             </div>
             <div class="row mb-2">
-                <div class="col-sm-2 col-form-lable text-nowrap" translate>LABEL_COLOR</div>
+                <div class="col-sm-2 col-form-lable text-nowrap" translate>Dashboard.LABEL_COLOR</div>
                 <div class="col-sm-10">
                     <input #colorInput type="color" class="form-control form-control-color" [value]="getColor(column)"
                         (change)="changeColor(column, colorInput.value)">
                 </div>
             </div>
             <div class="row mb-2">
-                <div class="col-sm-2 col-form-lable text-nowrap" translate>LABEL_CHART_TYPE</div>
+                <div class="col-sm-2 col-form-lable text-nowrap" translate>Dashboard.LABEL_CHART_TYPE</div>
                 <div class="col-sm-10">
                     <select #chartTypeSelect class="form-select"
                         (change)="changeChartType(column, chartTypeSelect.value)">
                         <option value="Line" [selected]="getChartType(column) === 'Line'" translate>
-                            OPTION_TIMELINE_CHART</option>
+                            Dashboard.OPTION_TIMELINE_CHART</option>
                         <option value="BarVertical" [selected]="getChartType(column) === 'BarVertical'" translate>
-                            OPTION_BAR_VERTICAL_CHART</option>
+                            Dashboard.OPTION_BAR_VERTICAL_CHART</option>
                         <option value="BarHorizontal" [selected]="getChartType(column) === 'BarHorizontal'" translate>
-                            OPTION_BAR_HORIZONTAL_CHART</option>
+                            Dashboard.OPTION_BAR_HORIZONTAL_CHART</option>
                     </select>
                 </div>
             </div>
             <div class="row mb-2">
-                <label [for]="'inputMin' + column.id" class="col-sm-2 col-form-label" translate>LABEL_MIN</label>
+                <label [for]="'inputMin' + column.id" class="col-sm-2 col-form-label" translate>Dashboard.LABEL_MIN</label>
                 <div class="col-sm-10">
                     <input #inputMin type="text" class="form-control" [id]="'inputMin' + column.id"
                         [value]="getMin(column)" (change)="changeMin(column, inputMin.value)">
                 </div>
             </div>
             <div class="row mb-2">
-                <label [for]="'inputMax' + column.id" class="col-sm-2 col-form-label" translate>LABEL_MAX</label>
+                <label [for]="'inputMax' + column.id" class="col-sm-2 col-form-label" translate>Dashboard.LABEL_MAX</label>
                 <div class="col-sm-10">
                     <input #inputMax type="text" class="form-control" [id]="'inputMax' + column.id"
                         [value]="getMax(column)" (change)="changeMax(column, inputMax.value)">
@@ -70,7 +70,7 @@
     </div>
     }
     } @else {
-    <div class="alert alert-info text-center mt-2" role="alert">{{'INFO_EMPTY_DASHBOARD' | translate}}</div>
+    <div class="alert alert-info text-center mt-2" role="alert">{{'Dashboard.EMPTY' | translate}}</div>
     }
 </div>
 
@@ -81,9 +81,9 @@
         </button>
     </div>
     <div class="input-group me-2 my-1">
-        <select #select class="form-select" [(ngModel)]="activePage">
+        <select #select class="form-select" [ngModel]="activePage()" (ngModelChange)="setActivePage($event)">
             @for (page of pages(); track page) {
-            <option [ngValue]="page">{{page}}</option>
+            <option [ngValue]="page">{{page.name}}</option>
             }
         </select>
         <button type="button" class="btn btn-primary" (click)="addNew()" [disabled]="!editMode()">
@@ -99,7 +99,7 @@
     <div class="input-group me-2 my-1">
         <div class="form-check form-switch pt-2">
             <input class="form-check-input" type="checkbox" role="switch" id="toggleEditMode" [(ngModel)]="editMode">
-            <label class="form-check-label" for="toggleEditMode" translate>LABEL_EDIT_MODE</label>
+            <label class="form-check-label" for="toggleEditMode" translate>Dashboard.LABEL_EDIT_MODE</label>
         </div>
     </div>
     <div class="btn-group me-2" [hidden]="!editMode()">

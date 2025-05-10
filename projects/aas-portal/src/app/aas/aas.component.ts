@@ -48,7 +48,7 @@ import { NewElementCommand } from './commands/new-element-command';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AASStore } from './aas.store';
-import { DashboardChartType } from '../dashboard/dashboard.store';
+import { DashboardChartType, DashboardPage } from '../dashboard/dashboard-types';
 
 @Component({
     selector: 'fhg-aas',
@@ -73,12 +73,6 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly start: StartService,
         private readonly auth: AuthService,
     ) {
-        effect(() => {
-            const value = this.dashboardPage();
-            if (value !== untracked(this.dashboard.activePage)) {
-                this.dashboard.setActivePage(value);
-            }
-        });
         effect(() => {
             const aasToolbar = this.aasToolbar();
             if (aasToolbar !== undefined) {
@@ -202,8 +196,12 @@ export class AASComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.dashboard.add(page, document, this.store.selectedElements, chartType as DashboardChartType);
+        this.dashboard.add(page.name, document, this.store.selectedElements, chartType as DashboardChartType);
         this.router.navigate(['/dashboard'], { queryParams: { page } });
+    }
+
+    public setDashboardPage(page: DashboardPage): void {
+        this.dashboard.setActivePage(page.name);
     }
 
     public synchronize(): Observable<void> {
