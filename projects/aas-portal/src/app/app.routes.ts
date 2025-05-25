@@ -20,7 +20,7 @@ export const routes: Routes = [
     { path: 'shells', component: ShellsComponent },
     { path: 'aas', component: AASComponent },
     {
-        path: 'view',
+        path: 'views',
         component: ViewComponent,
         children: viewRoutes,
     },

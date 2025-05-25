@@ -9,14 +9,16 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
-import { DashboardStore } from '../../app/dashboard/dashboard.store';
+import { AuthService } from 'aas-lib';
+import { of } from 'rxjs';
 
 describe('DashboardService', () => {
     let service: DashboardService;
-    let store: jasmine.SpyObj<DashboardStore>;
+    let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
-        store = jasmine.createSpyObj<DashboardStore>(['getPage'], { pages: [] });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie'], { userId: of('guest')});
+        auth.getCookie.and.returnValue(of(undefined));
 
         TestBed.configureTestingModule({
             imports: [
@@ -29,8 +31,8 @@ describe('DashboardService', () => {
             ],
             providers: [
                 {
-                    provide: DashboardStore,
-                    useValue: store,
+                    provide: AuthService,
+                    useValue: auth,
                 },
             ],
         });

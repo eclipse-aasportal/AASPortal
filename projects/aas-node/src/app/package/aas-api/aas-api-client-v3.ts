@@ -94,6 +94,15 @@ export class AASApiClientV3 extends AASApiClient {
         };
     }
 
+    public override async getConceptDescription(id: string): Promise<aas.ConceptDescription> {
+        const src = await this.http.get<aas.ConceptDescription>(
+            this.resolve(`concept-descriptions/${encodeBase64Url(id)}`),
+            this.endpoint.headers,
+        );
+
+        return new JsonReaderV3().read(src) as aas.ConceptDescription;
+    }
+
     public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
         const shell = await this.http.get<aas.AssetAdministrationShell>(
@@ -193,7 +202,7 @@ export class AASApiClientV3 extends AASApiClient {
         return this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}`).href;
     }
 
-    public async getPackageAsync(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
+    public async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
         const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
@@ -204,7 +213,7 @@ export class AASApiClientV3 extends AASApiClient {
         return await this.http.getResponse(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public async postPackageAsync(file: Express.Multer.File): Promise<string> {
+    public async postPackage(file: Express.Multer.File): Promise<string> {
         const formData = new FormData();
         const aasxFile = path.join(path.dirname(file.path), file.originalname);
         if (fs.existsSync(aasxFile)) {
@@ -217,7 +226,7 @@ export class AASApiClientV3 extends AASApiClient {
         return result;
     }
 
-    public async deletePackageAsync(aasId: string): Promise<string> {
+    public async deletePackage(aasId: string): Promise<string> {
         const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
             this.endpoint.headers,
@@ -264,7 +273,7 @@ export class AASApiClientV3 extends AASApiClient {
         return { ...operation, outputVariables: result.outputVariables, inoutputVariables: result.inoutputVariables };
     }
 
-    public async getBlobValueAsync(
+    public async getBlobValue(
         env: aas.Environment,
         submodelId: string,
         idShortPath: string,

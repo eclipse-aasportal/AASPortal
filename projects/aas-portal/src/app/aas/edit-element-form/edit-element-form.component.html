@@ -97,16 +97,16 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (langString.index < 0) { <a class="text-primary" href="javascript:void(0)"
+                                    @if (langString.index < 0) { <button class="btn btn-link p-0 text-primary" type="button"
                                         (click)="addLangString()">
                                         <i class="bi bi-plus"></i>
-                                        </a>
+                                        </button>
                                         }
                                         @else {
-                                        <a class="text-danger" href="javascript:void(0)"
+                                        <button class="btn btn-link p-0 text-danger" type="button"
                                             (click)="removeLangString(langString)">
                                             <i class="bi bi-dash"></i>
-                                        </a>
+                                        </button>
                                         }
                                 </td>
                             </tr>

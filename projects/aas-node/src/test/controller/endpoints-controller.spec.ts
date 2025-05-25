@@ -59,6 +59,7 @@ describe('EndpointsController', function () {
             'deletePackage',
             'getDataElementValue',
             'invoke',
+            'getConceptDescription',
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
@@ -332,14 +333,31 @@ describe('EndpointsController', function () {
         aasProvider.invoke.mockReturnValue(Promise.resolve(operation));
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
-        const url = Buffer.from('http://localhost/container').toString('base64url');
+        const endpointName = Buffer.from('endpoint').toString('base64url');
         const id = Buffer.from('http://localhost/document').toString('base64url');
         const response = await request(app)
-            .post(`/api/v1/endpoints/${url}/documents/${id}/invoke`)
+            .post(`/api/v1/endpoints/${endpointName}/documents/${id}/invoke`)
             .set('Authorization', `Bearer ${getToken('John')}`)
             .send(operation);
 
         expect(response.statusCode).toBe(200);
         expect(aasProvider.invoke).toHaveBeenCalled();
+    });
+
+    it('GET: /api/v1/endpoints/{name}/concept-descriptions/{id}', async () => {
+        aasProvider.getConceptDescription.mockResolvedValue({
+            id: 'http://localhost:1234/concept-description',
+            idShort: 'cd',
+            modelType: 'ConceptDescription',
+        });
+
+        const endpointName = Buffer.from('endpoint').toString('base64url');
+        const id = Buffer.from('http://localhost:1234/concept-description').toString('base64url');
+        const response = await request(app)
+            .get(`/api/v1/endpoints/${endpointName}/concept-descriptions/${id}`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(aasProvider.getConceptDescription).toHaveBeenCalled();
     });
 });

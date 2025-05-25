@@ -42,7 +42,7 @@ export interface StartTileItem extends StartTile {
 })
 export class StartComponent implements OnDestroy {
     private readonly items$ = signal<StartTileItem[]>([]);
-    private readonly md = httpResource.text('/assets/readme.md');
+    private readonly md = httpResource.text('/start/README.md');
     private readonly readme$ = signal<SafeHtml>('');
 
     public constructor(

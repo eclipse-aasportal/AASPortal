@@ -155,6 +155,23 @@ export class AASProvider {
     }
 
     /**
+     * Gets the AAS document with the specified identifier.
+     * @param id The identifier of the Concept Description.
+     * @param endpointName The endpoint name.
+     * @returns The requested Concept Description.
+     */
+    public async getConceptDescription(id: string, endpointName: string): Promise<aas.ConceptDescription> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const client = this.clientFactory.create(endpoint);
+        try {
+            await client.open();
+            return await client.getConceptDescription(id);
+        } finally {
+            await client.close();
+        }
+    }
+
+    /**
      * Gets the value of the specified DataElement.
      * @param endpointName The endpoint name.
      * @param id The AAS identifier.
@@ -204,7 +221,7 @@ export class AASProvider {
                     }
                 }
             } else if (isBlob(dataElement)) {
-                const value = await client.getBlobValueAsync(document.content, smId, idShortPath);
+                const value = await client.getBlobValue(document.content, smId, idShortPath);
                 const readable = new Readable();
                 readable.push(JSON.stringify({ value }));
                 readable.push(null);
@@ -366,7 +383,7 @@ export class AASProvider {
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
-            return await client.getPackageAsync(id, document.address);
+            return await client.getPackage(id, document.address);
         } finally {
             await client.close();
         }
@@ -391,7 +408,7 @@ export class AASProvider {
         try {
             await source.open();
             for (const file of files) {
-                await source.postPackageAsync(file);
+                await source.postPackage(file);
             }
         } finally {
             await source.close();
@@ -409,7 +426,7 @@ export class AASProvider {
         if (document) {
             const client = this.clientFactory.create(endpoint);
             try {
-                await client.deletePackageAsync(document.id, document.address);
+                await client.deletePackage(document.id, document.address);
                 await this.index.remove(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
