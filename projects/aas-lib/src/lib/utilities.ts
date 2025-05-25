@@ -8,7 +8,18 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import {aas,  ApplicationError, ErrorData, convertToString, stringFormat, noop } from 'aas-core';
+import {
+    aas,
+    ApplicationError,
+    ErrorData,
+    convertToString,
+    stringFormat,
+    noop,
+    getLocaleValue,
+    getPreferredName,
+    AASDocument,
+    getIdShortPath,
+} from 'aas-core';
 
 /**
  * Converts a message to a localized text.
@@ -173,6 +184,34 @@ export function convertBlobToBase64Async(blob: Blob): Promise<string> {
 }
 
 /**
+ * Determines the display name for the specified Referable.
+ * @param referable The current Referable.
+ * @param env The Environment of the Referable.
+ * @param currentLang The current language to get the display name for.
+ * @returns The display name.
+ */
+export function getDisplayName(referable: aas.Referable, env?: aas.Environment | null, currentLang?: string): string {
+    if (referable.displayName) {
+        const value = getLocaleValue(referable.displayName, currentLang);
+        if (value) {
+            return value;
+        }
+    }
+
+    if (env) {
+        const values = getPreferredName(env, referable);
+        if (values) {
+            const value = getLocaleValue(values, currentLang);
+            if (value) {
+                return value;
+            }
+        }
+    }
+
+    return toDisplayName(referable.idShort);
+}
+
+/**
  * Converts a camel case name to a display name.
  * @param name The current name.
  * @returns The display name.
@@ -265,7 +304,6 @@ export function hashCode(value: string): number {
     return hash >= 0 ? hash : 4294967296 + hash;
 }
 
-
 export function referenceToString(value: aas.Reference): string {
     return value.keys.map(key => key.value).join('.');
 }
@@ -278,4 +316,25 @@ export function isLangString(value: unknown): value is aas.LangString[] {
     const langString = value[0] as aas.LangString;
 
     return typeof langString.language === 'string' && typeof langString.text === 'string';
+}
+
+export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.File | undefined): string {
+    if (file === undefined || file.value === undefined) {
+        return '';
+    }
+
+    const smId = encodeBase64Url(submodel.id);
+    const path = getIdShortPath(file);
+    const name = encodeBase64Url(document.endpoint);
+    const id = encodeBase64Url(document.id);
+    return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+}
+
+/**
+ * Gets the semantic identifier of the specified AAS element.
+ * @param value The AAS element.
+ * @returns The semantic identifier or `undefined`.
+ */
+export function getSemanticId(value: aas.Referable): string | undefined {
+    return (value as aas.HasSemantics).semanticId?.keys.at(0)?.value;
 }

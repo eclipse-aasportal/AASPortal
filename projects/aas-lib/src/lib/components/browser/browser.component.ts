@@ -1,0 +1,235 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import upperFirst from 'lodash-es/upperFirst';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+
+import { aas, AASDocument, getAbbreviation, getChildren, isFile, isReference, isSubmodel } from 'aas-core';
+import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
+import { DocumentsService } from '../../services/documents.service';
+import { getSemanticId, isLangString, referenceToString } from '../../utilities';
+
+const collectionNames: Record<string, string> = {
+    SubmodelElementCollection: 'value',
+    SubmodelElementList: 'value',
+    Submodel: 'submodelElements',
+    AssetAdministrationShell: 'submodels',
+    Entity: 'statements',
+    AnnotatedRelationshipElement: 'annotations',
+    Operation: 'in-/inout-/outputVariables',
+};
+
+const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
+
+export interface BrowserProperty {
+    name: string;
+    value: string;
+    kind: 'text' | 'link';
+}
+
+export interface BrowserElementRef {
+    name: string;
+    abbreviation: string;
+    referable: aas.Referable;
+}
+
+export interface BrowserElement {
+    name: string;
+    referable: aas.Referable;
+    collection?: string;
+    properties: BrowserProperty[];
+    children: BrowserElementRef[];
+}
+
+export interface BrowserItem {
+    smId: string;
+    idShortPath: string;
+    property: string;
+}
+
+@Component({
+    selector: 'fhg-browser',
+    templateUrl: './browser.component.html',
+    styleUrl: './browser.component.scss',
+    imports: [NgbPaginationModule, ConceptDescriptionComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BrowserComponent {
+    private readonly path$ = signal<BrowserElement[]>([]);
+
+    public constructor(private readonly api: DocumentsService) {
+        effect(() => {
+            const env = this.document()?.content;
+            if (!env) {
+                this.current.set(undefined);
+                return;
+            }
+
+            if (!env || env.assetAdministrationShells.length === 0) {
+                this.current.set(undefined);
+                return;
+            }
+
+            const aas = env.assetAdministrationShells[0];
+            this.current.set(this.createElement(aas, env));
+        });
+
+        effect(() => {
+            const current = this.current();
+            if (!current) {
+                this.api.cdRef.set({});
+                return;
+            }
+
+            const id = getSemanticId(current.referable);
+            const endpoint = this.document()?.endpoint;
+            this.api.cdRef.set({ endpoint, id });
+        });
+    }
+
+    public readonly document = input<AASDocument | null | undefined>(undefined);
+
+    public readonly open = output<BrowserItem>();
+
+    public readonly path = this.path$.asReadonly();
+
+    public readonly current = signal<BrowserElement | undefined>(undefined);
+
+    public readonly properties = computed(() => this.current()?.properties ?? []);
+
+    public readonly collection = computed(() => this.current()?.collection);
+
+    public readonly children = computed(() => this.current()?.children ?? []);
+
+    public readonly conceptDescription = computed(() => {
+        return this.api.conceptDescription.value();
+    });
+
+    private get idShortPath(): string {
+        const current = this.current()?.referable;
+        if (current === undefined) {
+            return '';
+        }
+
+        const path = this.path$();
+        if (path.length < 3) {
+            return '';
+        }
+
+        let idShortPath = '';
+        for (let i = 2, n = path.length; i < n; i++) {
+            idShortPath += path[i].referable.idShort + '.';
+        }
+
+        return idShortPath + current.idShort;
+    }
+
+    public goUp(element: BrowserElement): void {
+        const index = this.path$().indexOf(element);
+        this.path$.update(state => state.slice(0, index));
+        this.current.set(element);
+    }
+
+    public goDown(element: BrowserElementRef): void {
+        const current = this.current();
+        if (current === undefined) {
+            return;
+        }
+
+        this.path$.update(state => [...state, current]);
+        this.current.set(this.createElement(element.referable));
+    }
+
+    public openProperty($event: MouseEvent, property: BrowserProperty): void {
+        const referable = this.current()?.referable;
+        if (!referable) {
+            return;
+        }
+
+        const submodel = isSubmodel(referable) ? referable : (this.path$()[1].referable as aas.Submodel);
+        if (isFile(referable) && referable.value && property.name === 'Value') {
+            this.open.emit({ smId: submodel.id, idShortPath: this.idShortPath, property: property.name });
+        } else if (property.name === 'SemanticId') {
+            this.open.emit({ smId: submodel.id, idShortPath: this.idShortPath, property: property.name });
+        }
+
+        $event.stopPropagation();
+    }
+
+    private createElement(referable: aas.Referable, env?: aas.Environment): BrowserElement {
+        return {
+            name: referable.idShort,
+            referable,
+            properties: this.createProperties(referable),
+            collection: upperFirst(collectionNames[referable.modelType]),
+            children: getChildren(referable, env).map(child => ({
+                name: child.idShort,
+                abbreviation: getAbbreviation(child.modelType) ?? '',
+                referable: child,
+            })),
+        };
+    }
+
+    private createProperties(referable: aas.Referable): BrowserProperty[] {
+        const properties: BrowserProperty[] = [];
+        for (const [key, value] of Object.entries(referable)) {
+            if (ignore.has(key)) {
+                continue;
+            }
+
+            properties.push(...this.createProperty(referable, key, value));
+        }
+
+        return properties.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    private createProperty(referable: aas.Referable, name: string, value: unknown): BrowserProperty[] {
+        name = upperFirst(name);
+        if (typeof value === 'string') {
+            if (isFile(referable) && name === 'Value') {
+                return [{ name, value, kind: 'link' }];
+            }
+
+            return [{ name, value, kind: 'text' }];
+        }
+
+        if (isReference(value)) {
+            let kind: 'text' | 'link' = 'text';
+            const id = referenceToString(value);
+            if (name === 'SemanticId') {
+                if (this.document()?.content?.conceptDescriptions.some(cd => cd.id === id)) {
+                    kind = 'link';
+                }
+            }
+
+            return [{ name, value: id, kind }];
+        }
+
+        if (isLangString(value)) {
+            return [
+                {
+                    name,
+                    value: value.map(item => `[${item.language}] ${item.text}`).join(', '),
+                    kind: 'text',
+                },
+            ];
+        }
+
+        if (typeof value === 'object' && !Array.isArray(value)) {
+            const items: BrowserProperty[] = [];
+            for (const [k, v] of Object.entries(value as object)) {
+                items.push(...this.createProperty(referable, `${name}.${upperFirst(k)}`, v));
+            }
+
+            return items;
+        }
+
+        return [];
+    }
+}

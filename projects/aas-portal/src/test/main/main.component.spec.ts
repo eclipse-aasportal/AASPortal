@@ -104,6 +104,6 @@ describe('MainComponent', () => {
 
     it('provides a list of route links', function () {
         expect(component.links()).toBeDefined();
-        expect(component.links().map(link => link.url)).toEqual(['/start', '/shells', '/aas', '/view', '/dashboard', '/about']);
+        expect(component.links().map(link => link.url)).toEqual(['/start', '/shells', '/aas', '/views', '/dashboard', '/about']);
     });
 });

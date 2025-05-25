@@ -35,7 +35,7 @@
                 </button>
             </div>
             @if (item.selected && text()) {
-            <div class="fw-light ts-small">{{text()}}</div>
+            <div class="fw-light ts-7">{{text()}}</div>
             }
         </li>
         }
@@ -43,8 +43,8 @@
 </div>
 <div class="modal-footer">
     <div class="position-absolute start-0 ms-3">
-        <a class="link-opacity-50-hover" href="javascript:void(0)" (click)="addNew()"
-            translate>FavoritesForm.ADD_NEW</a>
+        <button class="btn btn-link p-0 link-opacity-50-hover" type="button" (click)="addNew()"
+            translate>FavoritesForm.ADD_NEW</button>
     </div>
     <button type="submit" class="btn btn-primary" (click)="submit()" translate>CMD_OK</button>
     <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>

@@ -90,7 +90,7 @@ export class AasxDirectory extends AASClient {
         throw new Error('Not implemented.');
     }
 
-    public override async getPackageAsync(_: string, name: string): Promise<NodeJS.ReadableStream> {
+    public override async getPackage(_: string, name: string): Promise<NodeJS.ReadableStream> {
         const path = join(this.root, name);
         if (!(await this.fileStorage.exists(path))) {
             throw new Error(`The file '${path}' does not exist.`);
@@ -99,7 +99,7 @@ export class AasxDirectory extends AASClient {
         return this.fileStorage.createReadStream(path);
     }
 
-    public override async postPackageAsync(file: Express.Multer.File): Promise<string> {
+    public override async postPackage(file: Express.Multer.File): Promise<string> {
         const path = join(this.root, file.filename);
         const exists = await this.fileStorage.exists(path);
         if (exists) {
@@ -123,17 +123,22 @@ export class AasxDirectory extends AASClient {
         }
     }
 
-    public override async deletePackageAsync(_: string, name: string): Promise<string> {
+    public override async deletePackage(_: string, name: string): Promise<string> {
         const path = join(this.root, name);
         await this.fileStorage.delete(path);
         return `${path} successfully deleted`;
+    }
+
+    public override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
+        noop(id);
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public override invoke(): Promise<aas.Operation> {
         throw new Error('Not implemented.');
     }
 
-    public override getBlobValueAsync(): Promise<string | undefined> {
+    public override getBlobValue(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 

@@ -29,7 +29,7 @@ import { Router, provideRouter } from '@angular/router';
 import { Component, input, output, signal } from '@angular/core';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
-import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.store';
+import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -79,13 +79,13 @@ describe('AASComponent', () => {
     let pages: DashboardPage[];
 
     beforeEach(() => {
-        pages = [{ name: 'Dashboard 1', items: [], requests: [] }];
+        pages = [{ name: 'Dashboard 1', items: [], requests: [], active: true }];
 
         api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'putDocument']);
         download = jasmine.createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
         dashboard = jasmine.createSpyObj<DashboardService>(['add'], {
-            activePage: signal(pages[0].name),
-            pages: signal(pages.map(page => page.name)),
+            activePage: signal(pages[0]).asReadonly(),
+            pages: signal(pages).asReadonly(),
         });
 
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);

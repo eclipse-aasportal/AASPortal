@@ -29,7 +29,8 @@
                         "inlineStyleLanguage": "scss",
                         "assets": [
                             "projects/aas-portal/src/favicon.ico",
-                            "projects/aas-portal/src/assets"
+                            "projects/aas-portal/src/assets",
+                            "projects/aas-portal/src/start"
                         ],
                         "styles": [
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",

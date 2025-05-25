@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { AASCursor, AASDocument, AASPagedResult, aas } from 'aas-core';
 import { first, mergeMap, Observable, of, switchMap, tap } from 'rxjs';
 import { encodeBase64Url } from '../utilities';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../features/auth/auth.service';
 import { CacheService } from './cache.service';
 
 /** The API of the digital nameplate. */
@@ -22,6 +22,17 @@ export class DocumentsService {
         private readonly auth: AuthService,
         private readonly cache: CacheService,
     ) {}
+
+    public readonly cdRef = signal<{ endpoint?: string; id?: string }>({});
+
+    public readonly conceptDescription = httpResource<aas.ConceptDescription>(() => {
+        const cdRef = this.cdRef();
+        if (!cdRef.endpoint || !cdRef.id) {
+            return undefined;
+        }
+
+        return `/api/v1/endpoints/${encodeBase64Url(cdRef.endpoint)}/concept-descriptions/${encodeBase64Url(cdRef.id)}`;
+    });
 
     /**
      * Gets the AAS document with the specified identifier.
@@ -83,7 +94,7 @@ export class DocumentsService {
      * @param language The language to used for the filter.
      * @returns The document page.
      */
-    public getPage(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
+    public getDocuments(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
         let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
         if (filter) {
             url += `&filter=${encodeBase64Url(filter)}`;

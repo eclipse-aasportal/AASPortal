@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import * as aas from '../../lib/aas.js';
+import { aas } from 'aas-core';
 
 const data: unknown = {
     assetAdministrationShells: [
