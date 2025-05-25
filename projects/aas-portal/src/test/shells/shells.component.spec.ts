@@ -71,10 +71,10 @@ describe('ShellsComponent', () => {
         documents = jasmine.createSpyObj<DocumentsService>([
             'getContent',
             'getHierarchy',
-            'getPage',
+            'getDocuments',
         ]);
 
-        documents.getPage.and.returnValue(
+        documents.getDocuments.and.returnValue(
             of({
                 previous: null,
                 next: null,

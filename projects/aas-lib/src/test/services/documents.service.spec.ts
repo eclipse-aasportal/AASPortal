@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
-import { AuthService } from '../../lib/auth/auth.service';
+import { AuthService } from '../../lib/features/auth/auth.service';
 import { DocumentsService } from '../../lib/services/documents.service';
 import { CacheService } from '../../lib/services/cache.service';
 

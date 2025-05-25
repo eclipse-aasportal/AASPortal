@@ -92,9 +92,9 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Adds a new endpoint to the AASNode container configuration.
+     * @summary Adds a new endpoint.
      * @param name The endpoint name.
-     * @param endpoint The endpoint URL.
+     * @param endpoint The endpoint data.
      */
     @Post('{name}')
     @Security('bearerAuth', ['editor'])
@@ -134,7 +134,7 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Deletes the endpoint with the specified name from the AASNode container configuration.
+     * @summary Deletes the endpoint with the specified name.
      * @param name The endpoint name.
      */
     @Delete('{name}')
@@ -150,7 +150,7 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Resets the AAS endpoint configuration.
+     * @summary Resets the endpoint configuration.
      */
     @Delete('')
     @Security('bearerAuth', ['editor'])
@@ -165,8 +165,8 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Starts a scan of the AAS endpoint with the specified name.
-     * @param name The endpoint name.
+     * @summary Starts a scan of the endpoint with the specified name.
+     * @param name The endpoint name (Base64-URL encoded).
      */
     @Put('{name}/scan')
     @Security('bearerAuth', ['editor'])
@@ -182,8 +182,8 @@ export class EndpointsController extends Controller {
 
     /**
      * @summary Gets the thumbnail of the specified AAS document.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The AAS identifier (Base64-URL encoded).
      * @returns The thumbnail of the current AAS document.
      */
     @Get('{endpoint}/documents/{id}/thumbnail')
@@ -202,9 +202,9 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Downloads an AASX package from the specified AAS container.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
+     * @summary Downloads an AASX package from the specified endpoint.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The AAS identifier (Base64-URL encoded).
      * @returns A readable stream.
      */
     @Get('{endpoint}/packages/{id}')
@@ -220,8 +220,8 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Uploads one or more AASX packages to the specified AAS endpoint.
-     * @param endpoint The name of the destination endpoint (Base64Url encoded).
+     * @summary Uploads one or more AASX packages to the specified endpoint.
+     * @param endpoint The name of the destination endpoint (Base64-URL encoded).
      * @param files The AAS package file.
      */
     @Post('{endpoint}/packages')
@@ -237,9 +237,9 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Deletes an AAS document from its AAS container.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
+     * @summary Deletes an AAS document from the specified endpoint.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The AAS identifier (Base64-URL encoded).
      */
     @Delete('{endpoint}/packages/{id}')
     @Security('bearerAuth', ['editor'])
@@ -254,9 +254,9 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Downloads an AAS document from the specified AAS container.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
+     * @summary Downloads an AAS document from the specified endpoint.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The AAS identifier (Base64-URL encoded).
      * @returns The AAS document.
      */
     @Get('{endpoint}/documents/{id}')
@@ -273,8 +273,8 @@ export class EndpointsController extends Controller {
 
     /**
      * @summary Gets the content of the specified AAS document.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The AAS identifier (Base64-URL encoded).
      * @returns The AAS environment or `undefined`.
      */
     @Get('{endpoint}/documents/{id}/content')
@@ -293,13 +293,13 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Downloads the value of DataElement.
-     * @param endpoint The URL of the AAS container (Base64Url encoded).
-     * @param id The document or AAS identifier (Base64Url encoded).
-     * @param smId The Submodel identifier (Base64Url encoded).
-     * @param path The idShort path to the DataElement.
-     * @param width The image width.
-     * @param height The image height.
+     * @summary Downloads the value of a Data Element.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The document or AAS identifier (Base64-URL encoded).
+     * @param smId The Submodel identifier (Base64-URL encoded).
+     * @param path The idShort path to the Data Element.
+     * @param width The image width if the value represents an image.
+     * @param height The image height if the value represenst an image.
      */
     @Get('{endpoint}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
     @Security('bearerAuth', ['guest'])
@@ -328,8 +328,8 @@ export class EndpointsController extends Controller {
 
     /**
      * @summary Updates the content of an AAS document.
-     * @param endpoint The URL of the AAS container (Base64Url encoded).
-     * @param id The document or AAS identifier (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The document or AAS identifier (Base64-URL encoded).
      * @param file The new document content.
      * @returns The messages of the update process.
      */
@@ -353,8 +353,8 @@ export class EndpointsController extends Controller {
 
     /**
      * @summary Invokes an Operation synchronously.
-     * @param endpoint The URL of the AAS container (Base64Url encoded).
-     * @param id The document or AAS identifier (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The document dentifier (Base64-URL encoded).
      * @param operation The `Operation`.
      * @returns The executed `Operation`.
      */
@@ -376,8 +376,8 @@ export class EndpointsController extends Controller {
 
     /**
      * @summary Gets the content of the specified AAS document.
-     * @param endpoint The endpoint name (Base64Url encoded).
-     * @param id The AAS identifier (Base64Url encoded).
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The AAS identifier (Base64-URL encoded).
      * @returns The AAS environment or `undefined`.
      */
     @Get('{endpoint}/documents/{id}/hierarchy')
@@ -387,6 +387,24 @@ export class EndpointsController extends Controller {
         try {
             this.logger.start('getHierarchy');
             return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));
+        } finally {
+            this.logger.stop();
+        }
+    }
+
+    /**
+     * @summary Gets the Concept Description with the specified identfier of the given endpoint.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The Concept Description identifier (Base64-URL encoded).
+     * @returns The requested Concept Description.
+     */
+    @Get('{endpoint}/concept-descriptions/{id}')
+    @Security('bearerAuth', ['guest'])
+    @OperationId('getConceptDescription')
+    public async getConceptDescription(@Path() endpoint: string, @Path() id: string): Promise<aas.ConceptDescription> {
+        try {
+            this.logger.start('getConceptDescription');
+            return await this.aasProvider.getConceptDescription(decodeBase64Url(id), decodeBase64Url(endpoint));
         } finally {
             this.logger.stop();
         }

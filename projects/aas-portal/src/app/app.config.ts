@@ -16,7 +16,6 @@ import {
     FavoriteComponent,
     START_TILE_TYPES,
     START_TILES,
-    StartTile,
     StartTileType,
 } from 'aas-lib';
 

@@ -64,7 +64,7 @@ export class ShellsService implements OnDestroy {
         }
 
         this.api
-            .getPage(
+            .getDocuments(
                 {
                     previous: null,
                     limit: limit ?? untracked(this.store.limit),
@@ -83,7 +83,7 @@ export class ShellsService implements OnDestroy {
         }
 
         this.api
-            .getPage(
+            .getDocuments(
                 {
                     next: untracked(this.store.next),
                     limit: untracked(this.store.limit),
@@ -97,7 +97,7 @@ export class ShellsService implements OnDestroy {
 
     public getLastPage(): void {
         this.api
-            .getPage(
+            .getDocuments(
                 {
                     next: null,
                     limit: untracked(this.store.limit),
@@ -116,7 +116,7 @@ export class ShellsService implements OnDestroy {
         }
 
         this.api
-            .getPage(
+            .getDocuments(
                 {
                     previous: untracked(this.store.previous),
                     limit: untracked(this.store.limit),
@@ -159,7 +159,7 @@ export class ShellsService implements OnDestroy {
         }
 
         this.api
-            .getPage(
+            .getDocuments(
                 {
                     next: this.getId(untracked(this.store.documents)[0]),
                     limit,
@@ -178,7 +178,7 @@ export class ShellsService implements OnDestroy {
         }
 
         this.api
-            .getPage(
+            .getDocuments(
                 {
                     next: this.getId(documents[0]),
                     limit: untracked(this.store.limit),
