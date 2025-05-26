@@ -228,7 +228,7 @@ export class LaserComponent implements OnInit, OnDestroy {
                     idShort: child.idShort,
                     name: getDisplayName(child, env, this.translate.currentLang),
                     value: signal(getLocaleValue(child.value, this.translate.currentLang)),
-                    type: 'link',
+                    type: 'text',
                     element: child,
                 });
             } else if (isFile(child)) {

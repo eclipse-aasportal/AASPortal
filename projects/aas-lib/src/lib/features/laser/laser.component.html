@@ -20,7 +20,7 @@
     </div>
     <div ngbAccordion>
         @for (group of groups(); track group.idShort; let i = $index) {
-        <div ngbAccordionItem [collapsed]="i !== 0">
+        <div ngbAccordionItem [collapsed]="false">
             <h2 ngbAccordionHeader>
                 <button class="fw-semibold" ngbAccordionButton>{{group.name}}</button>
             </h2>
@@ -31,7 +31,7 @@
                             <tbody>
                                 @for (item of group.items; track item.idShort) {
                                 <tr>
-                                    <td class="text-nowrap align-middle">{{item.name}}</td>
+                                    <td class="align-middle">{{item.name}}</td>
                                     <td>
                                         @if (item.type === 'link') {
                                         <button class="btn btn-link p-0" type="button" (click)="open($event, item)">{{item.value()}}</button>
