@@ -6,25 +6,42 @@
  *
  *****************************************************************************/
 
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-// import { DashboardCardComponent } from '../../app/dashboard/dashboard-card.component';
+import { DashboardCardComponent } from '../../app/dashboard/dashboard-card.component';
+import { WebSocketFactoryService } from 'aas-lib';
+import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
 
-// describe('DashboardCardComponent', () => {
-//     let component: DashboardCardComponent;
-//     let fixture: ComponentFixture<DashboardCardComponent>;
+describe('DashboardCardComponent', () => {
+    let component: DashboardCardComponent;
+    let fixture: ComponentFixture<DashboardCardComponent>;
+    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
+    let api: jasmine.SpyObj<DashboardApiService>;
 
-//     beforeEach(async () => {
-//         await TestBed.configureTestingModule({
-//             imports: [],
-//         }).compileComponents();
+    beforeEach(async () => {
+        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
+        api = jasmine.createSpyObj<DashboardApiService>(['getBlobValue']);
 
-//         fixture = TestBed.createComponent(DashboardCardComponent);
-//         component = fixture.componentInstance;
-//         fixture.detectChanges();
-//     });
+        await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: WebSocketFactoryService,
+                    useValue: webSocketFactory,
+                },
+                {
+                    provide: DashboardApiService,
+                    useValue: api,
+                },
+            ],
+            imports: [],
+        }).compileComponents();
 
-//     it('should create', () => {
-//         expect(component).toBeTruthy();
-//     });
-// });
+        fixture = TestBed.createComponent(DashboardCardComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+});
