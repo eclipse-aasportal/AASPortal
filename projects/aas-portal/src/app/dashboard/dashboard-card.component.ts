@@ -6,7 +6,14 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, ElementRef, input, viewChild } from '@angular/core';
+import { WebSocketSubject } from 'rxjs/webSocket';
+
+import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
+import { Dashboard } from './dashboard';
+import { DashboardApiService } from './dashboard-api.service';
+import { WebSocketFactoryService } from 'aas-lib';
+import { ChartConfigurationTuple, DashboardChart } from './dashboard-types';
 
 @Component({
     selector: 'fhg-dashboard-card',
@@ -16,4 +23,97 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     imports: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardCardComponent {}
+export class DashboardCardComponent extends Dashboard {
+    private configuration?: ChartConfigurationTuple;
+    private requests: LiveRequest[] = [];
+    private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
+
+    public constructor(
+        api: DashboardApiService,
+        private readonly webServiceFactory: WebSocketFactoryService,
+    ) {
+        super(api);
+
+        effect(() => {
+            const item = this.item();
+            item ? this.enterLiveMode(item) : this.leaveLiveMode();
+        });
+    }
+
+    public readonly chartContainer = viewChild<ElementRef<HTMLCanvasElement>>('chartContainer');
+
+    public readonly item = input<DashboardChart>();
+
+    private enterLiveMode(item: DashboardChart): void {
+        if (this.configuration) {
+            return;
+        }
+
+        setTimeout(() => {
+            try {
+                this.openWebSocket();
+                const chartContainer = this.chartContainer();
+                if (chartContainer && this.isDashboardChart(item)) {
+                    this.configuration = this.createChart(item, chartContainer.nativeElement);
+                    if (this.webSocketSubject) {
+                        for (const request of this.requests) {
+                            this.webSocketSubject.next(this.createMessage(request));
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }, 0);
+    }
+
+    private leaveLiveMode(): void {
+        if (!this.configuration) {
+            return;
+        }
+
+        this.closeWebSocket();
+        this.configuration.chart.destroy();
+        this.map.clear();
+        this.configuration = undefined;
+    }
+
+    private openWebSocket(): void {
+        const item = this.item();
+        if (item && this.requests.length > 0) {
+            this.webSocketSubject = this.webServiceFactory.create();
+            this.webSocketSubject.subscribe({
+                next: this.socketOnMessage,
+                error: this.socketOnError,
+            });
+        }
+    }
+
+    private closeWebSocket(): void {
+        if (this.webSocketSubject) {
+            this.webSocketSubject.unsubscribe();
+            this.webSocketSubject = null;
+        }
+    }
+
+    private socketOnMessage = (data: WebSocketData): void => {
+        if (!this.configuration){
+            return;
+        }
+
+        if (data.type === 'LiveNode[]') {
+            for (const node of (data.data as LiveNode[])) {
+                const tuple = this.map.get(node.nodeId);
+                if (!tuple) {
+                    continue;
+                }
+
+                this.updateChart(node, tuple, this.configuration);
+            }
+        }
+    };
+
+    private socketOnError = (error: unknown): void => {
+        console.error(error);
+    };
+}

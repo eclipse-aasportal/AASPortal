@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { createSpyObj } from 'fhg-jest';
-import env from '../../assets/aas-environment.js';
+import { aasEnvironment as env } from '../../assets/aas-environment.js';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { AASApiClientV3, OperationResult } from '../../../app/package/aas-api/aas-api-client-v3.js';
 import { aas, DifferenceItem } from 'aas-core';
@@ -40,7 +40,7 @@ describe('AASApiClientV3', () => {
         it('returns the URL to "property1"', () => {
             const aasId = Buffer.from('http://localhost/test/aas').toString('base64url');
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
-            const nodeId = smId + '.submodel1/property1';
+            const nodeId = smId + '#property1';
             expect(client.resolveNodeId(shell, nodeId)).toEqual(
                 `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`,
             );
@@ -83,9 +83,7 @@ describe('AASApiClientV3', () => {
                 },
             ];
 
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual([
-                'SubmodelElement inserted.',
-            ]);
+            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['SubmodelElement inserted.']);
         });
 
         it('updates a submodel', async () => {

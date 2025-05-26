@@ -40,6 +40,11 @@ export class AASApiClientV0 extends AASApiClient {
         };
     }
 
+    public override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
+        noop(id);
+        return Promise.reject(new Error('Not implemented.'));
+    }
+
     public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const sourceEnv = await this.http.get<aasV2.AssetAdministrationShellEnvironment>(
             this.resolve(`/aas/${id.idShort}/aasenv`),
@@ -100,9 +105,10 @@ export class AASApiClientV0 extends AASApiClient {
     }
 
     public resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
-        const items = nodeId.split('.')[1].split('/');
-        const path = items.slice(1).join('/');
-        return this.resolve(`/aas/${shell.idShort}/submodels/${items[0]}/elements/${path}/value`).href;
+        const index = nodeId.indexOf('#');
+        const smId = nodeId.substring(0, index);
+        const idShortPath = nodeId.substring(index + 1);
+        return this.resolve(`/aas/${shell.idShort}/submodels/${smId}/elements/${idShortPath}/value`).href;
     }
 
     public async openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
@@ -110,15 +116,15 @@ export class AASApiClientV0 extends AASApiClient {
         return await this.http.getResponse(url, this.endpoint.headers);
     }
 
-    public override getPackageAsync(): Promise<NodeJS.ReadableStream> {
+    public override getPackage(): Promise<NodeJS.ReadableStream> {
         throw new Error('Not implemented.');
     }
 
-    public override postPackageAsync(): Promise<string> {
+    public override postPackage(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
-    public override deletePackageAsync(): Promise<string> {
+    public override deletePackage(): Promise<string> {
         throw new Error('Not implemented.');
     }
 
@@ -126,7 +132,7 @@ export class AASApiClientV0 extends AASApiClient {
         throw new Error('Not implemented.');
     }
 
-    public getBlobValueAsync(): Promise<string | undefined> {
+    public getBlobValue(): Promise<string | undefined> {
         throw new Error('Not implemented.');
     }
 

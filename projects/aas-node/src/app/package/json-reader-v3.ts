@@ -47,6 +47,8 @@ export class JsonReaderV3 extends AASReader {
                 throw new Error('Invalid operation.');
             case 'Submodel':
                 return this.readSubmodel(source as aas.Submodel);
+            case 'ConceptDescription':
+                return this.readConceptDescription(source as aas.ConceptDescription);
             default: {
                 return this.readSubmodelElement(source as aas.SubmodelElement, []);
             }
@@ -330,7 +332,9 @@ export class JsonReaderV3 extends AASReader {
 
         if (ancestors && (!property.category || property.category === 'VARIABLE')) {
             const smId = encodeBase64Url((ancestors[0] as aas.Submodel).id);
-            property.nodeId = `${smId}.${[...ancestors, property].map(item => item.idShort).join('/')}`;
+            const idShortPath = ancestors.map(ancestor => ancestor.idShort).slice(1);
+            idShortPath.push(property.idShort);
+            property.nodeId = `${smId}#${idShortPath.join('.')}`;
         }
 
         return property;

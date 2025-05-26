@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { DashboardChart, DashboardChartType, DashboardItemType } from '../../app/dashboard/dashboard.store';
+import { DashboardChart, DashboardChartType, DashboardItemType } from '../../app/dashboard/dashboard-types';
 import { maxRotationSpeed, rotationSpeed, torque } from '../../test/assets/sample-document';
 
 export const pages = [
@@ -30,7 +30,7 @@ export const pages = [
                         element: rotationSpeed,
                     },
                 ],
-                positions: [{ x: 0, y: 0 }],
+                position: { x: 0, y: 0 },
                 type: DashboardItemType.Chart,
             } as DashboardChart,
             {
@@ -45,7 +45,7 @@ export const pages = [
                         element: torque,
                     },
                 ],
-                positions: [{ x: 1, y: 0 }],
+                position: { x: 1, y: 0 },
                 type: DashboardItemType.Chart,
             } as DashboardChart,
             {
@@ -60,7 +60,7 @@ export const pages = [
                         element: maxRotationSpeed,
                     },
                 ],
-                positions: [{ x: 0, y: 1 }],
+                position: { x: 0, y: 1 },
                 type: DashboardItemType.Chart,
             } as DashboardChart,
         ],

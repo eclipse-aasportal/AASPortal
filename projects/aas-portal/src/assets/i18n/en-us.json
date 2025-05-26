@@ -87,17 +87,12 @@
     "LABEL_VALUE": "Value",
     "LABEL_AAS_URL": "AAS endpoint",
     "LABEL_SERVER_URL": "Server endpoint",
-    "LABEL_CHART_TYPE": "Chart type",
-    "LABEL_COLOR": "Color",
     "LABEL_UPLOAD_CONTAINER": "Destination",
     "LABEL_OVERWRITE_FILE": "Overwrite",
-    "LABEL_MIN": "Min",
-    "LABEL_MAX": "Max",
     "LABEL_MIME_TYPE": "MIME type",
     "LABEL_VIEWS": "Views",
     "LABEL_CATEGORY": "Category",
     "LABEL_SEMANTIC_ID": "Semantic ID",
-    "LABEL_EDIT_MODE": "Edit",
     "PLEASE_WAIT": "Please wait...",
     "PLACEHOLDER_EMAIL": "enter email address",
     "PLACEHOLDER_PASSWORD": "enter password",
@@ -134,7 +129,6 @@
     "INFO_NEW_PASSWORD_SENT": "A new password was sent to '{0}'.",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} was downloaded successfully.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} was uploaded successfully.",
-    "INFO_EMPTY_DASHBOARD": "The dashboard is empty.",
     "INFO_NO_SHELL_AVAILABLE": "No Asset Administration Shell selected.",
     "INFO_NO_SHELLS_AVAILABLE": "No Asset Administration Shells available.",
     "INFO_EMPTY_DISPLAY": "No elements available for display.",
@@ -143,16 +137,12 @@
     "CONFIRM_DELETE_FILES": "Permanently delete {0} files?",
     "CONFIRM_DELETE_USER": "Do you want to delete the account '{0}'?",
     "CONFIRM_DELETE_DOCUMENT": "Do you really want to delete documents {0}?",
-    "PROMPT_DASHBOARD_NAME": "Enter a name for the dashboard.",
     "TIP_PASSWORD_SEND_VIA_EMAIL": "A new password is sent to '{{email}}'.",
     "VALUE_ORDER": "{0} from {1}",
     "ROUTE_FILE_SYSTEM": "File system",
     "ROUTE_OPC_UA": "OPC UA",
     "ALERT_SUCCESS": "Success!",
     "ALERT_FAILED": "Failed!",
-    "OPTION_TIMELINE_CHART": "Timeline chart",
-    "OPTION_BAR_VERTICAL_CHART": "Vertical bar chart",
-    "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
     "Main": {
@@ -183,6 +173,19 @@
     "AAS": {
         "PLACEHOLDER_SEARCH": "Search"
     },
+    "Dashboard": {
+        "EMPTY": "The dashboard is empty.",
+        "LABEL_NAME": "Name",
+        "LABEL_COLOR": "Color",
+        "LABEL_CHART_TYPE": "Chart type",
+        "LABEL_EDIT_MODE": "Edit",
+        "OPTION_TIMELINE_CHART": "Timeline chart",
+        "OPTION_BAR_VERTICAL_CHART": "Vertical bar chart",
+        "OPTION_BAR_HORIZONTAL_CHART": "Horizontal bar chart",
+        "LABEL_MIN": "Min",
+        "LABEL_MAX": "Max",
+        "PROMPT_DASHBOARD_NAME": "Enter a name for the dashboard."
+        },
     "AddEndpointForm": {
         "CAPTION": "Add AAS Endpoint",
         "FileSystem": "File system",
@@ -282,7 +285,7 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
     },
     "DigitalProductPassport": {
-        "EMPTY": "Ups...",
+        "EMPTY": "No product passport available.",
         "Name": "Name",
         "Description": "Description",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
@@ -356,5 +359,12 @@
         "ManufacturerProductFamily": "Family",
         "ProductArticleNumberOfManufacturer": "Art. Nr.",
         "SerialNumber":"Serial Nr."
+    },
+    "Browser": {
+        "EMPTY": "No Asset Administration Shell available.",
+        "TITLE": "AAS browser"
+    },
+    "Laser": {
+        
     }
 }

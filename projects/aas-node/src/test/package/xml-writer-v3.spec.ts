@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect } from '@jest/globals';
-import env from '../assets/aas-environment.js';
+import { aasEnvironment } from '../assets/aas-environment.js';
 import { XmlWriterV3 } from '../../app/package/xml-writer-v3.js';
 
 describe('XmlWriterV3', () => {
@@ -19,7 +19,7 @@ describe('XmlWriterV3', () => {
 
     describe('writeEnvironment', () => {
         it('writes an AAS environment', () => {
-            const xml = writer.write(env);
+            const xml = writer.write(aasEnvironment);
             expect(xml).toBeDefined();
         });
     });

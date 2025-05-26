@@ -121,7 +121,7 @@ export class AASProvider {
      */
     public async getDocument(id: string, endpointName?: string): Promise<AASDocument> {
         const document = await this.index.get(endpointName, id);
-        document.content = await this.getDocumentContentAsync(document);
+        document.content = await this.getDocumentContent(document);
         return document;
     }
 
@@ -133,7 +133,7 @@ export class AASProvider {
      */
     public async getContent(endpointName: string, id: string): Promise<aas.Environment> {
         const document = await this.index.get(endpointName, id);
-        return this.getDocumentContentAsync(document);
+        return await this.getDocumentContent(document);
     }
 
     /**
@@ -149,6 +149,23 @@ export class AASProvider {
         try {
             await client.open();
             return await client.createPackage(document.address, document.idShort).getThumbnail(id);
+        } finally {
+            await client.close();
+        }
+    }
+
+    /**
+     * Gets the AAS document with the specified identifier.
+     * @param id The identifier of the Concept Description.
+     * @param endpointName The endpoint name.
+     * @returns The requested Concept Description.
+     */
+    public async getConceptDescription(id: string, endpointName: string): Promise<aas.ConceptDescription> {
+        const endpoint = await this.index.getEndpoint(endpointName);
+        const client = this.clientFactory.create(endpoint);
+        try {
+            await client.open();
+            return await client.getConceptDescription(id);
         } finally {
             await client.close();
         }
@@ -204,7 +221,7 @@ export class AASProvider {
                     }
                 }
             } else if (isBlob(dataElement)) {
-                const value = await client.getBlobValueAsync(document.content, smId, idShortPath);
+                const value = await client.getBlobValue(document.content, smId, idShortPath);
                 const readable = new Readable();
                 readable.push(JSON.stringify({ value }));
                 readable.push(null);
@@ -366,7 +383,7 @@ export class AASProvider {
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
-            return await client.getPackageAsync(id, document.address);
+            return await client.getPackage(id, document.address);
         } finally {
             await client.close();
         }
@@ -391,7 +408,7 @@ export class AASProvider {
         try {
             await source.open();
             for (const file of files) {
-                await source.postPackageAsync(file);
+                await source.postPackage(file);
             }
         } finally {
             await source.close();
@@ -409,7 +426,7 @@ export class AASProvider {
         if (document) {
             const client = this.clientFactory.create(endpoint);
             try {
-                await client.deletePackageAsync(document.id, document.address);
+                await client.deletePackage(document.id, document.address);
                 await this.index.remove(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
@@ -698,7 +715,7 @@ export class AASProvider {
     }
 
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
-        const content = parent.content ?? (await this.getDocumentContentAsync(parent));
+        const content = parent.content ?? (await this.getDocumentContent(parent));
         for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
             const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
             for (const assetId of assetIds) {
@@ -752,7 +769,7 @@ export class AASProvider {
         }
     }
 
-    private async getDocumentContentAsync(document: AASDocument): Promise<aas.Environment> {
+    private async getDocumentContent(document: AASDocument): Promise<aas.Environment> {
         let env = this.cache.get(document.endpoint, document.id);
         if (env) {
             return env;
