@@ -124,7 +124,7 @@ export class LaserComponent implements OnInit, OnDestroy {
         return getDisplayName(env.assetAdministrationShells[0], env, this.translate.currentLang);
     });
 
-    public readonly thumbnail = signal<string>('/assets/resources/image.svg').asReadonly();
+    public readonly thumbnail = signal<string>('/assets/resources/laser.png').asReadonly();
 
     public readonly groups = computed<Group[]>(() => {
         this.map.clear();
