@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { marked } from 'marked';
 import { EMPTY, Observable } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -23,6 +24,8 @@ import {
 } from '@angular/core';
 
 import { StartService, StartTile, ToolbarService } from 'aas-lib';
+import { httpResource } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface StartTileItem extends StartTile {
     component: Type<unknown>;
@@ -39,10 +42,13 @@ export interface StartTileItem extends StartTile {
 })
 export class StartComponent implements OnDestroy {
     private readonly items$ = signal<StartTileItem[]>([]);
+    private readonly md = httpResource.text('/start/README.md');
+    private readonly readme$ = signal<SafeHtml>('');
 
     public constructor(
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
+        private readonly sanitizer: DomSanitizer,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();
@@ -78,6 +84,12 @@ export class StartComponent implements OnDestroy {
                 return newState;
             });
         });
+
+        effect(async () => {
+            const md = this.md.value() ?? '';
+            const html = await marked.parse(md) ?? '';
+            this.readme$.set(this.sanitizer.bypassSecurityTrustHtml(html));
+        })
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
@@ -106,6 +118,8 @@ export class StartComponent implements OnDestroy {
 
         return indexes.length === 1 && indexes[0] < length - 1;
     });
+
+    public readonly readme = this.readme$.asReadonly();
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

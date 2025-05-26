@@ -17,7 +17,7 @@ const content: object = {
             "id": "http://customer.com/aas/9175_7013_7091_9168",
             "assetInformation": {
                 "assetKind": "Instance",
-                "globalAssetId": "http://customer.com/assets/KHBVZJSQKIY",
+                "globalAssetId": "http://customer.com/assets/KHBVZJSQKIY"
             },
             "submodels": [
                 {
@@ -385,7 +385,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "03-02",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/DocumentClassId"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassId"
                         },
                         {
                             "idShort": "DocumentClassName",
@@ -415,7 +415,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "langString",
                             "value": "Operation (EN) Bedienung (DE)",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/DocumentClassName"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassName"
                         },
                         {
                             "idShort": "DocumentClassificationSystem",
@@ -445,7 +445,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "VDI2770:2018",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/DocumentClassificationSystem"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassificationSystem"
                         },
                         {
                             "idShort": "OrganizationName",
@@ -475,7 +475,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "CUSTOMER",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/OrganizationName"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual/OrganizationName"
                         },
                         {
                             "idShort": "OrganizationOfficialName",
@@ -505,7 +505,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "CUSTOMER GmbH",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/OrganizationOfficialName"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationOfficialName"
                         },
                         {
                             "idShort": "Title",
@@ -535,7 +535,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "langString",
                             "value": "Operating Manual Servo Motor",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/Title"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Title"
                         },
                         {
                             "idShort": "Language",
@@ -565,7 +565,7 @@ const content: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "en-US",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/Language"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Language"
                         },
                         {
                             "idShort": "DigitalFile_PDF",
@@ -643,7 +643,7 @@ const content: object = {
                     "kind": "Instance",
                     "valueType": "xs:integer",
                     "value": "4370",
-                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU.OperationalData/RotationSpeed"
+                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU#RotationSpeed"
                 },
                 {
                     "idShort": "Torque",
@@ -670,7 +670,7 @@ const content: object = {
                     "kind": "Instance",
                     "valueType": "xs:float",
                     "value": "117.4",
-                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU.OperationalData/Torque"
+                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU#Torque"
                 }
             ]
         }
@@ -1489,15 +1489,7 @@ const sampleNoTechnicalData: object = {
             "id": "http://customer.com/aas/9175_7013_7091_9168",
             "assetInformation": {
                 "assetKind": "Instance",
-                "globalAssetId": {
-                    "type": "ModelReference",
-                    "keys": [
-                        {
-                            "type": "GlobalReference",
-                            "value": "http://customer.com/assets/KHBVZJSQKIY"
-                        }
-                    ]
-                }
+                "globalAssetId": "http://customer.com/assets/KHBVZJSQKIY"
             },
             "submodels": [
                 {
@@ -1762,7 +1754,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "03-02",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/DocumentClassId"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassId"
                         },
                         {
                             "idShort": "DocumentClassName",
@@ -1792,7 +1784,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "langString",
                             "value": "Operation (EN) Bedienung (DE)",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/DocumentClassName"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassName"
                         },
                         {
                             "idShort": "DocumentClassificationSystem",
@@ -1822,7 +1814,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "VDI2770:2018",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/DocumentClassificationSystem"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassificationSystem"
                         },
                         {
                             "idShort": "OrganizationName",
@@ -1852,7 +1844,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "CUSTOMER",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/OrganizationName"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationName"
                         },
                         {
                             "idShort": "OrganizationOfficialName",
@@ -1882,7 +1874,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "CUSTOMER GmbH",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/OrganizationOfficialName"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationOfficialName"
                         },
                         {
                             "idShort": "Title",
@@ -1912,7 +1904,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "langString",
                             "value": "Operating Manual Servo Motor",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/Title"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Title"
                         },
                         {
                             "idShort": "Language",
@@ -1942,7 +1934,7 @@ const sampleNoTechnicalData: object = {
                             "kind": "Instance",
                             "valueType": "xs:string",
                             "value": "en-US",
-                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg.Documentation/OperatingManual/Language"
+                            "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Language"
                         },
                         {
                             "idShort": "DigitalFile_PDF",
@@ -2020,7 +2012,7 @@ const sampleNoTechnicalData: object = {
                     "kind": "Instance",
                     "valueType": "xs:integer",
                     "value": "4370",
-                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU.OperationalData/RotationSpeed"
+                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU#RotationSpeed"
                 },
                 {
                     "idShort": "Torque",
@@ -2047,7 +2039,7 @@ const sampleNoTechnicalData: object = {
                     "kind": "Instance",
                     "valueType": "xs:float",
                     "value": "117.4",
-                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU.OperationalData/Torque"
+                    "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU#Torque"
                 }
             ]
         }
@@ -2964,7 +2956,7 @@ const technicalData: object = {
 export const sampleDocument: AASDocument = {
     id: "http://customer.com/aas/9175_7013_7091_9168",
     idShort: "ExampleMotor",
-    assetId: "http://customer.com/assets/KHBVZJSQKIY",
+    assetId: 'http://customer.com/assets/KHBVZJSQKIY',
     endpoint: 'Samples',
     address: "ExampleMotor.aasx",
     modified: false,
@@ -2978,7 +2970,7 @@ export const sampleDocument: AASDocument = {
 export const aasNoTechnicalData: AASDocument = {
     id: "http://customer.com/aas/9175_7013_7091_9168",
     idShort: "ExampleMotor",
-    assetId: "http://customer.com/assets/KHBVZJSQKIY",
+    assetId: 'http://customer.com/assets/KHBVZJSQKIY',
     endpoint: 'Samples',
     address: "ExampleMotor.aasx",
     modified: false,

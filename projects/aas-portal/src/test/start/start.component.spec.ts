@@ -11,6 +11,8 @@ import { signal } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from '../../app/start/start.component';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('StartComponent', () => {
     let component: StartComponent;
@@ -32,6 +34,8 @@ describe('StartComponent', () => {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
+                provideHttpClient(),
+                provideHttpClientTesting(),
             ],
             imports: [
                 TranslateModule.forRoot({

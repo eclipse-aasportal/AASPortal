@@ -7,18 +7,19 @@
  *****************************************************************************/
 
 import cloneDeep from 'lodash-es/cloneDeep';
-import { DashboardItem, DashboardPage, DashboardStore } from '../dashboard.store';
 import { DashboardCommand } from './dashboard-command';
+import { DashboardService } from '../dashboard.service';
+import { DashboardItem, DashboardPage } from '../dashboard-types';
 
 export class SetColorCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private page: DashboardPage,
         private item: DashboardItem,
         private index: number,
         private color: string,
     ) {
-        super('Set color', store);
+        super('Set color', service);
     }
 
     protected executing(): void {
@@ -27,7 +28,7 @@ export class SetColorCommand extends DashboardCommand {
 
         if (this.isChart(item)) {
             item.sources[this.index].color = this.color;
-            this.store.update(page);
+            this.service.updatePage(page);
         } else {
             throw new Error('Not implemented.');
         }

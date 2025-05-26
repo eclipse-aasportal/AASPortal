@@ -7,17 +7,18 @@
  *****************************************************************************/
 
 import { ApplicationError } from 'aas-core';
-import { DashboardPage, DashboardStore } from '../dashboard.store';
 import { DashboardCommand } from './dashboard-command';
 import { ERRORS } from '../../types/errors';
+import { DashboardService } from '../dashboard.service';
+import { DashboardPage } from '../dashboard-types';
 
 export class RenamePageCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private page: DashboardPage,
         private newName: string,
     ) {
-        super('Delete page', store);
+        super('Delete page', service);
     }
 
     protected executing(): void {
@@ -26,7 +27,7 @@ export class RenamePageCommand extends DashboardCommand {
             throw new Error('Valid page name expected.');
         }
 
-        if (this.store.pages.some(item => item.name === name)) {
+        if (this.service.pages().some(item => item.name === name)) {
             throw new ApplicationError(
                 `A page withe name "${name}" already exists.`,
                 ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
@@ -38,13 +39,11 @@ export class RenamePageCommand extends DashboardCommand {
     }
 
     private renamePage(name: string): void {
-        const index = this.store.pages.indexOf(this.page);
+        const index = this.service.pages().indexOf(this.page);
         if (index < 0) {
             return;
         }
 
-        const pages = [...this.store.pages];
-        pages[index] = { ...this.page, name };
-        this.store.updateState(state => ({ ...state, pages }));
+        this.service.updatePage({ ...this.page, name }, this.page.name);
     }
 }

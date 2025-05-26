@@ -13,7 +13,7 @@ import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { AASApiClient } from '../../../app/package/aas-api/aas-api-client.js';
-import env from '../../assets/aas-environment.js';
+import { aasEnvironment } from '../../assets/aas-environment.js';
 
 describe('HttpSubscription', function () {
     let aasxServer: jest.Mocked<AASApiClient>;
@@ -51,7 +51,7 @@ describe('HttpSubscription', function () {
             ],
         };
 
-        subscription = new HttpSubscription(logger, aasxServer, client, request, env);
+        subscription = new HttpSubscription(logger, aasxServer, client, request, aasEnvironment);
     });
 
     it('should be created', function () {

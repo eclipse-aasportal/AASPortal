@@ -19,7 +19,7 @@ import digitalProductPassport from '../../assets/test-aas/digital-product-passpo
 import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js';
 import { AASApiClientV0 } from '../../../app/package/aas-api/aas-api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
-import aasEnvironment from '../../assets/aas-environment.js';
+import { aasEnvironment } from '../../assets/aas-environment.js';
 import { createSpyObj } from 'fhg-jest';
 import { HttpClient } from '../../../app/http-client.js';
 
@@ -132,10 +132,10 @@ describe('AASApiClientV0', function () {
         });
 
         it('returns the URL to "property1"', function () {
-            const smId = Buffer.from('http://localhost/test/submodel1').toString('base64');
-            const nodeId = smId + '.submodel1/property1';
+            const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
+            const nodeId = smId + '#property1';
             expect(client.resolveNodeId(shell, nodeId)).toEqual(
-                `http://localhost:1234/aas/aas1/submodels/submodel1/elements/property1/value`,
+                `http://localhost:1234/aas/aas1/submodels/${smId}/elements/property1/value`,
             );
         });
     });

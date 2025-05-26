@@ -471,7 +471,7 @@ export class XmlReaderV3 extends AASReader {
 
     private readProperty(node: Node, parent: aas.Reference): aas.Property {
         const valueNode = this.selectNode('./aas:value', node);
-        let value = valueNode?.textContent;
+        const value = valueNode?.textContent;
 
         const valueTypeNode = this.selectNode('./aas:valueType', node);
         let valueType: aas.DataTypeDefXsd | undefined;
@@ -485,7 +485,6 @@ export class XmlReaderV3 extends AASReader {
 
         if (!valueType) {
             valueType = 'xs:string';
-            value = '!!! Undefined value type !!!';
         }
 
         const property: aas.Property = { ...this.readSubmodelElementType(node, parent), valueType };

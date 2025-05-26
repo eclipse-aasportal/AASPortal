@@ -1,0 +1,40 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="d-flex flex-row">
+    <button class="btn btn-link p-0" type="button" (click)="item().collapsed.set(!item().collapsed())">
+        <div class="text-primary">
+            @if (item().collapsed()) {
+            <i class="bi bi-caret-right-fill"></i>
+            } @else {
+            <i class="bi bi-caret-down-fill"></i>
+            }
+        </div>
+    </button>
+    <div class="text-info fw-semibold ms-2">CD</div>
+    <div class="fw-bold ms-2">{{item().idShort}}</div>
+    <div class="fw-light ms-2">{{item().id}}</div>
+</div>
+@if (!item().collapsed()) {
+@for (specification of item().specifications; track specification) {
+<table class="table table-sm table-striped table-borderless mt-2">
+    <tbody>
+        @for (item of specification; track item.name) {
+        <tr>
+            <td class="text-nowrap align-middle fw-semibold">{{item.name}}</td>
+            <td>
+                @for (text of item.value; track text) {
+                <div class="text-wrap">{{text}}</div>
+                }
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
+}
