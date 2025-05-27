@@ -34,7 +34,7 @@ export class HttpSubscription extends SocketSubscription {
 
     public open(): void {
         if (!this.timeoutId) {
-            this.timeoutId = setTimeout(this.readValues.bind(this), 10);
+            this.timeoutId = setTimeout(this.readValues, 10);
         } else {
             this.logger.debug(`The subscription ${this.server.endpoint} is already open.`);
         }
@@ -47,8 +47,7 @@ export class HttpSubscription extends SocketSubscription {
         }
     }
 
-    private async readValues(): Promise<void> {
-        this.timeoutId = undefined;
+    private readonly readValues = async (): Promise<void> => {
         const nodes: Array<LiveNode> = [];
         for (const item of this.items) {
             try {
@@ -71,6 +70,6 @@ export class HttpSubscription extends SocketSubscription {
             });
         }
 
-        this.timeoutId = setTimeout(this.readValues.bind(this), this.timeout);
-    }
+        this.timeoutId = setTimeout(this.readValues, this.timeout);
+    };
 }
