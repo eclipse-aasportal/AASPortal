@@ -40,7 +40,7 @@
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
                     <div class="wh-4"></div>
-                    <div class="ms-1 w-9 rounded bg-info text-white ts-7 text-center">
+                    <div class="ms-1 w-9 rounded bg-info text-white fs-7 text-center">
                         {{node.abbreviation}}</div>
                     <div class="ms-1 flex-grow-1 text-nowrap">
                         <b>{{node.name}}</b>
@@ -66,7 +66,7 @@
                 }
             </td>
             } @else {
-            <td [colSpan]="2">
+            <td class="align-middle" [colSpan]="2">
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
                     @if (node.expanded) {
@@ -88,11 +88,11 @@
                     </div>
                     }
                     }
-                    <div class="ms-1 w-9 rounded bg-info text-white ts-7 text-center">
+                    <div class="ms-1 w-9 rounded bg-info text-white fs-7 text-center">
                         {{node.abbreviation}}</div>
                     <div class="ms-1 flex-grow-1 text-nowrap">
                         @if (node.canOpen) {
-                        <button class="btn btn-link" type="button" (click)="open(node)">{{node.name}}</button>
+                        <button class="btn btn-link p-0" type="button" (click)="open(node)">{{node.name}}</button>
                         }@else {
                         <b>{{node.name}}</b>
                         }
