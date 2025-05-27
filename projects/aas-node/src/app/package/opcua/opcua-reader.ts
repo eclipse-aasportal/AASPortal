@@ -83,7 +83,7 @@ export class OpcuaReader extends AASReader {
         }
 
         if (!assetKind) {
-            throw new Error('AssetInformation.assetKind');
+            assetKind = 'Instance';
         }
 
         return { assetKind, globalAssetId };
