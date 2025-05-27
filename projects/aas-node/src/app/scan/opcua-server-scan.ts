@@ -84,7 +84,7 @@ export class OpcuaServerScan extends AASServerScan {
 
     private async isFolderAsync(obj: ReferenceDescription): Promise<boolean> {
         const type = (await this.readQualifiedName(obj)).name;
-        return type === 'FolderType' || type === 'AASEnvironmentType';
+        return type === 'FolderType' || type === 'AASEnvironmentType' || obj.browseName.name === 'AASEnvironment';
     }
 
     private async isAASTypeAsync(obj: ReferenceDescription): Promise<boolean> {
