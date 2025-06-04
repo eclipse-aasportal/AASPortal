@@ -15,10 +15,8 @@ import { DashboardApiService } from './dashboard-api.service';
 
 import {
     ChartConfigurationTuple,
-    DashboardChart,
+    DashboardChartItem,
     DashboardChartType,
-    DashboardItem,
-    DashboardItemType,
     TimeSeries,
     UpdateTuple,
 } from './dashboard-types';
@@ -28,8 +26,8 @@ export abstract class Dashboard {
 
     protected readonly map = new Map<string, UpdateTuple>();
 
-    protected createChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
-        switch (item.chartType) {
+    protected createChart(item: DashboardChartItem, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+        switch (item.chartType()) {
             case DashboardChartType.Line:
                 return this.createLineChart(item, canvas);
             case DashboardChartType.BarVertical:
@@ -39,18 +37,18 @@ export abstract class Dashboard {
             case DashboardChartType.TimeSeries:
                 return this.createTimeSeriesChart(item, canvas);
             default:
-                throw new Error(`Chart type "${item.chartType}" is not supported.`);
+                throw new Error(`Chart type "${item.chartType()}" is not supported.`);
         }
     }
 
     protected updateChart(node: LiveNode, tuple: UpdateTuple, cfg: ChartConfigurationTuple): void {
-        switch (tuple.item.chartType) {
+        switch (tuple.item.chartType()) {
             case DashboardChartType.Line:
-                this.updateLineChart(tuple.item, cfg, tuple.dataset, node);
+                this.updateLineChart(cfg, tuple.dataset, node);
                 break;
             case DashboardChartType.BarHorizontal:
             case DashboardChartType.BarVertical:
-                this.updateBarChart(tuple.item, cfg, tuple.dataset, node);
+                this.updateBarChart(cfg, tuple.dataset, node);
                 break;
         }
     }
@@ -62,11 +60,7 @@ export abstract class Dashboard {
         };
     }
 
-    protected isDashboardChart(value?: DashboardItem | null): value is DashboardChart {
-        return value?.type === DashboardItemType.Chart;
-    }
-
-    private updateLineChart(item: DashboardChart, tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
+    private updateLineChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
         if (tuple) {
             const data = dataset.data as number[];
             const labels = tuple.configuration.data.labels!;
@@ -94,7 +88,7 @@ export abstract class Dashboard {
         }
     }
 
-    private updateBarChart(item: DashboardChart, tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
+    private updateBarChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
         if (tuple) {
             const data = dataset.data as number[];
             let y = 0;
@@ -110,7 +104,7 @@ export abstract class Dashboard {
         }
     }
 
-    private createLineChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createLineChart(item: DashboardChartItem, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'line',
             data: {
@@ -155,7 +149,7 @@ export abstract class Dashboard {
         return { chart: new Chart(canvas, configuration), configuration };
     }
 
-    private createVerticalBarChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createVerticalBarChart(item: DashboardChartItem, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'bar',
             data: {
@@ -195,7 +189,7 @@ export abstract class Dashboard {
         return { chart: new Chart(canvas, configuration), configuration };
     }
 
-    private createHorizontalBarChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createHorizontalBarChart(item: DashboardChartItem, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'bar',
             data: {
@@ -235,7 +229,7 @@ export abstract class Dashboard {
         return { chart: new Chart(canvas, configuration), configuration };
     }
 
-    private createTimeSeriesChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createTimeSeriesChart(item: DashboardChartItem, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'line',
             data: {
