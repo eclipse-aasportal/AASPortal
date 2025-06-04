@@ -6,16 +6,15 @@
  *
  *****************************************************************************/
 
-import cloneDeep from 'lodash-es/cloneDeep';
 import { DashboardCommand } from './dashboard-command';
 import { DashboardService } from '../dashboard.service';
-import { DashboardChart, DashboardPage } from '../dashboard-types';
+import { DashboardChartItem, DashboardPage } from '../dashboard-types';
 
 export class SetMinMaxCommand extends DashboardCommand {
     public constructor(
         service: DashboardService,
         private page: DashboardPage,
-        private chart: DashboardChart,
+        private item: DashboardChartItem,
         private min?: number,
         private max?: number,
     ) {
@@ -23,14 +22,20 @@ export class SetMinMaxCommand extends DashboardCommand {
     }
 
     protected executing(): void {
-        const page = cloneDeep(this.page);
-        const chart = page.items[this.page.items.indexOf(this.chart)] as DashboardChart;
+        const i = this.page.items.indexOf(this.item);
+        if (i < 0) {
+            throw new Error('INVALID_OPERATION');
+        }
+
+        const page = { ...this.page, items: [...this.page.items] };
+        page.items[i] = { ...this.item };
+
         if (typeof this.min === 'number') {
-            chart.min = Number.isNaN(this.min) ? undefined : this.min;
+            page.items[i].min = Number.isNaN(this.min) ? undefined : this.min;
         }
 
         if (typeof this.max === 'number') {
-            chart.max = Number.isNaN(this.max) ? undefined : this.max;
+            page.items[i].max = Number.isNaN(this.max) ? undefined : this.max;
         }
 
         this.service.updatePage(page);

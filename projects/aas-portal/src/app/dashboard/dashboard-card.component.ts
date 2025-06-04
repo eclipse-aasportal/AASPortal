@@ -13,7 +13,7 @@ import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { Dashboard } from './dashboard';
 import { DashboardApiService } from './dashboard-api.service';
 import { WebSocketFactoryService } from 'aas-lib';
-import { ChartConfigurationTuple, DashboardChart } from './dashboard-types';
+import { ChartConfigurationTuple, DashboardChart, DashboardChartItem } from './dashboard-types';
 
 @Component({
     selector: 'fhg-dashboard-card',
@@ -35,16 +35,16 @@ export class DashboardCardComponent extends Dashboard {
         super(api);
 
         effect(() => {
-            const item = this.item();
-            item ? this.enterLiveMode(item) : this.leaveLiveMode();
+            const chart = this.chart();
+            chart ? this.enterLiveMode(chart) : this.leaveLiveMode();
         });
     }
 
-    public readonly chartContainer = viewChild<ElementRef<HTMLCanvasElement>>('chartContainer');
+    public readonly chartContainer = viewChild<ElementRef<HTMLCanvasElement>>('chart');
 
-    public readonly item = input<DashboardChart>();
+    public readonly chart = input<DashboardChartItem>();
 
-    private enterLiveMode(item: DashboardChart): void {
+    private enterLiveMode(chart: DashboardChartItem): void {
         if (this.configuration) {
             return;
         }
@@ -53,8 +53,8 @@ export class DashboardCardComponent extends Dashboard {
             try {
                 this.openWebSocket();
                 const chartContainer = this.chartContainer();
-                if (chartContainer && this.isDashboardChart(item)) {
-                    this.configuration = this.createChart(item, chartContainer.nativeElement);
+                if (chartContainer) {
+                    this.configuration = this.createChart(chart, chartContainer.nativeElement);
                     if (this.webSocketSubject) {
                         for (const request of this.requests) {
                             this.webSocketSubject.next(this.createMessage(request));
@@ -79,7 +79,7 @@ export class DashboardCardComponent extends Dashboard {
     }
 
     private openWebSocket(): void {
-        const item = this.item();
+        const item = this.chart();
         if (item && this.requests.length > 0) {
             this.webSocketSubject = this.webServiceFactory.create();
             this.webSocketSubject.subscribe({
