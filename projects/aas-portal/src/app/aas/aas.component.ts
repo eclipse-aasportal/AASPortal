@@ -196,7 +196,7 @@ export class AASComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.dashboard.add(page.name, document, this.store.selectedElements, chartType as DashboardChartType);
+        this.dashboard.addChart(page.name, document, this.store.selectedElements, chartType as DashboardChartType);
         this.router.navigate(['/dashboard'], { queryParams: { page } });
     }
 
