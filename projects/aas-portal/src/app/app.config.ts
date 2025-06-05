@@ -21,7 +21,7 @@ import {
 
 import { HttpLoaderFactory } from './http-loader-factory';
 import { routes } from './app.routes';
-import { DashboardCardComponent } from './dashboard/dashboard-card.component';
+import { DashboardCardComponent } from './dashboard/dashboard-card/dashboard-card.component';
 import { AboutCardComponent } from './about/about-card.component';
 
 export const appConfig: ApplicationConfig = {
