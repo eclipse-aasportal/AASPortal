@@ -64,7 +64,7 @@ export type DashboardPage = {
 export type DashboardState = DashboardPage[];
 
 export type UpdateTuple = {
-    item: DashboardChartItem;
+    chart: DashboardChart;
     dataset: ChartDataset;
 };
 

@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { DashboardCardComponent } from '../../app/dashboard/dashboard-card.component';
 import { WebSocketFactoryService } from 'aas-lib';
+import { DashboardCardComponent } from '../../app/dashboard/dashboard-card/dashboard-card.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
 
 describe('DashboardCardComponent', () => {
