@@ -27,7 +27,7 @@ import {
     signal,
 } from '@angular/core';
 
-import { LiveNode, WebSocketData } from 'aas-core';
+import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -40,8 +40,15 @@ import { DeleteItemCommand } from './commands/delete-item-command';
 import { DashboardApiService } from './dashboard-api.service';
 import { Dashboard } from './dashboard';
 import { DashboardService } from './dashboard.service';
-import { ChartConfigurationTuple, DashboardChartItem, DashboardPage, ViewPortSize } from './dashboard-types';
 import { ChartEditComponent } from './chart-edit/chart-edit.component';
+import {
+    ChartConfigurationTuple,
+    DashboardChart,
+    DashboardChartItem,
+    DashboardPage,
+    DashboardSource,
+    ViewPortSize,
+} from './dashboard-types';
 
 @Component({
     selector: 'fhg-dashboard',
@@ -108,7 +115,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
 
     public readonly firstItems = computed(() => {
         const items = this.activePage().items;
-        return items.slice(0, items.length % this.viewPortSize())
+        return items.slice(0, items.length % this.viewPortSize());
     });
 
     public readonly items = computed(() => {
@@ -256,12 +263,49 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
 
     public addToStart(): Observable<void> {
         for (const item of this.selectedItems()) {
-            if (!this.start.add('Dashboard', `DB.${item.id}`, { chart: item })) {
+            if (
+                !this.start.add('Dashboard', `DB.${item.id}`, {
+                    chart: {
+                        id: item.id,
+                        label: item.label,
+                        chartType: item.chartType(),
+                        min: item.min,
+                        max: item.max,
+                        sources: [...item.sources],
+                    } satisfies DashboardChart,
+                    requests: this.getRequests(item.sources),
+                })
+            ) {
                 return EMPTY;
             }
         }
 
         return this.start.save();
+    }
+
+    private getRequests(sources: DashboardSource[]): LiveRequest[] {
+        const results: LiveRequest[] = [];
+        for (const request of this.activePage().requests) {
+            let result: LiveRequest | undefined;
+            for (const node of request.nodes) {
+                for (const source of sources) {
+                    if (source.node?.nodeId === node.nodeId) {
+                        if (!result) {
+                            result = { ...request, nodes: [] };
+                        }
+
+                        result.nodes.push({ ...node })
+                        break;
+                    }
+                }
+            }
+
+            if (result) {
+                results.push(result);
+            }
+        }
+
+        return results;
     }
 
     private leaveLiveMode(): void {
@@ -322,7 +366,20 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         this.activePage().items.forEach(item => {
             const canvas = query.find(element => element.nativeElement.id === item.id);
             if (canvas) {
-                this.charts.set(item.id, this.createChart(item, canvas.nativeElement));
+                this.charts.set(
+                    item.id,
+                    this.createChart(
+                        {
+                            id: item.id,
+                            label: item.label,
+                            chartType: item.chartType(),
+                            min: item.min,
+                            max: item.max,
+                            sources: [...item.sources],
+                        },
+                        canvas.nativeElement,
+                    ),
+                );
             }
         });
     }
@@ -344,7 +401,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                 continue;
             }
 
-            const cfg = this.charts.get(tuple.item.id);
+            const cfg = this.charts.get(tuple.chart.id);
             if (!cfg) {
                 continue;
             }

@@ -12,7 +12,13 @@ import { EMPTY, map, mergeMap, Observable, skipWhile, tap } from 'rxjs';
 import { aas, AASDocument, getIdShortPath, getUnit, LiveNode } from 'aas-core';
 import { AuthService, encodeBase64Url } from 'aas-lib';
 
-import { DashboardChartItem, DashboardChartType, DashboardPage, DashboardSource, DashboardState } from './dashboard-types';
+import {
+    DashboardChartItem,
+    DashboardChartType,
+    DashboardPage,
+    DashboardSource,
+    DashboardState,
+} from './dashboard-types';
 
 const initialState: DashboardState = [{ name: 'Dashboard 1', active: true, items: [], requests: [] }];
 
