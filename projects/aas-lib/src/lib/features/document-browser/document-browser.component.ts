@@ -56,18 +56,6 @@ export type BrowserElement = {
     children: BrowserElementRef[];
 };
 
-const collectionNames: Record<string, string> = {
-    SubmodelElementCollection: 'value',
-    SubmodelElementList: 'value',
-    Submodel: 'submodelElements',
-    AssetAdministrationShell: 'submodels',
-    Entity: 'statements',
-    AnnotatedRelationshipElement: 'annotations',
-    Operation: 'in-/inout-/outputVariables',
-};
-
-const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
-
 @Component({
     selector: 'fhg-doc-browser',
     templateUrl: './document-browser.component.html',

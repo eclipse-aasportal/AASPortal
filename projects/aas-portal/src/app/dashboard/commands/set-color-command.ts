@@ -8,7 +8,7 @@
 
 import { DashboardCommand } from './dashboard-command';
 import { DashboardService } from '../dashboard.service';
-import { DashboardChartItem, DashboardPage, DashboardSource } from '../dashboard-types';
+import { DashboardChartItem, DashboardPage } from '../dashboard-types';
 
 export class SetColorCommand extends DashboardCommand {
     public constructor(

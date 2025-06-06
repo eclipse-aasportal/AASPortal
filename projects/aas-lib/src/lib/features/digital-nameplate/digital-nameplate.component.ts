@@ -29,7 +29,6 @@ import {
     aas,
     AASDocument,
     convertToString,
-    getIdShortPath,
     getLocaleValue,
     getReferable,
     getSemanticId,

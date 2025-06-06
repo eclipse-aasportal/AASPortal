@@ -13,7 +13,7 @@ import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { Dashboard } from '../dashboard';
 import { DashboardApiService } from '../dashboard-api.service';
 import { WebSocketFactoryService } from 'aas-lib';
-import { ChartConfigurationTuple, DashboardChart, DashboardChartItem } from '../dashboard-types';
+import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
 
 @Component({
     selector: 'fhg-dashboard-card',
