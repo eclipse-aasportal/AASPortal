@@ -20,7 +20,7 @@ export class MoveNextCommand extends DashboardCommand {
     }
 
     protected executing(): void {
-       const index = this.page.items.indexOf(this.item);
+        const index = this.page.items.indexOf(this.item);
         if (index >= this.page.items.length - 1) {
             throw new Error('INVALID_OPERATION');
         }

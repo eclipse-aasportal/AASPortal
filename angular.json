@@ -22,7 +22,6 @@
                         "index": "projects/aas-portal/src/index.html",
                         "browser": "projects/aas-portal/src/main.ts",
                         "polyfills": [
-                            "zone.js",
                             "@angular/localize/init"
                         ],
                         "tsConfig": "projects/aas-portal/tsconfig.app.json",
@@ -37,7 +36,10 @@
                             "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
                             "projects/aas-portal/src/styles.scss"
                         ],
-                        "scripts": []
+                        "scripts": [],
+                        "allowedCommonJsDependencies": [
+                            "qrcode"
+                        ]
                     },
                     "configurations": {
                         "production": {
@@ -109,9 +111,7 @@
                         "styles": [
                             "projects/aas-portal/src/styles.scss"
                         ],
-                        "scripts": [
-                            "node_modules/bootstrap/dist/js/bootstrap.min.js"
-                        ]
+                        "scripts": []
                     }
                 },
                 "lint": {

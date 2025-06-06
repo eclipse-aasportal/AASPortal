@@ -16,14 +16,13 @@ import { DashboardApiService } from './dashboard-api.service';
 import {
     ChartConfigurationTuple,
     DashboardChart,
-    DashboardChartItem,
     DashboardChartType,
     TimeSeries,
     UpdateTuple,
 } from './dashboard-types';
 
 export abstract class Dashboard {
-    protected constructor(public readonly api: DashboardApiService) { }
+    protected constructor(public readonly api: DashboardApiService) {}
 
     protected readonly map = new Map<string, UpdateTuple>();
 

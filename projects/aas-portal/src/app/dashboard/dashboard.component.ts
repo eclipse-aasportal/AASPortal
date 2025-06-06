@@ -90,7 +90,11 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            this.editMode() ? this.leaveLiveMode() : this.enterLiveMode();
+            if (this.editMode()) {
+                this.leaveLiveMode();
+            } else {
+                this.enterLiveMode();
+            }
         });
 
         effect(() => {
@@ -294,7 +298,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                             result = { ...request, nodes: [] };
                         }
 
-                        result.nodes.push({ ...node })
+                        result.nodes.push({ ...node });
                         break;
                     }
                 }
