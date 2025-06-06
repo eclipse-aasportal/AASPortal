@@ -38,9 +38,9 @@ import {
 
 import { decodeBase64Url, encodeBase64Url, getDisplayName, getUrl } from '../../utilities';
 import { WINDOW } from '../../services/window.service';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { EMPTY, first, mergeMap, Observable, Subscription } from 'rxjs';
+import { EMPTY, first, mergeMap, Observable } from 'rxjs';
 import { AuthService } from '../../features/auth/auth.service';
 import { DocumentsService } from '../../services/documents.service';
 import { ToolbarService } from '../../services/toolbar.service';

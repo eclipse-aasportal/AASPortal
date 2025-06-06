@@ -87,9 +87,9 @@ export class StartComponent implements OnDestroy {
 
         effect(async () => {
             const md = this.md.value() ?? '';
-            const html = await marked.parse(md) ?? '';
+            const html = (await marked.parse(md)) ?? '';
             this.readme$.set(this.sanitizer.bypassSecurityTrustHtml(html));
-        })
+        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
