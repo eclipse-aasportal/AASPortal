@@ -13,8 +13,7 @@
         ],
         "types": [
             "@angular/localize",
-            "jasmine",
-            "node"
+            "jasmine"
         ],
         "paths": {
             "aas-lib": [

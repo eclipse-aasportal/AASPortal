@@ -3,10 +3,6 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "./out-tsc/spec",
-        "types": [
-            "@angular/localize",
-            "jasmine"
-        ]
     },
     "include": [
         "src/test/**/*.ts"

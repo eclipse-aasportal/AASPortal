@@ -6,280 +6,208 @@
  *
  *****************************************************************************/
 
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { provideRouter } from '@angular/router';
-// import { of, Subject } from 'rxjs';
-// import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-// import { WebSocketSubject } from 'rxjs/webSocket';
-// import { WebSocketData } from 'aas-core';
-// import { AuthService, NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService } from 'aas-lib';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { Component, input, signal } from '@angular/core';
+import { EMPTY, Subject } from 'rxjs';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { WebSocketData } from 'aas-core';
+import { NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
 
-// import { DashboardComponent } from '../../app/dashboard/dashboard.component';
-// import { pages } from './test-pages';
-// import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-// import { DashboardChart } from '../../app/dashboard/dashboard-types';
-// import { DashboardService } from '../../app/dashboard/dashboard.service';
-// import { signal } from '@angular/core';
-// import { provideHttpClient } from '@angular/common/http';
-// import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { DashboardComponent } from '../../app/dashboard/dashboard.component';
+import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { DashboardService } from '../../app/dashboard/dashboard.service';
+import { DashboardChartItem, DashboardState } from '../../app/dashboard/dashboard-types';
+import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
 
-// describe('DashboardComponent', () => {
-//     let component: DashboardComponent;
-//     let fixture: ComponentFixture<DashboardComponent>;
-//     let webSocketSubject: WebSocketSubject<WebSocketData>;
-//     let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
-//     let auth: jasmine.SpyObj<AuthService>;
-//     let start: jasmine.SpyObj<StartService>;
-//     let service: jasmine.SpyObj<DashboardService>;
-//     const chart1 = '42';
-//     const chart2 = '4711';
-    // const chart3 = '0815';
+import data from '../assets/test-pages.json';
 
-    // beforeEach(() => {
-    //     webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
-    //     webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
-    //     webSocketFactory.create.and.returnValue(webSocketSubject);
-    //     start = jasmine.createSpyObj<StartService>(['add', 'save']);
-    //     auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { userId: of('guest') });
-    //     auth.checkCookie.and.returnValue(of(true));
-    //     auth.setCookie.and.returnValue(of(void 0));
-    //     auth.getCookie.and.callFake(name => {
-    //         if (name === '.DashboardPage') {
-    //             return of('Test');
-    //         }
+@Component({
+    selector: 'fhg-chart-edit',
+    imports: [],
+    template: '<div></div>',
+    styles: [],
+})
+export class TestChartEditComponent {
+    public readonly item = input.required<DashboardChartItem>();
+}
 
-    //         return of(JSON.stringify(pages));
-    //     });
+describe('DashboardComponent', () => {
+    let component: DashboardComponent;
+    let fixture: ComponentFixture<DashboardComponent>;
+    let webSocketSubject: WebSocketSubject<WebSocketData>;
+    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
+    let start: jasmine.SpyObj<StartService>;
+    let service: jasmine.SpyObj<DashboardService>;
+    let window: jasmine.SpyObj<WindowService>;
+    const chart1 = '42';
+    const chart2 = '4711';
+    const chart3 = '0815';
 
-    //     service = jasmine.createSpyObj<DashboardService>(['getMemento'], { 
-    //         editMode: signal(false),
-    //         activePage: signal({ name: 'Dashboard 1', active: true, items: [], requests: [] })
-    //      });
+    beforeEach(() => {
+        webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
+        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
+        webSocketFactory.create.and.returnValue(webSocketSubject);
+        start = jasmine.createSpyObj<StartService>(['add', 'save']);
 
-    //     TestBed.configureTestingModule({
-    //         providers: [
-    //             {
-    //                 provide: AuthService,
-    //                 useValue: auth,
-    //             },
-    //             {
-    //                 provide: WebSocketFactoryService,
-    //                 useValue: webSocketFactory,
-    //             },
-    //             {
-    //                 provide: NotifyService,
-    //                 useValue: jasmine.createSpyObj<NotifyService>(['error']),
-    //             },
-    //             {
-    //                 provide: DashboardApiService,
-    //                 useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
-    //             },
-    //             {
-    //                 provide: WINDOW,
-    //                 useValue: jasmine.createSpyObj<Window>(['prompt']),
-    //             },
-    //             {
-    //                 provide: ToolbarService,
-    //                 useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
-    //             },
-    //             {
-    //                 provide: StartService,
-    //                 useValue: start,
-    //             },
-    //             provideRouter([]),
-    //             provideHttpClient(),
-    //             provideHttpClientTesting(),
-    //         ],
-    //         imports: [
-    //             TranslateModule.forRoot({
-    //                 loader: {
-    //                     provide: TranslateLoader,
-    //                     useClass: TranslateFakeLoader,
-    //                 },
-    //             }),
-    //         ],
-    //     });
+        const pages: DashboardState = DashboardService.fromString(JSON.stringify(data));
 
-    //     fixture = TestBed.createComponent(DashboardComponent);
-    //     component = fixture.componentInstance;
-    //     fixture.detectChanges();
-    // });
+        service = jasmine.createSpyObj<DashboardService>(
+            ['getMemento', 'setMemento', 'save', 'updatePage', 'deletePage'],
+            {
+                editMode: signal(false),
+                pages: signal(pages).asReadonly(),
+                activePage: signal(pages[1]).asReadonly(),
+            },
+        );
 
-    // it('should create', () => {
-    //     expect(component).toBeTruthy();
-    // });
+        service.save.and.returnValue(EMPTY);
 
-    // it('shows the Test page', () => {
-    //     expect(component.activePage()?.name).toEqual('Test');
-    // });
+        window = jasmine.createSpyObj<WindowService>(['prompt', 'addEventListener', 'removeEventListener'], {
+            innerWidth: 700,
+        });
 
-    // it('displays two rows', () => {
-    //     expect(component.rows().length).toEqual(2);
-    // });
+        TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: WebSocketFactoryService,
+                    useValue: webSocketFactory,
+                },
+                {
+                    provide: NotifyService,
+                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                },
+                {
+                    provide: DashboardApiService,
+                    useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
+                },
+                {
+                    provide: WINDOW,
+                    useValue: window,
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
+                {
+                    provide: DashboardService,
+                    useValue: service,
+                },
+                provideRouter([]),
+            ],
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
+        });
 
-    // describe('single selection', () => {
-    //     it('indicates no item selected', () => {
-    //         expect(component.selectedItem()).toBeNull();
-    //         expect(component.selectedItems().length).toEqual(0);
-    //     });
+        TestBed.overrideComponent(DashboardComponent, {
+            add: {
+                imports: [TestChartEditComponent],
+            },
+            remove: {
+                imports: [ChartEditComponent],
+            },
+        });
 
-    //     it('allows to toggle the selection of a chart', () => {
-    //         const rows = component.rows();
-    //         component.toggleSelection(rows[0].columns[0]);
-    //         expect(component.selectedItem()).toEqual(rows[0].columns[0].item);
-    //         expect(component.selectedItems().length).toEqual(1);
-    //         component.toggleSelection(rows[0].columns[0]);
-    //         expect(component.selectedItem()).toBeNull();
-    //         expect(component.selectedItems().length).toEqual(0);
-    //     });
+        fixture = TestBed.createComponent(DashboardComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-    //     it('ensures that only one item is selected', () => {
-    //         const rows = component.rows();
-    //         component.toggleSelection(rows[0].columns[0]);
-    //         expect(component.selectedItem()).toEqual(rows[0].columns[0].item);
-    //         expect(component.selectedItems().length).toEqual(1);
-    //         component.toggleSelection(rows[0].columns[1]);
-    //         expect(component.selectedItem()).toEqual(rows[0].columns[1].item);
-    //         expect(component.selectedItems().length).toEqual(1);
-    //     });
-    // });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-    // describe('view mode', () => {
-    //     it('has a view mode (initial)', () => {
-    //         expect(component.editMode()).toBeFalse();
-    //     });
-    // });
+    it('shows the Test page', () => {
+        expect(component.activePage()?.name).toEqual('Test');
+    });
 
-    // describe('edit mode', () => {
-    //     beforeEach(() => {
-    //         component.editMode.set(true);
-    //     });
+    it('starts with 1 chart in first row', () => {
+        expect(component.firstItems().length).toBe(1);
+    });
 
-    //     it('has an edit mode', () => {
-    //         expect(component.editMode()).toBeTrue();
-    //     });
+    it('displays 2 charts per row', () => {
+        expect(component.items().length).toBe(2);
+    });
 
-    //     it('can move item[0, 1] to the left', () => {
-    //         component.toggleSelection(component.rows()[0].columns[1]);
-    //         expect(component.canMoveLeft()).toBeTrue();
-    //         component.moveLeft();
+    describe('single selection', () => {
+        it('indicates no item selected', () => {
+            expect(component.selectedItem()).toBeUndefined();
+            expect(component.selectedItems().length).toEqual(0);
+        });
 
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart2);
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
+        it('allows to toggle the selection of a chart', () => {
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[0]);
+            expect(component.selectedItem()).toEqual(items[0]);
+            expect(component.selectedItems().length).toEqual(1);
+            component.toggleSelection(undefined, items[0]);
+            expect(component.selectedItem()).toBeUndefined();
+            expect(component.selectedItems().length).toEqual(0);
+        });
 
-    //         expect(component.rows()[0].columns[1].id).toEqual(chart2);
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
+        it('ensures that only one item is selected', () => {
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[0]);
+            expect(component.selectedItem()).toEqual(items[0]);
+            expect(component.selectedItems().length).toEqual(1);
+            component.toggleSelection(undefined, items[1]);
+            expect(component.selectedItem()).toEqual(items[1]);
+            expect(component.selectedItems().length).toEqual(1);
+        });
+    });
 
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart2);
-    //     });
+    describe('view mode', () => {
+        it('has a view mode (initial)', () => {
+            expect(component.editMode()).toBeFalse();
+        });
+    });
 
-    //     it('can move item[0, 0] to the right including undo/redo', () => {
-    //         component.toggleSelection(component.rows()[0].columns[0]);
-    //         expect(component.canMoveRight()).toBeTrue();
-    //         component.moveRight();
+    describe('edit mode', () => {
+        beforeEach(() => {
+            service.editMode.set(true);
+        });
 
-    //         expect(component.rows()[0].columns[1].id).toEqual(chart1);
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
+        it('has an edit mode', () => {
+            expect(component.editMode()).toBeTrue();
+        });
 
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart1);
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
+        it('can move item[1] to the left', () => {
+            let items = component.activePage().items;
+            component.toggleSelection(undefined, items[1]);
+            expect(component.canMovePrevious()).toBeTrue();
+            component.movePrevious();
+            expect(service.updatePage).toHaveBeenCalled();
+        });
 
-    //         expect(component.rows()[0].columns[1].id).toEqual(chart1);
-    //     });
+        it('can move item[1] to the right', () => {
+            let items = component.activePage().items;
+            component.toggleSelection(undefined, items[1]);
+            expect(component.canMoveNext()).toBeTrue();
+            component.moveNext();
+            expect(service.updatePage).toHaveBeenCalled();
+        });
 
-    //     it('can move item[0, 0] up creating a new row including undo/redo', () => {
-    //         component.toggleSelection(component.rows()[0].columns[0]);
-    //         expect(component.canMoveUp()).toBeTrue();
-    //         component.moveUp();
+        it('deletes the Test page', () => {
+            component.delete();
+            expect(service.deletePage).toHaveBeenCalled();
+        });
 
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart1);
-    //         expect(component.rows().length).toEqual(3);
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
-
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart1);
-    //         expect(component.rows().length).toEqual(2);
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
-
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart1);
-    //         expect(component.rows().length).toEqual(3);
-    //     });
-
-    //     it('can move item[0, 0] down to [1, 1] including undo/redo', () => {
-    //         component.toggleSelection(component.rows()[0].columns[0]);
-    //         expect(component.canMoveDown()).toBeTrue();
-    //         component.moveDown();
-
-    //         expect(component.rows()[1].columns[1].id).toEqual(chart1);
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
-
-    //         expect(component.rows()[0].columns[0].id).toEqual(chart1);
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
-
-    //         expect(component.rows()[1].columns[1].id).toEqual(chart1);
-    //     });
-
-    //     it('gets the color of a chart', () => {
-    //         expect(component.getColor(component.rows()[0].columns[0])).toEqual('#123456');
-    //     });
-
-    //     it('sets the color of a chart including undo/redo', () => {
-    //         component.changeColor(component.rows()[0].columns[0], '#AA55AA');
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-    //     });
-
-    //     it('gets the source labels of a chart', () => {
-    //         expect(component.getSources(component.rows()[0].columns[0])).toEqual(['RotationSpeed']);
-    //     });
-
-    //     it('can delete the Test page', () => {
-    //         const name = component.activePage();
-    //         component.delete();
-    //         expect(component.pages().find(item => item === name)).toBeUndefined();
-    //     });
-
-    //     it('can change the min value', () => {
-    //         component.changeMin(component.rows()[0].columns[0], '0');
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).min).toEqual(0);
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).min).toBeUndefined();
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).min).toEqual(0);
-    //     });
-
-    //     it('can change the max value', () => {
-    //         component.changeMax(component.rows()[0].columns[0], '5500');
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).max).toEqual(5500);
-    //         expect(component.canUndo()).toBeTrue();
-    //         component.undo();
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).max).toBeUndefined();
-    //         expect(component.canRedo()).toBeTrue();
-    //         component.redo();
-
-    //         expect((component.rows()[0].columns[0].item as DashboardChart).max).toEqual(5500);
-    //     });
-    // });
-// });
+        it('deletes a chart', () => {
+            let items = component.activePage().items;
+            component.toggleSelection(undefined, items[1]);
+            component.delete();
+            expect(service.updatePage).toHaveBeenCalled();
+        });
+    });
+});

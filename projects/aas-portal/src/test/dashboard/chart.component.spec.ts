@@ -7,14 +7,14 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { DashboardCardComponent } from '../../app/dashboard/dashboard-card.component';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { WebSocketFactoryService } from 'aas-lib';
+import { ChartComponent } from '../../app/dashboard/chart/chart.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
 
-describe('DashboardCardComponent', () => {
-    let component: DashboardCardComponent;
-    let fixture: ComponentFixture<DashboardCardComponent>;
+describe('ChartComponent', () => {
+    let component: ChartComponent;
+    let fixture: ComponentFixture<ChartComponent>;
     let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
     let api: jasmine.SpyObj<DashboardApiService>;
 
@@ -33,10 +33,17 @@ describe('DashboardCardComponent', () => {
                     useValue: api,
                 },
             ],
-            imports: [],
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(DashboardCardComponent);
+        fixture = TestBed.createComponent(ChartComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

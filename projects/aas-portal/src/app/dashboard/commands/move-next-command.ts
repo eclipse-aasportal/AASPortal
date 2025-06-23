@@ -10,27 +10,24 @@ import { DashboardCommand } from './dashboard-command';
 import { DashboardService } from '../dashboard.service';
 import { DashboardChartItem, DashboardPage } from '../dashboard-types';
 
-export class SetColorCommand extends DashboardCommand {
+export class MoveNextCommand extends DashboardCommand {
     public constructor(
         service: DashboardService,
         private page: DashboardPage,
         private item: DashboardChartItem,
-        private color: string,
     ) {
-        super('Set color', service);
+        super('Move right', service);
     }
 
     protected executing(): void {
-        const i = this.page.items.indexOf(this.item);
-        if (i < 0) {
+        const index = this.page.items.indexOf(this.item);
+        if (index >= this.page.items.length - 1) {
             throw new Error('INVALID_OPERATION');
         }
 
-        const index = this.item.sources.findIndex(item => item.label === this.item.source());
-        const source = this.item.sources[index];
         const page = { ...this.page, items: [...this.page.items] };
-        page.items[i] = { ...this.item, sources: [...this.item.sources] };
-        page.items[i].sources[index] = { ...source, color: this.color };
+        page.items[index] = page.items[index + 1];
+        page.items[index + 1] = this.item;
         this.service.updatePage(page);
     }
 }

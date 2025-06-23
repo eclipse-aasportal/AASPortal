@@ -8,12 +8,15 @@
 
 import { Chart, ChartConfiguration, ChartDataset } from 'chart.js';
 import { aas, LiveNode, LiveRequest } from 'aas-core';
+import { WritableSignal } from '@angular/core';
 
 export type DashboardColor = string;
 
-export enum DashboardItemType {
-    Chart = 'Chart',
-    Grid = 'Grid',
+export enum ViewPortSize {
+    xs = 1,
+    sm = 2,
+    md = 3,
+    lg = 4,
 }
 
 export enum DashboardChartType {
@@ -31,57 +34,37 @@ export type DashboardSource = {
     url?: string;
 };
 
-export type DashboardItemPosition = {
-    x: number;
-    y: number;
-};
-
-export interface DashboardItem {
-    type: DashboardItemType;
+export interface DashboardChart {
     id: string;
-    position: DashboardItemPosition;
-}
-
-export type DashboardSelectable = {
-    selected: boolean;
-    column: DashboardItem;
-};
-
-export interface DashboardChart extends DashboardItem {
     label: string;
-    type: DashboardItemType.Chart;
     chartType: DashboardChartType;
     sources: DashboardSource[];
     min?: number;
     max?: number;
 }
 
-export interface DashboardGrid extends DashboardItem {
-    type: DashboardItemType.Grid;
-    items: DashboardItem[];
+export interface DashboardChartItem {
+    id: string;
+    label: string;
+    chartType: WritableSignal<DashboardChartType>;
+    sources: DashboardSource[];
+    min?: number;
+    max?: number;
+    selected: WritableSignal<boolean>;
+    source: WritableSignal<string | undefined>;
 }
 
 export type DashboardPage = {
     name: string;
     active: boolean;
-    items: DashboardItem[];
+    items: DashboardChartItem[];
     requests: LiveRequest[];
-};
-
-export type DashboardColumn = {
-    id: string;
-    item: DashboardItem;
-    itemType: DashboardItemType;
-};
-
-export type DashboardRow = {
-    columns: DashboardColumn[];
 };
 
 export type DashboardState = DashboardPage[];
 
 export type UpdateTuple = {
-    item: DashboardChart;
+    chart: DashboardChart;
     dataset: ChartDataset;
 };
 

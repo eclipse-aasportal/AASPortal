@@ -11,7 +11,6 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 import { EMPTY, first, Observable } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
-import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
     Component,
@@ -28,45 +27,39 @@ import {
     signal,
 } from '@angular/core';
 
-import { convertToString, LiveNode, WebSocketData } from 'aas-core';
-import { LogType, NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
+import { NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
-import { MoveLeftCommand } from './commands/move-left-command';
-import { MoveRightCommand } from './commands/move-right-command';
-import { MoveUpCommand } from './commands/move-up-command';
-import { MoveDownCommand } from './commands/move-down-command';
-import { SetColorCommand } from './commands/set-color-command';
+import { MovePreviousCommand } from './commands/move-previous-command';
+import { MoveNextCommand } from './commands/move-next-command';
 import { DeletePageCommand } from './commands/delete-page-command';
 import { RenamePageCommand } from './commands/rename-page-command';
 import { AddNewPageCommand } from './commands/add-new-page-command';
 import { DeleteItemCommand } from './commands/delete-item-command';
-import { SetChartTypeCommand } from './commands/set-chart-type-command';
-import { SetMinMaxCommand } from './commands/set-min-max-command';
 import { DashboardApiService } from './dashboard-api.service';
 import { Dashboard } from './dashboard';
 import { DashboardService } from './dashboard.service';
+import { ChartEditComponent } from './chart-edit/chart-edit.component';
 import {
     ChartConfigurationTuple,
     DashboardChart,
-    DashboardChartType,
-    DashboardColumn,
-    DashboardItem,
+    DashboardChartItem,
     DashboardPage,
+    DashboardSource,
+    ViewPortSize,
 } from './dashboard-types';
 
 @Component({
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
-    imports: [NgClass, FormsModule, TranslateModule],
+    imports: [FormsModule, TranslateModule, ChartEditComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private readonly charts = new Map<string, ChartConfigurationTuple>();
-    private readonly selections = signal<string[]>([]);
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
-    private selectedSources = new Map<string, number>();
     private live = false;
 
     public constructor(
@@ -83,21 +76,25 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     ) {
         super(api);
 
+        window.addEventListener('resize', this.updateViewPortSize);
+
         effect(() => {
             this.activePage();
             if (!this.service.editMode()) {
                 this.leaveLiveMode();
             }
 
-            this.selections.set([]);
-            this.selectedSources.clear();
             if (!this.service.editMode()) {
                 this.enterLiveMode();
             }
         });
 
         effect(() => {
-            this.editMode() ? this.leaveLiveMode() : this.enterLiveMode();
+            if (this.editMode()) {
+                this.leaveLiveMode();
+            } else {
+                this.enterLiveMode();
+            }
         });
 
         effect(() => {
@@ -120,35 +117,53 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
 
     public readonly editMode = this.service.editMode;
 
-    public readonly rows = this.service.rows;
+    public readonly firstItems = computed(() => {
+        const items = this.activePage().items;
+        return items.slice(0, items.length % this.viewPortSize());
+    });
+
+    public readonly items = computed(() => {
+        const items = this.activePage().items;
+        return items.slice(items.length % this.viewPortSize());
+    });
+
+    public readonly viewPortSize = signal<ViewPortSize>(this.getViewPortSize());
 
     public readonly selectedItem = computed(() => {
-        if (this.selections().length === 1) {
-            return this.findItem(this.selections()[0]);
-        }
-
-        return null;
+        const values = this.activePage().items.filter(item => item.selected());
+        return values.length === 1 ? values[0] : undefined;
     });
 
     public readonly selectedItems = computed(() => {
-        const selectedItems: DashboardItem[] = [];
-        for (const id of this.selections()) {
-            const item = this.findItem(id);
-            if (item) {
-                selectedItems.push(item);
-            }
-        }
-
-        return selectedItems;
+        return this.activePage().items.filter(item => item.selected());
     });
 
     public readonly canUndo = computed(() => this.editMode() && this.commandHandler.canUndo());
 
     public readonly canRedo = computed(() => this.editMode() && this.commandHandler.canRedo());
 
+    public readonly canMoveNext = computed(() => {
+        const selectedItem = this.selectedItem();
+        const items = this.activePage().items;
+        if (!this.editMode() || !selectedItem) {
+            return false;
+        }
+
+        return items.indexOf(selectedItem) < items.length - 1;
+    });
+
+    public readonly canMovePrevious = computed(() => {
+        const selectedItem = this.selectedItem();
+        const items = this.activePage().items;
+        if (!this.editMode() || !selectedItem) {
+            return false;
+        }
+
+        return items.indexOf(selectedItem) > 0;
+    });
+
     public ngOnInit(): void {
         this.commandHandler.clear();
-
         this.activeRoute.queryParams.pipe(first()).subscribe(params => {
             if (params.page) {
                 this.setActivePage(params.page);
@@ -157,54 +172,26 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     }
 
     public ngOnDestroy(): void {
+        this.window.removeEventListener('resize', this.updateViewPortSize);
         this.service.save().subscribe();
         this.toolbar.clear();
         this.leaveLiveMode();
     }
 
     public setActivePage(arg: DashboardPage | string): void {
-        const name = (typeof arg === 'string') ? arg : arg.name;
+        const name = typeof arg === 'string' ? arg : arg.name;
         this.service.setActivePage(name);
     }
 
-    public toggleSelection(column: DashboardColumn, $event?: MouseEvent): void {
-        if (this.selections().indexOf(column.id) >= 0) {
-            this.selections.update(state => state.filter(item => item !== column.id));
-        } else {
-            this.selections.set([column.id]);
-        }
-    }
-
-    public isSelected(column: DashboardColumn): boolean {
-        return this.selections().indexOf(column.id) >= 0;
-    }
-
-    public getSources(column: DashboardColumn): string[] {
-        const item = column.item;
-        if (this.isDashboardChart(item)) {
-            return item.sources.map(source => source.label);
-        }
-
-        return [];
-    }
-
-    public changeSource(column: DashboardColumn, label: string): void {
-        const item = column.item;
-        if (this.isDashboardChart(item)) {
-            this.selectedSources.set(
-                item.id,
-                item.sources.findIndex(source => source.label === label),
-            );
-        }
-    }
-
-    public getChartType(column: DashboardColumn): DashboardChartType | undefined {
-        const item = column.item;
-        if (this.isDashboardChart(item)) {
-            return item.chartType;
-        }
-
-        return undefined;
+    public toggleSelection($event: Event | undefined, chart: DashboardChartItem): void {
+        const page = this.activePage();
+        page.items.forEach(item => {
+            if (item === chart) {
+                item.selected.update(state => !state);
+            } else if (item.selected()) {
+                item.selected.set(false);
+            }
+        });
     }
 
     public addNew(): void {
@@ -232,166 +219,35 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                 this.commandHandler.execute(
                     new DeleteItemCommand(this.service, this.activePage(), this.selectedItems()),
                 );
-
-                this.selectedItems().forEach(item => {
-                    this.selections.update(state => state.filter(value => value !== item.id));
-                    this.selectedSources.delete(item.id);
-                });
             } else {
                 this.commandHandler.execute(new DeletePageCommand(this.service, this.activePage()));
-                this.selections.set([]);
-                this.selectedSources.clear();
             }
         } catch (error) {
             this.notify.error(error);
         }
     }
 
-    public canMoveLeft(): boolean {
-        const selectedItem = this.selectedItem();
-        return this.editMode() && selectedItem != null && this.service.canMoveLeft(this.activePage(), selectedItem);
-    }
-
-    public moveLeft(): void {
+    public moveNext(): void {
         try {
-            this.commandHandler.execute(new MoveLeftCommand(this.service, this.activePage(), this.selectedItem()!));
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
-    public canMoveRight(): boolean {
-        const selectedItem = this.selectedItem();
-        return this.editMode() && selectedItem != null && this.service.canMoveRight(this.activePage(), selectedItem);
-    }
-
-    public moveRight(): void {
-        try {
-            this.commandHandler.execute(new MoveRightCommand(this.service, this.activePage(), this.selectedItem()!));
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
-    public canMoveUp(): boolean {
-        const selectedItem = this.selectedItem();
-        return this.editMode() && selectedItem != null && this.service.canMoveUp(this.activePage(), selectedItem);
-    }
-
-    public moveUp(): void {
-        try {
-            this.commandHandler.execute(new MoveUpCommand(this.service, this.activePage(), this.selectedItem()!));
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
-    public canMoveDown(): boolean {
-        const selectedItem = this.selectedItem();
-        return this.editMode() && selectedItem != null && this.service.canMoveDown(this.activePage(), selectedItem);
-    }
-
-    public moveDown(): void {
-        try {
-            this.commandHandler.execute(new MoveDownCommand(this.service, this.activePage(), this.selectedItem()!));
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
-    public getColor(column: DashboardColumn) {
-        let color: string | undefined;
-
-        try {
-            const item = column.item;
-            if (this.isDashboardChart(item)) {
-                const value = item.sources[this.selectedSources.get(column.id) ?? 0].color;
-                if (typeof value === 'string') {
-                    color = value;
-                }
+            const item = this.selectedItem();
+            if (!item) {
+                return;
             }
-        } catch (error) {
-            this.notify.log(LogType.Error, error);
-        }
 
-        return color ?? '#ffffff';
-    }
-
-    public changeColor(column: DashboardColumn, color: string): void {
-        try {
-            this.commandHandler.execute(
-                new SetColorCommand(
-                    this.service,
-                    this.activePage(),
-                    column.item,
-                    this.selectedSources.get(column.id) ?? 0,
-                    color,
-                ),
-            );
+            this.commandHandler.execute(new MoveNextCommand(this.service, this.activePage(), item));
         } catch (error) {
             this.notify.error(error);
         }
     }
 
-    public changeChartType(column: DashboardColumn, value: string): void {
+    public movePrevious(): void {
         try {
-            this.commandHandler.execute(
-                new SetChartTypeCommand(this.service, this.activePage(), column.item, value as DashboardChartType),
-            );
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
+            const item = this.selectedItem();
+            if (!item) {
+                return;
+            }
 
-    public getMin(column: DashboardColumn): string {
-        const item = column.item;
-        if (this.isDashboardChart(item)) {
-            return typeof item.min === 'number' && !Number.isNaN(item.min)
-                ? convertToString(item.min, this.translate.currentLang)
-                : '-';
-        }
-
-        return '-';
-    }
-
-    public changeMin(column: DashboardColumn, value: string): void {
-        try {
-            this.commandHandler.execute(
-                new SetMinMaxCommand(
-                    this.service,
-                    this.activePage(),
-                    column.item as DashboardChart,
-                    Number(value),
-                    undefined,
-                ),
-            );
-        } catch (error) {
-            this.notify.error(error);
-        }
-    }
-
-    public getMax(column: DashboardColumn): string {
-        const item = column.item;
-        if (this.isDashboardChart(item)) {
-            return typeof item.max === 'number' && item.max && !Number.isNaN(item.max)
-                ? convertToString(item.max, this.translate.currentLang)
-                : '-';
-        }
-
-        return '-';
-    }
-
-    public changeMax(column: DashboardColumn, value: string): void {
-        try {
-            this.commandHandler.execute(
-                new SetMinMaxCommand(
-                    this.service,
-                    this.activePage(),
-                    column.item as DashboardChart,
-                    undefined,
-                    Number(value),
-                ),
-            );
+            this.commandHandler.execute(new MovePreviousCommand(this.service, this.activePage(), item));
         } catch (error) {
             this.notify.error(error);
         }
@@ -411,14 +267,51 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
 
     public addToStart(): Observable<void> {
         for (const item of this.selectedItems()) {
-            if (this.isDashboardChart(item)) {
-                if (!this.start.add('Dashboard', `DB.${item.id}`, { chart: item })) {
-                    return EMPTY;
-                }
+            if (
+                !this.start.add('Chart', `DB.${item.id}`, {
+                    chart: {
+                        id: item.id,
+                        label: item.label,
+                        chartType: item.chartType(),
+                        min: item.min,
+                        max: item.max,
+                        sources: [...item.sources],
+                    } satisfies DashboardChart,
+                    requests: this.getRequests(item.sources),
+                    page: this.service.activePage().name,
+                    href: `/dashboard?page=${this.service.activePage().name}`,
+                })
+            ) {
+                return EMPTY;
             }
         }
 
         return this.start.save();
+    }
+
+    private getRequests(sources: DashboardSource[]): LiveRequest[] {
+        const results: LiveRequest[] = [];
+        for (const request of this.activePage().requests) {
+            let result: LiveRequest | undefined;
+            for (const node of request.nodes) {
+                for (const source of sources) {
+                    if (source.node?.nodeId === node.nodeId) {
+                        if (!result) {
+                            result = { ...request, nodes: [] };
+                        }
+
+                        result.nodes.push({ ...node });
+                        break;
+                    }
+                }
+            }
+
+            if (result) {
+                results.push(result);
+            }
+        }
+
+        return results;
     }
 
     private leaveLiveMode(): void {
@@ -456,10 +349,6 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         }, 0);
     }
 
-    private findItem(id: string): DashboardItem | undefined {
-        return this.activePage().items.find(item => item.id === id);
-    }
-
     private openWebSocket(): void {
         const page = this.activePage();
         if (page && page.requests && page.requests.length > 0) {
@@ -481,11 +370,22 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private createCharts(query: ReadonlyArray<ElementRef<HTMLCanvasElement>>): void {
         this.charts.clear();
         this.activePage().items.forEach(item => {
-            if (this.isDashboardChart(item)) {
-                const canvas = query.find(element => element.nativeElement.id === item.id);
-                if (canvas) {
-                    this.charts.set(item.id, this.createChart(item, canvas.nativeElement));
-                }
+            const canvas = query.find(element => element.nativeElement.id === item.id);
+            if (canvas) {
+                this.charts.set(
+                    item.id,
+                    this.createChart(
+                        {
+                            id: item.id,
+                            label: item.label,
+                            chartType: item.chartType(),
+                            min: item.min,
+                            max: item.max,
+                            sources: [...item.sources],
+                        },
+                        canvas.nativeElement,
+                    ),
+                );
             }
         });
     }
@@ -507,7 +407,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                 continue;
             }
 
-            const cfg = this.charts.get(tuple.item.id);
+            const cfg = this.charts.get(tuple.chart.id);
             if (!cfg) {
                 continue;
             }
@@ -515,4 +415,25 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
             this.updateChart(node, tuple, cfg);
         }
     }
+
+    private getViewPortSize(): ViewPortSize {
+        const width = this.window.innerWidth;
+        if (width < 576) {
+            return ViewPortSize.xs;
+        }
+
+        if (width < 768) {
+            return ViewPortSize.sm;
+        }
+
+        if (width < 992) {
+            return ViewPortSize.md;
+        }
+
+        return ViewPortSize.lg;
+    }
+
+    private readonly updateViewPortSize = () => {
+        this.viewPortSize.set(this.getViewPortSize());
+    };
 }

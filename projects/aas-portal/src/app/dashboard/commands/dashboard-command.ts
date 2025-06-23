@@ -7,12 +7,11 @@
  *****************************************************************************/
 
 import { Command } from '../../types/command';
-import { DashboardChart, DashboardItem, DashboardItemType, DashboardRow, DashboardState } from '../dashboard-types';
 import { DashboardService } from '../dashboard.service';
 
 export abstract class DashboardCommand extends Command {
-    private preState!: DashboardState;
-    private postState!: DashboardState;
+    private preState!: string;
+    private postState!: string;
 
     protected constructor(
         name: string,
@@ -39,26 +38,5 @@ export abstract class DashboardCommand extends Command {
 
     protected onAbort(): void {
         this.service.setMemento(this.preState);
-    }
-
-    protected isChart(item: DashboardItem): item is DashboardChart {
-        return item.type === DashboardItemType.Chart;
-    }
-
-    protected getRows(grid: DashboardItem[][]): DashboardRow[] {
-        return grid.map(row => ({
-            columns: row.map(item => ({
-                id: item.id,
-                item: item,
-                itemType: item.type,
-            })),
-        }));
-    }
-
-    protected validateItems(grid: DashboardItem[][]): void {
-        grid.forEach((row, y) => {
-            row.forEach((item, x) => (item.position.x = x));
-            row.forEach(item => (item.position.y = y));
-        });
     }
 }

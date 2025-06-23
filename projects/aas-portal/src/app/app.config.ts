@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection } from '@angular/core';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -21,7 +21,7 @@ import {
 
 import { HttpLoaderFactory } from './http-loader-factory';
 import { routes } from './app.routes';
-import { DashboardCardComponent } from './dashboard/dashboard-card.component';
+import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
 
 export const appConfig: ApplicationConfig = {
@@ -55,8 +55,8 @@ export const appConfig: ApplicationConfig = {
                     component: CustomerFeedbackCardComponent,
                 },
                 {
-                    name: 'Dashboard',
-                    component: DashboardCardComponent,
+                    name: 'Chart',
+                    component: ChartComponent,
                 },
             ] satisfies StartTileType[],
         },
@@ -64,5 +64,6 @@ export const appConfig: ApplicationConfig = {
             provide: START_TILES,
             useValue: [],
         },
+        provideExperimentalZonelessChangeDetection(),
     ],
 };

@@ -176,14 +176,18 @@
         "EMPTY": "Das Dashboard ist leer.",
         "LABEL_NAME": "Name",
         "LABEL_COLOR": "Farbe",
-        "LABEL_CHART_TYPE": "Diagrammtyp",
+        "LABEL_CHART_TYPE": "Typ",
         "LABEL_EDIT_MODE": "Bearbeiten",
-        "OPTION_TIMELINE_CHART": "Zeitdiagramm",
-        "OPTION_BAR_VERTICAL_CHART": "Balkendiagramm vertikal",
-        "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
+        "Line": "Zeitdiagramm",
+        "BarVertical": "Balkendiagramm vertikal",
+        "BarHorizontal": "Balkendiagramm horizontal",
+        "TimeSeries": "Zeitserie",
         "LABEL_MIN": "Min",
         "LABEL_MAX": "Max",
         "PROMPT_DASHBOARD_NAME": "Geben Sie einen Namen für das Dashboard ein."
+    },
+    "Chart": {
+        "SHOW": "Anzeigen..."
     },
     "AddEndpointForm": {
         "CAPTION": "AAS-Endpunkt hinzufügen",
