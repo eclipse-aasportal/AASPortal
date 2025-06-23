@@ -10,22 +10,22 @@ import { ChangeDetectionStrategy, Component, effect, ElementRef, input, viewChil
 import { WebSocketSubject } from 'rxjs/webSocket';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
-import { Dashboard } from './dashboard';
-import { DashboardApiService } from './dashboard-api.service';
+import { Dashboard } from '../dashboard';
+import { DashboardApiService } from '../dashboard-api.service';
 import { WebSocketFactoryService } from 'aas-lib';
-import { ChartConfigurationTuple, DashboardChart } from './dashboard-types';
+import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'fhg-dashboard-card',
-    templateUrl: './dashboard-card.component.html',
-    styleUrl: './dashboard-card.component.scss',
+    selector: 'fhg-chart',
+    templateUrl: './chart.component.html',
+    styleUrl: './chart.component.scss',
     standalone: true,
-    imports: [],
+    imports: [TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardCardComponent extends Dashboard {
+export class ChartComponent extends Dashboard {
     private configuration?: ChartConfigurationTuple;
-    private requests: LiveRequest[] = [];
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
 
     public constructor(
@@ -35,16 +35,29 @@ export class DashboardCardComponent extends Dashboard {
         super(api);
 
         effect(() => {
-            const item = this.item();
-            item ? this.enterLiveMode(item) : this.leaveLiveMode();
+            const chart = this.chart();
+            const requests = this.requests();
+            if (this.configuration) {
+                this.leaveLiveMode();
+            }
+
+            if (chart) {
+                this.enterLiveMode(chart, requests);
+            }
         });
     }
 
-    public readonly chartContainer = viewChild<ElementRef<HTMLCanvasElement>>('chartContainer');
+    public readonly chartContainer = viewChild<ElementRef<HTMLCanvasElement>>('chart');
 
-    public readonly item = input<DashboardChart>();
+    public readonly chart = input<DashboardChart>();
 
-    private enterLiveMode(item: DashboardChart): void {
+    public readonly requests = input<LiveRequest[]>([]);
+
+    public readonly page = input('');
+
+    public readonly href = input('');
+
+    private enterLiveMode(chart: DashboardChart, requests: LiveRequest[]): void {
         if (this.configuration) {
             return;
         }
@@ -53,10 +66,10 @@ export class DashboardCardComponent extends Dashboard {
             try {
                 this.openWebSocket();
                 const chartContainer = this.chartContainer();
-                if (chartContainer && this.isDashboardChart(item)) {
-                    this.configuration = this.createChart(item, chartContainer.nativeElement);
+                if (chartContainer) {
+                    this.configuration = this.createChart(chart, chartContainer.nativeElement);
                     if (this.webSocketSubject) {
-                        for (const request of this.requests) {
+                        for (const request of requests) {
                             this.webSocketSubject.next(this.createMessage(request));
                         }
                     }
@@ -79,14 +92,11 @@ export class DashboardCardComponent extends Dashboard {
     }
 
     private openWebSocket(): void {
-        const item = this.item();
-        if (item && this.requests.length > 0) {
-            this.webSocketSubject = this.webServiceFactory.create();
-            this.webSocketSubject.subscribe({
-                next: this.socketOnMessage,
-                error: this.socketOnError,
-            });
-        }
+        this.webSocketSubject = this.webServiceFactory.create();
+        this.webSocketSubject.subscribe({
+            next: this.socketOnMessage,
+            error: this.socketOnError,
+        });
     }
 
     private closeWebSocket(): void {
@@ -97,12 +107,12 @@ export class DashboardCardComponent extends Dashboard {
     }
 
     private socketOnMessage = (data: WebSocketData): void => {
-        if (!this.configuration){
+        if (!this.configuration) {
             return;
         }
 
         if (data.type === 'LiveNode[]') {
-            for (const node of (data.data as LiveNode[])) {
+            for (const node of data.data as LiveNode[]) {
                 const tuple = this.map.get(node.nodeId);
                 if (!tuple) {
                     continue;

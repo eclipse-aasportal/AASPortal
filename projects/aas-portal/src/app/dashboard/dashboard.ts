@@ -17,40 +17,38 @@ import {
     ChartConfigurationTuple,
     DashboardChart,
     DashboardChartType,
-    DashboardItem,
-    DashboardItemType,
     TimeSeries,
     UpdateTuple,
 } from './dashboard-types';
 
 export abstract class Dashboard {
-    protected constructor(public readonly api: DashboardApiService) { }
+    protected constructor(public readonly api: DashboardApiService) {}
 
     protected readonly map = new Map<string, UpdateTuple>();
 
-    protected createChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
-        switch (item.chartType) {
+    protected createChart(chart: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+        switch (chart.chartType) {
             case DashboardChartType.Line:
-                return this.createLineChart(item, canvas);
+                return this.createLineChart(chart, canvas);
             case DashboardChartType.BarVertical:
-                return this.createVerticalBarChart(item, canvas);
+                return this.createVerticalBarChart(chart, canvas);
             case DashboardChartType.BarHorizontal:
-                return this.createHorizontalBarChart(item, canvas);
+                return this.createHorizontalBarChart(chart, canvas);
             case DashboardChartType.TimeSeries:
-                return this.createTimeSeriesChart(item, canvas);
+                return this.createTimeSeriesChart(chart, canvas);
             default:
-                throw new Error(`Chart type "${item.chartType}" is not supported.`);
+                throw new Error(`Chart type "${chart.chartType}" is not supported.`);
         }
     }
 
     protected updateChart(node: LiveNode, tuple: UpdateTuple, cfg: ChartConfigurationTuple): void {
-        switch (tuple.item.chartType) {
+        switch (tuple.chart.chartType) {
             case DashboardChartType.Line:
-                this.updateLineChart(tuple.item, cfg, tuple.dataset, node);
+                this.updateLineChart(cfg, tuple.dataset, node);
                 break;
             case DashboardChartType.BarHorizontal:
             case DashboardChartType.BarVertical:
-                this.updateBarChart(tuple.item, cfg, tuple.dataset, node);
+                this.updateBarChart(cfg, tuple.dataset, node);
                 break;
         }
     }
@@ -62,11 +60,7 @@ export abstract class Dashboard {
         };
     }
 
-    protected isDashboardChart(value?: DashboardItem | null): value is DashboardChart {
-        return value?.type === DashboardItemType.Chart;
-    }
-
-    private updateLineChart(item: DashboardChart, tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
+    private updateLineChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
         if (tuple) {
             const data = dataset.data as number[];
             const labels = tuple.configuration.data.labels!;
@@ -94,7 +88,7 @@ export abstract class Dashboard {
         }
     }
 
-    private updateBarChart(item: DashboardChart, tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
+    private updateBarChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
         if (tuple) {
             const data = dataset.data as number[];
             let y = 0;
@@ -110,7 +104,7 @@ export abstract class Dashboard {
         }
     }
 
-    private createLineChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createLineChart(chart: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'line',
             data: {
@@ -118,18 +112,19 @@ export abstract class Dashboard {
                 datasets: [],
             },
             options: {
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 scales: {
                     y: {
-                        min: item.min,
-                        max: item.max,
+                        min: chart.min,
+                        max: chart.max,
                     },
                 },
             },
         };
 
         let length = 0;
-        for (const source of item.sources) {
+        for (const source of chart.sources) {
             const dataset: ChartDataset<ChartType, number[]> = {
                 type: 'line',
                 label: source.label,
@@ -141,7 +136,7 @@ export abstract class Dashboard {
 
             configuration.data.datasets.push(dataset);
             if (source.node) {
-                this.map.set(source.node.nodeId, { item, dataset });
+                this.map.set(source.node.nodeId, { chart, dataset });
             }
 
             dataset.data = this.getInitialLineChartData(source.element as aas.Property);
@@ -155,26 +150,27 @@ export abstract class Dashboard {
         return { chart: new Chart(canvas, configuration), configuration };
     }
 
-    private createVerticalBarChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createVerticalBarChart(chart: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'bar',
             data: {
-                labels: [item.label],
+                labels: [chart.label],
                 datasets: [],
             },
             options: {
                 indexAxis: 'x',
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 scales: {
                     y: {
-                        min: item.min,
-                        max: item.max,
+                        min: chart.min,
+                        max: chart.max,
                     },
                 },
             },
         };
 
-        for (const source of item.sources) {
+        for (const source of chart.sources) {
             const dataset: ChartDataset<ChartType, number[]> = {
                 type: 'bar',
                 label: source.label,
@@ -186,7 +182,7 @@ export abstract class Dashboard {
 
             configuration.data.datasets.push(dataset);
             if (source.node) {
-                this.map.set(source.node.nodeId, { item, dataset });
+                this.map.set(source.node.nodeId, { chart, dataset });
             }
 
             dataset.data[0] = this.getInitialBarChartData(source.element as aas.Property);
@@ -195,26 +191,27 @@ export abstract class Dashboard {
         return { chart: new Chart(canvas, configuration), configuration };
     }
 
-    private createHorizontalBarChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createHorizontalBarChart(chart: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'bar',
             data: {
-                labels: [item.label],
+                labels: [chart.label],
                 datasets: [],
             },
             options: {
                 indexAxis: 'y',
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
                 scales: {
                     x: {
-                        min: item.min,
-                        max: item.max,
+                        min: chart.min,
+                        max: chart.max,
                     },
                 },
             },
         };
 
-        for (const source of item.sources) {
+        for (const source of chart.sources) {
             const dataset: ChartDataset<ChartType, number[]> = {
                 type: 'bar',
                 label: source.label,
@@ -226,7 +223,7 @@ export abstract class Dashboard {
 
             configuration.data.datasets.push(dataset);
             if (source.node) {
-                this.map.set(source.node.nodeId, { item, dataset });
+                this.map.set(source.node.nodeId, { chart, dataset });
             }
 
             dataset.data[0] = this.getInitialBarChartData(source.element as aas.Property);
@@ -235,7 +232,7 @@ export abstract class Dashboard {
         return { chart: new Chart(canvas, configuration), configuration };
     }
 
-    private createTimeSeriesChart(item: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
+    private createTimeSeriesChart(chart: DashboardChart, canvas: HTMLCanvasElement): ChartConfigurationTuple {
         const configuration: ChartConfiguration<ChartType, number[], string> = {
             type: 'line',
             data: {
@@ -246,8 +243,8 @@ export abstract class Dashboard {
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        min: item.min,
-                        max: item.max,
+                        min: chart.min,
+                        max: chart.max,
                     },
                 },
                 plugins: {
@@ -259,7 +256,7 @@ export abstract class Dashboard {
             },
         };
 
-        for (const source of item.sources) {
+        for (const source of chart.sources) {
             if (source.url) {
                 const dataset: ChartDataset<ChartType, number[]> = {
                     type: 'line',
@@ -274,7 +271,7 @@ export abstract class Dashboard {
 
                 configuration.data.datasets.push(dataset);
                 if (source.node) {
-                    this.map.set(source.node.nodeId, { item, dataset });
+                    this.map.set(source.node.nodeId, { chart, dataset });
                 }
 
                 this.getTimeSeriesData(source.url, dataset.data, configuration.data.labels!);

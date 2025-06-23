@@ -83,7 +83,7 @@ describe('AASComponent', () => {
 
         api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'putDocument']);
         download = jasmine.createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
-        dashboard = jasmine.createSpyObj<DashboardService>(['add'], {
+        dashboard = jasmine.createSpyObj<DashboardService>(['addChart'], {
             activePage: signal(pages[0]).asReadonly(),
             pages: signal(pages).asReadonly(),
         });
@@ -192,7 +192,7 @@ describe('AASComponent', () => {
             spyOn(router, 'navigateByUrl').and.resolveTo(true);
             expect(component.canAddToDashboard()).toBeTrue();
             component.addToDashboard(DashboardChartType.BarVertical);
-            expect(dashboard.add).toHaveBeenCalled();
+            expect(dashboard.addChart).toHaveBeenCalled();
             expect(router.navigateByUrl).toHaveBeenCalled();
         });
     });

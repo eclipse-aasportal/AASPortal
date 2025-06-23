@@ -21,8 +21,6 @@ import {
     TemplateRef,
     computed,
     effect,
-    signal,
-    untracked,
     viewChild,
 } from '@angular/core';
 
@@ -107,7 +105,7 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public readonly dashboardPages = this.dashboard.pages;
 
-    public readonly dashboardPage = signal(this.dashboard.activePage());
+    public readonly dashboardPage = this.dashboard.activePage;
 
     public readonly selectedElements = this.store.selectedElements$;
 
@@ -196,7 +194,7 @@ export class AASComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.dashboard.add(page.name, document, this.store.selectedElements, chartType as DashboardChartType);
+        this.dashboard.addChart(page.name, document, this.store.selectedElements, chartType as DashboardChartType);
         this.router.navigate(['/dashboard'], { queryParams: { page } });
     }
 
