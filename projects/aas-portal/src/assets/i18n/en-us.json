@@ -187,6 +187,9 @@
         "LABEL_MAX": "Max",
         "PROMPT_DASHBOARD_NAME": "Enter a name for the dashboard."
         },
+    "Chart": {
+        "SHOW": "Show..."
+    },
     "AddEndpointForm": {
         "CAPTION": "Add AAS Endpoint",
         "FileSystem": "File system",
@@ -366,6 +369,5 @@
         "TITLE": "AAS browser"
     },
     "Laser": {
-        
     }
 }

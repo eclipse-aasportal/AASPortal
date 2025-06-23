@@ -36,24 +36,6 @@
             }
         },
         {
-            "name": "Run aas-node",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceFolder}/projects/aas-node/dist/aas-node.js",
-            "cwd": "${workspaceFolder}",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "env": {
-                "NODE_ENV": "development",
-                "AAS_NODE_PORT": "1337",
-                "CONTENT_ROOT": "projects/aas-node/dist",
-                "WEB_ROOT": "projects/aas-portal/dist",
-                "ASSETS": "projects/aas-node/src/assets",
-                "ENDPOINTS": "[\"file:///endpoints/samples?name=Samples\"]"
-            }
-        },
-        {
             "name": "Test aas-portal",
             "type": "chrome",
             "request": "launch",

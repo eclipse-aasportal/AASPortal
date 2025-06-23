@@ -1067,9 +1067,9 @@ export function getIEC61360Content(
             }
         }
     } else {
-        const semanticId = (referable as aas.HasSemantics).semanticId;
+        const semanticId = (referable as aas.HasSemantics).semanticId?.keys.at(0)?.value;
         if (semanticId) {
-            const conceptDescription = selectReferable(env, semanticId);
+            const conceptDescription = env.conceptDescriptions.find(cd => cd.id === semanticId);
             if (conceptDescription) {
                 return getIEC61360Content(env, conceptDescription);
             }
