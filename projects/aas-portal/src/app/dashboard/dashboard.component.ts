@@ -268,7 +268,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     public addToStart(): Observable<void> {
         for (const item of this.selectedItems()) {
             if (
-                !this.start.add('Dashboard', `DB.${item.id}`, {
+                !this.start.add('Chart', `DB.${item.id}`, {
                     chart: {
                         id: item.id,
                         label: item.label,
@@ -278,6 +278,8 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                         sources: [...item.sources],
                     } satisfies DashboardChart,
                     requests: this.getRequests(item.sources),
+                    page: this.service.activePage().name,
+                    href: `/dashboard?page=${this.service.activePage().name}`,
                 })
             ) {
                 return EMPTY;

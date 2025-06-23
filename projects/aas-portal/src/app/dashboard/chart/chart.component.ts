@@ -14,16 +14,17 @@ import { Dashboard } from '../dashboard';
 import { DashboardApiService } from '../dashboard-api.service';
 import { WebSocketFactoryService } from 'aas-lib';
 import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'fhg-dashboard-card',
-    templateUrl: './dashboard-card.component.html',
-    styleUrl: './dashboard-card.component.scss',
+    selector: 'fhg-chart',
+    templateUrl: './chart.component.html',
+    styleUrl: './chart.component.scss',
     standalone: true,
-    imports: [],
+    imports: [TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardCardComponent extends Dashboard {
+export class ChartComponent extends Dashboard {
     private configuration?: ChartConfigurationTuple;
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
 
@@ -51,6 +52,10 @@ export class DashboardCardComponent extends Dashboard {
     public readonly chart = input<DashboardChart>();
 
     public readonly requests = input<LiveRequest[]>([]);
+
+    public readonly page = input('');
+
+    public readonly href = input('');
 
     private enterLiveMode(chart: DashboardChart, requests: LiveRequest[]): void {
         if (this.configuration) {
