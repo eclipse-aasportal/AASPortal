@@ -186,6 +186,9 @@
         "LABEL_MAX": "Max",
         "PROMPT_DASHBOARD_NAME": "Geben Sie einen Namen für das Dashboard ein."
     },
+    "Chart": {
+        "SHOW": "Anzeigen..."
+    },
     "AddEndpointForm": {
         "CAPTION": "AAS-Endpunkt hinzufügen",
         "FileSystem": "Dateisystem",
