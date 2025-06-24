@@ -10,6 +10,8 @@ import { marked } from 'marked';
 import { EMPTY, Observable } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { httpResource } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -24,8 +26,6 @@ import {
 } from '@angular/core';
 
 import { StartService, StartTile, ToolbarService } from 'aas-lib';
-import { httpResource } from '@angular/common/http';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface StartTileItem extends StartTile {
     component: Type<unknown>;
@@ -42,7 +42,7 @@ export interface StartTileItem extends StartTile {
 })
 export class StartComponent implements OnDestroy {
     private readonly items$ = signal<StartTileItem[]>([]);
-    private readonly md = httpResource.text('/start/README.md');
+    private readonly md = httpResource.text(() => '/start/README.md');
     private readonly readme$ = signal<SafeHtml>('');
 
     public constructor(

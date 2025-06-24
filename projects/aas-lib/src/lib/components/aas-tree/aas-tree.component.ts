@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { DOCUMENT, NgClass, NgStyle } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
 import { Route, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -22,6 +22,7 @@ import {
     effect,
     input,
     output,
+    DOCUMENT,
 } from '@angular/core';
 
 import {

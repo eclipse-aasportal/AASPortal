@@ -124,7 +124,7 @@ describe('CommandHandlerService', () => {
 
     it('aborts a failed command', () => {
         const abortSpy = jasmine.createSpy('abort');
-        expect(() => service.execute(new FailCommand(abortSpy))).toThrowError();
+        expect(() => service.execute(new FailCommand(abortSpy))).toThrow();
         expect(abortSpy).toHaveBeenCalled();
     });
 });

@@ -19,7 +19,7 @@ describe('JsonWriterV2', function () {
         });
 
         it('is not implemented', () => {
-            expect(() => writer.write(aasEnvironment)).toThrowError();
+            expect(() => writer.write(aasEnvironment)).toThrow();
         });
     });
 
@@ -31,7 +31,7 @@ describe('JsonWriterV2', function () {
         });
 
         it('does not support writing an AAS', () => {
-            expect(() => writer.convert(aasEnvironment.assetAdministrationShells[0])).toThrowError();
+            expect(() => writer.convert(aasEnvironment.assetAdministrationShells[0])).toThrow();
         });
 
         it('writes a submodel', () => {
