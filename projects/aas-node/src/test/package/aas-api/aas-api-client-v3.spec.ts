@@ -178,7 +178,7 @@ describe('AASApiClientV3', () => {
                 },
             };
 
-            await expect(client.invoke(env, operation)).rejects.toThrowError();
+            await expect(client.invoke(env, operation)).rejects.toThrow();
         });
     });
 });

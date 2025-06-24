@@ -129,7 +129,7 @@ describe('MySqlIndex', () => {
 
         it('throws an error if endpoint does not exist', async () => {
             connection.query.mockResolvedValue([[], []]);
-            await expect(index.getEndpoint('Unknown')).rejects.toThrowError();
+            await expect(index.getEndpoint('Unknown')).rejects.toThrow();
             expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Unknown']);
         });
     });
