@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -42,6 +43,7 @@ describe('DocumentsService', () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
         });
 

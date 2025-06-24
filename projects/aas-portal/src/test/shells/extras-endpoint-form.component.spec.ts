@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -33,7 +34,7 @@ describe('ExtrasEndpointFormComponent', () => {
         service.scan.and.returnValue(of(void 0));
 
         await TestBed.configureTestingModule({
-            providers: [NgbActiveModal],
+            providers: [NgbActiveModal, provideZonelessChangeDetection()],
             imports: [
                 TranslateModule.forRoot({
                     loader: {

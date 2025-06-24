@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { IndexChangeService } from 'aas-lib';
 import { AboutCardComponent } from '../../app/about/about-card.component';
@@ -30,6 +30,7 @@ describe('AboutCardComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

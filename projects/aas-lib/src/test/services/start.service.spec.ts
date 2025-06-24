@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
@@ -55,8 +55,10 @@ describe('StartService', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
+                provideZonelessChangeDetection(),
             ],
         });
+        
         service = TestBed.inject(StartService);
     });
 

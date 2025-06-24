@@ -6,8 +6,10 @@
  *
  *****************************************************************************/
 
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthResult } from 'aas-core';
@@ -16,7 +18,6 @@ import { of } from 'rxjs';
 import { AuthApiService } from '../../../lib/features/auth/auth-api.service';
 import { ERRORS } from '../../../lib/errors';
 import { ProfileFormComponent } from '../../../lib/features/auth/profile-form/profile-form.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ProfileFormComponent', () => {
     let component: ProfileFormComponent;
@@ -26,14 +27,22 @@ describe('ProfileFormComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-    imports: [TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useClass: TranslateFakeLoader,
-            },
-        })],
-    providers: [NgbModal, NgbActiveModal, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
+            providers: [
+                NgbModal,
+                NgbActiveModal,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
+            ],
+        });
 
         modal = TestBed.inject(NgbActiveModal);
         api = TestBed.inject(AuthApiService);
@@ -61,21 +70,21 @@ describe('ProfileFormComponent', () => {
         component.submit();
     });
 
-    it('does not update the profile if e-mail is empty', fakeAsync(async () => {
+    it('does not update the profile if e-mail is empty', async () => {
         component.id.set('');
         await component.submit();
         expect(component.messages().length).toEqual(1);
         expect(component.messages()[0]).toEqual(ERRORS.EMAIL_REQUIRED);
-    }));
+    });
 
-    it('does not update the profile if e-mail is invalid', fakeAsync(async () => {
+    it('does not update the profile if e-mail is invalid', async () => {
         component.id.set('invalidEMail');
         await component.submit();
         expect(component.messages().length).toEqual(1);
         expect(component.messages()[0]).toEqual(ERRORS.INVALID_EMAIL);
-    }));
+    });
 
-    it('does not update the profile if password are not equal', fakeAsync(async () => {
+    it('does not update the profile if password are not equal', async () => {
         component.id.set('john.doe@email.com');
         component.name.set('John Doe');
         component.password1.set('1234.zyx');
@@ -83,13 +92,13 @@ describe('ProfileFormComponent', () => {
         await component.submit();
         expect(component.messages().length).toEqual(1);
         expect(component.messages()[0]).toEqual(ERRORS.PASSWORDS_NOT_EQUAL);
-    }));
+    });
 
-    it('does not update the profile if password is invalid', fakeAsync(async () => {
+    it('does not update the profile if password is invalid', async () => {
         component.id.set('john.doe@email.com');
         component.password1.set('123');
         await component.submit();
         expect(component.messages().length).toEqual(1);
         expect(component.messages()[0]).toEqual(ERRORS.INVALID_PASSWORD);
-    }));
+    });
 });

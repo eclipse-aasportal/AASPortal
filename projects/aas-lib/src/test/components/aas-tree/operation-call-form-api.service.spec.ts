@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { AASDocument, aas } from 'aas-core';
 import { OperationCallFormApiService } from '../../../lib/components/operation-call-form/operation-call-form-api.service';
-import { provideHttpClient } from '@angular/common/http';
 
 describe('OperationCallFormApiService', function () {
     let service: OperationCallFormApiService;
@@ -18,7 +19,7 @@ describe('OperationCallFormApiService', function () {
 
     beforeEach(function () {
         TestBed.configureTestingModule({
-            providers: [OperationCallFormApiService, provideHttpClient(), provideHttpClientTesting()],
+            providers: [OperationCallFormApiService, provideHttpClient(), provideHttpClientTesting(), provideZonelessChangeDetection()],
         });
 
         service = TestBed.inject(OperationCallFormApiService);

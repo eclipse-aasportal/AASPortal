@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { FavoriteComponent } from '../../../lib/components/favorite/favorite.component';
 import { AuthService } from '../../../lib/features/auth/auth.service';
@@ -53,6 +53,7 @@ describe('FavoriteComponent', () => {
                     provide: DocumentsService,
                     useValue: api,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

@@ -90,7 +90,7 @@
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.2",
     "xpath": "^0.0.34",
-    "zone.js": "~0.15.1"
+    "zone.js": "^0.15.1"
   },
   "devDependencies": {
     "@angular-eslint/builder": "20.1.1",

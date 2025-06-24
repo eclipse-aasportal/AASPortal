@@ -17,7 +17,7 @@ import { aas, AASDocument } from 'aas-core';
 import { DocumentsService } from '../../../lib/services/documents.service';
 import { DocumentBrowserComponent } from '../../../lib/features/document-browser/document-browser.component';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, provideZonelessChangeDetection, signal } from '@angular/core';
 import { BrowserComponent, BrowserItem } from '../../../lib/components/browser/browser.component';
 import { AuthService } from '../../../lib/features/auth/auth.service';
 import { StartService } from '../../../lib/services/start.service';
@@ -118,6 +118,7 @@ describe('DocumentBrowserComponent', () => {
                 },
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

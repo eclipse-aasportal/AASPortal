@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { aas, AASDocument, selectElement } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { DocumentsService, NotifyService } from 'aas-lib';
@@ -30,6 +31,7 @@ describe('DeleteCommand', () => {
                     provide: DocumentsService,
                     useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideZonelessChangeDetection(),
             ],
         });
 

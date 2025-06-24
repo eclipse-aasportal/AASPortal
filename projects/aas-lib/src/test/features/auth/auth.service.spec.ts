@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -59,7 +60,6 @@ describe('AuthService', () => {
             window = jasmine.createSpyObj<Window>(['confirm'], { localStorage })
 
             TestBed.configureTestingModule({
-                declarations: [],
                 imports: [
                     TranslateModule.forRoot({
                         loader: {
@@ -83,6 +83,7 @@ describe('AuthService', () => {
                     },
                     provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
+                    provideZonelessChangeDetection(),
                 ],
             });
 

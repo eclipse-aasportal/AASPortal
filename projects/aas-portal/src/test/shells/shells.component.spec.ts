@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AASDocument, WebSocketData, aas } from 'aas-core';
@@ -33,6 +33,7 @@ import { FavoritesList, FavoritesService } from '../../app/shells/favorites.serv
     template: '<div></div>',
     styleUrls: [],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTableComponent {
     public readonly viewMode = input<ViewMode>(ViewMode.List);
@@ -154,6 +155,7 @@ describe('ShellsComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

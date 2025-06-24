@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NotifyService } from '../../../lib/features/notify/notify.service';
 import { AuthService } from '../../../lib/features/auth/auth.service';
 import { AuthComponent } from '../../../lib/features/auth/auth.component';
@@ -34,6 +34,7 @@ describe('AuthComponent', () => {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error', 'info']),
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({
