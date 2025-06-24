@@ -11,7 +11,6 @@ module.exports = function (config) {
             require('karma-jasmine-html-reporter'),
             require('karma-junit-reporter'),
             require('karma-coverage'),
-            
         ],
         client: {
             jasmine: {
@@ -29,7 +28,7 @@ module.exports = function (config) {
             suppressAll: true // removes the duplicated traces
         },
         junitReporter:{
-            outputDir: '../../reports',
+            outputDir: require('path').join(__dirname, '../../reports'),
             outputFile: 'aas-portal.xml',
             useBrowserName: false
         },
