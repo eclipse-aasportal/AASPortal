@@ -6,13 +6,13 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
 import { TemplateService } from 'aas-lib';
-import { signal } from '@angular/core';
 import { TemplateDescriptor } from 'aas-core';
+import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
 
 describe('NewElementFormComponent', () => {
     let component: NewElementFormComponent;
@@ -23,7 +23,7 @@ describe('NewElementFormComponent', () => {
         api = jasmine.createSpyObj<TemplateService>(['getTemplate'], { templates: signal<TemplateDescriptor[]>([]) });
 
         TestBed.configureTestingModule({
-            providers: [NgbActiveModal, { provide: TemplateService, useValue: api }],
+            providers: [NgbActiveModal, { provide: TemplateService, useValue: api }, provideZonelessChangeDetection()],
             imports: [
                 TranslateModule.forRoot({
                     loader: {

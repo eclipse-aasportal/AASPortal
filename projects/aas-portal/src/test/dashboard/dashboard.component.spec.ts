@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -28,6 +28,8 @@ import data from '../assets/test-pages.json';
     imports: [],
     template: '<div></div>',
     styles: [],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestChartEditComponent {
     public readonly item = input.required<DashboardChartItem>();
@@ -99,6 +101,7 @@ describe('DashboardComponent', () => {
                     useValue: service,
                 },
                 provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

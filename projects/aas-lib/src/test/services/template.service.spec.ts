@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZoneChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -28,6 +29,7 @@ describe('TemplateService', () => {
                 { provide: NotifyService, useValue: jasmine.createSpyObj<NotifyService>(['error']) },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
+                provideZoneChangeDetection(),
             ],
         });
 

@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 
@@ -27,6 +28,7 @@ describe('CacheService', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
+                provideZonelessChangeDetection(),
             ],
         });
 

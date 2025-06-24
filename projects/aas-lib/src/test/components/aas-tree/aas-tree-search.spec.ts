@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search';
@@ -18,13 +19,13 @@ describe('AASTreeSearch', function () {
 
     beforeEach(async function () {
         await TestBed.configureTestingModule({
-            declarations: [],
             providers: [
                 {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 AASTreeStore,
+                provideZonelessChangeDetection()
             ],
             imports: [
                 TranslateModule.forRoot({

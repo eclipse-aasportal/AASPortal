@@ -7,14 +7,14 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { TemplateRef } from '@angular/core';
+import { provideZonelessChangeDetection, TemplateRef } from '@angular/core';
 import { ToolbarService } from '../../lib/services/toolbar.service';
 
 describe('ToolbarService', () => {
     let service: ToolbarService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
         service = TestBed.inject(ToolbarService);
     });
 

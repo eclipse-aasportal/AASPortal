@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
@@ -35,6 +35,7 @@ describe('FavoritesFormComponent', () => {
                     provide: FavoritesService,
                     useValue: service,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

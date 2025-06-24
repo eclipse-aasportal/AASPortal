@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, Signal, signal } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
@@ -26,6 +26,7 @@ import { MainComponent } from '../../app/main/main.component';
     selector: 'fhg-auth',
     template: '<div></div>',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAuthComponent {}
 
@@ -42,6 +43,7 @@ class TestLocalizeComponent {
     selector: 'fhg-notify',
     template: '<div></div>',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestNotifyComponent {}
 
@@ -73,6 +75,7 @@ describe('MainComponent', () => {
                     useValue: indexChange,
                 },
                 provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

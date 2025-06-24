@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Command } from '../../app/types/command';
-import { noop } from 'rxjs';
 import { NotifyService } from 'aas-lib';
+import { noop } from 'aas-core';
+import { Command } from '../../app/types/command';
 import { CommandHandlerService } from '../../app/aas/command-handler.service';
 
 class TestCommand extends Command {
@@ -77,8 +78,8 @@ describe('CommandHandlerService', () => {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
+                provideZonelessChangeDetection(),
             ],
-            imports: [],
         });
 
         service = TestBed.inject(CommandHandlerService);

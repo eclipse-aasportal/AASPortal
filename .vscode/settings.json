@@ -62,5 +62,24 @@
             "runMode": "on-demand",
             "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
         }
+    ],
+    "karmaTestExplorer.autoWatchBatchDelay": 1000,
+    "karmaTestExplorer.autoWatchEnabled": false,
+    "karmaTestExplorer.enableExtension": true,
+    "karmaTestExplorer.projectWorkspaces": [
+        {
+            "rootPath": "projects/aas-lib",
+            "projectType": "angular",
+            "karmaConfFilePath": "./karma.conf.cjs",
+            "testFramework": "jasmine",
+            "testsBasePath": "src/test"
+        },
+        {
+            "rootPath": "projects/aas-portal",
+            "projectType": "angular",
+            "karmaConfFilePath": "./karma.conf.cjs",
+            "testFramework": "jasmine",
+            "testsBasePath": "src/test"
+        }
     ]
 }

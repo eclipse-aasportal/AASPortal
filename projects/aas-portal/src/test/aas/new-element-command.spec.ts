@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { aas, AASDocument, selectElement } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
@@ -34,6 +35,7 @@ describe('NewElementCommand', function () {
                     provide: DocumentsService,
                     useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideZonelessChangeDetection(),
             ],
         });
 

@@ -26,7 +26,7 @@ import { AASComponent } from '../../app/aas/aas.component';
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
-import { Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, provideZonelessChangeDetection, signal } from '@angular/core';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
@@ -36,6 +36,7 @@ import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard
     template: '<div></div>',
     styleUrls: [],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTreeComponent {
     public document = input<AASDocument | null>(null);
@@ -58,6 +59,7 @@ class TestAASTreeComponent {
     template: '<div></div>',
     styleUrls: [],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestSecureImageComponent {
     public readonly src = input.required<string>();
@@ -89,7 +91,7 @@ describe('AASComponent', () => {
         });
 
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        start.save.and.returnValue(of(void 0))
+        start.save.and.returnValue(of(void 0));
 
         TestBed.configureTestingModule({
             providers: [
@@ -121,8 +123,9 @@ describe('AASComponent', () => {
                     provide: StartService,
                     useValue: start,
                 },
-                 provideHttpClientTesting(),
+                provideHttpClientTesting(),
                 provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

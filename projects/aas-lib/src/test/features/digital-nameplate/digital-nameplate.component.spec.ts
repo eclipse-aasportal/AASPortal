@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
@@ -77,6 +77,7 @@ describe('DigitalNameplateComponent', () => {
                     provide: DocumentsService,
                     useValue: api,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

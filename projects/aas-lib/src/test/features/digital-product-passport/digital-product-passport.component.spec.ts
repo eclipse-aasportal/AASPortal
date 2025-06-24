@@ -9,10 +9,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
+import { AASDocument } from 'aas-core';
 
 import { DigitalProductPassportComponent } from '../../../lib/features/digital-product-passport/digital-product-passport.component';
 import { WINDOW } from '../../../lib/services/window.service';
@@ -24,7 +25,6 @@ import sample from '../../assets/dpp-sample.json';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { AASDocument } from 'projects/aas-core/dist/types';
 
 @Component({
     selector: 'fhg-img',
@@ -93,6 +93,7 @@ describe('DigitalProductPassportComponent', () => {
                 },
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

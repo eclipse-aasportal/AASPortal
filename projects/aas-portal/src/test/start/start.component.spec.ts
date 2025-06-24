@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from '../../app/start/start.component';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('StartComponent', () => {
     let component: StartComponent;
@@ -36,6 +36,7 @@ describe('StartComponent', () => {
                 },
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

@@ -22,6 +22,7 @@
                         "index": "projects/aas-portal/src/index.html",
                         "browser": "projects/aas-portal/src/main.ts",
                         "polyfills": [
+                            "zone.js",
                             "@angular/localize/init"
                         ],
                         "tsConfig": "projects/aas-portal/tsconfig.app.json",
