@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -35,7 +36,7 @@ describe('OperationCallFormComponent', () => {
                     },
                 }),
             ],
-            providers: [NgbModal, NgbActiveModal],
+            providers: [NgbModal, NgbActiveModal, provideZonelessChangeDetection()],
         });
 
         TestBed.overrideComponent(OperationCallFormComponent, {

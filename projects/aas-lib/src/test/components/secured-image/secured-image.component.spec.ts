@@ -6,13 +6,14 @@
  *
  *****************************************************************************/
 
+import { of } from 'rxjs';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthService } from '../../../lib/features/auth/auth.service';
-import { of } from 'rxjs';
 
 describe('SecuredImageComponent', () => {
     let component: SecuredImageComponent;
@@ -28,6 +29,7 @@ describe('SecuredImageComponent', () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
         });
         fixture = TestBed.createComponent(SecuredImageComponent);

@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -19,7 +20,11 @@ describe('DashboardApiService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [],
-            providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+            providers: [
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
+            ],
         });
 
         service = TestBed.inject(DashboardApiService);

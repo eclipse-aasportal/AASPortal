@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
@@ -41,6 +41,7 @@ describe('ChartEditComponent', () => {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

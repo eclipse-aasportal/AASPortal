@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -17,6 +17,7 @@ import { SecuredImageComponent } from '../../../lib/components/secured-image/sec
     selector: 'fhg-img',
     template: '<div></div>',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestSecureImageComponent {
     public readonly src = input.required<string>();
@@ -37,6 +38,7 @@ describe('ShowImageFormComponent', () => {
                     provide: NgbActiveModal,
                     useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
                 },
+                provideZonelessChangeDetection(),
             ],
 
             imports: [

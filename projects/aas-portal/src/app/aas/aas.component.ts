@@ -10,7 +10,6 @@ import head from 'lodash-es/head';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { Location } from '@angular/common';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
@@ -59,7 +58,6 @@ export class AASComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly store: AASStore,
         private readonly router: Router,
-        private readonly location: Location,
         private readonly route: ActivatedRoute,
         private readonly modal: NgbModal,
         private readonly notify: NotifyService,
@@ -151,18 +149,6 @@ export class AASComponent implements OnInit, OnDestroy {
         this.route.queryParams.pipe(first()).subscribe(params => {
             if (params.search) {
                 this.store.searchExpression$.set(params.search);
-            }
-
-            const state = this.location.getState() as Record<string, string>;
-            if (state.data) {
-                try {
-                    const document: AASDocument = JSON.parse(state.data);
-                    if (!document.content) {
-                        this.getDocumentContent(document);
-                    }
-                } catch {
-                    noop();
-                }
             }
 
             if (params.id) {
