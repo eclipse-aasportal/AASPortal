@@ -117,7 +117,7 @@ describe('AuthService', function () {
 
         it('throws an error if user is unknown or not authenticated', async function () {
             userStorage.read.mockReturnValue(new Promise<UserData | undefined>(result => result(undefined)));
-            await expect(auth.updateProfile('unknown', profile)).rejects.toThrowError();
+            await expect(auth.updateProfile('unknown', profile)).rejects.toThrow();
         });
     });
 
@@ -152,7 +152,7 @@ describe('AuthService', function () {
 
         it('throws an error if e-mail already registered', async function () {
             userStorage.exist.mockReturnValue(new Promise<boolean>(result => result(true)));
-            await expect(auth.registerUser(johnDoeProfile)).rejects.toThrowError();
+            await expect(auth.registerUser(johnDoeProfile)).rejects.toThrow();
         });
 
         it('throws an error if e-mail is invalid', async function () {
@@ -163,7 +163,7 @@ describe('AuthService', function () {
                     name: 'John Doe',
                     password: '12345678',
                 }),
-            ).rejects.toThrowError();
+            ).rejects.toThrow();
         });
 
         it('throws an error if password is invalid', async function () {
@@ -174,7 +174,7 @@ describe('AuthService', function () {
                     name: 'John Doe',
                     password: '1',
                 }),
-            ).rejects.toThrowError();
+            ).rejects.toThrow();
         });
     });
 
@@ -195,7 +195,7 @@ describe('AuthService', function () {
 
         it('throws an error if user is unknown', async function () {
             userStorage.delete.mockReturnValue(new Promise<boolean>(result => result(false)));
-            await expect(auth.deleteUserAsync('john.doe@email.com')).rejects.toThrowError();
+            await expect(auth.deleteUserAsync('john.doe@email.com')).rejects.toThrow();
         });
     });
 

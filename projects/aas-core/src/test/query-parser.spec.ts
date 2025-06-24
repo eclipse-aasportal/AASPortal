@@ -30,7 +30,7 @@ describe('QueryParser', () => {
 
         it('throws an error if end double quotation marks is missing', () => {
             parser = new QueryParser('"Hello World.');
-            expect(() => parser.check()).toThrowError();
+            expect(() => parser.check()).toThrow();
         });
 
         it('text with quotation marks', () => {
@@ -40,7 +40,7 @@ describe('QueryParser', () => {
 
         it('throws an error if end quotation marks is missing', () => {
             parser = new QueryParser("'Hello World.");
-            expect(() => parser.check()).toThrowError();
+            expect(() => parser.check()).toThrow();
         });
 
         it('A && B', () => {
@@ -65,12 +65,12 @@ describe('QueryParser', () => {
 
         it('throws an error for invalid link "A = B"', () => {
             parser = new QueryParser('A = B');
-            expect(() => parser.check()).toThrowError();
+            expect(() => parser.check()).toThrow();
         });
 
         it('throws an error for missing operand "A || "', () => {
             parser = new QueryParser('A || ');
-            expect(() => parser.check()).toThrowError();
+            expect(() => parser.check()).toThrow();
         });
     });
 
@@ -440,12 +440,12 @@ describe('QueryParser', () => {
 
         it('Missing closing bracket "(A && B"', () => {
             parser = new QueryParser('(A && B');
-            expect(() => parser.check()).toThrowError();
+            expect(() => parser.check()).toThrow();
         });
 
         it('Missing opening bracket "A && B)"', () => {
             parser = new QueryParser('A && B)');
-            expect(() => parser.check()).toThrowError();
+            expect(() => parser.check()).toThrow();
         });
     });
 

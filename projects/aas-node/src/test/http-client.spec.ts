@@ -119,7 +119,7 @@ describe('HttpClient', () => {
             });
 
             jest.spyOn(net, 'createConnection').mockReturnValue(socket);
-            await expect(server.checkUrlExist('http://localhost:9876')).rejects.toThrowError();
+            await expect(server.checkUrlExist('http://localhost:9876')).rejects.toThrow();
         });
     });
 });

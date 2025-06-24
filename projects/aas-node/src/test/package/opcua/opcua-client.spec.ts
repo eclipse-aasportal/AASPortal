@@ -61,7 +61,7 @@ describe('OpcuaClient', () => {
 
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
             jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
-            await expect(server.test()).rejects.toThrowError();
+            await expect(server.test()).rejects.toThrow();
         });
     });
 
@@ -104,7 +104,7 @@ describe('OpcuaClient', () => {
         });
 
         it('throws an Error if no connection is established', () => {
-            expect(() => server.getSession()).toThrowError();
+            expect(() => server.getSession()).toThrow();
         });
     });
 
@@ -133,19 +133,19 @@ describe('OpcuaClient', () => {
 
     describe('getPackage', () => {
         it('is not implemented', async () => {
-            await expect(() => server.getPackage()).rejects.toThrowError();
+            await expect(() => server.getPackage()).rejects.toThrow();
         });
     });
 
     describe('postPackage', () => {
         it('is not implemented', async () => {
-            await expect(() => server.postPackage()).rejects.toThrowError();
+            await expect(() => server.postPackage()).rejects.toThrow();
         });
     });
 
     describe('deletePackage', () => {
         it('is not implemented', async () => {
-            await expect(() => server.getPackage()).rejects.toThrowError();
+            await expect(() => server.getPackage()).rejects.toThrow();
         });
     });
 
@@ -241,7 +241,7 @@ describe('OpcuaClient', () => {
             };
 
             await server.open();
-            await expect(server.invoke(aasEnvironment, operation)).rejects.toThrowError();
+            await expect(server.invoke(aasEnvironment, operation)).rejects.toThrow();
             await server.close();
         });
     });
