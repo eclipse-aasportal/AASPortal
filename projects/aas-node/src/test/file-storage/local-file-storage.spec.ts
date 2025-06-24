@@ -56,7 +56,8 @@ describe('LocalFileStorage', () => {
         });
 
         it('returns the directory contents', async () => {
-            jest.spyOn(fs.promises, 'readdir').mockResolvedValue(files);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            jest.spyOn(fs.promises, 'readdir').mockResolvedValue(files as any);
             await expect(storage.readDir('./')).resolves.toEqual([
                 { name: 'A', path: '/A', type: 'file' },
                 { name: 'B', path: '/B', type: 'directory' },
