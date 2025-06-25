@@ -7,17 +7,14 @@
  *****************************************************************************/
 
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ShowVideoFormComponent } from '../../../lib/components/show-video-form/show-video-form.component';
 
 describe('ShowVideoFormComponent', () => {
-    let component: ShowVideoFormComponent;
-    let fixture: ComponentFixture<ShowVideoFormComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NgbActiveModal,
@@ -33,14 +30,13 @@ describe('ShowVideoFormComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(ShowVideoFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(ShowVideoFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

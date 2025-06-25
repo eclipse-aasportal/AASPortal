@@ -21,8 +21,11 @@ import { MainComponent } from '../../app/main/main.component';
 class TestMainComponent {}
 
 describe('AppComponent', () => {
-    beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [provideZonelessChangeDetection()],
+            imports: [AppComponent],
+        }).compileComponents();
 
         TestBed.overrideComponent(AppComponent, {
             remove: {

@@ -15,13 +15,13 @@ import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sam
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
 import { AASStore } from '../../app/aas/aas.store';
 
-describe('NewElementCommand', function () {
+describe('NewElementCommand', () => {
     let command: NewElementCommand;
     let document: AASDocument;
     let submodel: aas.Submodel;
     let store: AASStore;
 
-    beforeEach(function () {
+    beforeEach(() => {
         document = cloneDeep(aasNoTechnicalData);
         submodel = cloneDeep(submodelTechnicalData);
 
@@ -43,7 +43,7 @@ describe('NewElementCommand', function () {
         store.document$.set(document);
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
         command = new NewElementCommand(store, document, document.content!.assetAdministrationShells[0], submodel);
         command.execute();
     });

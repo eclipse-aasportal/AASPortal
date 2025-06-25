@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
@@ -17,13 +17,11 @@ import { AboutComponent } from '../../app/about/about.component';
 import { AboutApiService } from '../../app/about/about-api.service';
 
 describe('AboutComponent', () => {
-    let component: AboutComponent;
-    let fixture: ComponentFixture<AboutComponent>;
     let api: jasmine.SpyObj<AboutApiService>;
     let start: jasmine.SpyObj<StartService>;
     let indexChange: jasmine.SpyObj<IndexChangeService>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         const info: AppInfo = {
             name: 'Test',
             version: '1.0',
@@ -45,7 +43,7 @@ describe('AboutComponent', () => {
             { documentCount: signal(42), endpointCount: signal(2) },
         );
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: AboutApiService,
@@ -66,6 +64,7 @@ describe('AboutComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                AboutComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -73,14 +72,12 @@ describe('AboutComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(AboutComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(AboutComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 });

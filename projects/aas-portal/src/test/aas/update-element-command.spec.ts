@@ -15,14 +15,14 @@ import { UpdateElementCommand } from '../../app/aas/commands/update-element-comm
 import { sampleDocument } from '../../test/assets/sample-document';
 import { AASStore } from '../../app/aas/aas.store';
 
-describe('SetValueCommand', function () {
+describe('SetValueCommand', () => {
     let command: UpdateElementCommand;
     let store: AASStore;
     let document: AASDocument;
     let property: aas.Property;
     let element: aas.Property;
 
-    beforeEach(function () {
+    beforeEach(() => {
         document = cloneDeep(sampleDocument);
         property = selectElement(document.content!, 'TechnicalData', 'MaxRotationSpeed')!;
         element = cloneDeep(property);
@@ -46,7 +46,7 @@ describe('SetValueCommand', function () {
         store.document$.set(document);
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
         command = new UpdateElementCommand(store, document, property, element);
         command.execute();
     });

@@ -30,8 +30,6 @@ describe('DocumentsService', () => {
         cache.get.and.returnValue(undefined);
         
         TestBed.configureTestingModule({
-            declarations: [],
-            imports: [],
             providers: [
                 {
                     provide: CacheService,

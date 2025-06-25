@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 
@@ -14,8 +14,6 @@ import { IndexChangeService } from 'aas-lib';
 import { AboutCardComponent } from '../../app/about/about-card.component';
 
 describe('AboutCardComponent', () => {
-    let component: AboutCardComponent;
-    let fixture: ComponentFixture<AboutCardComponent>;
     let indexChange: jasmine.SpyObj<IndexChangeService>;
 
     beforeEach(async () => {
@@ -41,13 +39,11 @@ describe('AboutCardComponent', () => {
                 }),
             ],
         }).compileComponents();
-
-        fixture = TestBed.createComponent(AboutCardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(AboutCardComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 });

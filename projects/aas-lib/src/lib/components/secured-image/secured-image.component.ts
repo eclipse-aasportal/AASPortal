@@ -9,8 +9,8 @@
 import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, first, map, mergeMap, skipWhile, switchMap } from 'rxjs';
-import { DomSanitizer } from '@angular/platform-browser';
+import { BehaviorSubject, Observable, first, map, skipWhile, switchMap } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../../features/auth/auth.service';
 
 @Component({
@@ -50,10 +50,10 @@ export class SecuredImageComponent {
         ),
     );
 
-    private loadImage(url: string): Observable<unknown> {
+    private loadImage(url: string): Observable<SafeResourceUrl> {
         return this.auth.userId.pipe(
             first(userId => userId !== undefined),
-            mergeMap(() =>
+            switchMap(() =>
                 this.httpClient
                     .get(url, { responseType: 'blob' })
                     .pipe(map(blob => this.domSanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(blob)))),

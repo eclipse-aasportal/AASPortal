@@ -13,13 +13,11 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { CustomerFeedbackCardComponent } from '../../../lib/features/customer-feedback/customer-feedback-card.component';
 
 describe('CustomerFeedbackCardComponent', () => {
-    let component: CustomerFeedbackCardComponent;
-    let fixture: ComponentFixture<CustomerFeedbackCardComponent>;
-
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             providers: [provideZonelessChangeDetection()],
             imports: [
+                CustomerFeedbackCardComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -29,12 +27,12 @@ describe('CustomerFeedbackCardComponent', () => {
             ],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(CustomerFeedbackCardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(CustomerFeedbackCardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

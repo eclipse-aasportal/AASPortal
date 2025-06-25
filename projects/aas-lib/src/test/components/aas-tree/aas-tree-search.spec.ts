@@ -13,19 +13,19 @@ import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search'
 import { NotifyService } from '../../../lib/features/notify/notify.service';
 import { AASTreeStore } from '../../../lib/components/aas-tree/aas-tree.store';
 
-describe('AASTreeSearch', function () {
+describe('AASTreeSearch', () => {
     let search: AASTreeSearch;
     let store: AASTreeStore;
 
-    beforeEach(async function () {
-        await TestBed.configureTestingModule({
+    beforeEach(() => {
+        TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
                 AASTreeStore,
-                provideZonelessChangeDetection()
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({
