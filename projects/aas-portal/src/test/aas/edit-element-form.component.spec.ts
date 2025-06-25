@@ -14,13 +14,11 @@ import { aas } from 'aas-core';
 import { EditElementFormComponent } from '../../app/aas/edit-element-form/edit-element-form.component';
 
 describe('EditElementFormComponent', () => {
-    let component: EditElementFormComponent;
-    let fixture: ComponentFixture<EditElementFormComponent>;
     let activeModal: jasmine.SpyObj<NgbActiveModal>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         activeModal = jasmine.createSpyObj('NgbActiveModal', ['close']);
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NgbActiveModal,
@@ -36,18 +34,18 @@ describe('EditElementFormComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(EditElementFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(EditElementFormComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 
     describe('Property', () => {
+        let component: EditElementFormComponent;
+        let fixture: ComponentFixture<EditElementFormComponent>;
         let property: aas.Property;
 
         beforeEach(() => {
@@ -58,6 +56,8 @@ describe('EditElementFormComponent', () => {
                 valueType: 'xs:string',
             };
 
+            fixture = TestBed.createComponent(EditElementFormComponent);
+            component = fixture.componentInstance;
             component.initialize(property);
             fixture.detectChanges();
         });
@@ -115,6 +115,8 @@ describe('EditElementFormComponent', () => {
     });
 
     describe('MultiLanguageProperty', () => {
+        let component: EditElementFormComponent;
+        let fixture: ComponentFixture<EditElementFormComponent>;
         let property: aas.MultiLanguageProperty;
 
         beforeEach(() => {
@@ -125,6 +127,8 @@ describe('EditElementFormComponent', () => {
                 value: [{ language: 'de', text: 'Hallo Welt!' }],
             };
 
+            fixture = TestBed.createComponent(EditElementFormComponent);
+            component = fixture.componentInstance;
             component.initialize(property);
             fixture.detectChanges();
         });

@@ -22,9 +22,7 @@ import {
 @Component({
     selector: 'fhg-test-card',
     template: '<div></div>',
-    styles: [''],
-    standalone: true,
-    imports: [],
+    styles: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestCardComponent {}

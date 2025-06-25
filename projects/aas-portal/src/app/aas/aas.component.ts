@@ -23,7 +23,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, AASDocument, noop } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,

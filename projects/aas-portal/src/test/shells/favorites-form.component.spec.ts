@@ -15,17 +15,15 @@ import { FavoritesFormComponent } from '../../app/shells/favorites-form/favorite
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
 
 describe('FavoritesFormComponent', () => {
-    let component: FavoritesFormComponent;
-    let fixture: ComponentFixture<FavoritesFormComponent>;
     let service: jasmine.SpyObj<FavoritesService>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save'], {
             active: signal(''),
             items: signal<FavoritesList[]>([]),
         });
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NgbActiveModal,
@@ -38,6 +36,7 @@ describe('FavoritesFormComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                FavoritesFormComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -45,14 +44,13 @@ describe('FavoritesFormComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(FavoritesFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(FavoritesFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

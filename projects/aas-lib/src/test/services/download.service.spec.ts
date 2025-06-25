@@ -15,7 +15,6 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
 
-
 describe('DownloadService', () => {
     let service: DownloadService;
     let httpTestingController: HttpTestingController;

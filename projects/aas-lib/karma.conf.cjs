@@ -4,7 +4,7 @@
 module.exports = function (config) {
     config.set({
         basePath: '',
-        frameworks: ['jasmine', '@angular-devkit/build-angular'],
+        frameworks: ['jasmine'],
         plugins: [
             require('karma-jasmine'),
             require('karma-chrome-launcher'),
@@ -19,7 +19,6 @@ module.exports = function (config) {
                 // for example, you can disable the random execution with `random: false`
                 // or set a specific seed with `seed: 4321`
             },
-            clearContext: false // leave Jasmine Spec Runner output visible in browser
         },
         files: [
             { pattern: './src/**/*.ts', type: 'js' },
@@ -28,7 +27,7 @@ module.exports = function (config) {
             suppressAll: true // removes the duplicated traces
         },
         junitReporter:{
-            outputDir: '../../reports',
+            outputDir: require('path').join(__dirname, '../../reports'),
             outputFile: 'aas-lib.xml',
             useBrowserName: false
         },
@@ -42,14 +41,14 @@ module.exports = function (config) {
             ]
         },
         reporters: ['progress', 'kjhtml', 'junit'],
-        browsers: ['ChromeHeadlessNoSandbox'],
+        browsers: ['Chrome', 'ChromeHeadlessNoSandbox'],
         customLaunchers: {
           ChromeHeadlessNoSandbox: {
             base: 'ChromeHeadless',
             flags: ['--no-sandbox']
           }
         },
-        singleRun: true,
+        singleRun: false,
         restartOnFileChange: true
     });
 };

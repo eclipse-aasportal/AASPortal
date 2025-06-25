@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -20,7 +20,6 @@ import { DocumentsService } from '../../../lib/services/documents.service';
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestSecuredImageComponent {
@@ -32,8 +31,6 @@ export class TestSecuredImageComponent {
 }
 
 describe('FavoriteComponent', () => {
-    let component: FavoriteComponent;
-    let fixture: ComponentFixture<FavoriteComponent>;
     let api: jasmine.SpyObj<DocumentsService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
@@ -56,6 +53,7 @@ describe('FavoriteComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                FavoriteComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -67,18 +65,14 @@ describe('FavoriteComponent', () => {
 
         TestBed.overrideComponent(FavoriteComponent, {
             remove: { imports: [SecuredImageComponent] },
-            add: {
-                providers: [],
-                imports: [TestSecuredImageComponent],
-            },
+            add: { imports: [TestSecuredImageComponent] },
         });
-
-        fixture = TestBed.createComponent(FavoriteComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(FavoriteComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });
