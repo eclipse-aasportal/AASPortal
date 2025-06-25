@@ -6,19 +6,21 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, Signal, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { AASDocument } from 'aas-core';
 import {
-    AuthComponent,
-    IndexChangeService,
-    LocalizeComponent,
-    NotifyComponent,
-    ToolbarService,
-} from 'aas-lib';
+    ChangeDetectionStrategy,
+    Component,
+    input,
+    provideZonelessChangeDetection,
+    Signal,
+    signal,
+} from '@angular/core';
+
+import { AASDocument } from 'aas-core';
+import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
 
@@ -48,13 +50,11 @@ class TestLocalizeComponent {
 class TestNotifyComponent {}
 
 describe('MainComponent', () => {
-    let component: MainComponent;
-    let fixture: ComponentFixture<MainComponent>;
     let documentSubject: Subject<AASDocument | null>;
     let toolbar: jasmine.SpyObj<ToolbarService>;
     let indexChange: jasmine.SpyObj<IndexChangeService>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
         toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
@@ -64,7 +64,7 @@ describe('MainComponent', () => {
             changedDocuments: (() => 0) as Signal<number>,
         });
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: ToolbarService,
@@ -85,7 +85,7 @@ describe('MainComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
         TestBed.overrideComponent(MainComponent, {
             remove: {
@@ -95,18 +95,27 @@ describe('MainComponent', () => {
                 imports: [TestNotifyComponent, TestLocalizeComponent, TestAuthComponent],
             },
         });
-
-        fixture = TestBed.createComponent(MainComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(MainComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('provides a list of route links', function () {
+        const fixture = TestBed.createComponent(MainComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.links()).toBeDefined();
-        expect(component.links().map(link => link.url)).toEqual(['/start', '/shells', '/aas', '/views', '/dashboard', '/about']);
+        expect(component.links().map(link => link.url)).toEqual([
+            '/start',
+            '/shells',
+            '/aas',
+            '/views',
+            '/dashboard',
+            '/about',
+        ]);
     });
 });

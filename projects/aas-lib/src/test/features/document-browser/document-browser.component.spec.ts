@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -17,7 +17,14 @@ import { aas, AASDocument } from 'aas-core';
 import { DocumentsService } from '../../../lib/services/documents.service';
 import { DocumentBrowserComponent } from '../../../lib/features/document-browser/document-browser.component';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { ChangeDetectionStrategy, Component, input, output, provideZonelessChangeDetection, signal } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    input,
+    output,
+    provideZonelessChangeDetection,
+    signal,
+} from '@angular/core';
 import { BrowserComponent, BrowserItem } from '../../../lib/components/browser/browser.component';
 import { AuthService } from '../../../lib/features/auth/auth.service';
 import { StartService } from '../../../lib/services/start.service';
@@ -29,7 +36,6 @@ import { SecuredImageComponent } from '../../../lib/components/secured-image/sec
     selector: 'fhg-browser',
     template: '<div></div>',
     styles: [],
-    imports: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestBrowserComponent {
@@ -41,7 +47,6 @@ export class TestBrowserComponent {
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestSecuredImageComponent {
@@ -53,8 +58,6 @@ export class TestSecuredImageComponent {
 }
 
 describe('DocumentBrowserComponent', () => {
-    let component: DocumentBrowserComponent;
-    let fixture: ComponentFixture<DocumentBrowserComponent>;
     let api: jasmine.SpyObj<DocumentsService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
     let auth: jasmine.SpyObj<AuthService>;
@@ -112,7 +115,7 @@ describe('DocumentBrowserComponent', () => {
                     provide: DocumentsService,
                     useValue: api,
                 },
-               {
+                {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
@@ -121,6 +124,7 @@ describe('DocumentBrowserComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                DocumentBrowserComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -138,13 +142,12 @@ describe('DocumentBrowserComponent', () => {
                 imports: [TestBrowserComponent, TestSecuredImageComponent],
             },
         });
-
-        fixture = TestBed.createComponent(DocumentBrowserComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(DocumentBrowserComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

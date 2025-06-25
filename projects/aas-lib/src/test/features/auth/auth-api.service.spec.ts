@@ -22,8 +22,6 @@ describe('AuthApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [],
-            imports: [],
             providers: [
                 AuthApiService,
                 provideHttpClient(withInterceptorsFromDi()),

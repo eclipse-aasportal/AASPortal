@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ShowImageFormComponent } from '../../../lib/components/show-image-form/show-image-form.component';
@@ -16,7 +16,6 @@ import { SecuredImageComponent } from '../../../lib/components/secured-image/sec
 @Component({
     selector: 'fhg-img',
     template: '<div></div>',
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestSecureImageComponent {
@@ -28,11 +27,8 @@ class TestSecureImageComponent {
 }
 
 describe('ShowImageFormComponent', () => {
-    let component: ShowImageFormComponent;
-    let fixture: ComponentFixture<ShowImageFormComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NgbActiveModal,
@@ -42,6 +38,7 @@ describe('ShowImageFormComponent', () => {
             ],
 
             imports: [
+                ShowImageFormComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -49,7 +46,7 @@ describe('ShowImageFormComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
         TestBed.overrideComponent(ShowImageFormComponent, {
             remove: {
@@ -59,13 +56,12 @@ describe('ShowImageFormComponent', () => {
                 imports: [TestSecureImageComponent],
             },
         });
-
-        fixture = TestBed.createComponent(ShowImageFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(ShowImageFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

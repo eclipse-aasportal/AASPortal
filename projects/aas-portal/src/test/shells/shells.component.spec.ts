@@ -6,10 +6,18 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, input, model, provideZonelessChangeDetection, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    input,
+    model,
+    provideZonelessChangeDetection,
+    signal,
+} from '@angular/core';
+
 import { AASDocument, WebSocketData, aas } from 'aas-core';
 import {
     WINDOW,
@@ -32,7 +40,6 @@ import { FavoritesList, FavoritesService } from '../../app/shells/favorites.serv
     selector: 'fhg-aas-table',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTableComponent {
@@ -47,34 +54,18 @@ describe('ShellsComponent', () => {
     let localStorage: jasmine.SpyObj<Storage>;
     let endpoints: jasmine.SpyObj<EndpointsService>;
     let documents: jasmine.SpyObj<DocumentsService>;
-    let component: ShellsComponent;
-    let fixture: ComponentFixture<ShellsComponent>;
     let favorites: jasmine.SpyObj<FavoritesService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
     let indexChange: jasmine.SpyObj<IndexChangeService>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
         localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
-
         localStorage.getItem.and.returnValue(null);
         window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage });
-
-        endpoints = jasmine.createSpyObj<EndpointsService>([
-            'addEndpoint',
-            'delete',
-            'getEndpoints',
-            'removeEndpoint',
-        ]);
-
-        
-        documents = jasmine.createSpyObj<DocumentsService>([
-            'getContent',
-            'getHierarchy',
-            'getDocuments',
-        ]);
-
+        endpoints = jasmine.createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
+        documents = jasmine.createSpyObj<DocumentsService>(['getContent', 'getHierarchy', 'getDocuments']);
         documents.getDocuments.and.returnValue(
             of({
                 previous: null,
@@ -113,7 +104,7 @@ describe('ShellsComponent', () => {
             },
         );
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: EndpointsService,
@@ -158,6 +149,7 @@ describe('ShellsComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                ShellsComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -165,7 +157,7 @@ describe('ShellsComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
         TestBed.overrideComponent(ShellsComponent, {
             remove: {
@@ -175,13 +167,12 @@ describe('ShellsComponent', () => {
                 imports: [TestAASTableComponent],
             },
         });
-
-        fixture = TestBed.createComponent(ShellsComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(ShellsComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -25,7 +25,6 @@ import { encodeBase64Url } from '../../../lib/utilities';
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestSecuredImageComponent {
@@ -37,14 +36,12 @@ export class TestSecuredImageComponent {
 }
 
 describe('DigitalNameplateComponent', () => {
-    let component: DigitalNameplateComponent;
-    let fixture: ComponentFixture<DigitalNameplateComponent>;
     let auth: jasmine.SpyObj<AuthService>;
     let api: jasmine.SpyObj<DocumentsService>;
     let start: jasmine.SpyObj<StartService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
         api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
@@ -55,7 +52,7 @@ describe('DigitalNameplateComponent', () => {
 
         api.getDocument.and.returnValue(of(nameplate));
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: ActivatedRoute,
@@ -80,6 +77,7 @@ describe('DigitalNameplateComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                DigitalNameplateComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -87,25 +85,25 @@ describe('DigitalNameplateComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
         TestBed.overrideComponent(DigitalNameplateComponent, {
             remove: { imports: [SecuredImageComponent] },
-            add: {
-                imports: [TestSecuredImageComponent],
-            },
+            add: { imports: [TestSecuredImageComponent] },
         });
-
-        fixture = TestBed.createComponent(DigitalNameplateComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(DigitalNameplateComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('provides a "title"', () => {
+        const fixture = TestBed.createComponent(DigitalNameplateComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.title()).toEqual('Nameplate');
     });
 });

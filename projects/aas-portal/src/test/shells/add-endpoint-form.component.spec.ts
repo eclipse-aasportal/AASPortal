@@ -7,22 +7,20 @@
  *****************************************************************************/
 
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASEndpoint } from 'aas-core';
 import { AddEndpointFormComponent } from '../../app/shells/add-endpoint-form/add-endpoint-form.component';
 
 describe('AddEndpointFormComponent', () => {
-    let component: AddEndpointFormComponent;
-    let fixture: ComponentFixture<AddEndpointFormComponent>;
     let modal: NgbActiveModal;
-    let form: HTMLFormElement;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             providers: [NgbActiveModal, provideZonelessChangeDetection()],
             imports: [
+                AddEndpointFormComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -30,21 +28,23 @@ describe('AddEndpointFormComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
-        fixture = TestBed.createComponent(AddEndpointFormComponent);
         modal = TestBed.inject(NgbActiveModal);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-
-        form = fixture.debugElement.nativeElement.querySelector('form');
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('submits endpoint Name: "My endpoint", URL: "file:///my-endpoint"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
@@ -60,6 +60,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('submits AAS endpoint Name: "My endpoint", URL: "file:///a\\b\\my-endpoint"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
@@ -75,6 +79,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('ignores AAS endpoint: Name: "", URL: "file:///my-endpoint"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         spyOn(modal, 'close');
 
         component.selectItem(component.items()[3]);
@@ -87,6 +95,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         spyOn(modal, 'close');
 
         component.selectItem(component.items()[3]);
@@ -99,6 +111,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://localhost:30001/I4AASServer"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
@@ -114,6 +130,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('ignores AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         spyOn(modal, 'close');
 
         component.selectItem(component.items()[1]);
@@ -126,6 +146,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('submits AASX server Name: "AASX Server", URL: "http://localhost:50001/"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 
@@ -141,6 +165,10 @@ describe('AddEndpointFormComponent', () => {
     });
 
     it('submits WebDAV server Name: "WebDAV", URL: "http://localhost:8080/root/folder"', () => {
+        const fixture = TestBed.createComponent(AddEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
         spyOn(modal, 'close').and.callFake(result => (endpoint = result));
 

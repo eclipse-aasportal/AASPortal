@@ -19,8 +19,6 @@ describe('EndpointsService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [],
-            imports: [],
             providers: [
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),

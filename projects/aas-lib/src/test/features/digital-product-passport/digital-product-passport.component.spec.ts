@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
@@ -30,7 +30,6 @@ import { encodeBase64Url } from '../../../lib/utilities';
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestSecuredImageComponent {
@@ -42,8 +41,6 @@ export class TestSecuredImageComponent {
 }
 
 describe('DigitalProductPassportComponent', () => {
-    let component: DigitalProductPassportComponent;
-    let fixture: ComponentFixture<DigitalProductPassportComponent>;
     let window: jasmine.SpyObj<Window>;
     let api: jasmine.SpyObj<DocumentsService>;
     let auth: jasmine.SpyObj<AuthService>;
@@ -96,6 +93,7 @@ describe('DigitalProductPassportComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                DigitalProductPassportComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -107,47 +105,65 @@ describe('DigitalProductPassportComponent', () => {
 
         TestBed.overrideComponent(DigitalProductPassportComponent, {
             remove: { imports: [SecuredImageComponent] },
-            add: {
-                imports: [TestSecuredImageComponent],
-            },
+            add: { imports: [TestSecuredImageComponent] },
         });
-
-        fixture = TestBed.createComponent(DigitalProductPassportComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('mainData', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.mainData().productType).toEqual('turtle');
         expect(component.mainData().serialNumber).toEqual('00000001');
         expect(component.mainData().uriOfTheProduct).toEqual('https://smartfactory-owl.de/3dl/__turtle/__00000001');
     });
 
     it('hazardStatement', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.hazardStatement()).toEqual('Choking Hazard!');
     });
 
     it('thumbnail', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.thumbnail()).toBeTruthy();
     });
 
     it('hazardSymbol', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.hazardSymbol).toBeTruthy();
     });
 
     it('nameplate data', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.nameplateItems().length).toEqual(15);
     });
 
     it('totalPCFCO2eq', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.totalPCFCO2eq()).toBeCloseTo(1.23 + 4.56);
     });
 
     it('carbon footprint items', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.carbonFootprintSize()).toEqual(2);
         expect(component.carbonFootprintItems().length).toEqual(4);
         expect(component.carbonFootprintIndex()).toEqual(1);

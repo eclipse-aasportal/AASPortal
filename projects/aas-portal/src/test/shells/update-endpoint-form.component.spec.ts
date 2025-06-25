@@ -7,19 +7,17 @@
  *****************************************************************************/
 
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { UpdateEndpointFormComponent } from '../../app/shells/update-endpoint-form/update-endpoint-form.component';
 
 describe('UpdateEndpointFormComponent', () => {
-    let component: UpdateEndpointFormComponent;
-    let fixture: ComponentFixture<UpdateEndpointFormComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             providers: [NgbActiveModal, provideZonelessChangeDetection()],
             imports: [
+                UpdateEndpointFormComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -27,14 +25,13 @@ describe('UpdateEndpointFormComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(UpdateEndpointFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(UpdateEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

@@ -7,18 +7,15 @@
  *****************************************************************************/
 
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ToolbarService } from 'aas-lib';
 
 import { ViewComponent } from '../../app/view/view.component';
 
 describe('ViewComponent', () => {
-    let component: ViewComponent;
-    let fixture: ComponentFixture<ViewComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: ToolbarService,
@@ -27,6 +24,7 @@ describe('ViewComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
+                ViewComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -34,14 +32,13 @@ describe('ViewComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(ViewComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(ViewComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });
