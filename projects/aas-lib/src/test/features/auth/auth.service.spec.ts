@@ -293,6 +293,7 @@ describe('AuthService', () => {
                     },
                     provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
+                    provideZonelessChangeDetection(),
                 ],
             });
 
