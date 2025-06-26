@@ -5,7 +5,6 @@
         "outDir": "./build",
         "moduleResolution": "bundler",
         "module": "ES2022",
-        "skipLibCheck": true,
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
         "lib": [
