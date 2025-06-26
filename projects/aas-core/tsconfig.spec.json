@@ -2,9 +2,11 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./out-tsc/app"
-     },
+        "outDir": "./out-tsc/spec",
+        "isolatedModules": false,
+        "module": "es2022"
+    },
     "include": [
-        "./src/app/**/*.ts"
+        "./src/lib/**/*.ts"
     ]
 }
