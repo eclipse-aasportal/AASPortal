@@ -11,13 +11,12 @@
         "tsoa": "tsoa spec-and-routes -c tsoa.config.json",
         "serve": "rimraf build && npm run tsoa && tsc -p tsconfig.app.json",
         "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts",
-        "test:debug": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --runInBand --no-cache --verbose --watchAll=true",
+        "test:watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch --coverage=false",
         "build": "rimraf dist && npm run tsoa && node esbuild.prod.js",
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/app/**/*.ts",
-        "format": "eslint src/app/**/*.ts --fix",
-        "watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch"
+        "format": "eslint src/app/**/*.ts --fix"
     },
     "dependencies": {
         "@babel/polyfill": "^7.12.1",
