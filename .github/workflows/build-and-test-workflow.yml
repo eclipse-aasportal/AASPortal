@@ -35,3 +35,5 @@ jobs:
           path: |
             reports/aas-core.xml
             reports/aas-node.xml
+            reports/aas-lib.xml
+            reports/aas-portal.xml

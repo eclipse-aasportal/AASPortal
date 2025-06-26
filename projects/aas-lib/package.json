@@ -5,7 +5,8 @@
     "type": "module",
     "scripts": {
         "ng": "ng",
-        "test": "ng test aas-lib",
+        "test": "ng test aas-lib --browsers=ChromeHeadlessNoSandbox --no-watch",
+        "test:watch": "ng test aas-lib --browsers=Chrome --no-code-coverage",
         "build": "ng build aas-lib",
         "build:debug": "ng build aas-lib --configuration development",
         "tsc": "rimraf build && tsc -p tsconfig.json",
