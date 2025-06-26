@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { provideZoneChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -31,7 +31,7 @@ describe('TemplateService', () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-                provideZoneChangeDetection(),
+                provideZonelessChangeDetection(),
             ],
         });
 
