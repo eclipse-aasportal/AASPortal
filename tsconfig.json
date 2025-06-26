@@ -4,9 +4,9 @@
     "compilerOptions": {
       "baseUrl": "./",
       "target": "ES2022",
-      "module": "NodeNext",
-      "moduleResolution": "bundler",
+      "module": "preserve",
       "forceConsistentCasingInFileNames": true,
+      "skipLibCheck": true,
       "strict": true,
       "noFallthroughCasesInSwitch": true,
       "noImplicitAny": true,
