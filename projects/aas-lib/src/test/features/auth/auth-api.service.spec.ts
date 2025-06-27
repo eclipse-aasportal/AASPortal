@@ -6,13 +6,14 @@
  *
  *****************************************************************************/
 
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthResult, Cookie } from 'aas-core';
 
 import { AuthApiService } from '../../../lib/features/auth/auth-api.service';
 import { getGuestToken, getToken } from '../../assets/json-web-token';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthApiService', () => {
     let service: AuthApiService;
@@ -21,9 +22,12 @@ describe('AuthApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [],
-            imports: [],
-            providers: [AuthApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+            providers: [
+                AuthApiService,
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
+            ],
         });
 
         userId = 'john.doe@email.com';

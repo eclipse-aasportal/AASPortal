@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '../../../lib/features/auth/auth.service';
@@ -30,6 +31,7 @@ describe('AASTreeApiService', () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
         });
 

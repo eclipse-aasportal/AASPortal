@@ -2,26 +2,27 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "compileOnSave": false,
     "compilerOptions": {
-        "baseUrl": "./",
-        "target": "ES2022",
-        "downlevelIteration": true,
-        "module": "NodeNext",
-        "moduleResolution": "nodenext",
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitAny": true,
-        "noImplicitOverride": true,
-        "noImplicitReturns": true,
-        "sourceMap": true,
-        "experimentalDecorators": true,
-        "resolveJsonModule": true,
-        "esModuleInterop": true,
-        "useDefineForClassFields": false,
-        "useUnknownInCatchVariables": false,
-        "paths": {
-            "lib/*": ["./src/lib/*"]
-        },
+      "baseUrl": "./",
+      "target": "ES2022",
+      "module": "preserve",
+      "forceConsistentCasingInFileNames": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitAny": true,
+      "noImplicitOverride": true,
+      "noImplicitReturns": true,
+      "sourceMap": true,
+      "experimentalDecorators": true,
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "useDefineForClassFields": false,
+      "useUnknownInCatchVariables": false,
+      "paths": {
+        "lib/*": [
+          "./src/lib/*"
+        ]
+      }
     },
     "ts-node": {
         "esm": true

@@ -6,35 +6,18 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+
 import { NotifyService } from '../../../lib/features/notify/notify.service';
-import { AuthService } from '../../../lib/features/auth/auth.service';
-import { AuthComponent } from '../../../lib/features/auth/auth.component';
+import { NotifyComponent } from '../../../lib/features/notify/notify.component';
 
-describe('AuthComponent', () => {
-    let auth: jasmine.SpyObj<AuthService>;
-
+describe('NotifyComponent', () => {
     beforeEach(async () => {
-        auth = jasmine.createSpyObj<AuthService>(['login'], {
-            name: signal('guest'),
-            authenticated: signal(false),
-        });
-
         await TestBed.configureTestingModule({
-            providers: [
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
-                {
-                    provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info']),
-                },
-                provideZonelessChangeDetection(),
-            ],
             imports: [
+                NotifyComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -42,11 +25,18 @@ describe('AuthComponent', () => {
                     },
                 }),
             ],
+            providers: [
+                {
+                    provide: NotifyService,
+                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([])}),
+                },
+                provideZonelessChangeDetection(),
+            ],
         }).compileComponents();
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(AuthComponent);
+        const fixture = TestBed.createComponent(NotifyComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();

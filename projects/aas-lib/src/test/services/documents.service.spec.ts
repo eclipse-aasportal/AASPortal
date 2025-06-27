@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -29,8 +30,6 @@ describe('DocumentsService', () => {
         cache.get.and.returnValue(undefined);
         
         TestBed.configureTestingModule({
-            declarations: [],
-            imports: [],
             providers: [
                 {
                     provide: CacheService,
@@ -42,6 +41,7 @@ describe('DocumentsService', () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
         });
 

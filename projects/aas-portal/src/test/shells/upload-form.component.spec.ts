@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -27,6 +28,7 @@ describe('UploadFormComponent', () => {
                 },
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({

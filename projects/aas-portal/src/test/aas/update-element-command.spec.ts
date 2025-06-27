@@ -6,22 +6,23 @@
  *
  *****************************************************************************/
 
+import cloneDeep from 'lodash-es/cloneDeep';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { aas, AASDocument, selectElement } from 'aas-core';
-import cloneDeep from 'lodash-es/cloneDeep';
+import { DocumentsService, NotifyService } from 'aas-lib';
 import { UpdateElementCommand } from '../../app/aas/commands/update-element-command';
 import { sampleDocument } from '../../test/assets/sample-document';
 import { AASStore } from '../../app/aas/aas.store';
-import { DocumentsService, NotifyService } from 'aas-lib';
 
-describe('SetValueCommand', function () {
+describe('SetValueCommand', () => {
     let command: UpdateElementCommand;
     let store: AASStore;
     let document: AASDocument;
     let property: aas.Property;
     let element: aas.Property;
 
-    beforeEach(function () {
+    beforeEach(() => {
         document = cloneDeep(sampleDocument);
         property = selectElement(document.content!, 'TechnicalData', 'MaxRotationSpeed')!;
         element = cloneDeep(property);
@@ -37,6 +38,7 @@ describe('SetValueCommand', function () {
                     provide: DocumentsService,
                     useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideZonelessChangeDetection(),
             ],
         });
 
@@ -44,7 +46,7 @@ describe('SetValueCommand', function () {
         store.document$.set(document);
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
         command = new UpdateElementCommand(store, document, property, element);
         command.execute();
     });

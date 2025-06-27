@@ -6,17 +6,15 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from '../../app/start/start.component';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('StartComponent', () => {
-    let component: StartComponent;
-    let fixture: ComponentFixture<StartComponent>;
     let start: jasmine.SpyObj<StartService>;
 
     beforeEach(async () => {
@@ -36,8 +34,10 @@ describe('StartComponent', () => {
                 },
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
             imports: [
+                StartComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -46,13 +46,12 @@ describe('StartComponent', () => {
                 }),
             ],
         }).compileComponents();
-
-        fixture = TestBed.createComponent(StartComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(StartComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

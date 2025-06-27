@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
@@ -22,9 +22,7 @@ import {
 @Component({
     selector: 'fhg-test-card',
     template: '<div></div>',
-    styles: [''],
-    standalone: true,
-    imports: [],
+    styles: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestCardComponent {}
@@ -55,8 +53,10 @@ describe('StartService', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
+                provideZonelessChangeDetection(),
             ],
         });
+        
         service = TestBed.inject(StartService);
     });
 

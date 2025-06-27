@@ -8,6 +8,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { DocumentsService, NotifyService } from 'aas-lib';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { AASStore } from '../../app/aas/aas.store';
 
@@ -25,6 +26,7 @@ describe('AASStoreService', () => {
                     provide: DocumentsService,
                     useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideZonelessChangeDetection(),
             ],
         });
 

@@ -44,7 +44,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getCount()).resolves.toEqual(42);
-            expect(connection.query).toBeCalledWith('SELECT COUNT(*) FROM `documents`;');
+            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `documents`;');
         });
 
         it('returns the total number of documents of the specified Endpoint', async () => {
@@ -55,7 +55,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getCount('Samples')).resolves.toEqual(42);
-            expect(connection.query).toBeCalledWith('SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;', [
+            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;', [
                 'Samples',
             ]);
         });
@@ -100,7 +100,7 @@ describe('MySqlIndex', () => {
                 },
             ]);
 
-            expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints`;');
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints`;');
         });
     });
 
@@ -118,7 +118,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             const actual = await index.getEndpoint('Endpoint 1');
-            expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
             expect(actual).toEqual({
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
@@ -129,8 +129,8 @@ describe('MySqlIndex', () => {
 
         it('throws an error if endpoint does not exist', async () => {
             connection.query.mockResolvedValue([[], []]);
-            await expect(index.getEndpoint('Unknown')).rejects.toThrowError();
-            expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Unknown']);
+            await expect(index.getEndpoint('Unknown')).rejects.toThrow();
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Unknown']);
         });
     });
 
@@ -148,7 +148,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.findEndpoint('Endpoint 1')).resolves.toBeDefined();
-            expect(connection.query).toBeCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
         });
 
         it('indicates that Unknown does not exist', async () => {
