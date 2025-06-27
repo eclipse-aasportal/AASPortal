@@ -22,7 +22,8 @@
     "aas-portal:build:debug": "npm run build:debug -w=aas-core -w=aas-lib -w=aas-portal",
     "aas-node:build": "npm run build -w=aas-core -w=aas-node",
     "aas-node:build:debug": "npm run build:debug -w=aas-core -w=aas-node",
-    "serve": "npm run build && node --env-file projects/aas-node/.env projects/aas-node/dist/aas-node.js"
+    "serve": "npm run build && node --env-file projects/aas-node/.env projects/aas-node/dist/aas-node.js",
+    "test:docker": "docker build -f Dockerfile.test -t test . && docker run -d --name Test --restart=always test"
   },
   "repository": {
     "type": "git",
