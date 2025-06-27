@@ -23,7 +23,7 @@
     "aas-node:build": "npm run build -w=aas-core -w=aas-node",
     "aas-node:build:debug": "npm run build:debug -w=aas-core -w=aas-node",
     "serve": "npm run build && node --env-file projects/aas-node/.env projects/aas-node/dist/aas-node.js",
-    "test:docker": "docker build -f Dockerfile.test -t test . && docker run -d --name Test --restart=always test"
+    "test:docker": "docker build -f Dockerfile.test -t test --progress=plain . &> build.log"
   },
   "repository": {
     "type": "git",
