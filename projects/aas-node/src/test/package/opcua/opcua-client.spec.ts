@@ -15,6 +15,11 @@ import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Express } from 'express';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Multer } from 'multer';
+
 type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodResult>;
 
 describe('OpcuaClient', () => {
