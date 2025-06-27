@@ -26,7 +26,14 @@ import { AASComponent } from '../../app/aas/aas.component';
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
-import { Component, input, output, signal } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    input,
+    output,
+    provideZonelessChangeDetection,
+    signal,
+} from '@angular/core';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
@@ -35,7 +42,7 @@ import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard
     selector: 'fhg-aas-tree',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTreeComponent {
     public document = input<AASDocument | null>(null);
@@ -57,7 +64,7 @@ class TestAASTreeComponent {
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestSecureImageComponent {
     public readonly src = input.required<string>();
@@ -68,8 +75,6 @@ class TestSecureImageComponent {
 }
 
 describe('AASComponent', () => {
-    let component: AASComponent;
-    let fixture: ComponentFixture<AASComponent>;
     let dashboard: jasmine.SpyObj<DashboardService>;
     let router: Router;
     let store: AASStore;
@@ -78,7 +83,7 @@ describe('AASComponent', () => {
     let start: jasmine.SpyObj<StartService>;
     let pages: DashboardPage[];
 
-    beforeEach(() => {
+    beforeEach(async () => {
         pages = [{ name: 'Dashboard 1', items: [], requests: [], active: true }];
 
         api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'putDocument']);
@@ -89,9 +94,9 @@ describe('AASComponent', () => {
         });
 
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        start.save.and.returnValue(of(void 0))
+        start.save.and.returnValue(of(void 0));
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: DocumentsService,
@@ -121,10 +126,12 @@ describe('AASComponent', () => {
                     provide: StartService,
                     useValue: start,
                 },
-                 provideHttpClientTesting(),
+                provideHttpClientTesting(),
                 provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
             imports: [
+                AASComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -132,7 +139,7 @@ describe('AASComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
         TestBed.overrideComponent(AASComponent, {
             remove: {
@@ -143,52 +150,64 @@ describe('AASComponent', () => {
             },
         });
 
-        fixture = TestBed.createComponent(AASComponent);
-        component = fixture.componentInstance;
         store = TestBed.inject(AASStore);
         router = TestBed.inject(Router);
         store.document$.set(sampleDocument);
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 
     it('shows the document address', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.address()).toEqual(sampleDocument.address);
     });
 
     it('shows the document assetId', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.assetId()).toEqual('http://customer.com/assets/KHBVZJSQKIY');
     });
 
     it('shows the document id', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.id()).toEqual(sampleDocument.id);
     });
 
     it('shows the document version', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.version()).toEqual('-');
     });
 
     it('indicates that "play" is disabled while sample AAS is not online ready', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.canPlay()).toBeFalse();
     });
 
     it('indicates that "stop" is disabled while sample AAS is not online ready', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.canStop()).toBeFalse();
     });
 
     it('indicates that the sample AAS is editable', () => {
+        const fixture = TestBed.createComponent(AASComponent);
+        const component = fixture.componentInstance;
         expect(component.readOnly()).toBeFalse();
     });
 
     describe('canAddToDashboard', () => {
-        beforeEach(() => {
-            component.selectedElements.set([torque, rotationSpeed]);
-        });
-
         it('can add the selected properties to the dashboard', () => {
+            const fixture = TestBed.createComponent(AASComponent);
+            const component = fixture.componentInstance;
+            component.selectedElements.set([torque, rotationSpeed]);
             spyOn(router, 'navigateByUrl').and.resolveTo(true);
             expect(component.canAddToDashboard()).toBeTrue();
             component.addToDashboard(DashboardChartType.BarVertical);

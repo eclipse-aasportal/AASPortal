@@ -2,10 +2,10 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./out-tsc/lib",
-        "declaration": true,
-        "declarationMap": true,
-        "declarationDir": "./dist/types"
+        "outDir": "./out-tsc/spec",
+        "isolatedModules": false,
+        "module": "es2022",
+        "types": ["express", "multer"]
     },
     "include": [
         "./src/lib/**/*.ts"

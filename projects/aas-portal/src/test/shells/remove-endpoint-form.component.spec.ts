@@ -6,21 +6,19 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { RemoveEndpointFormComponent } from '../../app/shells/remove-endpoint-form/remove-endpoint-form.component';
 
 describe('RemoveEndpointFormComponent', () => {
-    let component: RemoveEndpointFormComponent;
-    let fixture: ComponentFixture<RemoveEndpointFormComponent>;
     let modal: NgbActiveModal;
-    let form: HTMLFormElement;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [NgbActiveModal],
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [NgbActiveModal, provideZonelessChangeDetection()],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
@@ -29,10 +27,14 @@ describe('RemoveEndpointFormComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
-        fixture = TestBed.createComponent(RemoveEndpointFormComponent);
-        component = fixture.componentInstance;
+        modal = TestBed.inject(NgbActiveModal);
+    });
+
+    it('should create', () => {
+        const fixture = TestBed.createComponent(RemoveEndpointFormComponent);
+        const component = fixture.componentInstance;
         component.endpoints.set([
             { name: 'Samples', url: 'http://localhost:1234', selected: false },
             { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
@@ -40,16 +42,20 @@ describe('RemoveEndpointFormComponent', () => {
         ]);
 
         fixture.detectChanges();
-
-        modal = TestBed.inject(NgbActiveModal);
-        form = fixture.debugElement.nativeElement.querySelector('form');
-    });
-
-    it('should create', () => {
         expect(component).toBeTruthy();
     });
 
     it('allows deleting the "Samples" registry', () => {
+        const fixture = TestBed.createComponent(RemoveEndpointFormComponent);
+        const component = fixture.componentInstance;
+        component.endpoints.set([
+            { name: 'Samples', url: 'http://localhost:1234', selected: false },
+            { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
+            { name: 'AAS Registry', url: 'http://localhost:1236', selected: false },
+        ]);
+
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         spyOn(modal, 'close').and.callFake(result => {
             expect(result).toEqual(['Samples']);
         });
@@ -65,6 +71,16 @@ describe('RemoveEndpointFormComponent', () => {
     });
 
     it('Display message if no element selected.', () => {
+        const fixture = TestBed.createComponent(RemoveEndpointFormComponent);
+        const component = fixture.componentInstance;
+        component.endpoints.set([
+            { name: 'Samples', url: 'http://localhost:1234', selected: false },
+            { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
+            { name: 'AAS Registry', url: 'http://localhost:1236', selected: false },
+        ]);
+
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
         spyOn(modal, 'close');
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);

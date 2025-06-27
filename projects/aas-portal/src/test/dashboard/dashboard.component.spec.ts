@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY, Subject } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -28,14 +28,14 @@ import data from '../assets/test-pages.json';
     imports: [],
     template: '<div></div>',
     styles: [],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestChartEditComponent {
     public readonly item = input.required<DashboardChartItem>();
 }
 
 describe('DashboardComponent', () => {
-    let component: DashboardComponent;
-    let fixture: ComponentFixture<DashboardComponent>;
     let webSocketSubject: WebSocketSubject<WebSocketData>;
     let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
     let start: jasmine.SpyObj<StartService>;
@@ -45,7 +45,7 @@ describe('DashboardComponent', () => {
     const chart2 = '4711';
     const chart3 = '0815';
 
-    beforeEach(() => {
+    beforeEach(async () => {
         webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
         webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
         webSocketFactory.create.and.returnValue(webSocketSubject);
@@ -68,7 +68,7 @@ describe('DashboardComponent', () => {
             innerWidth: 700,
         });
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: WebSocketFactoryService,
@@ -99,8 +99,10 @@ describe('DashboardComponent', () => {
                     useValue: service,
                 },
                 provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
             imports: [
+                DashboardComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -108,7 +110,7 @@ describe('DashboardComponent', () => {
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
         TestBed.overrideComponent(DashboardComponent, {
             add: {
@@ -118,35 +120,49 @@ describe('DashboardComponent', () => {
                 imports: [ChartEditComponent],
             },
         });
-
-        fixture = TestBed.createComponent(DashboardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('shows the Test page', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.activePage()?.name).toEqual('Test');
     });
 
     it('starts with 1 chart in first row', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.firstItems().length).toBe(1);
     });
 
     it('displays 2 charts per row', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.items().length).toBe(2);
     });
 
     describe('single selection', () => {
         it('indicates no item selected', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             expect(component.selectedItem()).toBeUndefined();
             expect(component.selectedItems().length).toEqual(0);
         });
 
         it('allows to toggle the selection of a chart', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             const items = component.activePage().items;
             component.toggleSelection(undefined, items[0]);
             expect(component.selectedItem()).toEqual(items[0]);
@@ -157,6 +173,9 @@ describe('DashboardComponent', () => {
         });
 
         it('ensures that only one item is selected', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             const items = component.activePage().items;
             component.toggleSelection(undefined, items[0]);
             expect(component.selectedItem()).toEqual(items[0]);
@@ -169,6 +188,9 @@ describe('DashboardComponent', () => {
 
     describe('view mode', () => {
         it('has a view mode (initial)', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             expect(component.editMode()).toBeFalse();
         });
     });
@@ -179,10 +201,16 @@ describe('DashboardComponent', () => {
         });
 
         it('has an edit mode', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             expect(component.editMode()).toBeTrue();
         });
 
         it('can move item[1] to the left', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             let items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             expect(component.canMovePrevious()).toBeTrue();
@@ -191,6 +219,9 @@ describe('DashboardComponent', () => {
         });
 
         it('can move item[1] to the right', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             let items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             expect(component.canMoveNext()).toBeTrue();
@@ -199,11 +230,17 @@ describe('DashboardComponent', () => {
         });
 
         it('deletes the Test page', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             component.delete();
             expect(service.deletePage).toHaveBeenCalled();
         });
 
         it('deletes a chart', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             let items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             component.delete();

@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Location as NgLocation } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
@@ -29,7 +29,6 @@ import sample from '../../assets/dpp-sample.json';
     selector: 'fhg-img',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestSecuredImageComponent {
@@ -41,9 +40,6 @@ export class TestSecuredImageComponent {
 }
 
 describe('HandoverDocumentationComponent', () => {
-    let component: HandoverDocumentationComponent;
-    let fixture: ComponentFixture<HandoverDocumentationComponent>;
-
     let location: jasmine.SpyObj<NgLocation>;
     let window: jasmine.SpyObj<Window>;
     let api: jasmine.SpyObj<DocumentsService>;
@@ -89,8 +85,10 @@ describe('HandoverDocumentationComponent', () => {
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
             imports: [
+                HandoverDocumentationComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -102,18 +100,14 @@ describe('HandoverDocumentationComponent', () => {
 
         TestBed.overrideComponent(HandoverDocumentationComponent, {
             remove: { imports: [SecuredImageComponent] },
-            add: {
-                providers: [],
-                imports: [TestSecuredImageComponent],
-            },
+            add: { imports: [TestSecuredImageComponent] },
         });
-
-        fixture = TestBed.createComponent(HandoverDocumentationComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(HandoverDocumentationComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

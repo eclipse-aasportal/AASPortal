@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
@@ -20,13 +20,11 @@ import { DocumentsService } from '../../../lib/services/documents.service';
 import { encodeBase64Url } from '../../../lib/utilities';
 
 describe('CustomerFeedbackComponent', () => {
-    let component: CustomerFeedbackComponent;
-    let fixture: ComponentFixture<CustomerFeedbackComponent>;
     let start: jasmine.SpyObj<StartService>;
     let api: jasmine.SpyObj<DocumentsService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         route = jasmine.createSpyObj<ActivatedRoute>(
@@ -46,7 +44,7 @@ describe('CustomerFeedbackComponent', () => {
             } satisfies AASDocument),
         );
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: ActivatedRoute,
@@ -64,8 +62,10 @@ describe('CustomerFeedbackComponent', () => {
                     provide: DocumentsService,
                     useValue: api,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
+                CustomerFeedbackComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -73,14 +73,13 @@ describe('CustomerFeedbackComponent', () => {
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(CustomerFeedbackComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(CustomerFeedbackComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

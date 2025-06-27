@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from '../../app/app.component';
-import { Component } from '@angular/core';
 import { MainComponent } from '../../app/main/main.component';
 
 @Component({
@@ -16,11 +16,17 @@ import { MainComponent } from '../../app/main/main.component';
     template: '<p></p>',
     styleUrls: [],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestMainComponent {}
 
 describe('AppComponent', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [provideZonelessChangeDetection()],
+            imports: [AppComponent],
+        }).compileComponents();
+
         TestBed.overrideComponent(AppComponent, {
             remove: {
                 imports: [MainComponent],

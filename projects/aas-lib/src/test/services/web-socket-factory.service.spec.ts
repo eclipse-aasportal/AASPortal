@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
@@ -17,7 +18,7 @@ describe('WebSocketFactoryService', () => {
     let webSocket: WebSocketSubject<WebSocketData>;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
         service = TestBed.inject(WebSocketFactoryService);
     });
 

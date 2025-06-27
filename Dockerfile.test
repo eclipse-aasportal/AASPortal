@@ -1,0 +1,9 @@
+# Creates an all-in-one Docker image
+FROM node:22.16.0-alpine AS build
+WORKDIR /usr/src/app
+COPY . .
+RUN apk add --no-cache chromium
+ENV CHROME_BIN=/usr/bin/chromium-browser
+RUN npm ci --unsafe-perm=true --allow-root
+RUN npm run build --workspaces
+RUN npm run test

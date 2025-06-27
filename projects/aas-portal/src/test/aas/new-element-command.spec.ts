@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { aas, AASDocument, selectElement } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
@@ -14,13 +15,13 @@ import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sam
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
 import { AASStore } from '../../app/aas/aas.store';
 
-describe('NewElementCommand', function () {
+describe('NewElementCommand', () => {
     let command: NewElementCommand;
     let document: AASDocument;
     let submodel: aas.Submodel;
     let store: AASStore;
 
-    beforeEach(function () {
+    beforeEach(() => {
         document = cloneDeep(aasNoTechnicalData);
         submodel = cloneDeep(submodelTechnicalData);
 
@@ -34,6 +35,7 @@ describe('NewElementCommand', function () {
                     provide: DocumentsService,
                     useValue: jasmine.createSpyObj<DocumentsService>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideZonelessChangeDetection(),
             ],
         });
 
@@ -41,7 +43,7 @@ describe('NewElementCommand', function () {
         store.document$.set(document);
     });
 
-    beforeEach(function () {
+    beforeEach(() => {
         command = new NewElementCommand(store, document, document.content!.assetAdministrationShells[0], submodel);
         command.execute();
     });
