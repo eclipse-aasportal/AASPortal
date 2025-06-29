@@ -20,7 +20,7 @@ describe('OpcuaReader', () => {
     let dataTypes: jest.Mocked<OpcuaDataTypeDictionary>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         origin = createSpyObj<OPCUAComponent>({}, ['displayName', 'hasProperty', 'nodeClass']);
         dataTypes = createSpyObj<OpcuaDataTypeDictionary>(['get']);
         reader = new OpcuaReader(logger, origin, dataTypes);

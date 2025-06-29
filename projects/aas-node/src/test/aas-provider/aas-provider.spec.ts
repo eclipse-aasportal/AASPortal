@@ -26,7 +26,7 @@ describe('AASProvider', function () {
     let variable: jest.Mocked<Variable>;
     let fileStorageFactory: jest.Mocked<FileStorageProvider>;
     let index: jest.Mocked<AASIndex>;
-    const logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+    const logger = createSpyObj<Logger>(['error', 'warning', 'info']);
     const parallel = createSpyObj<Parallel>(['execute', 'on']);
     // const wsServer = createSpyObj<WSServer>(['notify', 'close', 'on']);
     const clientFactory = createSpyObj<AASClientFactory>(['create', 'testAsync']);

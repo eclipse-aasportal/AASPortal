@@ -28,17 +28,13 @@ import {
 import { aas, AASDocument, AASEndpoint } from 'aas-core';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
-import { Logger } from '../logging/logger.js';
 import { decodeBase64Url } from '../convert.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
 @Tags('Endpoints')
 export class EndpointsController extends Controller {
-    public constructor(
-        @inject('Logger') private readonly logger: Logger,
-        @inject(AASProvider) private readonly aasProvider: AASProvider,
-    ) {
+    public constructor(@inject(AASProvider) private readonly aasProvider: AASProvider) {
         super();
     }
 
@@ -50,12 +46,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
-        try {
-            this.logger.start('getEndpoints');
-            return await this.aasProvider.getEndpoints();
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getEndpoints();
     }
 
     /**
@@ -66,12 +57,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
-        try {
-            this.logger.start('getEndpointCount');
-            return { count: await this.aasProvider.getEndpointCount() };
-        } finally {
-            this.logger.stop();
-        }
+        return { count: await this.aasProvider.getEndpointCount() };
     }
 
     /**
@@ -83,12 +69,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentCount')
     public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
-        try {
-            this.logger.start('getCount');
-            return { count: await this.aasProvider.getCount(decodeBase64Url(name)) };
-        } finally {
-            this.logger.stop();
-        }
+        return { count: await this.aasProvider.getCount(decodeBase64Url(name)) };
     }
 
     /**
@@ -100,16 +81,11 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('addEndpoint')
     public async addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
-        try {
-            this.logger.start('addEndpoint');
-            if (decodeBase64Url(name) !== endpoint.name) {
-                throw new Error('Invalid URL.');
-            }
-
-            await this.aasProvider.addEndpoint(endpoint);
-        } finally {
-            this.logger.stop();
+        if (decodeBase64Url(name) !== endpoint.name) {
+            throw new Error('Invalid URL.');
         }
+
+        await this.aasProvider.addEndpoint(endpoint);
     }
 
     /**
@@ -121,16 +97,11 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('updateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
-        try {
-            this.logger.start('addEndpoint');
-            if (decodeBase64Url(name) !== endpoint.name) {
-                throw new Error('Invalid URL.');
-            }
-
-            await this.aasProvider.updateEndpoint(endpoint);
-        } finally {
-            this.logger.stop();
+        if (decodeBase64Url(name) !== endpoint.name) {
+            throw new Error('Invalid URL.');
         }
+
+        await this.aasProvider.updateEndpoint(endpoint);
     }
 
     /**
@@ -141,12 +112,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('deleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
-        try {
-            this.logger.start('removeEndpoint');
-            await this.aasProvider.removeEndpoint(decodeBase64Url(name));
-        } finally {
-            this.logger.stop();
-        }
+        await this.aasProvider.removeEndpoint(decodeBase64Url(name));
     }
 
     /**
@@ -156,12 +122,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('reset')
     public async reset(): Promise<void> {
-        try {
-            this.logger.start('reset');
-            await this.aasProvider.reset();
-        } finally {
-            this.logger.stop();
-        }
+        await this.aasProvider.reset();
     }
 
     /**
@@ -172,12 +133,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('startEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
-        try {
-            this.logger.start('startEndpointScan');
-            await this.aasProvider.startEndpointScan(decodeBase64Url(name));
-        } finally {
-            this.logger.stop();
-        }
+        await this.aasProvider.startEndpointScan(decodeBase64Url(name));
     }
 
     /**
@@ -193,12 +149,7 @@ export class EndpointsController extends Controller {
         @Path() endpoint: string,
         @Path() id: string,
     ): Promise<NodeJS.ReadableStream | undefined> {
-        try {
-            this.logger.start('getThumbnail');
-            return await this.aasProvider.getThumbnail(decodeBase64Url(endpoint), decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getThumbnail(decodeBase64Url(endpoint), decodeBase64Url(id));
     }
 
     /**
@@ -211,12 +162,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getPackage')
     public async getPackage(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
-        try {
-            this.logger.start('getDocument');
-            return await this.aasProvider.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id));
     }
 
     /**
@@ -228,12 +174,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('addPackages')
     public async addPackages(@Path() endpoint: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
-        try {
-            this.logger.start('addPackages');
-            await this.aasProvider.addPackages(decodeBase64Url(endpoint), files);
-        } finally {
-            this.logger.stop();
-        }
+        await this.aasProvider.addPackages(decodeBase64Url(endpoint), files);
     }
 
     /**
@@ -245,12 +186,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['editor'])
     @OperationId('deletePackage')
     public async deletePackage(@Path() endpoint: string, @Path() id: string): Promise<void> {
-        try {
-            this.logger.start('deletePackage');
-            await this.aasProvider.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        await this.aasProvider.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id));
     }
 
     /**
@@ -263,12 +199,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
     public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
-        try {
-            this.logger.start('getDocument');
-            return await this.aasProvider.getDocument(decodeBase64Url(id), decodeBase64Url(endpoint));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getDocument(decodeBase64Url(id), decodeBase64Url(endpoint));
     }
 
     /**
@@ -284,12 +215,7 @@ export class EndpointsController extends Controller {
         @Path() endpoint: string,
         @Path() id: string,
     ): Promise<aas.Environment | undefined> {
-        try {
-            this.logger.start('getDocumentContent');
-            return await this.aasProvider.getContent(decodeBase64Url(endpoint), decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getContent(decodeBase64Url(endpoint), decodeBase64Url(id));
     }
 
     /**
@@ -312,18 +238,13 @@ export class EndpointsController extends Controller {
         @Path() path: string,
         @Queries() queryParams: { width?: number; height?: number },
     ): Promise<NodeJS.ReadableStream> {
-        try {
-            this.logger.start('getDataElementValue');
-            return await this.aasProvider.getDataElementValue(
-                decodeBase64Url(endpoint),
-                decodeBase64Url(id),
-                decodeBase64Url(smId),
-                path,
-                queryParams,
-            );
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getDataElementValue(
+            decodeBase64Url(endpoint),
+            decodeBase64Url(id),
+            decodeBase64Url(smId),
+            path,
+            queryParams,
+        );
     }
 
     /**
@@ -341,14 +262,9 @@ export class EndpointsController extends Controller {
         @Path() id: string,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<string[]> {
-        try {
-            this.logger.start('updateDocument');
-            const buffer = await fs.promises.readFile(file.path);
-            const env: aas.Environment = JSON.parse(buffer.toString());
-            return await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
-        } finally {
-            this.logger.stop();
-        }
+        const buffer = await fs.promises.readFile(file.path);
+        const env: aas.Environment = JSON.parse(buffer.toString());
+        return await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
     }
 
     /**
@@ -366,12 +282,7 @@ export class EndpointsController extends Controller {
         @Path() id: string,
         @Body() operation: aas.Operation,
     ): Promise<aas.Operation> {
-        try {
-            this.logger.start('invokeOperation');
-            return await this.aasProvider.invoke(decodeBase64Url(endpoint), decodeBase64Url(id), operation);
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.invoke(decodeBase64Url(endpoint), decodeBase64Url(id), operation);
     }
 
     /**
@@ -384,12 +295,7 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getHierarchy')
     public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
-        try {
-            this.logger.start('getHierarchy');
-            return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));
     }
 
     /**
@@ -402,11 +308,6 @@ export class EndpointsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getConceptDescription')
     public async getConceptDescription(@Path() endpoint: string, @Path() id: string): Promise<aas.ConceptDescription> {
-        try {
-            this.logger.start('getConceptDescription');
-            return await this.aasProvider.getConceptDescription(decodeBase64Url(id), decodeBase64Url(endpoint));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getConceptDescription(decodeBase64Url(id), decodeBase64Url(endpoint));
     }
 }

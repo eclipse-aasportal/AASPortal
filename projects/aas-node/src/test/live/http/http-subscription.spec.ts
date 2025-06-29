@@ -22,7 +22,7 @@ describe('HttpSubscription', function () {
     let subscription: HttpSubscription;
 
     beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
         aasxServer = createSpyObj<AASApiClient>(['getShells', 'commit', 'openFile', 'readValue', 'resolveNodeId']);
 

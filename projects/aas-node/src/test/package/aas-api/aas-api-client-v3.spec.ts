@@ -21,7 +21,7 @@ describe('AASApiClientV3', () => {
     let http: jest.Mocked<HttpClient>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         http = createSpyObj<HttpClient>(['get', 'getResponse', 'post', 'put', 'delete']);
         client = new AASApiClientV3(logger, http, {
             name: 'AASX Server',
