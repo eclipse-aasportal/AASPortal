@@ -12,18 +12,18 @@ import { Logger } from '../../../app/logging/logger.js';
 import { createSpyObj } from 'fhg-jest';
 import { OpcuaClient } from '../../../app/package/opcua/opcua-client.js';
 
-describe('OpcuaPackage', function () {
+describe('OpcuaPackage', () => {
     let aasPackage: OpcuaPackage;
     let logger: jest.Mocked<Logger>;
     let server: jest.Mocked<OpcuaClient>;
 
-    beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+    beforeEach(() => {
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         server = createSpyObj<OpcuaClient>(['open', 'close', 'getSession'], { isOpen: true });
         aasPackage = new OpcuaPackage(logger, server, 'ns=1;i=42');
     });
 
-    it('should be created', function () {
+    it('should be created', () => {
         expect(aasPackage).toBeTruthy();
     });
 });

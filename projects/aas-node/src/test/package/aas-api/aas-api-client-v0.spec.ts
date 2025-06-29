@@ -29,7 +29,7 @@ describe('AASApiClientV0', function () {
     let http: jest.Mocked<HttpClient>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         http = createSpyObj<HttpClient>(['get', 'getResponse']);
         client = new AASApiClientV0(logger, http, {
             name: 'AASX Server',

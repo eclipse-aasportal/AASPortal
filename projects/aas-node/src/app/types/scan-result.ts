@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, Message, TemplateDescriptor, AASEndpoint } from 'aas-core';
+import { AASDocument, TemplateDescriptor, AASEndpoint } from 'aas-core';
 
 export enum ScanResultKind {
     Add,
@@ -20,7 +20,6 @@ export interface ScanResult {
     type: 'ScanEndResult' | 'ScanEndpointResult' | 'ScanTemplatesResult';
     kind: ScanResultKind;
     taskId: number;
-    messages?: Message[];
 }
 
 /** The result of an endpoint scan. */

@@ -20,7 +20,7 @@ describe('AasxPackage', function () {
     let fileStorage: FileStorage;
 
     beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         fileStorage = new LocalFileStorage('file:///samples', './src/test/assets/');
         source = new AasxDirectory(logger, fileStorage, {
             url: 'file:///samples',

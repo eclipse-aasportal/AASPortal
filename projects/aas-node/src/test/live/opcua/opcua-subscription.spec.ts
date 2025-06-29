@@ -20,7 +20,7 @@ describe('OpcuaSubscription', function () {
     let server: jest.Mocked<OpcuaClient>;
 
     beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
         server = createSpyObj<OpcuaClient>(['getSession']);
         subscription = new OpcuaSubscription(logger, client, server, [
