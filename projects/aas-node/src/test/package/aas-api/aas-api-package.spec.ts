@@ -20,7 +20,7 @@ describe('AASApiPackage', () => {
     let env: aas.Environment;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         server = createSpyObj<AASApiClient>(['readEnvironment'], {
             endpoint: { name: 'Test', type: 'AAS_API', url: 'http:/localhost:1234' },
         });

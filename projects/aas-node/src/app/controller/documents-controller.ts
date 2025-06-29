@@ -8,7 +8,6 @@
 
 import { inject, injectable } from 'tsyringe';
 import { Controller, Get, OperationId, Path, Query, Route, Security, Tags } from 'tsoa';
-import { Logger } from '../logging/logger.js';
 import { AASDocument, AASPagedResult } from 'aas-core';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
@@ -17,10 +16,7 @@ import { decodeBase64Url } from '../convert.js';
 @Route('/api/v1/documents')
 @Tags('Documents')
 export class DocumentsController extends Controller {
-    public constructor(
-        @inject('Logger') private readonly logger: Logger,
-        @inject(AASProvider) private readonly aasProvider: AASProvider,
-    ) {
+    public constructor(@inject(AASProvider) private readonly aasProvider: AASProvider) {
         super();
     }
 
@@ -38,16 +34,11 @@ export class DocumentsController extends Controller {
         @Query() filter?: string,
         @Query() language?: string,
     ): Promise<AASPagedResult> {
-        try {
-            this.logger.start('getDocuments');
-            if (filter) {
-                filter = decodeBase64Url(filter);
-            }
-
-            return await this.aasProvider.getDocuments(JSON.parse(decodeBase64Url(cursor)), filter, language);
-        } finally {
-            this.logger.stop();
+        if (filter) {
+            filter = decodeBase64Url(filter);
         }
+
+        return await this.aasProvider.getDocuments(JSON.parse(decodeBase64Url(cursor)), filter, language);
     }
 
     /**
@@ -59,12 +50,7 @@ export class DocumentsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
-        try {
-            this.logger.start('getCount');
-            return { count: await this.aasProvider.getCount() };
-        } finally {
-            this.logger.stop();
-        }
+        return { count: await this.aasProvider.getCount() };
     }
 
     /**
@@ -76,11 +62,6 @@ export class DocumentsController extends Controller {
     @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
     public async getDocument(@Path() id: string): Promise<AASDocument> {
-        try {
-            this.logger.start('getDocument');
-            return await this.aasProvider.getDocument(decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getDocument(decodeBase64Url(id));
     }
 }

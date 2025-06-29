@@ -39,7 +39,7 @@ describe('Application Info service', () => {
     let applicationInfo: ApplicationInfo;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { ASSETS: './' });
         applicationInfo = new ApplicationInfo(logger, variable, appInfo as AppInfo);
     });

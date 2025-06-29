@@ -146,15 +146,7 @@ export class OpcuaPackage extends AASPackage {
     }
 
     private getIdentifier(component: OPCUAComponent): string {
-        let id = this.readIdentifier(component);
-        if (!id) {
-            id = this.nodeId;
-            this.logger.debug(
-                `Unable to read AAS identifier for '${component.browseName}' in '${this.server.endpoint}'.'`,
-            );
-        }
-
-        return id;
+        return this.readIdentifier(component) ?? this.nodeId;
     }
 
     private readIdentifier(component: OPCUAComponent): string | undefined {

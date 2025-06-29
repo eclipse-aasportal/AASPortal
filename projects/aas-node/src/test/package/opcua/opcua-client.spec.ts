@@ -27,7 +27,7 @@ describe('OpcuaClient', () => {
     let logger: jest.Mocked<Logger>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         server = new OpcuaClient(logger, {
             url: 'opc.tcp://localhost:1234/I4AASServer',
             name: 'OPCUA Server',

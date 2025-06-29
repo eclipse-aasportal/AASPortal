@@ -656,12 +656,6 @@ export class AASProvider {
             );
         }
 
-        if (result.messages) {
-            this.logger.start(`scan ${task.endpointName ?? 'undefined'}`);
-            result.messages.forEach(message => this.logger.log(message));
-            this.logger.stop();
-        }
-
         if (this.resetRequested) {
             this.taskHandler.delete(task.id);
         }
