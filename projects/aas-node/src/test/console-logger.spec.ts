@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { describe, beforeEach, it, jest, expect } from '@jest/globals';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { ConsoleLogger } from '../app/logging/console-logger.js';
 
 describe('ConsoleLogger', () => {

@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Connection } from 'mysql2/promise';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { AASEndpoint } from 'aas-core';
 import { MySqlIndex } from '../../../app/aas-index/mysql/mysql-index.js';
 import { Logger } from '../../../app/logging/logger.js';

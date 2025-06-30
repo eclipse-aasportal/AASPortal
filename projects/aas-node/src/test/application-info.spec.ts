@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { AppInfo } from 'aas-core';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { Variable } from '../app/variable.js';
