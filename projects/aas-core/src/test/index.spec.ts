@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, it, expect } from '@jest/globals';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import {
     aas,
     equalUrls,

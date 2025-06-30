@@ -16,7 +16,7 @@ import { Readable } from 'stream';
 import { resolve } from 'path/posix';
 import request from 'supertest';
 import { aas, AASEndpoint } from 'aas-core';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 
 import { sampleDocument } from '../assets/sample-document.js';
 import { LOGGER, Logger } from '../../app/logging/logger.js';

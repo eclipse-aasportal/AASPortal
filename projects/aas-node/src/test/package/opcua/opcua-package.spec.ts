@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { OpcuaPackage } from '../../../app/package/opcua/opcua-package.js';
 import { Logger } from '../../../app/logging/logger.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { OpcuaClient } from '../../../app/package/opcua/opcua-client.js';
 
 describe('OpcuaPackage', () => {
