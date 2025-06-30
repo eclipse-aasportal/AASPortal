@@ -15,7 +15,7 @@ import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { Parallel } from '../../app/aas-provider/parallel.js';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
 import { AASClientFactory } from '../../app/package/aas-client-factory.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
 import { AASIndex } from '../../app/aas-index/aas-index.js';

@@ -11,7 +11,7 @@ import { aas } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { AASApiClient } from '../../../app/package/aas-api/aas-api-client.js';
 import { AASApiPackage } from '../../../app/package/aas-api/aas-api-package.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 
 describe('AASApiPackage', () => {
     let aasPackage: AASApiPackage;

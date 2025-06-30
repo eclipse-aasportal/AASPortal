@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { OpcuaReader } from '../../../app/package/opcua/opcua-reader.js';
 import { OPCUAComponent } from '../../../app/package/opcua/opcua.js';

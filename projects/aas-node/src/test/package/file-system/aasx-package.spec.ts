@@ -11,7 +11,7 @@ import { AasxPackage } from '../../../app/package/file-system/aasx-package.js';
 import { AasxDirectory } from '../../../app/package/file-system/aasx-directory.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { LocalFileStorage } from '../../../app/file-storage/local-file-storage.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { FileStorage } from '../../../app/file-storage/file-storage.js';
 
 describe('AasxPackage', function () {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { aasEnvironment as env } from '../../assets/aas-environment.js';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { AASApiClientV3, OperationResult } from '../../../app/package/aas-api/aas-api-client-v3.js';

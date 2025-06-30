@@ -33,7 +33,7 @@
   "homepage": "https://www.iosb-ina.fraunhofer.de/",
   "license": "Apache-2.0",
   "workspaces": [
-    "projects/fhg-jest",
+    "projects/aas-jest",
     "projects/aas-core",
     "projects/aas-node",
     "projects/aas-lib",
@@ -130,7 +130,7 @@
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.0",
-    "fhg-jest": "./projects/fhg-jest",
+    "aas-jest": "./projects/aas-jest",
     "globals": "^16.2.0",
     "jasmine": "^5.8.0",
     "jasmine-core": "^5.8.0",
