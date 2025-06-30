@@ -14,7 +14,7 @@ import isEmpty from 'lodash-es/isEmpty.js';
 import { Mailer } from '../mailer.js';
 import { ERRORS } from '../errors.js';
 import { UserData } from './user-data.js';
-import { UserStorage } from './user-storage.js';
+import { USER_STORAGE, UserStorage } from './user-storage.js';
 import { Variable } from '../variable.js';
 import {
     Credentials,
@@ -36,7 +36,7 @@ export class AuthService {
 
     public constructor(
         @inject(Mailer) private readonly mailer: Mailer,
-        @inject('UserStorage') private readonly userStorage: UserStorage,
+        @inject(USER_STORAGE) private readonly userStorage: UserStorage,
         @inject(Variable) private readonly variable: Variable,
     ) {
         if (variable.JWT_PUBLIC_KEY) {

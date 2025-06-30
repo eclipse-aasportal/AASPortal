@@ -19,7 +19,7 @@ import { aas, AASEndpoint } from 'aas-core';
 import { createSpyObj } from 'fhg-jest';
 
 import { sampleDocument } from '../assets/sample-document.js';
-import { Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { Variable } from '../../app/variable.js';
@@ -66,7 +66,7 @@ describe('EndpointsController', function () {
         authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
-        container.registerInstance('Logger', logger);
+        container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(AASProvider, aasProvider);
         container.registerInstance(Authentication, authentication);

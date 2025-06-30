@@ -8,7 +8,7 @@
 
 import { extname, join } from 'path/posix';
 import { AASEndpoint, TemplateDescriptor, aas } from 'aas-core';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
@@ -30,7 +30,7 @@ export class TemplateStorage {
     private templates: TemplateDescriptor[] = [];
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) variable: Variable,
         @inject(FileStorageProvider) provider: FileStorageProvider,
         @inject(Parallel) private readonly parallel: Parallel,

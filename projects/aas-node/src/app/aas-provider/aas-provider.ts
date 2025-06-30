@@ -28,9 +28,9 @@ import {
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
-import { AASIndex } from '../aas-index/aas-index.js';
+import { AAS_INDEX, AASIndex } from '../aas-index/aas-index.js';
 import { ScanResultKind, ScanResult, ScanEndpointResult } from '../types/scan-result.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
 import { ScanEndpointData } from '../types/worker-data.js';
 import { SocketClient } from '../live/socket-client.js';
@@ -53,10 +53,10 @@ export class AASProvider {
 
     public constructor(
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(AASClientFactory) private readonly clientFactory: AASClientFactory,
-        @inject('AASIndex') private readonly index: AASIndex,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
         this.parallel.on('message', this.parallelOnMessage);

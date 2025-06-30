@@ -8,6 +8,10 @@
 
 import { Cookie } from 'aas-core';
 import { UserData } from './user-data.js';
+import { InjectionToken } from 'tsyringe';
+
+/** Injection token. */
+export const USER_STORAGE: InjectionToken<UserStorage> = 'USER_STORAGE';
 
 /** Defines user storage. */
 export abstract class UserStorage {

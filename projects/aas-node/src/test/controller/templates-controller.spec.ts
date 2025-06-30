@@ -14,7 +14,7 @@ import morgan from 'morgan';
 import request from 'supertest';
 import { TemplateDescriptor, aas } from 'aas-core';
 
-import { Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from 'fhg-jest';
 import { Variable } from '../../app/variable.js';
@@ -42,7 +42,7 @@ describe('TemplateController', () => {
         authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
-        container.registerInstance('Logger', logger);
+        container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(TemplateStorage, templateStorage);
         container.registerInstance(Authentication, authentication);

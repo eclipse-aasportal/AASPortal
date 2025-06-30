@@ -18,7 +18,7 @@ import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from 'fhg-jest';
 import { getToken, guestPayload } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
-import { Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
@@ -48,7 +48,7 @@ describe('AuthController', () => {
         authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
-        container.registerInstance('Logger', logger);
+        container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(Authentication, authentication);
 

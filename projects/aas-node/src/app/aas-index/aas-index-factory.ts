@@ -15,7 +15,7 @@ import { LowDbIndex } from './lowdb/lowdb-index.js';
 import { Variable } from '../variable.js';
 import { LowDbData } from './lowdb/lowdb-types.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { urlToString } from '../convert.js';
 import { KeywordDirectory } from './keyword-directory.js';
 
@@ -24,7 +24,7 @@ export class AASIndexFactory {
 
     public create(): AASIndex {
         const variable = this.container.resolve(Variable);
-        const logger = this.container.resolve<Logger>('Logger');
+        const logger = this.container.resolve<Logger>(LOGGER);
         const keywordDirectory = this.container.resolve(KeywordDirectory);
         if (variable.AAS_INDEX) {
             try {
