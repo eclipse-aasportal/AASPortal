@@ -6,14 +6,19 @@
  *
  *****************************************************************************/
 
+import { InjectionToken } from 'tsyringe';
+
 /** Injection token. */
-export const LOGGER = 'LOGGER';
+export const LOGGER: InjectionToken<Logger> = 'LOGGER';
+
+/** The logging levels. */
+export type LogLevel = 'Error' | 'Warning' | 'Info';
 
 /**
  * Defines a logger interface.
  */
 export abstract class Logger {
-    protected constructor(public readonly logLevel: string) {}
+    protected constructor(public readonly logLevel: LogLevel) {}
 
     /**
      * Logs an error.

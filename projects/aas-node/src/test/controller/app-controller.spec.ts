@@ -11,7 +11,7 @@ import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
-import { Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AppInfo } from 'aas-core';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
@@ -43,7 +43,7 @@ describe('AppController', function () {
         authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
-        container.registerInstance('Logger', logger);
+        container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(ApplicationInfo, applicationInfo);
         container.registerInstance(Authentication, authentication);
