@@ -2,7 +2,7 @@
 FROM node:22.16.0-alpine AS build
 WORKDIR /usr/src/app
 COPY . .
-RUN npm install
+RUN npm ci
 RUN npm run aas-portal:build
 
 FROM nginx:latest AS aas-portal
