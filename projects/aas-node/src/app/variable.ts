@@ -42,7 +42,7 @@ export class Variable {
         this.AAS_INDEX = process.env.AAS_INDEX;
         this.AAS_NODE_USERNAME = process.env.AAS_NODE_USERNAME ?? 'aas-server';
         this.AAS_NODE_PASSWORD = process.env.AAS_NODE_PASSWORD ?? 'aas-server';
-        this.LOG_LEVEL = process.env.LOOG_LEVEL ?? 'Error';
+        this.LOG_LEVEL = (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Error';
     }
 
     /** The secret for HS256 encryption or the private key file for RS256 encryption. */
@@ -111,6 +111,6 @@ export class Variable {
     /** The root password. */
     public readonly AAS_NODE_PASSWORD: string;
 
-    /** The logginh level. */
-    public readonly LOG_LEVEL: string;
+    /** The logging level. */
+    public readonly LOG_LEVEL: 'Error' | 'Warning' | 'Info';
 }
