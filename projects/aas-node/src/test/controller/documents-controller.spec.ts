@@ -14,7 +14,7 @@ import morgan from 'morgan';
 import request from 'supertest';
 import { AASCursor, AASPagedResult } from 'aas-core';
 
-import { Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
@@ -56,7 +56,7 @@ describe('DocumentsController', function () {
         authentication.check.mockResolvedValue(guestPayload);
 
         container.registerInstance(AuthService, auth);
-        container.registerInstance('Logger', logger);
+        container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(AASProvider, aasProvider);
         container.registerInstance(Authentication, authentication);

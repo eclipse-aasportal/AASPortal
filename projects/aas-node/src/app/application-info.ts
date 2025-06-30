@@ -11,14 +11,14 @@ import { readFile } from 'fs/promises';
 import { inject, singleton } from 'tsyringe';
 import { AppInfo } from 'aas-core';
 import { Variable } from './variable.js';
-import { Logger } from './logging/logger.js';
+import { LOGGER, Logger } from './logging/logger.js';
 
 @singleton()
 export class ApplicationInfo {
     private data?: AppInfo;
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
         data?: AppInfo,
     ) {

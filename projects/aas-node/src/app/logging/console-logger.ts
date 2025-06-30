@@ -6,11 +6,15 @@
  *
  *****************************************************************************/
 
-import { stringFormat } from 'aas-core';
-import { Logger } from './logger.js';
+import { convertToString, stringFormat } from 'aas-core';
+import { Logger, LogLevel } from './logger.js';
 
+/** Provides a logger that writes messages to `stdout` and `stderr`. */
 export class ConsoleLogger extends Logger {
-    public constructor(logLevel: string) {
+    public constructor(
+        logLevel: LogLevel,
+        private readonly _console: Console = console,
+    ) {
         super(logLevel);
     }
 
@@ -24,9 +28,11 @@ export class ConsoleLogger extends Logger {
             message = args.length > 0 ? stringFormat(error, ...args) : error;
         } else if (error instanceof Error) {
             message = error.message;
+        } else {
+            message = convertToString(error);
         }
 
-        console.error(message);
+        this._console.error(`Error, ${new Date().toUTCString()}: ${message}`);
     }
 
     public override warning(message: string, ...args: unknown[]): void {
@@ -38,7 +44,9 @@ export class ConsoleLogger extends Logger {
             return;
         }
 
-        console.warn(args.length > 0 ? stringFormat(message, ...args) : message);
+        this._console.warn(
+            `Warning, ${new Date().toUTCString()}: ${args.length > 0 ? stringFormat(message, ...args) : message}`,
+        );
     }
 
     public override info(message: string, ...args: unknown[]): void {
@@ -50,6 +58,8 @@ export class ConsoleLogger extends Logger {
             return;
         }
 
-        console.info(args.length > 0 ? stringFormat(message, ...args) : message);
+        this._console.info(
+            `Info, ${new Date().toUTCString()}: ${args.length > 0 ? stringFormat(message, ...args) : message}`,
+        );
     }
 }

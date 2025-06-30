@@ -8,22 +8,22 @@
 
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { Logger } from './logging/logger.js';
+import { LOGGER, Logger } from './logging/logger.js';
 import { AASDocument } from 'aas-core';
 import { ScanEndpointData } from './types/worker-data.js';
 import { ScanEndpointResult, ScanResultKind } from './types/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { AASServerScanFactory } from './scan/aas-server-scan-factory.js';
 import { Variable } from './variable.js';
-import { AASIndex } from './aas-index/aas-index.js';
+import { AAS_INDEX, AASIndex } from './aas-index/aas-index.js';
 
 @singleton()
 export class EndpointScan {
     private data!: ScanEndpointData;
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
-        @inject('AASIndex') private readonly index: AASIndex,
+        @inject(LOGGER) private readonly logger: Logger,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(AASServerScanFactory) private readonly factory: AASServerScanFactory,
         @inject(Variable) private readonly variable: Variable,
     ) {}
