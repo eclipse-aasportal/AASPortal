@@ -32,7 +32,7 @@ export class ConsoleLogger extends Logger {
             message = convertToString(error);
         }
 
-        this._console.error(`Error, ${new Date().toUTCString()}: ${message}`);
+        this._console.error(`${this.getDateTime()} [Error]: ${message}`);
     }
 
     public override warning(message: string, ...args: unknown[]): void {
@@ -45,7 +45,7 @@ export class ConsoleLogger extends Logger {
         }
 
         this._console.warn(
-            `Warning, ${new Date().toUTCString()}: ${args.length > 0 ? stringFormat(message, ...args) : message}`,
+            `${this.getDateTime()} [Warning]: ${args.length > 0 ? stringFormat(message, ...args) : message}`,
         );
     }
 
@@ -59,7 +59,12 @@ export class ConsoleLogger extends Logger {
         }
 
         this._console.info(
-            `Info, ${new Date().toUTCString()}: ${args.length > 0 ? stringFormat(message, ...args) : message}`,
+            `${this.getDateTime()} [Info]: ${args.length > 0 ? stringFormat(message, ...args) : message}`,
         );
+    }
+
+    private getDateTime(): string {
+        const value = new Date().toISOString().replace('T', ' ');
+        return value.substring(0, value.lastIndexOf('.'));
     }
 }
