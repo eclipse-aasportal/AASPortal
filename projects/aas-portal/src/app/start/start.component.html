@@ -8,7 +8,7 @@
 
 <div id="start-page" class="overflow-auto h-100 px-2">
     @if (isEmpty()){
-    <div id="AID_MD_CONTENT" [innerHTML]="readme()"></div>
+    <div id="AID_MD_CONTENT" [innerHTML]="welcome()"></div>
     } @else {
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
         @for (item of items(); track item; let i = $index) {
