@@ -13,7 +13,7 @@ import fs from 'fs';
 import { Cookie } from 'aas-core';
 import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { slash } from '../convert.js';
 
 @injectable()
@@ -21,7 +21,7 @@ export class LocalUserStorage extends UserStorage {
     private readonly usersDirectory: string;
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject('USERS_DIR') usersDirectory: string,
     ) {
         super();

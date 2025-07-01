@@ -2,7 +2,7 @@ export default {
     clearMocks: true,
     collectCoverage: true,
     collectCoverageFrom: ['<rootDir>/src/lib/**/*.ts'],
-    coverageDirectory: '<rootDir>/../../reports/fhg-jest',
+    coverageDirectory: '<rootDir>/../../reports/aas-jest',
     coverageReporters: ['html', 'json-summary', 'cobertura'],
     extensionsToTreatAsEsm: ['.ts'],
     moduleNameMapper: {

@@ -8,7 +8,7 @@
 
 import { extname, join } from 'path/posix';
 import { AASEndpoint, TemplateDescriptor, aas } from 'aas-core';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
@@ -30,7 +30,7 @@ export class TemplateStorage {
     private templates: TemplateDescriptor[] = [];
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) variable: Variable,
         @inject(FileStorageProvider) provider: FileStorageProvider,
         @inject(Parallel) private readonly parallel: Parallel,
@@ -127,12 +127,6 @@ export class TemplateStorage {
         task.state = 'idle';
         task.end = Date.now();
         task.handle = setTimeout(this.scanTemplates, this.timeout, task);
-
-        if (result.messages) {
-            this.logger.start(`scan ${task?.endpointName ?? 'undefined'}`);
-            result.messages.forEach(message => this.logger.log(message));
-            this.logger.stop();
-        }
     };
 
     private isScanTemplatesResult(result: ScanResult): result is ScanTemplatesResult {

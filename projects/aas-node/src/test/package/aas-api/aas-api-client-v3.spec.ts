@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { aasEnvironment as env } from '../../assets/aas-environment.js';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import { AASApiClientV3, OperationResult } from '../../../app/package/aas-api/aas-api-client-v3.js';
@@ -21,7 +21,7 @@ describe('AASApiClientV3', () => {
     let http: jest.Mocked<HttpClient>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         http = createSpyObj<HttpClient>(['get', 'getResponse', 'post', 'put', 'delete']);
         client = new AASApiClientV3(logger, http, {
             name: 'AASX Server',

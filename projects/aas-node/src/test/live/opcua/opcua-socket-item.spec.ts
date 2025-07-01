@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { ClientMonitoredItem } from 'node-opcua';
 import { OpcuaSocketItem } from '../../../app/live/opcua/opcua-socket-item.js';
 import { Logger } from '../../../app/logging/logger.js';
-import { createSpyObj } from 'fhg-jest'
+import { createSpyObj } from 'aas-jest';
 import { SocketClient } from '../../../app/live/socket-client.js';
 
 describe('OpcuaSocketItem', () => {
@@ -19,7 +19,7 @@ describe('OpcuaSocketItem', () => {
     let client: jest.Mocked<SocketClient>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         client = createSpyObj<SocketClient>([]);
         item = new OpcuaSocketItem(logger, client, { nodeId: '', valueType: 'xs:integer' });
     });

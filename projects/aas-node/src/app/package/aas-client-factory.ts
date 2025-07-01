@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import { AASEndpoint, ApplicationError } from 'aas-core';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { AASClient } from './aas-client.js';
 import { AasxDirectory } from './file-system/aasx-directory.js';
 import { AASApiClientV0 } from './aas-api/aas-api-client-v0.js';
@@ -22,7 +22,7 @@ import { HttpClient } from '../http-client.js';
 @singleton()
 export class AASClientFactory {
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
         @inject(HttpClient) private readonly http: HttpClient,
     ) {}

@@ -30,6 +30,7 @@ mongo-volume
 
 # Miscellaneous
 .angular
+out-tsc
 .sass-cache/9
 connect.lock
 coverage

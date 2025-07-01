@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
 import { AuthService } from '../auth/auth-service.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { ERRORS } from '../errors.js';
 import { Variable } from '../variable.js';
 
@@ -23,7 +23,7 @@ export class Authentication {
     private readonly publicKey: string;
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(AuthService) private readonly auth: AuthService,
         @inject(Variable) private readonly variable: Variable,
     ) {

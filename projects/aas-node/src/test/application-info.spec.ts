@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { AppInfo } from 'aas-core';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { Variable } from '../app/variable.js';
@@ -39,7 +39,7 @@ describe('Application Info service', () => {
     let applicationInfo: ApplicationInfo;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { ASSETS: './' });
         applicationInfo = new ApplicationInfo(logger, variable, appInfo as AppInfo);
     });

@@ -15,10 +15,10 @@ import { noop } from 'aas-core';
 
 import { ScanResultKind, ScanResult } from '../types/scan-result.js';
 import { WorkerData } from '../types/worker-data.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
 
-/** Represents a worker task for scanning a container. */
+/** Represents a worker task for scanning an endpoint. */
 class WorkerTask extends EventEmitter {
     private _worker?: Worker;
 
@@ -80,7 +80,7 @@ export class Parallel extends EventEmitter {
     private readonly pool = new Map<Worker, boolean>();
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
     ) {
         super();

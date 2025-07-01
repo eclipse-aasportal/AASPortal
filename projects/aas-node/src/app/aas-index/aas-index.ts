@@ -25,6 +25,10 @@ import {
 import { PagedResult } from '../types/paged-result.js';
 import { KeywordDirectory } from './keyword-directory.js';
 import { LangString } from '../types/aas-v2.js';
+import { InjectionToken } from 'tsyringe';
+
+/** Injection token. */
+export const AAS_INDEX: InjectionToken<AASIndex> = 'AAS_INDEX';
 
 /** Represents an index of Asset Administration Shells. */
 export abstract class AASIndex {
