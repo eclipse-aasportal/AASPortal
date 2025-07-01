@@ -33,11 +33,11 @@ export class HttpSubscription extends SocketSubscription {
     }
 
     public open(): void {
-        if (!this.timeoutId) {
-            this.timeoutId = setTimeout(this.readValues, 10);
-        } else {
-            this.logger.debug(`The subscription ${this.server.endpoint} is already open.`);
+        if (this.timeoutId) {
+            return;
         }
+
+        this.timeoutId = setTimeout(this.readValues, 10);
     }
 
     public close(): void {

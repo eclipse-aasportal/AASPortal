@@ -1,9 +1,9 @@
 {
-    "name": "fhg-jest",
+    "name": "aas-jest",
     "version": "1.0.0",
     "description": "Extensions for jest test framework",
     "module": "./dist/lib/index.js",
-    "main": "./dist/fhg-jest.js",
+    "main": "./dist/aas-jest.js",
     "types": "./dist/types/index.d.ts",
     "author": "Fraunhofer IOSB-INA",
     "license": "Apache-2.0",

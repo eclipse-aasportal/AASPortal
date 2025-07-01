@@ -18,6 +18,7 @@ import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { PagedResult } from '../../types/paged-result.js';
 
+/** Provides a file system based endpoint. */
 export class AasxDirectory extends AASClient {
     private readonly root: string;
     private reentry = 0;
@@ -65,7 +66,7 @@ export class AasxDirectory extends AASClient {
     public async open(): Promise<void> {
         if (this.reentry === 0) {
             if (!(await this.fileStorage.exists(this.root))) {
-                throw new Error(`The directory '${this.endpoint}' does not exist.`);
+                throw new Error(`The endpoint ${this.endpoint.name} (${this.endpoint.url}) does not exist.`);
             }
 
             ++this.reentry;

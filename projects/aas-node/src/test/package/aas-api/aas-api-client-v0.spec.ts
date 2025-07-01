@@ -20,7 +20,7 @@ import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js
 import { AASApiClientV0 } from '../../../app/package/aas-api/aas-api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { HttpClient } from '../../../app/http-client.js';
 
 describe('AASApiClientV0', function () {
@@ -29,7 +29,7 @@ describe('AASApiClientV0', function () {
     let http: jest.Mocked<HttpClient>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         http = createSpyObj<HttpClient>(['get', 'getResponse']);
         client = new AASApiClientV0(logger, http, {
             name: 'AASX Server',

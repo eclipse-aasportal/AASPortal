@@ -17,8 +17,5 @@
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/lib/**/*.ts",
         "format": "eslint src/lib/**/*.ts --fix"
-    },
-    "peerDependencies": {
-        "lodash-es": "^4.17.21"
     }
 }

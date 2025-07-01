@@ -9,7 +9,7 @@
 import { inject, singleton } from 'tsyringe';
 import { AASEndpoint } from 'aas-core';
 import { AASServerScan } from './aas-server-scan.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';
 import { AASApiServerScan } from './aas-api-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
@@ -25,7 +25,7 @@ import { HttpClient } from '../http-client.js';
 @singleton()
 export class AASServerScanFactory {
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
         @inject(HttpClient) private readonly http: HttpClient,
     ) {}
