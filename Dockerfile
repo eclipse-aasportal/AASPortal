@@ -16,6 +16,7 @@ COPY --from=build /usr/src/app/projects/aas-node/dist/ .
 COPY --from=build /usr/src/app/projects/aas-core/dist/ node_modules/aas-core/dist/
 COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-core/package.json
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ wwwroot/
+COPY --from=build /usr/src/app/welcome/ wwwroot/assets/welcome/
 ENV NODE_LOG=./log/debug.log
 ENV AAS_NODE_PORT=80
 ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]
