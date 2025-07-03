@@ -8,13 +8,13 @@
 
 @if (width() !== undefined && height() !== undefined) {
 <img [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()" [height]="height()"
-    onerror="this.src='assets/resources/aas.svg';" />
+    onerror="this.src='assets/resources/aas-portal.svg';" />
 } @else if (width() !== undefined) {
 <img [src]="dataUrl()" [alt]="alt()" [class]="class()" [width]="width()"
-    onerror="this.src='assets/resources/aas.svg';" />
+    onerror="this.src='assets/resources/aas-portal.svg';" />
 } @else if (height() !== undefined) {
 <img [src]="dataUrl()" [alt]="alt()" [class]="class()" [height]="height()"
-    onerror="this.src='assets/resources/aas.svg';" />
+    onerror="this.src='assets/resources/aas-portal.svg';" />
 } @else {
-<img [src]="dataUrl()" [alt]="alt()" [class]="class()" onerror="this.src='assets/resources/aas.svg';" />
+<img [src]="dataUrl()" [alt]="alt()" [class]="class()" onerror="this.src='assets/resources/aas-portal.svg';" />
 }
