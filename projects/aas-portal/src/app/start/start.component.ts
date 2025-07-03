@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { marked } from 'marked';
-import { EMPTY, Observable } from 'rxjs';
+import { catchError, EMPTY, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
-import { httpResource } from '@angular/common/http';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -33,6 +34,10 @@ export interface StartTileItem extends StartTile {
     tile: StartTile;
 }
 
+const errorMarkup = `# Sorry
+The welcome page is currently not available.
+`;
+
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
@@ -42,13 +47,13 @@ export interface StartTileItem extends StartTile {
 })
 export class StartComponent implements OnDestroy {
     private readonly items$ = signal<StartTileItem[]>([]);
-    private readonly md = httpResource.text(() => '/start/README.md');
-    private readonly readme$ = signal<SafeHtml>('');
 
     public constructor(
+        private readonly http: HttpClient,
+        private readonly translate: TranslateService,
+        private readonly sanitizer: DomSanitizer,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        private readonly sanitizer: DomSanitizer,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();
@@ -84,12 +89,6 @@ export class StartComponent implements OnDestroy {
                 return newState;
             });
         });
-
-        effect(async () => {
-            const md = this.md.value() ?? '';
-            const html = (await marked.parse(md)) ?? '';
-            this.readme$.set(this.sanitizer.bypassSecurityTrustHtml(html));
-        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
@@ -119,7 +118,22 @@ export class StartComponent implements OnDestroy {
         return indexes.length === 1 && indexes[0] < length - 1;
     });
 
-    public readonly readme = this.readme$.asReadonly();
+    public readonly welcome = toSignal(
+        this.http
+            .get(`/assets/welcome/${this.translate.currentLang}/welcome.md`, { responseType: 'text' })
+            .pipe(
+                catchError(() => {
+                    return this.http
+                        .get('/assets/welcome/en/welcome.md', { responseType: 'text' } )
+                        .pipe(catchError(() => of(errorMarkup)));
+                }),
+                switchMap(md => {
+                    const result = marked.parse(md);
+                    return typeof result === 'string' ? of(result) : from(result);
+                }),
+                map(html => this.sanitizer.bypassSecurityTrustHtml(html)),
+            ),
+    );
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
