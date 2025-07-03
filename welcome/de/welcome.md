@@ -1,4 +1,4 @@
 # Willkommen
 Im Bau befindlich...
 
-![AASPortal Logo <](../images/aas-portal.svg "AASPortal Logo")
+![AASPortal Logo <](../assets/aas-portal.svg "AASPortal Logo")
