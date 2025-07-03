@@ -7,6 +7,7 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -16,11 +17,15 @@ import { StartComponent } from '../../app/start/start.component';
 
 describe('StartComponent', () => {
     let start: jasmine.SpyObj<StartService>;
+    let sanitizer: jasmine.SpyObj<DomSanitizer>;
 
     beforeEach(async () => {
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save'], {
             tiles: signal([]),
         });
+
+        sanitizer = jasmine.createSpyObj<DomSanitizer>(['bypassSecurityTrustHtml']);
+        sanitizer.bypassSecurityTrustHtml.and.callFake(value => value as SafeHtml);
 
         await TestBed.configureTestingModule({
             providers: [
@@ -31,6 +36,10 @@ describe('StartComponent', () => {
                 {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                },
+                {
+                    provide: DomSanitizer,
+                    useValue: sanitizer,
                 },
                 provideHttpClient(),
                 provideHttpClientTesting(),
@@ -53,5 +62,12 @@ describe('StartComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
+    });
+
+    it('has a toolbar', () => {
+        const fixture = TestBed.createComponent(StartComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.toolbarTemplate).toBeTruthy();
     });
 });
