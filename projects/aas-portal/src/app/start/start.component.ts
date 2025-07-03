@@ -34,6 +34,10 @@ export interface StartTileItem extends StartTile {
     tile: StartTile;
 }
 
+const errorMarkup = `# Sorry
+The welcome page is currently not available.
+`;
+
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
@@ -121,7 +125,7 @@ export class StartComponent implements OnDestroy {
                 catchError(() => {
                     return this.http
                         .get('/assets/welcome/en/welcome.md', { responseType: 'text' } )
-                        .pipe(catchError(() => of('# Ups...')));
+                        .pipe(catchError(() => of(errorMarkup)));
                 }),
                 switchMap(md => {
                     const result = marked.parse(md);

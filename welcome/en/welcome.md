@@ -1,4 +1,4 @@
 # Welcome
 Under construction...
 
-![AASPortal Logo <](../images/aas-portal.svg "AASPortal Logo")
+![AASPortal Logo <](../assets/aas-portal.svg "AASPortal Logo")
