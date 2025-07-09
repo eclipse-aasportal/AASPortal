@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start aas-portal",
+            "name": "Launch aas-portal",
             "type": "chrome",
             "request": "launch",
             "preLaunchTask": "start",
@@ -10,7 +10,7 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "name": "Start aas-node",
+            "name": "Launch aas-node",
             "type": "node",
             "args": [],
             "request": "launch",
@@ -27,7 +27,7 @@
                 "NODE_ENV": "development",
                 "AAS_NODE_PORT": "1337",
                 "CONTENT_ROOT": "projects/aas-node/build",
-                "WEB_ROOT": "projects/aas-portal/dist",
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
                 "ASSETS": "projects/aas-node/src/assets",
                 // "ENDPOINTS": "[\"http://localhost:50010?name=AAS%20Server\"]",
                 // "USER_STORAGE": "mongodb://aas-server:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users",

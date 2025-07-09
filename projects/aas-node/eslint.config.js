@@ -1,5 +1,5 @@
 import globals from 'globals';
-import tsParser from '@typescript-eslint/parser'
+import tsParser from '@typescript-eslint/parser';
 import defaultConfig from '../../eslint.config.js';
 
 /** @type {import('eslint').Linter.Config[]} */
