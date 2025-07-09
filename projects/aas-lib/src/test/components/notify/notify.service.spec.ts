@@ -8,25 +8,15 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { AASTreeStore } from '../../../lib/components/aas-tree/aas-tree.store';
 
-describe('AASTreeSearch', () => {
-    let search: AASTreeSearch;
-    let store: AASTreeStore;
+describe('NotifyService', () => {
+    let service: NotifyService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                {
-                    provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
-                },
-                AASTreeStore,
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideZonelessChangeDetection()],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
@@ -37,11 +27,10 @@ describe('AASTreeSearch', () => {
             ],
         });
 
-        store = TestBed.inject(AASTreeStore);
-        search = new AASTreeSearch(store, TestBed.inject(TranslateService));
+        service = TestBed.inject(NotifyService);
     });
 
-    it('should create', () => {
-        expect(search).toBeTruthy();
+    it('should be created', () => {
+        expect(service).toBeTruthy();
     });
 });

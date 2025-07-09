@@ -13,7 +13,7 @@ import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/
 import { of } from 'rxjs';
 import { TemplateDescriptor, aas } from 'aas-core';
 
-import { NotifyService } from '../../lib/features/notify/notify.service';
+import { NotifyService } from '../../lib/components/notify/notify.service';
 import { TemplateService } from '../../lib/services/template.service';
 
 describe('TemplateService', () => {

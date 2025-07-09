@@ -12,7 +12,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { AASDocument } from 'aas-core';
 
 import { AASTableComponent } from '../../../lib/components/aas-table/aas-table.component';
-import { NotifyService } from '../../../lib/features/notify/notify.service';
+import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { createDocument } from '../../assets/test-document';
 import { ViewMode } from '../../../lib/types';
 
