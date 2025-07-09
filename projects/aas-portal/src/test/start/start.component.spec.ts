@@ -70,4 +70,12 @@ describe('StartComponent', () => {
         fixture.detectChanges();
         expect(component.toolbarTemplate).toBeTruthy();
     });
+
+    it('has inital an empty start page', () => {
+        const fixture = TestBed.createComponent(StartComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.isEmpty()).toBe(true);
+        expect(component.items()).toEqual([]);
+    });
 });

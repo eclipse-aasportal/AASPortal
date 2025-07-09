@@ -48,7 +48,6 @@
         "IDTA"
     ],
     "files.eol": "\n",
-    "jest.debugMode": true,
     "jest.virtualFolders": [
         {
             "name": "aas-core",

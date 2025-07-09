@@ -7,7 +7,4 @@
         "module": "es2022",
         "types": ["express", "multer"]
     },
-    "include": [
-        "./src/lib/**/*.ts"
-    ]
 }
