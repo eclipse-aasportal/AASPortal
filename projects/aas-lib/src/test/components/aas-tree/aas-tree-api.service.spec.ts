@@ -9,7 +9,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from '../../../lib/features/auth/auth.service';
+import { AuthService } from '../../../lib/components/auth/auth.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AASTreeApiService } from '../../../lib/components/aas-tree/aas-tree-api.service';
 

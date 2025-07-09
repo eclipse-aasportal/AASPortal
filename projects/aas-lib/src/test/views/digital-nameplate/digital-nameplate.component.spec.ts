@@ -7,14 +7,19 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { FavoriteComponent } from '../../../lib/components/favorite/favorite.component';
+import { of } from 'rxjs';
+
+import { nameplate } from './digital-nameplate-document';
+import { DigitalNameplateComponent } from '../../../lib/views/digital-nameplate/digital-nameplate.component';
+import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
-import { StartService } from '../../../lib/services/start.service';
 import { DocumentsService } from '../../../lib/services/documents.service';
+import { StartService } from '../../../lib/services/start.service';
+import { encodeBase64Url } from '../../../lib/utilities';
 
 @Component({
     selector: 'fhg-img',
@@ -30,21 +35,40 @@ export class TestSecuredImageComponent {
     public readonly height = input<number | undefined>();
 }
 
-describe('FavoriteComponent', () => {
-    let api: jasmine.SpyObj<DocumentsService>;
+describe('DigitalNameplateComponent', () => {
     let auth: jasmine.SpyObj<AuthService>;
+    let api: jasmine.SpyObj<DocumentsService>;
     let start: jasmine.SpyObj<StartService>;
+    let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument']);
+        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
+        route = jasmine.createSpyObj<ActivatedRoute>(
+            {},
+            { queryParams: of({ endpoint: encodeBase64Url(nameplate.endpoint), id: encodeBase64Url(nameplate.id) }) },
+        );
+
+        api.getDocument.and.returnValue(of(nameplate));
 
         await TestBed.configureTestingModule({
             providers: [
                 {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                },
+                {
                     provide: AuthService,
                     useValue: auth,
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
                 },
                 {
                     provide: DocumentsService,
@@ -53,7 +77,7 @@ describe('FavoriteComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                FavoriteComponent,
+                DigitalNameplateComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -63,16 +87,23 @@ describe('FavoriteComponent', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(FavoriteComponent, {
+        TestBed.overrideComponent(DigitalNameplateComponent, {
             remove: { imports: [SecuredImageComponent] },
             add: { imports: [TestSecuredImageComponent] },
         });
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(FavoriteComponent);
+        const fixture = TestBed.createComponent(DigitalNameplateComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
+    });
+
+    it('provides a "title"', () => {
+        const fixture = TestBed.createComponent(DigitalNameplateComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.title()).toEqual('Nameplate');
     });
 });

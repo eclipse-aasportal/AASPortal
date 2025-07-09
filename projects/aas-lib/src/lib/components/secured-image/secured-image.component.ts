@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, first, map, skipWhile, switchMap } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { AuthService } from '../../features/auth/auth.service';
+import { AuthService } from '../../components/auth/auth.service';
 
 @Component({
     selector: 'fhg-img',

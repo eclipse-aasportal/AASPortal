@@ -9,6 +9,6 @@ FROM nginx:latest AS aas-portal
 #possibility to check host & port availability of other containers via netcat
 RUN apt-get update -y && apt-get install -y netcat-openbsd
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ /usr/share/nginx/html/
-COPY --from=build /usr/src/app/welcome/ html/assets/welcome/
+COPY --from=build /usr/src/app/welcome/ /usr/share/nginx/html/assets/welcome/
 COPY --from=build /usr/src/app/projects/aas-portal/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80

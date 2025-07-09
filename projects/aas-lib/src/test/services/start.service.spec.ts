@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } fr
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
-import { AuthService } from '../../lib/features/auth/auth.service';
+import { AuthService } from '../../lib/components/auth/auth.service';
 import {
     START_TILE_TYPES,
     START_TILES,
