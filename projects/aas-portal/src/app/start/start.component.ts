@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { marked } from 'marked';
-import { catchError, EMPTY, from, map, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, from, map, Observable, of, switchMap } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -34,7 +34,7 @@ export interface StartTileItem extends StartTile {
     tile: StartTile;
 }
 
-const errorMarkup = `# Sorry
+const errorWelcome = `# Sorry
 The welcome page is currently not available.
 `;
 
@@ -119,20 +119,23 @@ export class StartComponent implements OnDestroy {
     });
 
     public readonly welcome = toSignal(
-        this.http
-            .get(`/assets/welcome/${this.translate.currentLang}/welcome.md`, { responseType: 'text' })
-            .pipe(
-                catchError(() => {
-                    return this.http
-                        .get('/assets/welcome/en/welcome.md', { responseType: 'text' } )
-                        .pipe(catchError(() => of(errorMarkup)));
-                }),
-                switchMap(md => {
-                    const result = marked.parse(md);
-                    return typeof result === 'string' ? of(result) : from(result);
-                }),
-                map(html => this.sanitizer.bypassSecurityTrustHtml(html)),
+        from(this.translate.onLangChange).pipe(
+            map(event => event.lang),
+            switchMap(lang =>
+                this.http.get(`/assets/welcome/${lang}/welcome.md`, { responseType: 'text' }).pipe(
+                    catchError(() => {
+                        return this.http
+                            .get('/assets/welcome/en-us/welcome.md', { responseType: 'text' })
+                            .pipe(catchError(() => of(errorWelcome)));
+                    }),
+                    switchMap(md => {
+                        const result = marked.parse(md);
+                        return typeof result === 'string' ? of(result) : from(result);
+                    }),
+                    map(html => this.sanitizer.bypassSecurityTrustHtml(html)),
+                ),
             ),
+        ),
     );
 
     public ngOnDestroy(): void {
