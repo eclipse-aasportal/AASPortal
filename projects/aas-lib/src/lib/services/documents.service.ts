@@ -11,7 +11,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { AASCursor, AASDocument, AASPagedResult, aas } from 'aas-core';
 import { first, mergeMap, Observable, of, tap } from 'rxjs';
 import { encodeBase64Url } from '../utilities';
-import { AuthService } from '../features/auth/auth.service';
+import { AuthService } from '../components/auth/auth.service';
 import { CacheService } from './cache.service';
 
 /** The API of the digital nameplate. */
