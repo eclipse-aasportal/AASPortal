@@ -33,7 +33,7 @@ export class AASApiServerScan extends AASServerScan {
 
     protected override createDocument(id: AASLabel): Promise<AASDocument> {
         const aasPackage = new AASApiPackage(this.logger, this.client, id.id, id.idShort);
-        return aasPackage.createDocumentAsync();
+        return aasPackage.createDocument();
     }
 
     protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {

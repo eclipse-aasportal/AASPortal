@@ -44,7 +44,7 @@ export class AASApiPackage extends AASPackage {
         return this.client.openFile(env.assetAdministrationShells[0], file);
     }
 
-    public async createDocumentAsync(): Promise<AASDocument> {
+    public async createDocument(): Promise<AASDocument> {
         const environment = await this.client.readEnvironment({ id: this.id, idShort: this.idShort });
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
@@ -71,7 +71,7 @@ export class AASApiPackage extends AASPackage {
         return this.client.readEnvironment({ id: this.id, idShort: this.idShort });
     }
 
-    public async setEnvironmentAsync(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {
+    public async setEnvironment(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {
         let messages: string[] | undefined;
         if (reference && content) {
             const diffs = await diffAsync(content, reference);

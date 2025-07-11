@@ -97,26 +97,7 @@ export class AASApiClientV1 extends AASApiClient {
             this.endpoint.headers,
         );
 
-        const submodels: aasv2.Submodel[] = [];
-        if (shell.submodels) {
-            for (const reference of shell.submodels) {
-                const submodelId = encodeBase64Url(reference.keys[0].value);
-                try {
-                    submodels.push(
-                        await this.http.get<aasv2.Submodel>(
-                            this.resolve(`submodels/${submodelId}/submodel`),
-                            this.endpoint.headers,
-                        ),
-                    );
-                } catch (error) {
-                    this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
-                }
-            }
-        }
-
-        const conceptDescriptions = await this.http.get<aasv2.ConceptDescription[]>(
-            this.resolve(`concept-descriptions`),
-        );
+        const submodels = await this.readSubmodels(shell);
 
         const asset: aasv2.Asset = {
             kind: 'Instance',
@@ -129,7 +110,7 @@ export class AASApiClientV1 extends AASApiClient {
             assetAdministrationShells: [shell],
             assets: [asset],
             submodels,
-            conceptDescriptions,
+            conceptDescriptions: [],
         };
 
         return new JsonReaderV2(sourceEnv).readEnvironment();
@@ -284,6 +265,27 @@ export class AASApiClientV1 extends AASApiClient {
         }
 
         return blob.value;
+    }
+
+    private async readSubmodels(shell: aasv2.AssetAdministrationShell): Promise<aasv2.Submodel[]> {
+        const submodels: aasv2.Submodel[] = [];
+        if (shell.submodels) {
+            for (const reference of shell.submodels) {
+                const submodelId = encodeBase64Url(reference.keys[0].value);
+                try {
+                    submodels.push(
+                        await this.http.get<aasv2.Submodel>(
+                            this.resolve(`submodels/${submodelId}/submodel`),
+                            this.endpoint.headers,
+                        ),
+                    );
+                } catch (error) {
+                    this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
+                }
+            }
+        }
+
+        return submodels;
     }
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {

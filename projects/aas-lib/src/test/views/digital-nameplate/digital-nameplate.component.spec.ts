@@ -17,7 +17,7 @@ import { DigitalNameplateComponent } from '../../../lib/views/digital-nameplate/
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
-import { DocumentsService } from '../../../lib/services/documents.service';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
 
@@ -37,13 +37,13 @@ export class TestSecuredImageComponent {
 
 describe('DigitalNameplateComponent', () => {
     let auth: jasmine.SpyObj<AuthService>;
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let start: jasmine.SpyObj<StartService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         route = jasmine.createSpyObj<ActivatedRoute>(
             {},
@@ -71,7 +71,7 @@ describe('DigitalNameplateComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 provideZonelessChangeDetection(),

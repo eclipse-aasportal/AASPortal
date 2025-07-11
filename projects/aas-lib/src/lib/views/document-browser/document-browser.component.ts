@@ -28,7 +28,7 @@ import {
 import { aas, AASDocument, getIdShortPath, isFile, selectElement, selectSubmodel } from 'aas-core';
 
 import { basename, decodeBase64Url, encodeBase64Url } from '../../utilities';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
@@ -68,7 +68,7 @@ export class DocumentBrowserComponent implements OnInit, OnDestroy {
 
     public constructor(
         private readonly route: ActivatedRoute,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
         private readonly toolbar: ToolbarService,
         private readonly auth: AuthService,
         private readonly start: StartService,

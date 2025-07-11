@@ -42,7 +42,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, first, mergeMap, Observable } from 'rxjs';
 import { AuthService } from '../../components/auth/auth.service';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
@@ -78,7 +78,7 @@ export class LaserComponent implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
         private readonly webSocketFactory: WebSocketFactoryService,
     ) {
         effect(() => {

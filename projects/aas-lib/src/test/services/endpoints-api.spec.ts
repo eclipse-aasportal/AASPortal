@@ -11,15 +11,15 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { of } from 'rxjs';
-import { AASDocument } from 'aas-core';
+import { aas, AASDocument } from 'aas-core';
 import { AuthService } from '../../lib/components/auth/auth.service';
-import { DocumentsService } from '../../lib/services/documents.service';
+import { EndpointsApi } from '../../lib/services/endpoints-api';
 import { CacheService } from '../../lib/services/cache.service';
 
 import sample from '../assets/dpp-sample.json';
 
-describe('DocumentsService', () => {
-    let service: DocumentsService;
+describe('EndpointsApi', () => {
+    let service: EndpointsApi;
     let httpTestingController: HttpTestingController;
     let auth: jasmine.SpyObj<AuthService>;
     let cache: jasmine.SpyObj<CacheService>;
@@ -45,7 +45,7 @@ describe('DocumentsService', () => {
             ],
         });
 
-        service = TestBed.inject(DocumentsService);
+        service = TestBed.inject(EndpointsApi);
         httpTestingController = TestBed.inject(HttpTestingController);
     });
 
@@ -58,9 +58,10 @@ describe('DocumentsService', () => {
     });
 
     describe('getDocument', () => {
-        it('/api/v1/endpoints/:name/documents/:id}', () => {
+        it('/api/v1/endpoints/:name/documents/:id}', (done: DoneFn) => {
             service.getDocument('document1', 'Samples').subscribe(value => {
                 expect(value).toEqual(sample as AASDocument);
+                done();
             });
 
             const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
@@ -70,9 +71,10 @@ describe('DocumentsService', () => {
     });
 
     describe('getContent', () => {
-        it('/api/v1/endpoints/:name/documents/:id/content}', () => {
+        it('/api/v1/endpoints/:name/documents/:id/content}', (done: DoneFn) => {
             service.getContent('document1', 'Samples').subscribe(value => {
                 expect(value).toEqual((sample as AASDocument).content!);
+                done();
             });
 
             const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx/content');

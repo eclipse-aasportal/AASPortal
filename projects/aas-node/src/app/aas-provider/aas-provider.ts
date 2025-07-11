@@ -155,23 +155,6 @@ export class AASProvider {
     }
 
     /**
-     * Gets the AAS document with the specified identifier.
-     * @param id The identifier of the Concept Description.
-     * @param endpointName The endpoint name.
-     * @returns The requested Concept Description.
-     */
-    public async getConceptDescription(id: string, endpointName: string): Promise<aas.ConceptDescription> {
-        const endpoint = await this.index.getEndpoint(endpointName);
-        const client = this.clientFactory.create(endpoint);
-        try {
-            await client.open();
-            return await client.getConceptDescription(id);
-        } finally {
-            await client.close();
-        }
-    }
-
-    /**
      * Gets the value of the specified DataElement.
      * @param endpointName The endpoint name.
      * @param id The AAS identifier.
@@ -365,7 +348,7 @@ export class AASProvider {
                 }
             }
 
-            return await pkg.setEnvironmentAsync(content, document.content);
+            return await pkg.setEnvironment(content, document.content);
         } finally {
             await client.close();
         }

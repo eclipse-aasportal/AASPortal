@@ -49,7 +49,7 @@ import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../..
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
 import { StartService } from '../../services/start.service';
 import { HandoverDocumentation } from '../views';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 
 export type DocumentationItem = {
     title: string;
@@ -75,7 +75,7 @@ export class HandoverDocumentationComponent implements OnInit, OnDestroy {
         private readonly start: StartService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();

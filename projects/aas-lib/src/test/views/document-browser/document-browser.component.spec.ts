@@ -13,8 +13,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
-import { aas, AASDocument } from 'aas-core';
-import { DocumentsService } from '../../../lib/services/documents.service';
+import { AASDocument } from 'aas-core';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { DocumentBrowserComponent } from '../../../lib/views/document-browser/document-browser.component';
 import { encodeBase64Url } from '../../../lib/utilities';
 import {
@@ -58,14 +58,14 @@ export class TestSecuredImageComponent {
 }
 
 describe('DocumentBrowserComponent', () => {
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let route: jasmine.SpyObj<ActivatedRoute>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
     let window: jasmine.SpyObj<Window>;
 
     beforeEach(async () => {
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument']);
         auth = jasmine.createSpyObj<AuthService>({}, { token: signal<string | undefined>('Token').asReadonly() });
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         route = jasmine.createSpyObj<ActivatedRoute>(
@@ -96,7 +96,7 @@ describe('DocumentBrowserComponent', () => {
                     useValue: route,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 {
@@ -112,7 +112,7 @@ describe('DocumentBrowserComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 {

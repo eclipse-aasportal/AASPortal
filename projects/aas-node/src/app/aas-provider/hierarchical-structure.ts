@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, aas, isEntity, isRelationshipElement, selectReferable } from 'aas-core';
+import { AASDocument, aas, getSemanticId, isEntity, isRelationshipElement, selectReferable } from 'aas-core';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 
@@ -16,9 +16,7 @@ export abstract class HierarchicalStructureElement {
         semanticId: string,
     ): aas.Property | undefined {
         return submodelElements?.find(
-            element =>
-                element.modelType === 'Property' &&
-                HierarchicalStructureElement.getSemanticId(element.semanticId) === semanticId,
+            element => element.modelType === 'Property' && getSemanticId(element) === semanticId,
         ) as aas.Property;
     }
 
@@ -27,9 +25,7 @@ export abstract class HierarchicalStructureElement {
         semanticId: string,
     ): aas.Entity | undefined {
         return submodelElements?.find(
-            element =>
-                element.modelType === 'Entity' &&
-                HierarchicalStructureElement.getSemanticId(element.semanticId) === semanticId,
+            element => element.modelType === 'Entity' && getSemanticId(element) === semanticId,
         ) as aas.Entity;
     }
 
@@ -38,14 +34,8 @@ export abstract class HierarchicalStructureElement {
         semanticId: string,
     ): aas.RelationshipElement | undefined {
         return submodelElements?.find(
-            element =>
-                element.modelType === 'RelationshipElement' &&
-                HierarchicalStructureElement.getSemanticId(element.semanticId) === semanticId,
+            element => element.modelType === 'RelationshipElement' && getSemanticId(element) === semanticId,
         ) as aas.RelationshipElement;
-    }
-
-    protected static getSemanticId(reference: aas.Reference | undefined): string | undefined {
-        return reference && reference.keys.length > 0 ? reference.keys[0].value : undefined;
     }
 }
 
@@ -66,10 +56,7 @@ export class HierarchicalStructure extends HierarchicalStructureElement {
     public readonly entryNode: aas.Entity;
 
     public static isHierarchicalStructure(submodel: aas.Submodel): boolean {
-        return (
-            HierarchicalStructureElement.getSemanticId(submodel.semanticId) ===
-            'https://admin-shell.io/idta/HierarchicalStructures/1/0/Submodel'
-        );
+        return getSemanticId(submodel) === 'https://admin-shell.io/idta/HierarchicalStructures/1/0/Submodel';
     }
 
     public async getChildren(): Promise<string[]> {
@@ -143,8 +130,7 @@ export class HierarchicalStructure extends HierarchicalStructureElement {
         for (const statement of node.statements) {
             if (
                 isRelationshipElement(statement) &&
-                HierarchicalStructureElement.getSemanticId(statement.semanticId) ===
-                    'https://admin-shell.io/idta/HierarchicalStructures/HasPart/1/0'
+                getSemanticId(statement) === 'https://admin-shell.io/idta/HierarchicalStructures/HasPart/1/0'
             ) {
                 hasParts.push(statement);
             }
@@ -167,9 +153,6 @@ export class HierarchicalStructure extends HierarchicalStructureElement {
     }
 
     private isNode(entity: aas.Entity): boolean {
-        return (
-            HierarchicalStructureElement.getSemanticId(entity.semanticId) ===
-            'https://admin-shell.io/idta/HierarchicalStructures/Node/1/0'
-        );
+        return getSemanticId(entity) === 'https://admin-shell.io/idta/HierarchicalStructures/Node/1/0';
     }
 }

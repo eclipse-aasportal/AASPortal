@@ -8,11 +8,11 @@
 
 import upperFirst from 'lodash-es/upperFirst';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 
-import { aas, AASDocument, getAbbreviation, getChildren, isFile, isReference, isSubmodel } from 'aas-core';
+import { aas, AASDocument, getAbbreviation, getChildren, getConceptDescription, isFile, isReference, isSubmodel } from 'aas-core';
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 import { getSemanticId, isLangString, referenceToString } from '../../utilities';
 
 const collectionNames: Record<string, string> = {
@@ -42,6 +42,7 @@ export interface BrowserElementRef {
 export interface BrowserElement {
     name: string;
     referable: aas.Referable;
+    conceptDescription?: aas.ConceptDescription;
     collection?: string;
     properties: BrowserProperty[];
     children: BrowserElementRef[];
@@ -62,34 +63,29 @@ export interface BrowserItem {
 })
 export class BrowserComponent {
     private readonly path$ = signal<BrowserElement[]>([]);
+    private readonly conceptDescription$ = signal<aas.ConceptDescription | null>(null);
+    private readonly env = signal<aas.Environment>({
+        assetAdministrationShells: [],
+        submodels: [],
+        conceptDescriptions: [],
+    });
 
-    public constructor(private readonly api: DocumentsService) {
+    public constructor(private readonly api: EndpointsApi) {
         effect(() => {
             const env = this.document()?.content;
-            if (!env) {
-                this.current.set(undefined);
-                return;
-            }
-
             if (!env || env.assetAdministrationShells.length === 0) {
                 this.current.set(undefined);
+                this.env.set({
+                    assetAdministrationShells: [],
+                    submodels: [],
+                    conceptDescriptions: [],
+                });
+
                 return;
             }
 
-            const aas = env.assetAdministrationShells[0];
-            this.current.set(this.createElement(aas, env));
-        });
-
-        effect(() => {
-            const current = this.current();
-            if (!current) {
-                this.api.cdRef.set({});
-                return;
-            }
-
-            const id = getSemanticId(current.referable);
-            const endpoint = this.document()?.endpoint;
-            this.api.cdRef.set({ endpoint, id });
+            this.env.set(env);
+            this.current.set(this.createElement(env.assetAdministrationShells[0]));
         });
     }
 
@@ -107,9 +103,7 @@ export class BrowserComponent {
 
     public readonly children = computed(() => this.current()?.children ?? []);
 
-    public readonly conceptDescription = computed(() => {
-        return this.api.conceptDescription.value();
-    });
+    public readonly conceptDescription = computed(() => this.current()?.conceptDescription);
 
     private get idShortPath(): string {
         const current = this.current()?.referable;
@@ -162,13 +156,15 @@ export class BrowserComponent {
         $event.stopPropagation();
     }
 
-    private createElement(referable: aas.Referable, env?: aas.Environment): BrowserElement {
+    private createElement(referable: aas.Referable): BrowserElement {
+        const semanticId = getSemanticId(referable);
         return {
             name: referable.idShort,
             referable,
+            conceptDescription: semanticId ? getConceptDescription(untracked(this.env), semanticId) : undefined,
             properties: this.createProperties(referable),
             collection: upperFirst(collectionNames[referable.modelType]),
-            children: getChildren(referable, env).map(child => ({
+            children: getChildren(referable, untracked(this.env)).map(child => ({
                 name: child.idShort,
                 abbreviation: getAbbreviation(child.modelType) ?? '',
                 referable: child,
@@ -203,7 +199,7 @@ export class BrowserComponent {
             let kind: 'text' | 'link' = 'text';
             const id = referenceToString(value);
             if (name === 'SemanticId') {
-                if (this.document()?.content?.conceptDescriptions.some(cd => cd.id === id)) {
+                if (untracked(this.env).conceptDescriptions.some(cd => cd.id === id)) {
                     kind = 'link';
                 }
             }

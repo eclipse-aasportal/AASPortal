@@ -153,41 +153,12 @@ export function isReference(value: unknown): value is Reference {
 }
 
 /**
- * Determines whether the specified value is of type `HasSemantics`.
- * @param value The current value.
- * @returns `true` if the specified value is of type `HasSemantics`; otherwise, `false`.
- */
-export function isHasSemantics(value: unknown): value is HasSemantics {
-    if (!value || typeof value !== 'object') {
-        return false;
-    }
-
-    return (
-        isReference((value as HasSemantics).semanticId) ||
-        Array.isArray((value as HasSemantics).supplementalSemanticIds)
-    );
-}
-
-/**
  * Gets the semantic identifier of the specified AAS element.
  * @param value The AAS element.
  * @returns The semantic identifier or `undefined`.
  */
-export function getSemanticId(value: HasSemantics | Reference): string | undefined {
-    let semanticId: string | undefined;
-    if (value) {
-        if (isReference(value)) {
-            if (value.keys.length > 0) {
-                return value.keys[0].value;
-            }
-        } else {
-            if (value.semanticId?.keys != null && value.semanticId.keys.length > 0) {
-                return value.semanticId.keys[0].value;
-            }
-        }
-    }
-
-    return semanticId;
+export function getSemanticId(value: Referable): string | undefined {
+    return (value as HasSemantics)?.semanticId?.keys.at(0)?.value;
 }
 
 /**
