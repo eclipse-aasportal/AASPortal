@@ -17,7 +17,7 @@ import { AASDocument } from 'aas-core';
 
 import { DigitalProductPassportComponent } from '../../../lib/views/digital-product-passport/digital-product-passport.component';
 import { WINDOW } from '../../../lib/services/window.service';
-import { DocumentsService } from '../../../lib/services/documents.service';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 
@@ -42,13 +42,13 @@ export class TestSecuredImageComponent {
 
 describe('DigitalProductPassportComponent', () => {
     let window: jasmine.SpyObj<Window>;
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(async () => {
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         auth = jasmine.createSpyObj<AuthService>({}, { token: signal<string | undefined>('Token').asReadonly() });
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<Window>(['open'], {
@@ -85,7 +85,7 @@ describe('DigitalProductPassportComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 provideHttpClient(),

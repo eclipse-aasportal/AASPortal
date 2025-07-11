@@ -42,6 +42,6 @@ describe('AASApiPackage', () => {
 
     it('creates a document', async () => {
         server.readEnvironment.mockResolvedValue(env);
-        await expect(aasPackage.createDocumentAsync()).resolves.toBeTruthy();
+        await expect(aasPackage.createDocument()).resolves.toBeTruthy();
     });
 });

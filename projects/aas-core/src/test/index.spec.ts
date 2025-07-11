@@ -8,6 +8,8 @@
 
 import { describe, it, expect } from '@jest/globals';
 import { createSpyObj } from 'aas-jest';
+
+import { Reference } from '../lib/aas.js';
 import {
     aas,
     equalUrls,
@@ -15,7 +17,6 @@ import {
     getEndpointType,
     isAssetAdministrationShell,
     isBlob,
-    isHasSemantics,
     isMultiLanguageProperty,
     isProperty,
     isReference,
@@ -29,7 +30,6 @@ import {
     isValidPassword,
     stringFormat,
 } from '../lib/index.js';
-import { HasSemantics, Reference } from '../lib/aas.js';
 
 describe('index', () => {
     describe('isSubmodelElement', () => {
@@ -379,31 +379,6 @@ describe('index', () => {
 
         it('indicates that "null" is not of type Reference', () => {
             expect(isReference(null)).toBeFalsy();
-        });
-    });
-
-    describe('isHasSemantics', () => {
-        it('indicates that value is of type HasSemantics', () => {
-            const value: HasSemantics = {
-                semanticId: {
-                    keys: [],
-                    type: 'ExternalReference',
-                },
-            };
-
-            expect(isHasSemantics(value)).toBeTruthy();
-        });
-
-        it('indicates that "{}" is not of type HasSemantics', () => {
-            expect(isHasSemantics({})).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not of type HasSemantics', () => {
-            expect(isHasSemantics(undefined)).toBeFalsy();
-        });
-
-        it('indicates that "null" is not of type HasSemantics', () => {
-            expect(isHasSemantics(null)).toBeFalsy();
         });
     });
 });

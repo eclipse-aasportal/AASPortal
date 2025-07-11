@@ -14,7 +14,7 @@ import { FavoriteComponent } from '../../../lib/components/favorite/favorite.com
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 import { StartService } from '../../../lib/services/start.service';
-import { DocumentsService } from '../../../lib/services/documents.service';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
 
 @Component({
     selector: 'fhg-img',
@@ -31,13 +31,13 @@ export class TestSecuredImageComponent {
 }
 
 describe('FavoriteComponent', () => {
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
 
     beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
 
         await TestBed.configureTestingModule({
@@ -47,7 +47,7 @@ describe('FavoriteComponent', () => {
                     useValue: auth,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 provideZonelessChangeDetection(),

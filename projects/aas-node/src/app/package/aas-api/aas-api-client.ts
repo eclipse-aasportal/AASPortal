@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, convertFromString, DefaultType, DifferenceItem, LiveRequest } from 'aas-core';
+import {
+    aas,
+    AASEndpoint,
+    convertFromString,
+    DefaultType,
+    DifferenceItem,
+    getSemanticId,
+    LiveRequest,
+    traverse,
+} from 'aas-core';
+
 import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
@@ -151,4 +161,21 @@ export abstract class AASApiClient extends AASClient {
      * @param nodeId The path from the Submodel to the Property.
      */
     public abstract resolveNodeId(aas: aas.AssetAdministrationShell, nodeId: string): string;
+
+    /**
+     * Gets all concept description identifiers that are available in the specified referable and its descendants.
+     * @param referable The current referable.
+     * @returns The available semantic identifiers.
+     */
+    protected getConceptDescriptionIds(referable: aas.Referable): Set<string> {
+        const result = new Set<string>();
+        for (const element of traverse(referable)) {
+            const id = getSemanticId(element);
+            if (id) {
+                result.add(id);
+            }
+        }
+
+        return result;
+    }
 }

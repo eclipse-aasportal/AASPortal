@@ -20,9 +20,10 @@ import {
     isSubmodel,
     isSubmodelElement,
     selectSubmodel,
-    getConceptDescriptionIds,
     noop,
     isConceptDescription,
+    traverse,
+    getSemanticId,
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
@@ -111,24 +112,7 @@ export class AASApiClientV3 extends AASApiClient {
         );
 
         const submodels = await this.readSubmodels(aasId, shell.submodels);
-        const conceptDescriptions: aas.ConceptDescription[] = [];
-        for (const submodel of submodels) {
-            for (const conceptDescriptionId of getConceptDescriptionIds(submodel)) {
-                try {
-                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
-                        this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescriptionId)}`),
-                        this.endpoint.headers,
-                    );
-
-                    if (isConceptDescription(conceptDescription)) {
-                        conceptDescriptions.push(conceptDescription);
-                    }
-                } catch {
-                    noop();
-                }
-            }
-        }
-
+        const conceptDescriptions = await this.readConceptDescriptions(submodels);
         const env: aas.Environment = {
             assetAdministrationShells: [shell],
             submodels,
@@ -311,6 +295,33 @@ export class AASApiClientV3 extends AASApiClient {
         }
 
         return submodels;
+    }
+
+    private async readConceptDescriptions(submodels: aas.Submodel[]): Promise<aas.ConceptDescription[]> {
+        const conceptDescriptions: aas.ConceptDescription[] = [];
+        for (const submodel of submodels) {
+            for (const referable of traverse(submodel)) {
+                const semanticId = getSemanticId(referable);
+                if (!semanticId) {
+                    continue;
+                }
+
+                try {
+                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
+                        this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
+                        this.endpoint.headers,
+                    );
+
+                    if (isConceptDescription(conceptDescription)) {
+                        conceptDescriptions.push(conceptDescription);
+                    }
+                } catch {
+                    noop();
+                }
+            }
+        }
+
+        return conceptDescriptions;
     }
 
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {

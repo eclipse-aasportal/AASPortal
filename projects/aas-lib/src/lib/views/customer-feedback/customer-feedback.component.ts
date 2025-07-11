@@ -28,7 +28,7 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { CustomerFeedbackStore, FeedbackItem, GeneralItem } from './customer-feedback.store';
 import { decodeBase64Url, encodeBase64Url, hashCode } from '../../utilities';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 
 const maxStars = 5;
 
@@ -54,7 +54,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
         private readonly store: CustomerFeedbackStore,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();

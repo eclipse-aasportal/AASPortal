@@ -45,7 +45,7 @@ export class DirectoryScan extends AASServerScan {
         for (const file of result.result) {
             try {
                 const aasxPackage = new AasxPackage(this.logger, this.source, file);
-                const document = await aasxPackage.createDocumentAsync();
+                const document = await aasxPackage.createDocument();
                 ids.push({ id: document.id, idShort: document.idShort });
                 this.map.set(document.id, document);
             } catch (error) {

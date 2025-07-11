@@ -22,7 +22,6 @@ import {
     isBooleanType,
     isEntity,
     isFile,
-    isHasSemantics,
     isIdentifiable,
     isMultiLanguageProperty,
     isOperation,
@@ -388,11 +387,7 @@ class TreeInitialize {
     }
 
     private hasSpecificView(identifiable: aas.Identifiable): boolean {
-        let semanticId: string | undefined;
-        if (isHasSemantics(identifiable)) {
-            semanticId = getSemanticId(identifiable);
-        }
-
+        const semanticId = getSemanticId(identifiable);
         return findRoute(identifiable.id, semanticId) !== undefined;
     }
 }

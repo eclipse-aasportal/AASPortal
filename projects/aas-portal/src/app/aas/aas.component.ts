@@ -34,7 +34,7 @@ import {
     StartService,
     ToolbarService,
     encodeBase64Url,
-    DocumentsService,
+    EndpointsApi,
 } from 'aas-lib';
 
 import { CommandHandlerService } from '../aas/command-handler.service';
@@ -62,7 +62,7 @@ export class AASComponent implements OnInit, OnDestroy {
         private readonly modal: NgbModal,
         private readonly notify: NotifyService,
         private readonly dashboard: DashboardService,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
         private readonly download: DownloadService,
         private readonly commandHandler: CommandHandlerService,
         private readonly toolbar: ToolbarService,

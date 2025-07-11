@@ -27,11 +27,11 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { CarbonFootprint, HandoverDocumentation, ZVEINameplate } from '../views';
+import { CarbonFootprint_0_9, HandoverDocumentation, ZVEINameplate } from '../views';
 import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
 import { ToolbarService } from '../../services/toolbar.service';
@@ -51,7 +51,7 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
         private readonly store: DigitalProductPassportStore,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
     ) {
@@ -215,7 +215,7 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
                 const semanticId = getSemanticId(submodel);
                 if (semanticId === ZVEINameplate) {
                     nameplate = submodel;
-                } else if (semanticId === CarbonFootprint) {
+                } else if (semanticId === CarbonFootprint_0_9) {
                     carbonFootprint = submodel;
                 } else if (semanticId === HandoverDocumentation) {
                     handoverDocumentation = submodel;

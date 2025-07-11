@@ -52,7 +52,7 @@ export class OpcuaServerScan extends AASServerScan {
             const nodeId = description.nodeId.toString();
             try {
                 const opcuaPackage = new OpcuaPackage(this.logger, this.server, nodeId, dataTypes);
-                const document = await opcuaPackage.createDocumentAsync();
+                const document = await opcuaPackage.createDocument();
                 ids.push({ id: document.id, idShort: document.idShort });
                 this.map.set(document.id, document);
             } catch (error) {

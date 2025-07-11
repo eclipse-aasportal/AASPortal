@@ -44,8 +44,9 @@ import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
 import { basename, decodeBase64Url, encodeBase64Url, getDisplayName, getUrl } from '../../utilities';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
+import { FHGNameplate, HSUNameplate, IDTANameplate, ZVEINameplate } from '../views';
 
 export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
 
@@ -57,11 +58,6 @@ export type NameplateItem = {
     element: aas.SubmodelElement;
     url?: string;
 };
-
-const IDTANameplate = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
-const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
-const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
-const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
 
 @Component({
     selector: 'fhg-digital-nameplate',
@@ -78,7 +74,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
         private readonly start: StartService,
         @Inject(WINDOW) private readonly window: Window,
         private readonly auth: AuthService,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();
@@ -141,6 +137,7 @@ export class DigitalNameplateComponent implements OnInit, OnDestroy {
             name: 'General',
             items: this.filterItems(document, submodel, submodel.submodelElements),
         });
+
         for (const element of submodel.submodelElements) {
             if (isSubmodelElementCollection(element)) {
                 const items = this.filterItems(document, submodel, element.value);

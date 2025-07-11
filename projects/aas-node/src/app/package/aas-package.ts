@@ -20,7 +20,7 @@ export abstract class AASPackage {
     }
 
     /** Gets the document that contains an Asset Administration Shell. */
-    public abstract createDocumentAsync(): Promise<AASDocument>;
+    public abstract createDocument(): Promise<AASDocument>;
 
     /**
      * Gets the thumbnail of the current Asset Administration Shell.
@@ -46,7 +46,7 @@ export abstract class AASPackage {
      * @param env The new AAS environment.
      * @param reference The previous state.
      */
-    public abstract setEnvironmentAsync(env: aas.Environment, reference?: aas.Environment): Promise<string[]>;
+    public abstract setEnvironment(env: aas.Environment, reference?: aas.Environment): Promise<string[]>;
 
     protected normalize(path: string): string {
         path = path.replace(/\\/g, '/');

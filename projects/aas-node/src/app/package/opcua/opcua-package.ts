@@ -33,7 +33,7 @@ export class OpcuaPackage extends AASPackage {
         this.dataTypes = dataTypes ?? new OpcuaDataTypeDictionary();
     }
 
-    public async createDocumentAsync(): Promise<AASDocument> {
+    public async createDocument(): Promise<AASDocument> {
         const component = await this.crawlAsync();
         if (component.typeDefinition !== 'AASAssetAdministrationShellType') {
             throw new Error(`${this.nodeId}: ${component.typeDefinition} is an unexpected type definition.`);
@@ -62,7 +62,7 @@ export class OpcuaPackage extends AASPackage {
         return await reader.readEnvironment();
     }
 
-    public override setEnvironmentAsync(): Promise<string[]> {
+    public override setEnvironment(): Promise<string[]> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
