@@ -18,8 +18,9 @@ export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemI
 export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
 export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
 export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
+export const IDTANameplate = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
 export const HandoverDocumentation = '0173-1#01-AHF578#003';
-export const CarbonFootprint = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
+export const CarbonFootprint_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 
 export const viewRoutes: Route[] = [
     {
@@ -33,7 +34,7 @@ export const viewRoutes: Route[] = [
         path: 'Nameplate',
         component: DigitalNameplateComponent,
         data: {
-            semanticIds: [ZVEINameplate, FHGNameplate, HSUNameplate],
+            semanticIds: [ZVEINameplate, FHGNameplate, HSUNameplate, IDTANameplate],
         },
     },
     {

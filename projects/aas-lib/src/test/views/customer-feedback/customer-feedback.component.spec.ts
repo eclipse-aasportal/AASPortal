@@ -16,17 +16,17 @@ import { AASDocument } from 'aas-core';
 import { CustomerFeedbackComponent } from '../../../lib/views/customer-feedback/customer-feedback.component';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
-import { DocumentsService } from '../../../lib/services/documents.service';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 
 describe('CustomerFeedbackComponent', () => {
     let start: jasmine.SpyObj<StartService>;
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(async () => {
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         route = jasmine.createSpyObj<ActivatedRoute>(
             {},
             { queryParams: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://localhost/aas') }) },
@@ -59,7 +59,7 @@ describe('CustomerFeedbackComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 provideZonelessChangeDetection(),

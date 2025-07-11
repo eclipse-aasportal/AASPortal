@@ -21,7 +21,7 @@ import { SecuredImageComponent } from '../../../lib/components/secured-image/sec
 import { HandoverDocumentationComponent } from '../../../lib/views/handover-documentation/handover-documentation.component';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
-import { DocumentsService } from '../../../lib/services/documents.service';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
 
 import sample from '../../assets/dpp-sample.json';
 
@@ -42,7 +42,7 @@ export class TestSecuredImageComponent {
 describe('HandoverDocumentationComponent', () => {
     let location: jasmine.SpyObj<NgLocation>;
     let window: jasmine.SpyObj<Window>;
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
 
@@ -50,7 +50,7 @@ describe('HandoverDocumentationComponent', () => {
         location = jasmine.createSpyObj<NgLocation>(['getState']);
         location.getState.and.returnValue({ data: JSON.stringify([sample]) });
         auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'getContent']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<Window>(['open'], {
             location: { toString: () => 'https://www.fraunhofer.de' } as Location,
@@ -79,7 +79,7 @@ describe('HandoverDocumentationComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 provideHttpClient(),

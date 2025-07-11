@@ -9,7 +9,7 @@
 import { effect, untracked, Injectable, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { EMPTY, Observable, Subscription, catchError, concat, from, map, mergeMap, of } from 'rxjs';
-import { DocumentsService, IndexChangeService, ViewMode } from 'aas-lib';
+import { EndpointsApi, IndexChangeService, ViewMode } from 'aas-lib';
 import { AASDocument, AASDocumentId, AASPagedResult, aas } from 'aas-core';
 import { ShellsStore } from './shells.store';
 import { FavoritesService } from './favorites.service';
@@ -20,7 +20,7 @@ export class ShellsService implements OnDestroy {
 
     public constructor(
         private readonly store: ShellsStore,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
         private readonly favorites: FavoritesService,
         private readonly translate: TranslateService,
         private readonly indexChange: IndexChangeService,

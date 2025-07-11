@@ -28,7 +28,7 @@ import {
     AASTableComponent,
     StartService,
     IndexChangeService,
-    DocumentsService,
+    EndpointsApi,
     ToolbarService,
 } from 'aas-lib';
 
@@ -53,7 +53,7 @@ describe('ShellsComponent', () => {
     let window: jasmine.SpyObj<Window>;
     let localStorage: jasmine.SpyObj<Storage>;
     let endpoints: jasmine.SpyObj<EndpointsService>;
-    let documents: jasmine.SpyObj<DocumentsService>;
+    let documents: jasmine.SpyObj<EndpointsApi>;
     let favorites: jasmine.SpyObj<FavoritesService>;
     let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
@@ -65,7 +65,7 @@ describe('ShellsComponent', () => {
         localStorage.getItem.and.returnValue(null);
         window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage });
         endpoints = jasmine.createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
-        documents = jasmine.createSpyObj<DocumentsService>(['getContent', 'getHierarchy', 'getDocuments']);
+        documents = jasmine.createSpyObj<EndpointsApi>(['getContent', 'getHierarchy', 'getDocuments']);
         documents.getDocuments.and.returnValue(
             of({
                 previous: null,
@@ -111,7 +111,7 @@ describe('ShellsComponent', () => {
                     useValue: endpoints,
                 },
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: documents,
                 },
                 {

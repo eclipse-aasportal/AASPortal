@@ -11,7 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getLocaleValue } from 'aas-core';
 import { SecuredImageComponent } from '../secured-image/secured-image.component';
 import { encodeBase64Url } from '../../utilities';
-import { DocumentsService } from '../../services/documents.service';
+import { EndpointsApi } from '../../services/endpoints-api';
 
 export type FavoriteDetail = {
     name: string;
@@ -33,7 +33,7 @@ export class FavoriteComponent {
 
     public constructor(
         private readonly translate: TranslateService,
-        private readonly api: DocumentsService,
+        private readonly api: EndpointsApi,
     ) {
         effect(() => {
             const endpoint = this.endpoint();

@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { Injectable, signal } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { AASCursor, AASDocument, AASPagedResult, aas } from 'aas-core';
 import { first, mergeMap, Observable, of, tap } from 'rxjs';
 import { encodeBase64Url } from '../utilities';
@@ -16,23 +16,12 @@ import { CacheService } from './cache.service';
 
 /** The API of the digital nameplate. */
 @Injectable({ providedIn: 'root' })
-export class DocumentsService {
+export class EndpointsApi {
     public constructor(
         private readonly http: HttpClient,
         private readonly auth: AuthService,
         private readonly cache: CacheService,
     ) {}
-
-    public readonly cdRef = signal<{ endpoint?: string; id?: string }>({});
-
-    public readonly conceptDescription = httpResource<aas.ConceptDescription>(() => {
-        const cdRef = this.cdRef();
-        if (!cdRef.endpoint || !cdRef.id) {
-            return undefined;
-        }
-
-        return `/api/v1/endpoints/${encodeBase64Url(cdRef.endpoint)}/concept-descriptions/${encodeBase64Url(cdRef.id)}`;
-    });
 
     /**
      * Gets the AAS document with the specified identifier.
