@@ -59,7 +59,6 @@ describe('EndpointsController', function () {
             'deletePackage',
             'getDataElementValue',
             'invoke',
-            'getConceptDescription',
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
