@@ -10,7 +10,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search';
-import { NotifyService } from '../../../lib/features/notify/notify.service';
+import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { AASTreeStore } from '../../../lib/components/aas-tree/aas-tree.store';
 
 describe('AASTreeSearch', () => {

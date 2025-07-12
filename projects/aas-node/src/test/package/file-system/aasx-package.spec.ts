@@ -34,7 +34,7 @@ describe('AasxPackage', function () {
             try {
                 await source.open();
                 const aasxPackage = new AasxPackage(logger, source, 'xml-origin.aasx');
-                const document = await aasxPackage.createDocumentAsync();
+                const document = await aasxPackage.createDocument();
                 expect(document).toBeDefined();
             } finally {
                 await source.close();
@@ -45,7 +45,7 @@ describe('AasxPackage', function () {
             try {
                 await source.open();
                 const aasxPackage = new AasxPackage(logger, source, 'json-origin.aasx');
-                const document = await aasxPackage.createDocumentAsync();
+                const document = await aasxPackage.createDocument();
                 expect(document).toBeDefined();
             } finally {
                 await source.close();

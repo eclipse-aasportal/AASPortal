@@ -14,12 +14,12 @@ import { Subject } from 'rxjs';
 
 import { AASTreeComponent } from '../../../lib/components/aas-tree/aas-tree.component';
 import { sampleDocument } from '../../assets/sample-document';
-import { NotifyService } from '../../../lib/features/notify/notify.service';
+import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { WebSocketFactoryService } from '../../../lib/services/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../../assets/test-web-socket-factory.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { AuthService } from '../../../lib/features/auth/auth.service';
+import { AuthService } from '../../../lib/components/auth/auth.service';
 import { WINDOW } from '../../../public-api';
 
 describe('AASTreeComponent', () => {

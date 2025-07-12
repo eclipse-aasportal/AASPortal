@@ -55,12 +55,12 @@ import { OperationCallFormComponent } from '../operation-call-form/operation-cal
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../../utilities';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
-import { LogType, NotifyService } from '../../features/notify/notify.service';
-import { findRoute } from '../../features/views';
+import { LogType, NotifyService } from '../notify/notify.service';
+import { findRoute } from '../../views/views';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
-import { AuthService } from '../../features/auth/auth.service';
+import { AuthService } from '../../components/auth/auth.service';
 import { WINDOW } from '../../services/window.service';
 
 @Component({

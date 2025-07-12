@@ -59,7 +59,6 @@ describe('EndpointsController', function () {
             'deletePackage',
             'getDataElementValue',
             'invoke',
-            'getConceptDescription',
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
@@ -179,7 +178,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.startEndpointScan).toHaveBeenCalledWith('Samples');
     });
 
-    it('GET: /api/v1/endpoints/:endpoint/packages/:id', async () => {
+    it('GET: /api/v1/endpoints/{name}/packages/{id}', async () => {
         aasProvider.getPackage.mockReturnValue(
             new Promise<NodeJS.ReadableStream>(resolve => {
                 const s = new Readable();
@@ -198,7 +197,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.getPackage).toHaveBeenCalled();
     });
 
-    it('POST: /api/v1/endpoints/:endpoint/packages', async () => {
+    it('POST: /api/v1/endpoints/{name}/packages', async () => {
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxl/packages')
@@ -209,7 +208,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.addPackages).toHaveBeenCalled();
     });
 
-    it('DELETE: /api/v1/endpoints/:endpoint/packages/:id', async () => {
+    it('DELETE: /api/v1/endpoints/{name}/packages/{id}', async () => {
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
         const response = await request(app)
             .delete('/api/v1/endpoints/U2FtcGxl/packages/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
@@ -219,7 +218,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.deletePackage).toHaveBeenCalled();
     });
 
-    it('GET: /api/v1/endpoints/:endpoint/documents/:id', async () => {
+    it('GET: /api/v1/endpoints/{name}/documents/{id}', async () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/endpoints/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
@@ -230,7 +229,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.getDocument).toHaveBeenCalled();
     });
 
-    it('GET: /api/v1/endpoints/:url/documents/:id/content', async () => {
+    it('GET: /api/v1/endpoints/{name}/documents/{id}/content', async () => {
         aasProvider.getContent.mockReturnValue(
             new Promise<aas.Environment>(resolve => {
                 resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
@@ -245,7 +244,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.getContent).toHaveBeenCalled();
     });
 
-    describe('getDataElementValue: /api/v1/endpoints/:url/documents/:id/submodels/:smId/submodel-elements/:path/value', () => {
+    describe('getDataElementValue: /api/v1/endpoints/{name}/documents/{id}/submodels/:smId/submodel-elements/{path}/value', () => {
         it('gets the value of a File that represents an image', async () => {
             aasProvider.getDataElementValue.mockReturnValue(
                 new Promise<NodeJS.ReadableStream>(resolve => {
@@ -324,7 +323,7 @@ describe('EndpointsController', function () {
         expect(aasProvider.updateDocument).toHaveBeenCalled();
     });
 
-    it('invokeOperation: /api/v1/endpoints/:url/documents/:id/invoke', async () => {
+    it('invokeOperation: /api/v1/endpoints/{name}/documents/{id}/invoke', async () => {
         const operation: aas.Operation = {
             idShort: 'noop',
             modelType: 'Operation',
@@ -342,22 +341,5 @@ describe('EndpointsController', function () {
 
         expect(response.statusCode).toBe(200);
         expect(aasProvider.invoke).toHaveBeenCalled();
-    });
-
-    it('GET: /api/v1/endpoints/{name}/concept-descriptions/{id}', async () => {
-        aasProvider.getConceptDescription.mockResolvedValue({
-            id: 'http://localhost:1234/concept-description',
-            idShort: 'cd',
-            modelType: 'ConceptDescription',
-        });
-
-        const endpointName = Buffer.from('endpoint').toString('base64url');
-        const id = Buffer.from('http://localhost:1234/concept-description').toString('base64url');
-        const response = await request(app)
-            .get(`/api/v1/endpoints/${endpointName}/concept-descriptions/${id}`)
-            .set('Authorization', `Bearer ${getToken()}`);
-
-        expect(response.statusCode).toBe(200);
-        expect(aasProvider.getConceptDescription).toHaveBeenCalled();
     });
 });
