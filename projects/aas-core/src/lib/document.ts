@@ -9,7 +9,6 @@
 import isEqual from 'lodash-es/isEqual.js';
 import * as aas from './aas.js';
 import { AASDocument, AASAbbreviation } from './types.js';
-import { isHasSemantics } from './index.js';
 
 /** Represents a difference. */
 export interface DifferenceItem {
@@ -134,6 +133,32 @@ export function flat(root: aas.Referable): aas.Referable[] {
     }
 
     return result;
+}
+
+/**
+ * Traverses over all descendants of the specified root element and the root element itself.
+ * @param root The root element.
+ * @returns An iterator.
+ */
+export function* traverse(root: aas.Referable): Generator<aas.Referable> {
+    const stack: aas.Referable[][] = [];
+    yield root;
+
+    let children = getChildren(root);
+    if (children.length > 0) {
+        stack.push(children);
+    }
+
+    while (stack.length) {
+        for (const child of stack.pop()!) {
+            yield child;
+
+            children = getChildren(child);
+            if (children.length > 0) {
+                stack.push(children);
+            }
+        }
+    }
 }
 
 /**
@@ -1178,28 +1203,6 @@ export function getPath(reference: aas.Reference): string {
 }
 
 /**
- * Gets all concept description identifiers that are available in the specified referable and its descendants.
- * @param referable The current referable.
- * @returns The available semantic identifiers.
- */
-export function getConceptDescriptionIds(referable: aas.Referable): string[] {
-    const result = new Set<string>();
-    for (const element of flat(referable)) {
-        if (isHasSemantics(element)) {
-            const semanticId = element.semanticId;
-            if (semanticId) {
-                const key = semanticId.keys.at(0);
-                if (key && key.type === 'ConceptDescription') {
-                    result.add(key.value);
-                }
-            }
-        }
-    }
-
-    return [...result.values()];
-}
-
-/**
  * Compares two AAS references for equality.
  * @param a The first reference.
  * @param b The second reference.
@@ -1248,4 +1251,14 @@ export function getReferable(submodel: aas.Submodel, idShortPath: string): aas.R
     }
 
     return referable;
+}
+
+/**
+ * Gets the concept description with the specified identifier from the given AAS environment.
+ * @param env The AAS environment.
+ * @param id The identifier of the concept description to get.
+ * @returns The concept description or `undefined`.
+ */
+export function getConceptDescription(env: aas.Environment, id: string): aas.ConceptDescription | undefined {
+    return env.conceptDescriptions.find(item => item.id === id);
 }

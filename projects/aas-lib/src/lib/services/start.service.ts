@@ -9,7 +9,7 @@
 import { Inject, Injectable, InjectionToken, signal, Type } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, EMPTY, map, mergeMap, Observable, of, skipWhile } from 'rxjs';
-import { AuthService } from '../features/auth/auth.service';
+import { AuthService } from '../components/auth/auth.service';
 
 export type StartTileType = {
     name: string;

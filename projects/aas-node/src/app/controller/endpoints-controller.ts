@@ -297,17 +297,4 @@ export class EndpointsController extends Controller {
     public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
         return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));
     }
-
-    /**
-     * @summary Gets the Concept Description with the specified identfier of the given endpoint.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The Concept Description identifier (Base64-URL encoded).
-     * @returns The requested Concept Description.
-     */
-    @Get('{endpoint}/concept-descriptions/{id}')
-    @Security('bearerAuth', ['guest'])
-    @OperationId('getConceptDescription')
-    public async getConceptDescription(@Path() endpoint: string, @Path() id: string): Promise<aas.ConceptDescription> {
-        return await this.aasProvider.getConceptDescription(decodeBase64Url(id), decodeBase64Url(endpoint));
-    }
 }

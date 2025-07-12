@@ -6,26 +6,11 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
-import {
-    AASTreeComponent,
-    AuthService,
-    DocumentsService,
-    DownloadService,
-    NotifyService,
-    OnlineState,
-    SecuredImageComponent,
-    StartService,
-    ToolbarService,
-} from 'aas-lib';
-
-import { AASDocument, aas, noop } from 'aas-core';
-import { AASComponent } from '../../app/aas/aas.component';
-import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
+import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -34,6 +19,22 @@ import {
     provideZonelessChangeDetection,
     signal,
 } from '@angular/core';
+
+import { AASDocument, aas, noop } from 'aas-core';
+import {
+    AASTreeComponent,
+    AuthService,
+    EndpointsApi,
+    DownloadService,
+    NotifyService,
+    OnlineState,
+    SecuredImageComponent,
+    StartService,
+    ToolbarService,
+} from 'aas-lib';
+
+import { AASComponent } from '../../app/aas/aas.component';
+import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
@@ -78,7 +79,7 @@ describe('AASComponent', () => {
     let dashboard: jasmine.SpyObj<DashboardService>;
     let router: Router;
     let store: AASStore;
-    let api: jasmine.SpyObj<DocumentsService>;
+    let api: jasmine.SpyObj<EndpointsApi>;
     let download: jasmine.SpyObj<DownloadService>;
     let start: jasmine.SpyObj<StartService>;
     let pages: DashboardPage[];
@@ -86,7 +87,7 @@ describe('AASComponent', () => {
     beforeEach(async () => {
         pages = [{ name: 'Dashboard 1', items: [], requests: [], active: true }];
 
-        api = jasmine.createSpyObj<DocumentsService>(['getDocument', 'putDocument']);
+        api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'putDocument']);
         download = jasmine.createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
         dashboard = jasmine.createSpyObj<DashboardService>(['addChart'], {
             activePage: signal(pages[0]).asReadonly(),
@@ -99,7 +100,7 @@ describe('AASComponent', () => {
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: DocumentsService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 {
