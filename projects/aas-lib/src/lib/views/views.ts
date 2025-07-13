@@ -8,7 +8,7 @@
 
 import { Route } from '@angular/router';
 import { CustomerFeedbackComponent } from './customer-feedback/customer-feedback.component';
-import { DigitalNameplateComponent } from './digital-nameplate/digital-nameplate.component';
+import { NameplateComponent } from './nameplate/nameplate.component';
 import { DigitalProductPassportComponent } from './digital-product-passport/digital-product-passport.component';
 import { HandoverDocumentationComponent } from './handover-documentation/handover-documentation.component';
 import { DocumentBrowserComponent } from './document-browser/document-browser.component';
@@ -21,6 +21,7 @@ export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
 export const IDTANameplate = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
 export const HandoverDocumentation = '0173-1#01-AHF578#003';
 export const CarbonFootprint_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
+export const CarbonFootprint_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
 
 export const viewRoutes: Route[] = [
     {
@@ -32,7 +33,7 @@ export const viewRoutes: Route[] = [
     },
     {
         path: 'Nameplate',
-        component: DigitalNameplateComponent,
+        component: NameplateComponent,
         data: {
             semanticIds: [ZVEINameplate, FHGNameplate, HSUNameplate, IDTANameplate],
         },

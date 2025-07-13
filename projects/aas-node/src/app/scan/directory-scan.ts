@@ -12,7 +12,7 @@ import { AasxPackage } from '../package/file-system/aasx-package.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../package/aas-api/aas-api-client.js';
+import { AASLabel } from '../package/api/api-client.js';
 
 export class DirectoryScan extends AASServerScan {
     private readonly map = new Map<string, AASDocument>();

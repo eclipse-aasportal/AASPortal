@@ -32,7 +32,6 @@ import {
     convertToString,
     getIdShortPath,
     getLocaleValue,
-    getPreferredName,
     getReferable,
     getSemanticId,
     isFile,
@@ -45,7 +44,7 @@ import {
 import { ToolbarService } from '../../services/toolbar.service';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
-import { basename, decodeBase64Url, encodeBase64Url, toDisplayName } from '../../utilities';
+import { basename, decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
 import { StartService } from '../../services/start.service';
 import { HandoverDocumentation } from '../views';
@@ -59,7 +58,7 @@ export type DocumentationItem = {
 };
 
 @Component({
-    selector: 'fhg-digital-nameplate',
+    selector: 'fhg-handover',
     templateUrl: './handover-documentation.component.html',
     styleUrls: ['./handover-documentation.component.scss'],
     imports: [TranslateModule, NgbPaginationModule, SecuredImageComponent],
@@ -110,7 +109,7 @@ export class HandoverDocumentationComponent implements OnInit, OnDestroy {
             return '-';
         }
 
-        return this.getPreferredName(tuple[0].content, tuple[1]);
+        return getDisplayName(tuple[1], tuple[0].content);
     });
 
     public readonly handoverDocumentationSize = computed(() => this.handoverDocumentations().length);
@@ -236,20 +235,6 @@ export class HandoverDocumentationComponent implements OnInit, OnDestroy {
                 }
             }
         }
-    }
-
-    private getPreferredName(env: aas.Environment | null | undefined, referable: aas.Referable): string {
-        if (env) {
-            const values = getPreferredName(env, referable);
-            if (values) {
-                const value = getLocaleValue(values, this.translate.currentLang);
-                if (value) {
-                    return value;
-                }
-            }
-        }
-
-        return toDisplayName(referable.idShort);
     }
 
     private browseForDocumentation(

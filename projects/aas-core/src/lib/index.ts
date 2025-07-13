@@ -17,7 +17,6 @@ import {
     Entity,
     Environment,
     File,
-    HasSemantics,
     Identifiable,
     MultiLanguageProperty,
     Operation,
@@ -150,15 +149,6 @@ export function isReference(value: unknown): value is Reference {
     }
 
     return typeof (value as Reference).type === 'string' && Array.isArray((value as Reference).keys);
-}
-
-/**
- * Gets the semantic identifier of the specified AAS element.
- * @param value The AAS element.
- * @returns The semantic identifier or `undefined`.
- */
-export function getSemanticId(value: Referable): string | undefined {
-    return (value as HasSemantics)?.semanticId?.keys.at(0)?.value;
 }
 
 /**
@@ -445,20 +435,4 @@ export function getEndpointType(url: string | URL): AASEndpointType {
         default:
             throw new Error(`Protocol "${url.protocol}" is not supported.`);
     }
-}
-
-/**
- * Creates an immutable object.
- * @param obj The current object.
- * @returns The immutable object.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function deepFreeze(obj: any): any {
-    Object.keys(obj).forEach(property => {
-        if (typeof obj[property] === 'object' && !Object.isFrozen(obj[property])) {
-            deepFreeze(obj[property]);
-        }
-    });
-
-    return Object.freeze(obj);
 }

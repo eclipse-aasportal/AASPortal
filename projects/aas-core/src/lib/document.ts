@@ -10,6 +10,8 @@ import isEqual from 'lodash-es/isEqual.js';
 import * as aas from './aas.js';
 import { AASDocument, AASAbbreviation } from './types.js';
 
+const DataSpecificationIEC61360 = 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360';
+
 /** Represents a difference. */
 export interface DifferenceItem {
     type: 'deleted' | 'inserted' | 'changed' | 'moved';
@@ -1072,6 +1074,15 @@ export function resolveReference(env: aas.Environment, reference: aas.Reference)
 }
 
 /**
+ * Gets the semantic identifier of the specified AAS element.
+ * @param value The AAS element.
+ * @returns The semantic identifier or `undefined`.
+ */
+export function getSemanticId(value: aas.Referable): string | undefined {
+    return (value as aas.HasSemantics)?.semanticId?.keys.at(0)?.value;
+}
+
+/**
  * Gets the data specification content of the specified referable.
  * @param env The AAS environment.
  * @param referable The current referable.
@@ -1084,17 +1095,14 @@ export function getIEC61360Content(
     const hasDataSpecification = referable as aas.HasDataSpecification;
     if (hasDataSpecification.embeddedDataSpecifications) {
         for (const item of hasDataSpecification.embeddedDataSpecifications) {
-            if (
-                getPath(item.dataSpecification) ===
-                'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360'
-            ) {
+            if (getPath(item.dataSpecification).startsWith(DataSpecificationIEC61360)) {
                 return item.dataSpecificationContent as aas.DataSpecificationIec61360;
             }
         }
     } else {
-        const semanticId = (referable as aas.HasSemantics).semanticId?.keys.at(0)?.value;
+        const semanticId = getSemanticId(referable);
         if (semanticId) {
-            const conceptDescription = env.conceptDescriptions.find(cd => cd.id === semanticId);
+            const conceptDescription = getConceptDescription(env, semanticId);
             if (conceptDescription) {
                 return getIEC61360Content(env, conceptDescription);
             }

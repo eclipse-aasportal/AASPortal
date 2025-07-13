@@ -9,7 +9,7 @@
 import { aas, AASEndpoint, DifferenceItem, noop, selectSubmodel } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
-import { AASApiClient, AASLabel } from './aas-api-client.js';
+import { ApiClient, AASLabel } from './api-client.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import * as aasV2 from '../../types/aas-v2.js';
 import { HttpClient } from '../../http-client.js';
@@ -19,7 +19,7 @@ interface AASList {
     aaslist: string[];
 }
 
-export class AASApiClientV0 extends AASApiClient {
+export class ApiClientV0 extends ApiClient {
     public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
         super(logger, http, endpoint);
     }
@@ -38,11 +38,6 @@ export class AASApiClientV0 extends AASApiClient {
             }),
             paging_metadata: {},
         };
-    }
-
-    public override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
-        noop(id);
-        return Promise.reject(new Error('Not implemented.'));
     }
 
     public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {

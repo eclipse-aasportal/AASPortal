@@ -13,7 +13,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { of } from 'rxjs';
 
 import { nameplate } from './digital-nameplate-document';
-import { DigitalNameplateComponent } from '../../../lib/views/digital-nameplate/digital-nameplate.component';
+import { NameplateComponent } from '../../../lib/views/nameplate/nameplate.component';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
@@ -77,7 +77,7 @@ describe('DigitalNameplateComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                DigitalNameplateComponent,
+                NameplateComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -87,21 +87,21 @@ describe('DigitalNameplateComponent', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(DigitalNameplateComponent, {
+        TestBed.overrideComponent(NameplateComponent, {
             remove: { imports: [SecuredImageComponent] },
             add: { imports: [TestSecuredImageComponent] },
         });
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(DigitalNameplateComponent);
+        const fixture = TestBed.createComponent(NameplateComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('provides a "title"', () => {
-        const fixture = TestBed.createComponent(DigitalNameplateComponent);
+        const fixture = TestBed.createComponent(NameplateComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component.title()).toEqual('Nameplate');

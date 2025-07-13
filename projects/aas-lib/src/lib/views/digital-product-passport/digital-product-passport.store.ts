@@ -18,9 +18,10 @@ import {
     isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
+    isSubmodelElementList,
 } from 'aas-core';
 
-import { basename } from '../../utilities';
+import { basename, getDisplayName } from '../../utilities';
 
 type ViewData = {
     document: AASDocument;
@@ -58,10 +59,10 @@ export type NameplateItem = {
 export type CarbonFootprintItem = {
     value: number;
     Name: string;
-    PCFCO2eq: string;
-    PCFLifeCyclePhase: [string, string][];
-    PCFCalculationMethod: string;
-    PCFGoodsAddressHandover: string;
+    PcfCO2eq: string;
+    PcfLifeCyclePhase: [string, string][];
+    PcfCalculationMethod: string;
+    PcfGoodsAddressHandover: string;
 };
 
 export type DocumentationItem = {
@@ -102,10 +103,10 @@ const emptyNameplate: NameplateItem = {
 const emptyCarbonFootprintItem: CarbonFootprintItem = {
     value: 0,
     Name: '-',
-    PCFCO2eq: '-',
-    PCFLifeCyclePhase: [],
-    PCFCalculationMethod: '-',
-    PCFGoodsAddressHandover: '-',
+    PcfCO2eq: '-',
+    PcfLifeCyclePhase: [],
+    PcfCalculationMethod: '-',
+    PcfGoodsAddressHandover: '-',
 };
 
 const PCFLifeCyclePhaseIds: [string, string][] = [
@@ -154,11 +155,11 @@ export class DigitalProductPassportStore {
             return emptyNameplate;
         }
 
-        const firstName = this.getPropertyValue(nameplate, 'ContactInformation.FirstName');
-        const nameOfContact = this.getPropertyValue(nameplate, 'ContactInformation.NameOfContact');
-        const nationalCode = this.getPropertyValue(nameplate, 'ContactInformation.NationalCode');
-        const zipCode = this.getPropertyValue(nameplate, 'ContactInformation.Zipcode');
-        const cityTown = this.getPropertyValue(nameplate, 'ContactInformation.CityTown');
+        const firstName = this.getPropertyValue(nameplate, 'AddressInformation.FirstName');
+        const nameOfContact = this.getPropertyValue(nameplate, 'AddressInformation.NameOfContact');
+        const nationalCode = this.getPropertyValue(nameplate, 'AddressInformation.NationalCode');
+        const zipCode = this.getPropertyValue(nameplate, 'AddressInformation.Zipcode');
+        const cityTown = this.getPropertyValue(nameplate, 'AddressInformation.CityTown');
         return {
             ManufacturerProductFamily: this.getPropertyValue(nameplate, 'ManufacturerProductFamily'),
             ManufacturerProductDesignation: this.getPropertyValue(nameplate, 'ManufacturerProductDesignation'),
@@ -167,14 +168,14 @@ export class DigitalProductPassportStore {
             DateOfManufacture: this.getPropertyValue(nameplate, 'DateOfManufacture'),
             ManufacturerName: this.getPropertyValue(nameplate, 'ManufacturerName'),
             NameOfContact: `${firstName} ${nameOfContact}`,
-            Language: this.getPropertyValue(nameplate, 'ContactInformation.Language'),
-            TelephoneNumber: this.getPropertyValue(nameplate, 'ContactInformation.Phone.TelephoneNumber'),
-            EmailAddress: this.getPropertyValue(nameplate, 'ContactInformation.Email.EmailAddress'),
-            Company: this.getPropertyValue(nameplate, 'ContactInformation.Company'),
+            Language: this.getPropertyValue(nameplate, 'AddressInformation.Language'),
+            TelephoneNumber: this.getPropertyValue(nameplate, 'AddressInformation.Phone.TelephoneNumber'),
+            EmailAddress: this.getPropertyValue(nameplate, 'AddressInformation.Email.EmailAddress'),
+            Company: this.getPropertyValue(nameplate, 'AddressInformation.Company'),
             CityTown: `${nationalCode}-${zipCode} ${cityTown}`,
-            Street: this.getPropertyValue(nameplate, 'ContactInformation.Street'),
-            StateCounty: this.getPropertyValue(nameplate, 'ContactInformation.StateCounty'),
-            TimeZone: this.getPropertyValue(nameplate, 'ContactInformation.TimeZone'),
+            Street: this.getPropertyValue(nameplate, 'AddressInformation.Street'),
+            StateCounty: this.getPropertyValue(nameplate, 'AddressInformation.StateCounty'),
+            TimeZone: this.getPropertyValue(nameplate, 'AddressInformation.TimeZone'),
         };
     });
 
@@ -183,8 +184,16 @@ export class DigitalProductPassportStore {
         const carbonFootprint = this.viewData$()?.carbonFootprint;
         if (carbonFootprint !== undefined && carbonFootprint.submodelElements) {
             for (const sme of carbonFootprint.submodelElements) {
-                if (isSubmodelElementCollection(sme)) {
-                    items.push(this.createCarbonFootprintItem(carbonFootprint, sme));
+                if (isSubmodelElementList(sme)) {
+                    if (!sme.value) {
+                        continue;
+                    }
+
+                    for (const item of sme.value) {
+                        if (isSubmodelElementCollection(item)) {
+                            items.push(this.createCarbonFootprintItem(carbonFootprint, item));
+                        }
+                    }
                 }
             }
         }
@@ -196,7 +205,7 @@ export class DigitalProductPassportStore {
         return items;
     });
 
-    public readonly totalPCFCO2eq = computed(() => {
+    public readonly totalPcfCO2eq = computed(() => {
         return convertToString(
             this.carbonFootprintItems()
                 .map(item => item.value)
@@ -288,26 +297,26 @@ export class DigitalProductPassportStore {
         carbonFootprint: aas.Submodel,
         smc: aas.SubmodelElementCollection,
     ): CarbonFootprintItem {
-        const value = this.getPropertyValueAsNumber(carbonFootprint, `${smc.idShort}.PCFCO2eq`);
-        const valueId = this.getPropertyValueId(carbonFootprint, `${smc.idShort}.PCFCO2eq`);
-        const calculationMethod = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFCalculationMethod`);
+        const value = this.getPropertyValueAsNumber(carbonFootprint, `${smc.idShort}.PcfCO2eq`);
+        const valueId = this.getPropertyValueId(carbonFootprint, `${smc.idShort}.PcfCO2eq`);
+        const calculationMethod = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfCalculationMethods`);
         const publicationDate = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PublicationDate`);
-        const street = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFGoodsAddressHandover.Street`);
+        const street = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.Street`);
         const houseNumber = this.getPropertyValue(
             carbonFootprint,
-            `${smc.idShort}.PCFGoodsAddressHandover.HouseNumber`,
+            `${smc.idShort}.PcfGoodsAddressHandover.HouseNumber`,
         );
 
-        const zipCode = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFGoodsAddressHandover.ZipCode`);
-        const cityTown = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFGoodsAddressHandover.CityTown`);
-        const country = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PCFGoodsAddressHandover.Country`);
+        const zipCode = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.ZipCode`);
+        const cityTown = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.CityTown`);
+        const country = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.Country`);
         const item: CarbonFootprintItem = {
             value,
             Name: this.getDisplayName(smc),
-            PCFCO2eq: `${convertToString(value, this.translate.currentLang)} kg, ${valueId}`,
-            PCFLifeCyclePhase: this.getArray(smc, PCFLifeCyclePhaseIds),
-            PCFCalculationMethod: `${calculationMethod}, ${publicationDate}`,
-            PCFGoodsAddressHandover: `${street} ${houseNumber}, ${country}-${zipCode} ${cityTown}`,
+            PcfCO2eq: `${convertToString(value, this.translate.currentLang)} kg, ${valueId}`,
+            PcfLifeCyclePhase: this.getArray(smc, PCFLifeCyclePhaseIds),
+            PcfCalculationMethod: `${calculationMethod}, ${publicationDate}`,
+            PcfGoodsAddressHandover: `${street} ${houseNumber}, ${country}-${zipCode} ${cityTown}`,
         };
 
         return item;

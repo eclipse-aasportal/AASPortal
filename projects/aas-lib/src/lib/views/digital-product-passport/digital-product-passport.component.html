@@ -57,7 +57,7 @@
                 <h2 ngbAccordionHeader>
                     <button ngbAccordionButton>
                         <span translate>DigitalProductPassport.CARBON_FOOTPRINT_DATA</span>
-                        <span class="ms-2 fs-4 fw-bold">{{totalPCFCO2eq()}}&nbsp;kg</span>
+                        <span class="ms-2 fs-4 fw-bold">{{totalPcfCO2eq()}}&nbsp;kg</span>
                         <span class="ms-2 fs-6 fw-bold" translate>DigitalProductPassport.TOTAL_PSFCO2EQ</span>
                     </button>
                 </h2>
@@ -71,7 +71,7 @@
                                 <tbody>
                                     @for (item of carbonFootprintItems(); track item.name) {
                                     <tr>
-                                        <td class="text-nowrap align-middle">{{item.name | translate}}</td>
+                                        <td class="text-nowrap align-middle">{{item.name}}</td>
                                         <td>{{item.value}}</td>
                                     </tr>
                                     }

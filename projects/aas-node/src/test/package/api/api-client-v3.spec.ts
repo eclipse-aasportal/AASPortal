@@ -9,21 +9,21 @@
 import { createSpyObj } from 'aas-jest';
 import { aasEnvironment as env } from '../../assets/aas-environment.js';
 import cloneDeep from 'lodash-es/cloneDeep.js';
-import { AASApiClientV3, OperationResult } from '../../../app/package/aas-api/aas-api-client-v3.js';
+import { ApiClientV3, OperationResult } from '../../../app/package/api/api-client-v3.js';
 import { aas, DifferenceItem } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 import { HttpClient } from '../../../app/http-client.js';
 
-describe('AASApiClientV3', () => {
+describe('ApiClientV3', () => {
     let logger: Logger;
-    let client: AASApiClientV3;
+    let client: ApiClientV3;
     let http: jest.Mocked<HttpClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         http = createSpyObj<HttpClient>(['get', 'getResponse', 'post', 'put', 'delete']);
-        client = new AASApiClientV3(logger, http, {
+        client = new ApiClientV3(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
             url: 'http://localhost:1234',

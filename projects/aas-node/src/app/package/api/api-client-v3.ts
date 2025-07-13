@@ -7,7 +7,9 @@
  *****************************************************************************/
 
 import FormData from 'form-data';
-import { createReadStream } from 'fs';
+import cloneDeep from 'lodash-es/cloneDeep.js';
+import fs from 'fs';
+import path from 'path';
 import {
     aas,
     AASEndpoint,
@@ -17,18 +19,19 @@ import {
     isAssetAdministrationShell,
     isSubmodel,
     isSubmodelElement,
-    noop,
     selectSubmodel,
+    noop,
+    isConceptDescription,
+    traverse,
+    getSemanticId,
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
-import { AASApiClient, AASLabel } from './aas-api-client.js';
+import { ApiClient, AASLabel } from './api-client.js';
 import { Logger } from '../../logging/logger.js';
-import * as aasv2 from '../../types/aas-v2.js';
-import { JsonReaderV2 } from '../json-reader-v2.js';
-import { JsonWriterV2 } from '../json-writer-v2.js';
-import { ERRORS } from '../../errors.js';
 import { JsonReaderV3 } from '../json-reader-v3.js';
+import { JsonWriterV3 } from '../json-writer-v3.js';
+import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
 import { PagedResult } from '../../types/paged-result.js';
 
@@ -38,31 +41,28 @@ interface PackageDescriptor {
 }
 
 interface OperationRequest {
-    inputArguments?: aasv2.OperationVariable[];
-    inoutputArguments?: aasv2.OperationVariable[];
-    requestId?: string;
-    timeout?: number;
+    inputVariables?: aas.OperationVariable[];
+    inoutputVariables?: aas.OperationVariable[];
+    clientTimeoutDuration?: string;
 }
 
-interface OperationResult {
-    executionResult: {
-        messages: [
-            {
-                code: string;
-                messageType: number;
-                text: string;
-                timestamp: string;
-            },
-        ];
-        success: boolean;
-    };
-    executionState: number;
-    inoutputArguments: aasv2.OperationVariable[];
-    outputArguments: aasv2.OperationVariable[];
-    requestId: string;
+export interface Message {
+    code?: string;
+    correlationId?: string;
+    messageType: 'Undefined' | 'Info' | 'Warning' | 'Error' | 'Exception';
+    text: string;
+    timeStamp?: string;
 }
 
-export class AASApiClientV1 extends AASApiClient {
+export interface OperationResult {
+    messages?: Message[];
+    executionState: 'Initiated' | 'Running' | 'Completed' | 'Canceled' | 'Failed' | 'Timeout';
+    success: boolean;
+    outputVariables?: aas.OperationVariable[];
+    inoutputVariables?: aas.OperationVariable[];
+}
+
+export class ApiClientV3 extends ApiClient {
     public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
         super(logger, http, endpoint);
     }
@@ -71,49 +71,46 @@ export class AASApiClientV1 extends AASApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
-        const result = await this.http.get<aasv2.AssetAdministrationShell[]>(
-            this.resolve('shells'),
+    public override async test(): Promise<void> {
+        await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+            this.resolve('shells', { limit: 10 }),
+            this.endpoint.headers,
+        );
+    }
+
+    public override async getShells(cursor?: string): Promise<PagedResult<AASLabel>> {
+        const searchParams: Record<string, string | number> = { limit: 100 };
+        if (cursor) {
+            searchParams.cursor = cursor;
+        }
+
+        const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+            this.resolve('shells', searchParams),
             this.endpoint.headers,
         );
 
-        noop(cursor);
-
         return {
-            result: result.map(shell => ({ id: shell.identification.id, idShort: shell.idShort })),
-            paging_metadata: {},
+            result: result.result.map(shell => ({ id: shell.id, idShort: shell.idShort })),
+            paging_metadata: { cursor: result.paging_metadata.cursor },
         };
     }
 
-    public override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
-        noop(id);
-        return Promise.reject(new Error('Not implemented.'));
-    }
-
-    public async readEnvironment(id: AASLabel): Promise<aas.Environment> {
+    public override async readEnvironment(id: AASLabel): Promise<aas.Environment> {
         const aasId = encodeBase64Url(id.id);
-        const shell = await this.http.get<aasv2.AssetAdministrationShell>(
+        const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${aasId}`),
             this.endpoint.headers,
         );
 
-        const submodels = await this.readSubmodels(shell);
-
-        const asset: aasv2.Asset = {
-            kind: 'Instance',
-            identification: { idType: shell.asset.keys[0].idType, id: shell.asset.keys[0].value },
-            modelType: { name: 'Asset' },
-            idShort: 'Asset',
-        };
-
-        const sourceEnv: aasv2.AssetAdministrationShellEnvironment = {
+        const submodels = await this.readSubmodels(aasId, shell.submodels);
+        const conceptDescriptions = await this.readConceptDescriptions(submodels);
+        const env: aas.Environment = {
             assetAdministrationShells: [shell],
-            assets: [asset],
             submodels,
-            conceptDescriptions: [],
+            conceptDescriptions,
         };
 
-        return new JsonReaderV2(sourceEnv).readEnvironment();
+        return new JsonReaderV3(env).readEnvironment();
     }
 
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
@@ -164,10 +161,11 @@ export class AASApiClientV1 extends AASApiClient {
         return messages;
     }
 
-    public async openFile(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
+        const aasId = encodeBase64Url(shell.id);
         const smId = encodeBase64Url(file.parent!.keys[0].value);
         const path = getIdShortPath(file);
-        const url = this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}/attachment`);
+        const url = this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${path}/attachment`);
         return await this.http.getResponse(url, this.endpoint.headers);
     }
 
@@ -176,31 +174,36 @@ export class AASApiClientV1 extends AASApiClient {
         const index = nodeId.indexOf('#');
         const smId = nodeId.substring(0, index);
         const idShortPath = nodeId.substring(index + 1);
-        return this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${idShortPath}`).href;
+        return this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}`).href;
     }
 
     public async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.get(
+        const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
 
-        const packageId = encodeBase64Url(descriptors[0].packageId);
+        const packageId = encodeBase64Url(result.result[0].packageId);
         return await this.http.getResponse(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public postPackage(file: Express.Multer.File): Promise<string> {
+    public async postPackage(file: Express.Multer.File): Promise<string> {
         const formData = new FormData();
-        formData.append('file', createReadStream(file.path));
-        formData.append('fileName', file.filename);
-        return this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        const aasxFile = path.join(path.dirname(file.path), file.originalname);
+        if (fs.existsSync(aasxFile)) {
+            await fs.promises.unlink(aasxFile);
+        }
+
+        await fs.promises.rename(file.path, path.join(path.dirname(file.path), file.originalname));
+        formData.append('file', fs.createReadStream(aasxFile));
+        const result = await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        return result;
     }
 
-    public async deletePackage(aasIdentifier: string): Promise<string> {
-        const aasId = encodeBase64Url(aasIdentifier);
+    public async deletePackage(aasId: string): Promise<string> {
         const descriptors: PackageDescriptor[] = await this.http.get(
-            this.resolve(`packages?aasId=${aasId}`),
+            this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
             this.endpoint.headers,
         );
 
@@ -216,37 +219,33 @@ export class AASApiClientV1 extends AASApiClient {
         const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
         const smId = encodeBase64Url(selectSubmodel(env, operation)!.id);
         const path = getIdShortPath(operation);
-        const writer = new JsonWriterV2();
-        const opr: aasv2.Operation = writer.convert(operation);
-        const request: OperationRequest = {
-            inputArguments: opr.inputVariable,
-            inoutputArguments: opr.inoutputVariable,
-            requestId: '1',
-            timeout: 0,
-        };
+        const request: OperationRequest = {};
+
+        if (operation.inputVariables) {
+            request.inputVariables = cloneDeep(operation.inputVariables);
+        }
+
+        if (operation.inoutputVariables) {
+            request.inoutputVariables = cloneDeep(operation.inoutputVariables);
+        }
 
         const result: OperationResult = JSON.parse(
             await this.http.post(
-                this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${path}/invoke`),
+                this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
                 request,
                 this.endpoint.headers,
             ),
         );
 
-        if (!result.executionResult.success) {
+        if (!result.success) {
             throw new ApplicationError(
                 `Invoking the operation ${operation.idShort} failed: {0}`,
                 ERRORS.InvokeOperationFailed,
-                result.executionResult.messages?.map(message => message.text).join(' ') ?? 'No messages.',
+                result.messages?.map(message => message.text).join(' ') ?? 'No messages.',
             );
         }
 
-        const reader = new JsonReaderV3();
-        return reader.read({
-            ...opr,
-            outputVariable: result.outputArguments,
-            inoutputVariable: result.inoutputArguments,
-        } as aasv2.Operation);
+        return { ...operation, outputVariables: result.outputVariables, inoutputVariables: result.inoutputVariables };
     }
 
     public async getBlobValue(
@@ -254,9 +253,8 @@ export class AASApiClientV1 extends AASApiClient {
         submodelId: string,
         idShortPath: string,
     ): Promise<string | undefined> {
-        const smId = encodeBase64Url(submodelId);
         const blob = await this.http.get<aas.Blob>(
-            this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
+            this.resolve(`submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
             this.endpoint.headers,
         );
 
@@ -267,37 +265,66 @@ export class AASApiClientV1 extends AASApiClient {
         return blob.value;
     }
 
-    private async readSubmodels(shell: aasv2.AssetAdministrationShell): Promise<aasv2.Submodel[]> {
-        const submodels: aasv2.Submodel[] = [];
-        if (shell.submodels) {
-            for (const reference of shell.submodels) {
-                const submodelId = encodeBase64Url(reference.keys[0].value);
-                try {
-                    submodels.push(
-                        await this.http.get<aasv2.Submodel>(
-                            this.resolve(`submodels/${submodelId}/submodel`),
-                            this.endpoint.headers,
-                        ),
-                    );
-                } catch (error) {
-                    this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
-                }
+    private async readSubmodels(aasId: string, submodelRefs: aas.Reference[] | undefined): Promise<aas.Submodel[]> {
+        const submodels: aas.Submodel[] = [];
+        if (submodelRefs === undefined) {
+            return submodels;
+        }
+
+        for (const reference of submodelRefs) {
+            const smId = encodeBase64Url(reference.keys[0].value);
+            try {
+                submodels.push(
+                    await this.http.get<aas.Submodel>(
+                        this.resolve(`shells/${aasId}/submodels/${smId}`),
+                        this.endpoint.headers,
+                    ),
+                );
+            } catch (error) {
+                this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
             }
         }
 
         return submodels;
     }
 
+    private async readConceptDescriptions(submodels: aas.Submodel[]): Promise<aas.ConceptDescription[]> {
+        const conceptDescriptions: aas.ConceptDescription[] = [];
+        for (const submodel of submodels) {
+            for (const referable of traverse(submodel)) {
+                const semanticId = getSemanticId(referable);
+                if (!semanticId) {
+                    continue;
+                }
+
+                try {
+                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
+                        this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
+                        this.endpoint.headers,
+                    );
+
+                    if (isConceptDescription(conceptDescription)) {
+                        conceptDescriptions.push(conceptDescription);
+                    }
+                } catch {
+                    noop();
+                }
+            }
+        }
+
+        return conceptDescriptions;
+    }
+
     private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
         const aasId = encodeBase64Url(shell.id);
-        return await this.http.put(this.resolve(`shells/${aasId}`), new JsonWriterV2().convert(shell));
+        return await this.http.put(this.resolve(`shells/${aasId}`), new JsonWriterV3().convert(shell));
     }
 
     private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         const smId = encodeBase64Url(submodel.id);
         return await this.http.put(
-            this.resolve(`shells/${aasId}/submodels/${smId}/submodel`),
-            new JsonWriterV2().convert(submodel),
+            this.resolve(`shells/${aasId}/submodels/${smId}`),
+            new JsonWriterV3().convert(submodel),
             this.endpoint.headers,
         );
     }
@@ -305,7 +332,8 @@ export class AASApiClientV1 extends AASApiClient {
     private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
         return await this.http.post(
             this.resolve(`submodels?aasIdentifier=${aasId}`),
-            new JsonWriterV2().convert(submodel),
+            new JsonWriterV3().convert(submodel),
+            this.endpoint.headers,
         );
     }
 
@@ -320,8 +348,9 @@ export class AASApiClientV1 extends AASApiClient {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.http.put(
-            this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}`),
-            new JsonWriterV2().convert(submodelElement),
+            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
+            new JsonWriterV3().convert(submodelElement),
+            this.endpoint.headers,
         );
     }
 
@@ -332,8 +361,8 @@ export class AASApiClientV1 extends AASApiClient {
         const smId = encodeBase64Url(submodel.id);
         const path = getIdShortPath(submodelElement);
         return await this.http.post(
-            this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}`),
-            new JsonWriterV2().convert(submodelElement),
+            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
+            new JsonWriterV3().convert(submodelElement),
             this.endpoint.headers,
         );
     }

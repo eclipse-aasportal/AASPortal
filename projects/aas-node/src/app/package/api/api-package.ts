@@ -10,11 +10,11 @@ import { AASDocument, diffAsync, aas } from 'aas-core';
 import { AASPackage } from '../aas-package.js';
 import { AASClient } from '../aas-client.js';
 import { Logger } from '../../logging/logger.js';
-import { AASApiClient } from './aas-api-client.js';
+import { ApiClient } from './api-client.js';
 import { ImageProcessing } from '../../image-processing.js';
 
-export class AASApiPackage extends AASPackage {
-    private readonly client: AASApiClient;
+export class ApiPackage extends AASPackage {
+    private readonly client: ApiClient;
     private readonly id: string;
     private readonly idShort: string;
 
@@ -27,7 +27,7 @@ export class AASApiPackage extends AASPackage {
     public constructor(logger: Logger, client: AASClient, id: string, idShort: string) {
         super(logger);
 
-        this.client = client as AASApiClient;
+        this.client = client as ApiClient;
         this.id = id;
         this.idShort = idShort;
     }

@@ -23,7 +23,7 @@ import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
 import { AASPackage } from '../aas-package.js';
 import { AASClient } from '../aas-client.js';
-import { AASApiPackage } from './aas-api-package.js';
+import { ApiPackage } from './api-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { PagedResult } from '../../types/paged-result.js';
 
@@ -35,7 +35,7 @@ interface PropertyValue {
 export type AASLabel = { id: string; idShort: string };
 
 /** Provides access to an AASX-Server. */
-export abstract class AASApiClient extends AASClient {
+export abstract class ApiClient extends AASClient {
     private reentry = 0;
 
     /**
@@ -100,7 +100,7 @@ export abstract class AASApiClient extends AASClient {
      * @returns A new `AASServerPackage` instance.
      **/
     public override createPackage(...args: string[]): AASPackage {
-        return new AASApiPackage(this.logger, this, args[0], args[1]);
+        return new ApiPackage(this.logger, this, args[0], args[1]);
     }
 
     /**

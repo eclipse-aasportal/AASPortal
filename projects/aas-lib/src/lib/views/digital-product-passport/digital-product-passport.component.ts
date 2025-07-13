@@ -9,7 +9,6 @@
 import { aas, AASDocument, getIdShortPath, getSemanticId, selectSubmodel } from 'aas-core';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
-import { Location } from '@angular/common';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import QRCode from 'qrcode';
@@ -27,10 +26,10 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { CarbonFootprint_0_9, HandoverDocumentation, ZVEINameplate } from '../views';
+import { CarbonFootprint_1_0, HandoverDocumentation, IDTANameplate } from '../views';
 import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
-import { decodeBase64Url, encodeBase64Url } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
@@ -47,7 +46,6 @@ import { StartService } from '../../services/start.service';
 export class DigitalProductPassportComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly route: ActivatedRoute,
-        private readonly location: Location,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
         private readonly store: DigitalProductPassportStore,
@@ -112,7 +110,7 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         return items;
     });
 
-    public readonly totalPCFCO2eq = this.store.totalPCFCO2eq;
+    public readonly totalPcfCO2eq = this.store.totalPcfCO2eq;
 
     public readonly carbonFootprintItems = computed(() => {
         const items: NameValue[] = [];
@@ -213,9 +211,9 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === ZVEINameplate) {
+                if (semanticId === IDTANameplate) {
                     nameplate = submodel;
-                } else if (semanticId === CarbonFootprint_0_9) {
+                } else if (semanticId === CarbonFootprint_1_0) {
                     carbonFootprint = submodel;
                 } else if (semanticId === HandoverDocumentation) {
                     handoverDocumentation = submodel;

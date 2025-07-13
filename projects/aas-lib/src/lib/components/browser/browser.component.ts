@@ -10,7 +10,16 @@ import upperFirst from 'lodash-es/upperFirst';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from '@angular/core';
 
-import { aas, AASDocument, getAbbreviation, getChildren, getConceptDescription, isFile, isReference, isSubmodel } from 'aas-core';
+import {
+    aas,
+    AASDocument,
+    getAbbreviation,
+    getChildren,
+    getConceptDescription,
+    isFile,
+    isReference,
+    isSubmodel,
+} from 'aas-core';
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { getSemanticId, isLangString, referenceToString } from '../../utilities';

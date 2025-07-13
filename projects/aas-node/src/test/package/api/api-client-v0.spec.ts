@@ -10,28 +10,28 @@ import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { aas, selectElement } from 'aas-core';
-import { AASApiClient } from '../../../app/package/aas-api/aas-api-client.js';
+import { ApiClient } from '../../../app/package/api/api-client.js';
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';
 import submodels from '../../assets/test-aas/submodels.js';
 import nameplate from '../../assets/test-aas/nameplate-becher1.js';
 import digitalProductPassport from '../../assets/test-aas/digital-product-passport-becher1.js';
 import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js';
-import { AASApiClientV0 } from '../../../app/package/aas-api/aas-api-client-v0.js';
+import { ApiClientV0 } from '../../../app/package/api/api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
 import { createSpyObj } from 'aas-jest';
 import { HttpClient } from '../../../app/http-client.js';
 
-describe('AASApiClientV0', function () {
+describe('ApiClientV0', function () {
     let logger: jest.Mocked<Logger>;
-    let client: AASApiClient;
+    let client: ApiClient;
     let http: jest.Mocked<HttpClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         http = createSpyObj<HttpClient>(['get', 'getResponse']);
-        client = new AASApiClientV0(logger, http, {
+        client = new ApiClientV0(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
             url: 'http://localhost:1234',

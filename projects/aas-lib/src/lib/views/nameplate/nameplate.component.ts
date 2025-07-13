@@ -60,13 +60,13 @@ export type NameplateItem = {
 };
 
 @Component({
-    selector: 'fhg-digital-nameplate',
-    templateUrl: './digital-nameplate.component.html',
-    styleUrls: ['./digital-nameplate.component.scss'],
+    selector: 'fhg-nameplate',
+    templateUrl: './nameplate.component.html',
+    styleUrls: ['./nameplate.component.scss'],
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, SecuredImageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DigitalNameplateComponent implements OnInit, OnDestroy {
+export class NameplateComponent implements OnInit, OnDestroy {
     public constructor(
         private readonly route: ActivatedRoute,
         private readonly translate: TranslateService,
