@@ -222,26 +222,39 @@ export function changeType(value: unknown, type: DataTypeDefXsd, localId?: strin
  * @returns A string expression that represents the specified value.
  */
 export function convertToString(value: unknown, localeId?: string): string {
-    let s = '';
-    if (value != null) {
-        if (typeof value === 'string') {
-            s = value;
-        } else if (typeof value === 'boolean') {
-            s = value ? 'true' : 'false';
-        } else if (typeof value === 'number') {
-            s = localeId ? value.toLocaleString(localeId) : value.toString();
-        } else if (value instanceof Date) {
-            s = localeId ? value.toLocaleString(localeId, dateTimeFormat) : value.toString();
-        } else if (typeof value === 'bigint') {
-            s = localeId ? value.toLocaleString(localeId) : value.toString();
-        } else if (Array.isArray(value)) {
-            s = `[${getItems(value).join(', ')}]`;
-        } else if (typeof value === 'object') {
-            s = JSON.stringify(value, undefined, 2);
-        }
+    if (value === undefined || value === null) {
+        return '';
     }
 
-    return s;
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    if (typeof value === 'boolean') {
+        return value ? 'true' : 'false';
+    }
+
+    if (typeof value === 'number') {
+        return localeId ? value.toLocaleString(localeId) : value.toString();
+    }
+
+    if (value instanceof Date) {
+        return localeId ? value.toLocaleString(localeId, dateTimeFormat) : value.toString();
+    }
+
+    if (typeof value === 'bigint') {
+        return localeId ? value.toLocaleString(localeId) : value.toString();
+    }
+
+    if (Array.isArray(value)) {
+        return `[${getItems(value).join(', ')}]`;
+    }
+
+    if (typeof value === 'object') {
+        return JSON.stringify(value, undefined, 2);
+    }
+
+    return '';
 
     function getItems(array: unknown[]): string[] {
         return array.map(item => convertToString(item, localeId));
@@ -303,7 +316,11 @@ export function convertFromString(
  * @param localeId The locale identifier.
  * @returns A number.
  */
-export function parseNumber(s: string, localeId?: string): number {
+export function parseNumber(s: string | undefined, localeId?: string): number {
+    if (!s) {
+        return NaN;
+    }
+
     let decimalSeparator: string;
     let groupSeparator: string;
     if (localeId) {
@@ -341,56 +358,58 @@ export function parseNumber(s: string, localeId?: string): number {
  * @param s The string expression that represents a date and time.
  * @param localeId The locale identifier.
  */
-export function parseDate(s: string, localeId?: string): Date | undefined {
+export function parseDate(s: string | undefined, localeId?: string): Date | undefined {
     const format = new Intl.DateTimeFormat(localeId, dateTimeFormat);
     const now = new Date();
     const parts = format.formatToParts(now);
     const tuple = getFormatInfo(parts);
 
+    s = s?.trim();
+    if (!s) {
+        return undefined;
+    }
+
     let date: Date | undefined;
-    if (s) {
-        s = s.trim();
-        if (localeId) {
-            let dateItems: string[] | undefined;
-            let timeTuple: { items: string[]; timePeriod?: string } | undefined;
-            const dateTime = splitDateTime(s);
-            if (dateTime.length === 1) {
-                if (s.indexOf(tuple.dateDelimiter) >= 0) {
-                    dateItems = s.split(tuple.dateDelimiter);
-                    const day = getDay(dateItems);
-                    date = day
-                        ? new Date(getYear(dateItems), getMonth(dateItems), getDay(dateItems))
-                        : new Date(getYear(dateItems), getMonth(dateItems));
-                } else {
-                    timeTuple = splitTime(s);
-                    date = new Date(
-                        now.getFullYear(),
-                        now.getMonth(),
-                        now.getDate(),
-                        getHours(timeTuple?.items, timeTuple?.timePeriod),
-                        getMinutes(timeTuple?.items),
-                        getSeconds(timeTuple?.items),
-                    );
-                }
-            } else if (dateTime.length === 2) {
-                dateItems = dateTime[0].split(tuple.dateDelimiter);
-                timeTuple = splitTime(dateTime[1]);
+    if (localeId) {
+        let dateItems: string[] | undefined;
+        let timeTuple: { items: string[]; timePeriod?: string } | undefined;
+        const dateTime = splitDateTime(s);
+        if (dateTime.length === 1) {
+            if (s.indexOf(tuple.dateDelimiter) >= 0) {
+                dateItems = s.split(tuple.dateDelimiter);
+                const day = getDay(dateItems);
+                date = day
+                    ? new Date(getYear(dateItems), getMonth(dateItems), getDay(dateItems))
+                    : new Date(getYear(dateItems), getMonth(dateItems));
+            } else {
+                timeTuple = splitTime(s);
                 date = new Date(
-                    getYear(dateItems),
-                    getMonth(dateItems),
-                    getDay(dateItems),
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
                     getHours(timeTuple?.items, timeTuple?.timePeriod),
                     getMinutes(timeTuple?.items),
                     getSeconds(timeTuple?.items),
                 );
-            } else {
-                date = new Date(0);
             }
+        } else if (dateTime.length === 2) {
+            dateItems = dateTime[0].split(tuple.dateDelimiter);
+            timeTuple = splitTime(dateTime[1]);
+            date = new Date(
+                getYear(dateItems),
+                getMonth(dateItems),
+                getDay(dateItems),
+                getHours(timeTuple?.items, timeTuple?.timePeriod),
+                getMinutes(timeTuple?.items),
+                getSeconds(timeTuple?.items),
+            );
         } else {
-            date = new Date(s);
-            if (date.toString() === 'Invalid Date') {
-                date = parseDate(s, 'en');
-            }
+            date = new Date(0);
+        }
+    } else {
+        date = new Date(s);
+        if (date.toString() === 'Invalid Date') {
+            date = parseDate(s, 'en');
         }
     }
 

@@ -16,13 +16,14 @@ import {
     getAbbreviation,
     getChildren,
     getConceptDescription,
+    getSemanticId,
     isFile,
     isReference,
     isSubmodel,
 } from 'aas-core';
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { getSemanticId, isLangString, referenceToString } from '../../utilities';
+import { isLangString, referenceToString } from '../../utilities';
 
 const collectionNames: Record<string, string> = {
     SubmodelElementCollection: 'value',

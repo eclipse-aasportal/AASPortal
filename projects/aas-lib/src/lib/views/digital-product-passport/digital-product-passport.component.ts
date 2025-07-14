@@ -11,13 +11,11 @@ import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
-import QRCode from 'qrcode';
 import {
     ChangeDetectionStrategy,
     Component,
     computed,
     effect,
-    ElementRef,
     Inject,
     OnDestroy,
     OnInit,
@@ -35,12 +33,14 @@ import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { CarbonFootprint } from "../carbon-footprint/carbon-footprint";
 
 @Component({
     selector: 'fhg-device-passport-portal',
     templateUrl: './digital-product-passport.component.html',
     styleUrl: './digital-product-passport.component.scss',
-    imports: [TranslateModule, SecuredImageComponent, NgbAccordionModule, NgbPaginationModule],
+    imports: [TranslateModule, SecuredImageComponent, NgbAccordionModule, NgbPaginationModule, ThumbnailQRCode, CarbonFootprint],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalProductPassportComponent implements OnInit, OnDestroy {
@@ -59,21 +59,13 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
                 this.toolbar.set(template);
             }
         });
-
-        effect(() => {
-            const qrCode = this.qrCode();
-            const url = this.window.location.toString();
-            if (qrCode) {
-                QRCode.toCanvas(qrCode.nativeElement, url);
-            }
-        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('dppToolbar');
 
-    public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
-
     public readonly viewData = this.store.viewData$.asReadonly();
+
+    public readonly document = computed(() => this.store.viewData$()?.document);
 
     public readonly hazardStatement = computed(() => {
         const nameplate = this.store.viewData$()?.nameplate;
@@ -88,15 +80,6 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         this.getUrl(this.store.getNameplateFile('AssetSpecificProperties.DppHazardSymbol')),
     );
 
-    public readonly thumbnail = computed(() => {
-        const document = this.store.viewData$()?.document;
-        if (document === undefined) {
-            return '';
-        }
-
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
-    });
-
     public readonly mainData = this.store.mainData;
 
     public readonly nameplateItems = computed(() => {
@@ -109,32 +92,6 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
 
         return items;
     });
-
-    public readonly totalPcfCO2eq = this.store.totalPcfCO2eq;
-
-    public readonly carbonFootprintItems = computed(() => {
-        const items: NameValue[] = [];
-        const item = this.store.carbonFootprintItems()[this.carbonFootprintIndex() - 1] as unknown as Record<
-            string,
-            unknown
-        >;
-        for (const name in item) {
-            const value = item[name];
-            if (typeof value === 'string') {
-                items.push({ name: 'DigitalProductPassport.' + name, value });
-            } else if (Array.isArray(value)) {
-                for (const tuple of value) {
-                    items.push({ name: `DigitalProductPassport.${name}${tuple[0]}`, value: tuple[1] });
-                }
-            }
-        }
-
-        return items;
-    });
-
-    public readonly carbonFootprintIndex = signal(1);
-
-    public readonly carbonFootprintSize = computed(() => this.store.carbonFootprintItems().length);
 
     public readonly documentationData = this.store.documentationData;
 
@@ -191,13 +148,6 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         const token = this.auth.token();
         this.window.open(url + '?access_token=' + token);
         $event.stopPropagation();
-    }
-
-    private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument(id, endpoint).subscribe({
-            next: document => this.initialize([document]),
-            error: error => console.debug(error),
-        });
     }
 
     private initialize(documents: AASDocument[]): void {

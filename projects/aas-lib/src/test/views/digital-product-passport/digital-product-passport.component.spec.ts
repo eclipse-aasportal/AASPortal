@@ -20,11 +20,12 @@ import { WINDOW } from '../../../lib/services/window.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
-
-import sample from '../../assets/dpp-sample.json';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
+import { ThumbnailQRCode } from 'projects/aas-lib/src/lib/views/thumbnail-qrcode/thumbnail-qrcode';
+
+import sample from '../../assets/dpp-sample.json';
 
 @Component({
     selector: 'fhg-img',
@@ -38,6 +39,16 @@ export class TestSecuredImageComponent {
     public readonly class = input<string | undefined>();
     public readonly width = input<number | undefined>();
     public readonly height = input<number | undefined>();
+}
+
+@Component({
+    selector: 'fhg-thumbnail-qrcode',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestThumbnailQRCode {
+    public readonly document = input<AASDocument>();
 }
 
 xdescribe('DigitalProductPassportComponent', () => {
@@ -104,8 +115,8 @@ xdescribe('DigitalProductPassportComponent', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(DigitalProductPassportComponent, {
-            remove: { imports: [SecuredImageComponent] },
-            add: { imports: [TestSecuredImageComponent] },
+            remove: { imports: [SecuredImageComponent, ThumbnailQRCode] },
+            add: { imports: [TestSecuredImageComponent, TestThumbnailQRCode] },
         });
     });
 
@@ -132,13 +143,6 @@ xdescribe('DigitalProductPassportComponent', () => {
         expect(component.hazardStatement()).toEqual('Choking Hazard!');
     });
 
-    it('thumbnail', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        expect(component.thumbnail()).toBeTruthy();
-    });
-
     it('hazardSymbol', () => {
         const fixture = TestBed.createComponent(DigitalProductPassportComponent);
         const component = fixture.componentInstance;
@@ -151,25 +155,5 @@ xdescribe('DigitalProductPassportComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component.nameplateItems().length).toEqual(15);
-    });
-
-    it('totalPCFCO2eq', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        expect(component.totalPcfCO2eq()).toBeCloseTo(1.23 + 4.56);
-    });
-
-    it('carbon footprint items', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        expect(component.carbonFootprintSize()).toEqual(2);
-        expect(component.carbonFootprintItems().length).toEqual(4);
-        expect(component.carbonFootprintIndex()).toEqual(1);
-        expect(component.carbonFootprintItems()[0].value).toEqual('ProductCarbonFootprint_CradleToGate');
-
-        component.carbonFootprintIndex.set(2);
-        expect(component.carbonFootprintItems()[0].value).toEqual('ProductCarbonFootprint_CooperativeAssembly');
     });
 });

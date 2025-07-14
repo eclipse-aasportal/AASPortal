@@ -18,10 +18,9 @@ import {
     isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
-    isSubmodelElementList,
 } from 'aas-core';
 
-import { basename, getDisplayName } from '../../utilities';
+import { basename } from '../../utilities';
 
 type ViewData = {
     document: AASDocument;
@@ -54,15 +53,6 @@ export type NameplateItem = {
     CityTown: string;
     StateCounty: string;
     TimeZone: string;
-};
-
-export type CarbonFootprintItem = {
-    value: number;
-    Name: string;
-    PcfCO2eq: string;
-    PcfLifeCyclePhase: [string, string][];
-    PcfCalculationMethod: string;
-    PcfGoodsAddressHandover: string;
 };
 
 export type DocumentationItem = {
@@ -100,33 +90,6 @@ const emptyNameplate: NameplateItem = {
     TimeZone: '-',
 };
 
-const emptyCarbonFootprintItem: CarbonFootprintItem = {
-    value: 0,
-    Name: '-',
-    PcfCO2eq: '-',
-    PcfLifeCyclePhase: [],
-    PcfCalculationMethod: '-',
-    PcfGoodsAddressHandover: '-',
-};
-
-const PCFLifeCyclePhaseIds: [string, string][] = [
-    ['0173-1#07-ABU208#001', '1'],
-    ['0173-1#07-ABU209#001', '2'],
-    ['0173-1#07-ABU210#001', '3'],
-    ['0173-1#07-ABU211#001', '4'],
-    ['0173-1#07-ABU212#001', '5'],
-    ['0173-1#07-ABV498#001', '6'],
-    ['0173-1#07-ABV497#001', '7'],
-    ['0173-1#07-ABV499#001', '8'],
-    ['0173-1#07-ABV500#001', '9'],
-    ['0173-1#07-ABV501#001', '10'],
-    ['0173-1#07-ABV502#001', '11'],
-    ['0173-1#07-ABU213#001', '12'],
-    ['0173-1#07-ABV503#001', '13'],
-    ['0173-1#07-ABV504#001', '14'],
-    ['0173-1#07-ABU214#001', '15'],
-    ['0173-1#07-ABZ789#001', '16'],
-];
 
 @Injectable({ providedIn: 'root' })
 export class DigitalProductPassportStore {
@@ -177,43 +140,6 @@ export class DigitalProductPassportStore {
             StateCounty: this.getPropertyValue(nameplate, 'AddressInformation.StateCounty'),
             TimeZone: this.getPropertyValue(nameplate, 'AddressInformation.TimeZone'),
         };
-    });
-
-    public readonly carbonFootprintItems = computed(() => {
-        const items: CarbonFootprintItem[] = [];
-        const carbonFootprint = this.viewData$()?.carbonFootprint;
-        if (carbonFootprint !== undefined && carbonFootprint.submodelElements) {
-            for (const sme of carbonFootprint.submodelElements) {
-                if (isSubmodelElementList(sme)) {
-                    if (!sme.value) {
-                        continue;
-                    }
-
-                    for (const item of sme.value) {
-                        if (isSubmodelElementCollection(item)) {
-                            items.push(this.createCarbonFootprintItem(carbonFootprint, item));
-                        }
-                    }
-                }
-            }
-        }
-
-        if (items.length === 0) {
-            items.push(emptyCarbonFootprintItem);
-        }
-
-        return items;
-    });
-
-    public readonly totalPcfCO2eq = computed(() => {
-        return convertToString(
-            this.carbonFootprintItems()
-                .map(item => item.value)
-                .reduce((accumulator, value) => {
-                    return (accumulator += value);
-                }, 0),
-            this.translate.currentLang,
-        );
     });
 
     public readonly documentationData = computed(() => {
@@ -271,79 +197,6 @@ export class DigitalProductPassportStore {
         return undefined;
     }
 
-    private getPropertyValueAsNumber(submodel: aas.Submodel, idShortPath: string): number {
-        const referable = getReferable(submodel, idShortPath);
-        if (isProperty(referable)) {
-            if (referable.valueType === 'xs:double') {
-                return Number(referable.value);
-            }
-        }
-
-        return NaN;
-    }
-
-    private getPropertyValueId(submodel: aas.Submodel, idShortPath: string): string {
-        const referable = getReferable(submodel, idShortPath);
-        if (isProperty(referable)) {
-            if (referable.valueId) {
-                return referable.valueId.keys.at(0)?.value ?? '-';
-            }
-        }
-
-        return '-';
-    }
-
-    private createCarbonFootprintItem(
-        carbonFootprint: aas.Submodel,
-        smc: aas.SubmodelElementCollection,
-    ): CarbonFootprintItem {
-        const value = this.getPropertyValueAsNumber(carbonFootprint, `${smc.idShort}.PcfCO2eq`);
-        const valueId = this.getPropertyValueId(carbonFootprint, `${smc.idShort}.PcfCO2eq`);
-        const calculationMethod = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfCalculationMethods`);
-        const publicationDate = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PublicationDate`);
-        const street = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.Street`);
-        const houseNumber = this.getPropertyValue(
-            carbonFootprint,
-            `${smc.idShort}.PcfGoodsAddressHandover.HouseNumber`,
-        );
-
-        const zipCode = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.ZipCode`);
-        const cityTown = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.CityTown`);
-        const country = this.getPropertyValue(carbonFootprint, `${smc.idShort}.PcfGoodsAddressHandover.Country`);
-        const item: CarbonFootprintItem = {
-            value,
-            Name: this.getDisplayName(smc),
-            PcfCO2eq: `${convertToString(value, this.translate.currentLang)} kg, ${valueId}`,
-            PcfLifeCyclePhase: this.getArray(smc, PCFLifeCyclePhaseIds),
-            PcfCalculationMethod: `${calculationMethod}, ${publicationDate}`,
-            PcfGoodsAddressHandover: `${street} ${houseNumber}, ${country}-${zipCode} ${cityTown}`,
-        };
-
-        return item;
-    }
-
-    private getArray(smc: aas.SubmodelElementCollection, valueIds: [string, string][]): [string, string][] {
-        const values: [string, string][] = [];
-        if (!smc.value) {
-            return values;
-        }
-
-        const map = new Map(valueIds);
-        for (const sme of smc.value) {
-            if (isProperty(sme) && sme.value) {
-                const valueId = sme.valueId?.keys.at(0)?.value;
-                if (valueId) {
-                    const index = map.get(valueId);
-                    if (index) {
-                        values.push([index, sme.value]);
-                    }
-                }
-            }
-        }
-
-        return values;
-    }
-
     private browseForDocumentation(
         elements: aas.SubmodelElement[],
         items: DocumentationItem[],
@@ -364,9 +217,5 @@ export class DigitalProductPassportStore {
                 });
             }
         }
-    }
-
-    private getDisplayName(element: aas.SubmodelElement): string {
-        return getLocaleValue(element.displayName, this.translate.currentLang) ?? element.idShort;
     }
 }

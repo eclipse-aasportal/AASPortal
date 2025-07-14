@@ -34,3 +34,9 @@ export enum ViewMode {
     List = 'list',
     Tree = 'tree',
 }
+
+export interface NameValue {
+    name: string;
+    value: string;
+    url?: string;
+}

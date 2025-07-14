@@ -19,7 +19,14 @@ import {
     getPreferredName,
     AASDocument,
     getIdShortPath,
+    isSubmodelElementCollection,
+    getReferable,
+    isProperty,
+    isSubmodel,
+    isMultiLanguageProperty,
 } from 'aas-core';
+
+import { NameValue } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -184,6 +191,51 @@ export function convertBlobToBase64Async(blob: Blob): Promise<string> {
 }
 
 /**
+ *
+ * @param env
+ * @param context
+ * @param path The idShort path if context is of type `Submodel`
+ */
+export function createNameValue(
+    env: aas.Environment,
+    context: aas.Submodel | aas.SubmodelElementCollection | aas.SubmodelElementList,
+    path: string,
+    currentLang: string,
+): NameValue {
+    let name = '';
+    let value = '';
+    let referable: aas.Referable | undefined;
+    if (isSubmodel(context)) {
+        referable = getReferable(context, path);
+    } else {
+        referable = context.value?.find(item => item.idShort === path);
+    }
+
+    if (!referable) {
+        return { name, value };
+    }
+
+    name = getDisplayName(referable, env, currentLang);
+
+    if (isProperty(referable)) {
+        switch (referable.valueType) {
+            case 'xs:double':
+            case 'xs:integer':
+            case 'xs:decimal':
+                value = convertToString(referable.value, currentLang);
+                break;
+            default:
+                value = referable.value ?? '-';
+                break;
+        }
+    } else if (isMultiLanguageProperty(referable)) {
+        value = getLocaleValue(referable.value, currentLang) ?? '-';
+    }
+
+    return { name, value };
+}
+
+/**
  * Determines the display name for the specified Referable.
  * @param referable The current Referable.
  * @param env The Environment of the Referable.
@@ -209,78 +261,73 @@ export function getDisplayName(referable: aas.Referable, env?: aas.Environment |
     }
 
     return toDisplayName(referable.idShort);
-}
 
-/**
- * Converts a camel case name to a display name.
- * @param name The current name.
- * @returns The display name.
- */
-export function toDisplayName(name: string): string {
-    const LOWER = 0;
-    const UPPER = 1;
-    const words: string[] = [];
-    let currentCase = LOWER;
-    let word = '';
-    for (let i = 0, n = name.length; i < n; i++) {
-        const c = name.charAt(i);
-        const charCase = getCharCase(c);
-        if (c === '_') {
-            if (word.length > 0) {
-                words.push(word);
-                word = '';
+    function toDisplayName(name: string): string {
+        const LOWER = 0;
+        const UPPER = 1;
+        const words: string[] = [];
+        let currentCase = LOWER;
+        let word = '';
+        for (let i = 0, n = name.length; i < n; i++) {
+            const c = name.charAt(i);
+            const charCase = getCharCase(c);
+            if (c === '_') {
+                if (word.length > 0) {
+                    words.push(word);
+                    word = '';
+                }
+
+                continue;
             }
 
-            continue;
-        }
-
-        if (i === 0) {
-            currentCase = charCase;
-            word += c;
-        } else {
-            if (currentCase === charCase) {
-                if (currentCase === UPPER && i < n - 1) {
-                    const next = name.charAt(i + 1);
-                    if (getCharCase(next) === LOWER) {
+            if (i === 0) {
+                currentCase = charCase;
+                word += c;
+            } else {
+                if (currentCase === charCase) {
+                    if (currentCase === UPPER && i < n - 1) {
+                        const next = name.charAt(i + 1);
+                        if (getCharCase(next) === LOWER) {
+                            words.push(word);
+                            word = c;
+                        } else {
+                            word += c;
+                        }
+                    } else {
+                        word += c;
+                    }
+                } else {
+                    if (charCase === UPPER) {
                         words.push(word);
                         word = c;
                     } else {
                         word += c;
                     }
-                } else {
-                    word += c;
+
+                    currentCase = charCase;
                 }
-            } else {
-                if (charCase === UPPER) {
-                    words.push(word);
-                    word = c;
-                } else {
-                    word += c;
-                }
-
-                currentCase = charCase;
-            }
-        }
-    }
-
-    if (word.length > 0) {
-        words.push(word);
-    }
-
-    return words.map((word, i) => (i > 0 && hasAnyLowerCase(word) ? word.toLowerCase() : word)).join(' ');
-
-    function getCharCase(c: string): number {
-        return c === c.toUpperCase() ? UPPER : LOWER;
-    }
-
-    function hasAnyLowerCase(s: string): boolean {
-        for (let i = 0, n = s.length; i < n; i++) {
-            if (s.charAt(i) === s.charAt(i).toLowerCase()) {
-                return true;
             }
         }
 
-        return false;
+        if (word.length > 0) {
+            words.push(word);
+        }
+
+        return words.map((word, i) => (i > 0 && hasAnyLowerCase(word) ? word.toLowerCase() : word)).join(' ');
+
+        function getCharCase(c: string): number {
+            return c === c.toUpperCase() ? UPPER : LOWER;
+        }
+
+        function hasAnyLowerCase(s: string): boolean {
+            for (let i = 0, n = s.length; i < n; i++) {
+                if (s.charAt(i) === s.charAt(i).toLowerCase()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
 
@@ -328,13 +375,4 @@ export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.
     const name = encodeBase64Url(document.endpoint);
     const id = encodeBase64Url(document.id);
     return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
-}
-
-/**
- * Gets the semantic identifier of the specified AAS element.
- * @param value The AAS element.
- * @returns The semantic identifier or `undefined`.
- */
-export function getSemanticId(value: aas.Referable): string | undefined {
-    return (value as aas.HasSemantics).semanticId?.keys.at(0)?.value;
 }

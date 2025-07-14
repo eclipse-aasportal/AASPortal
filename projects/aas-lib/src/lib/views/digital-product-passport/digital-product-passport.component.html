@@ -19,14 +19,7 @@
             <span class="fw-medium" translate>DigitalProductPassport.SERIAL_NUMBER</span>
             <span class="fw-medium">:&nbsp;</span><span>{{mainData().serialNumber}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-around align-items-center mb-2">
-            <div class="me-1">
-                <fhg-img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height"></fhg-img>
-            </div>
-            <div class="ms-1">
-                <canvas #qrCode></canvas>
-            </div>
-        </div>
+        <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
         <div class="text-center fs-3 fw-bold mb-2">{{hazardStatement()}}</div>
         <div class="d-flex flex-row justify-content-center">
             <fhg-img class="img-fluid" [src]="hazardSymbol()" alt="DPP hazard symbol" [width]="96"></fhg-img>
@@ -54,32 +47,7 @@
                 </div>
             </div>
             <div ngbAccordionItem>
-                <h2 ngbAccordionHeader>
-                    <button ngbAccordionButton>
-                        <span translate>DigitalProductPassport.CARBON_FOOTPRINT_DATA</span>
-                        <span class="ms-2 fs-4 fw-bold">{{totalPcfCO2eq()}}&nbsp;kg</span>
-                        <span class="ms-2 fs-6 fw-bold" translate>DigitalProductPassport.TOTAL_PSFCO2EQ</span>
-                    </button>
-                </h2>
-                <div ngbAccordionCollapse>
-                    <div ngbAccordionBody>
-                        <ng-template>
-                            <ngb-pagination [collectionSize]="carbonFootprintSize()" [(page)]="carbonFootprintIndex"
-                                [pageSize]="1" [directionLinks]="carbonFootprintSize() > 5" />
-
-                            <table class="table table-sm table-striped table-borderless">
-                                <tbody>
-                                    @for (item of carbonFootprintItems(); track item.name) {
-                                    <tr>
-                                        <td class="text-nowrap align-middle">{{item.name}}</td>
-                                        <td>{{item.value}}</td>
-                                    </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </ng-template>
-                    </div>
-                </div>
+                <fhg-carbon-footprint [document]="document()"></fhg-carbon-footprint>
             </div>
             <div ngbAccordionItem>
                 <h2 ngbAccordionHeader>
