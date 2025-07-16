@@ -6,51 +6,31 @@
  *
  *****************************************************************************/
 
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    Inject,
-    input,
-    Signal,
-    signal,
-    untracked,
-} from '@angular/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, input, Signal, signal, untracked } from '@angular/core';
+
 import {
     aas,
     AASDocument,
-    convertToString,
     getChildren,
-    getLocaleValue,
     getReferable,
     getSemanticId,
     getUnit,
     isFile,
-    isMultiLanguageProperty,
-    isProperty,
     isSubmodelElementCollection,
-    isSubmodelElementList,
-    parseDate,
     parseNumber,
 } from 'aas-core';
 
 import { CarbonFootprint_1_0 } from '../views';
-import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
-import { DataSheetItem } from '../../types';
-import { WINDOW, WindowService } from '../../services/window.service';
-
-export type CarbonFootprintItem = {
-    name: string;
-    items: DataSheetItem[];
-};
+import { DataSheetData, DataSheetFormat, DataSheetItem, DataSheetItemPath } from '../../types';
+import { DataSheet } from '../../components/data-sheet/data-sheet';
 
 @Component({
     selector: 'fhg-carbon-footprint',
-    imports: [TranslateModule, NgbAccordionModule, NgbPaginationModule],
+    imports: [TranslateModule, NgbAccordionModule, NgbPaginationModule, DataSheet],
     templateUrl: './carbon-footprint.html',
     styleUrl: './carbon-footprint.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,10 +39,7 @@ export class CarbonFootprint {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
 
-    public constructor(
-        translate: TranslateService,
-        @Inject(WINDOW) private readonly window: WindowService,
-    ) {
+    public constructor(translate: TranslateService) {
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
     }
@@ -113,7 +90,7 @@ export class CarbonFootprint {
 
     public readonly carbonFootprintItems = computed(() => {
         const submodel = this.submodel();
-        const items: CarbonFootprintItem[] = [];
+        const items: DataSheetData[] = [];
         if (!submodel) {
             return items;
         }
@@ -140,19 +117,14 @@ export class CarbonFootprint {
 
     public readonly carbonFootprintSize = computed(() => this.carbonFootprintItems().length);
 
-    public open($event: MouseEvent, url: string) {
-        this.window.open(url);
-        $event.stopPropagation();
-    }
-
     public isArray(value: unknown): boolean {
         return Array.isArray(value);
     }
 
-    private createCarbonFootprint(smc: aas.SubmodelElementCollection): CarbonFootprintItem {
+    private createCarbonFootprint(smc: aas.SubmodelElementCollection): DataSheetData {
         const env = this.document()!.content!;
         const currentLang = this.currentLang();
-        const carbonFootprint: CarbonFootprintItem = {
+        const carbonFootprint: DataSheetData = {
             name: getDisplayName(smc, env, currentLang),
             items: this.createDataSheet(smc, env, [
                 'PcfCO2eq',
@@ -165,45 +137,13 @@ export class CarbonFootprint {
                 'ExplanatoryStatement',
                 {
                     idShort: 'GoodsHandoverAddress',
-                    format: '{0} {1}, {2}-{3} {4}',
-                    items: ['Street', 'HouseNumber', 'Country', 'ZipCode', 'CityTown'],
+                    format: {
+                        format: '{0} {1}, {2}-{3} {4}',
+                        items: ['Street', 'HouseNumber', 'Country', 'ZipCode', 'CityTown'],
+                    },
                 },
             ]),
         };
-
-        // const goodsHandoverAddress = getReferable<aas.SubmodelElementCollection>(smc, 'GoodsHandoverAddress');
-        // if (goodsHandoverAddress) {
-        //     const street = getLocaleValue(
-        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'Street')?.value,
-        //         currentLang,
-        //     );
-
-        //     const houseNumber = getLocaleValue(
-        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'HouseNumber')?.value,
-        //         currentLang,
-        //     );
-
-        //     const zipCode = getLocaleValue(
-        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'ZipCode')?.value,
-        //         currentLang,
-        //     );
-
-        //     const cityTown = getLocaleValue(
-        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'CityTown')?.value,
-        //         currentLang,
-        //     );
-
-        //     const country = getLocaleValue(
-        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'Country')?.value,
-        //         currentLang,
-        //     );
-
-        //     carbonFootprint.items.push({
-        //         idShort: goodsHandoverAddress.idShort,
-        //         displayName: getDisplayName(goodsHandoverAddress, env, currentLang),
-        //         value: `${street} ${houseNumber}, ${country}-${zipCode} ${cityTown}`,
-        //     });
-        // }
 
         return carbonFootprint;
     }
@@ -211,44 +151,52 @@ export class CarbonFootprint {
     private createDataSheet(
         sm: aas.SubmodelElement | aas.Submodel,
         env: aas.Environment,
-        options?: (string | { idShort: string; format: string; items: string[] })[],
+        options?: DataSheetItemPath[],
     ): DataSheetItem[] {
-        const lang = untracked(this.currentLang);
         const items: DataSheetItem[] = [];
-        const document = this.document()!;
-        const submodel = this.submodel()!;
         if (options) {
-            for (const item of options) {
-                let referable: aas.Referable | undefined;
-                if (typeof item === 'string') {
-                    referable = getReferable(sm, item);
+            for (const option of options) {
+                let item: DataSheetItem | undefined;
+                if (typeof option === 'string') {
+                    item = this.createItem(getReferable(sm, option), env);
                 } else {
-                    referable = getReferable(sm, item.idShort);
+                    item = this.createItem(getReferable(sm, option.idShort), env, option.format);
                 }
 
-                if (referable) {
-                    a(referable);
+                if (item) {
+                    items.push(item);
                 }
             }
         } else {
             for (const referable of getChildren(sm)) {
-                a(referable);
+                const item = this.createItem(referable, env);
+                if (item) {
+                    items.push(item);
+                }
             }
         }
 
         return items;
-
-        function a(referable: aas.Referable): void {
-            let item: DataSheetItem | undefined;
-            if (isFile(referable)) {
-                item = createDataSheetItem(referable, env, lang, getUrl(document, submodel, referable));
-            } else {
-                item = createDataSheetItem(referable, env, lang);
-            }
-
-            if (item) {
-                items.push(item);
-            }
-        }
     }
+
+    private createItem(
+        referable: aas.Referable | undefined,
+        env: aas.Environment | undefined,
+        format?: DataSheetFormat,
+    ): DataSheetItem | undefined {
+        if (!referable) {
+            return undefined;
+        }
+
+        const lang = untracked(this.currentLang);
+        if (isFile(referable)) {
+            return createDataSheetItem(referable, env, lang, { getUrl: this.getUrl });
+        }
+
+        return createDataSheetItem(referable, env, lang, { format });
+    }
+
+    private readonly getUrl = (file: aas.File) => {
+        return getUrl(this.document()!, this.submodel()!, file);
+    };
 }

@@ -15,7 +15,6 @@ import {
     Component,
     computed,
     effect,
-    ElementRef,
     Inject,
     OnDestroy,
     OnInit,
@@ -42,7 +41,6 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
 import { basename, decodeBase64Url, encodeBase64Url, getDisplayName, getUrl } from '../../utilities';
-import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { FHGNameplate, HSUNameplate, IDTANameplate, ZVEINameplate } from '../views';

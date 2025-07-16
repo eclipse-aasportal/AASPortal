@@ -24,7 +24,7 @@ import { SecuredImageComponent } from '../../components/secured-image/secured-im
 
 /**
  * Displays a thumbnail of the current Asset Administration Shell
- * and a QR code containing the URL of the current page. 
+ * and a QR code containing the URL of the current page.
  */
 @Component({
     selector: 'fhg-thumbnail-qrcode',

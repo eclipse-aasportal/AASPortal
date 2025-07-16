@@ -22,7 +22,6 @@ import {
     isSubmodelElementCollection,
     getReferable,
     isProperty,
-    isSubmodel,
     isMultiLanguageProperty,
     getIEC61360Content,
     toLocale,
@@ -30,7 +29,7 @@ import {
     isSubmodelElementList,
 } from 'aas-core';
 
-import { DataSheetItem } from './types';
+import { DataSheetFormat, DataSheetItem } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -279,9 +278,9 @@ export function createDataSheetItem(
     element: aas.SubmodelElement,
     env: aas.Environment | undefined,
     lang: string | undefined,
-    url?: string,
+    options?: { format?: DataSheetFormat; getUrl?: (file: aas.File) => string },
 ): DataSheetItem | undefined {
-    let value = getValue(element);
+    let value = getValue(element, options);
     if (!value) {
         return undefined;
     }
@@ -328,13 +327,12 @@ export function createDataSheetItem(
         item.description = description;
     }
 
-    if (url) {
-        item.url = url;
-    }
-
     return item;
 
-    function getValue(element: aas.SubmodelElement): string | string[] | undefined {
+    function getValue(
+        element: aas.Referable,
+        options?: { format?: DataSheetFormat; getUrl?: (file: aas.File) => string },
+    ): string | string[] | undefined {
         if (isProperty(element)) {
             return lang ? toLocale(element.value, element.valueType, lang) : element.value;
         }
@@ -344,12 +342,20 @@ export function createDataSheetItem(
         }
 
         if (isFile(element)) {
+            if (options?.getUrl) {
+                item.url = options.getUrl(element);
+            }
+
             return element.value;
         }
 
-        if (isSubmodelElementList(element)) {
+        if (isSubmodelElementList(element) || isSubmodelElementCollection(element)) {
             if (!element.value) {
                 return undefined;
+            }
+
+            if (options?.format) {
+                return formatValue(element, options.format);
             }
 
             const values: string[] = [];
@@ -365,10 +371,28 @@ export function createDataSheetItem(
                     values.push(v.join('; '));
                 }
             }
-            return values
+
+            return values;
         }
 
         return undefined;
+
+        function formatValue(
+            sm: aas.SubmodelElementList | aas.SubmodelElementCollection,
+            format: DataSheetFormat,
+        ): string {
+            return stringFormat(
+                format.format,
+                format.items.map(item => {
+                    const referable = getReferable(sm, item);
+                    if (!referable) {
+                        return '-';
+                    }
+
+                    return getValue(referable);
+                }),
+            );
+        }
     }
 }
 

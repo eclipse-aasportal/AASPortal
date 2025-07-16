@@ -9,12 +9,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'fhg-carbon-footprint',
-  imports: [],
-  templateUrl: './carbon-footprint.view.html',
-  styleUrl: './carbon-footprint.view.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'fhg-carbon-footprint',
+    imports: [],
+    templateUrl: './carbon-footprint.view.html',
+    styleUrl: './carbon-footprint.view.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarbonFootprintView {
-
-}
+export class CarbonFootprintView {}

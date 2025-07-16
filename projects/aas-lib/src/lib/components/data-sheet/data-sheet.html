@@ -1,0 +1,33 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<table class="table table-sm table-striped table-borderless">
+    <caption class="caption-top">{{caption()}}</caption>
+    <tbody>
+        @for (item of items(); track item.idShort) {
+        <tr>
+            <td class="text-nowrap align-middle">{{item.displayName}}</td>
+            @if (item.url) {
+            <td>
+                <a [href]="item.url">{{item.value}}</a>
+            </td>
+            } @else if (isArray(item.value)) {
+            <td>
+                <ul>
+                    @for (value of item.value; track value) {
+                    <li>{{value}}</li>
+                    }
+                </ul>
+            </td>
+            } @else {
+            <td>{{item.value}}</td>
+            }
+        </tr>
+        }
+    </tbody>
+</table>

@@ -19,7 +19,6 @@ import {
     Inject,
     OnDestroy,
     OnInit,
-    signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
@@ -27,20 +26,27 @@ import {
 import { CarbonFootprint_1_0, HandoverDocumentation, IDTANameplate } from '../views';
 import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
-import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { CarbonFootprint } from "../carbon-footprint/carbon-footprint";
+import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 
 @Component({
     selector: 'fhg-device-passport-portal',
     templateUrl: './digital-product-passport.component.html',
     styleUrl: './digital-product-passport.component.scss',
-    imports: [TranslateModule, SecuredImageComponent, NgbAccordionModule, NgbPaginationModule, ThumbnailQRCode, CarbonFootprint],
+    imports: [
+        TranslateModule,
+        SecuredImageComponent,
+        NgbAccordionModule,
+        NgbPaginationModule,
+        ThumbnailQRCode,
+        CarbonFootprint,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalProductPassportComponent implements OnInit, OnDestroy {

@@ -20,32 +20,7 @@
                 <ng-template>
                     <ngb-pagination [collectionSize]="carbonFootprintSize()" [(page)]="carbonFootprintIndex"
                         [pageSize]="1" [directionLinks]="carbonFootprintSize() > 5" />
-                    <table class="table table-sm table-striped table-borderless">
-                        <caption class="caption-top">{{carbonFootprint().name}}</caption>
-                        <tbody>
-                            @for (item of carbonFootprint().items; track item.idShort) {
-                            <tr>
-                                <td class="text-nowrap align-middle">{{item.displayName}}</td>
-                                @if (item.url) {
-                                <td>
-                                    <button class="btn btn-link p-0" type="button"
-                                        (click)="open($event, item.url)">{{item.value}}</button>
-                                </td>
-                                } @else if (isArray(item.value)) {
-                                <td>
-                                    <ul>
-                                        @for (item of item.value; track item) {
-                                        <li>{{item}}</li>
-                                        }
-                                    </ul>
-                                </td>
-                                } @else {
-                                <td>{{item.value}}</td>
-                                }
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <fhg-data-sheet [dataSheet]="carbonFootprint()"></fhg-data-sheet>
                 </ng-template>
             </div>
         </div>

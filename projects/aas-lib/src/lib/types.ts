@@ -35,9 +35,21 @@ export enum ViewMode {
     Tree = 'tree',
 }
 
+export interface DataSheetFormat {
+    format: string;
+    items: string[];
+}
+
+export interface DataSheetItemPathWithOptions {
+    idShort: string;
+    format: DataSheetFormat;
+}
+
+export type DataSheetItemPath = string | DataSheetItemPathWithOptions;
+
 /** Represents an item of a data sheet. */
 export interface DataSheetItem {
-    /** The unique language independant name. */
+    /** The unique language independent name. */
     idShort: string;
     /** The display name in the current language. */
     displayName: string;
@@ -45,7 +57,11 @@ export interface DataSheetItem {
     value: string | string[] | undefined;
     /** The description in the current language. */
     description?: string;
-    /** */
+    /** A resource URL.*/
     url?: string;
 }
 
+export interface DataSheetData {
+    name: string;
+    items: DataSheetItem[];
+}

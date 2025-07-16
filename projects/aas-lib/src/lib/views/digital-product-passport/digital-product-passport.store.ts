@@ -90,7 +90,6 @@ const emptyNameplate: NameplateItem = {
     TimeZone: '-',
 };
 
-
 @Injectable({ providedIn: 'root' })
 export class DigitalProductPassportStore {
     public constructor(private readonly translate: TranslateService) {}
