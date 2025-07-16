@@ -8,7 +8,6 @@
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import QRCode from 'qrcode';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import {
@@ -47,6 +46,7 @@ import { SecuredImageComponent } from '../../components/secured-image/secured-im
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { FHGNameplate, HSUNameplate, IDTANameplate, ZVEINameplate } from '../views';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 
 export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
 
@@ -63,7 +63,7 @@ export type NameplateItem = {
     selector: 'fhg-nameplate',
     templateUrl: './nameplate.component.html',
     styleUrls: ['./nameplate.component.scss'],
-    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, SecuredImageComponent],
+    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NameplateComponent implements OnInit, OnDestroy {
@@ -82,26 +82,9 @@ export class NameplateComponent implements OnInit, OnDestroy {
                 this.toolbar.set(template);
             }
         });
-
-        effect(() => {
-            const qrCode = this.qrCode();
-            const url = new URL(this.window.location.toString());
-            const tuple = this.nameplate();
-            if (tuple) {
-                const [document] = tuple;
-                url.searchParams.set('endpoint', encodeBase64Url(document.endpoint));
-                url.searchParams.set('id', encodeBase64Url(document.id));
-            }
-
-            if (qrCode) {
-                QRCode.toCanvas(qrCode.nativeElement, url.toString());
-            }
-        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('nameplateToolbar');
-
-    public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
 
     public readonly title = computed(() => {
         const tuple = this.nameplate();
@@ -117,6 +100,11 @@ export class NameplateComponent implements OnInit, OnDestroy {
     public readonly nameplateSize = computed(() => this.nameplates().length);
 
     public readonly nameplate = computed(() => this.nameplates().at(this.nameplateIndex() - 1));
+
+    public readonly document = computed(() => {
+        const nameplate = this.nameplate();
+        return nameplate ? nameplate[0] : undefined;
+    });
 
     public readonly nameplateIndex = signal(1);
 
@@ -220,7 +208,7 @@ export class NameplateComponent implements OnInit, OnDestroy {
 
         const endpoint = nameplate[0].endpoint;
         const id = nameplate[0].id;
-        const details = this.getFavoriteDetails(nameplate[1]);
+        const details = this.getFavoriteDetails(nameplate[0], nameplate[1]);
         const notes = this.getFavoriteNotes(nameplate[1]);
         const href = `/view/Nameplate?endpoint=${encodeBase64Url(endpoint)}&id=${encodeBase64Url(id)}`;
         if (!this.start.add('Favorite', `DNP#${endpoint}#${id}`, { endpoint, id, details, notes, href })) {
@@ -230,11 +218,14 @@ export class NameplateComponent implements OnInit, OnDestroy {
         return this.start.save();
     }
 
-    private getFavoriteDetails(nameplate: aas.Submodel): { name: string; value: string }[] {
+    private getFavoriteDetails(document: AASDocument, nameplate: aas.Submodel): { name: string; value: string }[] {
         const details: { name: string; value: string }[] = [];
-        const manufacturerName = this.getPropertyValue(nameplate, 'ManufacturerName');
-        if (manufacturerName) {
-            details.push({ name: 'DigitalNameplate.ManufacturerName', value: manufacturerName });
+        const manufacturerName = getReferable<aas.Property>(nameplate, 'ManufacturerName');
+        if (manufacturerName?.value) {
+            details.push({
+                name: getDisplayName(manufacturerName, document.content, this.translate.currentLang),
+                value: manufacturerName.value,
+            });
         }
 
         const productType = this.getPropertyValue(nameplate, 'ManufacturerProductType');

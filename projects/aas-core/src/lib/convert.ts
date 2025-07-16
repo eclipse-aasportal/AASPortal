@@ -691,7 +691,8 @@ export function toLocale(value: string | undefined, valueType: DataTypeDefXsd, l
 
     switch (valueType) {
         case 'xs:float':
-        case 'xs:double': {
+        case 'xs:double':
+        case 'xs:decimal': {
             const d = parseNumber(value);
             return Number.isNaN(d) ? undefined : d.toLocaleString(localeId);
         }

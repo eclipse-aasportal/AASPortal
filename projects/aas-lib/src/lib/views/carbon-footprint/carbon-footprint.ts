@@ -6,29 +6,46 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, Inject, input, signal } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    Inject,
+    input,
+    Signal,
+    signal,
+    untracked,
+} from '@angular/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
     aas,
     AASDocument,
     convertToString,
+    getChildren,
+    getLocaleValue,
     getReferable,
     getSemanticId,
     getUnit,
+    isFile,
+    isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
+    isSubmodelElementList,
     parseDate,
     parseNumber,
 } from 'aas-core';
+
 import { CarbonFootprint_1_0 } from '../views';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { getDisplayName, getUrl } from '../../utilities';
-import { NameValue } from '../../types';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
+import { DataSheetItem } from '../../types';
 import { WINDOW, WindowService } from '../../services/window.service';
 
 export type CarbonFootprintItem = {
     name: string;
-    items: NameValue[];
+    items: DataSheetItem[];
 };
 
 @Component({
@@ -39,10 +56,16 @@ export type CarbonFootprintItem = {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprint {
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
+
     public constructor(
-        private readonly translate: TranslateService,
+        translate: TranslateService,
         @Inject(WINDOW) private readonly window: WindowService,
-    ) {}
+    ) {
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+    }
 
     public readonly document = input<AASDocument>();
 
@@ -57,6 +80,7 @@ export class CarbonFootprint {
 
     public readonly totalPcfCO2eq = computed(() => {
         const submodel = this.submodel();
+        const currentLang = this.currentLang();
         if (!submodel) {
             return '-';
         }
@@ -84,7 +108,7 @@ export class CarbonFootprint {
             }
         }
 
-        return `${total.toLocaleString(this.translate.currentLang)} ${unit ?? 'kg'}`;
+        return `${total.toLocaleString(currentLang)} ${unit ?? 'kg'}`;
     });
 
     public readonly carbonFootprintItems = computed(() => {
@@ -117,103 +141,114 @@ export class CarbonFootprint {
     public readonly carbonFootprintSize = computed(() => this.carbonFootprintItems().length);
 
     public open($event: MouseEvent, url: string) {
-        this.window.open(url)
+        this.window.open(url);
         $event.stopPropagation();
+    }
+
+    public isArray(value: unknown): boolean {
+        return Array.isArray(value);
     }
 
     private createCarbonFootprint(smc: aas.SubmodelElementCollection): CarbonFootprintItem {
         const env = this.document()!.content!;
+        const currentLang = this.currentLang();
         const carbonFootprint: CarbonFootprintItem = {
-            name: getDisplayName(smc, env, this.translate.currentLang),
-            items: [],
+            name: getDisplayName(smc, env, currentLang),
+            items: this.createDataSheet(smc, env, [
+                'PcfCO2eq',
+                'ReferenceImpactUnitForCalculation',
+                'QuantityOfMeasureForCalculation',
+                'LifeCyclePhases',
+                'PcfCalculationMethods',
+                'PublicationDate',
+                'ExpirationDate',
+                'ExplanatoryStatement',
+                {
+                    idShort: 'GoodsHandoverAddress',
+                    format: '{0} {1}, {2}-{3} {4}',
+                    items: ['Street', 'HouseNumber', 'Country', 'ZipCode', 'CityTown'],
+                },
+            ]),
         };
 
-        const pcfCO2eq = getReferable<aas.Property>(smc, 'PcfCO2eq');
-        if (pcfCO2eq) {
-            carbonFootprint.items.push({
-                name: getDisplayName(pcfCO2eq, env, this.translate.currentLang),
-                value: `${convertToString(parseNumber(pcfCO2eq.value, this.translate.currentLang))} ${getUnit(env, pcfCO2eq) ?? 'kg'}`,
-            });
-        }
+        // const goodsHandoverAddress = getReferable<aas.SubmodelElementCollection>(smc, 'GoodsHandoverAddress');
+        // if (goodsHandoverAddress) {
+        //     const street = getLocaleValue(
+        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'Street')?.value,
+        //         currentLang,
+        //     );
 
-        const referenceImpactUnitForCalculation = getReferable<aas.Property>(smc, 'ReferenceImpactUnitForCalculation');
-        if (referenceImpactUnitForCalculation?.value) {
-            carbonFootprint.items.push({
-                name: getDisplayName(referenceImpactUnitForCalculation, env, this.translate.currentLang),
-                value: referenceImpactUnitForCalculation.value,
-            });
-        }
+        //     const houseNumber = getLocaleValue(
+        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'HouseNumber')?.value,
+        //         currentLang,
+        //     );
 
-        const quantityOfMeasureForCalculation = getReferable<aas.Property>(smc, 'QuantityOfMeasureForCalculation');
-        if (quantityOfMeasureForCalculation?.value) {
-            carbonFootprint.items.push({
-                name: getDisplayName(quantityOfMeasureForCalculation, env, this.translate.currentLang),
-                value: convertToString(parseNumber(quantityOfMeasureForCalculation.value), this.translate.currentLang),
-            });
-        }
+        //     const zipCode = getLocaleValue(
+        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'ZipCode')?.value,
+        //         currentLang,
+        //     );
 
-        const liveCyclePhases = getReferable<aas.SubmodelElementList>(smc, 'LiveCyclePhases');
-        if (liveCyclePhases?.value) {
-            for (const liveCyclePhase of liveCyclePhases.value) {
-                if (isProperty(liveCyclePhase) && liveCyclePhase.value) {
-                    carbonFootprint.items.push({
-                        name: getDisplayName(liveCyclePhase, env, this.translate.currentLang),
-                        value: liveCyclePhase.value,
-                    });
-                }
-            }
-        }
+        //     const cityTown = getLocaleValue(
+        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'CityTown')?.value,
+        //         currentLang,
+        //     );
 
-        const calculationMethods = getReferable<aas.SubmodelElementList>(smc, 'PcfCalculationMethods');
-        if (calculationMethods?.value) {
-            for (const calculationMethod of calculationMethods.value) {
-                if (isProperty(calculationMethod) && calculationMethod.value) {
-                    carbonFootprint.items.push({
-                        name: getDisplayName(calculationMethod, env, this.translate.currentLang),
-                        value: calculationMethod.value,
-                    });
-                }
-            }
-        }
+        //     const country = getLocaleValue(
+        //         getReferable<aas.MultiLanguageProperty>(goodsHandoverAddress, 'Country')?.value,
+        //         currentLang,
+        //     );
 
-        const publicationDate = getReferable<aas.Property>(smc, 'PublicationDate');
-        if (publicationDate?.value) {
-            carbonFootprint.items.push({
-                name: getDisplayName(publicationDate, env, this.translate.currentLang),
-                value: convertToString(parseDate(publicationDate.value, this.translate.currentLang)),
-            });
-        }
-
-        const expirationDate = getReferable<aas.Property>(smc, 'ExpirationDate');
-        if (expirationDate?.value) {
-            carbonFootprint.items.push({
-                name: getDisplayName(expirationDate, env, this.translate.currentLang),
-                value: convertToString(parseDate(expirationDate.value, this.translate.currentLang)),
-            });
-        }
-
-        const explanatoryStatement = getReferable<aas.File>(smc, 'ExplanatoryStatement');
-        if (explanatoryStatement?.value) {
-            carbonFootprint.items.push({
-                name: getDisplayName(explanatoryStatement, env, this.translate.currentLang),
-                value: explanatoryStatement.value,
-                url: getUrl(this.document()!, this.submodel()!, explanatoryStatement),
-            });
-        }
-
-        const goodsHandoverAddress = getReferable<aas.SubmodelElementCollection>(smc, 'GoodsHandoverAddress');
-        if (goodsHandoverAddress) {
-            const street = getReferable<aas.Property>(goodsHandoverAddress, 'Street');
-            const houseNumber = getReferable<aas.Property>(goodsHandoverAddress, 'HouseNumber');
-            const zipCode = getReferable<aas.Property>(goodsHandoverAddress, 'ZipCode');
-            const cityTown = getReferable<aas.Property>(goodsHandoverAddress, 'CityTown');
-            const country = getReferable<aas.Property>(goodsHandoverAddress, 'Country');
-            carbonFootprint.items.push({
-                name: getDisplayName(goodsHandoverAddress, env, this.translate.currentLang),
-                value: `${street?.value} ${houseNumber?.value}, ${country?.value}-${zipCode?.value} ${cityTown?.value}`,
-            });
-        }
+        //     carbonFootprint.items.push({
+        //         idShort: goodsHandoverAddress.idShort,
+        //         displayName: getDisplayName(goodsHandoverAddress, env, currentLang),
+        //         value: `${street} ${houseNumber}, ${country}-${zipCode} ${cityTown}`,
+        //     });
+        // }
 
         return carbonFootprint;
+    }
+
+    private createDataSheet(
+        sm: aas.SubmodelElement | aas.Submodel,
+        env: aas.Environment,
+        options?: (string | { idShort: string; format: string; items: string[] })[],
+    ): DataSheetItem[] {
+        const lang = untracked(this.currentLang);
+        const items: DataSheetItem[] = [];
+        const document = this.document()!;
+        const submodel = this.submodel()!;
+        if (options) {
+            for (const item of options) {
+                let referable: aas.Referable | undefined;
+                if (typeof item === 'string') {
+                    referable = getReferable(sm, item);
+                } else {
+                    referable = getReferable(sm, item.idShort);
+                }
+
+                if (referable) {
+                    a(referable);
+                }
+            }
+        } else {
+            for (const referable of getChildren(sm)) {
+                a(referable);
+            }
+        }
+
+        return items;
+
+        function a(referable: aas.Referable): void {
+            let item: DataSheetItem | undefined;
+            if (isFile(referable)) {
+                item = createDataSheetItem(referable, env, lang, getUrl(document, submodel, referable));
+            } else {
+                item = createDataSheetItem(referable, env, lang);
+            }
+
+            if (item) {
+                items.push(item);
+            }
+        }
     }
 }

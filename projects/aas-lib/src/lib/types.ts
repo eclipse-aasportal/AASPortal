@@ -35,8 +35,17 @@ export enum ViewMode {
     Tree = 'tree',
 }
 
-export interface NameValue {
-    name: string;
-    value: string;
+/** Represents an item of a data sheet. */
+export interface DataSheetItem {
+    /** The unique language independant name. */
+    idShort: string;
+    /** The display name in the current language. */
+    displayName: string;
+    /** The display value in the current language inclusive unit if exist. */
+    value: string | string[] | undefined;
+    /** The description in the current language. */
+    description?: string;
+    /** */
     url?: string;
 }
+

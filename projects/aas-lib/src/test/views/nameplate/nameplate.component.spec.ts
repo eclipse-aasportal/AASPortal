@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
-import { nameplate } from './digital-nameplate-document';
+import { nameplate } from './nameplate-document';
 import { NameplateComponent } from '../../../lib/views/nameplate/nameplate.component';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
@@ -35,7 +35,7 @@ export class TestSecuredImageComponent {
     public readonly height = input<number | undefined>();
 }
 
-describe('DigitalNameplateComponent', () => {
+describe('NameplateComponent', () => {
     let auth: jasmine.SpyObj<AuthService>;
     let api: jasmine.SpyObj<EndpointsApi>;
     let start: jasmine.SpyObj<StartService>;

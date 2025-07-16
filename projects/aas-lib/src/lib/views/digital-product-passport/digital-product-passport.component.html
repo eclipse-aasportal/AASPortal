@@ -46,35 +46,35 @@
                     </div>
                 </div>
             </div>
-            <div ngbAccordionItem>
-                <fhg-carbon-footprint [document]="document()"></fhg-carbon-footprint>
-            </div>
-            <div ngbAccordionItem>
-                <h2 ngbAccordionHeader>
-                    <button ngbAccordionButton translate>DigitalProductPassport.DOCUMENTATION</button>
-                </h2>
-                <div ngbAccordionCollapse>
-                    <div ngbAccordionBody>
-                        <ng-template>
-                            <table class="table table-sm table-striped table-borderless">
-                                <tbody>
-                                    @for (item of documentationData().items; track item.title) {
-                                    <tr>
-                                        @if (item.version) {
-                                        <td>{{item.title}}&nbsp;({{item.version}})</td>
-                                        } @else {
-                                        <td>{{item.title}}</td>
-                                        }
-                                        <td>
-                                            <button class="btn btn-link p-0" type="button"
-                                                (click)="downloadDocumentation($event, item)">{{item.filename}}</button>
-                                        </td>
-                                    </tr>
+        </div>
+    </div>
+    <fhg-carbon-footprint [document]="document()"></fhg-carbon-footprint>
+    <div class="mt-3" ngbAccordion>
+        <div ngbAccordionItem>
+            <h2 ngbAccordionHeader>
+                <button ngbAccordionButton translate>DigitalProductPassport.DOCUMENTATION</button>
+            </h2>
+            <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                    <ng-template>
+                        <table class="table table-sm table-striped table-borderless">
+                            <tbody>
+                                @for (item of documentationData().items; track item.title) {
+                                <tr>
+                                    @if (item.version) {
+                                    <td>{{item.title}}&nbsp;({{item.version}})</td>
+                                    } @else {
+                                    <td>{{item.title}}</td>
                                     }
-                                </tbody>
-                            </table>
-                        </ng-template>
-                    </div>
+                                    <td>
+                                        <button class="btn btn-link p-0" type="button"
+                                            (click)="downloadDocumentation($event, item)">{{item.filename}}</button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </ng-template>
                 </div>
             </div>
         </div>
