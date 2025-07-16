@@ -33,7 +33,6 @@ import {
     NotifyService,
     StartService,
     ToolbarService,
-    ViewMode,
     WINDOW,
     encodeBase64Url,
     viewRoutes,
@@ -87,8 +86,6 @@ export class ShellsComponent implements OnDestroy {
 
     public readonly limit = this.store.limit;
 
-    public readonly viewMode = this.store.viewMode;
-
     public readonly favoritesLists = computed(() => ['', ...this.favorites.items().map(list => list.name)]);
 
     public readonly filter = computed(() => {
@@ -122,10 +119,6 @@ export class ShellsComponent implements OnDestroy {
 
     public setLimit(value: number): void {
         this.store.setLimit(value);
-    }
-
-    public setViewMode(value: ViewMode): void {
-        this.store.setViewMode(value);
     }
 
     public addEndpoint(): Observable<void> {

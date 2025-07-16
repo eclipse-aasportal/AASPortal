@@ -13,7 +13,6 @@ import { AASDocument, AASDocumentId } from 'aas-core';
 import { AuthService, ViewMode } from 'aas-lib';
 
 type ShellsState = {
-    viewMode: ViewMode;
     limit: number;
     filterText: string;
 };
@@ -21,7 +20,6 @@ type ShellsState = {
 const cookieName = 'v1.Shells';
 
 const initialState: ShellsState = {
-    viewMode: ViewMode.Undefined,
     limit: 10,
     filterText: '',
 };
@@ -50,8 +48,6 @@ export class ShellsStore {
 
     public readonly limit = computed(() => this.state().limit);
 
-    public readonly viewMode = computed(() => this.state().viewMode);
-
     public readonly filterText = computed(() => this.state().filterText);
 
     public readonly documents = signal<AASDocument[]>([]);
@@ -64,10 +60,6 @@ export class ShellsStore {
 
     public setLimit(limit: number): void {
         this.state.update(state => ({ ...state, limit }));
-    }
-
-    public setViewMode(viewMode: ViewMode): void {
-        this.state.update(state => ({ ...state, viewMode }));
     }
 
     public setFilterText(value: string): void {

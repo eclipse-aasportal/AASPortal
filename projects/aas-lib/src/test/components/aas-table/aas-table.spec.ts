@@ -11,10 +11,9 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
-import { AASTableComponent } from '../../../lib/components/aas-table/aas-table.component';
+import { AASTable } from '../../../lib/components/aas-table/aas-table';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { createDocument } from '../../assets/test-document';
-import { ViewMode } from '../../../lib/types';
 
 describe('AASTableComponent', () => {
     let document1: AASDocument;
@@ -35,7 +34,7 @@ describe('AASTableComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                AASTableComponent,
+                AASTable,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -47,18 +46,16 @@ describe('AASTableComponent', () => {
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(AASTableComponent);
+        const fixture = TestBed.createComponent(AASTable);
         const component = fixture.componentInstance;
-        fixture.componentRef.setInput('viewMode', ViewMode.List);
         fixture.componentRef.setInput('documents', [document1, document2, document3]);
         fixture.detectChanges();
        expect(component).toBeTruthy();
     });
 
     it('provides a rows property', () => {
-        const fixture = TestBed.createComponent(AASTableComponent);
+        const fixture = TestBed.createComponent(AASTable);
         const component = fixture.componentInstance;
-        fixture.componentRef.setInput('viewMode', ViewMode.List);
         fixture.componentRef.setInput('documents', [document1, document2, document3]);
         fixture.detectChanges();
         expect(component.rows()).toBeTruthy();

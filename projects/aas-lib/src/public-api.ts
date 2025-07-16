@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-export * from './lib/components/aas-table/aas-table-row';
-export * from './lib/components/aas-table/aas-table.component';
+export * from './lib/components/aas-table/aas-table';
 export * from './lib/components/aas-tree/aas-tree-row';
 export * from './lib/components/aas-tree/aas-tree.component';
 export * from './lib/components/auth/auth.component';
@@ -16,6 +15,7 @@ export * from './lib/components/auth/auth.service';
 export * from './lib/components/auth/login-form/login-form.component';
 export * from './lib/components/auth/profile-form/profile-form.component';
 export * from './lib/components/auth/register-form/register-form.component';
+export * from './lib/components/data-sheet/data-sheet';
 export * from './lib/components/favorite/favorite.component';
 export * from './lib/components/license-info/license-info.component';
 export * from './lib/components/localize/culture-info';
