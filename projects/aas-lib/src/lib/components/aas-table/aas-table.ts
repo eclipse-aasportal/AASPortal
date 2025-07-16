@@ -123,12 +123,12 @@ export class AASTable {
 
     public readonly someSelected = computed(() => {
         const rows = this.rows();
-        return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
+        return rows.length > 0 && rows.some(row => row.selected()) && !rows.every(row => row.selected());
     });
 
     public readonly everySelected = computed(() => {
         const rows = this.rows();
-        return rows.length > 0 && rows.every(row => row.selected);
+        return rows.length > 0 && rows.every(row => row.selected());
     });
 
     public open(row: AASTableRow): void {
@@ -145,8 +145,8 @@ export class AASTable {
         return `${row.endpoint}, ${row.document.address}`;
     }
 
-    public toggleSelected(row: AASTableRow): void {
-        row.selected.update(value => !value);
+    public toggleSelected(row: AASTableRow, value: boolean): void {
+        row.selected.set(value);
         this.selected.set(
             this._rows()
                 .filter(row => row.selected())

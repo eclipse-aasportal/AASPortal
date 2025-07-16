@@ -29,7 +29,7 @@ import {
     isSubmodelElementList,
 } from 'aas-core';
 
-import { DataSheetFormat, DataSheetItem } from './types';
+import { DataSheetFormat, DataSheetItem, GetUrlFn } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -278,7 +278,7 @@ export function createDataSheetItem(
     element: aas.SubmodelElement,
     env: aas.Environment | undefined,
     lang: string | undefined,
-    options?: { format?: DataSheetFormat; getUrl?: (file: aas.File) => string },
+    options?: { format?: DataSheetFormat; getUrl?: GetUrlFn },
 ): DataSheetItem | undefined {
     let value = getValue(element, options);
     if (!value) {
@@ -323,6 +323,10 @@ export function createDataSheetItem(
         value,
     };
 
+    if (options?.getUrl) {
+        item.url = options.getUrl(element);
+    }
+
     if (description) {
         item.description = description;
     }
@@ -331,7 +335,7 @@ export function createDataSheetItem(
 
     function getValue(
         element: aas.Referable,
-        options?: { format?: DataSheetFormat; getUrl?: (file: aas.File) => string },
+        options?: { format?: DataSheetFormat; getUrl?: GetUrlFn },
     ): string | string[] | undefined {
         if (isProperty(element)) {
             return lang ? toLocale(element.value, element.valueType, lang) : element.value;
@@ -342,10 +346,6 @@ export function createDataSheetItem(
         }
 
         if (isFile(element)) {
-            if (options?.getUrl) {
-                item.url = options.getUrl(element);
-            }
-
             return element.value;
         }
 
@@ -383,7 +383,7 @@ export function createDataSheetItem(
         ): string {
             return stringFormat(
                 format.format,
-                format.items.map(item => {
+                ...format.items.map(item => {
                     const referable = getReferable(sm, item);
                     if (!referable) {
                         return '-';

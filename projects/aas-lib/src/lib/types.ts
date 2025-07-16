@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+import { aas } from 'aas-core';
+
 export interface AASQueryParams {
     format?: string;
     id?: string;
@@ -44,6 +46,8 @@ export interface DataSheetItemPathWithOptions {
     idShort: string;
     format: DataSheetFormat;
 }
+
+export type GetUrlFn = (element: aas.Referable) => string | undefined;
 
 export type DataSheetItemPath = string | DataSheetItemPathWithOptions;
 

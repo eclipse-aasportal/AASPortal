@@ -14,7 +14,7 @@
             <td class="text-nowrap align-middle">{{item.displayName}}</td>
             @if (item.url) {
             <td>
-                <a [href]="item.url">{{item.value}}</a>
+                <a [href]="item.url" target="_blank">{{item.value}}</a>
             </td>
             } @else if (isArray(item.value)) {
             <td>

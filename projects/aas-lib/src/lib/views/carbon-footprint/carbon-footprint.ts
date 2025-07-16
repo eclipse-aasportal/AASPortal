@@ -190,13 +190,19 @@ export class CarbonFootprint {
 
         const lang = untracked(this.currentLang);
         if (isFile(referable)) {
-            return createDataSheetItem(referable, env, lang, { getUrl: this.getUrl });
+            return createDataSheetItem(referable, env, lang, {
+                getUrl: (element: aas.Referable) => {
+                    const document = this.document()!;
+                    const submodel = this.submodel()!;
+                    if (isFile(element)) {
+                        return getUrl(document, submodel, element);
+                    }
+
+                    return undefined;
+                },
+            });
         }
 
         return createDataSheetItem(referable, env, lang, { format });
     }
-
-    private readonly getUrl = (file: aas.File) => {
-        return getUrl(this.document()!, this.submodel()!, file);
-    };
 }

@@ -26,7 +26,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
 import { AASEndpoint, QueryParser, stringFormat } from 'aas-core';
 import {
-    AASTableComponent,
+    AASTable,
     AuthService,
     DownloadService,
     EndpointsService,
@@ -52,7 +52,7 @@ import { ShellsService } from './shells.service';
     selector: 'fhg-shells',
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
-    imports: [AASTableComponent, NgClass, TranslateModule, NgbModule, FormsModule],
+    imports: [AASTable, NgClass, TranslateModule, NgbModule, FormsModule],
     providers: [ShellsService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -103,7 +103,7 @@ export class ShellsComponent implements OnDestroy {
 
     public readonly selected = this.store.selected;
 
-    public readonly someSelected = computed(() => this.store.selected().length > 0);
+    public readonly someSelected = computed(() => this.selected().length > 0);
 
     public readonly views = signal(viewRoutes).asReadonly();
 

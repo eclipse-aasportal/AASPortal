@@ -29,14 +29,6 @@ export class ShellsService implements OnDestroy {
             this.refreshPage(this.store.limit());
         });
 
-        effect(() => {
-            this.setViewMode(this.store.viewMode());
-        });
-
-        effect(() => {
-            this.setActiveFavorites(this.favorites.active());
-        });
-
         this.subscription.add(this.indexChange.message.subscribe(this.updatePage));
     }
 
@@ -128,31 +120,6 @@ export class ShellsService implements OnDestroy {
             .subscribe();
     }
 
-    private setViewMode(viewMode: ViewMode): void {
-        if (viewMode === ViewMode.List) {
-            this.store.selected.set([]);
-            const favorites = this.favorites.get(this.favorites.active());
-            if (favorites) {
-                this.getFavorites(favorites.documents);
-            } else {
-                this.getFirstPage();
-            }
-        } else if (viewMode === ViewMode.Tree) {
-            this.store.documents.set([]);
-            this.getTreeView(this.store.selected());
-        }
-    }
-
-    private setActiveFavorites(name: string): void {
-        this.store.selected.set([]);
-        const favorites = this.favorites.get(name);
-        if (favorites) {
-            this.getFavorites(favorites.documents);
-        } else {
-            this.getFirstPage();
-        }
-    }
-
     private refreshPage(limit: number): void {
         if (untracked(this.store.documents).length === 0) {
             return;
@@ -210,29 +177,6 @@ export class ShellsService implements OnDestroy {
         return true;
     }
 
-    private getFavorites(documents: AASDocument[]): void {
-        this.store.documents.set(documents);
-        from(documents)
-            .pipe(
-                mergeMap(document =>
-                    this.api.getContent(document.id, document.endpoint).pipe(
-                        catchError(() => of(undefined)),
-                        map(content => this.setContent(document, content)),
-                    ),
-                ),
-            )
-            .subscribe();
-    }
-
-    private getTreeView(documents: AASDocument[]): void {
-        from(documents)
-            .pipe(
-                mergeMap(document => this.api.getHierarchy(document.id, document.endpoint)),
-                mergeMap(nodes => this.addTreeAndLoadContents(nodes)),
-            )
-            .subscribe();
-    }
-
     private getId(document: AASDocument): AASDocumentId {
         return { id: document.id, endpoint: document.endpoint };
     }
@@ -256,17 +200,6 @@ export class ShellsService implements OnDestroy {
         this.store.previous.set(result.previous);
         this.store.next.set(result.next);
         this.store.update(limit, filter);
-    }
-
-    private addTreeAndLoadContents(documents: AASDocument[]): Observable<void> {
-        this.store.documents.update(state => [...state, ...documents]);
-        return from(documents).pipe(
-            mergeMap(document =>
-                this.api
-                    .getContent(document.endpoint, document.id)
-                    .pipe(map(content => this.setContent(document, content))),
-            ),
-        );
     }
 
     private setContent(document: AASDocument, content: aas.Environment | null | undefined): void {

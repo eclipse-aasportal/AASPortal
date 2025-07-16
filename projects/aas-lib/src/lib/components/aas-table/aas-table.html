@@ -30,7 +30,7 @@
         <tr class="align-middle">
             <td>
                 <input type="checkbox" class="form-check-input" [ngModel]="row.selected()"
-                    (ngModelChange)="toggleSelected($event)" [name]="row.name" />
+                    (ngModelChange)="toggleSelected(row, $event)" [name]="row.name" />
             </td>
             <td>
                 @switch (row.state) {

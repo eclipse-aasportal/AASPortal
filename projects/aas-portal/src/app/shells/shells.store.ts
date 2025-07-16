@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, effect, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { mergeMap, Observable, skipWhile } from 'rxjs';
+import { catchError, from, map, mergeMap, Observable, of, skipWhile } from 'rxjs';
 import { AASDocument, AASDocumentId } from 'aas-core';
-import { AuthService, ViewMode } from 'aas-lib';
+import { AuthService, EndpointsApi, ViewMode } from 'aas-lib';
+import { FavoritesService } from './favorites.service';
 
 type ShellsState = {
     limit: number;
@@ -30,7 +31,11 @@ const initialState: ShellsState = {
 export class ShellsStore {
     private readonly state = signal(initialState);
 
-    public constructor(private readonly auth: AuthService) {
+    public constructor(
+        private readonly auth: AuthService,
+        private readonly favorites: FavoritesService,
+        private readonly api: EndpointsApi,
+    ) {
         this.auth.userId
             .pipe(
                 skipWhile(userId => userId === undefined),
@@ -44,7 +49,18 @@ export class ShellsStore {
                     this.state.update(state => ({ ...state, viewMode: ViewMode.List }));
                 }
             });
+
+        effect(() => {
+            const active = this.favorites.active();
+            if (active) {
+                this.getFavorites(this.favorites.get(active)?.documents);
+            } else {
+                this.getFirstPage();
+            }
+        });
     }
+
+    public readonly active = this.favorites.active;
 
     public readonly limit = computed(() => this.state().limit);
 
@@ -76,5 +92,19 @@ export class ShellsStore {
 
     public save(): Observable<void> {
         return this.auth.setCookie(cookieName, JSON.stringify(this.state()));
+    }
+
+    private getFavorites(documents: AASDocument[]): void {
+        this.documents.set(documents);
+        from(documents)
+            .pipe(
+                mergeMap(document =>
+                    this.api.getContent(document.id, document.endpoint).pipe(
+                        catchError(() => of(undefined)),
+                        map(content => this.setContent(document, content)),
+                    ),
+                ),
+            )
+            .subscribe();
     }
 }
