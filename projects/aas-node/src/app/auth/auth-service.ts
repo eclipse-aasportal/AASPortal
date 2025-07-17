@@ -48,26 +48,16 @@ export class AuthService {
         }
     }
 
-    public async login(credentials?: Credentials): Promise<AuthResult> {
-        let token: string;
-        if (credentials?.id) {
-            if (credentials.password) {
-                const data = await this.userStorage.read(credentials.id);
-                if (!data) {
-                    throw new ApplicationError(`Unknown user ${credentials.id}.`, ERRORS.UnknownUser, credentials.id);
-                }
-
-                await this.checkPassword(credentials.password, data.password);
-                token = this.generateToken(data.id, data.name, data.role);
-                data.lastLoggedIn = new Date();
-                await this.userStorage.write(credentials.id, data);
-            } else {
-                token = this.generateExternalToken(credentials.id);
-            }
-        } else {
-            token = this.generateGuestToken();
+    public async login(credentials: Credentials): Promise<AuthResult> {
+        const data = await this.userStorage.read(credentials.id);
+        if (!data) {
+            throw new ApplicationError(`Unknown user ${credentials.id}.`, ERRORS.UnknownUser, credentials.id);
         }
 
+        await this.checkPassword(credentials.password, data.password);
+        const token = this.generateToken(data.id, data.name, data.role);
+        data.lastLoggedIn = new Date();
+        await this.userStorage.write(credentials.id, data);
         return { token };
     }
 
@@ -195,23 +185,6 @@ export class AuthService {
         return jwt.sign(payload, this.privateKey, {
             subject,
             expiresIn: this.variable.JWT_EXPIRES_IN,
-            algorithm: this.algorithm,
-        });
-    }
-
-    private generateGuestToken(): string {
-        const payload: JWTPayload = { role: 'guest' };
-        return jwt.sign(payload, this.privateKey, {
-            expiresIn: this.variable.JWT_EXPIRES_IN,
-            algorithm: this.algorithm,
-        });
-    }
-
-    private generateExternalToken(subject: string): string {
-        const payload: JWTPayload = { role: 'guest' };
-        return jwt.sign(payload, this.privateKey, {
-            subject,
-            expiresIn: this.variable.JWT_SHORT_EXP,
             algorithm: this.algorithm,
         });
     }

@@ -49,7 +49,7 @@ describe('HandoverDocumentationComponent', () => {
     beforeEach(async () => {
         location = jasmine.createSpyObj<NgLocation>(['getState']);
         location.getState.and.returnValue({ data: JSON.stringify([sample]) });
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<Window>(['open'], {

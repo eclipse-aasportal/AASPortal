@@ -18,7 +18,7 @@ describe('AuthComponent', () => {
 
     beforeEach(async () => {
         auth = jasmine.createSpyObj<AuthService>(['login'], {
-            name: signal('guest'),
+            name: signal<string | undefined>(undefined),
             authenticated: signal(false),
         });
 

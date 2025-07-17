@@ -30,9 +30,9 @@ export class DashboardService {
     private readonly modified$ = signal(false);
 
     public constructor(private readonly auth: AuthService) {
-        this.auth.userId
+        this.auth.ready
             .pipe(
-                skipWhile(userId => userId === undefined),
+                skipWhile(ready => ready === true),
                 mergeMap(() => this.auth.getCookie('.Dashboard.v4')),
                 map(data => {
                     if (data === undefined) {

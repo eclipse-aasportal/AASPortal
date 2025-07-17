@@ -58,7 +58,7 @@ describe('NameplateComponent', () => {
     let window: jasmine.SpyObj<WindowService>;
 
     beforeEach(async () => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         window = jasmine.createSpyObj<WindowService>(['focus'], { location: undefined });

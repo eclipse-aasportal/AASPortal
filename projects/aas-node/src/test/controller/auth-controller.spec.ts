@@ -16,7 +16,7 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 
 import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from 'aas-jest';
-import { getToken, guestPayload } from '../assets/json-web-token.js';
+import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
@@ -45,7 +45,7 @@ describe('AuthController', () => {
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(guestPayload);
+        authentication.check.mockResolvedValue(editorPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);
@@ -201,7 +201,7 @@ describe('AuthController', () => {
 
         it('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t', async () => {
             authentication.check.mockRejectedValue(
-                new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
+                new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess),
             );
 
             const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t');

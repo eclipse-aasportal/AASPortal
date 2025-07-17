@@ -88,7 +88,7 @@ describe('ShellsComponent', () => {
         });
 
         auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
-            userId: of('guest'),
+            ready: of(true),
         });
 
         auth.getCookie.and.returnValue(of(undefined));

@@ -23,13 +23,13 @@ import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { Variable } from '../../app/variable.js';
-import { getToken, guestPayload } from '../assets/json-web-token.js';
+import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
 import multer from 'multer';
 
-describe('EndpointsController', function () {
+describe('EndpointsController', () => {
     let app: Express;
     let logger: Logger;
     let auth: jest.Mocked<AuthService>;
@@ -37,7 +37,7 @@ describe('EndpointsController', function () {
     let variable: jest.Mocked<Variable>;
     let authentication: jest.Mocked<Authentication>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
@@ -62,7 +62,7 @@ describe('EndpointsController', function () {
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(guestPayload);
+        authentication.check.mockResolvedValue(editorPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);

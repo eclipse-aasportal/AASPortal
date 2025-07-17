@@ -36,7 +36,7 @@ describe('FavoriteComponent', () => {
     let start: jasmine.SpyObj<StartService>;
 
     beforeEach(async () => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
 

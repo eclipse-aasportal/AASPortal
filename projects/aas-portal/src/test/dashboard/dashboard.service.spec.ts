@@ -20,7 +20,7 @@ describe('DashboardService', () => {
     let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie'], { ready: of(true) });
         auth.getCookie.and.returnValue(of(JSON.stringify(data)));
 
         TestBed.configureTestingModule({

@@ -40,9 +40,9 @@ export class ShellsService implements OnDestroy {
         private readonly api: EndpointsApi,
         private readonly indexChange: IndexChangeService,
     ) {
-        this.auth.userId
+        this.auth.ready
             .pipe(
-                skipWhile(userId => userId === undefined),
+                skipWhile(ready => ready === false),
                 takeUntilDestroyed(),
                 mergeMap(() => this.auth.getCookie(cookieName)),
             )

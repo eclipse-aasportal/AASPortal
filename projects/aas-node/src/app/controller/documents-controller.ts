@@ -27,7 +27,6 @@ export class DocumentsController extends Controller {
      * @returns A page of AAS documents.
      */
     @Get('')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocuments')
     public async getDocuments(
         @Query() cursor: string,
@@ -47,7 +46,6 @@ export class DocumentsController extends Controller {
      * @returns The total number of AAS documents.
      */
     @Get('count')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
         return { count: await this.aasProvider.getCount() };
@@ -59,7 +57,7 @@ export class DocumentsController extends Controller {
      * @returns The first occurrence of an AAS document with the specified identifier.
      */
     @Get('{id}')
-    @Security('bearerAuth', ['guest'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getDocument')
     public async getDocument(@Path() id: string): Promise<AASDocument> {
         return await this.aasProvider.getDocument(decodeBase64Url(id));

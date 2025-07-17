@@ -13,7 +13,7 @@ import { TestBed } from '@angular/core/testing';
 import { AuthResult, Cookie } from 'aas-core';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
-import { getGuestToken, getToken } from '../../assets/json-web-token';
+import { getToken } from '../../assets/json-web-token';
 
 describe('AuthApiService', () => {
     let service: AuthApiService;
@@ -41,19 +41,6 @@ describe('AuthApiService', () => {
 
     it('should created', () => {
         expect(service).toBeTruthy();
-    });
-
-    describe('guest', () => {
-        it('login guest', () => {
-            const result: AuthResult = { token: getGuestToken() };
-            service.guest().subscribe(res => {
-                expect(res).toEqual(result);
-            });
-
-            const req = httpTestingController.expectOne('/api/v1/guest');
-            expect(req.request.method).toEqual('POST');
-            req.flush(result);
-        });
     });
 
     describe('login', () => {
