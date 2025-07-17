@@ -21,9 +21,7 @@ export type FavoritesState = { active: string; items: FavoritesList[] };
 
 const cookieName = 'v2.Favorites';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class FavoritesService {
     private readonly state$ = signal<FavoritesState>({ active: '', items: [] });
 

@@ -25,7 +25,7 @@ import {
     AuthService,
     NotifyService,
     DownloadService,
-    AASTableComponent,
+    AASTable,
     StartService,
     IndexChangeService,
     EndpointsApi,
@@ -42,7 +42,7 @@ import { FavoritesList, FavoritesService } from '../../app/shells/favorites.serv
     styleUrls: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestAASTableComponent {
+class TestAASTable {
     public readonly viewMode = input<ViewMode>(ViewMode.List);
     public readonly documents = input<AASDocument[]>([]);
     public readonly selected = model<AASDocument[]>([]);
@@ -161,10 +161,10 @@ describe('ShellsComponent', () => {
 
         TestBed.overrideComponent(ShellsComponent, {
             remove: {
-                imports: [AASTableComponent],
+                imports: [AASTable],
             },
             add: {
-                imports: [TestAASTableComponent],
+                imports: [TestAASTable],
             },
         });
     });

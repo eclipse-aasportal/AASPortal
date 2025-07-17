@@ -6,60 +6,118 @@
  *
  *****************************************************************************/
 
-import { effect, untracked, Injectable, OnDestroy } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { EMPTY, Observable, Subscription, catchError, concat, from, map, mergeMap, of } from 'rxjs';
-import { EndpointsApi, IndexChangeService, ViewMode } from 'aas-lib';
-import { AASDocument, AASDocumentId, AASPagedResult, aas } from 'aas-core';
-import { ShellsStore } from './shells.store';
+import { computed, effect, Injectable, OnDestroy, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, concat, EMPTY, from, map, mergeMap, Observable, of, skipWhile, Subscription } from 'rxjs';
+import { aas, AASDocument, AASDocumentId, AASPagedResult } from 'aas-core';
+import { AuthService, EndpointsApi, IndexChangeService, ViewMode } from 'aas-lib';
 import { FavoritesService } from './favorites.service';
+import { TranslateService } from '@ngx-translate/core';
 
-@Injectable()
+type ShellsState = {
+    limit: number;
+    filterText: string;
+};
+
+const cookieName = 'v1.Shells';
+
+const initialState: ShellsState = {
+    limit: 10,
+    filterText: '',
+};
+
+@Injectable({
+    providedIn: 'root',
+})
 export class ShellsService implements OnDestroy {
+    private readonly state = signal(initialState);
     private readonly subscription = new Subscription();
 
     public constructor(
-        private readonly store: ShellsStore,
-        private readonly api: EndpointsApi,
-        private readonly favorites: FavoritesService,
+        private readonly auth: AuthService,
         private readonly translate: TranslateService,
+        private readonly favorites: FavoritesService,
+        private readonly api: EndpointsApi,
         private readonly indexChange: IndexChangeService,
     ) {
+        this.auth.userId
+            .pipe(
+                skipWhile(userId => userId === undefined),
+                takeUntilDestroyed(),
+                mergeMap(() => this.auth.getCookie(cookieName)),
+            )
+            .subscribe(value => {
+                if (value) {
+                    this.state.set(JSON.parse(value));
+                } else {
+                    this.state.update(state => ({ ...state, viewMode: ViewMode.List }));
+                }
+            });
+
         effect(() => {
-            this.refreshPage(this.store.limit());
+            const activeFavorites = this.favorites.active();
+            if (activeFavorites) {
+                this.getFavorites(this.favorites.get(activeFavorites)?.documents ?? []);
+            } else {
+                this.getFirstPage();
+            }
+        });
+
+        effect(() => {
+            this.refreshPage(this.limit());
         });
 
         this.subscription.add(this.indexChange.message.subscribe(this.updatePage));
     }
 
+    public readonly active = this.favorites.active;
+
+    public readonly limit = computed(() => this.state().limit);
+
+    public readonly filterText = computed(() => this.state().filterText);
+
+    public readonly documents = signal<AASDocument[]>([]);
+
+    public readonly selected = signal<AASDocument[]>([]);
+
+    public readonly previous = signal<AASDocumentId | null>(null);
+
+    public readonly next = signal<AASDocumentId | null>(null);
+
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    public removeFavorites(favorites: AASDocument[]): void {
-        if (!this.favorites.active()) {
-            return;
-        }
+    public setLimit(limit: number): void {
+        this.state.update(state => ({ ...state, limit }));
+    }
 
-        const documents = this.store
-            .documents()
-            .filter(document =>
-                favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
-            );
+    public setFilterText(value: string): void {
+        this.state.update(state => ({ ...state, value }));
+    }
 
-        this.store.documents.set(documents);
+    public update(limit: number | undefined, filterText: string | undefined): void {
+        this.state.update(state => ({
+            ...state,
+            limit: limit ?? state.limit,
+            filterText: filterText ?? state.filterText,
+        }));
+    }
+
+    public save(): Observable<void> {
+        return this.auth.setCookie(cookieName, JSON.stringify(this.state()));
     }
 
     public getFirstPage(filter?: string, limit?: number): void {
         if (filter === undefined) {
-            filter = untracked(this.store.filterText);
+            filter = untracked(this.filterText);
         }
 
         this.api
             .getDocuments(
                 {
                     previous: null,
-                    limit: limit ?? untracked(this.store.limit),
+                    limit: limit ?? untracked(this.limit),
                 },
                 filter,
                 this.translate.currentLang,
@@ -69,7 +127,7 @@ export class ShellsService implements OnDestroy {
     }
 
     public getNextPage(): void {
-        const documents = untracked(this.store.documents);
+        const documents = untracked(this.documents);
         if (documents.length === 0) {
             return;
         }
@@ -77,10 +135,10 @@ export class ShellsService implements OnDestroy {
         this.api
             .getDocuments(
                 {
-                    next: untracked(this.store.next),
-                    limit: untracked(this.store.limit),
+                    next: untracked(this.next),
+                    limit: untracked(this.limit),
                 },
-                untracked(this.store.filterText),
+                untracked(this.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -92,9 +150,9 @@ export class ShellsService implements OnDestroy {
             .getDocuments(
                 {
                     next: null,
-                    limit: untracked(this.store.limit),
+                    limit: untracked(this.limit),
                 },
-                untracked(this.store.filterText),
+                untracked(this.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -102,7 +160,7 @@ export class ShellsService implements OnDestroy {
     }
 
     public getPreviousPage(): void {
-        const documents = untracked(this.store.documents);
+        const documents = untracked(this.documents);
         if (documents.length === 0) {
             return;
         }
@@ -110,28 +168,54 @@ export class ShellsService implements OnDestroy {
         this.api
             .getDocuments(
                 {
-                    previous: untracked(this.store.previous),
-                    limit: untracked(this.store.limit),
+                    previous: untracked(this.previous),
+                    limit: untracked(this.limit),
                 },
-                untracked(this.store.filterText),
+                untracked(this.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
     }
 
+    public removeFavorites(favorites: AASDocument[]): void {
+        if (!this.favorites.active()) {
+            return;
+        }
+
+        const documents = this.documents().filter(document =>
+            favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
+        );
+
+        this.documents.set(documents);
+    }
+
+    private getFavorites(documents: AASDocument[]): void {
+        this.documents.set(documents);
+        from(documents)
+            .pipe(
+                mergeMap(document =>
+                    this.api.getContent(document.id, document.endpoint).pipe(
+                        catchError(() => of(undefined)),
+                        map(content => this.setContent(document, content)),
+                    ),
+                ),
+            )
+            .subscribe();
+    }
+
     private refreshPage(limit: number): void {
-        if (untracked(this.store.documents).length === 0) {
+        if (untracked(this.documents).length === 0) {
             return;
         }
 
         this.api
             .getDocuments(
                 {
-                    next: this.getId(untracked(this.store.documents)[0]),
+                    next: this.getId(untracked(this.documents)[0]),
                     limit,
                 },
-                untracked(this.store.filterText),
+                untracked(this.filterText),
                 this.translate.currentLang,
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
@@ -139,7 +223,7 @@ export class ShellsService implements OnDestroy {
     }
 
     private readonly updatePage = () => {
-        const documents = untracked(this.store.documents);
+        const documents = untracked(this.documents);
         if (documents.length === 0) {
             return;
         }
@@ -148,9 +232,9 @@ export class ShellsService implements OnDestroy {
             .getDocuments(
                 {
                     next: this.getId(documents[0]),
-                    limit: untracked(this.store.limit),
+                    limit: untracked(this.limit),
                 },
-                untracked(this.store.filterText),
+                untracked(this.filterText),
                 this.translate.currentLang,
             )
             .pipe(
@@ -196,14 +280,14 @@ export class ShellsService implements OnDestroy {
     }
 
     private setPage(result: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
-        this.store.documents.set(result.documents);
-        this.store.previous.set(result.previous);
-        this.store.next.set(result.next);
-        this.store.update(limit, filter);
+        this.documents.set(result.documents);
+        this.previous.set(result.previous);
+        this.next.set(result.next);
+        this.update(limit, filter);
     }
 
     private setContent(document: AASDocument, content: aas.Environment | null | undefined): void {
-        this.store.documents.update(state => {
+        this.documents.update(state => {
             const documents = [...state];
             const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
             if (index >= 0) {
