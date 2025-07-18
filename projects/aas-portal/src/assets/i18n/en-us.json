@@ -168,7 +168,10 @@
         "DigitalProductPassport": "Product passport",
         "CustomerFeedback": "User feedback",
         "Nameplate": "Nameplate",
-        "HandoverDocumentation": "Handover documentation"
+        "HandoverDocumentation": "Handover documentation",
+        "OperationalData": "Operational data",
+        "Browser": "Browser",
+        "ContactInformations": "Contact information"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Search"
@@ -320,16 +323,8 @@
     "HandoverDocumentation": {
         "EMPTY": "No handover documents available."
     },
-    "DigitalNameplate": {
-        "ManufacturerName": "Manufacturer",
-        "ManufacturerProductType": "Type",
-        "ManufacturerProductFamily": "Family",
-        "ProductArticleNumberOfManufacturer": "Art. Nr.",
-        "SerialNumber": "Serial Nr."
-    },
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",
         "TITLE": "AAS browser"
-    },
-    "Laser": {}
+    }
 }

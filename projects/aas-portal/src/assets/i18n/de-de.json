@@ -167,7 +167,10 @@
         "DigitalProductPassport": "Produktpass",
         "CustomerFeedback": "Nutzer-Feedback",
         "Nameplate": "Typenschild",
-        "HandoverDocumentation": "Übergabedokumentation"
+        "HandoverDocumentation": "Übergabedokumentation",
+        "OperationalData": "Operative Daten",
+        "Browser": "Browser",
+        "ContactInformations": "Kontaktinformationen"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -318,13 +321,6 @@
     },
     "HandoverDocumentation": {
         "EMPTY": "Keine Übergabedokumente verfügbar."
-    },
-    "DigitalNameplate": {
-        "ManufacturerName": "Hersteller",
-        "ManufacturerProductType": "Typ",
-        "ManufacturerProductFamily": "Familie",
-        "ProductArticleNumberOfManufacturer": "Art.-Nr.",
-        "SerialNumber": "Serien-Nr."
     },
     "Browser": {
         "TITLE": "AAS-Browser",
