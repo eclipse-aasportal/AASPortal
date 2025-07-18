@@ -66,7 +66,6 @@ export class EndpointsController extends Controller {
      * @returns The total number of AAS documents.
      */
     @Get('{name}/documents/count')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getDocumentCount')
     public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
         return { count: await this.aasProvider.getCount(decodeBase64Url(name)) };
@@ -195,7 +194,6 @@ export class EndpointsController extends Controller {
      * @returns The AAS document.
      */
     @Get('{endpoint}/documents/{id}')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getDocument')
     public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
         return await this.aasProvider.getDocument(decodeBase64Url(id), decodeBase64Url(endpoint));
@@ -208,7 +206,6 @@ export class EndpointsController extends Controller {
      * @returns The AAS environment or `undefined`.
      */
     @Get('{endpoint}/documents/{id}/content')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getDocumentContent')
     public async getDocumentContent(
         @Path() endpoint: string,
@@ -227,8 +224,6 @@ export class EndpointsController extends Controller {
      * @param height The image height if the value represenst an image.
      */
     @Get('{endpoint}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
-    @Security('api_key')
     @OperationId('getDataElementValue')
     public async getDataElementValue(
         @Path() endpoint: string,
@@ -291,7 +286,6 @@ export class EndpointsController extends Controller {
      * @returns The AAS environment or `undefined`.
      */
     @Get('{endpoint}/documents/{id}/hierarchy')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getHierarchy')
     public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
         return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));

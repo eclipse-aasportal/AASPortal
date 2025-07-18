@@ -32,7 +32,7 @@ export class DashboardService {
     public constructor(private readonly auth: AuthService) {
         this.auth.ready
             .pipe(
-                skipWhile(ready => ready === true),
+                skipWhile(ready => ready === false),
                 mergeMap(() => this.auth.getCookie('.Dashboard.v4')),
                 map(data => {
                     if (data === undefined) {

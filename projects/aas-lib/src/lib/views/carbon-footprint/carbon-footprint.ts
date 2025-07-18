@@ -23,7 +23,7 @@ import {
     parseNumber,
 } from 'aas-core';
 
-import { CarbonFootprint_1_0 } from '../views';
+import { CarbonFootprint_0_9, CarbonFootprint_1_0 } from '../views';
 import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
 import { DataSheetData, DataSheetFormat, DataSheetItem, DataSheetItemPath } from '../../types';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
@@ -52,7 +52,10 @@ export class CarbonFootprint {
             return undefined;
         }
 
-        return env.submodels.find(submodel => getSemanticId(submodel) === CarbonFootprint_1_0);
+        return env.submodels.find(submodel => {
+            const semanticId = getSemanticId(submodel);
+            return semanticId === CarbonFootprint_1_0 || semanticId === CarbonFootprint_0_9;
+        });
     });
 
     public readonly totalPcfCO2eq = computed(() => {
@@ -116,10 +119,6 @@ export class CarbonFootprint {
     public readonly carbonFootprintIndex = signal(1);
 
     public readonly carbonFootprintSize = computed(() => this.carbonFootprintItems().length);
-
-    public isArray(value: unknown): boolean {
-        return Array.isArray(value);
-    }
 
     private createCarbonFootprint(smc: aas.SubmodelElementCollection): DataSheetData {
         const env = this.document()!.content!;

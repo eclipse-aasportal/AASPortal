@@ -18,7 +18,7 @@ import { of } from 'rxjs';
 import { WINDOW } from '../../../lib/services/window.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
-import { HandoverDocumentationComponent } from '../../../lib/views/handover-documentation/handover-documentation.component';
+import { HandoverDocumentationView } from '../../../lib/views/handover-documentation/handover-documentation.view';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
@@ -88,7 +88,7 @@ describe('HandoverDocumentationComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                HandoverDocumentationComponent,
+                HandoverDocumentationView,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -98,14 +98,14 @@ describe('HandoverDocumentationComponent', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(HandoverDocumentationComponent, {
+        TestBed.overrideComponent(HandoverDocumentationView, {
             remove: { imports: [SecuredImageComponent] },
             add: { imports: [TestSecuredImageComponent] },
         });
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(HandoverDocumentationComponent);
+        const fixture = TestBed.createComponent(HandoverDocumentationView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();

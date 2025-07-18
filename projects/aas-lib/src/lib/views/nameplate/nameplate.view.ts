@@ -30,41 +30,28 @@ import {
     getLocaleValue,
     getReferable,
     getSemanticId,
-    isFile,
     isMultiLanguageProperty,
     isProperty,
-    isSubmodelElementCollection,
-    isSubmodelElementList,
 } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
 import { WINDOW } from '../../services/window.service';
 import { AuthService } from '../../components/auth/auth.service';
-import { basename, decodeBase64Url, encodeBase64Url, getDisplayName, getUrl } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
-import { FHGNameplate, HSUNameplate, IDTANameplate, ZVEINameplate } from '../views';
+import { FHGNameplate, HSUNameplate, Nameplate_3_0, ZVEINameplate } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-
-export type NameplateGroup = { idShort: string; name: string; items: NameplateItem[] };
-
-export type NameplateItem = {
-    idShort: string;
-    name: string;
-    value: string;
-    type: 'text' | 'link';
-    element: aas.SubmodelElement;
-    url?: string;
-};
+import { Nameplate } from './nameplate';
 
 @Component({
-    selector: 'fhg-nameplate',
-    templateUrl: './nameplate.component.html',
-    styleUrls: ['./nameplate.component.scss'],
-    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode],
+    selector: 'fhg-nameplate-view',
+    templateUrl: './nameplate.view.html',
+    styleUrls: ['./nameplate.view.scss'],
+    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NameplateComponent implements OnInit, OnDestroy {
+export class NameplateView implements OnInit, OnDestroy {
     public constructor(
         private readonly route: ActivatedRoute,
         private readonly translate: TranslateService,
@@ -106,56 +93,12 @@ export class NameplateComponent implements OnInit, OnDestroy {
 
     public readonly nameplateIndex = signal(1);
 
-    public readonly nameplateGroups = computed(() => {
-        const groups: NameplateGroup[] = [];
-        const tuple = this.nameplate();
-        if (tuple === undefined) {
-            return groups;
-        }
-
-        const [document, submodel] = tuple;
-        if (submodel === undefined || submodel.submodelElements === undefined) {
-            return groups;
-        }
-
-        groups.push({
-            idShort: 'General',
-            name: 'General',
-            items: this.filterItems(document, submodel, submodel.submodelElements),
-        });
-
-        for (const element of submodel.submodelElements) {
-            if (isSubmodelElementCollection(element)) {
-                const items = this.filterItems(document, submodel, element.value);
-                if (items.length > 0) {
-                    groups.push({
-                        idShort: element.idShort,
-                        name: getDisplayName(element, document.content, this.translate.currentLang),
-                        items,
-                    });
-                }
-            } else if (isSubmodelElementList(element)) {
-                const items = this.filterItems(document, submodel, element.value);
-                if (items.length > 0) {
-                    groups.push({
-                        idShort: element.idShort,
-                        name: getDisplayName(element, document.content, this.translate.currentLang),
-                        items,
-                    });
-                }
-            }
-        }
-
-        return groups;
-    });
-
     public readonly thumbnail = computed(() => {
-        const tuple = this.nameplate();
-        if (tuple === undefined) {
+        const document = this.document();
+        if (!document) {
             return '';
         }
 
-        const [document] = tuple;
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
     });
 
@@ -187,15 +130,6 @@ export class NameplateComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-    }
-
-    public open($event: MouseEvent, item: NameplateItem): void {
-        if (item.url) {
-            const token = this.auth.token();
-            this.window.open(item.url + '?access_token=' + token);
-        }
-
-        $event.stopPropagation();
     }
 
     public addToStart(): Observable<void> {
@@ -284,61 +218,6 @@ export class NameplateComponent implements OnInit, OnDestroy {
         this.nameplates.set([...this.filterSubmodels(documents)]);
     }
 
-    private filterItems(
-        document: AASDocument,
-        submodel: aas.Submodel,
-        values: aas.SubmodelElement[] | undefined,
-    ): NameplateItem[] {
-        if (!values) {
-            return [];
-        }
-
-        const items: NameplateItem[] = [];
-        values.forEach(value => {
-            const name = getDisplayName(value, document.content, this.translate.currentLang);
-            if (isProperty(value)) {
-                if (!value.value) {
-                    return;
-                }
-
-                items.push({
-                    idShort: value.idShort,
-                    name,
-                    type: 'text',
-                    value: convertToString(value.value, this.translate.currentLang),
-                    element: value,
-                });
-            } else if (isMultiLanguageProperty(value)) {
-                if (value.value === undefined || value.value.length === 0) {
-                    return;
-                }
-
-                items.push({
-                    idShort: value.idShort,
-                    name,
-                    type: 'text',
-                    value: getLocaleValue(value.value, this.translate.currentLang) ?? '-',
-                    element: value,
-                });
-            } else if (isFile(value)) {
-                if (!value.value) {
-                    return;
-                }
-
-                items.push({
-                    idShort: value.idShort,
-                    name,
-                    type: 'link',
-                    value: basename(value.value),
-                    url: getUrl(document, submodel, value),
-                    element: value,
-                });
-            }
-        });
-
-        return items;
-    }
-
     private *filterSubmodels(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
         for (const document of documents) {
             if (!document.content) {
@@ -348,7 +227,7 @@ export class NameplateComponent implements OnInit, OnDestroy {
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
                 if (
-                    semanticId === IDTANameplate ||
+                    semanticId === Nameplate_3_0 ||
                     semanticId === ZVEINameplate ||
                     semanticId === FHGNameplate ||
                     semanticId === HSUNameplate

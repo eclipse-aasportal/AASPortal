@@ -11,7 +11,6 @@ import {
     Component,
     computed,
     effect,
-    ElementRef,
     Inject,
     OnDestroy,
     OnInit,
@@ -20,7 +19,6 @@ import {
     viewChild,
     WritableSignal,
 } from '@angular/core';
-import QRCode from 'qrcode';
 import { ActivatedRoute } from '@angular/router';
 import {
     aas,
@@ -36,7 +34,7 @@ import {
     WebSocketData,
 } from 'aas-core';
 
-import { decodeBase64Url, encodeBase64Url, getDisplayName, getUrl } from '../../utilities';
+import { decodeBase64Url, getDisplayName, getUrl } from '../../utilities';
 import { WINDOW } from '../../services/window.service';
 import { TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
@@ -46,6 +44,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 
 export type GroupItem = {
     idShort: string;
@@ -60,14 +59,14 @@ export type GroupItem = {
 export type Group = { idShort: string; name: string; items: GroupItem[] };
 
 @Component({
-    selector: 'fhg-laser',
-    templateUrl: './laser.component.html',
-    styleUrl: './laser.component.scss',
-    imports: [NgbAccordionModule],
+    selector: 'fhg-operational-data-view',
+    templateUrl: './operational-data-view.html',
+    styleUrl: './operational-data-view.scss',
+    imports: [NgbAccordionModule, ThumbnailQRCode],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LaserComponent implements OnInit, OnDestroy {
-    private readonly document = signal<AASDocument | undefined>(undefined);
+export class OperationalDataView implements OnInit, OnDestroy {
+    private readonly document$ = signal<AASDocument | undefined>(undefined);
     private readonly map = new Map<string, GroupItem>();
     private liveNodes: LiveNode[] = [];
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
@@ -89,20 +88,6 @@ export class LaserComponent implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            const qrCode = this.qrCode();
-            const url = new URL(this.window.location.toString());
-            const document = this.document();
-            if (document) {
-                url.searchParams.set('endpoint', encodeBase64Url(document.endpoint));
-                url.searchParams.set('id', encodeBase64Url(document.id));
-            }
-
-            if (qrCode) {
-                QRCode.toCanvas(qrCode.nativeElement, url.toString());
-            }
-        });
-
-        effect(() => {
             this.groups();
             this.stop();
             if (this.liveNodes.length > 0) {
@@ -113,10 +98,8 @@ export class LaserComponent implements OnInit, OnDestroy {
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('laserToolbar');
 
-    public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
-
     public readonly title = computed(() => {
-        const env = this.document()?.content;
+        const env = this.document$()?.content;
         if (!env || env.assetAdministrationShells.length === 0) {
             return '-';
         }
@@ -124,12 +107,12 @@ export class LaserComponent implements OnInit, OnDestroy {
         return getDisplayName(env.assetAdministrationShells[0], env, this.translate.currentLang);
     });
 
-    public readonly thumbnail = signal<string>('/assets/resources/cunalaserinalogo.gif').asReadonly();
+    public readonly document = this.document$.asReadonly();
 
     public readonly groups = computed<Group[]>(() => {
         this.map.clear();
         this.liveNodes = [];
-        const content = this.document()?.content;
+        const content = this.document$()?.content;
         if (!content) {
             return [];
         }
@@ -173,7 +156,7 @@ export class LaserComponent implements OnInit, OnDestroy {
                 }),
             )
             .subscribe(document => {
-                this.document.set(document);
+                this.document$.set(document);
             });
     }
 
@@ -182,21 +165,12 @@ export class LaserComponent implements OnInit, OnDestroy {
         this.toolbar.clear();
     }
 
-    public open($event: MouseEvent, item: GroupItem): void {
-        if (item.url) {
-            const token = this.auth.token();
-            this.window.open(item.url + '?access_token=' + token);
-        }
-
-        $event.stopPropagation();
-    }
-
     public addToStart(): Observable<void> {
         return EMPTY;
     }
 
     private createGroup(submodel: aas.Submodel, parent: aas.Referable, children: aas.Referable[]): Group {
-        const env = this.document()?.content;
+        const env = this.document$()?.content;
         const items: GroupItem[] = [];
         for (const child of children) {
             if (isProperty(child)) {
@@ -242,7 +216,7 @@ export class LaserComponent implements OnInit, OnDestroy {
                     value: signal(child.value),
                     type: 'link',
                     element: child,
-                    url: getUrl(this.document()!, submodel, child),
+                    url: getUrl(this.document$()!, submodel, child),
                 });
             }
         }
@@ -255,7 +229,7 @@ export class LaserComponent implements OnInit, OnDestroy {
     }
 
     private play(): void {
-        const document = this.document();
+        const document = this.document$();
         if (!document) {
             return;
         }

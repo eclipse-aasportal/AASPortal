@@ -18,11 +18,11 @@
             </td>
             } @else if (isArray(item.value)) {
             <td>
-                <ul>
+                <div class="d-flex flex-column">
                     @for (value of item.value; track value) {
-                    <li>{{value}}</li>
+                    <div>{{value}}</div>
                     }
-                </ul>
+                </div>
             </td>
             } @else {
             <td>{{item.value}}</td>

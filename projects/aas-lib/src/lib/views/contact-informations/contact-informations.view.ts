@@ -1,0 +1,141 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute } from '@angular/router';
+import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    OnDestroy,
+    OnInit,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
+
+import { aas, AASDocument, getSemanticId } from 'aas-core';
+
+import { ToolbarService } from '../../services/toolbar.service';
+import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
+import { EndpointsApi } from '../../services/endpoints-api';
+import { ContactInformations_1_0 } from '../views';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ContactInformations } from './contact-informations';
+
+@Component({
+    selector: 'fhg-contact-informations-view',
+    templateUrl: './contact-informations.view.html',
+    styleUrls: ['./contact-informations.view.scss'],
+    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformations],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ContactInformationsView implements OnInit, OnDestroy {
+    public constructor(
+        private readonly route: ActivatedRoute,
+        private readonly translate: TranslateService,
+        private readonly toolbar: ToolbarService,
+        private readonly api: EndpointsApi,
+    ) {
+        effect(() => {
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
+            }
+        });
+    }
+
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
+
+    public readonly title = computed(() => {
+        const tuple = this.item();
+        if (tuple === undefined) {
+            return '-';
+        }
+
+        return getDisplayName(tuple[1], tuple[0].content, this.translate.currentLang);
+    });
+
+    private readonly items = signal<[AASDocument, aas.Submodel][]>([]);
+
+    public readonly count = computed(() => this.items().length);
+
+    public readonly item = computed(() => this.items().at(this.index() - 1));
+
+    public readonly document = computed(() => {
+        const item = this.item();
+        return item ? item[0] : undefined;
+    });
+
+    public readonly index = signal(1);
+
+    public readonly thumbnail = computed(() => {
+        const document = this.document();
+        if (!document) {
+            return '';
+        }
+
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
+    });
+
+    public ngOnInit(): void {
+        this.route.queryParams
+            .pipe(
+                first(),
+                mergeMap(params => {
+                    if (params.id) {
+                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+                    }
+
+                    if (!params.docs) {
+                        return of([]);
+                    }
+
+                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+                    return from(docs).pipe(
+                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                        toArray(),
+                    );
+                }),
+            )
+            .subscribe(documents => {
+                this.initialize(documents);
+            });
+    }
+
+    public ngOnDestroy(): void {
+        this.toolbar.clear();
+    }
+
+    public addToStart(): Observable<void> {
+        return EMPTY;
+    }
+
+    private initialize(documents: AASDocument[]) {
+        this.items.set([...this.filterSubmodels(documents)]);
+    }
+
+    private *filterSubmodels(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
+        for (const document of documents) {
+            if (!document.content) {
+                continue;
+            }
+
+            for (const submodel of document.content.submodels) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId === ContactInformations_1_0) {
+                    yield [document, submodel];
+                }
+            }
+        }
+    }
+}

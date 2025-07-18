@@ -6,39 +6,69 @@
  *
  *****************************************************************************/
 
-import { aas, AASDocument, getIdShortPath, getSemanticId, selectSubmodel } from 'aas-core';
+import {
+    aas,
+    AASDocument,
+    convertToString,
+    getIdShortPath,
+    getLocaleValue,
+    getReferable,
+    getSemanticId,
+    isFile,
+    isMultiLanguageProperty,
+    isProperty,
+    selectSubmodel,
+} from 'aas-core';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
     computed,
     effect,
-    Inject,
     OnDestroy,
     OnInit,
+    signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
 
-import { CarbonFootprint_1_0, HandoverDocumentation, IDTANameplate } from '../views';
-import { DigitalProductPassportStore, DocumentationItem, NameValue } from './digital-product-passport.store';
+import { CarbonFootprint_1_0, HandoverDocumentation_003, Nameplate_3_0 } from '../views';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { WINDOW } from '../../services/window.service';
-import { AuthService } from '../../components/auth/auth.service';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
+import { Nameplate } from '../nameplate/nameplate';
+import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
+
+export type MainData = {
+    uriOfTheProduct: string;
+    productType: string;
+    serialNumber: string;
+};
+
+type ViewData = {
+    document: AASDocument;
+    nameplate: aas.Submodel;
+    carbonFootprint: aas.Submodel;
+    handoverDocumentation: aas.Submodel;
+};
+
+const emptyMainData: MainData = {
+    uriOfTheProduct: '-',
+    productType: '-',
+    serialNumber: '-',
+};
 
 @Component({
     selector: 'fhg-device-passport-portal',
-    templateUrl: './digital-product-passport.component.html',
-    styleUrl: './digital-product-passport.component.scss',
+    templateUrl: './digital-product-passport.view.html',
+    styleUrl: './digital-product-passport.view.scss',
     imports: [
         TranslateModule,
         SecuredImageComponent,
@@ -46,18 +76,20 @@ import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
         NgbPaginationModule,
         ThumbnailQRCode,
         CarbonFootprint,
+        Nameplate,
+        HandoverDocumentation,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DigitalProductPassportComponent implements OnInit, OnDestroy {
+export class DigitalProductPassportView implements OnInit, OnDestroy {
+    private readonly viewData$ = signal<ViewData | undefined>(undefined);
+
     public constructor(
         private readonly route: ActivatedRoute,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        private readonly store: DigitalProductPassportStore,
         private readonly api: EndpointsApi,
-        @Inject(WINDOW) private readonly window: Window,
-        private readonly auth: AuthService,
+        private readonly translate: TranslateService,
     ) {
         effect(() => {
             const template = this.toolbarTemplate();
@@ -69,37 +101,35 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('dppToolbar');
 
-    public readonly viewData = this.store.viewData$.asReadonly();
+    public readonly viewData = this.viewData$.asReadonly();
 
-    public readonly document = computed(() => this.store.viewData$()?.document);
+    public readonly document = computed(() => this.viewData$()?.document);
 
     public readonly hazardStatement = computed(() => {
-        const nameplate = this.store.viewData$()?.nameplate;
+        const nameplate = this.viewData$()?.nameplate;
         if (nameplate === undefined) {
             return '-';
         }
 
-        return this.store.getPropertyValue(nameplate, 'AssetSpecificProperties.DppHazardStatement_01');
+        return this.getPropertyValue(nameplate, 'AssetSpecificProperties.DPPHazardStatement_01');
     });
 
     public readonly hazardSymbol = computed(() =>
-        this.getUrl(this.store.getNameplateFile('AssetSpecificProperties.DppHazardSymbol')),
+        this.getUrl(this.getNameplateFile('AssetSpecificProperties.DPPHazardSymbol')),
     );
 
-    public readonly mainData = this.store.mainData;
-
-    public readonly nameplateItems = computed(() => {
-        const items: NameValue[] = [];
-        for (const [name, value] of Object.entries(this.store.nameplateItems())) {
-            if (typeof value === 'string') {
-                items.push({ name: 'DigitalProductPassport.' + name, value });
-            }
+    public readonly mainData = computed<MainData>(() => {
+        const nameplate = this.viewData$()?.nameplate;
+        if (nameplate === undefined) {
+            return emptyMainData;
         }
 
-        return items;
+        return {
+            uriOfTheProduct: this.getPropertyValue(nameplate, 'URIOfTheProduct'),
+            productType: this.getPropertyValue(nameplate, 'ManufacturerProductType'),
+            serialNumber: this.getPropertyValue(nameplate, 'SerialNumber'),
+        };
     });
-
-    public readonly documentationData = this.store.documentationData;
 
     public ngOnInit(): void {
         this.route.queryParams
@@ -144,18 +174,6 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         return this.start.save();
     }
 
-    public downloadDocumentation($event: MouseEvent, item: DocumentationItem) {
-        const document = this.store.viewData$()?.document;
-        if (document === undefined) {
-            return;
-        }
-
-        const url = this.getUrl(item.file);
-        const token = this.auth.token();
-        this.window.open(url + '?access_token=' + token);
-        $event.stopPropagation();
-    }
-
     private initialize(documents: AASDocument[]): void {
         let nameplate: aas.Submodel | undefined;
         let carbonFootprint: aas.Submodel | undefined;
@@ -167,17 +185,17 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === IDTANameplate) {
+                if (semanticId === Nameplate_3_0) {
                     nameplate = submodel;
                 } else if (semanticId === CarbonFootprint_1_0) {
                     carbonFootprint = submodel;
-                } else if (semanticId === HandoverDocumentation) {
+                } else if (semanticId === HandoverDocumentation_003) {
                     handoverDocumentation = submodel;
                 }
             }
 
             if (nameplate && carbonFootprint && handoverDocumentation) {
-                this.store.viewData$.set({ document, nameplate, carbonFootprint, handoverDocumentation });
+                this.viewData$.set({ document, nameplate, carbonFootprint, handoverDocumentation });
                 break;
             }
 
@@ -190,7 +208,7 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
             return '';
         }
 
-        const document = this.store.viewData$()?.document;
+        const document = this.viewData$()?.document;
         if (!document?.content) {
             return '';
         }
@@ -205,5 +223,40 @@ export class DigitalProductPassportComponent implements OnInit, OnDestroy {
         const name = encodeBase64Url(document.endpoint);
         const id = encodeBase64Url(document.id);
         return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+    }
+
+    private getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
+        const referable = getReferable(submodel, idShortPath);
+        if (isProperty(referable)) {
+            switch (referable.valueType) {
+                case 'xs:double':
+                case 'xs:integer':
+                    return convertToString(referable.value, this.translate.currentLang);
+                case 'xs:string':
+                    return referable.value ?? '';
+                default:
+                    return referable.value ?? '-';
+            }
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            return getLocaleValue(referable.value, this.translate.currentLang) ?? '-';
+        }
+
+        return '-';
+    }
+
+    public getNameplateFile(idShortPath: string): aas.File | undefined {
+        const submodel = this.viewData$()?.nameplate;
+        if (submodel?.submodelElements === undefined || idShortPath.length === 0) {
+            return undefined;
+        }
+
+        const referable = getReferable(submodel, idShortPath);
+        if (isFile(referable)) {
+            return referable;
+        }
+
+        return undefined;
     }
 }

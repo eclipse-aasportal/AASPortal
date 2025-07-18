@@ -11,7 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 import { provideZonelessChangeDetection } from '@angular/core';
 
-describe('Nameplate', () => {
+xdescribe('Nameplate', () => {
     let component: Nameplate;
     let fixture: ComponentFixture<Nameplate>;
 

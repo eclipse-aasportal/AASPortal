@@ -66,6 +66,6 @@ export interface DataSheetItem {
 }
 
 export interface DataSheetData {
-    name: string;
+    name?: string;
     items: DataSheetItem[];
 }

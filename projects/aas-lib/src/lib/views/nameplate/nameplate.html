@@ -6,4 +6,19 @@
  !
  !---------------------------------------------------------------------------->
 
-<p>nameplate works!</p>
+<div ngbAccordion>
+    @for (group of nameplateGroups(); track group; let i = $index) {
+    <div ngbAccordionItem [collapsed]="i !== 0">
+        <h2 ngbAccordionHeader>
+            <button ngbAccordionButton>{{group.name}}</button>
+        </h2>
+        <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+                <ng-template>
+                    <fhg-data-sheet [dataSheet]="group"></fhg-data-sheet>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+    }
+</div>

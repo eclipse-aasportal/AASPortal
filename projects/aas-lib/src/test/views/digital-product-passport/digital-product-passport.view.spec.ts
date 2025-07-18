@@ -15,7 +15,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
 
-import { DigitalProductPassportComponent } from '../../../lib/views/digital-product-passport/digital-product-passport.component';
+import { DigitalProductPassportView } from '../../../lib/views/digital-product-passport/digital-product-passport.view';
 import { WINDOW } from '../../../lib/services/window.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { AuthService } from '../../../lib/components/auth/auth.service';
@@ -51,7 +51,7 @@ export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();
 }
 
-xdescribe('DigitalProductPassportComponent', () => {
+xdescribe('DigitalProductPassportView', () => {
     let window: jasmine.SpyObj<Window>;
     let api: jasmine.SpyObj<EndpointsApi>;
     let auth: jasmine.SpyObj<AuthService>;
@@ -80,14 +80,6 @@ xdescribe('DigitalProductPassportComponent', () => {
                     useValue: route,
                 },
                 {
-                    provide: WINDOW,
-                    useValue: window,
-                },
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
-                {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
@@ -104,7 +96,7 @@ xdescribe('DigitalProductPassportComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                DigitalProductPassportComponent,
+                DigitalProductPassportView,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -114,21 +106,21 @@ xdescribe('DigitalProductPassportComponent', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(DigitalProductPassportComponent, {
+        TestBed.overrideComponent(DigitalProductPassportView, {
             remove: { imports: [SecuredImageComponent, ThumbnailQRCode] },
             add: { imports: [TestSecuredImageComponent, TestThumbnailQRCode] },
         });
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('mainData', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component.mainData().productType).toEqual('turtle');
@@ -137,23 +129,16 @@ xdescribe('DigitalProductPassportComponent', () => {
     });
 
     it('hazardStatement', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component.hazardStatement()).toEqual('Choking Hazard!');
     });
 
     it('hazardSymbol', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component.hazardSymbol).toBeTruthy();
-    });
-
-    it('nameplate data', () => {
-        const fixture = TestBed.createComponent(DigitalProductPassportComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        expect(component.nameplateItems().length).toEqual(15);
     });
 });

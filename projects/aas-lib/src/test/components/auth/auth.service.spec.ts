@@ -83,7 +83,7 @@ describe('AuthService', () => {
 
         it('should be created', () => {
             expect(service).toBeTruthy();
-            expect(service.payload()).toBeTruthy();
+            expect(service.payload()).toBeUndefined();
             expect(service.email()).toBeUndefined();
             expect(service.authenticated()).toBeFalse();
             expect(service.name()).toBeUndefined();
@@ -96,11 +96,11 @@ describe('AuthService', () => {
             });
 
             it('indicates that a guest is not authorized as editor', () => {
-                expect(service.isAuthorized('editor')).toBeFalse();
+                expect(service.isAuthorized(['editor'])).toBeFalse();
             });
 
             it('indicates that a guest is not authorized as admin', () => {
-                expect(service.isAuthorized('admin')).toBeFalse();
+                expect(service.isAuthorized(['admin'])).toBeFalse();
             });
         });
 
@@ -306,11 +306,11 @@ describe('AuthService', () => {
             });
 
             it('indicates that a guest is authorized as editor', () => {
-                expect(service.isAuthorized('editor')).toBeTrue();
+                expect(service.isAuthorized(['editor'])).toBeTrue();
             });
 
             it('indicates that a guest is not authorized as admin', () => {
-                expect(service.isAuthorized('admin')).toBeFalse();
+                expect(service.isAuthorized(['admin'])).toBeFalse();
             });
         });
 
@@ -319,7 +319,7 @@ describe('AuthService', () => {
 
             it('logs out the current user', function (done: DoneFn) {
                 service.logout().subscribe(value => {
-                    expect(value).toBeTruthy();
+                    expect(value).toBeUndefined();
                     expect(service.email()).toBeUndefined();
                     expect(service.authenticated()).toBeFalse();
                     expect(service.name()).toBeUndefined();
@@ -395,7 +395,7 @@ describe('AuthService', () => {
                     .updateUserProfile()
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
-                        expect(value).toBeTruthy();
+                        expect(value).toBeUndefined();
                         expect(service.email()).toBeUndefined();
                         expect(service.authenticated()).toBeFalse();
                         expect(service.name()).toBeUndefined();

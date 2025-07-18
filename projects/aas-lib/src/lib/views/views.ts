@@ -8,20 +8,24 @@
 
 import { Route } from '@angular/router';
 import { CustomerFeedbackComponent } from './customer-feedback/customer-feedback.component';
-import { NameplateComponent } from './nameplate/nameplate.component';
-import { DigitalProductPassportComponent } from './digital-product-passport/digital-product-passport.component';
-import { HandoverDocumentationComponent } from './handover-documentation/handover-documentation.component';
+import { NameplateView } from './nameplate/nameplate.view';
+import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport.view';
+import { HandoverDocumentationView } from './handover-documentation/handover-documentation.view';
 import { DocumentBrowserComponent } from './document-browser/document-browser.component';
-import { LaserComponent } from './laser/laser.component';
+import { OperationalDataView } from './operational-data/operational-data-view';
+import { ContactInformationsView } from './contact-informations/contact-informations.view';
+import { CarbonFootprintView } from './carbon-footprint/carbon-footprint.view';
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
 export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
 export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
 export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
-export const IDTANameplate = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
-export const HandoverDocumentation = '0173-1#01-AHF578#003';
+export const Nameplate_3_0 = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
+export const HandoverDocumentation_001 = '0173-1#01-AHF578#001';
+export const HandoverDocumentation_003 = '0173-1#01-AHF578#003';
 export const CarbonFootprint_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 export const CarbonFootprint_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
+export const ContactInformations_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
 
 export const viewRoutes: Route[] = [
     {
@@ -33,28 +37,39 @@ export const viewRoutes: Route[] = [
     },
     {
         path: 'Nameplate',
-        component: NameplateComponent,
+        component: NameplateView,
         data: {
-            semanticIds: [ZVEINameplate, FHGNameplate, HSUNameplate, IDTANameplate],
+            semanticIds: [ZVEINameplate, FHGNameplate, HSUNameplate, Nameplate_3_0],
         },
     },
     {
         path: 'DigitalProductPassport',
-        component: DigitalProductPassportComponent,
+        component: DigitalProductPassportView,
     },
     {
         path: 'HandoverDocumentation',
-        component: HandoverDocumentationComponent,
+        component: HandoverDocumentationView,
         data: {
-            semanticIds: [HandoverDocumentation],
+            semanticIds: [HandoverDocumentation_003, HandoverDocumentation_001],
         },
     },
     {
-        path: 'Laser',
-        component: LaserComponent,
+        path: 'ContactInformations',
+        component: ContactInformationsView,
         data: {
-            ids: ['https://smartfactory-owl.de/aas/laser', 'http://customer.com/aas/9175_7013_7091_9168'],
+            semanticIds: [ContactInformations_1_0],
         },
+    },
+    {
+        path: 'CarbonFootprint',
+        component: CarbonFootprintView,
+        data: {
+            semanticIds: [CarbonFootprint_1_0, CarbonFootprint_0_9],
+        },
+    },
+    {
+        path: 'OperationalData',
+        component: OperationalDataView,
     },
     {
         path: 'Browser',

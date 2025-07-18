@@ -22,7 +22,6 @@ import {
     toBoolean,
 } from 'aas-core';
 
-import { NotifyService } from '../notify/notify.service';
 import { ERRORS } from '../../errors';
 import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-form.component';
 import { ProfileFormComponent, ProfileFormResult } from '../auth/profile-form/profile-form.component';
@@ -53,7 +52,7 @@ export class AuthService {
                     next: () => this.ready$.next(true),
                     error: () => this.ready$.next(true),
                 });
-                
+
                 return;
             }
         }
@@ -124,14 +123,14 @@ export class AuthService {
      * Ensures that the current user has the expected rights.
      * @param role The expected user role.
      */
-    public ensureAuthorized(role: UserRole): Observable<void> {
-        if (this.isAuthorized(role)) {
+    public ensureAuthorized(...roles: UserRole[]): Observable<void> {
+        if (this.isAuthorized(roles)) {
             return of(void 0);
         }
 
         return this.login().pipe(
             map(() => {
-                if (!this.isAuthorized(role)) {
+                if (!this.isAuthorized(roles)) {
                     throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
                 }
             }),
@@ -224,7 +223,7 @@ export class AuthService {
      * Determines whether the current user is authorized for the specified roles.
      * @param expected The expected role, the current user must have.
      */
-    public isAuthorized(expected: UserRole): boolean {
+    public isAuthorized(expected: UserRole[] | undefined): boolean {
         if (!expected) {
             return true;
         }
@@ -234,7 +233,7 @@ export class AuthService {
             return false;
         }
 
-        return isUserAuthorized(this.role(), [expected]);
+        return isUserAuthorized(role, expected);
     }
 
     /**
