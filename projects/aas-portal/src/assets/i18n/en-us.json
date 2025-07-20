@@ -171,7 +171,9 @@
         "HandoverDocumentation": "Handover documentation",
         "OperationalData": "Operational data",
         "Browser": "Browser",
-        "ContactInformations": "Contact information"
+        "ContactInformations": "Contact information",
+        "CarbonFootprint": "Carbon footprint",
+        "TechnicalData": "Technical data"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Search"

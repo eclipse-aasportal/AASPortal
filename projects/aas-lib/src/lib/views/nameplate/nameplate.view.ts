@@ -15,7 +15,6 @@ import {
     Component,
     computed,
     effect,
-    Inject,
     OnDestroy,
     OnInit,
     signal,
@@ -35,8 +34,6 @@ import {
 } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { WINDOW } from '../../services/window.service';
-import { AuthService } from '../../components/auth/auth.service';
 import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
@@ -57,8 +54,6 @@ export class NameplateView implements OnInit, OnDestroy {
         private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        @Inject(WINDOW) private readonly window: Window,
-        private readonly auth: AuthService,
         private readonly api: EndpointsApi,
     ) {
         effect(() => {
@@ -82,25 +77,16 @@ export class NameplateView implements OnInit, OnDestroy {
 
     private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
 
-    public readonly nameplateSize = computed(() => this.nameplates().length);
+    public readonly count = computed(() => this.nameplates().length);
 
-    public readonly nameplate = computed(() => this.nameplates().at(this.nameplateIndex() - 1));
+    public readonly nameplate = computed(() => this.nameplates().at(this.index() - 1));
 
     public readonly document = computed(() => {
         const nameplate = this.nameplate();
         return nameplate ? nameplate[0] : undefined;
     });
 
-    public readonly nameplateIndex = signal(1);
-
-    public readonly thumbnail = computed(() => {
-        const document = this.document();
-        if (!document) {
-            return '';
-        }
-
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
-    });
+    public readonly index = signal(1);
 
     public ngOnInit(): void {
         this.route.queryParams

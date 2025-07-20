@@ -58,6 +58,15 @@ export class CarbonFootprint {
         });
     });
 
+    public readonly version = computed(() => {
+        const administration = this.submodel()?.administration;
+        if (!administration) {
+            return undefined;
+        }
+
+        return `${administration.version}.${administration.revision}`;
+    });
+
     public readonly totalPcfCO2eq = computed(() => {
         const submodel = this.submodel();
         const currentLang = this.currentLang();

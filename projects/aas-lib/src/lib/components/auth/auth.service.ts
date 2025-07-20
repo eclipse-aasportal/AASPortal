@@ -14,7 +14,6 @@ import { jwtDecode } from 'jwt-decode';
 import {
     ApplicationError,
     Credentials,
-    isUserAuthorized,
     stringFormat,
     UserProfile,
     UserRole,
@@ -233,7 +232,7 @@ export class AuthService {
             return false;
         }
 
-        return isUserAuthorized(role, expected);
+        return expected.indexOf(role) >= 0;
     }
 
     /**

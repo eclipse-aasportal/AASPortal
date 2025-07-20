@@ -15,6 +15,7 @@ import { DocumentBrowserComponent } from './document-browser/document-browser.co
 import { OperationalDataView } from './operational-data/operational-data-view';
 import { ContactInformationsView } from './contact-informations/contact-informations.view';
 import { CarbonFootprintView } from './carbon-footprint/carbon-footprint.view';
+import { TechnicalDataView } from './technical-data/technical-data.view';
 
 export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
 export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
@@ -26,7 +27,7 @@ export const HandoverDocumentation_003 = '0173-1#01-AHF578#003';
 export const CarbonFootprint_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 export const CarbonFootprint_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
 export const ContactInformations_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
-
+export const TechnicalData_1_2 = 'https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2';
 export const viewRoutes: Route[] = [
     {
         path: 'CustomerFeedback',
@@ -70,6 +71,13 @@ export const viewRoutes: Route[] = [
     {
         path: 'OperationalData',
         component: OperationalDataView,
+    },
+    {
+        path: 'TechnicalData',
+        component: TechnicalDataView,
+        data: {
+            semanticIds: [TechnicalData_1_2],
+        },
     },
     {
         path: 'Browser',
