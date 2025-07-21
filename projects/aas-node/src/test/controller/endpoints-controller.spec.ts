@@ -309,7 +309,7 @@ describe('EndpointsController', () => {
     });
 
     it('PUT: /api/v1/endpoints/{endpoint}/documents/{id}', async () => {
-        aasProvider.updateDocument.mockReturnValue(Promise.resolve([]));
+        aasProvider.updateDocument.mockResolvedValue(void 0);
         auth.hasUser.mockReturnValue(new Promise<boolean>(resolve => resolve(true)));
 
         const endpoint = Buffer.from('Endpoint 1').toString('base64url');
@@ -317,9 +317,13 @@ describe('EndpointsController', () => {
         const response = await request(app)
             .put(`/api/v1/endpoints/${endpoint}/documents/${id}`)
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .attach('file', resolve('./src/test/assets/aas-example.json'));
+            .send({
+                assetAdministrationShells: [],
+                conceptDescriptions: [],
+                submodels: [],
+            } satisfies aas.Environment);
 
-        expect(response.statusCode).toBe(200);
+        expect(response.statusCode).toBe(204);
         expect(aasProvider.updateDocument).toHaveBeenCalled();
     });
 

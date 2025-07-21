@@ -6,16 +6,7 @@
  *
  *****************************************************************************/
 
-import {
-    aas,
-    AASEndpoint,
-    convertFromString,
-    DefaultType,
-    DifferenceItem,
-    getSemanticId,
-    LiveRequest,
-    traverse,
-} from 'aas-core';
+import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
 
 import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
@@ -66,10 +57,18 @@ export abstract class ApiClient extends AASClient {
 
     /**
      * Reads the environment of the AAS with the specified identifier.
-     * @param label The AAS label.
-     * @returns An AAS environment.
+     * @param id The unique identifier of the AAS.
+     * @param idShort The short identifier of the AAS.
+     * @returns The AAS environment.
      */
-    public abstract readEnvironment(label: AASLabel): Promise<aas.Environment>;
+    public abstract readEnvironment(id: string, idShort: string): Promise<aas.Environment>;
+
+    /**
+     * Updates the elements contained in the specified AAS environment.
+     * @param id The unique identifier of the AAS to which the environment belongs.
+     * @param env The AAS environment.
+     */
+    public abstract writeEnvironment(id: string, env: aas.Environment): Promise<void>;
 
     /**
      * Gets the thumbnail of the AAS with the specified identifier.
@@ -123,18 +122,6 @@ export abstract class ApiClient extends AASClient {
      * @returns The names of the AASs contained in the current AASX server.
      */
     public abstract getShells(cursor?: string): Promise<PagedResult<AASLabel>>;
-
-    /**
-     * ToDo
-     * @param source The source AAS.
-     * @param destination The destination
-     * @param diffs
-     */
-    public abstract commit(
-        source: aas.Environment,
-        destination: aas.Environment,
-        diffs: DifferenceItem[],
-    ): Promise<string[]>;
 
     /**
      * Opens the specified file from the AASX server.

@@ -24,7 +24,7 @@ describe('HttpSubscription', function () {
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        aasxServer = createSpyObj<ApiClient>(['getShells', 'commit', 'openFile', 'readValue', 'resolveNodeId']);
+        aasxServer = createSpyObj<ApiClient>(['readValue', 'resolveNodeId']);
 
         const reference: aas.Reference = {
             type: 'ModelReference',

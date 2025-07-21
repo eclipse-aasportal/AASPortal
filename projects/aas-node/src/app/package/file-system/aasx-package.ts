@@ -72,13 +72,12 @@ export class AasxPackage extends AASPackage {
         return (await this.createReader()).readEnvironment();
     }
 
-    public override async setEnvironment(env: aas.Environment): Promise<string[]> {
+    public override async setEnvironment(id: string, env: aas.Environment): Promise<void> {
         const writer = new XmlWriterV3();
         const xml = writer.write(env);
         const path = await this.getOriginName();
         (await this.zip).file(path, xml, { compression: 'DEFLATE' });
         await this.save();
-        return [`${this.file} successfully written.`];
     }
 
     public override async openReadStream(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {

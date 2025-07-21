@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, diffAsync, aas } from 'aas-core';
+import { AASDocument, aas } from 'aas-core';
 import { AASPackage } from '../aas-package.js';
 import { AASClient } from '../aas-client.js';
 import { Logger } from '../../logging/logger.js';
@@ -45,7 +45,7 @@ export class ApiPackage extends AASPackage {
     }
 
     public async createDocument(): Promise<AASDocument> {
-        const environment = await this.client.readEnvironment({ id: this.id, idShort: this.idShort });
+        const environment = await this.client.readEnvironment(this.id, this.idShort);
         const document: AASDocument = {
             id: environment.assetAdministrationShells[0].id,
             endpoint: this.client.endpoint.name,
@@ -68,19 +68,11 @@ export class ApiPackage extends AASPackage {
     }
 
     public override getEnvironment(): Promise<aas.Environment> {
-        return this.client.readEnvironment({ id: this.id, idShort: this.idShort });
+        return this.client.readEnvironment(this.id, this.idShort);
     }
 
-    public async setEnvironment(content: aas.Environment, reference?: aas.Environment): Promise<string[]> {
-        let messages: string[] | undefined;
-        if (reference && content) {
-            const diffs = await diffAsync(content, reference);
-            if (diffs.length > 0) {
-                messages = await this.client.commit(content, reference, diffs);
-            }
-        }
-
-        return messages ?? [];
+    public setEnvironment(id: string, env: aas.Environment): Promise<void> {
+        return this.client.writeEnvironment(id, env);
     }
 
     private async createThumbnail(id: string): Promise<string | undefined> {

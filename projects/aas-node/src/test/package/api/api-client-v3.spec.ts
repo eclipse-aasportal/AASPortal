@@ -6,13 +6,12 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { createSpyObj } from 'aas-jest';
 import { aasEnvironment as env } from '../../assets/aas-environment.js';
-import cloneDeep from 'lodash-es/cloneDeep.js';
 import { ApiClientV3, OperationResult } from '../../../app/package/api/api-client-v3.js';
-import { aas, DifferenceItem } from 'aas-core';
+import { aas } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
-import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 import { HttpClient } from '../../../app/http-client.js';
 
 describe('ApiClientV3', () => {
@@ -47,96 +46,37 @@ describe('ApiClientV3', () => {
         });
     });
 
-    describe('commitAsync', () => {
-        let source: aas.Environment;
-        let destination: aas.Environment;
+    describe('writeEnvironment', () => {
+        it('updates an AssetAdministrationShell', async () => {
+            const aas = env.assetAdministrationShells[0];
+            const content: aas.Environment = {
+                assetAdministrationShells: [aas],
+                submodels: [],
+                conceptDescriptions: [],
+            };
 
-        beforeEach(async () => {
-            source = env;
-            destination = cloneDeep(source);
+            http.get.mockResolvedValue(aas);
+            http.put.mockResolvedValue('OK');
+
+            await expect(client.writeEnvironment(aas.id, content)).resolves.toBe(void 0);
+            expect(http.get).toHaveBeenCalled();
+            expect(http.put).toHaveBeenCalled();
         });
 
-        afterEach(() => {
-            jest.restoreAllMocks();
-        });
+        it('adds a new AssetAdministrationShell', async () => {
+            const aas = env.assetAdministrationShells[0];
+            const content: aas.Environment = {
+                assetAdministrationShells: [aas],
+                submodels: [],
+                conceptDescriptions: [],
+            };
 
-        it('inserts a submodel', async () => {
-            http.post.mockResolvedValue('Submodel inserted.');
-            const diffs: DifferenceItem[] = [
-                {
-                    type: 'inserted',
-                    sourceElement: source.submodels[0],
-                },
-            ];
+            http.get.mockRejectedValue(new Error());
+            http.post.mockResolvedValue('OK');
 
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['Submodel inserted.']);
-        });
-
-        it('inserts a submodel-element', async () => {
-            http.post.mockResolvedValue('SubmodelElement inserted.');
-            const diffs: DifferenceItem[] = [
-                {
-                    type: 'inserted',
-                    sourceParent: source.submodels[0],
-                    sourceElement: source.submodels[0].submodelElements![0],
-                    destinationParent: destination.submodels[0],
-                },
-            ];
-
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['SubmodelElement inserted.']);
-        });
-
-        it('updates a submodel', async () => {
-            http.put.mockResolvedValue('Submodel updated.');
-            const diffs: DifferenceItem[] = [
-                {
-                    type: 'changed',
-                    sourceElement: source.submodels[0],
-                    destinationElement: destination.submodels[0],
-                },
-            ];
-
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['Submodel updated.']);
-        });
-
-        it('updates a submodel-element', async () => {
-            http.put.mockResolvedValue('SubmodelElement updated.');
-            const diffs: DifferenceItem[] = [
-                {
-                    type: 'changed',
-                    sourceParent: source.submodels[0],
-                    sourceElement: source.submodels[0].submodelElements![0],
-                    destinationParent: destination.submodels[0],
-                    destinationElement: destination.submodels[0].submodelElements![0],
-                },
-            ];
-
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['SubmodelElement updated.']);
-        });
-
-        it('deletes a submodel', async () => {
-            http.delete.mockResolvedValue('Submodel deleted.');
-            const diffs: DifferenceItem[] = [
-                {
-                    type: 'deleted',
-                    destinationElement: destination.submodels[0],
-                },
-            ];
-
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['Submodel deleted.']);
-        });
-
-        it('deletes a submodel-element', async () => {
-            http.delete.mockResolvedValue('SubmodelElement deleted.');
-            const diffs: DifferenceItem[] = [
-                {
-                    type: 'deleted',
-                    destinationParent: destination.submodels[0],
-                    destinationElement: destination.submodels[0].submodelElements![0],
-                },
-            ];
-
-            await expect(client.commit(source, destination, diffs)).resolves.toEqual(['SubmodelElement deleted.']);
+            await expect(client.writeEnvironment(aas.id, content)).resolves.toBe(void 0);
+            expect(http.get).toHaveBeenCalled();
+            expect(http.post).toHaveBeenCalled();
         });
     });
 

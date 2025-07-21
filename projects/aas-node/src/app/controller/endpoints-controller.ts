@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import fs from 'fs';
 import { inject, injectable } from 'tsyringe';
 import {
     Body,
@@ -21,7 +20,6 @@ import {
     Route,
     Security,
     Tags,
-    UploadedFile,
     UploadedFiles,
 } from 'tsoa';
 
@@ -245,7 +243,7 @@ export class EndpointsController extends Controller {
      * @summary Updates the content of an AAS document.
      * @param endpoint The endpoint name (Base64-URL encoded).
      * @param id The document or AAS identifier (Base64-URL encoded).
-     * @param file The new document content.
+     * @param env The ASS environment containing the modified elements.
      * @returns The messages of the update process.
      */
     @Put('{endpoint}/documents/{id}')
@@ -254,11 +252,9 @@ export class EndpointsController extends Controller {
     public async updateDocument(
         @Path() endpoint: string,
         @Path() id: string,
-        @UploadedFile() file: Express.Multer.File,
-    ): Promise<string[]> {
-        const buffer = await fs.promises.readFile(file.path);
-        const env: aas.Environment = JSON.parse(buffer.toString());
-        return await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
+        @Body() env: aas.Environment,
+    ): Promise<void> {
+        await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
     }
 
     /**

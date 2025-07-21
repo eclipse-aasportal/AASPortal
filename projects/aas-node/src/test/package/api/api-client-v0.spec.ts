@@ -84,9 +84,7 @@ describe('ApiClientV0', function () {
                 return new Promise(resolve => resolve(value));
             });
 
-            await expect(
-                client.readEnvironment({ id: 'http://aas/CunaCup_Becher1', idShort: 'CunaCup_Becher1' }),
-            ).resolves.toBeTruthy();
+            await expect(client.readEnvironment('http://aas/CunaCup_Becher1', 'CunaCup_Becher1')).resolves.toBeTruthy();
         });
     });
 
@@ -111,7 +109,7 @@ describe('ApiClientV0', function () {
             await expect(
                 client.openFile(
                     aasEnvironment.assetAdministrationShells[0],
-                    selectElement(aasEnvironment, 'Documentation', 'OperatingManual', 'DigitalFile_PDF')!,
+                    selectElement(aasEnvironment, 'Documentation', 'OperatingManual.DigitalFile_PDF')!,
                 ),
             ).resolves.toBeTruthy();
         });

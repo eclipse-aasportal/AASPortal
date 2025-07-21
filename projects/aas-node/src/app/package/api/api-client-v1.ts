@@ -8,18 +8,7 @@
 
 import FormData from 'form-data';
 import { createReadStream } from 'fs';
-import {
-    aas,
-    AASEndpoint,
-    ApplicationError,
-    DifferenceItem,
-    getIdShortPath,
-    isAssetAdministrationShell,
-    isSubmodel,
-    isSubmodelElement,
-    noop,
-    selectSubmodel,
-} from 'aas-core';
+import { aas, AASEndpoint, ApplicationError, getIdShortPath, noop, selectSubmodel } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
 import { ApiClient, AASLabel } from './api-client.js';
@@ -85,10 +74,16 @@ export class ApiClientV1 extends ApiClient {
         };
     }
 
-    public async readEnvironment(id: AASLabel): Promise<aas.Environment> {
-        const aasId = encodeBase64Url(id.id);
+    public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
+        return this.http.getResponse(
+            this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
+            this.endpoint.headers,
+        );
+    }
+
+    public async readEnvironment(id: string): Promise<aas.Environment> {
         const shell = await this.http.get<aasv2.AssetAdministrationShell>(
-            this.resolve(`shells/${aasId}`),
+            this.resolve(`shells/${encodeBase64Url(id)}`),
             this.endpoint.headers,
         );
 
@@ -112,52 +107,9 @@ export class ApiClientV1 extends ApiClient {
         return new JsonReaderV2(sourceEnv).readEnvironment();
     }
 
-    public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
-        return this.http.getResponse(
-            this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
-            this.endpoint.headers,
-        );
-    }
-
-    public async commit(source: aas.Environment, target: aas.Environment, diffs: DifferenceItem[]): Promise<string[]> {
-        const messages: string[] = [];
-        const aasId = encodeBase64Url(target.assetAdministrationShells[0].id);
-        for (const diff of diffs) {
-            if (diff.type === 'inserted') {
-                if (isSubmodel(diff.sourceElement)) {
-                    messages.push(await this.postSubmodelAsync(aasId, diff.sourceElement));
-                } else if (isSubmodelElement(diff.sourceElement)) {
-                    const submodel = this.getSubmodel(target, diff.destinationParent);
-                    messages.push(await this.postSubmodelElementAsync(submodel, diff.sourceElement));
-                } else {
-                    throw new Error(`Inserting "${diff?.sourceElement?.modelType}" is not implemented.`);
-                }
-            } else if (diff.type === 'changed') {
-                if (isSubmodel(diff.sourceElement)) {
-                    messages.push(await this.putSubmodelAsync(aasId, diff.sourceElement));
-                } else if (isSubmodelElement(diff.sourceElement)) {
-                    const submodel = this.getSubmodel(target, diff.destinationElement);
-                    messages.push(
-                        await this.putSubmodelElementAsync(submodel, diff.sourceElement as aas.SubmodelElement),
-                    );
-                } else if (isAssetAdministrationShell(diff.sourceElement)) {
-                    messages.push(await this.putShellAsync(diff.sourceElement));
-                } else {
-                    throw new Error(`Updating "${diff?.sourceElement?.modelType}" is not implemented.`);
-                }
-            } else if (diff.type === 'deleted') {
-                if (isSubmodel(diff.destinationElement)) {
-                    messages.push(await this.deleteSubmodelAsync(diff.destinationElement.id));
-                } else if (isSubmodelElement(diff.destinationElement)) {
-                    const submodel = this.getSubmodel(target, diff.destinationParent);
-                    messages.push(await this.deleteSubmodelElementAsync(submodel, diff.destinationElement));
-                } else {
-                    throw new Error(`Deleting "${diff?.destinationElement?.modelType}" is not implemented.`);
-                }
-            }
-        }
-
-        return messages;
+    public writeEnvironment(id: string, env: aas.Environment): Promise<void> {
+        noop(id, env);
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public async openFile(_: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream> {
@@ -309,81 +261,6 @@ export class ApiClientV1 extends ApiClient {
         }
 
         return conceptDescriptions;
-    }
-
-    private async putShellAsync(shell: aas.AssetAdministrationShell): Promise<string> {
-        const aasId = encodeBase64Url(shell.id);
-        return await this.http.put(this.resolve(`shells/${aasId}`), new JsonWriterV2().convert(shell));
-    }
-
-    private async putSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
-        const smId = encodeBase64Url(submodel.id);
-        return await this.http.put(
-            this.resolve(`shells/${aasId}/submodels/${smId}/submodel`),
-            new JsonWriterV2().convert(submodel),
-            this.endpoint.headers,
-        );
-    }
-
-    private async postSubmodelAsync(aasId: string, submodel: aas.Submodel): Promise<string> {
-        return await this.http.post(
-            this.resolve(`submodels?aasIdentifier=${aasId}`),
-            new JsonWriterV2().convert(submodel),
-        );
-    }
-
-    private async deleteSubmodelAsync(smId: string): Promise<string> {
-        return await this.http.delete(this.resolve(`submodels/${encodeBase64Url(smId)}`), this.endpoint.headers);
-    }
-
-    private async putSubmodelElementAsync(
-        submodel: aas.Submodel,
-        submodelElement: aas.SubmodelElement,
-    ): Promise<string> {
-        const smId = encodeBase64Url(submodel.id);
-        const path = getIdShortPath(submodelElement);
-        return await this.http.put(
-            this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}`),
-            new JsonWriterV2().convert(submodelElement),
-        );
-    }
-
-    private async postSubmodelElementAsync(
-        submodel: aas.Submodel,
-        submodelElement: aas.SubmodelElement,
-    ): Promise<string> {
-        const smId = encodeBase64Url(submodel.id);
-        const path = getIdShortPath(submodelElement);
-        return await this.http.post(
-            this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}`),
-            new JsonWriterV2().convert(submodelElement),
-            this.endpoint.headers,
-        );
-    }
-
-    private async deleteSubmodelElementAsync(
-        submodel: aas.Submodel,
-        submodelElement: aas.SubmodelElement,
-    ): Promise<string> {
-        const smId = encodeBase64Url(submodel.id);
-        const path = getIdShortPath(submodelElement);
-        return await this.http.delete(
-            this.resolve(`submodels/${smId}/submodel-elements/${path}`),
-            this.endpoint.headers,
-        );
-    }
-
-    private getSubmodel(env: aas.Environment, referable?: aas.Referable): aas.Submodel {
-        if (!referable) {
-            throw new Error('Argument undefined.');
-        }
-
-        const submodel = selectSubmodel(env, referable);
-        if (!submodel) {
-            throw new Error('Invalid operation.');
-        }
-
-        return submodel;
     }
 
     private *traverse(root: aasv2.Referable): Generator<aasv2.Referable> {

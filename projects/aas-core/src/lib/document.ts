@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import isEqual from 'lodash-es/isEqual.js';
 import * as aas from './aas.js';
 import { AASDocument, AASAbbreviation } from './types.js';
 
@@ -21,6 +20,239 @@ export interface DifferenceItem {
     destinationParent?: aas.Referable;
     destinationElement?: aas.Referable;
     destinationIndex?: number;
+}
+
+/**
+ * Determines whether the specified referable represents a `AssetAdministrationShell`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `AssetAdministrationShell`; otherwise, `false`.
+ */
+export function isAssetAdministrationShell(referable: unknown): referable is aas.AssetAdministrationShell {
+    return (referable as aas.Referable)?.modelType === 'AssetAdministrationShell';
+}
+
+/**
+ * Determines whether the specified referable represents a `Submodel`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Submodel`; otherwise, `false`.
+ */
+export function isSubmodel(referable: unknown): referable is aas.Submodel {
+    return (referable as aas.Referable)?.modelType === 'Submodel';
+}
+
+/**
+ * Determines whether the specified referable represents a `Property`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Property`; otherwise, `false`.
+ */
+export function isProperty(referable: unknown): referable is aas.Property {
+    return (referable as aas.Referable)?.modelType === 'Property';
+}
+
+/**
+ * Determines whether the specified referable represents a `File`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `File`; otherwise, `false`.
+ */
+export function isFile(referable: unknown): referable is aas.File {
+    return (referable as aas.Referable)?.modelType === 'File';
+}
+
+/**
+ * Determines whether the specified referable represents a `Blob`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Blob`; otherwise, `false`.
+ */
+export function isBlob(referable: unknown): referable is aas.Blob {
+    return (referable as aas.Referable)?.modelType === 'Blob';
+}
+
+/**
+ * Determines whether the specified referable represents a `MultiLanguageProperty`.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `MultiLanguageProperty`; otherwise, `false`.
+ */
+export function isMultiLanguageProperty(referable: unknown): referable is aas.MultiLanguageProperty {
+    return (referable as aas.Referable)?.modelType === 'MultiLanguageProperty';
+}
+
+/**
+ * Determines whether the specified referable represents a reference element.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `ReferenceElement`; otherwise, `false`.
+ */
+export function isReferenceElement(referable: unknown): referable is aas.ReferenceElement {
+    return (referable as aas.Referable)?.modelType === 'ReferenceElement';
+}
+
+/**
+ * Determines whether the specified referable represents a submodel element collection.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `SubmodelElementCollection`; otherwise, `false`.
+ */
+export function isSubmodelElementCollection(referable: unknown): referable is aas.SubmodelElementCollection {
+    return (referable as aas.Referable)?.modelType === 'SubmodelElementCollection';
+}
+
+/**
+ * Determines whether the specified referable represents a submodel element list.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `SubmodelElementList`; otherwise, `false`.
+ */
+export function isSubmodelElementList(referable: unknown): referable is aas.SubmodelElementList {
+    return (referable as aas.Referable)?.modelType === 'SubmodelElementList';
+}
+
+/**
+ * Determines whether the specified referable represents an annotated relationship element.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `AnnotatedRelationshipElement`; otherwise, `false`.
+ */
+export function isAnnotatedRelationshipElement(referable: unknown): referable is aas.AnnotatedRelationshipElement {
+    return (referable as aas.AnnotatedRelationshipElement)?.modelType === 'AnnotatedRelationshipElement';
+}
+
+/**
+ * Determines whether the specified referable represents a relationship element.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `RelationshipElement`; otherwise, `false`.
+ */
+export function isRelationshipElement(referable: unknown): referable is aas.RelationshipElement {
+    return (referable as aas.Referable)?.modelType === 'RelationshipElement';
+}
+
+/**
+ * Determines whether the specified referable represents an entity.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Entity`; otherwise, `false`.
+ */
+export function isEntity(referable: unknown): referable is aas.Entity {
+    return (referable as aas.Referable)?.modelType === 'Entity';
+}
+
+/**
+ * Determines whether the specified referable represents an operation.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents an `Operation`; otherwise, `false`.
+ */
+export function isOperation(referable: unknown): referable is aas.Operation {
+    return (referable as aas.Referable)?.modelType === 'Operation';
+}
+
+/**
+ * Determines whether the specified referable represents a range.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `Range`; otherwise, `false`.
+ */
+export function isRange(referable: unknown): referable is aas.Range {
+    return (referable as aas.Referable)?.modelType === 'Range';
+}
+
+/**
+ * Determines whether the specified referable represents a concept description.
+ * @param value The current referable.
+ * @returns `true` if the specified referable represents a `ConceptDescription`; otherwise, `false`.
+ */
+export function isConceptDescription(referable: unknown): referable is aas.ConceptDescription {
+    return (referable as aas.Referable)?.modelType === 'ConceptDescription';
+}
+
+/**
+ * Determines whether the specified value is of type `Referable`.
+ * @param value The current value.
+ * @returns `true` if the specified value is of type `Referable`; otherwise, `false`.
+ */
+export function isReferable(value: unknown): value is aas.Referable {
+    const referable = value as aas.Referable;
+    return typeof referable.modelType === 'string' && typeof referable.idShort === 'string';
+}
+
+/**
+ * Determines whether the specified value is of type `HasSemantics`.
+ * @param value The current value.
+ * @returns `true` if the specified value is of type `HasSemantics`; otherwise, `false`.
+ */
+export function isReference(value: unknown): value is aas.Reference {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    return typeof (value as aas.Reference).type === 'string' && Array.isArray((value as aas.Reference).keys);
+}
+
+/**
+ * Determines whether the specified value represents a submodel element.
+ * @param value The current value.
+ * @returns `true` if the specified value represents a submodel element; otherwise, `false`.
+ */
+export function isSubmodelElement(value: unknown): value is aas.SubmodelElement {
+    if (value && (value as aas.Referable).modelType) {
+        switch ((value as aas.Referable).modelType) {
+            case 'AnnotatedRelationshipElement':
+            case 'BasicEventElement':
+            case 'Blob':
+            case 'Capability':
+            case 'Entity':
+            case 'File':
+            case 'MultiLanguageProperty':
+            case 'Operation':
+            case 'Property':
+            case 'Range':
+            case 'ReferenceElement':
+            case 'RelationshipElement':
+            case 'SubmodelElementCollection':
+            case 'SubmodelElementList':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    return false;
+}
+
+/** Indicates whether the specified value if of type `Environment`. */
+export function isEnvironment(value: unknown): value is aas.Environment {
+    return (
+        Array.isArray((value as aas.Environment).assetAdministrationShells) &&
+        Array.isArray((value as aas.Environment).submodels) &&
+        Array.isArray((value as aas.Environment).conceptDescriptions)
+    );
+}
+
+/**
+ * Indicates whether the specified referable if of type Identifiable.
+ * @param referable The referable.
+ * @returns `true` if the specified referable is of type Identifiable.
+ */
+export function isIdentifiable(referable: aas.Referable | undefined | null): referable is aas.Identifiable {
+    switch (referable?.modelType) {
+        case 'AssetAdministrationShell':
+        case 'Submodel':
+        case 'ConceptDescription':
+            return true;
+        default:
+            return false;
+    }
+}
+
+/**
+ * Indicates whether the specified referable if of type `DataElement`.
+ * @param referable The referable.
+ * @returns `true` if the specified referable is of type `DataElement`.
+ */
+export function isDataElement(referable: aas.Referable | undefined): referable is aas.DataElement {
+    switch (referable?.modelType) {
+        case 'Blob':
+        case 'File':
+        case 'MultiLanguageProperty':
+        case 'Property':
+        case 'Range':
+        case 'ReferenceElement':
+            return true;
+        default:
+            return false;
+    }
 }
 
 /**
@@ -44,13 +276,13 @@ export function getParent(env: aas.Environment, referable: aas.Referable): aas.R
 }
 
 /**
- * Goes up the hierarchy to the submodel.
+ * Determines the submodel to which the specified  referable belongs.
  * @param env The AAS environment.
  * @param referable An element of the AAS.
  * @returns The submodel or `undefined`.
  */
 export function selectSubmodel(env: aas.Environment, referable: aas.Referable): aas.Submodel | undefined {
-    if (referable.modelType === 'Submodel') {
+    if (isSubmodel(referable)) {
         return referable as aas.Submodel;
     }
 
@@ -77,37 +309,6 @@ export function isDescendant(env: aas.Environment, ancestor: aas.Referable, elem
     }
 
     return false;
-}
-
-/**
- * Removes equal elements or descendants of an element.
- * @param aas The root element.
- * @param elements The elements to normalize.
- * @returns An array of elements.
- */
-export function normalize<T>(
-    env: aas.Environment,
-    elements: T[],
-    access: (item: T) => aas.Referable = item => item as aas.Referable,
-): T[] {
-    let items: T[] = elements;
-    let temp: T[] = [];
-    for (let i = 0; i < items.length; ++i) {
-        for (let j = 0; j < items.length; j++) {
-            if (i !== j) {
-                if (items[i] !== items[j] && !isDescendant(env, access(items[i]), access(items[j]))) {
-                    temp.push(items[j]);
-                }
-            } else {
-                temp.push(items[i]);
-            }
-        }
-
-        items = temp;
-        temp = [];
-    }
-
-    return items;
 }
 
 /**
@@ -160,698 +361,6 @@ export function* traverse(root: aas.Referable): Generator<aas.Referable> {
                 stack.push(children);
             }
         }
-    }
-}
-
-/**
- * Determines the differences between the specified source and destination referable.
- * @param sourceEnv The source element.
- * @param targetEnv The destination element.
- * @returns The differences between the source and destination element.
- */
-export function diff(sourceEnv: aas.Environment, targetEnv: aas.Environment): DifferenceItem[] {
-    if (sourceEnv && targetEnv && sourceEnv === targetEnv) {
-        return [];
-    }
-
-    return [
-        ...diffCollection(sourceEnv.assetAdministrationShells, targetEnv.assetAdministrationShells),
-        ...diffCollection(sourceEnv.submodels, targetEnv.submodels),
-        ...diffCollection(sourceEnv.conceptDescriptions, targetEnv.conceptDescriptions),
-    ];
-
-    function diffCollection(sources: aas.Referable[], targets: aas.Referable[]): DifferenceItem[] {
-        const diffs: DifferenceItem[] = [];
-        for (let i = 0; i < sources.length; i++) {
-            const j = targets.findIndex(item => item.idShort === sources[i].idShort);
-            if (j < 0) {
-                diffs.push({ type: 'inserted', sourceIndex: i, sourceElement: sources[i] });
-            } else {
-                diffs.push(...diffReferable(sources[i], targets[j]));
-            }
-        }
-
-        for (let i = 0; i < targets.length; i++) {
-            const j = sources.findIndex(item => item.idShort === targets[i].idShort);
-            if (j < 0) {
-                diffs.push({ type: 'deleted', destinationIndex: i, destinationElement: targets[i] });
-            }
-        }
-
-        return diffs;
-    }
-
-    function diffReferable(source: aas.Referable, target: aas.Referable): DifferenceItem[] {
-        const sourceMap = new Map<string, [aas.Referable | undefined, aas.Referable]>(traverse(source));
-        const destinationMap = new Map<string, [aas.Referable | undefined, aas.Referable]>(traverse(target));
-        let deleted: DifferenceItem[] = [];
-        let inserted: DifferenceItem[] = [];
-        const changed: DifferenceItem[] = [];
-        const moved: DifferenceItem[] = [];
-
-        for (const destinationItem of destinationMap) {
-            const sourceTuple = sourceMap.get(destinationItem[0]);
-            if (sourceTuple) {
-                const src = sourceTuple[1];
-                const srcParent = sourceTuple[0];
-                const dst = destinationItem[1][1];
-                const dstParent = destinationItem[1][0];
-                if (!isEqualReferable(src, dst)) {
-                    changed.push({
-                        type: 'changed',
-                        sourceParent: srcParent,
-                        sourceElement: src,
-                        sourceIndex: indexOf(srcParent, src),
-                        destinationParent: dstParent,
-                        destinationElement: dst,
-                        destinationIndex: indexOf(dstParent, dst),
-                    });
-                } else {
-                    const i = indexOf(srcParent, src);
-                    const j = indexOf(dstParent, dst);
-                    if (twins(srcParent, dstParent) && i !== j) {
-                        moved.push({
-                            type: 'moved',
-                            sourceParent: srcParent,
-                            sourceElement: src,
-                            sourceIndex: i,
-                            destinationParent: dstParent,
-                            destinationElement: dst,
-                            destinationIndex: j,
-                        });
-                    }
-                }
-            } else {
-                deleted.push({
-                    type: 'deleted',
-                    sourceParent: getParent(targetEnv, destinationItem[1][1]),
-                    destinationParent: destinationItem[1][0],
-                    destinationElement: destinationItem[1][1],
-                    destinationIndex: indexOf(destinationItem[1][0], destinationItem[1][1]),
-                });
-            }
-        }
-
-        for (const item of sourceMap) {
-            if (!destinationMap.has(item[0])) {
-                inserted.push({
-                    type: 'inserted',
-                    sourceParent: item[1][0],
-                    sourceElement: item[1][1],
-                    sourceIndex: indexOf(item[1][0], item[1][1]),
-                    destinationParent: getParent(targetEnv, item[1][1]),
-                });
-            }
-        }
-
-        deleted = normalize(targetEnv, deleted, item => item.destinationElement as aas.Referable);
-        inserted = normalize(sourceEnv, inserted, item => item.sourceElement as aas.Referable);
-
-        return [...deleted, ...inserted, ...moved, ...changed];
-    }
-
-    function* traverse(root: aas.Referable): Generator<[string, [aas.Referable | undefined, aas.Referable]]> {
-        yield ['/', [undefined, root]];
-
-        for (const item of traverseChildren(root, '/' + root.idShort)) {
-            yield item;
-        }
-
-        function* traverseChildren(
-            parent: aas.Referable,
-            path: string,
-        ): Generator<[string, [aas.Referable, aas.Referable]]> {
-            for (const child of getChildren(parent)) {
-                const childPath = path + child.idShort;
-                yield [path + child.idShort, [parent, child]];
-
-                for (const item of traverseChildren(child, childPath)) {
-                    yield item;
-                }
-            }
-        }
-    }
-
-    function twins(a?: aas.Referable, b?: aas.Referable): boolean {
-        return a && b ? a === b || (equalReference(a.parent, b.parent) && a.idShort === b.idShort) : false;
-    }
-
-    function indexOf(parent: aas.Referable | undefined, child: aas.Referable): number {
-        return parent ? getChildren(parent).indexOf(child) : -1;
-    }
-
-    function isEqualReferable(a: aas.Referable, b: aas.Referable): boolean {
-        let equal = false;
-        if (a === b) {
-            equal = true;
-        } else if (a.modelType === b.modelType) {
-            if (a.modelType === 'SubmodelElementCollection') {
-                equal = isEqual(
-                    { ...a, value: undefined } as aas.SubmodelElementCollection,
-                    { ...b, value: undefined } as aas.SubmodelElementCollection,
-                );
-            } else if (a.modelType === 'SubmodelElementList') {
-                equal = isEqual(
-                    { ...a, value: undefined } as aas.SubmodelElementList,
-                    { ...b, value: undefined } as aas.SubmodelElementList,
-                );
-            } else if (a.modelType === 'Submodel') {
-                equal = isEqual(
-                    { ...a, submodelElements: undefined } as aas.Submodel,
-                    { ...b, submodelElements: undefined } as aas.Submodel,
-                );
-            } else if (a.modelType === 'AssetAdministrationShell') {
-                equal = isEqual(
-                    { ...a, submodels: undefined } as aas.AssetAdministrationShell,
-                    { ...b, submodels: undefined } as aas.AssetAdministrationShell,
-                );
-            } else {
-                equal = isEqual(a, b);
-            }
-        }
-
-        return equal;
-    }
-}
-
-/**
- * Determines the differences between the specified source and destination AAS Element.
- * @param source The source element.
- * @param destination The destination element.
- * @returns The differences between the source and destination element.
- */
-export function diffAsync(source: aas.Environment, destination: aas.Environment): Promise<DifferenceItem[]> {
-    return new Promise<DifferenceItem[]>((result, reject) => {
-        try {
-            result(diff(source, destination));
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
-
-/**
- * Compares two trees for equality.
- * @param a The root element of the first tree.
- * @param b The root element of the second tree.
- * @returns `true` if both trees are equal; otherwise, `false`.
- */
-export function isDeepEqual(a?: aas.Environment, b?: aas.Environment): boolean {
-    const queue: [aas.Referable, aas.Referable][] = [];
-    if (a && b) {
-        if (
-            !equalLength(a.assetAdministrationShells, b.assetAdministrationShells) ||
-            !equalLength(a.submodels, b.submodels) ||
-            !equalLength(a.conceptDescriptions, b.conceptDescriptions)
-        ) {
-            return false;
-        }
-
-        if (
-            !queueReferables(a.assetAdministrationShells, b.assetAdministrationShells) ||
-            !queueReferables(a.submodels, b.submodels) ||
-            !queueReferables(a.conceptDescriptions, b.conceptDescriptions)
-        ) {
-            return false;
-        }
-
-        while (queue.length > 0) {
-            const pair = queue.pop();
-            if (!pair || !equal(pair[0], pair[1])) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-
-    function equalLength<T>(a?: T[], b?: T[]): boolean {
-        return a != null && b != null && a.length === b.length;
-    }
-
-    function queueReferables(a?: aas.Referable[], b?: aas.Referable[]): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.length === b.length) {
-            for (let i = 0, n = a.length; i < n; i++) {
-                queue.push([a[i], b[i]]);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equal(a: aas.Referable, b: aas.Referable): boolean {
-        switch (a.modelType) {
-            case 'AssetAdministrationShell':
-                return equalShell(a as aas.AssetAdministrationShell, b as aas.AssetAdministrationShell);
-            case 'AnnotatedRelationshipElement':
-                return equalAnnotatedRelationshipElement(
-                    a as aas.AnnotatedRelationshipElement,
-                    b as aas.AnnotatedRelationshipElement,
-                );
-            case 'BasicEventElement':
-                return equalBasicEventElement(a as aas.BasicEventElement, b as aas.BasicEventElement);
-            case 'Capability':
-                return equalCapability(a as aas.Capability, b as aas.Capability);
-            case 'Blob':
-                return equalBlob(a as aas.Blob, b as aas.Blob);
-            case 'ConceptDescription':
-                return equalConceptDescription(a as aas.ConceptDescription, b as aas.ConceptDescription);
-            case 'Entity':
-                return equalEntity(a as aas.Entity, b as aas.Entity);
-            case 'File':
-                return equalFile(a as aas.File, b as aas.File);
-            case 'MultiLanguageProperty':
-                return equalMultiLanguageProperty(a as aas.MultiLanguageProperty, b as aas.MultiLanguageProperty);
-            case 'Operation':
-                return equalOperation(a as aas.Operation, b as aas.Operation);
-            case 'Property':
-                return equalProperty(a as aas.Property, b as aas.Property);
-            case 'Range':
-                return equalRange(a as aas.Range, b as aas.Range);
-            case 'ReferenceElement':
-                return equalReferenceElement(a as aas.ReferenceElement, b as aas.ReferenceElement);
-            case 'RelationshipElement':
-                return equalRelationshipElement(a as aas.RelationshipElement, b as aas.RelationshipElement);
-            case 'Submodel':
-                return equalSubmodel(a as aas.Submodel, b as aas.Submodel);
-            case 'SubmodelElementCollection':
-                return equalSubmodelElementCollection(
-                    a as aas.SubmodelElementCollection,
-                    b as aas.SubmodelElementCollection,
-                );
-            case 'SubmodelElementList':
-                return equalSubmodelElementList(a as aas.SubmodelElementList, b as aas.SubmodelElementList);
-            default:
-                return true;
-        }
-    }
-
-    function equalIdentifiable(a: aas.Identifiable, b: aas.Identifiable): boolean {
-        return (
-            equalReferable(a, b) && a.id === b.id && equalAdministrativeInformation(a.administration, b.administration)
-        );
-    }
-
-    function equalAdministrativeInformation(
-        a?: aas.AdministrativeInformation,
-        b?: aas.AdministrativeInformation,
-    ): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (!a || !b) {
-            return false;
-        }
-
-        return a.version === b.version && a.revision === b.revision;
-    }
-
-    function equalHasDataSpecification(a: aas.HasDataSpecification, b: aas.HasDataSpecification): boolean {
-        return equalEmbeddedDataSpecifications(a.embeddedDataSpecifications, b.embeddedDataSpecifications);
-    }
-
-    function equalEmbeddedDataSpecifications(
-        a?: aas.EmbeddedDataSpecification[],
-        b?: aas.EmbeddedDataSpecification[],
-    ): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.length === b.length) {
-            for (let i = 0, n = a.length; i < n; i++) {
-                if (!equalEmbeddedDataSpecification(a[i], b[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equalEmbeddedDataSpecification(
-        a: aas.EmbeddedDataSpecification,
-        b: aas.EmbeddedDataSpecification,
-    ): boolean {
-        return (
-            equalReference(a.dataSpecification, b.dataSpecification) &&
-            equalDataSpecificationContent(a.dataSpecificationContent, b.dataSpecificationContent)
-        );
-    }
-
-    function equalDataSpecificationContent(a: aas.DataSpecificationContent, b: aas.DataSpecificationContent): boolean {
-        return isEqual(a, b);
-    }
-
-    function equalHasSemantics(a: aas.HasSemantics, b: aas.HasSemantics): boolean {
-        return equalReference(a.semanticId, b.semanticId);
-    }
-
-    function equalQualifiable(a: aas.Qualifiable, b: aas.Qualifiable): boolean {
-        return equalQualifiers(a.qualifiers, b.qualifiers);
-    }
-
-    function equalQualifiers(a?: aas.Qualifier[], b?: aas.Qualifier[]): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.length === b.length) {
-            for (let i = 0, n = a.length; i < n; i++) {
-                if (!equalQualifier(a[i], b[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equalQualifier(a: aas.Qualifier, b: aas.Qualifier) {
-        return (
-            a.kind === b.kind &&
-            a.type === b.type &&
-            a.valueType === b.valueType &&
-            a.value === b.value &&
-            equalReference(a.valueId, b.valueId)
-        );
-    }
-
-    function equalHasKind(a: aas.HasKind, b: aas.HasKind): boolean {
-        return a.kind === b.kind;
-    }
-
-    function equalShell(a: aas.AssetAdministrationShell, b: aas.AssetAdministrationShell): boolean {
-        if (!equalIdentifiable(a, b) || !equalHasDataSpecification(a, b)) {
-            return false;
-        }
-
-        return (
-            equalReferences(a.submodels, b.submodels) &&
-            equalAssetInformation(a.assetInformation, b.assetInformation) &&
-            equalReference(a.derivedFrom, b.derivedFrom)
-        );
-    }
-
-    function equalAssetInformation(a: aas.AssetInformation, b: aas.AssetInformation): boolean {
-        return (
-            a.assetKind === b.assetKind &&
-            a.globalAssetId === b.globalAssetId &&
-            equalSpecificIds(a.specificAssetIds, b.specificAssetIds) &&
-            equalResource(a.defaultThumbnail, b.defaultThumbnail)
-        );
-    }
-
-    function equalSpecificIds(a?: aas.SpecificAssetId[], b?: aas.SpecificAssetId[]): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.length === b.length) {
-            for (let i = 0, n = a.length; i < n; i++) {
-                if (!equalSpecificAssetId(a[i], b[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equalResource(a?: aas.Resource, b?: aas.Resource): boolean {
-        return a === b || (a != null && b != null && a.contentType === b.contentType && a.path === b.path);
-    }
-
-    function equalSubmodel(a: aas.Submodel, b: aas.Submodel): boolean {
-        return (
-            equalIdentifiable(a, b) &&
-            equalHasDataSpecification(a, b) &&
-            equalHasSemantics(a, b) &&
-            equalQualifiable(a, b) &&
-            equalHasKind(a, b) &&
-            queueReferables(a.submodelElements, b.submodelElements)
-        );
-    }
-
-    function equalReferable(a: aas.Referable, b: aas.Referable): boolean {
-        return (
-            a.modelType === b.modelType &&
-            a.idShort === b.idShort &&
-            a.category === b.category &&
-            equalLangStrings(a.description, b.description) &&
-            equalReference(a.parent, b.parent)
-        );
-    }
-
-    function equalSubmodelElement(a: aas.SubmodelElement, b: aas.SubmodelElement): boolean {
-        return (
-            equalReferable(a, b) && equalHasDataSpecification(a, b) && equalHasSemantics(a, b) && equalQualifiable(a, b)
-        );
-    }
-
-    function equalProperty(a: aas.Property, b: aas.Property): boolean {
-        if (!equalSubmodelElement(a, b)) {
-            return false;
-        }
-
-        if (a.valueType !== b.valueType) {
-            return false;
-        }
-
-        if (a.category === 'CONSTANT' || a.category === 'PARAMETER') {
-            if (a.value !== b.value) {
-                return false;
-            }
-        }
-
-        return equalReference(a.valueId, b.valueId);
-    }
-
-    function equalMultiLanguageProperty(a: aas.MultiLanguageProperty, b: aas.MultiLanguageProperty): boolean {
-        return equalSubmodelElement(a, b) && equalLangStrings(a.value, b.value);
-    }
-
-    function equalSubmodelElementCollection(
-        a: aas.SubmodelElementCollection,
-        b: aas.SubmodelElementCollection,
-    ): boolean {
-        return equalSubmodelElement(a, b) && queueReferables(a.value, b.value);
-    }
-
-    function equalSubmodelElementList(a: aas.SubmodelElementList, b: aas.SubmodelElementList): boolean {
-        return (
-            equalSubmodelElement(a, b) &&
-            a.orderRelevant === b.orderRelevant &&
-            a.typeValueListElement === b.typeValueListElement &&
-            equalReference(a.semanticIdListElement, b.semanticIdListElement) &&
-            queueReferables(a.value, b.value)
-        );
-    }
-
-    function equalLangStrings(a?: aas.LangString[], b?: aas.LangString[]): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.length === b.length) {
-            for (let i = 0, n = a.length; i < n; i++) {
-                if (!equalLangString(a[i], b[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equalAnnotatedRelationshipElement(
-        a: aas.AnnotatedRelationshipElement,
-        b: aas.AnnotatedRelationshipElement,
-    ): boolean {
-        return (
-            equalSubmodelElement(a, b) &&
-            equalRelationshipElement(a, b) &&
-            queueReferables(a.annotations, b.annotations)
-        );
-    }
-
-    function equalBasicEventElement(a: aas.BasicEventElement, b: aas.BasicEventElement): boolean {
-        return (
-            equalSubmodelElement(a, b) &&
-            a.direction === b.direction &&
-            a.lastUpdate === b.lastUpdate &&
-            a.maxInterval === b.maxInterval &&
-            equalReference(a.messageBroker, b.messageBroker) &&
-            a.messageTopic === b.messageTopic &&
-            a.minInterval === b.minInterval &&
-            equalReference(a.observed, b.observed) &&
-            a.state === b.state
-        );
-    }
-
-    function equalCapability(a: aas.Capability, b: aas.Capability): boolean {
-        return equalSubmodelElement(a, b);
-    }
-
-    function equalOperation(a: aas.Operation, b: aas.Operation): boolean {
-        return (
-            equalSubmodelElement(a, b) &&
-            equalOperationVariables(a.inputVariables, b.inoutputVariables) &&
-            equalOperationVariables(a.inoutputVariables, b.inoutputVariables) &&
-            equalOperationVariables(a.outputVariables, b.outputVariables)
-        );
-    }
-
-    function equalOperationVariables(
-        a: aas.OperationVariable[] | undefined,
-        b: aas.OperationVariable[] | undefined,
-    ): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (!a || !b || a.length !== b.length) {
-            return false;
-        }
-
-        for (let i = 0, n = a.length; i < n; i++) {
-            if (!equalOperationVariable(a[i], b[i])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function equalOperationVariable(a: aas.OperationVariable, b: aas.OperationVariable): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        return equal(a.value, b.value);
-    }
-
-    function equalRange(a: aas.Range, b: aas.Range): boolean {
-        return equalSubmodelElement(a, b) && a.max === b.max && a.min === b.min && a.valueType === b.valueType;
-    }
-
-    function equalRelationshipElement(a: aas.RelationshipElement, b: aas.RelationshipElement): boolean {
-        return equalSubmodelElement(a, b) && equalReference(a.first, b.first) && equalReference(a.second, b.second);
-    }
-
-    function equalReferenceElement(a: aas.ReferenceElement, b: aas.ReferenceElement): boolean {
-        return equalSubmodelElement(a, b) && equalReference(a.value, b.value);
-    }
-
-    function equalEntity(a: aas.Entity, b: aas.Entity): boolean {
-        return (
-            equalSubmodelElement(a, b) &&
-            a.entityType == b.entityType &&
-            a.globalAssetId === b.globalAssetId &&
-            equalSpecificAssetIds(a.specificAssetIds, b.specificAssetIds) &&
-            queueReferables(a.statements, b.statements)
-        );
-    }
-
-    function equalSpecificAssetIds(a?: aas.SpecificAssetId[], b?: aas.SpecificAssetId[]): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (!a || !b || a.length != b.length) {
-            return false;
-        }
-
-        for (let i = 0, n = a.length; i < n; i++) {
-            if (!equalSpecificAssetId(a[i], b[i])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function equalSpecificAssetId(a?: aas.SpecificAssetId, b?: aas.SpecificAssetId): boolean {
-        return (
-            a === b ||
-            (a != null &&
-                b != null &&
-                equalHasSemantics(a, b) &&
-                a.name === b.name &&
-                a.value === b.value &&
-                equalReference(a.externalSubjectId, b.externalSubjectId))
-        );
-    }
-
-    function equalFile(a: aas.File, b: aas.File): boolean {
-        return equalSubmodelElement(a, b) && a.contentType === b.contentType && a.value === b.value;
-    }
-
-    function equalBlob(a: aas.Blob, b: aas.Blob): boolean {
-        return equalSubmodelElement(a, b) && a.contentType === b.contentType && a.value === b.value;
-    }
-
-    function equalConceptDescription(a: aas.ConceptDescription, b: aas.ConceptDescription): boolean {
-        return equalSubmodelElement(a, b) && equalReferences(a.isCaseOf, b.isCaseOf);
-    }
-
-    function equalLangString(a: aas.LangString, b: aas.LangString): boolean {
-        return a.language === b.language && a.text === b.text;
-    }
-
-    function equalReferences(a?: aas.Reference[], b?: aas.Reference[]): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.length === b.length) {
-            for (let i = 0, n = a.length; i < n; i++) {
-                if (!equalReference(a[i], b[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
-        if (a === b) {
-            return true;
-        }
-
-        if (a && b && a.keys && b.keys && a.keys.length === b.keys.length) {
-            for (let i = 0, n = a.keys.length; i < n; i++) {
-                if (!equalKey(a.keys[i], b.keys[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function equalKey(a: aas.Key, b: aas.Key): boolean {
-        return a.type === b.type && a.value === b.value;
     }
 }
 
@@ -961,9 +470,9 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
 
 /**
  * Selects the referable that belongs to the specified reference.
- * @param env The AssetAdministration Shell environment.
+ * @param env The AAS environment.
  * @param reference The reference.
- * @returns The referable or `undefined`.
+ * @returns The referenced referable or `undefined`.
  */
 export function selectReferable<T extends aas.Referable>(
     env: aas.Environment,
@@ -997,80 +506,25 @@ export function selectReferable<T extends aas.Referable>(
 /**
  * Selects the referable with the specified path in the given AAS environment.
  * @param env The Asset Administration Shell environment.
- * @param args The path to the SubmodelElement.
+ * @param submodel The name (idShort or identifier) of the submodel.
+ * @param idShortPath The path to the submodel element.
  * @returns The `Referable` at the specified path.
  */
-export function selectElement<T extends aas.Referable>(env: aas.Environment, ...args: string[]): T | undefined {
-    let current: aas.Referable | undefined;
-    if (args.length > 0) {
-        current = env.submodels?.find(item => item.idShort === args[0] || item.id === args[0]);
-        if (current) {
-            for (const idShort of args.slice(1).flatMap(item => item.split('.'))) {
-                if (current.modelType === 'Submodel') {
-                    current = (current as aas.Submodel).submodelElements?.find(item => item.idShort === idShort);
-                } else if (current.modelType === 'SubmodelElementCollection') {
-                    current = (current as aas.SubmodelElementCollection).value?.find(item => item.idShort === idShort);
-                } else if (current.modelType === 'SubmodelElementList') {
-                    current = (current as aas.SubmodelElementList).value?.find(item => item.idShort === idShort);
-                }
-
-                if (!current) {
-                    break;
-                }
-            }
-        }
+export function selectElement<T extends aas.Referable>(
+    env: aas.Environment,
+    submodel: string,
+    idShortPath?: string,
+): T | undefined {
+    const sm = env.submodels.find(sm => sm.idShort === submodel || sm.id === submodel);
+    if (!sm) {
+        return undefined;
     }
 
-    return current as T;
-}
-
-/**
- * Resolves the specified reference.
- * @param env The Asset Administration Shell environment.
- * @param reference The reference.
- * @returns The referables that belongs to the specified reference.
- */
-export function resolveReference(env: aas.Environment, reference: aas.Reference): aas.Referable[] | undefined {
-    let parent: aas.Referable | undefined;
-    const referables: aas.Referable[] = [];
-    for (const key of reference.keys) {
-        let referable: aas.Referable | undefined = undefined;
-        let children: aas.SubmodelElement[] | undefined = undefined;
-        if (parent) {
-            switch (parent.modelType) {
-                case 'Submodel':
-                    children = (parent as aas.Submodel).submodelElements;
-                    break;
-                case 'SubmodelElementCollection':
-                    children = (parent as aas.SubmodelElementCollection).value;
-                    break;
-                case 'SubmodelElementList':
-                    children = (parent as aas.SubmodelElementList).value;
-                    break;
-                default:
-                    return undefined;
-            }
-
-            referable = children?.find(child => child.idShort === key.value);
-        } else {
-            if (key.type === 'Submodel') {
-                referable = env.submodels.find(item => item.id === key.value);
-            } else if (key.type === 'AssetAdministrationShell') {
-                referable = env.assetAdministrationShells.find(item => item.id === key.value);
-            } else if (key.type === 'ConceptDescription') {
-                referable = env.conceptDescriptions.find(item => item.id === key.value);
-            }
-        }
-
-        if (!referable) {
-            return undefined;
-        }
-
-        referables.push(referable);
-        parent = referable;
+    if (!idShortPath) {
+        return sm as unknown as T;
     }
 
-    return referables;
+    return getReferable(sm, idShortPath);
 }
 
 /**
