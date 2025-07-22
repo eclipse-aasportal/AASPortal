@@ -6,7 +6,8 @@
  *
  *****************************************************************************/
 
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
@@ -17,24 +18,16 @@ import {
     effect,
     OnDestroy,
     OnInit,
+    Signal,
     signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
 
-import {
-    aas,
-    AASDocument,
-    convertToString,
-    getLocaleValue,
-    getReferable,
-    getSemanticId,
-    isMultiLanguageProperty,
-    isProperty,
-} from 'aas-core';
+import { aas, AASDocument, getReferable, getSemanticId } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url, getDisplayName, getPropertyValue } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { FHGNameplate, HSUNameplate, Nameplate_3_0, ZVEINameplate } from '../views';
@@ -49,13 +42,21 @@ import { Nameplate } from './nameplate';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NameplateView implements OnInit, OnDestroy {
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
+    private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
+    private readonly nameplate = computed(() => this.nameplates().at(this.index() - 1));
+
     public constructor(
         private readonly route: ActivatedRoute,
-        private readonly translate: TranslateService,
+        translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
         private readonly api: EndpointsApi,
     ) {
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {
@@ -64,23 +65,23 @@ export class NameplateView implements OnInit, OnDestroy {
         });
     }
 
+    /** The toolbar. */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('nameplateToolbar');
 
+    /** The title. */
     public readonly title = computed(() => {
         const tuple = this.nameplate();
         if (tuple === undefined) {
             return '-';
         }
 
-        return getDisplayName(tuple[1], tuple[0].content, this.translate.currentLang);
+        return getDisplayName(tuple[1], tuple[0].content, this.currentLang());
     });
 
-    private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
-
+    /** The total number of AAS documents that provide a nameplate. */
     public readonly count = computed(() => this.nameplates().length);
 
-    public readonly nameplate = computed(() => this.nameplates().at(this.index() - 1));
-
+    /** The current active AAS document. */
     public readonly document = computed(() => {
         const nameplate = this.nameplate();
         return nameplate ? nameplate[0] : undefined;
@@ -141,27 +142,27 @@ export class NameplateView implements OnInit, OnDestroy {
         const manufacturerName = getReferable<aas.Property>(nameplate, 'ManufacturerName');
         if (manufacturerName?.value) {
             details.push({
-                name: getDisplayName(manufacturerName, document.content, this.translate.currentLang),
+                name: getDisplayName(manufacturerName, document.content, this.currentLang()),
                 value: manufacturerName.value,
             });
         }
 
-        const productType = this.getPropertyValue(nameplate, 'ManufacturerProductType');
+        const productType = getPropertyValue(nameplate, 'ManufacturerProductType', this.currentLang());
         if (productType) {
             details.push({ name: 'DigitalNameplate.ManufacturerProductType', value: productType });
         }
 
-        const productFamily = this.getPropertyValue(nameplate, 'ManufacturerProductFamily');
+        const productFamily = getPropertyValue(nameplate, 'ManufacturerProductFamily', this.currentLang());
         if (productFamily) {
             details.push({ name: 'DigitalNameplate.ManufacturerProductFamily', value: productFamily });
         }
 
-        const articleNumber = this.getPropertyValue(nameplate, 'ProductArticleNumberOfManufacturer');
+        const articleNumber = getPropertyValue(nameplate, 'ProductArticleNumberOfManufacturer', this.currentLang());
         if (articleNumber) {
             details.push({ name: 'DigitalNameplate.ProductArticleNumberOfManufacturer', value: articleNumber });
         }
 
-        const serialNumber = this.getPropertyValue(nameplate, 'SerialNumber');
+        const serialNumber = getPropertyValue(nameplate, 'SerialNumber', this.currentLang());
         if (serialNumber) {
             details.push({ name: 'DigitalNameplate.SerialNumber', value: serialNumber });
         }
@@ -171,33 +172,12 @@ export class NameplateView implements OnInit, OnDestroy {
 
     private getFavoriteNotes(submodel: aas.Submodel): string[] {
         const notes: string[] = [];
-        const designation = this.getPropertyValue(submodel, 'ManufacturerProductDesignation');
+        const designation = getPropertyValue(submodel, 'ManufacturerProductDesignation', this.currentLang());
         if (designation) {
             notes.push(designation);
         }
 
         return notes;
-    }
-
-    private getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
-        const referable = getReferable(submodel, idShortPath);
-        if (isProperty(referable)) {
-            switch (referable.valueType) {
-                case 'xs:double':
-                case 'xs:integer':
-                    return convertToString(referable.value, this.translate.currentLang);
-                case 'xs:string':
-                    return referable.value ?? '';
-                default:
-                    return referable.value ?? '-';
-            }
-        }
-
-        if (isMultiLanguageProperty(referable)) {
-            return getLocaleValue(referable.value, this.translate.currentLang) ?? '-';
-        }
-
-        return '-';
     }
 
     private initialize(documents: AASDocument[]) {

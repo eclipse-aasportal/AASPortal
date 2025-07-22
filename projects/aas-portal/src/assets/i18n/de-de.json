@@ -327,5 +327,9 @@
     "Browser": {
         "TITLE": "AAS-Browser",
         "EMPTY": "Keine Verwalungsschale verfügbar."
+    },
+    "Nameplate": {
+        "GENERAL": "Allgemein",
+        "TITLE": "Digitales Typenschild"
     }
 }

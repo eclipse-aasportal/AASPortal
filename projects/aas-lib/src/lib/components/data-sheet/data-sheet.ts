@@ -23,9 +23,6 @@ export class DataSheet {
     /** The data to visualize as data sheet. */
     public readonly dataSheet = input<DataSheetData>({ name: '', items: [] });
 
-    /** The data sheet caption. */
-    public readonly caption = computed(() => this.dataSheet().name);
-
     /** The data sheet items. */
     public readonly items = computed(() => this.dataSheet().items);
 

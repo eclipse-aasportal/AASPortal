@@ -24,12 +24,13 @@ import {
     isProperty,
     isMultiLanguageProperty,
     getIEC61360Content,
-    toLocale,
     isFile,
     isSubmodelElementList,
+    getUnit,
+    toDisplayValue,
 } from 'aas-core';
 
-import { DataSheetFormat, DataSheetItem, GetUrlFn } from './types';
+import { DataSheetItem, GetUrlFn } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -275,19 +276,19 @@ export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.
  * @returns
  */
 export function createDataSheetItem(
-    element: aas.SubmodelElement,
+    element: aas.Referable,
     env: aas.Environment | undefined,
     lang: string | undefined,
-    options?: { format?: DataSheetFormat; getUrl?: GetUrlFn },
+    options?: { format?: string; getUrl?: GetUrlFn },
 ): DataSheetItem | undefined {
-    let value = getValue(element, options);
-    if (!value) {
-        return undefined;
-    }
-
     let dataSpecification: aas.DataSpecificationIec61360 | undefined;
     if (env) {
         dataSpecification = getIEC61360Content(env, element);
+    }
+
+    const value = getValue(element, options);
+    if (!value) {
+        return undefined;
     }
 
     let displayName: string | undefined;
@@ -312,11 +313,6 @@ export function createDataSheetItem(
         description = getLocaleValue(dataSpecification.definition);
     }
 
-    const unit = dataSpecification?.unit;
-    if (unit) {
-        value = value + ' ' + unit;
-    }
-
     const item: DataSheetItem = {
         idShort: element.idShort,
         displayName,
@@ -335,10 +331,11 @@ export function createDataSheetItem(
 
     function getValue(
         element: aas.Referable,
-        options?: { format?: DataSheetFormat; getUrl?: GetUrlFn },
+        options?: { format?: string; getUrl?: GetUrlFn },
     ): string | string[] | undefined {
         if (isProperty(element)) {
-            return lang ? toLocale(element.value, element.valueType, lang) : element.value;
+            const unit = dataSpecification?.unit;
+            return lang ? toDisplayValue(element.value, element.valueType, lang, unit) : element.value;
         }
 
         if (isMultiLanguageProperty(element)) {
@@ -377,21 +374,21 @@ export function createDataSheetItem(
 
         return undefined;
 
-        function formatValue(
-            sm: aas.SubmodelElementList | aas.SubmodelElementCollection,
-            format: DataSheetFormat,
-        ): string {
-            return stringFormat(
-                format.format,
-                ...format.items.map(item => {
-                    const referable = getReferable(sm, item);
-                    if (!referable) {
-                        return '-';
-                    }
+        function formatValue(sm: aas.SubmodelElementList | aas.SubmodelElementCollection, format: string): string {
+            const regex = /{([^{}]+)}/g;
+            return format.replace(regex, (x, y) => {
+                const referable = getReferable(sm, y);
+                if (!referable) {
+                    return x;
+                }
 
-                    return getValue(referable);
-                }),
-            );
+                const value = getValue(referable);
+                if (!value) {
+                    return x;
+                }
+
+                return Array.isArray(value) ? value.join(' ') : value;
+            });
         }
     }
 }
@@ -467,4 +464,47 @@ export function toDisplayName(name: string): string {
 
         return false;
     }
+}
+
+/**
+ * Gets the display value of a property.
+ * @param submodel The submodel to which the proerty belongs.
+ * @param idShortPath The path to the property.
+ * @param lang The current language.
+ * @param env The AAS environment used to get the unit.
+ * @returns The property value.
+ */
+export function getPropertyValue(
+    submodel: aas.Submodel,
+    idShortPath: string,
+    lang: string,
+    env?: aas.Environment,
+): string | undefined {
+    const referable = getReferable(submodel, idShortPath);
+    if (isProperty(referable)) {
+        let unit: string | undefined;
+        if (env) {
+            unit = getUnit(env, referable);
+        }
+
+        switch (referable.valueType) {
+            case 'xs:double':
+            case 'xs:integer':
+            case 'xs:decimal':
+            case 'xs:date':
+            case 'xs:dateTime':
+            case 'xs:time':
+                return toDisplayValue(referable.value, referable.valueType, lang, unit);
+            case 'xs:string':
+                return referable.value;
+            default:
+                return referable.value ?? '-';
+        }
+    }
+
+    if (isMultiLanguageProperty(referable)) {
+        return getLocaleValue(referable.value, lang) ?? '-';
+    }
+
+    return '-';
 }

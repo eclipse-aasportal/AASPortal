@@ -7,11 +7,10 @@
  !---------------------------------------------------------------------------->
 
 <table class="table table-sm table-striped table-borderless">
-    <caption class="caption-top">{{caption()}}</caption>
     <tbody>
         @for (item of items(); track item.idShort) {
         <tr>
-            <td class="text-nowrap align-middle">{{item.displayName}}</td>
+            <td class="text-nowrap align-middle fw-medium">{{item.displayName}}</td>
             @if (item.url) {
             <td>
                 <a [href]="item.url" target="_blank">{{item.value}}</a>

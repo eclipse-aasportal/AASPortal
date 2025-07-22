@@ -21,7 +21,7 @@ import {
     isSubmodelElementCollection,
 } from 'aas-core';
 import { ContactInformations_1_0 } from '../views';
-import { DataSheetData, DataSheetFormat, DataSheetItem, DataSheetItemPath } from '../../types';
+import { DataSheetData, DataSheetItem, DataSheetItemPath } from '../../types';
 import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 
@@ -92,7 +92,7 @@ export class ContactInformations {
                 if (typeof option === 'string') {
                     item = this.createItem(getReferable(sm, option), env);
                 } else {
-                    item = this.createItem(getReferable(sm, option.idShort), env, option.format);
+                    item = this.createItem(getReferable(sm, option.idShortPath), env, option.format);
                 }
 
                 if (item) {
@@ -114,7 +114,7 @@ export class ContactInformations {
     private createItem(
         referable: aas.Referable | undefined,
         env: aas.Environment | undefined,
-        format?: DataSheetFormat,
+        format?: string,
     ): DataSheetItem | undefined {
         if (!referable) {
             return undefined;

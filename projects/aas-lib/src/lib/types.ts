@@ -37,19 +37,14 @@ export enum ViewMode {
     Tree = 'tree',
 }
 
-export interface DataSheetFormat {
+export interface DataSheetItemPathFormatOption {
+    idShortPath: string;
     format: string;
-    items: string[];
-}
-
-export interface DataSheetItemPathWithOptions {
-    idShort: string;
-    format: DataSheetFormat;
 }
 
 export type GetUrlFn = (element: aas.Referable) => string | undefined;
 
-export type DataSheetItemPath = string | DataSheetItemPathWithOptions;
+export type DataSheetItemPath = string | DataSheetItemPathFormatOption;
 
 /** Represents an item of a data sheet. */
 export interface DataSheetItem {
@@ -67,5 +62,6 @@ export interface DataSheetItem {
 
 export interface DataSheetData {
     name?: string;
+    level?: number;
     items: DataSheetItem[];
 }

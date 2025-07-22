@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
@@ -17,6 +17,7 @@ import {
     effect,
     OnDestroy,
     OnInit,
+    Signal,
     signal,
     TemplateRef,
     viewChild,
@@ -31,6 +32,7 @@ import { StartService } from '../../services/start.service';
 import { TechnicalData_1_2 } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { TechnicalData } from './technical-data';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'fhg-technical-data-view',
@@ -40,13 +42,21 @@ import { TechnicalData } from './technical-data';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TechnicalDataView implements OnInit, OnDestroy {
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
+    private readonly tuples = signal<[AASDocument, aas.Submodel][]>([]);
+    private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
+
     public constructor(
         private readonly route: ActivatedRoute,
-        private readonly translate: TranslateService,
+        translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
         private readonly api: EndpointsApi,
     ) {
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {
@@ -63,12 +73,8 @@ export class TechnicalDataView implements OnInit, OnDestroy {
             return '-';
         }
 
-        return getDisplayName(tuple[1], tuple[0].content, this.translate.currentLang);
+        return getDisplayName(tuple[1], tuple[0].content, this.currentLang());
     });
-
-    private readonly tuples = signal<[AASDocument, aas.Submodel][]>([]);
-
-    private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
     public readonly count = computed(() => this.tuples().length);
 

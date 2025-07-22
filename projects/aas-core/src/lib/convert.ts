@@ -679,38 +679,63 @@ export function isBooleanType(type: DataTypeDefXsd): boolean {
 }
 
 /**
- * Converts a locale invariant string representation of the current value into a localized.
- * @param value The locale invariant string representation of a value.
+ * Converts a culture invariant value expression to a locale string.
+ * @param value The value expression.
  * @param valueType The value type.
  * @param localeId The target language.
+ * @param unit The physicale unit.
+ * @returns The locale string or `undefined`.
  */
-export function toLocale(value: string | undefined, valueType: DataTypeDefXsd, localeId: string): string | undefined {
+export function toDisplayValue(
+    value: string | undefined,
+    valueType: DataTypeDefXsd,
+    localeId?: string,
+    unit?: string,
+): string | undefined {
     if (!value) {
         return value;
     }
 
-    switch (valueType) {
-        case 'xs:float':
-        case 'xs:double':
-        case 'xs:decimal': {
-            const d = parseNumber(value);
-            return Number.isNaN(d) ? undefined : d.toLocaleString(localeId);
+    let s: string | undefined = value;
+    if (localeId) {
+        switch (valueType) {
+            case 'xs:float':
+            case 'xs:double':
+            case 'xs:decimal':
+            case 'xs:integer':
+            case 'xs:int':
+            case 'xs:unsignedInt':
+            case 'xs:unsignedShort': {
+                const d = parseNumber(value);
+                if (isNaN(d)) {
+                    return undefined;
+                }
+
+                s = d.toLocaleString(localeId);
+                break;
+            }
+            case 'xs:date':
+                s = parseDate(value)?.toLocaleDateString(localeId);
+                break;
+            case 'xs:dateTime':
+                s = parseDate(value)?.toLocaleString(localeId, dateTimeFormat);
+                break;
+            case 'xs:time':
+                s = parseDate(value)?.toLocaleTimeString(localeId);
+                break;
+            case 'xs:unsignedLong':
+                s = BigInt(value).toLocaleString(localeId);
+                break;
         }
-        case 'xs:integer':
-        case 'xs:int':
-        case 'xs:unsignedInt':
-        case 'xs:unsignedShort': {
-            const i = parseNumber(value);
-            return Number.isNaN(i) ? undefined : i.toLocaleString(localeId);
-        }
-        case 'xs:date':
-        case 'xs:dateTime':
-            return parseDate(value)?.toLocaleString(localeId, dateTimeFormat);
-        case 'xs:unsignedLong':
-        case 'xs:long':
-        default:
-            return value;
+    } else {
+        s = value;
     }
+
+    if (s && unit) {
+        s += ' ' + unit;
+    }
+
+    return s;
 }
 
 /**

@@ -35,7 +35,7 @@ import {
     noop,
     selectReferable,
     toBoolean,
-    toLocale,
+    toDisplayValue,
 } from 'aas-core';
 
 import { Tree, TreeNode } from '../tree';
@@ -302,7 +302,7 @@ class TreeInitialize {
         if (isBooleanType(property.valueType)) {
             return toBoolean(property.value);
         } else {
-            return toLocale(property.value, property.valueType, localeId);
+            return toDisplayValue(property.value, property.valueType, localeId);
         }
     }
 

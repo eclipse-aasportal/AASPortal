@@ -25,7 +25,7 @@ import {
 
 import { CarbonFootprint_0_9, CarbonFootprint_1_0 } from '../views';
 import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
-import { DataSheetData, DataSheetFormat, DataSheetItem, DataSheetItemPath } from '../../types';
+import { DataSheetData, DataSheetItem, DataSheetItemPath } from '../../types';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 
 @Component({
@@ -144,11 +144,8 @@ export class CarbonFootprint {
                 'ExpirationDate',
                 'ExplanatoryStatement',
                 {
-                    idShort: 'GoodsHandoverAddress',
-                    format: {
-                        format: '{0} {1}, {2}-{3} {4}',
-                        items: ['Street', 'HouseNumber', 'Country', 'ZipCode', 'CityTown'],
-                    },
+                    idShortPath: 'GoodsHandoverAddress',
+                    format: '{Street} {HouseNumber}, {Country}-{ZipCode} {CityTown}',
                 },
             ]),
         };
@@ -168,7 +165,7 @@ export class CarbonFootprint {
                 if (typeof option === 'string') {
                     item = this.createItem(getReferable(sm, option), env);
                 } else {
-                    item = this.createItem(getReferable(sm, option.idShort), env, option.format);
+                    item = this.createItem(getReferable(sm, option.idShortPath), env, option.format);
                 }
 
                 if (item) {
@@ -190,7 +187,7 @@ export class CarbonFootprint {
     private createItem(
         referable: aas.Referable | undefined,
         env: aas.Environment | undefined,
-        format?: DataSheetFormat,
+        format?: string,
     ): DataSheetItem | undefined {
         if (!referable) {
             return undefined;

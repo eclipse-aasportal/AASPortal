@@ -328,5 +328,9 @@
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",
         "TITLE": "AAS browser"
+    },
+    "Nameplate": {
+        "GENERAL": "General",
+        "TITLE": "Digital Namplate"
     }
 }

@@ -6,19 +6,26 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input, Signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, Signal } from '@angular/core';
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { aas, AASDocument, getChildren, getReferable, getSemanticId, isFile } from 'aas-core';
+import {
+    aas,
+    AASDocument,
+    getChildren,
+    getSemanticId,
+    isFile,
+    isSubmodelElementCollection,
+    isSubmodelElementList,
+} from 'aas-core';
 
-import { DataSheetData, DataSheetFormat, DataSheetItem, DataSheetItemPath } from '../../types';
+import { DataSheetData } from '../../types';
 import { Nameplate_3_0 } from '../views';
 import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
-
-export type NameplateGroup = { idShort: string; name: string };
+import { DataSheetItem } from 'projects/aas-lib/dist';
 
 @Component({
     selector: 'fhg-nameplate',
@@ -47,84 +54,59 @@ export class Nameplate {
         return env.submodels.find(submodel => getSemanticId(submodel) === Nameplate_3_0);
     });
 
-    public readonly nameplateGroups = computed(() => {
-        const groups: DataSheetData[] = [];
-        this.currentLang();
+    public readonly dataSheets = computed(() => {
+        const dataSheets: DataSheetData[] = [];
+        const currentLang = this.currentLang();
         const submodel = this.submodel();
-        if (!submodel?.submodelElements) {
-            return groups;
+        const env = this.document()?.content;
+        if (!submodel?.submodelElements || !env) {
+            return dataSheets;
         }
 
-        groups.push(this.createNameplateGroup(submodel));
+        const queue: [number, aas.Referable][] = [[0, submodel]];
+        while (queue.length > 0) {
+            const [level, parent] = queue.shift()!;
+            const dataSheet: DataSheetData = {
+                name:
+                    level === 0
+                        ? this.translate.instant('Nameplate.GENERAL')
+                        : getDisplayName(parent, env, currentLang),
+                level,
+                items: [],
+            };
 
-        return groups;
+            for (const child of getChildren(parent)) {
+                let item: DataSheetItem | undefined;
+                if (isSubmodelElementCollection(child) || isSubmodelElementList(child)) {
+                    if (child.idShort === 'AddressInformation') {
+                        item = createDataSheetItem(child, env, currentLang, {
+                            format: '{Street}, {NationalCode}-{ZipCode} {CityTown}',
+                        });
+                    } else {
+                        queue.unshift([level + 1, child]);
+                    }
+                } else {
+                    item = createDataSheetItem(child, env, currentLang, { getUrl: this.getUrl });
+                }
+
+                if (item) {
+                    dataSheet.items.push(item);
+                }
+            }
+
+            if (dataSheet.items.length > 0) {
+                dataSheets.push(dataSheet);
+            }
+        }
+
+        return dataSheets;
     });
 
-    private createNameplateGroup(sm: aas.Referable): DataSheetData {
-        const env = this.document()!.content!;
-        const group: DataSheetData = {
-            name: getDisplayName(sm, env, this.translate.currentLang),
-            items: this.createDataSheet(sm, env),
-        };
-
-        return group;
-    }
-
-    private createDataSheet(
-        sm: aas.SubmodelElement | aas.Submodel,
-        env: aas.Environment,
-        options?: DataSheetItemPath[],
-    ): DataSheetItem[] {
-        const items: DataSheetItem[] = [];
-        if (options) {
-            for (const option of options) {
-                let item: DataSheetItem | undefined;
-                if (typeof option === 'string') {
-                    item = this.createItem(getReferable(sm, option), env);
-                } else {
-                    item = this.createItem(getReferable(sm, option.idShort), env, option.format);
-                }
-
-                if (item) {
-                    items.push(item);
-                }
-            }
-        } else {
-            for (const referable of getChildren(sm)) {
-                const item = this.createItem(referable, env);
-                if (item) {
-                    items.push(item);
-                }
-            }
+    private readonly getUrl = (element: aas.Referable) => {
+        if (isFile(element)) {
+            return getUrl(this.document()!, this.submodel()!, element);
         }
 
-        return items;
-    }
-
-    private createItem(
-        referable: aas.Referable | undefined,
-        env: aas.Environment | undefined,
-        format?: DataSheetFormat,
-    ): DataSheetItem | undefined {
-        if (!referable) {
-            return undefined;
-        }
-
-        const lang = untracked(this.currentLang);
-        if (isFile(referable)) {
-            return createDataSheetItem(referable, env, lang, {
-                getUrl: (element: aas.Referable) => {
-                    const document = this.document()!;
-                    const submodel = this.submodel()!;
-                    if (isFile(element)) {
-                        return getUrl(document, submodel, element);
-                    }
-
-                    return undefined;
-                },
-            });
-        }
-
-        return createDataSheetItem(referable, env, lang, { format });
-    }
+        return undefined;
+    };
 }

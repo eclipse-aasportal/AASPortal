@@ -11,15 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import {
-    ApplicationError,
-    Credentials,
-    stringFormat,
-    UserProfile,
-    UserRole,
-    JWTPayload,
-    toBoolean,
-} from 'aas-core';
+import { ApplicationError, Credentials, stringFormat, UserProfile, UserRole, JWTPayload, toBoolean } from 'aas-core';
 
 import { ERRORS } from '../../errors';
 import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-form.component';
