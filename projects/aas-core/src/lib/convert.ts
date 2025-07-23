@@ -21,81 +21,81 @@ const invariantDecimalSeparator = '.';
 const invariantGroupSeparator = ',';
 
 const mimeTypes = new Map<string, string>([
-    ['audio/aac', '.aac'],
-    ['application/x-abiword', '.abw'],
-    ['application/x-freearc', '.arc'],
-    ['image/avif', '.avif'],
-    ['video/x-msvideo', '.avi'],
-    ['application/vnd.amazon.ebook', '.azw'],
+    ['application/epub+zip', '.epub'],
+    ['application/gzip', '.gz'],
+    ['application/java-archive', '.jar'],
+    ['application/json', '.json'],
+    ['application/ld+json', '.jsonld'],
+    ['application/msword', '.doc'],
     ['application/octet-stream', '.bin'],
-    ['.bmp', 'image/bmp'],
+    ['application/ogg', '.ogx'],
+    ['application/pdf', '.pdf'],
+    ['application/rtf', '.rtf'],
+    ['application/vnd.amazon.ebook', '.azw'],
+    ['application/vnd.apple.installer+xml', '.mpkg'],
+    ['application/vnd.mozilla.xul+xml', '.xul'],
+    ['application/vnd.ms-excel', '.xls'],
+    ['application/vnd.ms-fontobject', '.eot'],
+    ['application/vnd.ms-powerpoint', '.ppt'],
+    ['application/vnd.oasis.opendocument.presentation', '.odp'],
+    ['application/vnd.oasis.opendocument.spreadsheet', '.ods'],
+    ['application/vnd.oasis.opendocument.text', '.odt'],
+    ['application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx'],
+    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
+    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
+    ['application/vnd.rar', '.rar'],
+    ['application/vnd.visio', '.vsd'],
+    ['application/x-7z-compressed', '.7z'],
+    ['application/x-abiword', '.abw'],
     ['application/x-bzip', '.bz'],
     ['application/x-bzip2', '.bz2'],
     ['application/x-cdf', '.cda'],
     ['application/x-csh', '.csh'],
-    ['text/css', '.css'],
-    ['text/csv', '.csv'],
-    ['application/msword', '.doc'],
-    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
-    ['application/vnd.ms-fontobject', '.eot'],
-    ['application/epub+zip', '.epub'],
-    ['application/gzip', '.gz'],
-    ['image/gif', '.gif'],
-    ['text/html', '.html'],
-    ['image/vnd.microsoft.icon', '.ico'],
-    ['text/calendar', '.ics'],
-    ['application/java-archive', '.jar'],
-    ['image/jpeg', '.jpg'],
-    ['text/javascript', '.js'],
-    ['application/json', '.json'],
-    ['application/ld+json', '.jsonld'],
-    ['audio/midi', '.midi'],
-    ['audio/x-midi', '.midi'],
-    ['audio/mpeg', '.mp3'],
-    ['video/mp4', '.mp4'],
-    ['video/mpeg', '.mpeg'],
-    ['application/vnd.apple.installer+xml', '.mpkg'],
-    ['application/vnd.oasis.opendocument.presentation', '.odp'],
-    ['application/vnd.oasis.opendocument.spreadsheet', '.ods'],
-    ['application/vnd.oasis.opendocument.text', '.odt'],
-    ['audio/ogg', '.oga'],
-    ['video/ogg', '.ogv'],
-    ['application/ogg', '.ogx'],
-    ['audio/opus', '.opus'],
-    ['font/otf', '.otf'],
-    ['image/png', '.png'],
-    ['application/pdf', '.pdf'],
+    ['application/x-freearc', '.arc'],
     ['application/x-httpd-php', '.php'],
-    ['application/vnd.ms-powerpoint', '.ppt'],
-    ['application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx'],
-    ['application/vnd.rar', '.rar'],
-    ['application/rtf', '.rtf'],
+    ['application/x-pem-file', '.pem'],
     ['application/x-sh', '.sh'],
-    ['image/svg+xml', '.svg'],
     ['application/x-tar', '.tar'],
-    ['image/tiff', '.tiff'],
-    ['video/mp2t', '.ts'],
-    ['font/ttf', '.ttf'],
-    ['text/plain', '.txt'],
-    ['application/vnd.visio', '.vsd'],
+    ['application/xhtml+xml', '.xhtml'],
+    ['application/xml', '.xml'],
+    ['application/zip', '.zip'],
+    ['audio/3gpp', '.3gp'],
+    ['audio/3gpp2', '.3g2'],
+    ['audio/aac', '.aac'],
+    ['audio/midi', '.midi'],
+    ['audio/mpeg', '.mp3'],
+    ['audio/ogg', '.oga'],
+    ['audio/opus', '.opus'],
     ['audio/wav', '.wav'],
     ['audio/webm', '.weba'],
-    ['video/webm', '.webp'],
+    ['audio/x-midi', '.midi'],
+    ['font/otf', '.otf'],
+    ['font/ttf', '.ttf'],
     ['font/woff', '.woff'],
     ['font/woff2', '.woff2'],
-    ['application/xhtml+xml', '.xhtml'],
-    ['application/vnd.ms-excel', '.xls'],
-    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
-    ['application/xml', '.xml'],
+    ['image/avif', '.avif'],
+    ['image/bmp', '.bmp'],
+    ['image/gif', '.gif'],
+    ['image/jpeg', '.jpg'],
+    ['image/png', '.png'],
+    ['image/svg+xml', '.svg'],
+    ['image/tiff', '.tiff'],
+    ['image/vnd.microsoft.icon', '.ico'],
+    ['text/calendar', '.ics'],
+    ['text/css', '.css'],
+    ['text/csv', '.csv'],
+    ['text/html', '.html'],
+    ['text/javascript', '.js'],
+    ['text/plain', '.txt'],
     ['text/xml', '.xml'],
-    ['application/vnd.mozilla.xul+xml', '.xul'],
-    ['application/x-pem-file', '.pem'],
-    ['application/zip', '.zip'],
     ['video/3gpp', '.3gp'],
-    ['audio/3gpp', '.3gp'],
     ['video/3gpp2', '.3g2'],
-    ['audio/3gpp2', '.3g2'],
-    ['application/x-7z-compressed', '.7z'],
+    ['video/mp2t', '.ts'],
+    ['video/mp4', '.mp4'],
+    ['video/mpeg', '.mpeg'],
+    ['video/ogg', '.ogv'],
+    ['video/webm', '.webp'],
+    ['video/x-msvideo', '.avi'],
 ]);
 
 export type DefaultType = string | number | boolean | bigint;
@@ -683,7 +683,7 @@ export function isBooleanType(type: DataTypeDefXsd): boolean {
  * @param value The value expression.
  * @param valueType The value type.
  * @param localeId The target language.
- * @param unit The physicale unit.
+ * @param unit The physical unit.
  * @returns The locale string or `undefined`.
  */
 export function toDisplayValue(
@@ -723,6 +723,7 @@ export function toDisplayValue(
             case 'xs:time':
                 s = parseDate(value)?.toLocaleTimeString(localeId);
                 break;
+            case 'xs:long':
             case 'xs:unsignedLong':
                 s = BigInt(value).toLocaleString(localeId);
                 break;
@@ -739,8 +740,8 @@ export function toDisplayValue(
 }
 
 /**
- * Converts a localized string representation of the current value into a locale invariant.
- * @param value The localized string representation of a value.
+ * Converts a localized value into its invariant equivalent.
+ * @param value The localized value.
  * @param valueType The value type.
  * @param localeId The source language.
  */
@@ -755,12 +756,14 @@ export function toInvariant(
 
     switch (valueType) {
         case 'xs:float':
-        case 'xs:double': {
+        case 'xs:double':
+        case 'xs:decimal': {
             const d = parseNumber(value, localeId);
             return Number.isNaN(d) ? undefined : d.toString();
         }
         case 'xs:integer':
         case 'xs:int':
+        case 'xs:short':
         case 'xs:unsignedInt':
         case 'xs:unsignedShort': {
             const i = parseNumber(value, localeId);
@@ -782,10 +785,11 @@ export function toInvariant(
  */
 export function isNumberType(valueType: DataTypeDefXsd): boolean {
     switch (valueType) {
-        case 'xs:float':
         case 'xs:double':
-        case 'xs:integer':
+        case 'xs:float':
         case 'xs:int':
+        case 'xs:integer':
+        case 'xs:short':
         case 'xs:unsignedInt':
         case 'xs:unsignedShort':
             return true;

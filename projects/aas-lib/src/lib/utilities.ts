@@ -28,9 +28,10 @@ import {
     isSubmodelElementList,
     getUnit,
     toDisplayValue,
+    getChildren,
 } from 'aas-core';
 
-import { DataSheetItem, GetUrlFn } from './types';
+import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetItemPath } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -242,23 +243,39 @@ export function hashCode(value: string): number {
     return hash >= 0 ? hash : 4294967296 + hash;
 }
 
+/**
+ *
+ * @param value
+ * @returns
+ */
 export function referenceToString(value: aas.Reference): string {
     return value.keys.map(key => key.value).join('.');
 }
 
+/**
+ *
+ * @param value
+ * @returns
+ */
 export function isLangString(value: unknown): value is aas.LangString[] {
     if (!Array.isArray(value) || value.length === 0) {
         return false;
     }
 
     const langString = value[0] as aas.LangString;
-
     return typeof langString.language === 'string' && typeof langString.text === 'string';
 }
 
-export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.File | undefined): string {
+/**
+ *
+ * @param document
+ * @param submodel
+ * @param file
+ * @returns
+ */
+export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.File | undefined): string | undefined {
     if (file === undefined || file.value === undefined) {
-        return '';
+        return undefined;
     }
 
     const smId = encodeBase64Url(submodel.id);
@@ -266,6 +283,83 @@ export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.
     const name = encodeBase64Url(document.endpoint);
     const id = encodeBase64Url(document.id);
     return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+}
+
+/**
+ * Creates a data sheet.
+ * @param document The AAS document.
+ * @param submodel The submodel.
+ * @param sm The
+ * @param lang The current language.
+ * @param paths A list
+ * @returns An object of type `DataSheetData`.
+ */
+export function createDataSheet(
+    document: AASDocument,
+    submodel: aas.Submodel,
+    sm: aas.SubmodelElement | aas.Submodel,
+    lang: string,
+    paths?: DataSheetItemPath[],
+): DataSheetData {
+    const dataSheet: DataSheetData = {
+        name: '',
+        items: [],
+    };
+
+    const env = document.content;
+    if (!env) {
+        return dataSheet;
+    }
+
+    dataSheet.name = getDisplayName(sm, env, lang);
+
+    if (paths) {
+        for (const path of paths) {
+            let item: DataSheetItem | undefined;
+            if (typeof path === 'string') {
+                item = createItem(getReferable(sm, path), env);
+            } else {
+                item = createItem(path.idShortPath ? getReferable(sm, path.idShortPath) : sm, env, path);
+            }
+
+            if (item) {
+                dataSheet.items.push(item);
+            }
+        }
+    } else {
+        for (const referable of getChildren(sm)) {
+            const item = createItem(referable, env);
+            if (item) {
+                dataSheet.items.push(item);
+            }
+        }
+    }
+
+    return dataSheet;
+
+    function createItem(
+        referable: aas.Referable | undefined,
+        env: aas.Environment | undefined,
+        option?: DataSheetItemOptions,
+    ): DataSheetItem | undefined {
+        if (!referable) {
+            return undefined;
+        }
+
+        if (isFile(referable) && !option?.getUrl) {
+            option = option ? { ...option, getUrl: resolveUrl } : { type: 'url', getUrl: resolveUrl };
+        }
+
+        return createDataSheetItem(referable, env, lang, option);
+    }
+
+    function resolveUrl(referable: aas.Referable): string | undefined {
+        if (isFile(referable)) {
+            return getUrl(document, submodel, referable);
+        }
+
+        return undefined;
+    }
 }
 
 /**
@@ -279,7 +373,7 @@ export function createDataSheetItem(
     element: aas.Referable,
     env: aas.Environment | undefined,
     lang: string | undefined,
-    options?: { format?: string; getUrl?: GetUrlFn },
+    options?: DataSheetItemOptions,
 ): DataSheetItem | undefined {
     let dataSpecification: aas.DataSpecificationIec61360 | undefined;
     if (env) {
@@ -329,10 +423,7 @@ export function createDataSheetItem(
 
     return item;
 
-    function getValue(
-        element: aas.Referable,
-        options?: { format?: string; getUrl?: GetUrlFn },
-    ): string | string[] | undefined {
+    function getValue(element: aas.Referable, options?: DataSheetItemOptions): string | string[] | undefined {
         if (isProperty(element)) {
             const unit = dataSpecification?.unit;
             return lang ? toDisplayValue(element.value, element.valueType, lang, unit) : element.value;
@@ -351,8 +442,10 @@ export function createDataSheetItem(
                 return undefined;
             }
 
-            if (options?.format) {
+            if (options?.type === 'format') {
                 return formatValue(element, options.format);
+            } else if (options?.type === 'join') {
+                return joinValue(element, options.join, options.separator);
             }
 
             const values: string[] = [];
@@ -389,6 +482,23 @@ export function createDataSheetItem(
 
                 return Array.isArray(value) ? value.join(' ') : value;
             });
+        }
+
+        function joinValue(sm: aas.SubmodelElement, idShortPaths: string[], separator: string): string {
+            const values: string[] = [];
+            for (const idShortPath of idShortPaths) {
+                const referable = getReferable(sm, idShortPath);
+                if (!referable) {
+                    continue;
+                }
+
+                const value = getValue(referable);
+                if (value) {
+                    values.push(Array.isArray(value) ? value.join(' ') : value);
+                }
+            }
+
+            return values.join(separator);
         }
     }
 }

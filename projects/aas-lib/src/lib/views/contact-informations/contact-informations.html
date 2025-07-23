@@ -15,7 +15,12 @@
         <div ngbAccordionCollapse>
             <div ngbAccordionBody>
                 <ng-template>
-                    <fhg-data-sheet [dataSheet]="contact"></fhg-data-sheet>
+                    <dl class="row">
+                        @for (item of contact.items; track item) {
+                        <dt class="col-sm-3">{{item.displayName}}</dt>
+                        <dd class="col-sm-9">{{item.value}}</dd>
+                        }
+                    </dl>
                 </ng-template>
             </div>
         </div>

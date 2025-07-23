@@ -22,7 +22,7 @@ import {
 } from 'aas-core';
 
 import { DataSheetData } from '../../types';
-import { Nameplate_3_0 } from '../views';
+import { FHGNameplate, HSUNameplate, Nameplate_3_0, ZVEINameplate } from '../views';
 import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 import { DataSheetItem } from 'projects/aas-lib/dist';
@@ -37,22 +37,29 @@ import { DataSheetItem } from 'projects/aas-lib/dist';
 export class Nameplate {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
+    private readonly submodel = computed(() => {
+        const env = this.document()?.content;
+        if (!env) {
+            return undefined;
+        }
+
+        return env.submodels.find(submodel => {
+            const semanticId = getSemanticId(submodel);
+            if (!semanticId) {
+                return false;
+            }
+
+            return [ZVEINameplate, FHGNameplate, HSUNameplate, Nameplate_3_0].indexOf(semanticId) >= 0;
+        });
+    });
 
     public constructor(private readonly translate: TranslateService) {
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
     }
 
+    /** The active AAS document. */
     public readonly document = input<AASDocument>();
-
-    public readonly submodel = computed(() => {
-        const env = this.document()?.content;
-        if (!env) {
-            return undefined;
-        }
-
-        return env.submodels.find(submodel => getSemanticId(submodel) === Nameplate_3_0);
-    });
 
     public readonly dataSheets = computed(() => {
         const dataSheets: DataSheetData[] = [];
@@ -80,13 +87,14 @@ export class Nameplate {
                 if (isSubmodelElementCollection(child) || isSubmodelElementList(child)) {
                     if (child.idShort === 'AddressInformation') {
                         item = createDataSheetItem(child, env, currentLang, {
+                            type: 'format',
                             format: '{Street}, {NationalCode}-{ZipCode} {CityTown}',
                         });
                     } else {
                         queue.unshift([level + 1, child]);
                     }
                 } else {
-                    item = createDataSheetItem(child, env, currentLang, { getUrl: this.getUrl });
+                    item = createDataSheetItem(child, env, currentLang, { type: 'url', getUrl: this.getUrl });
                 }
 
                 if (item) {

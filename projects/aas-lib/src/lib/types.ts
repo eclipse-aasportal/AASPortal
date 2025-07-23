@@ -37,14 +37,31 @@ export enum ViewMode {
     Tree = 'tree',
 }
 
-export interface DataSheetItemPathFormatOption {
-    idShortPath: string;
-    format: string;
-}
+/** Defines options for an item in the data sheet. */
+export type DataSheetItemOptions = {
+    /** The idShort path to a root element. */
+    idShortPath?: string;
+    /** Resolves the URL if the value of an item represents an URL. */
+    getUrl?: GetUrlFn;
+} & (
+    | { type: 'url'; getUrl: GetUrlFn }
+    | {
+          type: 'format';
+          /** The format string like `{FirstName} {LastName}`. */
+          format: string;
+      }
+    | {
+          type: 'join';
+          /** The idShortPaths of the referables that values should be joined. */
+          join: string[];
+          /**  A string used to separate one element of the array from the next in the resulting string. */
+          separator: string;
+      }
+);
 
 export type GetUrlFn = (element: aas.Referable) => string | undefined;
 
-export type DataSheetItemPath = string | DataSheetItemPathFormatOption;
+export type DataSheetItemPath = string | DataSheetItemOptions;
 
 /** Represents an item of a data sheet. */
 export interface DataSheetItem {

@@ -9,23 +9,21 @@
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, computed, input, Signal, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, Signal, signal } from '@angular/core';
 
 import {
     aas,
     AASDocument,
-    getChildren,
     getReferable,
     getSemanticId,
     getUnit,
-    isFile,
     isSubmodelElementCollection,
     parseNumber,
 } from 'aas-core';
 
 import { CarbonFootprint_0_9, CarbonFootprint_1_0 } from '../views';
-import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
-import { DataSheetData, DataSheetItem, DataSheetItemPath } from '../../types';
+import { createDataSheet } from '../../utilities';
+import { DataSheetData } from '../../types';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 
 @Component({
@@ -101,9 +99,11 @@ export class CarbonFootprint {
     });
 
     public readonly carbonFootprintItems = computed(() => {
+        const document = this.document();
         const submodel = this.submodel();
+        const currentLang = this.currentLang();
         const items: DataSheetData[] = [];
-        if (!submodel) {
+        if (!document || !submodel) {
             return items;
         }
 
@@ -114,7 +114,7 @@ export class CarbonFootprint {
 
         for (const item of sml.value) {
             if (isSubmodelElementCollection(item)) {
-                items.push(this.createCarbonFootprint(item));
+                items.push(this.createCarbonFootprint(document, submodel, item, currentLang));
             }
         }
 
@@ -122,92 +122,33 @@ export class CarbonFootprint {
     });
 
     public readonly carbonFootprint = computed(() => {
-        return this.carbonFootprintItems()[this.carbonFootprintIndex() - 1];
+        return this.carbonFootprintItems()[this.index() - 1];
     });
 
-    public readonly carbonFootprintIndex = signal(1);
+    public readonly index = signal(1);
 
-    public readonly carbonFootprintSize = computed(() => this.carbonFootprintItems().length);
+    public readonly count = computed(() => this.carbonFootprintItems().length);
 
-    private createCarbonFootprint(smc: aas.SubmodelElementCollection): DataSheetData {
-        const env = this.document()!.content!;
-        const currentLang = this.currentLang();
-        const carbonFootprint: DataSheetData = {
-            name: getDisplayName(smc, env, currentLang),
-            items: this.createDataSheet(smc, env, [
-                'PcfCO2eq',
-                'ReferenceImpactUnitForCalculation',
-                'QuantityOfMeasureForCalculation',
-                'LifeCyclePhases',
-                'PcfCalculationMethods',
-                'PublicationDate',
-                'ExpirationDate',
-                'ExplanatoryStatement',
-                {
-                    idShortPath: 'GoodsHandoverAddress',
-                    format: '{Street} {HouseNumber}, {Country}-{ZipCode} {CityTown}',
-                },
-            ]),
-        };
-
-        return carbonFootprint;
-    }
-
-    private createDataSheet(
-        sm: aas.SubmodelElement | aas.Submodel,
-        env: aas.Environment,
-        options?: DataSheetItemPath[],
-    ): DataSheetItem[] {
-        const items: DataSheetItem[] = [];
-        if (options) {
-            for (const option of options) {
-                let item: DataSheetItem | undefined;
-                if (typeof option === 'string') {
-                    item = this.createItem(getReferable(sm, option), env);
-                } else {
-                    item = this.createItem(getReferable(sm, option.idShortPath), env, option.format);
-                }
-
-                if (item) {
-                    items.push(item);
-                }
-            }
-        } else {
-            for (const referable of getChildren(sm)) {
-                const item = this.createItem(referable, env);
-                if (item) {
-                    items.push(item);
-                }
-            }
-        }
-
-        return items;
-    }
-
-    private createItem(
-        referable: aas.Referable | undefined,
-        env: aas.Environment | undefined,
-        format?: string,
-    ): DataSheetItem | undefined {
-        if (!referable) {
-            return undefined;
-        }
-
-        const lang = untracked(this.currentLang);
-        if (isFile(referable)) {
-            return createDataSheetItem(referable, env, lang, {
-                getUrl: (element: aas.Referable) => {
-                    const document = this.document()!;
-                    const submodel = this.submodel()!;
-                    if (isFile(element)) {
-                        return getUrl(document, submodel, element);
-                    }
-
-                    return undefined;
-                },
-            });
-        }
-
-        return createDataSheetItem(referable, env, lang, { format });
+    private createCarbonFootprint(
+        document: AASDocument,
+        submodel: aas.Submodel,
+        collection: aas.SubmodelElementCollection,
+        currentLang: string,
+    ): DataSheetData {
+        return createDataSheet(document, submodel, collection, currentLang, [
+            'PcfCO2eq',
+            'ReferenceImpactUnitForCalculation',
+            'QuantityOfMeasureForCalculation',
+            'LifeCyclePhases',
+            'PcfCalculationMethods',
+            'PublicationDate',
+            'ExpirationDate',
+            'ExplanatoryStatement',
+            {
+                type: 'format',
+                idShortPath: 'GoodsHandoverAddress',
+                format: '{Street} {HouseNumber}, {Country}-{ZipCode} {CityTown}',
+            },
+        ]);
     }
 }

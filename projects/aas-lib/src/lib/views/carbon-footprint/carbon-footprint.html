@@ -18,8 +18,8 @@
         <div ngbAccordionCollapse>
             <div ngbAccordionBody>
                 <ng-template>
-                    <ngb-pagination [collectionSize]="carbonFootprintSize()" [(page)]="carbonFootprintIndex"
-                        [pageSize]="1" [directionLinks]="carbonFootprintSize() > 5" />
+                    <ngb-pagination [collectionSize]="count()" [(page)]="index"
+                        [pageSize]="1" [directionLinks]="count() > 5" />
                     <fhg-data-sheet [dataSheet]="carbonFootprint()"></fhg-data-sheet>
                 </ng-template>
             </div>

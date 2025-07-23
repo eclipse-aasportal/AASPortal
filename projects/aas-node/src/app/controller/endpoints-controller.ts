@@ -260,7 +260,7 @@ export class EndpointsController extends Controller {
     /**
      * @summary Invokes an Operation synchronously.
      * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The document dentifier (Base64-URL encoded).
+     * @param id The document identifier (Base64-URL encoded).
      * @param operation The `Operation`.
      * @returns The executed `Operation`.
      */
