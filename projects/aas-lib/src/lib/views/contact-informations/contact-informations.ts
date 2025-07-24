@@ -11,15 +11,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
-import {
-    aas,
-    AASDocument,
-    getSemanticId,
-    isSubmodelElementCollection,
-} from 'aas-core';
+import { aas, AASDocument, getSemanticId, isSubmodelElementCollection } from 'aas-core';
 import { ContactInformations_1_0 } from '../views';
 import { DataSheetData } from '../../types';
-import { createDataSheet } from '../../utilities';
+import { createDataSheet, getDisplayName } from '../../utilities';
 
 const idShorts = [
     'RoleOfContactPerson',
@@ -75,58 +70,58 @@ export class ContactInformations {
     });
 
     public readonly contacts = computed(() => {
-        const contact: DataSheetData[] = [];
+        const contacts: DataSheetData[] = [];
         const currentLang = this.currentLang();
         const document = this.document();
         const submodel = this.submodel();
-        if (!document || !submodel?.submodelElements) {
-            return contact;
+        const env = document?.content;
+        if (!env || !submodel?.submodelElements) {
+            return contacts;
         }
 
+        let index = 1;
         for (const element of submodel.submodelElements) {
-            if (isSubmodelElementCollection(element)) {
-                contact.push(this.createContact(document, submodel, element, currentLang));
+            const dataSheet = createDataSheet(document, submodel, element, currentLang, {
+                name: `${getDisplayName(element, env, currentLang)} [${index}]`,
+                type: 'A',
+                include: [
+                    'RoleOfContactPerson',
+                    'NationalCode',
+                    'Language',
+                    'TimeZone',
+                    'CityTown',
+                    'Company',
+                    'Department',
+                    {
+                        type: 'join',
+                        idShortPath: 'Phone',
+                        join: ['TypeOfTelephone', 'TelephoneNumber', 'AvailableTime'],
+                        separator: ', ',
+                    },
+                    'Fax',
+                    'Email',
+                    'IPCommunication{00}',
+                    'Street',
+                    'Zipcode',
+                    'POBox',
+                    'ZipCodeOfPOBox',
+                    'StateCounty',
+                    {
+                        type: 'join',
+                        join: ['AcademicTitle', 'Title', 'FirstName', 'MiddleNames', 'NameOfContact'],
+                        separator: ' ',
+                    },
+                    'FurtherDetailsOfContact',
+                    'AddressOfAdditionalLink',
+                ],
+            });
+
+            if (dataSheet.items.length > 0) {
+                contacts.push(dataSheet);
+                ++index;
             }
         }
 
-        return contact;
+        return contacts;
     });
-
-    private createContact(
-        document: AASDocument,
-        submodel: aas.Submodel,
-        collection: aas.SubmodelElementCollection,
-        currentLang: string,
-    ): DataSheetData {
-        return createDataSheet(document, submodel, collection, currentLang, [
-            'RoleOfContactPerson',
-            'NationalCode',
-            'Language',
-            'TimeZone',
-            'CityTown',
-            'Company',
-            'Department',
-            {
-                type: 'join',
-                idShortPath: 'Phone',
-                join: ['TypeOfTelephone', 'TelephoneNumber', 'AvailableTime'],
-                separator: ', ',
-            },
-            'Fax',
-            'Email',
-            'IPCommunication{00}',
-            'Street',
-            'Zipcode',
-            'POBox',
-            'ZipCodeOfPOBox',
-            'StateCounty',
-            {
-                type: 'join',
-                join: ['AcademicTitle', 'Title', 'FirstName', 'MiddleNames', 'NameOfContact'],
-                separator: ' ',
-            },
-            'FurtherDetailsOfContact',
-            'AddressOfAdditionalLink',
-        ]);
-    }
 }

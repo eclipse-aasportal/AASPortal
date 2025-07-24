@@ -44,6 +44,8 @@ export class CarbonFootprint {
 
     public readonly document = input<AASDocument>();
 
+    public readonly collapsed = input(true);
+
     public readonly submodel = computed(() => {
         const env = this.document()?.content;
         if (!env) {
@@ -67,6 +69,7 @@ export class CarbonFootprint {
 
     public readonly totalPcfCO2eq = computed(() => {
         const submodel = this.submodel();
+        const env = this.document()?.content!;
         const currentLang = this.currentLang();
         if (!submodel) {
             return '-';
@@ -89,7 +92,7 @@ export class CarbonFootprint {
                     }
 
                     if (!unit) {
-                        unit = getUnit(this.document()!.content!, pcfCO2eq);
+                        unit = getUnit(env, pcfCO2eq);
                     }
                 }
             }
@@ -135,20 +138,23 @@ export class CarbonFootprint {
         collection: aas.SubmodelElementCollection,
         currentLang: string,
     ): DataSheetData {
-        return createDataSheet(document, submodel, collection, currentLang, [
-            'PcfCO2eq',
-            'ReferenceImpactUnitForCalculation',
-            'QuantityOfMeasureForCalculation',
-            'LifeCyclePhases',
-            'PcfCalculationMethods',
-            'PublicationDate',
-            'ExpirationDate',
-            'ExplanatoryStatement',
-            {
-                type: 'format',
-                idShortPath: 'GoodsHandoverAddress',
-                format: '{Street} {HouseNumber}, {Country}-{ZipCode} {CityTown}',
-            },
-        ]);
+        return createDataSheet(document, submodel, collection, currentLang, {
+            type: 'A',
+            include: [
+                'PcfCO2eq',
+                'ReferenceImpactUnitForCalculation',
+                'QuantityOfMeasureForCalculation',
+                'LifeCyclePhases',
+                'PcfCalculationMethods',
+                'PublicationDate',
+                'ExpirationDate',
+                'ExplanatoryStatement',
+                {
+                    type: 'format',
+                    idShortPath: 'GoodsHandoverAddress',
+                    format: '{Street} {HouseNumber}, {Country}-{ZipCode} {CityTown}',
+                },
+            ],
+        });
     }
 }

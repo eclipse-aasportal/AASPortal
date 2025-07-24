@@ -31,7 +31,7 @@ import {
     getChildren,
 } from 'aas-core';
 
-import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetItemPath } from './types';
+import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetItemPath, DataSheetOptions } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -299,7 +299,7 @@ export function createDataSheet(
     submodel: aas.Submodel,
     sm: aas.SubmodelElement | aas.Submodel,
     lang: string,
-    paths?: DataSheetItemPath[],
+    options?: DataSheetOptions,
 ): DataSheetData {
     const dataSheet: DataSheetData = {
         name: '',
@@ -311,15 +311,19 @@ export function createDataSheet(
         return dataSheet;
     }
 
-    dataSheet.name = getDisplayName(sm, env, lang);
+    dataSheet.name = options?.name ?? getDisplayName(sm, env, lang);
 
-    if (paths) {
-        for (const path of paths) {
+    if (options?.type === 'A') {
+        for (const itemOptions of options.include) {
             let item: DataSheetItem | undefined;
-            if (typeof path === 'string') {
-                item = createItem(getReferable(sm, path), env);
+            if (typeof itemOptions === 'string') {
+                item = createItem(getReferable(sm, itemOptions), env);
             } else {
-                item = createItem(path.idShortPath ? getReferable(sm, path.idShortPath) : sm, env, path);
+                item = createItem(
+                    itemOptions.idShortPath ? getReferable(sm, itemOptions.idShortPath) : sm,
+                    env,
+                    itemOptions,
+                );
             }
 
             if (item) {
@@ -327,8 +331,19 @@ export function createDataSheet(
             }
         }
     } else {
+        const exclude = new Set(options?.exclude);
+        const itemOptions = options?.items;
         for (const referable of getChildren(sm)) {
-            const item = createItem(referable, env);
+            if (exclude.has(referable.idShort)) {
+                continue;
+            }
+
+            const item = createItem(
+                referable,
+                env,
+                itemOptions?.find(item => item.idShortPath === referable.idShort),
+            );
+
             if (item) {
                 dataSheet.items.push(item);
             }
@@ -577,7 +592,7 @@ export function toDisplayName(name: string): string {
 }
 
 /**
- * Gets the display value of a property.
+ * Gets the display value of a submodel element.
  * @param submodel The submodel to which the proerty belongs.
  * @param idShortPath The path to the property.
  * @param lang The current language.

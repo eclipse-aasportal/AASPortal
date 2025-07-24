@@ -10,7 +10,7 @@
     @for (dataSheet of dataSheets(); track dataSheet; let i = $index) {
     <div ngbAccordionItem [collapsed]="i !== 0">
         <h2 ngbAccordionHeader>
-            <button class="fs-5 fw-semibold" ngbAccordionButton>{{dataSheet.name}}</button>
+            <button ngbAccordionButton>{{dataSheet.name}}</button>
         </h2>
         <div ngbAccordionCollapse>
             <div ngbAccordionBody>

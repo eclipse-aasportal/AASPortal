@@ -6,67 +6,33 @@
  *
  *****************************************************************************/
 
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { computed, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    OnDestroy,
-    OnInit,
-    signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
-
+import { first, from, mergeMap, of, toArray } from 'rxjs';
 import { aas, AASDocument, getSemanticId } from 'aas-core';
+import { decodeBase64Url, encodeBase64Url } from '../utilities';
+import { EndpointsApi } from '../../public-api';
 
-import { ToolbarService } from '../../services/toolbar.service';
-import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
-import { ContactInformations_1_0 } from '../views';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { ContactInformations } from './contact-informations';
-
-@Component({
-    selector: 'fhg-contact-informations-view',
-    templateUrl: './contact-informations.view.html',
-    styleUrls: ['./contact-informations.view.scss'],
-    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformations],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class ContactInformationsView implements OnInit, OnDestroy {
-    public constructor(
+export abstract class View {
+    protected constructor(
         private readonly route: ActivatedRoute,
-        private readonly translate: TranslateService,
-        private readonly toolbar: ToolbarService,
         private readonly api: EndpointsApi,
-    ) {
-        effect(() => {
-            const template = this.toolbarTemplate();
-            if (template) {
-                this.toolbar.set(template);
-            }
-        });
-    }
+    ) {}
 
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
+    protected abstract get expectedSemanticIds(): string[];
 
-    private readonly items = signal<[AASDocument, aas.Submodel][]>([]);
+    protected readonly items = signal<[AASDocument, aas.Submodel][]>([]);
 
-    public readonly count = computed(() => this.items().length);
+    protected readonly item = computed(() => this.items().at(this.index() - 1));
 
-    public readonly item = computed(() => this.items().at(this.index() - 1));
+    public readonly index = signal(1);
 
     public readonly document = computed(() => {
         const item = this.item();
         return item ? item[0] : undefined;
     });
 
-    public readonly index = signal(1);
+    public readonly count = computed(() => this.items().length);
 
     public readonly thumbnail = computed(() => {
         const document = this.document();
@@ -77,7 +43,35 @@ export class ContactInformationsView implements OnInit, OnDestroy {
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
     });
 
-    public ngOnInit(): void {
+    public readonly submodel = computed(() => {
+        const env = this.document()?.content;
+        if (!env) {
+            return undefined;
+        }
+
+        return env.submodels.find(submodel => {
+            const semanticId = getSemanticId(submodel);
+            return semanticId && this.expectedSemanticIds.indexOf(semanticId) >= 0;
+        });
+    });
+
+    public readonly version = computed(() => {
+        const item = this.item();
+        if (!item) {
+            return undefined;
+        }
+
+        const submodel = item[1];
+        const version = submodel.administration?.version;
+        const revision = submodel.administration?.revision;
+        if (version) {
+            return revision ? `${version}.${revision}`: `${version}`;
+        }
+
+        return undefined;
+    });
+
+    protected init(): void {
         this.route.queryParams
             .pipe(
                 first(),
@@ -103,14 +97,6 @@ export class ContactInformationsView implements OnInit, OnDestroy {
             });
     }
 
-    public ngOnDestroy(): void {
-        this.toolbar.clear();
-    }
-
-    public addToStart(): Observable<void> {
-        return EMPTY;
-    }
-
     private initialize(documents: AASDocument[]) {
         this.items.set([...this.filterSubmodels(documents)]);
     }
@@ -123,7 +109,7 @@ export class ContactInformationsView implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === ContactInformations_1_0) {
+                if (semanticId && this.expectedSemanticIds.indexOf(semanticId) >= 0) {
                     yield [document, submodel];
                 }
             }

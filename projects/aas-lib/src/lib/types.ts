@@ -44,7 +44,10 @@ export type DataSheetItemOptions = {
     /** Resolves the URL if the value of an item represents an URL. */
     getUrl?: GetUrlFn;
 } & (
-    | { type: 'url'; getUrl: GetUrlFn }
+    | {
+          type: 'url';
+          getUrl: GetUrlFn;
+      }
     | {
           type: 'format';
           /** The format string like `{FirstName} {LastName}`. */
@@ -56,6 +59,21 @@ export type DataSheetItemOptions = {
           join: string[];
           /**  A string used to separate one element of the array from the next in the resulting string. */
           separator: string;
+      }
+);
+
+export type DataSheetOptions = {
+    name?: string;
+    type: 'A' | 'B';
+} & (
+    | {
+          type: 'A';
+          include: (string | DataSheetItemOptions)[];
+      }
+    | {
+          type: 'B';
+          exclude?: string[];
+          items?: DataSheetItemOptions[];
       }
 );
 

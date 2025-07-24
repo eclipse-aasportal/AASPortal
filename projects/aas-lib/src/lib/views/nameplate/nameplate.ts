@@ -14,18 +14,16 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
     aas,
     AASDocument,
-    getChildren,
+    getReferable,
     getSemanticId,
-    isFile,
     isSubmodelElementCollection,
     isSubmodelElementList,
 } from 'aas-core';
 
 import { DataSheetData } from '../../types';
 import { FHGNameplate, HSUNameplate, Nameplate_3_0, ZVEINameplate } from '../views';
-import { createDataSheetItem, getDisplayName, getUrl } from '../../utilities';
+import { createDataSheet, getDisplayName } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { DataSheetItem } from 'projects/aas-lib/dist';
 
 @Component({
     selector: 'fhg-nameplate',
@@ -65,43 +63,48 @@ export class Nameplate {
         const dataSheets: DataSheetData[] = [];
         const currentLang = this.currentLang();
         const submodel = this.submodel();
-        const env = this.document()?.content;
+        const document = this.document();
+        const env = document?.content;
         if (!submodel?.submodelElements || !env) {
             return dataSheets;
         }
 
-        const queue: [number, aas.Referable][] = [[0, submodel]];
-        while (queue.length > 0) {
-            const [level, parent] = queue.shift()!;
-            const dataSheet: DataSheetData = {
-                name:
-                    level === 0
-                        ? this.translate.instant('Nameplate.GENERAL')
-                        : getDisplayName(parent, env, currentLang),
-                level,
-                items: [],
-            };
+        let dataSheet = createDataSheet(document, submodel, submodel, currentLang, {
+            type: 'B',
+            name: this.translate.instant('Nameplate.GENERAL'),
+            exclude: ['Markings', 'AssetSpecificProperties'],
+            items: [
+                {
+                    type: 'format',
+                    idShortPath: 'AddressInformation',
+                    format: '{Street}, {NationalCode}-{ZipCode} {CityTown}',
+                },
+            ],
+        });
 
-            for (const child of getChildren(parent)) {
-                let item: DataSheetItem | undefined;
-                if (isSubmodelElementCollection(child) || isSubmodelElementList(child)) {
-                    if (child.idShort === 'AddressInformation') {
-                        item = createDataSheetItem(child, env, currentLang, {
-                            type: 'format',
-                            format: '{Street}, {NationalCode}-{ZipCode} {CityTown}',
-                        });
-                    } else {
-                        queue.unshift([level + 1, child]);
-                    }
-                } else {
-                    item = createDataSheetItem(child, env, currentLang, { type: 'url', getUrl: this.getUrl });
-                }
+        if (dataSheet.items.length > 0) {
+            dataSheets.push(dataSheet);
+        }
 
-                if (item) {
-                    dataSheet.items.push(item);
+        const markings = getReferable(submodel, 'Markings');
+        if (isSubmodelElementList(markings) && markings.value) {
+            let index = 1;
+            for (const marking of markings.value) {
+                dataSheet = createDataSheet(document, submodel, marking, currentLang, {
+                    name: `${getDisplayName(marking, env)} [${index}]`,
+                    type: 'B',
+                });
+
+                if (dataSheet.items.length > 0) {
+                    dataSheets.push(dataSheet);
+                    ++index;
                 }
             }
+        }
 
+        const assetProperties = getReferable(submodel, 'AssetSpecificProperties');
+        if (isSubmodelElementCollection(assetProperties) && assetProperties.value) {
+            dataSheet = createDataSheet(document, submodel, assetProperties, currentLang);
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }
@@ -109,12 +112,4 @@ export class Nameplate {
 
         return dataSheets;
     });
-
-    private readonly getUrl = (element: aas.Referable) => {
-        if (isFile(element)) {
-            return getUrl(this.document()!, this.submodel()!, element);
-        }
-
-        return undefined;
-    };
 }

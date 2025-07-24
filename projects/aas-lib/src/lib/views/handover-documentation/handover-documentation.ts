@@ -6,33 +6,30 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, Signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
     aas,
     AASDocument,
-    convertToString,
-    getLocaleValue,
     getReferable,
     getSemanticId,
     isFile,
-    isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
+    toDisplayValue,
 } from 'aas-core';
 
-import { HandoverDocumentation_001, HandoverDocumentation_003 } from '../views';
-import { basename, getUrl } from '../../utilities';
+import { HandoverDocumentation_1_2, HandoverDocumentation_2_0 } from '../views';
+import { getUrl } from '../../utilities';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 export type DocumentationItem = {
     title: string;
     version: string;
     filename: string;
-    file: aas.File;
-    url: string;
+    url?: string;
 };
 
 @Component({
@@ -61,71 +58,120 @@ export class HandoverDocumentation {
 
         return env.submodels.find(submodel => {
             const semanticId = getSemanticId(submodel);
-            return semanticId === HandoverDocumentation_001 || HandoverDocumentation_003;
+            return semanticId === HandoverDocumentation_1_2 || semanticId === HandoverDocumentation_2_0;
         });
     });
 
+    public readonly semanticId = computed(() => {
+        const submodel = this.submodel();
+        if (!submodel) {
+            return undefined;
+        }
+
+        return getSemanticId(submodel);
+    });
+
     public readonly items = computed(() => {
-        this.currentLang();
-        const items: DocumentationItem[] = [];
+        const semanticId = untracked(this.semanticId);
         const submodel = this.submodel();
         const document = this.document();
-        if (!document || !submodel?.submodelElements) {
+        this.currentLang();
+        if (!document || !submodel) {
+            return [];
+        }
+
+        return semanticId === HandoverDocumentation_1_2
+            ? this.createItemsV1Dot2(document, submodel)
+            : this.createItemsV2Dot0(document, submodel);
+    });
+
+    private createItemsV1Dot2(document: AASDocument, submodel: aas.Submodel): DocumentationItem[] {
+        const items: DocumentationItem[] = [];
+        const documentId = '0173-1#02-ABI500#001/0173-1#01-AHF579#001*01';
+        const documentVersionId = '0173-1#02-ABI503#001/0173-1#01-AHF582#001*01';
+        const digitalFileId = '0173-1#02-ABI504#001/0173-1#01-AHF583#001';
+        if (!submodel.submodelElements) {
             return items;
         }
 
         for (const sme of submodel.submodelElements) {
-            if (isSubmodelElementCollection(sme)) {
-                if (sme.value === undefined) {
-                    continue;
-                }
+            if (isSubmodelElementCollection(sme) && getSemanticId(sme) === documentId && sme.value) {
+                for (const documentVersion of sme.value.filter(
+                    element => getSemanticId(element) === documentVersionId,
+                )) {
+                    if (isSubmodelElementCollection(documentVersion) && documentVersion.value) {
+                        const previewFile = getReferable(documentVersion, 'PreviewFile');
+                        const version = getReferable(documentVersion, 'DocumentVersionId');
+                        const titel = getReferable(documentVersion, 'Title');
+                        const digitalFiles = documentVersion.value.filter(
+                            element => getSemanticId(element) === digitalFileId,
+                        );
 
-                this.browseForDocumentation(sme.value, items, submodel, sme.idShort);
+                        if (digitalFiles.length) {
+                            items.push({
+                                title: this.toString(titel),
+                                version: this.toString(version),
+                                filename: this.toString(digitalFiles[0]),
+                                url: getUrl(document, submodel, digitalFiles[0] as aas.File),
+                            });
+                        }
+                    }
+                }
             }
         }
 
         return items;
-    });
-
-    private browseForDocumentation(
-        elements: aas.SubmodelElement[],
-        items: DocumentationItem[],
-        sm: aas.Submodel,
-        idShortPath: string,
-    ) {
-        for (const element of elements) {
-            if (isSubmodelElementCollection(element)) {
-                if (element.value) {
-                    this.browseForDocumentation(element.value, items, sm, idShortPath + '.' + element.idShort);
-                }
-            } else if (isFile(element)) {
-                items.push({
-                    title: this.getPropertyValue(sm, idShortPath + '.Title'),
-                    version: this.getPropertyValue(sm, idShortPath + '.Version'),
-                    filename: element.value ? basename(element.value) : '-',
-                    file: element,
-                    url: getUrl(this.document()!, this.submodel()!, element),
-                });
-            }
-        }
     }
 
-    public getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
-        const referable = getReferable(submodel, idShortPath);
-        if (isProperty(referable)) {
-            switch (referable.valueType) {
-                case 'xs:double':
-                case 'xs:integer':
-                    return convertToString(referable.value, this.translate.currentLang);
-                case 'xs:string':
-                    return referable.value ?? '';
-                default:
-                    return referable.value ?? '-';
+    private createItemsV2Dot0(document: AASDocument, submodel: aas.Submodel): DocumentationItem[] {
+        const items: DocumentationItem[] = [];
+        const documentId = '0173-1#02-ABI500#003/0173-1#01-AHF579#003*01';
+        const documentVersionId = '0173-1#02-ABI503#003/0173-1#01-AHF582#003*01';
+        const digitalFileId = '0173-1#02-ABI503#003/0173-1#01-AHF582#003*01';
+        if (!submodel.submodelElements) {
+            return items;
+        }
+
+        for (const sme of submodel.submodelElements) {
+            if (isSubmodelElementCollection(sme) && getSemanticId(sme) === documentId && sme.value) {
+                for (const documentVersion of sme.value.filter(
+                    element => getSemanticId(element) === documentVersionId,
+                )) {
+                    if (isSubmodelElementCollection(documentVersion) && documentVersion.value) {
+                        const previewFile = getReferable(documentVersion, 'PreviewFile');
+                        const version = getReferable(documentVersion, 'DocumentVersionId');
+                        const titel = getReferable(documentVersion, 'Title');
+                        const digitalFiles = documentVersion.value.filter(
+                            element => getSemanticId(element) === digitalFileId,
+                        );
+
+                        if (digitalFiles.length) {
+                            items.push({
+                                title: this.toString(titel),
+                                version: this.toString(version),
+                                filename: this.toString(digitalFiles[0]),
+                                url: getUrl(document, submodel, digitalFiles[0] as aas.File),
+                            });
+                        }
+                    }
+                }
             }
         }
 
-        if (isMultiLanguageProperty(referable)) {
-            return getLocaleValue(referable.value, this.translate.currentLang) ?? '-';
+        return items;
+    }
+
+    private toString(referable: aas.Referable | undefined): string {
+        if (!referable) {
+            return '-';
+        }
+
+        if (isProperty(referable)) {
+            return toDisplayValue(referable.value, referable.valueType, untracked(this.currentLang)) ?? '-';
+        }
+
+        if (isFile(referable)) {
+            return referable.value ?? '-';
         }
 
         return '-';

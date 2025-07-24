@@ -22,8 +22,8 @@ export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplat
 export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
 export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
 export const Nameplate_3_0 = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
-export const HandoverDocumentation_001 = '0173-1#01-AHF578#001';
-export const HandoverDocumentation_003 = '0173-1#01-AHF578#003';
+export const HandoverDocumentation_1_2 = '0173-1#01-AHF578#001';
+export const HandoverDocumentation_2_0 = '0173-1#01-AHF578#003';
 export const CarbonFootprint_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 export const CarbonFootprint_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
 export const ContactInformations_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
@@ -51,7 +51,7 @@ export const viewRoutes: Route[] = [
         path: 'HandoverDocumentation',
         component: HandoverDocumentationView,
         data: {
-            semanticIds: [HandoverDocumentation_003, HandoverDocumentation_001],
+            semanticIds: [HandoverDocumentation_2_0, HandoverDocumentation_1_2],
         },
     },
     {

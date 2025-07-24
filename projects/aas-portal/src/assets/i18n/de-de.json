@@ -294,18 +294,18 @@
     },
     "CarbonFootprint": {
         "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
-        "TOTAL_PSFCO2EQ": "CO2-eq GWP100"
+        "TOTAL_PSFCO2EQ": "GWP100"
     },
     "DigitalProductPassport": {
-        "EMPTY": "Kein Productpass verfügbar.",
-        "Name": "Name",
-        "Description": "Beschreibung",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
         "CAPTION": "Produktpass",
-        "TYPE": "Type",
-        "SERIAL_NUMBER": "Seriennummer",
+        "Description": "Beschreibung",
+        "DOCUMENTATION": "Dokumentation",
+        "EMPTY": "Kein Productpass verfügbar.",
+        "Name": "Name",
         "NAMEPLATE_DATA": "Typenschild",
-        "DOCUMENTATION": "Dokumentation"
+        "SERIAL_NUMBER": "Seriennummer",
+        "TYPE": "Type"
     },
     "Favorite": {
         "ID_SHORT": "ID-Short",
@@ -322,6 +322,7 @@
         "ABOUT": "Info über..."
     },
     "HandoverDocumentation": {
+        "TITLE": "Übergabedocumentation",
         "EMPTY": "Keine Übergabedokumente verfügbar."
     },
     "Browser": {
@@ -331,5 +332,11 @@
     "Nameplate": {
         "GENERAL": "Allgemein",
         "TITLE": "Digitales Typenschild"
+    },
+    "TechnicalData": {
+        "TITLE": "Technische Daten"
+    },
+    "ContactInformations": {
+        "TITLE": "Kontaktdaten"
     }
 }
