@@ -25,9 +25,9 @@ import {
 import { aas, AASDocument, getSemanticId } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { ContactInformations_1_0 } from '../views';
+import { CONTACT_INFORMATIONS_1_0 } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { ContactInformations } from './contact-informations';
 
@@ -123,7 +123,7 @@ export class ContactInformationsView implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === ContactInformations_1_0) {
+                if (semanticId === CONTACT_INFORMATIONS_1_0) {
                     yield [document, submodel];
                 }
             }

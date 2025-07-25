@@ -21,7 +21,7 @@ import {
     parseNumber,
 } from 'aas-core';
 
-import { CarbonFootprint_0_9, CarbonFootprint_1_0 } from '../views';
+import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views';
 import { createDataSheet } from '../../utilities';
 import { DataSheetData } from '../../types';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
@@ -54,7 +54,7 @@ export class CarbonFootprint {
 
         return env.submodels.find(submodel => {
             const semanticId = getSemanticId(submodel);
-            return semanticId === CarbonFootprint_1_0 || semanticId === CarbonFootprint_0_9;
+            return semanticId === CARBON_FOOTPRINT_1_0 || semanticId === CARBON_FOOTPRINT_0_9;
         });
     });
 
@@ -69,9 +69,9 @@ export class CarbonFootprint {
 
     public readonly totalPcfCO2eq = computed(() => {
         const submodel = this.submodel();
-        const env = this.document()?.content!;
+        const env = this.document()?.content;
         const currentLang = this.currentLang();
-        if (!submodel) {
+        if (!env || !submodel) {
             return '-';
         }
 

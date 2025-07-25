@@ -11,16 +11,10 @@ import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-transla
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import {
-    aas,
-    AASDocument,
-    getReferable,
-    getSemanticId,
-    isSubmodelElementCollection,
-} from 'aas-core';
+import { AASDocument, getReferable, getSemanticId, isSubmodelElementCollection } from 'aas-core';
 
-import { DataSheetData, DataSheetItem } from '../../types';
-import { TechnicalData_1_2 } from '../views';
+import { DataSheetData } from '../../types';
+import { TECHNICAL_DATA_1_2 } from '../views';
 import { createDataSheet } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 
@@ -48,7 +42,7 @@ export class TechnicalData {
             return undefined;
         }
 
-        return env.submodels.find(submodel => getSemanticId(submodel) === TechnicalData_1_2);
+        return env.submodels.find(submodel => getSemanticId(submodel) === TECHNICAL_DATA_1_2);
     });
 
     public readonly dataSheets = computed(() => {

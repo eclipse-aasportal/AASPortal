@@ -23,8 +23,8 @@ export interface DifferenceItem {
 }
 
 /**
- * Determines whether the specified referable represents a `AssetAdministrationShell`.
- * @param value The current referable.
+ * Determines whether the specified referable represents an `AssetAdministrationShell`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `AssetAdministrationShell`; otherwise, `false`.
  */
 export function isAssetAdministrationShell(referable: unknown): referable is aas.AssetAdministrationShell {
@@ -33,7 +33,7 @@ export function isAssetAdministrationShell(referable: unknown): referable is aas
 
 /**
  * Determines whether the specified referable represents a `Submodel`.
- * @param value The current referable.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `Submodel`; otherwise, `false`.
  */
 export function isSubmodel(referable: unknown): referable is aas.Submodel {
@@ -42,7 +42,7 @@ export function isSubmodel(referable: unknown): referable is aas.Submodel {
 
 /**
  * Determines whether the specified referable represents a `Property`.
- * @param value The current referable.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `Property`; otherwise, `false`.
  */
 export function isProperty(referable: unknown): referable is aas.Property {
@@ -51,7 +51,7 @@ export function isProperty(referable: unknown): referable is aas.Property {
 
 /**
  * Determines whether the specified referable represents a `File`.
- * @param value The current referable.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `File`; otherwise, `false`.
  */
 export function isFile(referable: unknown): referable is aas.File {
@@ -60,7 +60,7 @@ export function isFile(referable: unknown): referable is aas.File {
 
 /**
  * Determines whether the specified referable represents a `Blob`.
- * @param value The current referable.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `Blob`; otherwise, `false`.
  */
 export function isBlob(referable: unknown): referable is aas.Blob {
@@ -69,7 +69,7 @@ export function isBlob(referable: unknown): referable is aas.Blob {
 
 /**
  * Determines whether the specified referable represents a `MultiLanguageProperty`.
- * @param value The current referable.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `MultiLanguageProperty`; otherwise, `false`.
  */
 export function isMultiLanguageProperty(referable: unknown): referable is aas.MultiLanguageProperty {
@@ -77,8 +77,8 @@ export function isMultiLanguageProperty(referable: unknown): referable is aas.Mu
 }
 
 /**
- * Determines whether the specified referable represents a reference element.
- * @param value The current referable.
+ * Determines whether the specified referable represents a `ReferenceElement`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `ReferenceElement`; otherwise, `false`.
  */
 export function isReferenceElement(referable: unknown): referable is aas.ReferenceElement {
@@ -86,8 +86,8 @@ export function isReferenceElement(referable: unknown): referable is aas.Referen
 }
 
 /**
- * Determines whether the specified referable represents a submodel element collection.
- * @param value The current referable.
+ * Determines whether the specified referable represents a `SubmodelElementCollection`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `SubmodelElementCollection`; otherwise, `false`.
  */
 export function isSubmodelElementCollection(referable: unknown): referable is aas.SubmodelElementCollection {
@@ -95,8 +95,8 @@ export function isSubmodelElementCollection(referable: unknown): referable is aa
 }
 
 /**
- * Determines whether the specified referable represents a submodel element list.
- * @param value The current referable.
+ * Determines whether the specified referable represents a `SubmodelElementList`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `SubmodelElementList`; otherwise, `false`.
  */
 export function isSubmodelElementList(referable: unknown): referable is aas.SubmodelElementList {
@@ -104,8 +104,8 @@ export function isSubmodelElementList(referable: unknown): referable is aas.Subm
 }
 
 /**
- * Determines whether the specified referable represents an annotated relationship element.
- * @param value The current referable.
+ * Determines whether the specified referable represents an `AnnotatedRelationshipElement`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `AnnotatedRelationshipElement`; otherwise, `false`.
  */
 export function isAnnotatedRelationshipElement(referable: unknown): referable is aas.AnnotatedRelationshipElement {
@@ -113,8 +113,8 @@ export function isAnnotatedRelationshipElement(referable: unknown): referable is
 }
 
 /**
- * Determines whether the specified referable represents a relationship element.
- * @param value The current referable.
+ * Determines whether the specified referable represents a `RelationshipElement`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `RelationshipElement`; otherwise, `false`.
  */
 export function isRelationshipElement(referable: unknown): referable is aas.RelationshipElement {
@@ -122,8 +122,8 @@ export function isRelationshipElement(referable: unknown): referable is aas.Rela
 }
 
 /**
- * Determines whether the specified referable represents an entity.
- * @param value The current referable.
+ * Determines whether the specified referable represents an 'Entity'.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `Entity`; otherwise, `false`.
  */
 export function isEntity(referable: unknown): referable is aas.Entity {
@@ -131,8 +131,8 @@ export function isEntity(referable: unknown): referable is aas.Entity {
 }
 
 /**
- * Determines whether the specified referable represents an operation.
- * @param value The current referable.
+ * Determines whether the specified referable represents an `Operation`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents an `Operation`; otherwise, `false`.
  */
 export function isOperation(referable: unknown): referable is aas.Operation {
@@ -140,8 +140,8 @@ export function isOperation(referable: unknown): referable is aas.Operation {
 }
 
 /**
- * Determines whether the specified referable represents a range.
- * @param value The current referable.
+ * Determines whether the specified referable represents a `Range`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `Range`; otherwise, `false`.
  */
 export function isRange(referable: unknown): referable is aas.Range {
@@ -149,8 +149,8 @@ export function isRange(referable: unknown): referable is aas.Range {
 }
 
 /**
- * Determines whether the specified referable represents a concept description.
- * @param value The current referable.
+ * Determines whether the specified referable represents a `ConceptDescription`.
+ * @param referable The current referable.
  * @returns `true` if the specified referable represents a `ConceptDescription`; otherwise, `false`.
  */
 export function isConceptDescription(referable: unknown): referable is aas.ConceptDescription {
@@ -168,9 +168,9 @@ export function isReferable(value: unknown): value is aas.Referable {
 }
 
 /**
- * Determines whether the specified value is of type `HasSemantics`.
+ * Determines whether the specified value is of type `Reference`.
  * @param value The current value.
- * @returns `true` if the specified value is of type `HasSemantics`; otherwise, `false`.
+ * @returns `true` if the specified value is of type `Reference`; otherwise, `false`.
  */
 export function isReference(value: unknown): value is aas.Reference {
     if (!value || typeof value !== 'object') {
@@ -186,26 +186,24 @@ export function isReference(value: unknown): value is aas.Reference {
  * @returns `true` if the specified value represents a submodel element; otherwise, `false`.
  */
 export function isSubmodelElement(value: unknown): value is aas.SubmodelElement {
-    if (value && (value as aas.Referable).modelType) {
-        switch ((value as aas.Referable).modelType) {
-            case 'AnnotatedRelationshipElement':
-            case 'BasicEventElement':
-            case 'Blob':
-            case 'Capability':
-            case 'Entity':
-            case 'File':
-            case 'MultiLanguageProperty':
-            case 'Operation':
-            case 'Property':
-            case 'Range':
-            case 'ReferenceElement':
-            case 'RelationshipElement':
-            case 'SubmodelElementCollection':
-            case 'SubmodelElementList':
-                return true;
-            default:
-                return false;
-        }
+    switch ((value as aas.Referable)?.modelType) {
+        case 'AnnotatedRelationshipElement':
+        case 'BasicEventElement':
+        case 'Blob':
+        case 'Capability':
+        case 'Entity':
+        case 'File':
+        case 'MultiLanguageProperty':
+        case 'Operation':
+        case 'Property':
+        case 'Range':
+        case 'ReferenceElement':
+        case 'RelationshipElement':
+        case 'SubmodelElementCollection':
+        case 'SubmodelElementList':
+            return true;
+        default:
+            return false;
     }
 
     return false;
@@ -296,7 +294,7 @@ export function selectSubmodel(env: aas.Environment, referable: aas.Referable): 
 
 /**
  * Determines wether the specified element is a descendant of the given ancestor.
- * @param root The root element.
+ * @param env The AAS environment.
  * @param ancestor An ancestor element.
  * @param element An element to check.
  * @returns `true` if the element is a descendant of the given ancestor; otherwise, `false`.

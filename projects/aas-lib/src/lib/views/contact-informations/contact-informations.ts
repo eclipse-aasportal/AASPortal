@@ -11,36 +11,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { aas, AASDocument, getSemanticId, isSubmodelElementCollection } from 'aas-core';
-import { ContactInformations_1_0 } from '../views';
+import { AASDocument, getSemanticId } from 'aas-core';
+import { CONTACT_INFORMATIONS_1_0 } from '../views';
 import { DataSheetData } from '../../types';
 import { createDataSheet, getDisplayName } from '../../utilities';
-
-const idShorts = [
-    'RoleOfContactPerson',
-    'NationalCode',
-    'Language',
-    'TimeZone',
-    'CityTown',
-    'Company',
-    'Department',
-    'Phone',
-    'Fax',
-    'Email',
-    'IPCommunication{00}',
-    'Street',
-    'Zipcode',
-    'POBox',
-    'ZipCodeOfPOBox',
-    'StateCounty',
-    'NameOfContact',
-    'FirstName',
-    'MiddleNames',
-    'Title',
-    'AcademicTitle',
-    'FurtherDetailsOfContact',
-    'AddressOfAdditionalLink',
-];
 
 @Component({
     selector: 'fhg-contact-informations',
@@ -66,7 +40,7 @@ export class ContactInformations {
             return undefined;
         }
 
-        return env.submodels.find(submodel => getSemanticId(submodel) === ContactInformations_1_0);
+        return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATIONS_1_0);
     });
 
     public readonly contacts = computed(() => {

@@ -11,17 +11,10 @@ import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-transla
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import {
-    aas,
-    AASDocument,
-    getReferable,
-    getSemanticId,
-    isSubmodelElementCollection,
-    isSubmodelElementList,
-} from 'aas-core';
+import { AASDocument, getReferable, getSemanticId, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
 
 import { DataSheetData } from '../../types';
-import { FHGNameplate, HSUNameplate, Nameplate_3_0, ZVEINameplate } from '../views';
+import { NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0, NAMEPLATE_2_0 } from '../views';
 import { createDataSheet, getDisplayName } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 
@@ -47,7 +40,7 @@ export class Nameplate {
                 return false;
             }
 
-            return [ZVEINameplate, FHGNameplate, HSUNameplate, Nameplate_3_0].indexOf(semanticId) >= 0;
+            return [NAMEPLATE_2_0, NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0].indexOf(semanticId) >= 0;
         });
     });
 

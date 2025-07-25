@@ -7,72 +7,74 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { Location as NgLocation } from '@angular/common';
-import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { aas, AASDocument } from 'aas-core';
 
-import { WINDOW } from '../../../lib/services/window.service';
-import { AuthService } from '../../../lib/components/auth/auth.service';
-import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 import { HandoverDocumentationView } from '../../../lib/views/handover-documentation/handover-documentation.view';
+import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
+import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { encodeBase64Url } from '../../../lib/utilities';
 
-import sample from '../../assets/dpp-sample.json';
+import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
 
 @Component({
-    selector: 'fhg-img',
+    selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TestSecuredImageComponent {
-    public readonly src = input<string>('');
-    public readonly alt = input<string | undefined>();
-    public readonly class = input<string | undefined>();
-    public readonly width = input<number | undefined>();
-    public readonly height = input<number | undefined>();
+export class TestThumbnailQRCode {
+    public readonly document = input<AASDocument>();
 }
 
-describe('HandoverDocumentationComponent', () => {
-    let location: jasmine.SpyObj<NgLocation>;
-    let window: jasmine.SpyObj<Window>;
+@Component({
+    selector: 'fhg-handover-documentation',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestHandoverDocumentation {
+    public readonly document = input<AASDocument>();
+}
+
+describe('HandoverDocumentationView', () => {
     let api: jasmine.SpyObj<EndpointsApi>;
-    let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
+    let route: jasmine.SpyObj<ActivatedRoute>;
+    let document: AASDocument;
 
     beforeEach(async () => {
-        location = jasmine.createSpyObj<NgLocation>(['getState']);
-        location.getState.and.returnValue({ data: JSON.stringify([sample]) });
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
-        window = jasmine.createSpyObj<Window>(['open'], {
-            location: { toString: () => 'https://www.fraunhofer.de' } as Location,
-        });
+        document = {
+            address: '',
+            crc32: 0,
+            idShort: 'HandoverDocumentation',
+            readonly: false,
+            timestamp: 0,
+            id: 'https://admin-shell.io/idta/aas/HandoverDocumentation/1/2',
+            endpoint: 'Test',
+            content: handoverDocumentation_1_2 as aas.Environment
+        };
+
+        route = jasmine.createSpyObj<ActivatedRoute>(
+            {},
+            { queryParams: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+        );
+
+        api.getDocument.and.returnValue(of(document));
 
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: NgLocation,
-                    useValue: location,
-                },
-                {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
-                },
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
-                {
-                    provide: WINDOW,
-                    useValue: window,
                 },
                 {
                     provide: StartService,
@@ -82,8 +84,6 @@ describe('HandoverDocumentationComponent', () => {
                     provide: EndpointsApi,
                     useValue: api,
                 },
-                provideHttpClient(),
-                provideHttpClientTesting(),
                 provideRouter([]),
                 provideZonelessChangeDetection(),
             ],
@@ -99,8 +99,8 @@ describe('HandoverDocumentationComponent', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(HandoverDocumentationView, {
-            remove: { imports: [SecuredImageComponent] },
-            add: { imports: [TestSecuredImageComponent] },
+            remove: { imports: [HandoverDocumentation, ThumbnailQRCode] },
+            add: { imports: [TestHandoverDocumentation, TestThumbnailQRCode] },
         });
     });
 

@@ -10,14 +10,23 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
-xdescribe('Nameplate', () => {
+describe('Nameplate', () => {
     let component: Nameplate;
     let fixture: ComponentFixture<Nameplate>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [Nameplate],
+            imports: [
+                Nameplate,
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: TranslateFakeLoader,
+                    },
+                }),
+            ],
             providers: [provideZonelessChangeDetection()],
         }).compileComponents();
 

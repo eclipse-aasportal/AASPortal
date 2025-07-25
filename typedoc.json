@@ -1,0 +1,18 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPointStrategy": "packages",
+    "entryPoints": [
+        "projects/aas-core/",
+        "projects/aas-node/",
+        "projects/aas-lib/",
+        "projects/aas-portal/",
+    ],
+    "name": "AASPortal",
+    "includeVersion": false,
+    "exclude": [
+        "**/node_modules/**/*",
+        "**/dist/**/*",
+        "**/build/**/*",
+        "**/test/**/*"
+    ]
+}

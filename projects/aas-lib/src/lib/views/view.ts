@@ -13,27 +13,40 @@ import { aas, AASDocument, getSemanticId } from 'aas-core';
 import { decodeBase64Url, encodeBase64Url } from '../utilities';
 import { EndpointsApi } from '../../public-api';
 
+/** Provides a specific view of a submodel. */
 export abstract class View {
+    /**
+     * Creates a new instance of a derived `View` class.
+     * @param route The activated route.
+     * @param api The endpoint API.
+     */
     protected constructor(
         private readonly route: ActivatedRoute,
         private readonly api: EndpointsApi,
     ) {}
 
+    /** A list of expected semantic identifiers. */
     protected abstract get expectedSemanticIds(): string[];
 
-    protected readonly items = signal<[AASDocument, aas.Submodel][]>([]);
+    /** The available document-submodel tuples. */
+    protected readonly tuples = signal<[AASDocument, aas.Submodel][]>([]);
 
-    protected readonly item = computed(() => this.items().at(this.index() - 1));
+    /** The current active document-submodel tuple. */
+    protected readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
+    /** The index of the current active document-submodel tuple. */
     public readonly index = signal(1);
 
+    /** The number of document-submodel tuples. */
+    public readonly count = computed(() => this.tuples().length);
+
+    /** The current active AAS document. */
     public readonly document = computed(() => {
-        const item = this.item();
+        const item = this.tuple();
         return item ? item[0] : undefined;
     });
 
-    public readonly count = computed(() => this.items().length);
-
+    /** The thumbnail URL of the current active AAS document. */
     public readonly thumbnail = computed(() => {
         const document = this.document();
         if (!document) {
@@ -43,20 +56,15 @@ export abstract class View {
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
     });
 
+    /** The current active submodel. */
     public readonly submodel = computed(() => {
-        const env = this.document()?.content;
-        if (!env) {
-            return undefined;
-        }
-
-        return env.submodels.find(submodel => {
-            const semanticId = getSemanticId(submodel);
-            return semanticId && this.expectedSemanticIds.indexOf(semanticId) >= 0;
-        });
+        const item = this.tuple();
+        return item ? item[1] : undefined;
     });
 
+    /** The version of the current active submodel. */
     public readonly version = computed(() => {
-        const item = this.item();
+        const item = this.tuple();
         if (!item) {
             return undefined;
         }
@@ -65,13 +73,14 @@ export abstract class View {
         const version = submodel.administration?.version;
         const revision = submodel.administration?.revision;
         if (version) {
-            return revision ? `${version}.${revision}`: `${version}`;
+            return revision ? `${version}.${revision}` : `${version}`;
         }
 
         return undefined;
     });
 
-    protected init(): void {
+    /** ToDo: */
+    protected onInit(): void {
         this.route.queryParams
             .pipe(
                 first(),
@@ -93,12 +102,8 @@ export abstract class View {
                 }),
             )
             .subscribe(documents => {
-                this.initialize(documents);
+                this.tuples.set([...this.filterSubmodels(documents)]);
             });
-    }
-
-    private initialize(documents: AASDocument[]) {
-        this.items.set([...this.filterSubmodels(documents)]);
     }
 
     private *filterSubmodels(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {

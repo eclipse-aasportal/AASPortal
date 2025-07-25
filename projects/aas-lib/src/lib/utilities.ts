@@ -31,7 +31,7 @@ import {
     getChildren,
 } from 'aas-core';
 
-import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetItemPath, DataSheetOptions } from './types';
+import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } from './types';
 
 /**
  * Converts a message to a localized text.

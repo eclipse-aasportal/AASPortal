@@ -10,7 +10,7 @@ import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-transla
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -24,15 +24,16 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, AASDocument, getReferable, getSemanticId } from 'aas-core';
+import { aas, AASDocument, getReferable } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { decodeBase64Url, encodeBase64Url, getDisplayName, getPropertyValue } from '../../utilities';
+import { encodeBase64Url, getDisplayName, getPropertyValue } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
-import { FHGNameplate, HSUNameplate, Nameplate_3_0, ZVEINameplate } from '../views';
+import { NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0, NAMEPLATE_2_0 } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { Nameplate } from './nameplate';
+import { View } from '../view';
 
 @Component({
     selector: 'fhg-nameplate-view',
@@ -41,19 +42,21 @@ import { Nameplate } from './nameplate';
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NameplateView implements OnInit, OnDestroy {
+export class NameplateView extends View implements OnInit, OnDestroy {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
     private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
     private readonly nameplate = computed(() => this.nameplates().at(this.index() - 1));
 
     public constructor(
-        private readonly route: ActivatedRoute,
+        route: ActivatedRoute,
+        api: EndpointsApi,
         translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        private readonly api: EndpointsApi,
     ) {
+        super(route, api);
+
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
 
@@ -65,54 +68,15 @@ export class NameplateView implements OnInit, OnDestroy {
         });
     }
 
+    protected override get expectedSemanticIds(): string[] {
+        return [NAMEPLATE_3_0, NAMEPLATE_2_0, NAMEPLATE_FHG, NAMEPLATE_HSU];
+    }
+
     /** The toolbar. */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('nameplateToolbar');
 
-    /** The title. */
-    public readonly title = computed(() => {
-        const tuple = this.nameplate();
-        if (tuple === undefined) {
-            return '-';
-        }
-
-        return getDisplayName(tuple[1], tuple[0].content, this.currentLang());
-    });
-
-    /** The total number of AAS documents that provide a nameplate. */
-    public readonly count = computed(() => this.nameplates().length);
-
-    /** The current active AAS document. */
-    public readonly document = computed(() => {
-        const nameplate = this.nameplate();
-        return nameplate ? nameplate[0] : undefined;
-    });
-
-    public readonly index = signal(1);
-
     public ngOnInit(): void {
-        this.route.queryParams
-            .pipe(
-                first(),
-                mergeMap(params => {
-                    if (params.id) {
-                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
-                    }
-
-                    if (!params.docs) {
-                        return of([]);
-                    }
-
-                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
-                    return from(docs).pipe(
-                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
-                        toArray(),
-                    );
-                }),
-            )
-            .subscribe(documents => {
-                this.initialize(documents);
-            });
+        this.onInit();
     }
 
     public ngOnDestroy(): void {
@@ -178,29 +142,5 @@ export class NameplateView implements OnInit, OnDestroy {
         }
 
         return notes;
-    }
-
-    private initialize(documents: AASDocument[]) {
-        this.nameplates.set([...this.filterSubmodels(documents)]);
-    }
-
-    private *filterSubmodels(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
-        for (const document of documents) {
-            if (!document.content) {
-                continue;
-            }
-
-            for (const submodel of document.content.submodels) {
-                const semanticId = getSemanticId(submodel);
-                if (
-                    semanticId === Nameplate_3_0 ||
-                    semanticId === ZVEINameplate ||
-                    semanticId === FHGNameplate ||
-                    semanticId === HSUNameplate
-                ) {
-                    yield [document, submodel];
-                }
-            }
-        }
     }
 }

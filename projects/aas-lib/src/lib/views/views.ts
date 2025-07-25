@@ -17,30 +17,30 @@ import { ContactInformationsView } from './contact-informations/contact-informat
 import { CarbonFootprintView } from './carbon-footprint/carbon-footprint.view';
 import { TechnicalDataView } from './technical-data/technical-data.view';
 
-export const CustomerFeedback = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
-export const ZVEINameplate = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
-export const FHGNameplate = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
-export const HSUNameplate = 'https://www.hsu-hh.de/aut/aas/nameplate';
-export const Nameplate_3_0 = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
-export const HandoverDocumentation_1_2 = '0173-1#01-AHF578#001';
-export const HandoverDocumentation_2_0 = '0173-1#01-AHF578#003';
-export const CarbonFootprint_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
-export const CarbonFootprint_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
-export const ContactInformations_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
-export const TechnicalData_1_2 = 'https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2';
+export const CUSTOMER_FEEDBACK = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
+export const NAMEPLATE_2_0 = 'https://admin-shell.io/zvei/nameplate/2/0/Nameplate';
+export const NAMEPLATE_FHG = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
+export const NAMEPLATE_HSU = 'https://www.hsu-hh.de/aut/aas/nameplate';
+export const NAMEPLATE_3_0 = 'https://admin-shell.io/idta/nameplate/3/0/Nameplate';
+export const HANDOVER_DOCUMENTATION_1_2 = '0173-1#01-AHF578#001';
+export const HANDOVER_DOCUMENTATION_2_0 = '0173-1#01-AHF578#003';
+export const CARBON_FOOTPRINT_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
+export const CARBON_FOOTPRINT_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
+export const CONTACT_INFORMATIONS_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
+export const TECHNICAL_DATA_1_2 = 'https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2';
 export const viewRoutes: Route[] = [
     {
         path: 'CustomerFeedback',
         component: CustomerFeedbackComponent,
         data: {
-            semanticIds: [CustomerFeedback],
+            semanticIds: [CUSTOMER_FEEDBACK],
         },
     },
     {
         path: 'Nameplate',
         component: NameplateView,
         data: {
-            semanticIds: [ZVEINameplate, FHGNameplate, HSUNameplate, Nameplate_3_0],
+            semanticIds: [NAMEPLATE_2_0, NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0],
         },
     },
     {
@@ -51,21 +51,21 @@ export const viewRoutes: Route[] = [
         path: 'HandoverDocumentation',
         component: HandoverDocumentationView,
         data: {
-            semanticIds: [HandoverDocumentation_2_0, HandoverDocumentation_1_2],
+            semanticIds: [HANDOVER_DOCUMENTATION_2_0, HANDOVER_DOCUMENTATION_1_2],
         },
     },
     {
         path: 'ContactInformations',
         component: ContactInformationsView,
         data: {
-            semanticIds: [ContactInformations_1_0],
+            semanticIds: [CONTACT_INFORMATIONS_1_0],
         },
     },
     {
         path: 'CarbonFootprint',
         component: CarbonFootprintView,
         data: {
-            semanticIds: [CarbonFootprint_1_0, CarbonFootprint_0_9],
+            semanticIds: [CARBON_FOOTPRINT_1_0, CARBON_FOOTPRINT_0_9],
         },
     },
     {
@@ -76,7 +76,7 @@ export const viewRoutes: Route[] = [
         path: 'TechnicalData',
         component: TechnicalDataView,
         data: {
-            semanticIds: [TechnicalData_1_2],
+            semanticIds: [TECHNICAL_DATA_1_2],
         },
     },
     {

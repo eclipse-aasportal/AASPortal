@@ -35,7 +35,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { CarbonFootprint_1_0, HandoverDocumentation_2_0, Nameplate_3_0 } from '../views';
+import { CARBON_FOOTPRINT_1_0, HANDOVER_DOCUMENTATION_2_0, NAMEPLATE_3_0 } from '../views';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
@@ -185,11 +185,11 @@ export class DigitalProductPassportView implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === Nameplate_3_0) {
+                if (semanticId === NAMEPLATE_3_0) {
                     nameplate = submodel;
-                } else if (semanticId === CarbonFootprint_1_0) {
+                } else if (semanticId === CARBON_FOOTPRINT_1_0) {
                     carbonFootprint = submodel;
-                } else if (semanticId === HandoverDocumentation_2_0) {
+                } else if (semanticId === HANDOVER_DOCUMENTATION_2_0) {
                     handoverDocumentation = submodel;
                 }
             }

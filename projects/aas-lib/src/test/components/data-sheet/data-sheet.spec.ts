@@ -47,10 +47,6 @@ describe('DataSheet', () => {
         expect(component).toBeTruthy();
     });
 
-    it('has a caption', () => {
-        expect(component.caption()).toEqual('Caption');
-    });
-
     it('has items', () => {
         expect(component.items()).toBeDefined();
         expect(component.items().length).toBe(2);

@@ -27,7 +27,7 @@ import { aas, AASDocument, getSemanticId } from 'aas-core';
 import { ToolbarService } from '../../services/toolbar.service';
 import { decodeBase64Url, encodeBase64Url, getDisplayName } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { CarbonFootprint_0_9, CarbonFootprint_1_0 } from '../views';
+import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from './carbon-footprint';
 
@@ -132,7 +132,7 @@ export class CarbonFootprintView implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === CarbonFootprint_1_0 || semanticId === CarbonFootprint_0_9) {
+                if (semanticId === CARBON_FOOTPRINT_1_0 || semanticId === CARBON_FOOTPRINT_0_9) {
                     yield [document, submodel];
                 }
             }

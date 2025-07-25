@@ -21,7 +21,7 @@ import {
     toDisplayValue,
 } from 'aas-core';
 
-import { HandoverDocumentation_1_2, HandoverDocumentation_2_0 } from '../views';
+import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views';
 import { getUrl } from '../../utilities';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -43,7 +43,7 @@ export class HandoverDocumentation {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
 
-    public constructor(private readonly translate: TranslateService) {
+    public constructor(translate: TranslateService) {
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
     }
@@ -58,7 +58,7 @@ export class HandoverDocumentation {
 
         return env.submodels.find(submodel => {
             const semanticId = getSemanticId(submodel);
-            return semanticId === HandoverDocumentation_1_2 || semanticId === HandoverDocumentation_2_0;
+            return semanticId === HANDOVER_DOCUMENTATION_1_2 || semanticId === HANDOVER_DOCUMENTATION_2_0;
         });
     });
 
@@ -80,7 +80,7 @@ export class HandoverDocumentation {
             return [];
         }
 
-        return semanticId === HandoverDocumentation_1_2
+        return semanticId === HANDOVER_DOCUMENTATION_1_2
             ? this.createItemsV1Dot2(document, submodel)
             : this.createItemsV2Dot0(document, submodel);
     });
@@ -100,16 +100,16 @@ export class HandoverDocumentation {
                     element => getSemanticId(element) === documentVersionId,
                 )) {
                     if (isSubmodelElementCollection(documentVersion) && documentVersion.value) {
-                        const previewFile = getReferable(documentVersion, 'PreviewFile');
+                        // const previewFile = getReferable(documentVersion, 'PreviewFile');
                         const version = getReferable(documentVersion, 'DocumentVersionId');
-                        const titel = getReferable(documentVersion, 'Title');
+                        const title = getReferable(documentVersion, 'Title');
                         const digitalFiles = documentVersion.value.filter(
                             element => getSemanticId(element) === digitalFileId,
                         );
 
                         if (digitalFiles.length) {
                             items.push({
-                                title: this.toString(titel),
+                                title: this.toString(title),
                                 version: this.toString(version),
                                 filename: this.toString(digitalFiles[0]),
                                 url: getUrl(document, submodel, digitalFiles[0] as aas.File),
@@ -138,16 +138,16 @@ export class HandoverDocumentation {
                     element => getSemanticId(element) === documentVersionId,
                 )) {
                     if (isSubmodelElementCollection(documentVersion) && documentVersion.value) {
-                        const previewFile = getReferable(documentVersion, 'PreviewFile');
+                        // const previewFile = getReferable(documentVersion, 'PreviewFile');
                         const version = getReferable(documentVersion, 'DocumentVersionId');
-                        const titel = getReferable(documentVersion, 'Title');
+                        const title = getReferable(documentVersion, 'Title');
                         const digitalFiles = documentVersion.value.filter(
                             element => getSemanticId(element) === digitalFileId,
                         );
 
                         if (digitalFiles.length) {
                             items.push({
-                                title: this.toString(titel),
+                                title: this.toString(title),
                                 version: this.toString(version),
                                 filename: this.toString(digitalFiles[0]),
                                 url: getUrl(document, submodel, digitalFiles[0] as aas.File),

@@ -9,27 +9,16 @@
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    OnDestroy,
-    OnInit,
-    signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { EMPTY, Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, effect, OnDestroy, OnInit, TemplateRef, viewChild } from '@angular/core';
 
-import { aas, AASDocument, getSemanticId } from 'aas-core';
+import { aas } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { HandoverDocumentation } from './handover-documentation';
-import { HandoverDocumentation_1_2, HandoverDocumentation_2_0 } from '../views';
+import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views';
 import { View } from '../view';
 
 export type DocumentationItem = {
@@ -63,13 +52,13 @@ export class HandoverDocumentationView extends View implements OnInit, OnDestroy
     }
 
     protected override get expectedSemanticIds(): string[] {
-        return [HandoverDocumentation_1_2, HandoverDocumentation_2_0];
+        return [HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0];
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public ngOnInit(): void {
-        this.init();
+        this.onInit();
     }
 
     public ngOnDestroy(): void {

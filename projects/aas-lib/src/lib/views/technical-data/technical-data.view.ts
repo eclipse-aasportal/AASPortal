@@ -29,7 +29,7 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { decodeBase64Url, getDisplayName } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
-import { TechnicalData_1_2 } from '../views';
+import { TECHNICAL_DATA_1_2 } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { TechnicalData } from './technical-data';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -131,7 +131,7 @@ export class TechnicalDataView implements OnInit, OnDestroy {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === TechnicalData_1_2) {
+                if (semanticId === TECHNICAL_DATA_1_2) {
                     yield [document, submodel];
                 }
             }
