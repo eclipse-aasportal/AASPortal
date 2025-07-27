@@ -14,6 +14,7 @@ import { HandoverDocumentation } from '../../../lib/views/handover-documentation
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
+import { HANDOVER_DOCUMENTATION_1_2 } from 'projects/aas-lib/src/public-api';
 
 describe('HandoverDocumentation', () => {
     let component: HandoverDocumentation;
@@ -58,5 +59,23 @@ describe('HandoverDocumentation', () => {
         fixture.componentRef.setInput('document', document);
         fixture.detectChanges();
         expect(component.document()).toBeDefined();
+    });
+
+    it('should has a submodel', () => {
+        fixture.componentRef.setInput('document', document);
+        fixture.detectChanges();
+        expect(component.submodel()).toBeDefined();
+    });
+
+    it('should has a semanticId', () => {
+        fixture.componentRef.setInput('document', document);
+        fixture.detectChanges();
+        expect(component.semanticId()).toEqual(HANDOVER_DOCUMENTATION_1_2);
+    });
+
+    it('should has document items', () => {
+        fixture.componentRef.setInput('document', document);
+        fixture.detectChanges();
+        expect(component.items()).toBeDefined();
     });
 });

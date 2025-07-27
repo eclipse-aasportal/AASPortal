@@ -294,6 +294,7 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
     },
     "CarbonFootprint": {
+        "TITLE": "Carbon Footprint",
         "CARBON_FOOTPRINT_DATA": "Carbon footprint",
         "TOTAL_PSFCO2EQ": "GWP100"
     },

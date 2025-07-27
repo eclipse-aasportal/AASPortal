@@ -293,6 +293,7 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
     },
     "CarbonFootprint": {
+        "TITLE": "CO2-Fußabdruck",
         "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
         "TOTAL_PSFCO2EQ": "GWP100"
     },

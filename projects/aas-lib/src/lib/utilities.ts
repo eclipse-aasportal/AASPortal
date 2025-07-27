@@ -267,11 +267,11 @@ export function isLangString(value: unknown): value is aas.LangString[] {
 }
 
 /**
- *
- * @param document
- * @param submodel
- * @param file
- * @returns
+ * Gets the URL to the content of the specified file.
+ * @param document The AAS document.
+ * @param submodel The submodel to which the file belongs.
+ * @param file The current file.
+ * @returns The URL to the content of the specified file.
  */
 export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.File | undefined): string | undefined {
     if (file === undefined || file.value === undefined) {
@@ -378,7 +378,7 @@ export function createDataSheet(
 }
 
 /**
- *
+ * Creates a data sheet item.
  * @param element
  * @param env
  * @param lang
@@ -449,7 +449,7 @@ export function createDataSheetItem(
         }
 
         if (isFile(element)) {
-            return element.value;
+            return element.value ? basename(element.value) : '-';
         }
 
         if (isSubmodelElementList(element) || isSubmodelElementCollection(element)) {

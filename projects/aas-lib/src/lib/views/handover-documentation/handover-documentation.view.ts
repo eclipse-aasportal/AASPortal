@@ -38,8 +38,8 @@ export type DocumentationItem = {
 export class HandoverDocumentationView extends View implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
-        private readonly toolbar: ToolbarService,
         api: EndpointsApi,
+        private readonly toolbar: ToolbarService,
     ) {
         super(route, api);
 
