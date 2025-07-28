@@ -20,7 +20,7 @@ import {
 } from 'aas-core';
 
 import { normalize } from '../../utilities';
-import { AASTreeRow } from './aas-tree-row';
+import { AASTreeNode } from './aas-tree-row';
 import { AASTreeStore } from './aas-tree.store';
 
 export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
@@ -255,7 +255,7 @@ export class AASTreeSearch {
         }
     }
 
-    private match(row: AASTreeRow): boolean {
+    private match(row: AASTreeNode): boolean {
         let match = false;
         for (const term of this.terms) {
             if (term.query) {

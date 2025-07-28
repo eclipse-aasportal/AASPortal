@@ -40,7 +40,7 @@
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
                     <div class="wh-4"></div>
-                    <div class="ms-1 w-9 rounded bg-info text-white fs-7 text-center">
+                    <div class="ms-1 w-9 text-info fw-bold text-center">
                         {{node.abbreviation}}</div>
                     <div class="ms-1 flex-grow-1 text-nowrap">
                         <b>{{node.name}}</b>
@@ -52,14 +52,11 @@
             </td>
             <td class="text-end">
                 @if (node.canOpen) {
-                <button class="btn btn-link p-0 text-nowrap me-2" type="button"
-                    (click)="open(node)">{{node.value()}}</button>
+                <a [href]="getUrl(node)" target="_blank">{{node.value()}}</a>
                 } @else if (node.element.modelType === 'RelationshipElement') {
                 <div class="d-flex flex-column fs-9 me-2">
-                    <button class="btn btn-link p-0 text-nowrap" type="button"
-                        (click)="openReference(node.relationship?.first)">{{toString(node.relationship?.first)}}</button>
-                    <button class="btn btn-link p-0 text-nowrap" type="button"
-                        (click)="openReference(node.relationship?.second)">{{toString(node.relationship?.second)}}</button>
+                    <a [href]="getReferenceUrl(node.relationship?.first)">1.</a>
+                    <a [href]="getReferenceUrl(node.relationship?.second)">2.</a>
                 </div>
                 } @else {
                 <div class="text-nowrap me-2">{{node.value()}}</div>
@@ -70,14 +67,14 @@
                 <div class="d-flex" style="overflow-x: hidden">
                     <div [ngStyle]="{'width': (node.level * 16) + 'px'}"></div>
                     @if (node.expanded) {
-                    <button class="btn btn-link p-0" type="button" (click)="collapse(node)">
+                    <button class="btn p-0" type="button" (click)="collapse(node)">
                         <div class="text-dark">
                             <i class="bi bi-dash-square"></i>
                         </div>
                     </button>
                     } @else {
                     @if (node.hasChildren) {
-                    <button class="btn btn-link p-0" type="button" (click)="expand(node)">
+                    <button class="btn p-0" type="button" (click)="expand(node)">
                         <div class="text-dark">
                             <i class="bi bi-plus-square"></i>
                         </div>
@@ -88,11 +85,11 @@
                     </div>
                     }
                     }
-                    <div class="ms-1 w-9 rounded bg-info text-white fs-7 text-center">
+                    <div class="ms-1 w-9 text-info fw-bold text-center">
                         {{node.abbreviation}}</div>
                     <div class="ms-1 flex-grow-1 text-nowrap">
                         @if (node.canOpen) {
-                        <button class="btn btn-link p-0" type="button" (click)="open(node)">{{node.name}}</button>
+                        <a [routerLink]="getRouterLink(node)">{{node.name}}</a>
                         }@else {
                         <b>{{node.name}}</b>
                         }

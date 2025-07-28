@@ -75,8 +75,8 @@ export class CarbonFootprint {
             : this.totalPcfCO2eq_1_0(env, submodel, currentLang);
     });
 
-    /** The available carbon footprints of a product. */
-    public readonly carbonFootprintItems = computed(() => {
+    /** The available product carbon footprint items. */
+    public readonly items = computed(() => {
         const submodel = this.submodel();
         const currentLang = this.currentLang();
         const semanticId = untracked(this.semanticId);
@@ -92,10 +92,10 @@ export class CarbonFootprint {
 
     /** The current active carbon footprint item. */
     public readonly carbonFootprint = computed(() => {
-        return this.carbonFootprintItems()[this.index() - 1];
+        return this.items()[this.index() - 1];
     });
 
-    /** The semantic identifier of the submodel. */
+    /** The semantic identifier of the current active submodel. */
     public readonly semanticId = computed(() => {
         const submodel = this.submodel();
         if (!submodel) {
@@ -107,7 +107,7 @@ export class CarbonFootprint {
 
     public readonly index = signal(1);
 
-    public readonly count = computed(() => this.carbonFootprintItems().length);
+    public readonly count = computed(() => this.items().length);
 
     private totalPcfCO2eq_0_9(env: aas.Environment, submodel: aas.Submodel, currentLang: string): string {
         if (!submodel.submodelElements) {

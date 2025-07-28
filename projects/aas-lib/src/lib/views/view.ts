@@ -81,7 +81,7 @@ export abstract class View {
 
     /** ToDo: */
     protected onInit(): void {
-        this.route.queryParams
+        this.route.params
             .pipe(
                 first(),
                 mergeMap(params => {

@@ -43,7 +43,7 @@ import { basename, normalize } from '../../utilities';
 import { signal, WritableSignal } from '@angular/core';
 import { findRoute } from '../../views/views';
 
-export class AASTreeRow extends TreeNode<aas.Referable> {
+export class AASTreeNode extends TreeNode<aas.Referable> {
     public constructor(
         public readonly id: string,
         element: aas.Referable,
@@ -74,22 +74,22 @@ export class AASTreeRow extends TreeNode<aas.Referable> {
 }
 
 class TreeInitialize {
-    private readonly rows: AASTreeRow[] = [];
+    private readonly nodes: AASTreeNode[] = [];
 
     public constructor(
         private readonly env: aas.Environment,
         private readonly language: string,
     ) {}
 
-    public get(): AASTreeRow[] {
+    public get(): AASTreeNode[] {
         for (const shell of this.env.assetAdministrationShells) {
-            const row = this.createRow(shell, -1, 0, true);
-            this.rows.push(row);
-            row.firstChild = this.env.submodels.length > 0 ? this.rows.length : -1;
-            this.traverse(shell, this.rows.length - 1, 1);
-            for (const stateRow of this.rows) {
+            const node = this.createNode(shell, -1, 0, true);
+            this.nodes.push(node);
+            node.firstChild = this.env.submodels.length > 0 ? this.nodes.length : -1;
+            this.traverse(shell, this.nodes.length - 1, 1);
+            for (const stateRow of this.nodes) {
                 if (stateRow.expanded || stateRow.selected) {
-                    const row = this.findRow(this.rows, stateRow.element);
+                    const row = this.findNode(this.nodes, stateRow.element);
                     if (row) {
                         row.expanded = stateRow.expanded;
                         row.selected = stateRow.selected;
@@ -98,10 +98,10 @@ class TreeInitialize {
             }
         }
 
-        return this.rows;
+        return this.nodes;
     }
 
-    private createRow(element: aas.Referable, parent: number, level: number, expanded: boolean): AASTreeRow {
+    private createNode(element: aas.Referable, parent: number, level: number, expanded: boolean): AASTreeNode {
         let isLeaf = true;
         switch (element.modelType) {
             case 'AssetAdministrationShell':
@@ -140,8 +140,8 @@ class TreeInitialize {
                 break;
         }
 
-        return new AASTreeRow(
-            `row_${this.rows.length + 1}`,
+        return new AASTreeNode(
+            `row_${this.nodes.length + 1}`,
             element,
             expanded,
             false,
@@ -160,18 +160,18 @@ class TreeInitialize {
     }
 
     private traverse(element: aas.Referable, parent: number, level: number): void {
-        let previous: AASTreeRow | null = null;
+        let previous: AASTreeNode | null = null;
         for (const child of this.getChildren(element)) {
-            const row = this.createRow(child, parent, level, false);
-            this.rows.push(row);
+            const row = this.createNode(child, parent, level, false);
+            this.nodes.push(row);
             if (previous) {
-                previous.nextSibling = this.rows.length - 1;
+                previous.nextSibling = this.nodes.length - 1;
             }
 
             const descendants = this.getChildren(child);
             if (descendants.length > 0) {
-                row.firstChild = this.rows.length;
-                this.traverse(child, this.rows.length - 1, level + 1);
+                row.firstChild = this.nodes.length;
+                this.traverse(child, this.nodes.length - 1, level + 1);
             }
 
             previous = row;
@@ -238,7 +238,7 @@ class TreeInitialize {
         }
     }
 
-    private findRow(rows: AASTreeRow[], referable: aas.Referable): AASTreeRow | undefined {
+    private findNode(rows: AASTreeNode[], referable: aas.Referable): AASTreeNode | undefined {
         return rows.find(row => isEqual(this.createReference(row.element), this.createReference(referable)));
     }
 
@@ -392,16 +392,16 @@ class TreeInitialize {
     }
 }
 
-export class AASTree extends Tree<aas.Referable, AASTreeRow> {
-    private _nodes: AASTreeRow[];
+export class AASTree extends Tree<aas.Referable, AASTreeNode> {
+    private _nodes: AASTreeNode[];
 
-    public constructor(nodes: AASTreeRow[]) {
+    public constructor(nodes: AASTreeNode[]) {
         super();
 
         this._nodes = nodes;
     }
 
-    public get nodes(): AASTreeRow[] {
+    public get nodes(): AASTreeNode[] {
         return this._nodes;
     }
 
@@ -417,16 +417,16 @@ export class AASTree extends Tree<aas.Referable, AASTreeRow> {
         noop(referable);
     }
 
-    protected override getNodes(): AASTreeRow[] {
+    protected override getNodes(): AASTreeNode[] {
         return this._nodes;
     }
 
-    protected override setNodes(nodes: AASTreeRow[]): void {
+    protected override setNodes(nodes: AASTreeNode[]): void {
         this._nodes = nodes;
     }
 
-    protected override cloneNode(node: AASTreeRow): AASTreeRow {
-        return new AASTreeRow(
+    protected override cloneNode(node: AASTreeNode): AASTreeNode {
+        return new AASTreeNode(
             node.id,
             node.element,
             node.expanded,
