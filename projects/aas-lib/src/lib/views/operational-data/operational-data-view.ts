@@ -216,7 +216,7 @@ export class OperationalDataView implements OnInit, OnDestroy {
                     value: signal(child.value),
                     type: 'link',
                     element: child,
-                    url: getUrl(this.document$()!, submodel, child),
+                    url: getUrl(this.document$()!, child),
                 });
             }
         }

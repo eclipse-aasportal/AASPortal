@@ -27,7 +27,7 @@ import {
 import { aas, AASDocument, getReferable } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { encodeBase64Url, getDisplayName, getPropertyValue } from '../../utilities';
+import { encodeBase64Url, getDisplayName, toString } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0, NAMEPLATE_2_0 } from '../views';
@@ -104,29 +104,30 @@ export class NameplateView extends View implements OnInit, OnDestroy {
     private getFavoriteDetails(document: AASDocument, nameplate: aas.Submodel): { name: string; value: string }[] {
         const details: { name: string; value: string }[] = [];
         const manufacturerName = getReferable<aas.Property>(nameplate, 'ManufacturerName');
+        const currentLang = this.currentLang();
         if (manufacturerName?.value) {
             details.push({
-                name: getDisplayName(manufacturerName, document.content, this.currentLang()),
+                name: getDisplayName(manufacturerName, document.content, currentLang),
                 value: manufacturerName.value,
             });
         }
 
-        const productType = getPropertyValue(nameplate, 'ManufacturerProductType', this.currentLang());
+        const productType = toString(nameplate, 'ManufacturerProductType', currentLang);
         if (productType) {
             details.push({ name: 'DigitalNameplate.ManufacturerProductType', value: productType });
         }
 
-        const productFamily = getPropertyValue(nameplate, 'ManufacturerProductFamily', this.currentLang());
+        const productFamily = toString(nameplate, 'ManufacturerProductFamily', currentLang);
         if (productFamily) {
             details.push({ name: 'DigitalNameplate.ManufacturerProductFamily', value: productFamily });
         }
 
-        const articleNumber = getPropertyValue(nameplate, 'ProductArticleNumberOfManufacturer', this.currentLang());
+        const articleNumber = toString(nameplate, 'ProductArticleNumberOfManufacturer', currentLang);
         if (articleNumber) {
             details.push({ name: 'DigitalNameplate.ProductArticleNumberOfManufacturer', value: articleNumber });
         }
 
-        const serialNumber = getPropertyValue(nameplate, 'SerialNumber', this.currentLang());
+        const serialNumber = toString(nameplate, 'SerialNumber', currentLang);
         if (serialNumber) {
             details.push({ name: 'DigitalNameplate.SerialNumber', value: serialNumber });
         }
@@ -136,7 +137,7 @@ export class NameplateView extends View implements OnInit, OnDestroy {
 
     private getFavoriteNotes(submodel: aas.Submodel): string[] {
         const notes: string[] = [];
-        const designation = getPropertyValue(submodel, 'ManufacturerProductDesignation', this.currentLang());
+        const designation = toString(submodel, 'ManufacturerProductDesignation', this.currentLang());
         if (designation) {
             notes.push(designation);
         }

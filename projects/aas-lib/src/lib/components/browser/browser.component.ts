@@ -19,11 +19,11 @@ import {
     getSemanticId,
     isFile,
     isReference,
-    isSubmodel,
 } from 'aas-core';
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { isLangString, referenceToString } from '../../utilities';
+import { getUrl, isLangString, referenceToString } from '../../utilities';
+import { RouterLink } from '@angular/router';
 
 const collectionNames: Record<string, string> = {
     SubmodelElementCollection: 'value',
@@ -40,7 +40,8 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
 export interface BrowserProperty {
     name: string;
     value: string;
-    kind: 'text' | 'link';
+    url?: string;
+    kind: 'text' | 'link' | 'url';
 }
 
 export interface BrowserElementRef {
@@ -68,7 +69,7 @@ export interface BrowserItem {
     selector: 'fhg-browser',
     templateUrl: './browser.component.html',
     styleUrl: './browser.component.scss',
-    imports: [NgbPaginationModule, ConceptDescriptionComponent],
+    imports: [RouterLink, NgbPaginationModule, ConceptDescriptionComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BrowserComponent {
@@ -150,22 +151,6 @@ export class BrowserComponent {
         this.current.set(this.createElement(element.referable));
     }
 
-    public openProperty($event: MouseEvent, property: BrowserProperty): void {
-        const referable = this.current()?.referable;
-        if (!referable) {
-            return;
-        }
-
-        const submodel = isSubmodel(referable) ? referable : (this.path$()[1].referable as aas.Submodel);
-        if (isFile(referable) && referable.value && property.name === 'Value') {
-            this.open.emit({ smId: submodel.id, idShortPath: this.idShortPath, property: property.name });
-        } else if (property.name === 'SemanticId') {
-            this.open.emit({ smId: submodel.id, idShortPath: this.idShortPath, property: property.name });
-        }
-
-        $event.stopPropagation();
-    }
-
     private createElement(referable: aas.Referable): BrowserElement {
         const semanticId = getSemanticId(referable);
         return {
@@ -199,7 +184,7 @@ export class BrowserComponent {
         name = upperFirst(name);
         if (typeof value === 'string') {
             if (isFile(referable) && name === 'Value') {
-                return [{ name, value, kind: 'link' }];
+                return [{ name, value, kind: 'url', url: getUrl(this.document()!, referable) }];
             }
 
             return [{ name, value, kind: 'text' }];

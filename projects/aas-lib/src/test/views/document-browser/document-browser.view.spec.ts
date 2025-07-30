@@ -15,7 +15,7 @@ import { of } from 'rxjs';
 
 import { AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
-import { DocumentBrowserComponent } from '../../../lib/views/document-browser/document-browser.component';
+import { DocumentBrowserView } from '../../../lib/views/document-browser/document-browser.view';
 import { encodeBase64Url } from '../../../lib/utilities';
 import {
     ChangeDetectionStrategy,
@@ -57,7 +57,7 @@ export class TestSecuredImageComponent {
     public readonly height = input<number | undefined>();
 }
 
-describe('DocumentBrowserComponent', () => {
+describe('DocumentBrowserView', () => {
     let api: jasmine.SpyObj<EndpointsApi>;
     let route: jasmine.SpyObj<ActivatedRoute>;
     let auth: jasmine.SpyObj<AuthService>;
@@ -124,7 +124,7 @@ describe('DocumentBrowserComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                DocumentBrowserComponent,
+                DocumentBrowserView,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -134,7 +134,7 @@ describe('DocumentBrowserComponent', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(DocumentBrowserComponent, {
+        TestBed.overrideComponent(DocumentBrowserView, {
             remove: {
                 imports: [BrowserComponent, SecuredImageComponent],
             },
@@ -145,7 +145,7 @@ describe('DocumentBrowserComponent', () => {
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(DocumentBrowserComponent);
+        const fixture = TestBed.createComponent(DocumentBrowserView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();

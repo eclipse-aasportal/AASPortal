@@ -269,16 +269,20 @@ export function isLangString(value: unknown): value is aas.LangString[] {
 /**
  * Gets the URL to the content of the specified file.
  * @param document The AAS document.
- * @param submodel The submodel to which the file belongs.
  * @param file The current file.
  * @returns The URL to the content of the specified file.
  */
-export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.File | undefined): string | undefined {
+export function getUrl(document: AASDocument, file: aas.File | undefined): string | undefined {
     if (file === undefined || file.value === undefined) {
         return undefined;
     }
 
-    const smId = encodeBase64Url(submodel.id);
+    let smId = file.parent?.keys.at(0)?.value;
+    if (!smId) {
+        return undefined;
+    }
+
+    smId = encodeBase64Url(smId);
     const path = getIdShortPath(file);
     const name = encodeBase64Url(document.endpoint);
     const id = encodeBase64Url(document.id);
@@ -370,7 +374,7 @@ export function createDataSheet(
 
     function resolveUrl(referable: aas.Referable): string | undefined {
         if (isFile(referable)) {
-            return getUrl(document, submodel, referable);
+            return getUrl(document, referable);
         }
 
         return undefined;
@@ -594,18 +598,21 @@ export function toDisplayName(name: string): string {
 /**
  * Gets the display value of a submodel element.
  * @param submodel The submodel to which the proerty belongs.
- * @param idShortPath The path to the property.
+ * @param idShortPath The path to the submodel element.
  * @param lang The current language.
  * @param env The AAS environment used to get the unit.
- * @returns The property value.
+ * @param defaultValue A default value if no value exists.
+ * @returns The display value.
  */
-export function getPropertyValue(
+export function toString(
     submodel: aas.Submodel,
     idShortPath: string,
     lang: string,
-    env?: aas.Environment,
-): string | undefined {
+    env?: aas.Environment | null,
+    defaultValue: string = '',
+): string {
     const referable = getReferable(submodel, idShortPath);
+    let value: string | undefined;
     if (isProperty(referable)) {
         let unit: string | undefined;
         if (env) {
@@ -619,17 +626,18 @@ export function getPropertyValue(
             case 'xs:date':
             case 'xs:dateTime':
             case 'xs:time':
-                return toDisplayValue(referable.value, referable.valueType, lang, unit);
+                value = toDisplayValue(referable.value, referable.valueType, lang, unit);
+                break;
             case 'xs:string':
-                return referable.value;
+                value = referable.value;
+                break;
             default:
-                return referable.value ?? '-';
+                value = referable.value;
+                break;
         }
+    } else if (isMultiLanguageProperty(referable)) {
+        value = getLocaleValue(referable.value, lang);
     }
 
-    if (isMultiLanguageProperty(referable)) {
-        return getLocaleValue(referable.value, lang) ?? '-';
-    }
-
-    return '-';
+    return value ?? defaultValue;
 }

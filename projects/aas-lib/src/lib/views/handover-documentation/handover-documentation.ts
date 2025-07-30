@@ -229,13 +229,13 @@ export class HandoverDocumentation {
         return {
             name: basename(digitalFile.value!),
             extension: extension(digitalFile.value!),
-            url: getUrl(this.document()!, this.submodel()!, digitalFile),
+            url: getUrl(this.document()!, digitalFile),
         };
     }
 
     private getPreview(referable: aas.Referable | undefined): string | undefined {
         if (isFile(referable) && referable.value) {
-            return getUrl(this.document()!, this.submodel()!, referable);
+            return getUrl(this.document()!, referable);
         }
 
         return undefined;

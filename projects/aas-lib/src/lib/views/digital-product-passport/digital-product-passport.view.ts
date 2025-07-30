@@ -20,9 +20,10 @@ import {
     selectSubmodel,
 } from 'aas-core';
 import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -30,6 +31,7 @@ import {
     effect,
     OnDestroy,
     OnInit,
+    Signal,
     signal,
     TemplateRef,
     viewChild,
@@ -37,7 +39,7 @@ import {
 
 import { CARBON_FOOTPRINT_1_0, HANDOVER_DOCUMENTATION_2_0, NAMEPLATE_3_0 } from '../views';
 import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
-import { decodeBase64Url, encodeBase64Url } from '../../utilities';
+import { decodeBase64Url, encodeBase64Url, toString } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
@@ -82,15 +84,20 @@ const emptyMainData: MainData = {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalProductPassportView implements OnInit, OnDestroy {
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
     private readonly viewData$ = signal<ViewData | undefined>(undefined);
 
     public constructor(
         private readonly route: ActivatedRoute,
+        private readonly api: EndpointsApi,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        private readonly api: EndpointsApi,
-        private readonly translate: TranslateService,
+        translate: TranslateService,
     ) {
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {
@@ -111,7 +118,7 @@ export class DigitalProductPassportView implements OnInit, OnDestroy {
             return '-';
         }
 
-        return this.getPropertyValue(nameplate, 'AssetSpecificProperties.DPPHazardStatement_01');
+        return toString(nameplate, 'AssetSpecificProperties.DPPHazardStatement_01', this.currentLang());
     });
 
     public readonly hazardSymbol = computed(() =>
@@ -120,19 +127,20 @@ export class DigitalProductPassportView implements OnInit, OnDestroy {
 
     public readonly mainData = computed<MainData>(() => {
         const nameplate = this.viewData$()?.nameplate;
+        const currentLang = this.currentLang();
         if (nameplate === undefined) {
             return emptyMainData;
         }
 
         return {
-            uriOfTheProduct: this.getPropertyValue(nameplate, 'URIOfTheProduct'),
-            productType: this.getPropertyValue(nameplate, 'ManufacturerProductType'),
-            serialNumber: this.getPropertyValue(nameplate, 'SerialNumber'),
+            uriOfTheProduct: toString(nameplate, 'URIOfTheProduct', currentLang),
+            productType: toString(nameplate, 'ManufacturerProductType', currentLang),
+            serialNumber: toString(nameplate, 'SerialNumber', currentLang),
         };
     });
 
     public ngOnInit(): void {
-        this.route.queryParams
+        this.route.params
             .pipe(
                 first(),
                 mergeMap(params => {
@@ -169,7 +177,7 @@ export class DigitalProductPassportView implements OnInit, OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
-        const href = `/view/DigitalProductPassport?endpoint=${encodeBase64Url(endpoint)}&id=${encodeBase64Url(id)}`;
+        const href = `/view/DigitalProductPassport;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
         this.start.add('Favorite', `DPP#${endpoint}#${id}`, { endpoint, id, href });
         return this.start.save();
     }
@@ -225,26 +233,26 @@ export class DigitalProductPassportView implements OnInit, OnDestroy {
         return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
     }
 
-    private getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
-        const referable = getReferable(submodel, idShortPath);
-        if (isProperty(referable)) {
-            switch (referable.valueType) {
-                case 'xs:double':
-                case 'xs:integer':
-                    return convertToString(referable.value, this.translate.currentLang);
-                case 'xs:string':
-                    return referable.value ?? '';
-                default:
-                    return referable.value ?? '-';
-            }
-        }
+    // private getPropertyValue(submodel: aas.Submodel, idShortPath: string): string {
+    //     const referable = getReferable(submodel, idShortPath);
+    //     if (isProperty(referable)) {
+    //         switch (referable.valueType) {
+    //             case 'xs:double':
+    //             case 'xs:integer':
+    //                 return convertToString(referable.value, this.translate.currentLang);
+    //             case 'xs:string':
+    //                 return referable.value ?? '';
+    //             default:
+    //                 return referable.value ?? '-';
+    //         }
+    //     }
 
-        if (isMultiLanguageProperty(referable)) {
-            return getLocaleValue(referable.value, this.translate.currentLang) ?? '-';
-        }
+    //     if (isMultiLanguageProperty(referable)) {
+    //         return getLocaleValue(referable.value, this.translate.currentLang) ?? '-';
+    //     }
 
-        return '-';
-    }
+    //     return '-';
+    // }
 
     public getNameplateFile(idShortPath: string): aas.File | undefined {
         const submodel = this.viewData$()?.nameplate;

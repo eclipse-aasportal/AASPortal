@@ -58,12 +58,12 @@ export type BrowserElement = {
 
 @Component({
     selector: 'fhg-doc-browser',
-    templateUrl: './document-browser.component.html',
-    styleUrl: './document-browser.component.scss',
+    templateUrl: './document-browser.view.html',
+    styleUrl: './document-browser.view.scss',
     imports: [TranslateModule, NgbPaginationModule, SecuredImageComponent, BrowserComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentBrowserComponent implements OnInit, OnDestroy {
+export class DocumentBrowserView implements OnInit, OnDestroy {
     private readonly documents = signal<AASDocument[]>([]);
 
     public constructor(
@@ -193,7 +193,7 @@ export class DocumentBrowserComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.window.open(url + '?access_token=' + this.auth.token());
+        this.window.open(url);
     }
 
     private resolveFile(file: aas.File): { url?: string; name?: string } {

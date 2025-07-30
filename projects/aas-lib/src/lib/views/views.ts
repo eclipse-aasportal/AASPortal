@@ -11,7 +11,7 @@ import { CustomerFeedbackComponent } from './customer-feedback/customer-feedback
 import { NameplateView } from './nameplate/nameplate.view';
 import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport.view';
 import { HandoverDocumentationView } from './handover-documentation/handover-documentation.view';
-import { DocumentBrowserComponent } from './document-browser/document-browser.component';
+import { DocumentBrowserView } from './document-browser/document-browser.view';
 import { OperationalDataView } from './operational-data/operational-data-view';
 import { ContactInformationsView } from './contact-informations/contact-informations.view';
 import { CarbonFootprintView } from './carbon-footprint/carbon-footprint.view';
@@ -81,7 +81,7 @@ export const viewRoutes: Route[] = [
     },
     {
         path: 'Browser',
-        component: DocumentBrowserComponent,
+        component: DocumentBrowserView,
         data: {
             default: true,
         },
