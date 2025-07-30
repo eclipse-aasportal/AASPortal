@@ -28,6 +28,7 @@ import {
     isProperty,
     isRange,
     isReferenceElement,
+    isRelationshipElement,
     isSubmodel,
     isSubmodelElement,
     isSubmodelElementCollection,
@@ -41,7 +42,7 @@ import {
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../../utilities';
 import { signal, WritableSignal } from '@angular/core';
-import { findRoute } from '../../views/views';
+import { hasSpecificView } from '../../views/views';
 
 export class AASTreeNode extends TreeNode<aas.Referable> {
     public constructor(
@@ -69,7 +70,7 @@ export class AASTreeNode extends TreeNode<aas.Referable> {
     }
 
     public get relationship(): aas.RelationshipElement | undefined {
-        return this.element.modelType === 'RelationshipElement' ? (this.element as aas.RelationshipElement) : undefined;
+        return isRelationshipElement(this.element) ? this.element : undefined;
     }
 }
 
@@ -118,7 +119,7 @@ class TreeInitialize {
         let canOpen = false;
         switch (element.modelType) {
             case 'AssetAdministrationShell':
-                canOpen = this.hasSpecificView(element as aas.AssetAdministrationShell);
+                canOpen = hasSpecificView(this.env);
                 break;
             case 'Blob':
                 canOpen = true;
@@ -384,11 +385,6 @@ class TreeInitialize {
 
     private referenceToString(reference: aas.Reference | undefined): string {
         return reference?.keys.map(key => key.value).join('.') ?? '-';
-    }
-
-    private hasSpecificView(identifiable: aas.Identifiable): boolean {
-        const semanticId = getSemanticId(identifiable);
-        return findRoute(identifiable.id, semanticId) !== undefined;
     }
 }
 

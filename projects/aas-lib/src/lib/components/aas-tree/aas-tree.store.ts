@@ -8,7 +8,7 @@
 
 import { computed, Injectable, signal, untracked } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
-import { AASTree, AASTreeNode } from './aas-tree-row';
+import { AASTree, AASTreeNode } from './aas-tree-node';
 
 type AASTreeState = {
     expanded: boolean;
