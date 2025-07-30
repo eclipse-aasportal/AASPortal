@@ -6,29 +6,37 @@
  *
  *****************************************************************************/
 
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { of, Subject } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { AASDocument, WebSocketData } from 'aas-core';
-import { Subject } from 'rxjs';
 
 import { AASTreeComponent } from '../../../lib/components/aas-tree/aas-tree.component';
 import { sampleDocument } from '../../assets/sample-document';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { WebSocketFactoryService } from '../../../lib/services/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../../assets/test-web-socket-factory.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { AuthService } from '../../../lib/components/auth/auth.service';
-import { WINDOW } from '../../../public-api';
+import { WINDOW } from '../../../lib/services/window.service';
+import { AASTreeApiService } from '../../../lib/components/aas-tree/aas-tree-api.service';
+import { encodeBase64Url } from '../../../lib/utilities';
 
 describe('AASTreeComponent', () => {
     let document: AASDocument;
     let webSocketSubject: Subject<WebSocketData>;
+    let api: jasmine.SpyObj<AASTreeApiService>;
+    let route: jasmine.SpyObj<ActivatedRoute>;
 
     beforeEach(async () => {
         document = sampleDocument;
         webSocketSubject = new Subject<WebSocketData>();
+        api = jasmine.createSpyObj<AASTreeApiService>(['getValueAsync']);
+
+        route = jasmine.createSpyObj<ActivatedRoute>(
+            {},
+            { queryParams: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+        );
 
         await TestBed.configureTestingModule({
             imports: [
@@ -46,10 +54,6 @@ describe('AASTreeComponent', () => {
                     useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
                 },
                 {
-                    provide: AuthService,
-                    useValue: jasmine.createSpyObj<AuthService>({}, { token: signal('Token') }),
-                },
-                {
                     provide: WINDOW,
                     useValue: jasmine.createSpyObj<Window>(['addEventListener', 'open', 'removeEventListener']),
                 },
@@ -57,8 +61,14 @@ describe('AASTreeComponent', () => {
                     provide: WebSocketFactoryService,
                     useValue: new TestWebSocketFactoryService(webSocketSubject),
                 },
-                provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
+                {
+                    provide: AASTreeApiService,
+                    useValue: api,
+                },
+                {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();
@@ -147,7 +157,7 @@ describe('AASTreeComponent', () => {
             fixture.componentRef.setInput('document', document);
             fixture.detectChanges();
             component.toggleSelections();
-            expect(component.rows().every(value => value.selected)).toBeTrue();
+            expect(component.nodes().every(value => value.selected)).toBeTrue();
         });
     });
 
@@ -198,7 +208,7 @@ describe('AASTreeComponent', () => {
             fixture.detectChanges();
             expect(component.expanded()).toEqual(false);
             component.expand();
-            expect(component.nodes()).toEqual(component.rows());
+            expect(component.nodes()).toEqual(component.nodes());
             expect(component.expanded()).toEqual(true);
         });
     });

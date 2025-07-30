@@ -20,7 +20,7 @@ import {
 } from 'aas-core';
 
 import { normalize } from '../../utilities';
-import { AASTreeNode } from './aas-tree-row';
+import { AASTreeNode } from './aas-tree-node';
 import { AASTreeStore } from './aas-tree.store';
 
 export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';

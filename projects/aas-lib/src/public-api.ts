@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 export * from './lib/components/aas-table/aas-table';
-export * from './lib/components/aas-tree/aas-tree-row';
+export * from './lib/components/aas-tree/aas-tree-node';
 export * from './lib/components/aas-tree/aas-tree.component';
 export * from './lib/components/auth/auth.component';
 export * from './lib/components/auth/auth.interceptor';

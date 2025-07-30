@@ -11,7 +11,6 @@ import { Route, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -41,15 +40,11 @@ import {
     isOperation,
     isSubmodel,
     equalDocument,
-    getSemanticId,
     isAssetAdministrationShell,
 } from 'aas-core';
 
-import { AASTree, AASTreeNode } from './aas-tree-row';
+import { AASTree, AASTreeNode } from './aas-tree-node';
 import { OnlineState } from '../../types';
-import { ShowImageFormComponent } from '../show-image-form/show-image-form.component';
-import { ShowVideoFormComponent } from '../show-video-form/show-video-form.component';
-import { OperationCallFormComponent } from '../operation-call-form/operation-call-form.component';
 import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../../utilities';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
@@ -58,8 +53,7 @@ import { findRoute } from '../../views/views';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
-import { AuthService } from '../../components/auth/auth.service';
-import { WINDOW } from '../../services/window.service';
+import { WINDOW, WindowService } from '../../services/window.service';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -78,12 +72,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     public constructor(
         private readonly store: AASTreeStore,
-        private readonly api: AASTreeApiService,
         private readonly searching: AASTreeSearch,
-        private readonly modal: NgbModal,
-        @Inject(WINDOW) private readonly window: Window,
+        @Inject(WINDOW) private readonly window: WindowService,
         @Inject(DOCUMENT) private readonly dom: Document,
-        private readonly auth: AuthService,
         private readonly translate: TranslateService,
         private readonly notify: NotifyService,
         private readonly webSocketFactory: WebSocketFactoryService,
@@ -291,10 +282,9 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
         let route: Route | undefined;
         if (isSubmodel(identifiable)) {
-            const semanticId = getSemanticId(identifiable);
-            route = findRoute(identifiable.id, semanticId);
+            route = findRoute(identifiable);
         } else if (isAssetAdministrationShell(identifiable)) {
-            route = findRoute(identifiable.id);
+            route = findRoute(document);
         }
 
         if (route === undefined) {
@@ -368,48 +358,6 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         const smId = blob.parent.keys[0].value;
         const idShortPath = getIdShortPath(blob);
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${idShortPath}/value`;
-    }
-
-    private async openOperation(operation: aas.Operation): Promise<void> {
-        if (!operation || this.state() === 'online') {
-            return;
-        }
-
-        try {
-            if (operation) {
-                const modalRef = this.modal.open(OperationCallFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.initialize(this.document(), operation);
-                await modalRef.result;
-            }
-        } catch (error) {
-            if (error) {
-                this.notify.error(error);
-            }
-        }
-    }
-
-    private async showImageAsync(name: string, src: string): Promise<void> {
-        try {
-            const modalRef = this.modal.open(ShowImageFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.initialize(name, src);
-            await modalRef.result;
-        } catch (error) {
-            if (error) {
-                this.notify.error(error);
-            }
-        }
-    }
-
-    private async showVideoAsync(name: string, src: string): Promise<void> {
-        try {
-            const modalRef = this.modal.open(ShowVideoFormComponent, { backdrop: 'static' });
-            modalRef.componentInstance.initialize(name, src);
-            await modalRef.result;
-        } catch (error) {
-            if (error) {
-                this.notify.error(error);
-            }
-        }
     }
 
     private goOnline(): void {
