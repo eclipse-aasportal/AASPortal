@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Controller, Get, OperationId, Route, Security, Tags } from 'tsoa';
+import { Controller, Get, OperationId, Route, Tags } from 'tsoa';
 import { ApplicationInfo } from '../application-info.js';
 import { AppInfo } from 'aas-core';
 
@@ -24,7 +24,6 @@ export class AppController extends Controller {
      * @returns The application info.
      */
     @Get('info')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getInfo')
     public async getInfo(): Promise<AppInfo> {
         return await this.applicationInfo.getAsync();

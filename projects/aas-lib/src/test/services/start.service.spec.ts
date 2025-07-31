@@ -32,7 +32,7 @@ describe('StartService', () => {
     let auth: jasmine.SpyObj<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         auth.getCookie.and.returnValue(of(undefined));
         TestBed.configureTestingModule({
             providers: [

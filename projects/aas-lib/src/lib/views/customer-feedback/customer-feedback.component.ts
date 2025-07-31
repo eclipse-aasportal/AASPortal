@@ -99,7 +99,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     public readonly starClassNames = this.starClassNames$.asReadonly();
 
     public ngOnInit(): void {
-        this.route.queryParams
+        this.route.params
             .pipe(
                 first(),
                 mergeMap(params => {
@@ -147,9 +147,9 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
 
         let href: string;
         if (documents.length === 1) {
-            href = `/view/CustomerFeedback?endpoint=${encodeBase64Url(documents[0].endpoint)}&id=${encodeBase64Url(documents[0].id)}`;
+            href = `/view/CustomerFeedback;endpoint=${encodeBase64Url(documents[0].endpoint)};id=${encodeBase64Url(documents[0].id)}`;
         } else {
-            href = `/view/CustomerFeedback?docs=${encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id])))}`;
+            href = `/view/CustomerFeedback;docs=${encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id])))}`;
         }
 
         const inputs: Record<string, unknown> = {

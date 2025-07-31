@@ -8,7 +8,7 @@
 
 import { computed, Injectable, signal } from '@angular/core';
 import { aas, AASDocument, getSemanticId } from 'aas-core';
-import { CustomerFeedback } from '../views';
+import { CUSTOMER_FEEDBACK } from '../views';
 
 export interface GeneralItem {
     name: string;
@@ -39,7 +39,7 @@ export class CustomerFeedbackStore {
 
             for (const submodel of document.content.submodels) {
                 const semanticId = getSemanticId(submodel);
-                if (semanticId === CustomerFeedback) {
+                if (semanticId === CUSTOMER_FEEDBACK) {
                     yield [document.content, submodel];
                 }
             }

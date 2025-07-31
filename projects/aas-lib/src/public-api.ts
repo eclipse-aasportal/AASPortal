@@ -6,9 +6,8 @@
  *
  *****************************************************************************/
 
-export * from './lib/components/aas-table/aas-table-row';
-export * from './lib/components/aas-table/aas-table.component';
-export * from './lib/components/aas-tree/aas-tree-row';
+export * from './lib/components/aas-table/aas-table';
+export * from './lib/components/aas-tree/aas-tree-node';
 export * from './lib/components/aas-tree/aas-tree.component';
 export * from './lib/components/auth/auth.component';
 export * from './lib/components/auth/auth.interceptor';
@@ -16,6 +15,7 @@ export * from './lib/components/auth/auth.service';
 export * from './lib/components/auth/login-form/login-form.component';
 export * from './lib/components/auth/profile-form/profile-form.component';
 export * from './lib/components/auth/register-form/register-form.component';
+export * from './lib/components/data-sheet/data-sheet';
 export * from './lib/components/favorite/favorite.component';
 export * from './lib/components/license-info/license-info.component';
 export * from './lib/components/localize/culture-info';
@@ -39,7 +39,7 @@ export * from './lib/types';
 export * from './lib/utilities';
 export * from './lib/views/customer-feedback/customer-feedback-card.component';
 export * from './lib/views/customer-feedback/customer-feedback.component';
-export * from './lib/views/digital-nameplate/digital-nameplate.component';
-export * from './lib/views/digital-product-passport/digital-product-passport.component';
-export * from './lib/views/handover-documentation/handover-documentation.component';
+export * from './lib/views/digital-product-passport/digital-product-passport.view';
+export * from './lib/views/handover-documentation/handover-documentation.view';
+export * from './lib/views/nameplate/nameplate.view';
 export * from './lib/views/views';

@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+import { aas } from 'aas-core';
+
 export interface AASQueryParams {
     format?: string;
     id?: string;
@@ -33,4 +35,68 @@ export enum ViewMode {
     Undefined = '',
     List = 'list',
     Tree = 'tree',
+}
+
+/** Defines options for an item in the data sheet. */
+export type DataSheetItemOptions = {
+    /** The idShort path to a root element. */
+    idShortPath?: string;
+    /** Resolves the URL if the value of an item represents an URL. */
+    getUrl?: GetUrlFn;
+} & (
+    | {
+          type: 'url';
+          getUrl: GetUrlFn;
+      }
+    | {
+          type: 'format';
+          /** The format string like `{FirstName} {LastName}`. */
+          format: string;
+      }
+    | {
+          type: 'join';
+          /** The idShortPaths of the referables that values should be joined. */
+          join: string[];
+          /**  A string used to separate one element of the array from the next in the resulting string. */
+          separator: string;
+      }
+);
+
+export type DataSheetOptions = {
+    name?: string;
+    type: 'A' | 'B';
+} & (
+    | {
+          type: 'A';
+          include: (string | DataSheetItemOptions)[];
+      }
+    | {
+          type: 'B';
+          exclude?: string[];
+          items?: DataSheetItemOptions[];
+      }
+);
+
+export type GetUrlFn = (element: aas.Referable) => string | undefined;
+
+export type DataSheetItemPath = string | DataSheetItemOptions;
+
+/** Represents an item of a data sheet. */
+export interface DataSheetItem {
+    /** The unique language independent name. */
+    idShort: string;
+    /** The display name in the current language. */
+    displayName: string;
+    /** The display value in the current language inclusive unit if exist. */
+    value: string | string[] | undefined;
+    /** The description in the current language. */
+    description?: string;
+    /** A resource URL.*/
+    url?: string;
+}
+
+export interface DataSheetData {
+    name?: string;
+    level?: number;
+    items: DataSheetItem[];
 }

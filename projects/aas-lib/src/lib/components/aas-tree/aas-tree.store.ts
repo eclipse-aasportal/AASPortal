@@ -8,13 +8,13 @@
 
 import { computed, Injectable, signal, untracked } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
-import { AASTree, AASTreeRow } from './aas-tree-row';
+import { AASTree, AASTreeNode } from './aas-tree-node';
 
 type AASTreeState = {
     expanded: boolean;
     matchIndex: number;
-    rows: AASTreeRow[];
-    nodes: AASTreeRow[];
+    rows: AASTreeNode[];
+    nodes: AASTreeNode[];
 };
 
 const initialState: AASTreeState = {
@@ -38,7 +38,7 @@ export class AASTreeStore {
             .map(item => item.element),
     );
 
-    public get rows(): AASTreeRow[] {
+    public get rows(): AASTreeNode[] {
         return untracked(this.state$).rows;
     }
 
@@ -61,7 +61,7 @@ export class AASTreeStore {
         });
     }
 
-    public highlight(node: AASTreeRow): void {
+    public highlight(node: AASTreeNode): void {
         this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.highlight(node);
@@ -73,7 +73,7 @@ export class AASTreeStore {
         });
     }
 
-    public toggleSelected(row: AASTreeRow, altKey: boolean, shiftKey: boolean): void {
+    public toggleSelected(row: AASTreeNode, altKey: boolean, shiftKey: boolean): void {
         this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.toggleSelected(row, altKey, shiftKey);
@@ -121,7 +121,7 @@ export class AASTreeStore {
         });
     }
 
-    public collapseRow(row: AASTreeRow): void {
+    public collapseRow(row: AASTreeNode): void {
         this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.collapse(row);
@@ -133,7 +133,7 @@ export class AASTreeStore {
         });
     }
 
-    public expandRow(arg: AASTreeRow | number): void {
+    public expandRow(arg: AASTreeNode | number): void {
         this.state$.update(state => {
             const tree = new AASTree(state.rows);
             tree.expand(arg);

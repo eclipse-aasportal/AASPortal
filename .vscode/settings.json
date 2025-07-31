@@ -14,6 +14,8 @@
         "Forschung",
         "IDREF",
         "IDREFS",
+        "IDTA",
+        "Informations",
         "IOSB",
         "irdi",
         "jszip",
@@ -44,8 +46,7 @@
         "uuid",
         "webdav",
         "xmldoc",
-        "ZVEI",
-        "IDTA"
+        "ZVEI"
     ],
     "files.eol": "\n",
     "jest.virtualFolders": [

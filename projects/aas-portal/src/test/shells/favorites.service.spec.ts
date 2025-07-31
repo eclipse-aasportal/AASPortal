@@ -40,7 +40,7 @@ describe('FavoritesService', () => {
     };
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         auth.getCookie.and.returnValue(of(JSON.stringify(state)));
         auth.setCookie.and.returnValue(of(void 0));
         auth.deleteCookie.and.returnValue(of(void 0));

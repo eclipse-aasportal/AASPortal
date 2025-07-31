@@ -167,7 +167,12 @@
         "DigitalProductPassport": "Produktpass",
         "CustomerFeedback": "Nutzer-Feedback",
         "Nameplate": "Typenschild",
-        "HandoverDocumentation": "Übergabedokumentation"
+        "HandoverDocumentation": "Übergabedokumentation",
+        "OperationalData": "Operative Daten",
+        "Browser": "Browser",
+        "ContactInformations": "Kontaktinformationen",
+        "CarbonFootprint": "CO2-Fußabdruck",
+        "TechnicalData": "Technische Daten"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -287,57 +292,21 @@
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
     },
+    "CarbonFootprint": {
+        "TITLE": "CO2-Fußabdruck",
+        "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
+        "TOTAL_PSFCO2EQ": "GWP100"
+    },
     "DigitalProductPassport": {
-        "EMPTY": "Kein Productpass verfügbar.",
-        "Name": "Name",
-        "Description": "Beschreibung",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
         "CAPTION": "Produktpass",
-        "TYPE": "Type",
-        "SERIAL_NUMBER": "Seriennummer",
-        "NAMEPLATE_DATA": "Typenschild",
-        "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
-        "TOTAL_PSFCO2EQ": "CO2-eq GWP100",
+        "Description": "Beschreibung",
         "DOCUMENTATION": "Dokumentation",
-        "ManufacturerProductFamily": "Produktfamilie",
-        "ManufacturerProductType": "Produkttyp",
-        "ManufacturerProductDesignation": "Produktbezeichnung",
-        "OrderCodeOfManufacturer": "Bestellnummer",
-        "SerialNumber": "Seriennummer",
-        "DateOfManufacture": "Herstellungsdatum",
-        "ManufacturerName": "Hersteller",
-        "URIOfTheProduct": "URI des Produkts",
-        "FirstName": "Vorname",
-        "NameOfContact": "Name",
-        "Language": "Sprache",
-        "TelephoneNumber": "Telefonnummer",
-        "EmailAddress": "E-Mail",
-        "Company": "Unternehmen",
-        "Street": "Straße",
-        "Zipcode": "Postleitzahl",
-        "CityTown": "Stadt",
-        "StateCounty": "Land",
-        "NationalCode": "Länderkennung",
-        "TimeZone": "Zeitzone",
-        "PCFGoodsAddressHandover": "Übergabeadresse",
-        "PCFCalculationMethod": "Berechnungsmethode",
-        "PCFCO2eq": "CO2-Äquivalent",
-        "PCFLifeCyclePhase1": "Lebenszyklusphase A1",
-        "PCFLifeCyclePhase2": "Lebenszyklusphase A2",
-        "PCFLifeCyclePhase3": "Lebenszyklusphase A3",
-        "PCFLifeCyclePhase4": "Lebenszyklusphase A4",
-        "PCFLifeCyclePhase5": "Lebenszyklusphase B1",
-        "PCFLifeCyclePhase6": "Lebenszyklusphase B2",
-        "PCFLifeCyclePhase7": "Lebenszyklusphase B3",
-        "PCFLifeCyclePhase8": "Lebenszyklusphase B5",
-        "PCFLifeCyclePhase9": "Lebenszyklusphase B6",
-        "PCFLifeCyclePhase10": "Lebenszyklusphase B7",
-        "PCFLifeCyclePhase11": "Lebenszyklusphase C1",
-        "PCFLifeCyclePhase12": "Lebenszyklusphase C2",
-        "PCFLifeCyclePhase13": "Lebenszyklusphase C3",
-        "PCFLifeCyclePhase14": "Lebenszyklusphase C4",
-        "PCFLifeCyclePhase15": "Lebenszyklusphase D",
-        "PCFLifeCyclePhase16": "Lebenszyklusphase A1-A3"
+        "EMPTY": "Kein Productpass verfügbar.",
+        "Name": "Name",
+        "NAMEPLATE_DATA": "Typenschild",
+        "SERIAL_NUMBER": "Seriennummer",
+        "TYPE": "Type"
     },
     "Favorite": {
         "ID_SHORT": "ID-Short",
@@ -354,17 +323,21 @@
         "ABOUT": "Info über..."
     },
     "HandoverDocumentation": {
+        "TITLE": "Übergabedocumentation",
         "EMPTY": "Keine Übergabedokumente verfügbar."
-    },
-    "DigitalNameplate": {
-        "ManufacturerName": "Hersteller",
-        "ManufacturerProductType": "Typ",
-        "ManufacturerProductFamily": "Familie",
-        "ProductArticleNumberOfManufacturer": "Art.-Nr.",
-        "SerialNumber": "Serien-Nr."
     },
     "Browser": {
         "TITLE": "AAS-Browser",
         "EMPTY": "Keine Verwalungsschale verfügbar."
+    },
+    "Nameplate": {
+        "GENERAL": "Allgemein",
+        "TITLE": "Digitales Typenschild"
+    },
+    "TechnicalData": {
+        "TITLE": "Technische Daten"
+    },
+    "ContactInformations": {
+        "TITLE": "Kontaktdaten"
     }
 }

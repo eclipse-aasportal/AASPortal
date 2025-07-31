@@ -20,13 +20,13 @@ import { AASProvider } from '../../app/aas-provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
 import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
-import { getToken, guestPayload } from '../assets/json-web-token.js';
+import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
 import { encodeBase64Url } from '../../app/convert.js';
 
-describe('DocumentsController', function () {
+describe('DocumentsController', () => {
     let app: Express;
     let logger: Logger;
     let auth: jest.Mocked<AuthService>;
@@ -34,7 +34,7 @@ describe('DocumentsController', function () {
     let variable: jest.Mocked<Variable>;
     let authentication: jest.Mocked<Authentication>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
@@ -53,7 +53,7 @@ describe('DocumentsController', function () {
         ]);
 
         authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(guestPayload);
+        authentication.check.mockResolvedValue(editorPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);
@@ -71,7 +71,7 @@ describe('DocumentsController', function () {
         app.use(errorHandler);
     });
 
-    it('getDocument: /api/v1/documents/:id', async function () {
+    it('getDocument: /api/v1/documents/:id', async () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
@@ -82,7 +82,7 @@ describe('DocumentsController', function () {
         expect(aasProvider.getDocument).toHaveBeenCalled();
     });
 
-    it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async function () {
+    it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async () => {
         const page: AASPagedResult = { previous: null, documents: [sampleDocument], next: null };
         aasProvider.getDocuments.mockResolvedValue(page);
         const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));

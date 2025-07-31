@@ -168,7 +168,12 @@
         "DigitalProductPassport": "Product passport",
         "CustomerFeedback": "User feedback",
         "Nameplate": "Nameplate",
-        "HandoverDocumentation": "Handover documentation"
+        "HandoverDocumentation": "Handover documentation",
+        "OperationalData": "Operational data",
+        "Browser": "Browser",
+        "ContactInformations": "Contact information",
+        "CarbonFootprint": "Carbon footprint",
+        "TechnicalData": "Technical data"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Search"
@@ -186,7 +191,7 @@
         "LABEL_MIN": "Min",
         "LABEL_MAX": "Max",
         "PROMPT_DASHBOARD_NAME": "Enter a name for the dashboard."
-        },
+    },
     "Chart": {
         "SHOW": "Show..."
     },
@@ -288,57 +293,21 @@
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
     },
+    "CarbonFootprint": {
+        "TITLE": "Carbon Footprint",
+        "CARBON_FOOTPRINT_DATA": "Carbon footprint",
+        "TOTAL_PSFCO2EQ": "GWP100"
+    },
     "DigitalProductPassport": {
-        "EMPTY": "No product passport available.",
-        "Name": "Name",
-        "Description": "Description",
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
         "CAPTION": "Product Passport",
-        "TYPE": "Type",
-        "SERIAL_NUMBER": "Serial No.",
-        "NAMEPLATE_DATA": "Nameplate",
-        "CARBON_FOOTPRINT_DATA": "Carbon footprint",
-        "TOTAL_PSFCO2EQ": "CO2-eq GWP100",
+        "Description": "Description",
         "DOCUMENTATION": "Documentation",
-        "ManufacturerProductFamily": "Product family",
-        "ManufacturerProductType": "Product type",
-        "ManufacturerProductDesignation": "Product designation",
-        "OrderCodeOfManufacturer": "Order code",
-        "SerialNumber": "Serial number",
-        "DateOfManufacture": "Date of manufacture",
-        "ManufacturerName": "Manufacturer name",
-        "URIOfTheProduct": "URI of the product",
-        "FirstName": "First name",
-        "NameOfContact": "Name of contact",
-        "Language": "Language",
-        "TelephoneNumber": "Telephone number",
-        "EmailAddress": "E-mail",
-        "Company": "Company",
-        "Street": "Street",
-        "Zipcode": "Zip code",
-        "CityTown": "City/Town",
-        "StateCounty": "State/County",
-        "NationalCode": "National code",
-        "TimeZone": "Time zone",
-        "PCFGoodsAddressHandover": "Handover address",
-        "PCFCalculationMethod": "Calculation method",
-        "PCFCO2eq": "CO2 equivalent",
-        "PCFLifeCyclePhase1": "Life cycle phase A1",
-        "PCFLifeCyclePhase2": "Life cycle phase A2",
-        "PCFLifeCyclePhase3": "Life cycle phase A3",
-        "PCFLifeCyclePhase4": "Life cycle phase A4",
-        "PCFLifeCyclePhase5": "Life cycle phase B1",
-        "PCFLifeCyclePhase6": "Life cycle phase B2",
-        "PCFLifeCyclePhase7": "Life cycle phase B3",
-        "PCFLifeCyclePhase8": "Life cycle phase B5",
-        "PCFLifeCyclePhase9": "Life cycle phase B6",
-        "PCFLifeCyclePhase10": "Life cycle phase B7",
-        "PCFLifeCyclePhase11": "Life cycle phase C1",
-        "PCFLifeCyclePhase12": "Life cycle phase C2",
-        "PCFLifeCyclePhase13": "Life cycle phase C3",
-        "PCFLifeCyclePhase14": "Life cycle phase C4",
-        "PCFLifeCyclePhase15": "Life cycle phase D",
-        "PCFLifeCyclePhase16": "Life cycle phase A1-A3"
+        "EMPTY": "No product passport available.",
+        "Name": "Name",
+        "NAMEPLATE_DATA": "Nameplate",
+        "SERIAL_NUMBER": "Serial No.",
+        "TYPE": "Type"
     },
     "Favorite": {
         "ID_SHORT": "ID short",
@@ -355,19 +324,21 @@
         "ABOUT": "About..."
     },
     "HandoverDocumentation": {
+        "TITLE": "Handover Documentation",
         "EMPTY": "No handover documents available."
-    },
-    "DigitalNameplate": {
-        "ManufacturerName": "Manufacturer",
-        "ManufacturerProductType": "Type",
-        "ManufacturerProductFamily": "Family",
-        "ProductArticleNumberOfManufacturer": "Art. Nr.",
-        "SerialNumber":"Serial Nr."
     },
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",
         "TITLE": "AAS browser"
     },
-    "Laser": {
+    "Nameplate": {
+        "GENERAL": "General",
+        "TITLE": "Digital Namplate"
+    },
+    "TechnicalData": {
+        "TITLE": "Technical Data"
+    },
+    "ContactInformations": {
+        "TITLE": "Contact Information"
     }
 }
