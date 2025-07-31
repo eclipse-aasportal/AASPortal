@@ -6,19 +6,7 @@
  *
  *****************************************************************************/
 
-import {
-    aas,
-    AASDocument,
-    convertToString,
-    getIdShortPath,
-    getLocaleValue,
-    getReferable,
-    getSemanticId,
-    isFile,
-    isMultiLanguageProperty,
-    isProperty,
-    selectSubmodel,
-} from 'aas-core';
+import { aas, AASDocument, getIdShortPath, getReferable, getSemanticId, isFile, selectSubmodel } from 'aas-core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, first, from, mergeMap, Observable, of, toArray } from 'rxjs';

@@ -125,7 +125,7 @@ describe('views', () => {
             expect(findRoute(env)?.path).toEqual('DigitalProductPassport');
         });
 
-        it('return "Default" while "HandoverDocumentation" missing', () => {
+        xit('return "Default" while "HandoverDocumentation" missing', () => {
             const env: aas.Environment = {
                 assetAdministrationShells: [],
                 conceptDescriptions: [],

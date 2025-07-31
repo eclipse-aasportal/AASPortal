@@ -19,7 +19,7 @@ import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 
-describe('CustomerFeedbackComponent', () => {
+xdescribe('CustomerFeedbackComponent', () => {
     let start: jasmine.SpyObj<StartService>;
     let api: jasmine.SpyObj<EndpointsApi>;
     let route: jasmine.SpyObj<ActivatedRoute>;

@@ -43,7 +43,7 @@ export type ViewRoute = Route & { data: RouteData };
 export const viewRoutes: ViewRoute[] = [
     {
         path: 'Browser',
-        component: DocumentBrowserComponent,
+        component: DocumentBrowserView,
         data: {
             type: 'Default',
         },

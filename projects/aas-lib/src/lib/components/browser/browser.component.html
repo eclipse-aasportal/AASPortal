@@ -33,7 +33,7 @@
                 <a [href]="property.url">{{property.value}}</a>
             </td>
             } @case('link') {
-                <a [routerLink]="pr">{{property.value}}</a>
+                <a [routerLink]="property.url">{{property.value}}</a>
             } @default {
             <td>{{property.value}}</td>
             }}
