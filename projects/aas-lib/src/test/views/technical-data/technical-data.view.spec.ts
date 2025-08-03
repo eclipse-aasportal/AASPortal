@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TechnicalDataView } from '../../../lib/views/technical-data/technical-data.view';
+import { TechnicalDataView } from '../../../lib/internal';
 
 xdescribe('TechnicalDataView', () => {
     let component: TechnicalDataView;

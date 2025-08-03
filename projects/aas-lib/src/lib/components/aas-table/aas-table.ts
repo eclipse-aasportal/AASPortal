@@ -37,6 +37,7 @@ export class AASTableRow {
         selected: boolean = false,
     ) {
         this.selected = signal(selected);
+        this.thumbnail = this.document.thumbnail;
     }
 
     public readonly selected: WritableSignal<boolean>;
@@ -53,9 +54,7 @@ export class AASTableRow {
         return this.document.idShort;
     }
 
-    public get thumbnail(): string {
-        return this.document.thumbnail || '/assets/resources/aas.32.png';
-    }
+    public thumbnail: string | undefined;
 
     public get endpoint(): string {
         return this.document.endpoint;
@@ -131,13 +130,20 @@ export class AASTable {
         return rows.length > 0 && rows.every(row => row.selected());
     });
 
+    public getThumbnail(row: AASTableRow): string {
+        if (row.thumbnail) {
+            return row.thumbnail;
+        }
+
+        return '/assets/resources/aas-idta.png';
+    }
+
     public open(row: AASTableRow): void {
         this.router.navigate(['/aas'], {
             queryParams: {
                 endpoint: encodeBase64Url(row.endpoint),
                 id: encodeBase64Url(row.id),
             },
-            state: { data: JSON.stringify(row.document) },
         });
     }
 

@@ -13,12 +13,10 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
 
-import { HandoverDocumentationView } from '../../../lib/views/handover-documentation/handover-documentation.view';
-import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
-import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { HandoverDocumentation, HandoverDocumentationView, ThumbnailQRCode } from '../../../lib/internal';
 import { encodeBase64Url } from '../../../lib/utilities';
 
 import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
@@ -60,7 +58,7 @@ describe('HandoverDocumentationView', () => {
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/HandoverDocumentation/1/2',
             endpoint: 'Test',
-            content: handoverDocumentation_1_2 as aas.Environment
+            content: handoverDocumentation_1_2 as aas.Environment,
         };
 
         route = jasmine.createSpyObj<ActivatedRoute>(
@@ -83,6 +81,10 @@ describe('HandoverDocumentationView', () => {
                 {
                     provide: EndpointsApi,
                     useValue: api,
+                },
+                {
+                    provide: ActivatedRoute,
+                    useValue: route,
                 },
                 provideRouter([]),
                 provideZonelessChangeDetection(),

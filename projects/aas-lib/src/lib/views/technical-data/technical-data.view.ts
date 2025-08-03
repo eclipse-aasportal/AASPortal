@@ -6,31 +6,16 @@
  *
  *****************************************************************************/
 
-import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    OnDestroy,
-    OnInit,
-    Signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, OnDestroy, OnInit, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { getDisplayName } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
-import { TECHNICAL_DATA_1_2 } from '../views';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { TechnicalData } from './technical-data';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { View } from '../view';
+import { LeafView, TechnicalData, ThumbnailQRCode } from '../../internal';
 
 @Component({
     selector: 'fhg-technical-data-view',
@@ -39,21 +24,14 @@ import { View } from '../view';
     styleUrl: './technical-data.view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TechnicalDataView extends View implements OnInit, OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
-
+export class TechnicalDataView extends LeafView implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
-        translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
     ) {
-        super(route, api);
-
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+        super(route, api, 'TechnicalData');
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -63,20 +41,7 @@ export class TechnicalDataView extends View implements OnInit, OnDestroy {
         });
     }
 
-    protected override get expectedSemanticIds(): string[] {
-        return [TECHNICAL_DATA_1_2];
-    }
-
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
-
-    public readonly title = computed(() => {
-        const tuple = this.tuple();
-        if (tuple === undefined) {
-            return '-';
-        }
-
-        return getDisplayName(tuple[1], tuple[0].content, this.currentLang());
-    });
 
     public ngOnInit(): void {
         this.onInit();

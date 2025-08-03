@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { Data, Route } from '@angular/router';
 import { aas } from 'aas-core';
 
 export interface AASQueryParams {
@@ -100,3 +101,28 @@ export interface DataSheetData {
     level?: number;
     items: DataSheetItem[];
 }
+
+export type RouteData = Data &
+    (
+        | { type: 'Leaf'; semanticIds?: string[]; idShorts?: string[] }
+        | { type: 'Composition'; routes: string[] }
+        | { type: 'Default' }
+    );
+
+export type ViewRoute = Route & { path: ViewRouteName; data: RouteData };
+
+export type ViewRouteName =
+    | 'Browser'
+    | 'CarbonFootprint'
+    | 'ContactInformations'
+    | 'CustomerFeedback'
+    | 'DigitalProductPassport'
+    | 'HandoverDocumentation'
+    | 'Nameplate'
+    | 'OperationalData'
+    | 'TechnicalData';
+
+export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;
+
+export type ViewRouteResult = { route?: ViewRoute; map?: ViewRouteMap };
+

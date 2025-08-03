@@ -10,7 +10,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DataSheet } from '../../../lib/components/data-sheet/data-sheet';
-import { DataSheetData } from 'projects/aas-lib/src/public-api';
+import { DataSheetData } from '../../../lib/types';
 
 describe('DataSheet', () => {
     let component: DataSheet;

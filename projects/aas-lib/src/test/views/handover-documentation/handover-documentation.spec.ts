@@ -8,13 +8,12 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 
-import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { HANDOVER_DOCUMENTATION_1_2, HandoverDocumentation } from '../../../lib/internal';
 
 import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
-import { HANDOVER_DOCUMENTATION_1_2 } from 'projects/aas-lib/src/public-api';
 
 describe('HandoverDocumentation', () => {
     let component: HandoverDocumentation;

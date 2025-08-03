@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
@@ -16,8 +16,7 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { ContactInformations } from './contact-informations';
-import { View } from '../view';
-import { CONTACT_INFORMATIONS_1_0 } from '../views';
+import { LeafView } from '../../internal';
 
 @Component({
     selector: 'fhg-contact-informations-view',
@@ -26,14 +25,13 @@ import { CONTACT_INFORMATIONS_1_0 } from '../views';
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformations],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContactInformationsView extends View implements OnInit, OnDestroy {
+export class ContactInformationsView extends LeafView implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
-        private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
     ) {
-        super(route, api);
+        super(route, api, 'ContactInformations');
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -43,11 +41,7 @@ export class ContactInformationsView extends View implements OnInit, OnDestroy {
         });
     }
 
-    protected override get expectedSemanticIds(): string[] {
-        return [CONTACT_INFORMATIONS_1_0];
-    }
-
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<ContactInformationsView>>('toolbar');
 
     public ngOnInit(): void {
         this.onInit();

@@ -8,7 +8,8 @@
 
 import upperFirst from 'lodash-es/upperFirst';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal, untracked } from '@angular/core';
 
 import {
     aas,
@@ -23,7 +24,6 @@ import {
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { getUrl, isLangString, referenceToString } from '../../utilities';
-import { RouterLink } from '@angular/router';
 
 const collectionNames: Record<string, string> = {
     SubmodelElementCollection: 'value',
@@ -74,7 +74,6 @@ export interface BrowserItem {
 })
 export class BrowserComponent {
     private readonly path$ = signal<BrowserElement[]>([]);
-    private readonly conceptDescription$ = signal<aas.ConceptDescription | null>(null);
     private readonly env = signal<aas.Environment>({
         assetAdministrationShells: [],
         submodels: [],
@@ -102,8 +101,6 @@ export class BrowserComponent {
 
     public readonly document = input<AASDocument | null | undefined>(undefined);
 
-    public readonly open = output<BrowserItem>();
-
     public readonly path = this.path$.asReadonly();
 
     public readonly current = signal<BrowserElement | undefined>(undefined);
@@ -115,25 +112,6 @@ export class BrowserComponent {
     public readonly children = computed(() => this.current()?.children ?? []);
 
     public readonly conceptDescription = computed(() => this.current()?.conceptDescription);
-
-    private get idShortPath(): string {
-        const current = this.current()?.referable;
-        if (current === undefined) {
-            return '';
-        }
-
-        const path = this.path$();
-        if (path.length < 3) {
-            return '';
-        }
-
-        let idShortPath = '';
-        for (let i = 2, n = path.length; i < n; i++) {
-            idShortPath += path[i].referable.idShort + '.';
-        }
-
-        return idShortPath + current.idShort;
-    }
 
     public goUp(element: BrowserElement): void {
         const index = this.path$().indexOf(element);

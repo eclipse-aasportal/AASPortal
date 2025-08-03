@@ -1,14 +1,17 @@
-import { aas } from 'aas-core';
-import {
-    findRoute,
-    hasSpecificView,
-    NAMEPLATE_3_0,
-    CARBON_FOOTPRINT_1_0,
-    HANDOVER_DOCUMENTATION_2_0,
-} from '../../lib/views/views';
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
 
-describe('views', () => {
-    describe('findRoute', () => {
+import { aas } from 'aas-core';
+import { NAMEPLATE_3_0, CARBON_FOOTPRINT_1_0, HANDOVER_DOCUMENTATION_2_0 } from '../../lib/views/views-constants';
+import { findRouteForShell, findRouteForSubmodel, hasSpecificView } from '../../lib/views/views-utilities';
+
+describe('views-utilities', () => {
+    describe('findRouteForSubmodel', () => {
         it('should has a Nameplate route', () => {
             const submodel: aas.Submodel = {
                 id: 'http://localhost/aas/sm/nameplate',
@@ -25,7 +28,7 @@ describe('views', () => {
                 },
             };
 
-            expect(findRoute(submodel)?.path).toEqual('Nameplate');
+            expect(findRouteForSubmodel(submodel)?.path).toEqual('Nameplate');
         });
 
         it('has no specific route for "Unknown"', () => {
@@ -44,13 +47,13 @@ describe('views', () => {
                 },
             };
 
-            expect(findRoute(submodel)?.data.type).toEqual('Default');
+            expect(findRouteForSubmodel(submodel, false)?.data.type).toBeUndefined();
         });
 
-        it('should has a OperationData route', () => {
+        it('returns the default route for "Unknown"', () => {
             const submodel: aas.Submodel = {
                 id: 'http://localhost/aas/sm/nameplate',
-                idShort: 'nAMEPLATE',
+                idShort: 'Nameplate',
                 modelType: 'Submodel',
                 semanticId: {
                     keys: [
@@ -61,17 +64,32 @@ describe('views', () => {
                     ],
                     type: 'ExternalReference',
                 },
-                submodelElements: [
-                    {
-                        idShort: 'OperationalData',
-                        modelType: 'SubmodelElementCollection',
-                    } satisfies aas.SubmodelElementCollection,
-                ],
             };
 
-            expect(findRoute(submodel)?.path).toEqual('OperationalData');
+            expect(findRouteForSubmodel(submodel)?.data.type).toEqual('Default');
         });
 
+        it('should has a OperationData route', () => {
+            const submodel: aas.Submodel = {
+                id: 'http://localhost/aas/sm/nameplate',
+                idShort: 'OperationalData',
+                modelType: 'Submodel',
+                semanticId: {
+                    keys: [
+                        {
+                            type: 'GlobalReference',
+                            value: 'http://localhost/unknown',
+                        },
+                    ],
+                    type: 'ExternalReference',
+                },
+            };
+
+            expect(findRouteForSubmodel(submodel)?.path).toEqual('OperationalData');
+        });
+    });
+
+    describe('findRouteForShell', () => {
         it('should has a DPP view', () => {
             const env: aas.Environment = {
                 assetAdministrationShells: [],
@@ -122,10 +140,14 @@ describe('views', () => {
                 ],
             };
 
-            expect(findRoute(env)?.path).toEqual('DigitalProductPassport');
+            const result = findRouteForShell(env);
+            expect(result.route?.path).toEqual('DigitalProductPassport');
+            expect(result.map?.Nameplate).toBeDefined();
+            expect(result.map?.CarbonFootprint).toBeDefined();
+            expect(result.map?.HandoverDocumentation).toBeDefined();
         });
 
-        xit('return "Default" while "HandoverDocumentation" missing', () => {
+        it('return "Default" while "HandoverDocumentation" missing', () => {
             const env: aas.Environment = {
                 assetAdministrationShells: [],
                 conceptDescriptions: [],
@@ -175,7 +197,8 @@ describe('views', () => {
                 ],
             };
 
-            expect(findRoute(env)?.data.type).toEqual('Default');
+            const result = findRouteForShell(env, false);
+            expect(result).toEqual({});
         });
     });
 
@@ -183,7 +206,7 @@ describe('views', () => {
         it('has a Nameplate view', () => {
             const submodel: aas.Submodel = {
                 id: 'http://localhost/aas/sm/nameplate',
-                idShort: 'nAMEPLATE',
+                idShort: 'Nameplate',
                 modelType: 'Submodel',
                 semanticId: {
                     keys: [
@@ -202,7 +225,7 @@ describe('views', () => {
         it('has no specific view for "Unknown"', () => {
             const submodel: aas.Submodel = {
                 id: 'http://localhost/aas/sm/nameplate',
-                idShort: 'nAMEPLATE',
+                idShort: 'Nameplate',
                 modelType: 'Submodel',
                 semanticId: {
                     keys: [
@@ -221,7 +244,7 @@ describe('views', () => {
         it('should has a specific OperationData view', () => {
             const submodel: aas.Submodel = {
                 id: 'http://localhost/aas/sm/nameplate',
-                idShort: 'nAMEPLATE',
+                idShort: 'OperationalData',
                 modelType: 'Submodel',
                 semanticId: {
                     keys: [
@@ -232,12 +255,6 @@ describe('views', () => {
                     ],
                     type: 'ExternalReference',
                 },
-                submodelElements: [
-                    {
-                        idShort: 'OperationalData',
-                        modelType: 'SubmodelElementCollection',
-                    } satisfies aas.SubmodelElementCollection,
-                ],
             };
 
             expect(hasSpecificView(submodel)).toBeTrue();

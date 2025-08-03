@@ -10,16 +10,9 @@
 <div class="container container-md container-lg h-100">
     <div class="d-flex flex-column text-center">
         <div class="bg-primary text-center py-2 my-2 fs-5">{{"Browser.TITLE" | translate}}</div>
-        <div class="d-flex flex-wrap justify-content-around align-items-center mb-2">
-            <div class="m-1">
-                <fhg-img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height"></fhg-img>
-            </div>
-            <div class="m-1">
-                <canvas #qrCode></canvas>
-            </div>
-        </div>
+        <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
     </div>
-    <fhg-browser [document]="document()" (open)="open($event)"></fhg-browser>
+    <fhg-browser [document]="document()"></fhg-browser>
 </div>
 } @else {
 <div class="alert alert-info text-center mt-2" role="alert" translate>Browser.EMPTY</div>
@@ -31,10 +24,10 @@
             <i class="bi bi-house-add"></i>
         </button>
     </div>
-    @if (documentSize() >= 2) {
+    @if (count() >= 2) {
     <div class="input-group my-1">
-        <ngb-pagination [collectionSize]="documentSize()" [(page)]="documentIndex" [pageSize]="1"
-            [directionLinks]="documentSize() > 5" [ellipses]="true" />
+        <ngb-pagination [collectionSize]="count()" [(page)]="index" [pageSize]="1"
+            [directionLinks]="count() > 5" [ellipses]="true" />
     </div>
     }
 </ng-template>

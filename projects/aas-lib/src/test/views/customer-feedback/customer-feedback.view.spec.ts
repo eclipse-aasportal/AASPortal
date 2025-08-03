@@ -13,13 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AASDocument } from 'aas-core';
-import { CustomerFeedbackComponent } from '../../../lib/views/customer-feedback/customer-feedback.component';
+import { CustomerFeedbackView } from '../../../lib/internal';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 
-xdescribe('CustomerFeedbackComponent', () => {
+describe('CustomerFeedbackView', () => {
     let start: jasmine.SpyObj<StartService>;
     let api: jasmine.SpyObj<EndpointsApi>;
     let route: jasmine.SpyObj<ActivatedRoute>;
@@ -29,7 +29,7 @@ xdescribe('CustomerFeedbackComponent', () => {
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         route = jasmine.createSpyObj<ActivatedRoute>(
             {},
-            { queryParams: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://localhost/aas') }) },
+            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://localhost/aas') }) },
         );
 
         api.getDocument.and.returnValue(
@@ -65,7 +65,7 @@ xdescribe('CustomerFeedbackComponent', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                CustomerFeedbackComponent,
+                CustomerFeedbackView,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -77,7 +77,7 @@ xdescribe('CustomerFeedbackComponent', () => {
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(CustomerFeedbackComponent);
+        const fixture = TestBed.createComponent(CustomerFeedbackView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();

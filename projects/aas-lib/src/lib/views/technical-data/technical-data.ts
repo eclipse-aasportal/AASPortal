@@ -14,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AASDocument, getReferable, getSemanticId, isSubmodelElementCollection } from 'aas-core';
 
 import { DataSheetData } from '../../types';
-import { TECHNICAL_DATA_1_2 } from '../views';
+import { TECHNICAL_DATA_1_2 } from '../../internal';
 import { createDataSheet } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 

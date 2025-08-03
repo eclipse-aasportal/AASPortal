@@ -339,5 +339,8 @@
     },
     "ContactInformations": {
         "TITLE": "Kontaktdaten"
+    },
+    "OperationalData": {
+        "TITLE": "Betriebsdaten"
     }
 }

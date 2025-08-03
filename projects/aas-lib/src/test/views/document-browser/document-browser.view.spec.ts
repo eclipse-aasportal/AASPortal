@@ -8,15 +8,8 @@
 
 import { TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
-
-import { AASDocument } from 'aas-core';
-import { EndpointsApi } from '../../../lib/services/endpoints-api';
-import { DocumentBrowserView } from '../../../lib/views/document-browser/document-browser.view';
-import { encodeBase64Url } from '../../../lib/utilities';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -25,12 +18,14 @@ import {
     provideZonelessChangeDetection,
     signal,
 } from '@angular/core';
-import { BrowserComponent, BrowserItem } from '../../../lib/components/browser/browser.component';
-import { AuthService } from '../../../lib/components/auth/auth.service';
+
+import { AASDocument } from 'aas-core';
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
+import { DocumentBrowserView } from '../../../lib/internal';
+import { encodeBase64Url } from '../../../lib/utilities';
+import { BrowserComponent } from '../../../lib/components/browser/browser.component';
 import { StartService } from '../../../lib/services/start.service';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
-import { WINDOW } from '../../../lib/services/window.service';
-import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 
 @Component({
     selector: 'fhg-browser',
@@ -40,37 +35,19 @@ import { SecuredImageComponent } from '../../../lib/components/secured-image/sec
 })
 export class TestBrowserComponent {
     public readonly document = input<AASDocument | null | undefined>(undefined);
-    public readonly open = output<BrowserItem>();
-}
-
-@Component({
-    selector: 'fhg-img',
-    template: '<div></div>',
-    styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class TestSecuredImageComponent {
-    public readonly src = input<string>('');
-    public readonly alt = input<string | undefined>();
-    public readonly class = input<string | undefined>();
-    public readonly width = input<number | undefined>();
-    public readonly height = input<number | undefined>();
 }
 
 describe('DocumentBrowserView', () => {
     let api: jasmine.SpyObj<EndpointsApi>;
     let route: jasmine.SpyObj<ActivatedRoute>;
-    let auth: jasmine.SpyObj<AuthService>;
     let start: jasmine.SpyObj<StartService>;
-    let window: jasmine.SpyObj<Window>;
 
     beforeEach(async () => {
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument']);
-        auth = jasmine.createSpyObj<AuthService>({}, { token: signal<string | undefined>('Token').asReadonly() });
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         route = jasmine.createSpyObj<ActivatedRoute>(
             {},
-            { queryParams: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://localhost/aas') }) },
+            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://localhost/aas') }) },
         );
 
         api.getDocument.and.returnValue(
@@ -85,10 +62,6 @@ describe('DocumentBrowserView', () => {
             } satisfies AASDocument),
         );
 
-        window = jasmine.createSpyObj<Window>(['open'], {
-            location: { toString: () => 'https://www.fraunhofer.de' } as Location,
-        });
-
         await TestBed.configureTestingModule({
             providers: [
                 {
@@ -100,27 +73,13 @@ describe('DocumentBrowserView', () => {
                     useValue: api,
                 },
                 {
-                    provide: WINDOW,
-                    useValue: window,
-                },
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
-                {
                     provide: StartService,
                     useValue: start,
-                },
-                {
-                    provide: EndpointsApi,
-                    useValue: api,
                 },
                 {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
-                provideHttpClient(),
-                provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],
             imports: [
@@ -136,10 +95,10 @@ describe('DocumentBrowserView', () => {
 
         TestBed.overrideComponent(DocumentBrowserView, {
             remove: {
-                imports: [BrowserComponent, SecuredImageComponent],
+                imports: [BrowserComponent],
             },
             add: {
-                imports: [TestBrowserComponent, TestSecuredImageComponent],
+                imports: [TestBrowserComponent],
             },
         });
     });

@@ -340,5 +340,8 @@
     },
     "ContactInformations": {
         "TITLE": "Contact Information"
+    },
+    "OperationalData": {
+        "TITLE": "Operational Data"
     }
 }

@@ -7,10 +7,10 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { Nameplate } from '../../../lib/views/nameplate/nameplate';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection } from '@angular/core';
+
+import { Nameplate } from '../../../lib/internal';
 
 describe('Nameplate', () => {
     let component: Nameplate;

@@ -30,10 +30,7 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { encodeBase64Url, getDisplayName, toString } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
-import { NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0, NAMEPLATE_2_0 } from '../views';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { Nameplate } from './nameplate';
-import { View } from '../view';
+import { LeafView, Nameplate, ThumbnailQRCode } from '../../internal';
 
 @Component({
     selector: 'fhg-nameplate-view',
@@ -42,7 +39,7 @@ import { View } from '../view';
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NameplateView extends View implements OnInit, OnDestroy {
+export class NameplateView extends LeafView implements OnInit, OnDestroy {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
     private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
@@ -55,7 +52,7 @@ export class NameplateView extends View implements OnInit, OnDestroy {
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
     ) {
-        super(route, api);
+        super(route, api, 'Nameplate');
 
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
@@ -66,10 +63,6 @@ export class NameplateView extends View implements OnInit, OnDestroy {
                 this.toolbar.set(template);
             }
         });
-    }
-
-    protected override get expectedSemanticIds(): string[] {
-        return [NAMEPLATE_3_0, NAMEPLATE_2_0, NAMEPLATE_FHG, NAMEPLATE_HSU];
     }
 
     /** The toolbar. */

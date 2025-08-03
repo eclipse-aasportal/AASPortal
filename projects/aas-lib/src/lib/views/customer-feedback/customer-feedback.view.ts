@@ -6,15 +6,17 @@
  *
  *****************************************************************************/
 
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
-import { EMPTY, first, from, mergeMap, Observable, of, Subscription, toArray } from 'rxjs';
+import { EMPTY, Observable, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
     ChangeDetectionStrategy,
     Component,
     OnDestroy,
     OnInit,
+    Signal,
     TemplateRef,
     computed,
     effect,
@@ -22,24 +24,25 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, getLocaleValue, getPreferredName } from 'aas-core';
+import { aas, AASDocument } from 'aas-core';
 import { ScoreComponent } from '../../components/score/score.component';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
-import { CustomerFeedbackStore, FeedbackItem, GeneralItem } from './customer-feedback.store';
-import { decodeBase64Url, encodeBase64Url, hashCode } from '../../utilities';
+import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
+import { LeafView } from '../../internal';
+import { FeedbackItem, GeneralItem } from './customer-feedback.types';
 
 const maxStars = 5;
 
 @Component({
     selector: 'fhg-customer-feedback',
-    templateUrl: './customer-feedback.component.html',
-    styleUrls: ['./customer-feedback.component.scss'],
+    templateUrl: './customer-feedback.view.html',
+    styleUrls: ['./customer-feedback.view.scss'],
     imports: [ScoreComponent, DecimalPipe, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerFeedbackComponent implements OnInit, OnDestroy {
+export class CustomerFeedbackView extends LeafView implements OnInit, OnDestroy {
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
     private readonly stars$ = signal(0.0);
@@ -47,15 +50,21 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     private readonly items$ = signal<GeneralItem[]>([]);
     private readonly feedbacks$ = signal<FeedbackItem[]>([]);
     private readonly starClassNames$ = signal<string[]>([]);
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
 
     public constructor(
-        private readonly route: ActivatedRoute,
+        route: ActivatedRoute,
+        api: EndpointsApi,
         private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        private readonly store: CustomerFeedbackStore,
-        private readonly api: EndpointsApi,
     ) {
+        super(route, api, 'CustomerFeedback');
+
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {
@@ -64,21 +73,20 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            this.initialize(this.store.submodels());
+            this.initialize(this.tuples());
         });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('customerFeedbackToolbar');
 
     public readonly name = computed(() => {
-        const submodels = this.store.submodels();
-        if (!submodels) {
-            return '';
+        const tuples = this.tuples();
+        if (!tuples) {
+            return undefined;
         }
 
-        const names = submodels.map(
-            ([env, submodel]) =>
-                getLocaleValue(getPreferredName(env, submodel), this.translate.currentLang) ?? submodel.idShort,
+        const names = tuples.map(([document, submodel]) =>
+            getDisplayName(submodel, document.content, this.currentLang()),
         );
 
         if (names.length <= 2) {
@@ -99,39 +107,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     public readonly starClassNames = this.starClassNames$.asReadonly();
 
     public ngOnInit(): void {
-        this.route.params
-            .pipe(
-                first(),
-                mergeMap(params => {
-                    if (params.id) {
-                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
-                    }
-
-                    if (!params.docs) {
-                        return of([]);
-                    }
-
-                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
-                    return from(docs).pipe(
-                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
-                        toArray(),
-                    );
-                }),
-            )
-            .subscribe(documents => {
-                if (documents.length > 0) {
-                    this.store.documents.set(documents);
-                } else {
-                    this.initialize(this.store.submodels());
-                }
-            });
-
-        this.subscription.add(
-            this.translate.onLangChange.subscribe(() => {
-                this.initialize(this.store.submodels());
-            }),
-        );
+        this.onInit();
     }
 
     public ngOnDestroy(): void {
@@ -140,7 +116,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        const documents = this.store.documents();
+        const documents = this.tuples().map(([document]) => document);
         if (documents.length === 0) {
             return EMPTY;
         }
@@ -169,7 +145,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         return this.start.save();
     }
 
-    private initialize(submodels: [aas.Environment, aas.Submodel][]): void {
+    private initialize(tuples: [AASDocument, aas.Submodel][]): void {
         this.map.clear();
         let count = 0;
         let stars = 0.0;
@@ -177,7 +153,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         const feedbacks: FeedbackItem[] = [];
         let sumStars = 0;
 
-        for (const [, submodel] of submodels) {
+        for (const [, submodel] of tuples) {
             if (submodel.submodelElements) {
                 for (const feedback of submodel.submodelElements.filter(
                     item => item.modelType === 'SubmodelElementCollection',
@@ -260,7 +236,7 @@ export class CustomerFeedbackComponent implements OnInit, OnDestroy {
         const property = this.findProperty(element, 'createdAt');
         if (property) {
             const date = new Date(String(property.value));
-            return date.toLocaleDateString(this.translate.currentLang);
+            return date.toLocaleDateString(this.currentLang());
         }
 
         return '-';

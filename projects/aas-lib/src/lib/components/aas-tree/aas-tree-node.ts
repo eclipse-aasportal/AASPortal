@@ -42,7 +42,7 @@ import {
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../../utilities';
 import { signal, WritableSignal } from '@angular/core';
-import { hasSpecificView } from '../../views/views';
+import { hasSpecificView } from '../../views/views-utilities';
 
 export class AASTreeNode extends TreeNode<aas.Referable> {
     public constructor(

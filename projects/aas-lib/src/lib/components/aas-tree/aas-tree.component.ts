@@ -49,7 +49,7 @@ import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../../utilities';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import { findRoute } from '../../views/views';
+import { findRouteForShell, findRouteForSubmodel } from '../../views/views-utilities';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';
@@ -282,9 +282,10 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
         let route: Route | undefined;
         if (isSubmodel(identifiable)) {
-            route = findRoute(identifiable);
+            route = findRouteForSubmodel(identifiable);
         } else if (isAssetAdministrationShell(identifiable)) {
-            route = findRoute(document);
+            const tuple = findRouteForShell(document);
+            route = tuple.route;
         }
 
         if (route === undefined) {

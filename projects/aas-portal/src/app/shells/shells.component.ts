@@ -259,19 +259,19 @@ export class ShellsComponent implements OnDestroy {
         }
 
         if (documents.length === 1) {
-            return this.router.navigate([`/views/${view.path}`], {
-                queryParams: {
+            return this.router.navigate([
+                `/views/${view.path}`,
+                {
                     endpoint: encodeBase64Url(documents[0].endpoint),
                     id: encodeBase64Url(documents[0].id),
                 },
-            });
+            ]);
         }
 
-        return this.router.navigate([`/views/${view.path}`], {
-            queryParams: {
-                docs: encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id]))),
-            },
-        });
+        return this.router.navigate([
+            `/views/${view.path}`,
+            { docs: encodeBase64Url(JSON.stringify(documents.map(document => [document.endpoint, document.id]))) },
+        ]);
     }
 
     public setFilter(filter: string): void {

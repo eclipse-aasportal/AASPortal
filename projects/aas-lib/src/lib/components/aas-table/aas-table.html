@@ -36,7 +36,8 @@
                 @switch (row.state) {
                 @case ('unloaded') {
                 <div class="position-relative">
-                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" [alt]="row.name" />
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="getThumbnail(row)" [alt]="row.name"
+                        (error)="row.thumbnail=undefined" />
                     <div
                         class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info">
                         <i class="bi bi-cloud-arrow-down"></i>
@@ -54,7 +55,8 @@
                 }
                 @default {
                 <div>
-                    <img class="img-fluid" width="40" height="40" [src]="row.thumbnail" [alt]="row.name" />
+                    <img class="img-fluid" width="40" height="40" [src]="getThumbnail(row)" [alt]="row.name"
+                        (error)="row.thumbnail=undefined" />
                 </div>
                 }
                 }

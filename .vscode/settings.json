@@ -48,6 +48,7 @@
         "xmldoc",
         "ZVEI"
     ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.eol": "\n",
     "jest.virtualFolders": [
         {

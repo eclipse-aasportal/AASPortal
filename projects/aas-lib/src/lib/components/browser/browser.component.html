@@ -30,10 +30,10 @@
             @switch (property.kind) {
             @case('url') {
             <td>
-                <a [href]="property.url">{{property.value}}</a>
+                <a [href]="property.url" target="_blank">{{property.value}}</a>
             </td>
             } @case('link') {
-                <a [routerLink]="property.url">{{property.value}}</a>
+            <a [routerLink]="property.url">{{property.value}}</a>
             } @default {
             <td>{{property.value}}</td>
             }}

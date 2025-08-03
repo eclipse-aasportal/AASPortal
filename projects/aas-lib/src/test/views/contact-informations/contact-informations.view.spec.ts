@@ -8,7 +8,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ContactInformationsView } from '../../../lib/views/contact-informations/contact-informations.view';
+import { ContactInformationsView } from '../../../lib/internal';
 
 xdescribe('ContactInformationsView', () => {
     let component: ContactInformationsView;

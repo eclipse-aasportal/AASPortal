@@ -14,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AASDocument, getReferable, getSemanticId, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
 
 import { DataSheetData } from '../../types';
-import { NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0, NAMEPLATE_2_0 } from '../views';
+import { NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0, NAMEPLATE_2_0 } from '../../internal';
 import { createDataSheet, getDisplayName } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 

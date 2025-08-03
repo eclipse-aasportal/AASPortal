@@ -22,7 +22,7 @@ import {
     parseNumber,
 } from 'aas-core';
 
-import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views';
+import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views-constants';
 import { createDataSheet } from '../../utilities';
 import { DataSheetData } from '../../types';
 import { DataSheet } from '../../components/data-sheet/data-sheet';

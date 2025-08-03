@@ -13,15 +13,11 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
-import { nameplate } from './nameplate-document';
-import { NameplateView } from '../../../lib/views/nameplate/nameplate.view';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
-import { AuthService } from '../../../lib/components/auth/auth.service';
-import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { Nameplate, NameplateView, ThumbnailQRCode } from '../../../lib/internal';
 
 import nameplate_3_0 from '../../assets/nameplate-3-0.json';
 
@@ -46,14 +42,12 @@ export class TestNameplate {
 }
 
 describe('NameplateView', () => {
-    let auth: jasmine.SpyObj<AuthService>;
     let api: jasmine.SpyObj<EndpointsApi>;
     let start: jasmine.SpyObj<StartService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
         api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = jasmine.createSpyObj<StartService>(['add', 'save']);
         document = {
@@ -83,10 +77,6 @@ describe('NameplateView', () => {
                 {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
-                },
-                {
-                    provide: AuthService,
-                    useValue: auth,
                 },
                 {
                     provide: StartService,

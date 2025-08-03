@@ -23,7 +23,7 @@ import {
     toDisplayValue,
 } from 'aas-core';
 
-import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views';
+import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../../internal';
 import { basename, extension, getUrl } from '../../utilities';
 
 export type FileItem = {
@@ -61,6 +61,9 @@ export class HandoverDocumentation {
 
     /** The current active AAS document. */
     public readonly document = input<AASDocument>();
+
+    /** Indicates the accordion item is collapsed or expanded. */
+    public readonly collapsed = input(false);
 
     /** The handover documentation submodel. */
     public readonly submodel = computed(() => {

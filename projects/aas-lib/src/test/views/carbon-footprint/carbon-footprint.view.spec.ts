@@ -13,13 +13,11 @@ import { of } from 'rxjs';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
-import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint.view';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
-import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { CarbonFootprint, CarbonFootprintView, ThumbnailQRCode } from '../../../lib/internal';
 
 import carbon_footprint_0_9 from '../../assets/carbon-footprint-0-9.json';
 

@@ -14,11 +14,11 @@ import { ChangeDetectionStrategy, Component, effect, OnDestroy, OnInit, Template
 
 import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from './carbon-footprint';
-import { View } from '../view';
+import { LeafView } from '../../internal';
 
+/** Provides a specific view for a carbon footprint submodel. */
 @Component({
     selector: 'fhg-carbon-footprint-view',
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, CarbonFootprint],
@@ -26,13 +26,13 @@ import { View } from '../view';
     styleUrl: './carbon-footprint.view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarbonFootprintView extends View implements OnInit, OnDestroy {
+export class CarbonFootprintView extends LeafView implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
         private readonly toolbar: ToolbarService,
     ) {
-        super(route, api);
+        super(route, api, 'CarbonFootprint');
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -42,11 +42,7 @@ export class CarbonFootprintView extends View implements OnInit, OnDestroy {
         });
     }
 
-    protected override get expectedSemanticIds(): string[] {
-        return [CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0];
-    }
-
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<CarbonFootprintView>>('toolbar');
 
     public ngOnInit(): void {
         this.onInit();

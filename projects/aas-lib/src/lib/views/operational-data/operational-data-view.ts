@@ -11,40 +11,41 @@ import {
     Component,
     computed,
     effect,
-    Inject,
     OnDestroy,
     OnInit,
+    Signal,
     signal,
     TemplateRef,
     viewChild,
     WritableSignal,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { WebSocketSubject } from 'rxjs/webSocket';
 import {
     aas,
     AASDocument,
     convertToString,
+    getChildren,
     getLocaleValue,
     isFile,
     isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
+    isSubmodelElementList,
     LiveNode,
     LiveRequest,
     WebSocketData,
 } from 'aas-core';
 
-import { decodeBase64Url, getDisplayName, getUrl } from '../../utilities';
-import { WINDOW } from '../../services/window.service';
-import { TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { EMPTY, first, mergeMap, Observable } from 'rxjs';
-import { AuthService } from '../../components/auth/auth.service';
+import { EMPTY, Observable } from 'rxjs';
+import { getDisplayName, getUrl } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
-import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LeafView, ThumbnailQRCode } from '../../internal';
 
 export type GroupItem = {
     idShort: string;
@@ -65,21 +66,25 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     imports: [NgbAccordionModule, ThumbnailQRCode],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OperationalDataView implements OnInit, OnDestroy {
-    private readonly document$ = signal<AASDocument | undefined>(undefined);
+export class OperationalDataView extends LeafView implements OnInit, OnDestroy {
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
     private readonly map = new Map<string, GroupItem>();
     private liveNodes: LiveNode[] = [];
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor(
-        private readonly route: ActivatedRoute,
-        private readonly translate: TranslateService,
+        route: ActivatedRoute,
+        api: EndpointsApi,
+        translate: TranslateService,
         private readonly toolbar: ToolbarService,
-        @Inject(WINDOW) private readonly window: Window,
-        private readonly auth: AuthService,
-        private readonly api: EndpointsApi,
         private readonly webSocketFactory: WebSocketFactoryService,
     ) {
+        super(route, api, 'OperationalData');
+
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {
@@ -98,43 +103,24 @@ export class OperationalDataView implements OnInit, OnDestroy {
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('laserToolbar');
 
-    public readonly title = computed(() => {
-        const env = this.document$()?.content;
-        if (!env || env.assetAdministrationShells.length === 0) {
-            return '-';
-        }
-
-        return getDisplayName(env.assetAdministrationShells[0], env, this.translate.currentLang);
-    });
-
-    public readonly document = this.document$.asReadonly();
-
     public readonly groups = computed<Group[]>(() => {
         this.map.clear();
         this.liveNodes = [];
-        const content = this.document$()?.content;
-        if (!content) {
+
+        const operationalData = this.submodel();
+        if (!operationalData?.submodelElements) {
             return [];
         }
 
         const groups: Group[] = [];
-        for (const submodel of content.submodels) {
-            const submodelElements = submodel.submodelElements;
-            if (!submodelElements) {
-                continue;
-            }
-
-            const group = this.createGroup(submodel, submodel, submodelElements);
-            if (group.items.length > 0) {
-                groups.push(group);
-            }
-
-            for (const element of submodelElements) {
-                if (isSubmodelElementCollection(element) && element.value) {
-                    const group = this.createGroup(submodel, element, element.value);
-                    if (group.items.length > 0) {
-                        groups.push(group);
-                    }
+        const stack: aas.Referable[] = [];
+        stack.push(operationalData);
+        while (stack.length > 0) {
+            const referale = stack.pop()!;
+            groups.push(this.createGroup(referale, getChildren(referale)));
+            for (const child of getChildren(referale)) {
+                if ((isSubmodelElementCollection(child) || isSubmodelElementList(child)) && child.value) {
+                    stack.push(child);
                 }
             }
         }
@@ -143,21 +129,7 @@ export class OperationalDataView implements OnInit, OnDestroy {
     });
 
     public ngOnInit(): void {
-        this.route.queryParams
-            .pipe(
-                first(),
-                mergeMap(params => {
-                    if (params.id) {
-                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-                        return this.api.getDocument(decodeBase64Url(params.id), endpoint);
-                    }
-
-                    return EMPTY;
-                }),
-            )
-            .subscribe(document => {
-                this.document$.set(document);
-            });
+        this.onInit();
     }
 
     public ngOnDestroy(): void {
@@ -169,14 +141,15 @@ export class OperationalDataView implements OnInit, OnDestroy {
         return EMPTY;
     }
 
-    private createGroup(submodel: aas.Submodel, parent: aas.Referable, children: aas.Referable[]): Group {
-        const env = this.document$()?.content;
+    private createGroup(parent: aas.Referable, children: aas.Referable[]): Group {
+        const currentLang = this.currentLang();
+        const env = this.document()?.content;
         const items: GroupItem[] = [];
         for (const child of children) {
             if (isProperty(child)) {
                 const item: GroupItem = {
                     idShort: child.idShort,
-                    name: getDisplayName(child, env, this.translate.currentLang),
+                    name: getDisplayName(child, env, currentLang),
                     value: signal(child.value),
                     type: 'text',
                     element: child,
@@ -200,8 +173,8 @@ export class OperationalDataView implements OnInit, OnDestroy {
 
                 items.push({
                     idShort: child.idShort,
-                    name: getDisplayName(child, env, this.translate.currentLang),
-                    value: signal(getLocaleValue(child.value, this.translate.currentLang)),
+                    name: getDisplayName(child, env, currentLang),
+                    value: signal(getLocaleValue(child.value, currentLang)),
                     type: 'text',
                     element: child,
                 });
@@ -212,24 +185,24 @@ export class OperationalDataView implements OnInit, OnDestroy {
 
                 items.push({
                     idShort: child.idShort,
-                    name: getDisplayName(child, env, this.translate.currentLang),
+                    name: getDisplayName(child, env, currentLang),
                     value: signal(child.value),
                     type: 'link',
                     element: child,
-                    url: getUrl(this.document$()!, child),
+                    url: getUrl(this.document()!, child),
                 });
             }
         }
 
         return {
             idShort: parent.idShort,
-            name: getDisplayName(parent, null, this.translate.currentLang),
+            name: getDisplayName(parent, null, currentLang),
             items,
         };
     }
 
     private play(): void {
-        const document = this.document$();
+        const document = this.document();
         if (!document) {
             return;
         }
@@ -265,7 +238,7 @@ export class OperationalDataView implements OnInit, OnDestroy {
                     continue;
                 }
 
-                item.value.set(convertToString(node.value, this.translate.currentLang));
+                item.value.set(convertToString(node.value, this.currentLang()));
             }
         }
     };

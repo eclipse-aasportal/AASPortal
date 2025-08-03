@@ -12,7 +12,7 @@ import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument, getSemanticId } from 'aas-core';
-import { CONTACT_INFORMATIONS_1_0 } from '../views';
+import { CONTACT_INFORMATIONS_1_0 } from '../views-constants';
 import { DataSheetData } from '../../types';
 import { createDataSheet, getDisplayName } from '../../utilities';
 

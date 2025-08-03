@@ -12,22 +12,11 @@ import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
 import { ChangeDetectionStrategy, Component, effect, OnDestroy, OnInit, TemplateRef, viewChild } from '@angular/core';
 
-import { aas } from 'aas-core';
-
 import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { HandoverDocumentation } from './handover-documentation';
-import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views';
-import { View } from '../view';
+import { HandoverDocumentation, LeafView, ThumbnailQRCode } from '../../internal';
 
-export type DocumentationItem = {
-    title: string;
-    version: string;
-    filename: string;
-    file: aas.File;
-};
-
+/** Provides a specific view for the handover documentation submodel. */
 @Component({
     selector: 'fhg-handover-documentation-view',
     templateUrl: './handover-documentation.view.html',
@@ -35,13 +24,13 @@ export type DocumentationItem = {
     imports: [TranslateModule, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentationView extends View implements OnInit, OnDestroy {
+export class HandoverDocumentationView extends LeafView implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
         private readonly toolbar: ToolbarService,
     ) {
-        super(route, api);
+        super(route, api, 'HandoverDocumentation');
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -51,11 +40,7 @@ export class HandoverDocumentationView extends View implements OnInit, OnDestroy
         });
     }
 
-    protected override get expectedSemanticIds(): string[] {
-        return [HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0];
-    }
-
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<HandoverDocumentationView>>('toolbar');
 
     public ngOnInit(): void {
         this.onInit();
