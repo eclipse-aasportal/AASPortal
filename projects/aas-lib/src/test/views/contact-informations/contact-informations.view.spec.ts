@@ -8,7 +8,10 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ContactInformationsView } from '../../../lib/internal';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes} from '../../../lib/views/views-routes';
+import { ContactInformationsView } from '../../../lib/views/contact-informations/contact-informations.view';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 xdescribe('ContactInformationsView', () => {
     let component: ContactInformationsView;
@@ -16,6 +19,13 @@ xdescribe('ContactInformationsView', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },
+                provideZonelessChangeDetection(),
+            ],
             imports: [ContactInformationsView],
         }).compileComponents();
 

@@ -17,6 +17,8 @@ import {
     START_TILE_TYPES,
     START_TILES,
     StartTileType,
+    VIEW_ROUTES,
+    viewRoutes,
 } from 'aas-lib';
 
 import { HttpLoaderFactory } from './http-loader-factory';
@@ -63,6 +65,10 @@ export const appConfig: ApplicationConfig = {
         {
             provide: START_TILES,
             useValue: [],
+        },
+        {
+            provide: VIEW_ROUTES,
+            useValue: viewRoutes,
         },
         provideZonelessChangeDetection(),
     ],

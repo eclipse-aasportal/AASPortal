@@ -13,11 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AASDocument } from 'aas-core';
-import { CustomerFeedbackView } from '../../../lib/internal';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes} from '../../../lib/views/views-routes';
+import { CustomerFeedbackView } from '../../../lib/views/customer-feedback/customer-feedback.view';
 
 describe('CustomerFeedbackView', () => {
     let start: jasmine.SpyObj<StartService>;
@@ -61,6 +63,10 @@ describe('CustomerFeedbackView', () => {
                 {
                     provide: EndpointsApi,
                     useValue: api,
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
                 },
                 provideZonelessChangeDetection(),
             ],

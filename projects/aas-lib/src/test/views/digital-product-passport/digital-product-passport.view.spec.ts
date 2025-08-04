@@ -17,7 +17,10 @@ import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { DigitalProductPassportView, ThumbnailQRCode } from '../../../lib/internal';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes} from '../../../lib/views/views-routes';
+import { DigitalProductPassportView } from '../../../lib/views/digital-product-passport/digital-product-passport.view';
+import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 
 import sample from '../../assets/dpp-sample.json';
 
@@ -64,6 +67,10 @@ describe('DigitalProductPassportView', () => {
                     provide: EndpointsApi,
                     useValue: api,
                 },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },                
                 provideZonelessChangeDetection(),
             ],
             imports: [

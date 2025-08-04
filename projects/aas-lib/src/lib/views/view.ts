@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AASDocument } from 'aas-core';
 import { encodeBase64Url } from '../utilities';
 import { EndpointsApi } from '../services/endpoints-api';
-import { ViewRouteName } from '../types';
+import { ViewRoute, ViewRouteName } from '../types';
 
 /** Provides a specific view. */
 export abstract class View {
@@ -24,8 +24,13 @@ export abstract class View {
     protected constructor(
         protected readonly route: ActivatedRoute,
         protected readonly api: EndpointsApi,
-        protected readonly expectedRoute: ViewRouteName,
-    ) {}
+        protected readonly viewRoutes: ViewRoute[],
+        protected readonly viewRouteName: ViewRouteName,
+    ) {
+        this.view = this.viewRoutes.find(item => item.path === viewRouteName)!;
+    }
+
+    protected view: ViewRoute;
 
     /** The index of the current active document-submodel tuple. */
     public readonly index = signal(1);

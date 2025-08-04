@@ -14,18 +14,19 @@ import {
     ChangeDetectionStrategy,
     Component,
     input,
-    output,
     provideZonelessChangeDetection,
     signal,
 } from '@angular/core';
 
 import { AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
-import { DocumentBrowserView } from '../../../lib/internal';
 import { encodeBase64Url } from '../../../lib/utilities';
 import { BrowserComponent } from '../../../lib/components/browser/browser.component';
 import { StartService } from '../../../lib/services/start.service';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes} from '../../../lib/views/views-routes';
+import { DocumentBrowserView } from '../../../lib/views/document-browser/document-browser.view';
 
 @Component({
     selector: 'fhg-browser',
@@ -80,6 +81,10 @@ describe('DocumentBrowserView', () => {
                     provide: ToolbarService,
                     useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },                
                 provideZonelessChangeDetection(),
             ],
             imports: [

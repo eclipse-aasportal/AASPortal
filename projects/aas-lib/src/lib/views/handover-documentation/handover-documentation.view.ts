@@ -10,11 +10,14 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, OnDestroy, OnInit, TemplateRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, Inject, OnDestroy, OnInit, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { HandoverDocumentation, LeafView, ThumbnailQRCode } from '../../internal';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { HandoverDocumentation } from './handover-documentation';
+import { LeafView } from '../view-leaf';
+import { VIEW_ROUTES, ViewRoute } from '../../types';
 
 /** Provides a specific view for the handover documentation submodel. */
 @Component({
@@ -28,9 +31,10 @@ export class HandoverDocumentationView extends LeafView implements OnInit, OnDes
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
+        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
         private readonly toolbar: ToolbarService,
     ) {
-        super(route, api, 'HandoverDocumentation');
+        super(route, api, viewRoutes, 'HandoverDocumentation');
 
         effect(() => {
             const template = this.toolbarTemplate();

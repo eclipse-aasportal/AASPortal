@@ -16,6 +16,7 @@ import {
     Component,
     computed,
     effect,
+    Inject,
     OnDestroy,
     OnInit,
     Signal,
@@ -30,7 +31,10 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { encodeBase64Url, getDisplayName, toString } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
-import { LeafView, Nameplate, ThumbnailQRCode } from '../../internal';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { Nameplate } from './nameplate';
+import { LeafView } from '../view-leaf';
+import { VIEW_ROUTES, ViewRoute } from '../../types';
 
 @Component({
     selector: 'fhg-nameplate-view',
@@ -48,11 +52,12 @@ export class NameplateView extends LeafView implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
+        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
         translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
     ) {
-        super(route, api, 'Nameplate');
+        super(route, api, viewRoutes, 'Nameplate');
 
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);

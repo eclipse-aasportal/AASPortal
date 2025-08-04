@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { InjectionToken } from '@angular/core';
 import { Data, Route } from '@angular/router';
 import { aas } from 'aas-core';
 
@@ -126,3 +127,4 @@ export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;
 
 export type ViewRouteResult = { route?: ViewRoute; map?: ViewRouteMap };
 
+export const VIEW_ROUTES = new InjectionToken<ViewRoute[]>('ViewRoutes');

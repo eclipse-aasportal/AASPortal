@@ -11,9 +11,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 import { WINDOW, WindowService } from '../../../lib/services/window.service';
-import { CARBON_FOOTPRINT_1_0, CarbonFootprint } from '../../../lib/internal';
 
 import carbon_footprint_1_0 from '../../assets/carbon-footprint-1-0.json';
+import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
+import { CARBON_FOOTPRINT_1_0 } from '../../../lib/views/views-constants';
 
 describe('CarbonFootprint', () => {
     let component: CarbonFootprint;

@@ -17,7 +17,11 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { Nameplate, NameplateView, ThumbnailQRCode } from '../../../lib/internal';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes} from '../../../lib/views/views-routes';
+import { NameplateView } from '../../../lib/views/nameplate/nameplate.view';
+import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 
 import nameplate_3_0 from '../../assets/nameplate-3-0.json';
 
@@ -86,6 +90,10 @@ describe('NameplateView', () => {
                     provide: EndpointsApi,
                     useValue: api,
                 },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },                
                 provideZonelessChangeDetection(),
             ],
             imports: [

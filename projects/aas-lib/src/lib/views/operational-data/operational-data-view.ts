@@ -11,6 +11,7 @@ import {
     Component,
     computed,
     effect,
+    Inject,
     OnDestroy,
     OnInit,
     Signal,
@@ -45,7 +46,9 @@ import { getDisplayName, getUrl } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
-import { LeafView, ThumbnailQRCode } from '../../internal';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LeafView } from '../view-leaf';
+import { VIEW_ROUTES, ViewRoute } from '../../types';
 
 export type GroupItem = {
     idShort: string;
@@ -76,11 +79,12 @@ export class OperationalDataView extends LeafView implements OnInit, OnDestroy {
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
+        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
         translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly webSocketFactory: WebSocketFactoryService,
     ) {
-        super(route, api, 'OperationalData');
+        super(route, api, viewRoutes, 'OperationalData');
 
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);

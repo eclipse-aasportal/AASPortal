@@ -16,8 +16,12 @@ import { aas, AASDocument } from 'aas-core';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
-import { HandoverDocumentation, HandoverDocumentationView, ThumbnailQRCode } from '../../../lib/internal';
 import { encodeBase64Url } from '../../../lib/utilities';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes} from '../../../lib/views/views-routes';
+import { HandoverDocumentationView } from '../../../lib/views/handover-documentation/handover-documentation.view';
+import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
+import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 
 import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
 
@@ -63,7 +67,7 @@ describe('HandoverDocumentationView', () => {
 
         route = jasmine.createSpyObj<ActivatedRoute>(
             {},
-            { queryParams: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
         );
 
         api.getDocument.and.returnValue(of(document));
@@ -86,7 +90,10 @@ describe('HandoverDocumentationView', () => {
                     provide: ActivatedRoute,
                     useValue: route,
                 },
-                provideRouter([]),
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },                
                 provideZonelessChangeDetection(),
             ],
             imports: [

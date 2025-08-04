@@ -49,7 +49,7 @@ import { AASTreeSearch } from './aas-tree-search';
 import { basename, encodeBase64Url } from '../../utilities';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import { findRouteForShell, findRouteForSubmodel } from '../../views/views-utilities';
+import { findRouteForShell, findRouteForSubmodel } from '../../views/views-routes';
 
 import { AASTreeApiService } from './aas-tree-api.service';
 import { AASTreeStore } from './aas-tree.store';

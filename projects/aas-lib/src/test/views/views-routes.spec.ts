@@ -8,9 +8,9 @@
 
 import { aas } from 'aas-core';
 import { NAMEPLATE_3_0, CARBON_FOOTPRINT_1_0, HANDOVER_DOCUMENTATION_2_0 } from '../../lib/views/views-constants';
-import { findRouteForShell, findRouteForSubmodel, hasSpecificView } from '../../lib/views/views-utilities';
+import { findRouteForShell, findRouteForSubmodel, hasSpecificView } from '../../lib/views/views-routes';
 
-describe('views-utilities', () => {
+describe('views-roots', () => {
     describe('findRouteForSubmodel', () => {
         it('should has a Nameplate route', () => {
             const submodel: aas.Submodel = {

@@ -10,18 +10,23 @@ import { computed, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { first, from, mergeMap, of, toArray } from 'rxjs';
 
-import { aas, AASDocument } from 'aas-core';
+import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { EndpointsApi } from '../services/endpoints-api';
-import { ViewRouteName } from '../types';
-import { findSubmodel, View, viewRoutes } from '../internal';
+import { ViewRoute, ViewRouteName } from '../types';
+import { View } from './view';
 
-/**  Represents a specific vire for a submodel. */
+/**  Represents a specific view for a submodel. */
 export abstract class LeafView extends View {
     private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
-    protected constructor(route: ActivatedRoute, api: EndpointsApi, expectedRoute: ViewRouteName) {
-        super(route, api, expectedRoute);
+    protected constructor(
+        route: ActivatedRoute,
+        api: EndpointsApi,
+        viewRoutes: ViewRoute[],
+        viewRouteName: ViewRouteName,
+    ) {
+        super(route, api, viewRoutes, viewRouteName);
     }
 
     public override readonly document = computed(() => {
@@ -61,6 +66,7 @@ export abstract class LeafView extends View {
     /** */
     protected readonly tuples = signal<[AASDocument, aas.Submodel][]>([]);
 
+    /** Initializes the current view. */
     protected onInit(): void {
         this.route.params
             .pipe(
@@ -88,20 +94,43 @@ export abstract class LeafView extends View {
     }
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
-        const route = viewRoutes.find(item => item.path === this.expectedRoute);
-        if (!route || route.data.type !== 'Leaf') {
-            return;
-        }
-
         for (const document of documents) {
             if (!document.content) {
                 continue;
             }
 
-            const submodel = findSubmodel(document, route);
+            const submodel = this.findSubmodel(document);
             if (submodel) {
                 yield [document, submodel];
             }
         }
+    }
+
+    private findSubmodel(document: AASDocument): aas.Submodel | undefined {
+        const env = isEnvironment(document) ? document : document.content;
+        if (!env) {
+            return undefined;
+        }
+
+        for (const submodel of env.submodels) {
+            if (this.view.data.semanticIds) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId && this.view.data.semanticIds) {
+                    if (this.view.data.semanticIds.indexOf(semanticId) >= 0) {
+                        return submodel;
+                    }
+                }
+            }
+
+            if (this.view.data.idShorts) {
+                for (const idShort of this.view.data.idShorts) {
+                    if (submodel.idShort === idShort) {
+                        return submodel;
+                    }
+                }
+            }
+        }
+
+        return undefined;
     }
 }

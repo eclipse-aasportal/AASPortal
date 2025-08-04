@@ -15,6 +15,7 @@ import {
     Component,
     computed,
     effect,
+    Inject,
     OnDestroy,
     OnInit,
     TemplateRef,
@@ -28,7 +29,9 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { BrowserComponent } from '../../components/browser/browser.component';
-import { CompositeView, ThumbnailQRCode } from '../../internal';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { CompositeView } from '../view-composite';
+import { VIEW_ROUTES, ViewRoute } from '../../types';
 
 export type BrowserProperty = {
     name: string;
@@ -61,10 +64,11 @@ export class DocumentBrowserView extends CompositeView implements OnInit, OnDest
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
+        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
     ) {
-        super(route, api, 'Browser');
+        super(route, api, viewRoutes, 'Browser');
 
         effect(() => {
             const template = this.toolbarTemplate();

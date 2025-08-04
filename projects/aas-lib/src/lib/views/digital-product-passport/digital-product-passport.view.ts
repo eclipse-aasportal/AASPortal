@@ -17,6 +17,7 @@ import {
     Component,
     computed,
     effect,
+    Inject,
     OnDestroy,
     OnInit,
     Signal,
@@ -28,7 +29,12 @@ import { encodeBase64Url, getUrl, toString } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
-import { CompositeView, CarbonFootprint, Nameplate, HandoverDocumentation, ThumbnailQRCode } from '../../internal';
+import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
+import { Nameplate } from '../nameplate/nameplate';
+import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
+import { CompositeView } from '../view-composite';
+import { VIEW_ROUTES, ViewRoute } from '../../types';
 
 export type MainData = {
     uriOfTheProduct: string;
@@ -64,11 +70,12 @@ export class DigitalProductPassportView extends CompositeView implements OnInit,
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
+        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
         translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
     ) {
-        super(route, api, 'DigitalProductPassport');
+        super(route, api, viewRoutes, 'DigitalProductPassport');
 
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);

@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
-import { TechnicalData } from '../../../lib/internal';
+import { TechnicalData } from '../../../lib/views/technical-data/technical-data';
 
 xdescribe('TechnicalData', () => {
     let component: TechnicalData;
@@ -16,6 +17,7 @@ xdescribe('TechnicalData', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
+            providers: [provideZonelessChangeDetection()],
             imports: [TechnicalData],
         }).compileComponents();
 

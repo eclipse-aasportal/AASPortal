@@ -23,7 +23,7 @@ import {
     toDisplayValue,
 } from 'aas-core';
 
-import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../../internal';
+import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
 import { basename, extension, getUrl } from '../../utilities';
 
 export type FileItem = {

@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { ContactInformations } from '../../../lib/internal';
+import { ContactInformations } from '../../../lib/views/contact-informations/contact-informations';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 xdescribe('ContactInformations', () => {
     let component: ContactInformations;
@@ -16,6 +16,7 @@ xdescribe('ContactInformations', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
+            providers: [provideZonelessChangeDetection()],
             imports: [ContactInformations],
         }).compileComponents();
 

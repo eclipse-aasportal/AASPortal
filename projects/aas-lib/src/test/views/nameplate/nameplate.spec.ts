@@ -9,8 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
-
-import { Nameplate } from '../../../lib/internal';
+import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 
 describe('Nameplate', () => {
     let component: Nameplate;

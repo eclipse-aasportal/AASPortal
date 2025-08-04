@@ -14,6 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
     ChangeDetectionStrategy,
     Component,
+    Inject,
     OnDestroy,
     OnInit,
     Signal,
@@ -30,8 +31,9 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { LeafView } from '../../internal';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';
+import { LeafView } from '../view-leaf';
+import { VIEW_ROUTES, ViewRoute } from '../../types';
 
 const maxStars = 5;
 
@@ -56,11 +58,12 @@ export class CustomerFeedbackView extends LeafView implements OnInit, OnDestroy 
     public constructor(
         route: ActivatedRoute,
         api: EndpointsApi,
+        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
         private readonly translate: TranslateService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
     ) {
-        super(route, api, 'CustomerFeedback');
+        super(route, api, viewRoutes, 'CustomerFeedback');
 
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
