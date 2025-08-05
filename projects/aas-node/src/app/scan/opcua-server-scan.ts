@@ -14,7 +14,7 @@ import { OpcuaClient } from '../package/opcua/opcua-client.js';
 import { OpcuaPackage } from '../package/opcua/opcua-package.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../package/aas-api/aas-api-client.js';
+import { AASLabel } from '../package/api/api-client.js';
 
 export class OpcuaServerScan extends AASServerScan {
     private readonly logger: Logger;

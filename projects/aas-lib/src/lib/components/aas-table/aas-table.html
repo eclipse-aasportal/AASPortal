@@ -1,0 +1,80 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+@if (rows().length > 0) {
+<table class="table table-sm table-hover table-striped">
+    <thead>
+        <tr>
+            <th class="th-w-checkbox">
+                <input id="aas-table-checkbox" type="checkbox" class="form-check-input" [indeterminate]="someSelected()"
+                    [checked]="everySelected()" (change)="toggleSelections()">
+            </th>
+            <th scope="col" class="th-w-icon">
+                <i class="bi bi-tag"></i>
+            </th>
+            <th scope="col">
+                <div class="me-1" translate>COLUMN_NAME</div>
+            </th>
+            <th scope="col">
+                <div class="me-1" translate>COLUMN_ID</div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (row of rows(); track row.trackId) {
+        <tr class="align-middle">
+            <td>
+                <input type="checkbox" class="form-check-input" [ngModel]="row.selected()"
+                    (ngModelChange)="toggleSelected(row, $event)" [name]="row.name" />
+            </td>
+            <td>
+                @switch (row.state) {
+                @case ('unloaded') {
+                <div class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="getThumbnail(row)" [alt]="row.name"
+                        (error)="row.thumbnail=undefined" />
+                    <div
+                        class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info">
+                        <i class="bi bi-cloud-arrow-down"></i>
+                    </div>
+                </div>
+                }
+                @case ('unavailable') {
+                <div class="position-relative">
+                    <img class="img-fluid opacity-50" width="40" height="40" [src]="row.thumbnail" [alt]="row.name" />
+                    <div
+                        class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger">
+                        <i class="bi bi-cone-striped"></i>
+                    </div>
+                </div>
+                }
+                @default {
+                <div>
+                    <img class="img-fluid" width="40" height="40" [src]="getThumbnail(row)" [alt]="row.name"
+                        (error)="row.thumbnail=undefined" />
+                </div>
+                }
+                }
+            </td>
+            <td>
+                <button class="btn btn-link p-0 text-nowrap" type="button" [name]="row.name"
+                    (click)="open(row)">{{row.name
+                    |
+                    max:60}}</button>
+            </td>
+            <td>
+                <div>{{row.endpoint}}</div>
+                <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">{{row.id | max:80}}</div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+} @else {
+<div class="alert alert-info text-center mt-2" role="alert">{{'INFO_NO_SHELLS_AVAILABLE' | translate}}</div>
+}

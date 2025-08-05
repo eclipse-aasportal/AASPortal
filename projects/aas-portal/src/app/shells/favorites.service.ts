@@ -21,16 +21,14 @@ export type FavoritesState = { active: string; items: FavoritesList[] };
 
 const cookieName = 'v2.Favorites';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class FavoritesService {
     private readonly state$ = signal<FavoritesState>({ active: '', items: [] });
 
     public constructor(private readonly auth: AuthService) {
-        this.auth.userId
+        this.auth.ready
             .pipe(
-                skipWhile(userId => userId === undefined),
+                skipWhile(ready => ready === false),
                 takeUntilDestroyed(),
                 mergeMap(() => this.auth.getCookie(cookieName)),
                 map(value => {

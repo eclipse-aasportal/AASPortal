@@ -17,7 +17,7 @@ import { Logger } from '../../logging/logger.js';
 import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
-import { AASDocument, aas } from 'aas-core';
+import { AASDocument, aas, noop } from 'aas-core';
 import { OpcuaReader } from './opcua-reader.js';
 
 export class OpcuaPackage extends AASPackage {
@@ -62,7 +62,8 @@ export class OpcuaPackage extends AASPackage {
         return await reader.readEnvironment();
     }
 
-    public override setEnvironment(): Promise<string[]> {
+    public override setEnvironment(id: string, env: aas.Environment): Promise<void> {
+        noop(id, env);
         return Promise.reject(new Error('Not implemented.'));
     }
 

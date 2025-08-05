@@ -25,7 +25,7 @@ describe('EndpointsApi', () => {
     let cache: jasmine.SpyObj<CacheService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['login'], { userId: of('guest') });
+        auth = jasmine.createSpyObj<AuthService>(['login'], { ready: of(true) });
         cache = jasmine.createSpyObj<CacheService>(['get', 'set']);
         cache.get.and.returnValue(undefined);
         

@@ -19,7 +19,19 @@ import {
     getPreferredName,
     AASDocument,
     getIdShortPath,
+    isSubmodelElementCollection,
+    getReferable,
+    isProperty,
+    isMultiLanguageProperty,
+    getIEC61360Content,
+    isFile,
+    isSubmodelElementList,
+    getUnit,
+    toDisplayValue,
+    getChildren,
 } from 'aas-core';
+
+import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } from './types';
 
 /**
  * Converts a message to a localized text.
@@ -212,9 +224,308 @@ export function getDisplayName(referable: aas.Referable, env?: aas.Environment |
 }
 
 /**
- * Converts a camel case name to a display name.
+ * Computes a has code of the specified string value.
+ * @param value The current value.
+ * @returns The has code of the specified value.
+ */
+export function hashCode(value: string): number {
+    let hash = 0;
+    if (value.length === 0) {
+        return hash;
+    }
+
+    for (let i = 0; i < value.length; i++) {
+        const char = value.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0;
+    }
+
+    return hash >= 0 ? hash : 4294967296 + hash;
+}
+
+/**
+ *
+ * @param value
+ * @returns
+ */
+export function referenceToString(value: aas.Reference): string {
+    return value.keys.map(key => key.value).join('.');
+}
+
+/**
+ *
+ * @param value
+ * @returns
+ */
+export function isLangString(value: unknown): value is aas.LangString[] {
+    if (!Array.isArray(value) || value.length === 0) {
+        return false;
+    }
+
+    const langString = value[0] as aas.LangString;
+    return typeof langString.language === 'string' && typeof langString.text === 'string';
+}
+
+/**
+ * Gets the URL to the content of the specified file.
+ * @param document The AAS document.
+ * @param file The current file.
+ * @returns The URL to the content of the specified file.
+ */
+export function getUrl(document: AASDocument, file: aas.File | undefined): string | undefined {
+    if (file === undefined || file.value === undefined) {
+        return undefined;
+    }
+
+    let smId = file.parent?.keys.at(0)?.value;
+    if (!smId) {
+        return undefined;
+    }
+
+    smId = encodeBase64Url(smId);
+    const path = getIdShortPath(file);
+    const name = encodeBase64Url(document.endpoint);
+    const id = encodeBase64Url(document.id);
+    return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
+}
+
+/**
+ * Creates a data sheet.
+ * @param document The AAS document.
+ * @param submodel The submodel.
+ * @param sm The
+ * @param lang The current language.
+ * @param paths A list
+ * @returns An object of type `DataSheetData`.
+ */
+export function createDataSheet(
+    document: AASDocument,
+    submodel: aas.Submodel,
+    sm: aas.SubmodelElement | aas.Submodel,
+    lang: string,
+    options?: DataSheetOptions,
+): DataSheetData {
+    const dataSheet: DataSheetData = {
+        name: '',
+        items: [],
+    };
+
+    const env = document.content;
+    if (!env) {
+        return dataSheet;
+    }
+
+    dataSheet.name = options?.name ?? getDisplayName(sm, env, lang);
+
+    if (options?.type === 'A') {
+        for (const itemOptions of options.include) {
+            let item: DataSheetItem | undefined;
+            if (typeof itemOptions === 'string') {
+                item = createItem(getReferable(sm, itemOptions), env);
+            } else {
+                item = createItem(
+                    itemOptions.idShortPath ? getReferable(sm, itemOptions.idShortPath) : sm,
+                    env,
+                    itemOptions,
+                );
+            }
+
+            if (item) {
+                dataSheet.items.push(item);
+            }
+        }
+    } else {
+        const exclude = new Set(options?.exclude);
+        const itemOptions = options?.items;
+        for (const referable of getChildren(sm)) {
+            if (exclude.has(referable.idShort)) {
+                continue;
+            }
+
+            const item = createItem(
+                referable,
+                env,
+                itemOptions?.find(item => item.idShortPath === referable.idShort),
+            );
+
+            if (item) {
+                dataSheet.items.push(item);
+            }
+        }
+    }
+
+    return dataSheet;
+
+    function createItem(
+        referable: aas.Referable | undefined,
+        env: aas.Environment | undefined,
+        option?: DataSheetItemOptions,
+    ): DataSheetItem | undefined {
+        if (!referable) {
+            return undefined;
+        }
+
+        if (isFile(referable) && !option?.getUrl) {
+            option = option ? { ...option, getUrl: resolveUrl } : { type: 'url', getUrl: resolveUrl };
+        }
+
+        return createDataSheetItem(referable, env, lang, option);
+    }
+
+    function resolveUrl(referable: aas.Referable): string | undefined {
+        if (isFile(referable)) {
+            return getUrl(document, referable);
+        }
+
+        return undefined;
+    }
+}
+
+/**
+ * Creates a data sheet item.
+ * @param element
+ * @param env
+ * @param lang
+ * @returns
+ */
+export function createDataSheetItem(
+    element: aas.Referable,
+    env: aas.Environment | undefined,
+    lang: string | undefined,
+    options?: DataSheetItemOptions,
+): DataSheetItem | undefined {
+    let dataSpecification: aas.DataSpecificationIec61360 | undefined;
+    if (env) {
+        dataSpecification = getIEC61360Content(env, element);
+    }
+
+    const value = getValue(element, options);
+    if (!value) {
+        return undefined;
+    }
+
+    let displayName: string | undefined;
+    if (element.displayName) {
+        displayName = getLocaleValue(element.displayName, lang);
+    }
+
+    if (!displayName && dataSpecification?.preferredName) {
+        displayName = getLocaleValue(dataSpecification.preferredName);
+    }
+
+    if (!displayName) {
+        displayName = toDisplayName(element.idShort);
+    }
+
+    let description: string | undefined;
+    if (element.description) {
+        description = getLocaleValue(element.description, lang);
+    }
+
+    if (!description && dataSpecification?.definition) {
+        description = getLocaleValue(dataSpecification.definition);
+    }
+
+    const item: DataSheetItem = {
+        idShort: element.idShort,
+        displayName,
+        value,
+    };
+
+    if (options?.getUrl) {
+        item.url = options.getUrl(element);
+    }
+
+    if (description) {
+        item.description = description;
+    }
+
+    return item;
+
+    function getValue(element: aas.Referable, options?: DataSheetItemOptions): string | string[] | undefined {
+        if (isProperty(element)) {
+            const unit = dataSpecification?.unit;
+            return lang ? toDisplayValue(element.value, element.valueType, lang, unit) : element.value;
+        }
+
+        if (isMultiLanguageProperty(element)) {
+            return getLocaleValue(element.value, lang);
+        }
+
+        if (isFile(element)) {
+            return element.value ? basename(element.value) : '-';
+        }
+
+        if (isSubmodelElementList(element) || isSubmodelElementCollection(element)) {
+            if (!element.value) {
+                return undefined;
+            }
+
+            if (options?.type === 'format') {
+                return formatValue(element, options.format);
+            } else if (options?.type === 'join') {
+                return joinValue(element, options.join, options.separator);
+            }
+
+            const values: string[] = [];
+            for (const item of element.value) {
+                const v = getValue(item);
+                if (!v) {
+                    continue;
+                }
+
+                if (typeof v === 'string') {
+                    values.push(v);
+                } else {
+                    values.push(v.join('; '));
+                }
+            }
+
+            return values;
+        }
+
+        return undefined;
+
+        function formatValue(sm: aas.SubmodelElementList | aas.SubmodelElementCollection, format: string): string {
+            const regex = /{([^{}]+)}/g;
+            return format.replace(regex, (x, y) => {
+                const referable = getReferable(sm, y);
+                if (!referable) {
+                    return x;
+                }
+
+                const value = getValue(referable);
+                if (!value) {
+                    return x;
+                }
+
+                return Array.isArray(value) ? value.join(' ') : value;
+            });
+        }
+
+        function joinValue(sm: aas.SubmodelElement, idShortPaths: string[], separator: string): string {
+            const values: string[] = [];
+            for (const idShortPath of idShortPaths) {
+                const referable = getReferable(sm, idShortPath);
+                if (!referable) {
+                    continue;
+                }
+
+                const value = getValue(referable);
+                if (value) {
+                    values.push(Array.isArray(value) ? value.join(' ') : value);
+                }
+            }
+
+            return values.join(separator);
+        }
+    }
+}
+
+/**
+ * Converts a name to a more readable display name.
  * @param name The current name.
- * @returns The display name.
+ * @returns A display name.
  */
 export function toDisplayName(name: string): string {
     const LOWER = 0;
@@ -285,56 +596,48 @@ export function toDisplayName(name: string): string {
 }
 
 /**
- * Computes a has code of the specified string value.
- * @param value The current value.
- * @returns The has code of the specified value.
+ * Gets the display value of a submodel element.
+ * @param submodel The submodel to which the proerty belongs.
+ * @param idShortPath The path to the submodel element.
+ * @param lang The current language.
+ * @param env The AAS environment used to get the unit.
+ * @param defaultValue A default value if no value exists.
+ * @returns The display value.
  */
-export function hashCode(value: string): number {
-    let hash = 0;
-    if (value.length === 0) {
-        return hash;
+export function toString(
+    submodel: aas.Submodel,
+    idShortPath: string,
+    lang: string,
+    env?: aas.Environment | null,
+    defaultValue: string = '',
+): string {
+    const referable = getReferable(submodel, idShortPath);
+    let value: string | undefined;
+    if (isProperty(referable)) {
+        let unit: string | undefined;
+        if (env) {
+            unit = getUnit(env, referable);
+        }
+
+        switch (referable.valueType) {
+            case 'xs:double':
+            case 'xs:integer':
+            case 'xs:decimal':
+            case 'xs:date':
+            case 'xs:dateTime':
+            case 'xs:time':
+                value = toDisplayValue(referable.value, referable.valueType, lang, unit);
+                break;
+            case 'xs:string':
+                value = referable.value;
+                break;
+            default:
+                value = referable.value;
+                break;
+        }
+    } else if (isMultiLanguageProperty(referable)) {
+        value = getLocaleValue(referable.value, lang);
     }
 
-    for (let i = 0; i < value.length; i++) {
-        const char = value.charCodeAt(i);
-        hash = (hash << 5) - hash + char;
-        hash |= 0;
-    }
-
-    return hash >= 0 ? hash : 4294967296 + hash;
-}
-
-export function referenceToString(value: aas.Reference): string {
-    return value.keys.map(key => key.value).join('.');
-}
-
-export function isLangString(value: unknown): value is aas.LangString[] {
-    if (!Array.isArray(value) || value.length === 0) {
-        return false;
-    }
-
-    const langString = value[0] as aas.LangString;
-
-    return typeof langString.language === 'string' && typeof langString.text === 'string';
-}
-
-export function getUrl(document: AASDocument, submodel: aas.Submodel, file: aas.File | undefined): string {
-    if (file === undefined || file.value === undefined) {
-        return '';
-    }
-
-    const smId = encodeBase64Url(submodel.id);
-    const path = getIdShortPath(file);
-    const name = encodeBase64Url(document.endpoint);
-    const id = encodeBase64Url(document.id);
-    return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
-}
-
-/**
- * Gets the semantic identifier of the specified AAS element.
- * @param value The AAS element.
- * @returns The semantic identifier or `undefined`.
- */
-export function getSemanticId(value: aas.Referable): string | undefined {
-    return (value as aas.HasSemantics).semanticId?.keys.at(0)?.value;
+    return value ?? defaultValue;
 }

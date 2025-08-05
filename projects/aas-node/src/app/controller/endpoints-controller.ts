@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import fs from 'fs';
 import { inject, injectable } from 'tsyringe';
 import {
     Body,
@@ -21,7 +20,6 @@ import {
     Route,
     Security,
     Tags,
-    UploadedFile,
     UploadedFiles,
 } from 'tsoa';
 
@@ -43,7 +41,7 @@ export class EndpointsController extends Controller {
      * @returns All current available endpoints.
      */
     @Get('')
-    @Security('bearerAuth', ['guest'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         return await this.aasProvider.getEndpoints();
@@ -54,7 +52,7 @@ export class EndpointsController extends Controller {
      * @returns The number of registered endpoints.
      */
     @Get('count')
-    @Security('bearerAuth', ['guest'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
         return { count: await this.aasProvider.getEndpointCount() };
@@ -66,7 +64,6 @@ export class EndpointsController extends Controller {
      * @returns The total number of AAS documents.
      */
     @Get('{name}/documents/count')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentCount')
     public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
         return { count: await this.aasProvider.getCount(decodeBase64Url(name)) };
@@ -78,7 +75,7 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint data.
      */
     @Post('{name}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('addEndpoint')
     public async addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
@@ -94,7 +91,7 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint to update.
      */
     @Put('{name}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('updateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
@@ -109,7 +106,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name.
      */
     @Delete('{name}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('deleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
         await this.aasProvider.removeEndpoint(decodeBase64Url(name));
@@ -119,7 +116,7 @@ export class EndpointsController extends Controller {
      * @summary Resets the endpoint configuration.
      */
     @Delete('')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('reset')
     public async reset(): Promise<void> {
         await this.aasProvider.reset();
@@ -130,7 +127,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name (Base64-URL encoded).
      */
     @Put('{name}/scan')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('startEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
         await this.aasProvider.startEndpointScan(decodeBase64Url(name));
@@ -143,7 +140,6 @@ export class EndpointsController extends Controller {
      * @returns The thumbnail of the current AAS document.
      */
     @Get('{endpoint}/documents/{id}/thumbnail')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getThumbnail')
     public async getThumbnail(
         @Path() endpoint: string,
@@ -159,7 +155,7 @@ export class EndpointsController extends Controller {
      * @returns A readable stream.
      */
     @Get('{endpoint}/packages/{id}')
-    @Security('bearerAuth', ['guest'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getPackage')
     public async getPackage(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
         return await this.aasProvider.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id));
@@ -171,7 +167,7 @@ export class EndpointsController extends Controller {
      * @param files The AAS package file.
      */
     @Post('{endpoint}/packages')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('addPackages')
     public async addPackages(@Path() endpoint: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
         await this.aasProvider.addPackages(decodeBase64Url(endpoint), files);
@@ -183,7 +179,7 @@ export class EndpointsController extends Controller {
      * @param id The AAS identifier (Base64-URL encoded).
      */
     @Delete('{endpoint}/packages/{id}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('deletePackage')
     public async deletePackage(@Path() endpoint: string, @Path() id: string): Promise<void> {
         await this.aasProvider.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id));
@@ -196,7 +192,6 @@ export class EndpointsController extends Controller {
      * @returns The AAS document.
      */
     @Get('{endpoint}/documents/{id}')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
     public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
         return await this.aasProvider.getDocument(decodeBase64Url(id), decodeBase64Url(endpoint));
@@ -209,7 +204,6 @@ export class EndpointsController extends Controller {
      * @returns The AAS environment or `undefined`.
      */
     @Get('{endpoint}/documents/{id}/content')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocumentContent')
     public async getDocumentContent(
         @Path() endpoint: string,
@@ -228,8 +222,6 @@ export class EndpointsController extends Controller {
      * @param height The image height if the value represenst an image.
      */
     @Get('{endpoint}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
-    @Security('bearerAuth', ['guest'])
-    @Security('api_key')
     @OperationId('getDataElementValue')
     public async getDataElementValue(
         @Path() endpoint: string,
@@ -251,31 +243,29 @@ export class EndpointsController extends Controller {
      * @summary Updates the content of an AAS document.
      * @param endpoint The endpoint name (Base64-URL encoded).
      * @param id The document or AAS identifier (Base64-URL encoded).
-     * @param file The new document content.
+     * @param env The ASS environment containing the modified elements.
      * @returns The messages of the update process.
      */
     @Put('{endpoint}/documents/{id}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('updateDocument')
     public async updateDocument(
         @Path() endpoint: string,
         @Path() id: string,
-        @UploadedFile() file: Express.Multer.File,
-    ): Promise<string[]> {
-        const buffer = await fs.promises.readFile(file.path);
-        const env: aas.Environment = JSON.parse(buffer.toString());
-        return await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
+        @Body() env: aas.Environment,
+    ): Promise<void> {
+        await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
     }
 
     /**
      * @summary Invokes an Operation synchronously.
      * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The document dentifier (Base64-URL encoded).
+     * @param id The document identifier (Base64-URL encoded).
      * @param operation The `Operation`.
      * @returns The executed `Operation`.
      */
     @Post('{endpoint}/documents/{id}/invoke')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('invokeOperation')
     public async invokeOperation(
         @Path() endpoint: string,
@@ -292,7 +282,6 @@ export class EndpointsController extends Controller {
      * @returns The AAS environment or `undefined`.
      */
     @Get('{endpoint}/documents/{id}/hierarchy')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getHierarchy')
     public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
         return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));

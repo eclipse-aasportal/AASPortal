@@ -1,0 +1,42 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div ngbAccordion>
+    <div ngbAccordionItem [collapsed]="collapsed()">
+        <h2 ngbAccordionHeader>
+            <button ngbAccordionButton translate>DigitalProductPassport.DOCUMENTATION</button>
+        </h2>
+        <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+                <ng-template>
+                    <table class="table table-sm table-striped table-borderless">
+                        <tbody>
+                            @for (item of items(); track item.title) {
+                            <tr class="align-middle">
+                                <td>
+                                    <img [src]="getPreviewSource(item)" height="48" (error)="item.preview = undefined">
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        @for(file of item.files; track file.name) {
+                                        <a [href]="file.url" target="_blank">{{file.name}}</a>
+                                        }
+                                    </div>
+                                </td>
+                                <td>{{item.title}}</td>
+                                <td>{{item.version}}</td>
+                                <td>{{item.status}}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
