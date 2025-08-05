@@ -50,9 +50,9 @@ export class IndexChangeService implements OnDestroy {
         message.next(this.createMessage());
         this.message = message.asObservable();
 
-        this.auth.userId
+        this.auth.ready
             .pipe(
-                first(userId => userId !== undefined),
+                first(ready => ready === true),
                 mergeMap(() =>
                     zip(
                         this.http.get<{ count: number }>('/api/v1/endpoints/count'),

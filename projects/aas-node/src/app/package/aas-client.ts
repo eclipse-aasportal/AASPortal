@@ -73,12 +73,6 @@ export abstract class AASClient {
     public abstract deletePackage(aasId: string, name: string): Promise<string>;
 
     /**
-     * Gets the Concept Description with the specified identifier.
-     * @param id The identifier of the Concept Description to get.
-     */
-    public abstract getConceptDescription(id: string): Promise<aas.ConceptDescription>;
-
-    /**
      * Invokes the specified operation synchronously.
      * @param env The current AAS environment.
      * @param operation The operation to invoke.

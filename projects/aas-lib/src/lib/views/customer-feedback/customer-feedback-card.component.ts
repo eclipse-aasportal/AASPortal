@@ -11,7 +11,7 @@ import { DecimalPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { ScoreComponent } from '../../components/score/score.component';
-import { GeneralItem } from './customer-feedback.store';
+import { GeneralItem } from './customer-feedback.types';
 
 @Component({
     selector: 'fhg-customer-feedback-card',

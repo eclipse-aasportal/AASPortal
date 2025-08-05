@@ -11,7 +11,7 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { LocalizeComponent } from '../../../lib/components/localize/localize.component';
-import { WINDOW } from '../../../public-api';
+import { WINDOW, WindowService } from '../../../lib/services/window.service';
 
 describe('LocalizeComponent', () => {
     let window: jasmine.SpyObj<Window>;
@@ -20,7 +20,7 @@ describe('LocalizeComponent', () => {
     beforeEach(async () => {
         localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
         localStorage.getItem.and.returnValue(null);
-        window = jasmine.createSpyObj<Window>(['confirm'], { localStorage });
+        window = jasmine.createSpyObj<WindowService>(['confirm'], { localStorage });
 
         await TestBed.configureTestingModule({
             providers: [

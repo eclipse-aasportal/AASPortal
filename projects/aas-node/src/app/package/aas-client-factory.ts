@@ -11,12 +11,12 @@ import { AASEndpoint, ApplicationError } from 'aas-core';
 import { LOGGER, Logger } from '../logging/logger.js';
 import { AASClient } from './aas-client.js';
 import { AasxDirectory } from './file-system/aasx-directory.js';
-import { AASApiClientV0 } from './aas-api/aas-api-client-v0.js';
-import { AASApiClientV3 } from './aas-api/aas-api-client-v3.js';
+import { ApiClientV0 } from './api/api-client-v0.js';
+import { ApiClientV3 } from './api/api-client-v3.js';
 import { OpcuaClient } from './opcua/opcua-client.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
-import { AASApiClientV1 } from './aas-api/aas-api-client-v1.js';
+import { ApiClientV1 } from './api/api-client-v1.js';
 import { HttpClient } from '../http-client.js';
 
 @singleton()
@@ -37,11 +37,11 @@ export class AASClientFactory {
             case 'AAS_API':
                 switch (endpoint.version) {
                     case 'v3':
-                        return new AASApiClientV3(this.logger, this.http, endpoint);
+                        return new ApiClientV3(this.logger, this.http, endpoint);
                     case 'v1':
-                        return new AASApiClientV1(this.logger, this.http, endpoint);
+                        return new ApiClientV1(this.logger, this.http, endpoint);
                     case 'v0':
-                        return new AASApiClientV0(this.logger, this.http, endpoint);
+                        return new ApiClientV0(this.logger, this.http, endpoint);
                     default:
                         throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                 }
@@ -67,13 +67,13 @@ export class AASClientFactory {
                 case 'AAS_API':
                     switch (endpoint.version) {
                         case 'v3':
-                            await new AASApiClientV3(this.logger, this.http, endpoint).test();
+                            await new ApiClientV3(this.logger, this.http, endpoint).test();
                             break;
                         case 'v1':
-                            await new AASApiClientV1(this.logger, this.http, endpoint).test();
+                            await new ApiClientV1(this.logger, this.http, endpoint).test();
                             break;
                         case 'v0':
-                            await new AASApiClientV0(this.logger, this.http, endpoint).test();
+                            await new ApiClientV0(this.logger, this.http, endpoint).test();
                             break;
                         default:
                             throw new Error(`AASX server version ${endpoint.version} is not supported.`);

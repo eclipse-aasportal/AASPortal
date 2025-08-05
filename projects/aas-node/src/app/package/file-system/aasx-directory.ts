@@ -130,11 +130,6 @@ export class AasxDirectory extends AASClient {
         return `${path} successfully deleted`;
     }
 
-    public override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
-        noop(id);
-        return Promise.reject(new Error('Not implemented.'));
-    }
-
     public override invoke(): Promise<aas.Operation> {
         throw new Error('Not implemented.');
     }

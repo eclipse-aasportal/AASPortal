@@ -22,10 +22,6 @@ export class AuthApiService {
         return this.http.post<AuthResult>('/api/v1/register', profile);
     }
 
-    public guest(): Observable<AuthResult> {
-        return this.http.post<AuthResult>('/api/v1/guest', undefined);
-    }
-
     public login(credentials: Credentials): Observable<AuthResult> {
         return this.http.post<AuthResult>('/api/v1/login', credentials);
     }

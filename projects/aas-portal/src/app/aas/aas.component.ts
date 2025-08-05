@@ -23,7 +23,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, AASDocument } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
@@ -327,13 +327,6 @@ export class AASComponent implements OnInit, OnDestroy {
             element.idShort === 'TimeSeriesHistory' &&
             element.contentType === 'application/json'
         );
-    }
-
-    private getDocumentContent(document: AASDocument): void {
-        this.api.getContent(document.id, document.endpoint).subscribe({
-            next: content => this.store.document$.set({ ...document, content }),
-            error: () => this.store.document$.set(document),
-        });
     }
 
     private getDocument(id: string, endpoint?: string): void {

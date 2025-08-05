@@ -16,6 +16,7 @@
         "test:watch": "ng test aas-lib --browsers=Chrome --no-code-coverage",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "ng lint aas-portal",
-        "format": "ng lint aas-portal --fix"
+        "format": "ng lint aas-portal --fix",
+        "docs": "typedoc --out docs"
     }
 }

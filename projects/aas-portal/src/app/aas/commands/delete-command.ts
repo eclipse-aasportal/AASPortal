@@ -13,9 +13,9 @@ import {
     getParent,
     isAssetAdministrationShell,
     isSubmodel,
-    normalize,
     selectSubmodel,
     noop,
+    isDescendant,
 } from 'aas-core';
 
 import cloneDeep from 'lodash-es/cloneDeep';
@@ -48,7 +48,7 @@ export class DeleteCommand extends Command {
             },
         };
 
-        this.elements = Array.isArray(elements) ? normalize(document.content, elements, item => item) : [elements];
+        this.elements = Array.isArray(elements) ? this.normalize(document.content, elements) : [elements];
     }
 
     protected onExecute(): void {
@@ -112,5 +112,26 @@ export class DeleteCommand extends Command {
 
     protected onAbort(): void {
         noop();
+    }
+
+    private normalize(env: aas.Environment, elements: aas.Referable[]): aas.Referable[] {
+        let items: aas.Referable[] = elements;
+        let temp: aas.Referable[] = [];
+        for (let i = 0; i < items.length; ++i) {
+            for (let j = 0; j < items.length; j++) {
+                if (i !== j) {
+                    if (items[i] !== items[j] && !isDescendant(env, items[i], items[j])) {
+                        temp.push(items[j]);
+                    }
+                } else {
+                    temp.push(items[i]);
+                }
+            }
+
+            items = temp;
+            temp = [];
+        }
+
+        return items;
     }
 }

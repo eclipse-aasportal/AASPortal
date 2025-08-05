@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Controller, Get, OperationId, Path, Query, Route, Security, Tags } from 'tsoa';
+import { Controller, Get, OperationId, Path, Query, Route, Tags } from 'tsoa';
 import { AASDocument, AASPagedResult } from 'aas-core';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
@@ -27,7 +27,6 @@ export class DocumentsController extends Controller {
      * @returns A page of AAS documents.
      */
     @Get('')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocuments')
     public async getDocuments(
         @Query() cursor: string,
@@ -47,7 +46,6 @@ export class DocumentsController extends Controller {
      * @returns The total number of AAS documents.
      */
     @Get('count')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
         return { count: await this.aasProvider.getCount() };
@@ -59,7 +57,6 @@ export class DocumentsController extends Controller {
      * @returns The first occurrence of an AAS document with the specified identifier.
      */
     @Get('{id}')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
     public async getDocument(@Path() id: string): Promise<AASDocument> {
         return await this.aasProvider.getDocument(decodeBase64Url(id));

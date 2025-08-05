@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { convertBlobToBase64Async, extension } from 'aas-lib';
-import { aas, extensionToMimeType, toInvariant, toLocale } from 'aas-core';
+import { aas, extensionToMimeType, toDisplayValue, toInvariant } from 'aas-core';
 
 export interface LangStringRow extends aas.LangString {
     index: number;
@@ -191,7 +191,7 @@ export class EditElementFormComponent {
 
     private initProperty(): void {
         const property = this.element as aas.Property;
-        this.value.set(toLocale(property.value, property.valueType, this.translate.currentLang));
+        this.value.set(toDisplayValue(property.value, property.valueType, this.translate.currentLang));
         this.valueType.set(property.valueType ?? null);
     }
 
@@ -207,8 +207,8 @@ export class EditElementFormComponent {
 
     private initRange(): void {
         const range = this.element as aas.Range;
-        this.min.set(toLocale(range.min, range.valueType, this.translate.currentLang));
-        this.max.set(toLocale(range.max, range.valueType, this.translate.currentLang));
+        this.min.set(toDisplayValue(range.min, range.valueType, this.translate.currentLang));
+        this.max.set(toDisplayValue(range.max, range.valueType, this.translate.currentLang));
         this.valueType.set(range.valueType ?? null);
     }
 
