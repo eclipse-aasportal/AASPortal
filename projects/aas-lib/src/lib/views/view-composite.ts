@@ -10,7 +10,7 @@ import { computed, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { first, from, mergeMap, of, toArray } from 'rxjs';
 
-import { aas, AASDocument, getReferable, getSemanticId, isEnvironment } from 'aas-core';
+import { aas, AASDocument, getReferable, getSemanticId } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { EndpointsApi } from '../services/endpoints-api';
 import { ViewRoute, ViewRouteMap, ViewRouteName } from '../types';
@@ -20,7 +20,12 @@ import { View } from './view';
 export abstract class CompositeView extends View {
     private readonly tuples = signal<[AASDocument, ViewRouteMap][]>([]);
 
-    protected constructor(route: ActivatedRoute, api: EndpointsApi, viewRoutes: ViewRoute[], viewRouteName: ViewRouteName) {
+    protected constructor(
+        route: ActivatedRoute,
+        api: EndpointsApi,
+        viewRoutes: ViewRoute[],
+        viewRouteName: ViewRouteName,
+    ) {
         super(route, api, viewRoutes, viewRouteName);
     }
 
@@ -80,38 +85,35 @@ export abstract class CompositeView extends View {
             });
     }
 
-
-    private *filter(
-        documents: AASDocument[],
-    ): Generator<[AASDocument, ViewRouteMap]> {
+    private *filter(documents: AASDocument[]): Generator<[AASDocument, ViewRouteMap]> {
         for (const document of documents) {
             if (!document.content) {
                 continue;
             }
-    
+
             const map = this.findSubmodelMap(document);
             if (map) {
                 yield [document, map];
             }
         }
     }
-    
+
     private findSubmodelMap(document: AASDocument): ViewRouteMap | undefined {
         const env = document.content;
         if (!env) {
             return undefined;
         }
-    
+
         if (this.view.data.type === 'Leaf') {
             return undefined;
         } else if (this.view.data.type === 'Default') {
             return {};
         }
-    
+
         const leafRoutes = new Map<string, ViewRoute>(
             this.viewRoutes.filter(route => route.data.type === 'Leaf').map(route => [route.path!, route]),
         );
-    
+
         const submodelSemanticIds = new Map<string, aas.Submodel>();
         for (const submodel of env.submodels) {
             const semanticId = getSemanticId(submodel);
@@ -119,52 +121,51 @@ export abstract class CompositeView extends View {
                 submodelSemanticIds.set(semanticId, submodel);
             }
         }
-    
+
         const map: ViewRouteMap = {};
         for (const path of this.view.data.routes) {
             const leafRoute = leafRoutes.get(path);
             if (!leafRoute) {
                 return undefined;
             }
-    
+
             if (leafRoute.data.type !== 'Leaf') {
                 continue;
             }
-    
+
             const data = leafRoute.data;
             if (data.semanticIds && data.semanticIds.length) {
                 const semanticId = data.semanticIds.find(id => submodelSemanticIds.has(id));
                 if (!semanticId) {
                     return undefined;
                 }
-    
+
                 const submodel = submodelSemanticIds.get(semanticId);
                 if (!submodel) {
                     return undefined;
                 }
-    
+
                 map[leafRoute.path!] = submodel;
             }
-    
+
             if (data.idShorts) {
                 let submodel: aas.Submodel | undefined;
                 for (const idShortPath of data.idShorts) {
                     const submodel = env.submodels.find(submodel => getReferable(submodel, idShortPath) !== undefined);
-    
+
                     if (submodel) {
                         break;
                     }
                 }
-    
+
                 if (!submodel) {
                     return undefined;
                 }
-    
+
                 map[leafRoute.path!] = submodel;
             }
         }
-    
+
         return map;
     }
-    
 }

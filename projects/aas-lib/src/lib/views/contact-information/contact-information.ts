@@ -12,18 +12,18 @@ import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument, getSemanticId } from 'aas-core';
-import { CONTACT_INFORMATIONS_1_0 } from '../views-constants';
+import { CONTACT_INFORMATION_1_0 } from '../views-constants';
 import { DataSheetData } from '../../types';
 import { createDataSheet, getDisplayName } from '../../utilities';
 
 @Component({
-    selector: 'fhg-contact-informations',
+    selector: 'fhg-contact-information',
     imports: [NgbAccordionModule],
-    templateUrl: './contact-informations.html',
-    styleUrl: './contact-informations.scss',
+    templateUrl: './contact-information.html',
+    styleUrl: './contact-information.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContactInformations {
+export class ContactInformation {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
 
@@ -40,7 +40,7 @@ export class ContactInformations {
             return undefined;
         }
 
-        return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATIONS_1_0);
+        return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
     });
 
     public readonly contacts = computed(() => {

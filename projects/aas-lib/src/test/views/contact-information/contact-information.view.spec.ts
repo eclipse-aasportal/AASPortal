@@ -20,11 +20,11 @@ import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 import { VIEW_ROUTES } from '../../../lib/types';
 import { viewRoutes } from '../../../lib/views/views-routes';
-import { TechnicalDataView } from '../../../lib/views/technical-data/technical-data.view';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
-import { TechnicalData } from '../../../lib/views/technical-data/technical-data';
+import { ContactInformationView } from '../../../lib/views/contact-information/contact-information.view';
+import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
 
-import technicalData from '../../assets/technical-data-1-2.json';
+import contactInformation from '../../assets/contact-information-1-0.json';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -37,18 +37,18 @@ export class TestThumbnailQRCode {
 }
 
 @Component({
-    selector: 'fhg-technical-data',
+    selector: 'fhg-contact-information',
     template: '<div></div>',
     styleUrls: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TestTechnicalData {
+export class TestContactInformation {
     public readonly document = input<AASDocument>();
 }
 
-describe('TechnicalDataView', () => {
-    let component: TechnicalDataView;
-    let fixture: ComponentFixture<TechnicalDataView>;
+describe('ContactInformationsView', () => {
+    let component: ContactInformationView;
+    let fixture: ComponentFixture<ContactInformationView>;
     let api: jasmine.SpyObj<EndpointsApi>;
     let start: jasmine.SpyObj<StartService>;
     let route: jasmine.SpyObj<ActivatedRoute>;
@@ -60,12 +60,12 @@ describe('TechnicalDataView', () => {
         document = {
             address: '',
             crc32: 0,
-            idShort: 'TechnicalDataAAS',
+            idShort: 'ContactInformationAAS',
             readonly: false,
             timestamp: 0,
-            id: 'https://admin-shell.io/aas/TechnicalData/1/2',
+            id: 'https://admin-shell.io/idta/aas/ContactInformation/1/0',
             endpoint: 'Test',
-            content: technicalData as aas.Environment,
+            content: contactInformation as aas.Environment,
         };
 
         route = jasmine.createSpyObj<ActivatedRoute>(
@@ -100,7 +100,7 @@ describe('TechnicalDataView', () => {
                 provideZonelessChangeDetection(),
             ],
             imports: [
-                TechnicalDataView,
+                ContactInformationView,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -110,12 +110,12 @@ describe('TechnicalDataView', () => {
             ],
         }).compileComponents();
 
-        TestBed.overrideComponent(TechnicalDataView, {
-            remove: { imports: [TechnicalData, ThumbnailQRCode] },
-            add: { imports: [TestTechnicalData, TestThumbnailQRCode] },
+        TestBed.overrideComponent(ContactInformationView, {
+            remove: { imports: [ContactInformation, ThumbnailQRCode] },
+            add: { imports: [TestContactInformation, TestThumbnailQRCode] },
         });
 
-        fixture = TestBed.createComponent(TechnicalDataView);
+        fixture = TestBed.createComponent(ContactInformationView);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

@@ -8,7 +8,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { ActivatedRoute, provideRouter } from '@angular/router';
+import { ActivatedRoute, } from '@angular/router';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';

@@ -115,7 +115,7 @@ export type ViewRoute = Route & { path: ViewRouteName; data: RouteData };
 export type ViewRouteName =
     | 'Browser'
     | 'CarbonFootprint'
-    | 'ContactInformations'
+    | 'ContactInformation'
     | 'CustomerFeedback'
     | 'DigitalProductPassport'
     | 'HandoverDocumentation'

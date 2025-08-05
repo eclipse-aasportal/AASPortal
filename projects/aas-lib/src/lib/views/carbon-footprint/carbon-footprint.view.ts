@@ -10,7 +10,16 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, Inject, OnDestroy, OnInit, TemplateRef, viewChild } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    effect,
+    Inject,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
 
 import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';

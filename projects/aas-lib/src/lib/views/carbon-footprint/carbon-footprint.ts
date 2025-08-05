@@ -27,8 +27,6 @@ import { createDataSheet } from '../../utilities';
 import { DataSheetData } from '../../types';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 
-const CarbonFootprint_0_9_Id = 'https://admin-shell.io/idta/CarbonFootprint/ProductCarbonFootprint/0/9';
-
 @Component({
     selector: 'fhg-carbon-footprint',
     imports: [TranslateModule, NgbAccordionModule, NgbPaginationModule, DataSheet],
@@ -117,7 +115,7 @@ export class CarbonFootprint {
         let total = 0.0;
         let unit: string | undefined;
         for (const sme of submodel.submodelElements) {
-            if (isSubmodelElementCollection(sme) && sme.value && getSemanticId(sme) === CarbonFootprint_0_9_Id) {
+            if (isSubmodelElementCollection(sme) && sme.value && getSemanticId(sme) === CARBON_FOOTPRINT_0_9) {
                 const pcfCO2eq = getReferable<aas.Property>(sme, 'PCFCO2eq');
                 if (pcfCO2eq?.value) {
                     const value = parseNumber(pcfCO2eq.value);
@@ -169,7 +167,7 @@ export class CarbonFootprint {
         }
 
         for (const sme of submodel.submodelElements) {
-            if (isSubmodelElementCollection(sme) && sme.value && getSemanticId(sme) === CarbonFootprint_0_9_Id) {
+            if (isSubmodelElementCollection(sme) && sme.value && getSemanticId(sme) === CARBON_FOOTPRINT_0_9) {
                 dataSheets.push(this.createCarbonFootprint_0_9(submodel, sme, currentLang));
             }
         }

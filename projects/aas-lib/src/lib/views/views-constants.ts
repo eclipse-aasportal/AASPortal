@@ -15,5 +15,5 @@ export const HANDOVER_DOCUMENTATION_1_2 = '0173-1#01-AHF578#001';
 export const HANDOVER_DOCUMENTATION_2_0 = '0173-1#01-AHF578#003';
 export const CARBON_FOOTPRINT_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 export const CARBON_FOOTPRINT_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
-export const CONTACT_INFORMATIONS_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
+export const CONTACT_INFORMATION_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
 export const TECHNICAL_DATA_1_2 = 'https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2';

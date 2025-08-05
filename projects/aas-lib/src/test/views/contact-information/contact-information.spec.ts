@@ -8,34 +8,33 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-
-import { aas, AASDocument } from 'aas-core';
-import { TechnicalData } from '../../../lib/views/technical-data/technical-data';
-
-import technicalData from '../../assets/technical-data-1-2.json';
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
-describe('TechnicalData', () => {
-    let component: TechnicalData;
-    let fixture: ComponentFixture<TechnicalData>;
+import { aas, AASDocument } from 'aas-core';
+import contactInformation from '../../assets/contact-information-1-0.json';
+import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
+
+describe('ContactInformation', () => {
+    let component: ContactInformation;
+    let fixture: ComponentFixture<ContactInformation>;
     let document: AASDocument;
 
     beforeEach(async () => {
         document = {
             address: '',
             crc32: 0,
-            idShort: 'TechnicalDataAAS',
+            idShort: 'ContactInformationAAS',
             readonly: false,
             timestamp: 0,
-            id: 'https://admin-shell.io/aas/TechnicalData/1/2',
+            id: 'https://admin-shell.io/idta/aas/ContactInformation/1/0',
             endpoint: 'Test',
-            content: technicalData as aas.Environment,
+            content: contactInformation as aas.Environment,
         };
 
         await TestBed.configureTestingModule({
             providers: [provideZonelessChangeDetection()],
             imports: [
-                TechnicalData,
+                ContactInformation,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
@@ -45,7 +44,7 @@ describe('TechnicalData', () => {
             ],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TechnicalData);
+        fixture = TestBed.createComponent(ContactInformation);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

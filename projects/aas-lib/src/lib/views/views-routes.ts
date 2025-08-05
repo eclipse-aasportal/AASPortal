@@ -6,12 +6,11 @@
  *
  *****************************************************************************/
 
-import { InjectionToken } from '@angular/core';
 import { aas, AASDocument, getSemanticId, isEnvironment, isSubmodel } from 'aas-core';
 
 import { ViewRoute, ViewRouteMap, ViewRouteResult } from '../types';
 import { CarbonFootprintView } from './carbon-footprint/carbon-footprint.view';
-import { ContactInformationsView } from './contact-informations/contact-informations.view';
+import { ContactInformationView } from './contact-information/contact-information.view';
 import { CustomerFeedbackView } from './customer-feedback/customer-feedback.view';
 import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport.view';
 import { DocumentBrowserView } from './document-browser/document-browser.view';
@@ -22,7 +21,7 @@ import { TechnicalDataView } from './technical-data/technical-data.view';
 import {
     CARBON_FOOTPRINT_0_9,
     CARBON_FOOTPRINT_1_0,
-    CONTACT_INFORMATIONS_1_0,
+    CONTACT_INFORMATION_1_0,
     CUSTOMER_FEEDBACK,
     HANDOVER_DOCUMENTATION_1_2,
     HANDOVER_DOCUMENTATION_2_0,
@@ -51,11 +50,11 @@ export const viewRoutes: ViewRoute[] = [
         },
     },
     {
-        path: 'ContactInformations',
-        component: ContactInformationsView,
+        path: 'ContactInformation',
+        component: ContactInformationView,
         data: {
             type: 'Leaf',
-            semanticIds: [CONTACT_INFORMATIONS_1_0],
+            semanticIds: [CONTACT_INFORMATION_1_0],
         },
     },
     {
@@ -235,4 +234,3 @@ export function hasSpecificView(arg: aas.Submodel | AASDocument | aas.Environmen
     const { route } = findRouteForShell(arg, false);
     return route !== undefined;
 }
-
