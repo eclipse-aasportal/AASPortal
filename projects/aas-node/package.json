@@ -16,7 +16,8 @@
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/app/**/*.ts",
-        "format": "eslint src/app/**/*.ts --fix"
+        "format": "eslint src/app/**/*.ts --fix",
+        "docs": "typedoc --out docs"
     },
     "dependencies": {
         "@babel/polyfill": "^7.12.1",

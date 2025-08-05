@@ -1,0 +1,136 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { computed, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { first, from, mergeMap, of, toArray } from 'rxjs';
+
+import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
+import { decodeBase64Url } from '../utilities';
+import { EndpointsApi } from '../services/endpoints-api';
+import { ViewRoute, ViewRouteName } from '../types';
+import { View } from './view';
+
+/**  Represents a specific view for a submodel. */
+export abstract class LeafView extends View {
+    private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
+
+    protected constructor(
+        route: ActivatedRoute,
+        api: EndpointsApi,
+        viewRoutes: ViewRoute[],
+        viewRouteName: ViewRouteName,
+    ) {
+        super(route, api, viewRoutes, viewRouteName);
+    }
+
+    public override readonly document = computed(() => {
+        const item = this.tuple();
+        return item ? item[0] : undefined;
+    });
+
+    public override readonly count = computed(() => this.tuples().length);
+
+    /** The version of the current active submodel. */
+    public override readonly version = computed(() => {
+        const item = this.tuple();
+        if (!item) {
+            return undefined;
+        }
+
+        const administration = item[1].administration;
+        if (!administration) {
+            return undefined;
+        }
+
+        const version = administration?.version;
+        const revision = administration?.revision;
+        if (version) {
+            return revision ? `${version}.${revision}` : `${version}`;
+        }
+
+        return undefined;
+    });
+
+    /** The current active submodel. */
+    public readonly submodel = computed(() => {
+        const item = this.tuple();
+        return item ? item[1] : undefined;
+    });
+
+    /** */
+    protected readonly tuples = signal<[AASDocument, aas.Submodel][]>([]);
+
+    /** Initializes the current view. */
+    protected onInit(): void {
+        this.route.params
+            .pipe(
+                first(),
+                mergeMap(params => {
+                    if (params.id) {
+                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+                    }
+
+                    if (!params.docs) {
+                        return of([]);
+                    }
+
+                    const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+                    return from(docs).pipe(
+                        mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                        toArray(),
+                    );
+                }),
+            )
+            .subscribe(documents => {
+                this.tuples.set([...this.filter(documents)]);
+            });
+    }
+
+    private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
+        for (const document of documents) {
+            if (!document.content) {
+                continue;
+            }
+
+            const submodel = this.findSubmodel(document);
+            if (submodel) {
+                yield [document, submodel];
+            }
+        }
+    }
+
+    private findSubmodel(document: AASDocument): aas.Submodel | undefined {
+        const env = isEnvironment(document) ? document : document.content;
+        if (!env) {
+            return undefined;
+        }
+
+        for (const submodel of env.submodels) {
+            if (this.view.data.semanticIds) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId && this.view.data.semanticIds) {
+                    if (this.view.data.semanticIds.indexOf(semanticId) >= 0) {
+                        return submodel;
+                    }
+                }
+            }
+
+            if (this.view.data.idShorts) {
+                for (const idShort of this.view.data.idShorts) {
+                    if (submodel.idShort === idShort) {
+                        return submodel;
+                    }
+                }
+            }
+        }
+
+        return undefined;
+    }
+}

@@ -27,14 +27,16 @@
         @for (property of properties(); track property) {
         <tr>
             <td class="text-nowrap align-middle fw-semibold">{{property.name}}</td>
-            @if (property.kind === 'link') {
+            @switch (property.kind) {
+            @case('url') {
             <td>
-                <button class="btn btn-link p-0" type="button"
-                    (click)="openProperty($event, property)">{{property.value}}</button>
+                <a [href]="property.url" target="_blank">{{property.value}}</a>
             </td>
-            } @else {
+            } @case('link') {
+            <a [routerLink]="property.url">{{property.value}}</a>
+            } @default {
             <td>{{property.value}}</td>
-            }
+            }}
         </tr>
         }
         @if (conceptDescription()) {

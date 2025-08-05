@@ -36,13 +36,13 @@ export class QueryParser {
     private static readonly minLength = 3;
     private static readonly operatorChars = new Set(['=', '<', '>', '!', '&', '|']);
     private static readonly abbreviations = new Set([
-        'prop',
-        'mlp',
-        'range',
+        'blob',
         'ent',
         'file',
-        'blob',
+        'mlp',
         'opr',
+        'prop',
+        'range',
         'ref',
         'rel',
         'rela',

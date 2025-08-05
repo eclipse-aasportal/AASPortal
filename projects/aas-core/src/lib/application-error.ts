@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
+/** Provides a specific AASPortal error. */
 export class ApplicationError extends Error {
     /**
-     * @constructor
      * @param message The error message.
      * @param name The name of the error.
      * @param args Additional arguments for the error message.

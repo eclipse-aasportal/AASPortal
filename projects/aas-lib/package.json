@@ -11,6 +11,7 @@
         "build:debug": "ng build aas-lib --configuration development",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "ng lint aas-lib",
-        "format": "ng lint aas-lib --fix"
+        "format": "ng lint aas-lib --fix",
+        "docs": "typedoc --out docs"
     }
 }

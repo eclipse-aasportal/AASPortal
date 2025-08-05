@@ -1,0 +1,29 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div ngbAccordion>
+    @for (contact of contacts(); track contact; let i = $index) {
+    <div ngbAccordionItem [collapsed]="i !== 0">
+        <h2 ngbAccordionHeader>
+            <button ngbAccordionButton>{{contact.name}}</button>
+        </h2>
+        <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+                <ng-template>
+                    <dl class="row">
+                        @for (item of contact.items; track item) {
+                        <dt class="col-sm-3">{{item.displayName}}</dt>
+                        <dd class="col-sm-9">{{item.value}}</dd>
+                        }
+                    </dl>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+    }
+</div>

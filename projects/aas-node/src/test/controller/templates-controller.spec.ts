@@ -18,7 +18,7 @@ import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
-import { getToken, guestPayload } from '../assets/json-web-token.js';
+import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
@@ -39,7 +39,7 @@ describe('TemplateController', () => {
 
         templateStorage = createSpyObj<TemplateStorage>(['getTemplatesAsync', 'readTemplateAsync']);
         authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(guestPayload);
+        authentication.check.mockResolvedValue(editorPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);

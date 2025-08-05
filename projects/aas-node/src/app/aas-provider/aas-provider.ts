@@ -324,13 +324,12 @@ export class AASProvider {
     }
 
     /**
-     * Updates an Asset Administration Shell.
+     * Updates the content of an AAS document.
      * @param endpointName The endpoint name.
-     * @param id The AAS identifier.
-     * @param content The new document content.
-     * @returns
+     * @param id The unique AAS identifier.
+     * @param content The modified elements of the document content.
      */
-    public async updateDocument(endpointName: string, id: string, content: aas.Environment): Promise<string[]> {
+    public async updateDocument(endpointName: string, id: string, content: aas.Environment): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (!document) {
@@ -340,15 +339,7 @@ export class AASProvider {
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
-            const pkg = client.createPackage(document.address, document.idShort);
-            if (!document.content) {
-                document.content = await pkg.getEnvironment();
-                if (this.cache.has(document.endpoint, document.id)) {
-                    this.cache.set(document.endpoint, document.id, document.content);
-                }
-            }
-
-            return await pkg.setEnvironment(content, document.content);
+            await client.createPackage(document.address, document.idShort).setEnvironment(document.id, content);
         } finally {
             await client.close();
         }

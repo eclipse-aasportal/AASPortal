@@ -19,12 +19,12 @@ import { ApplicationInfo } from '../../app/application-info.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
-import { getToken, guestPayload } from '../assets/json-web-token.js';
+import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
 
-describe('AppController', function () {
+describe('AppController', () => {
     let app: Express;
     let logger: Logger;
     let auth: jest.Mocked<AuthService>;
@@ -32,7 +32,7 @@ describe('AppController', function () {
     let variable: jest.Mocked<Variable>;
     let authentication: jest.Mocked<Authentication>;
 
-    beforeEach(function () {
+    beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
@@ -40,7 +40,7 @@ describe('AppController', function () {
         applicationInfo = createSpyObj<ApplicationInfo>(['getAsync']);
 
         authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(guestPayload);
+        authentication.check.mockResolvedValue(editorPayload);
 
         container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);
@@ -58,7 +58,7 @@ describe('AppController', function () {
         app.use(errorHandler);
     });
 
-    it('getInfo: /api/v1/app/info', async function () {
+    it('getInfo: /api/v1/app/info', async () => {
         const data: AppInfo = {
             name: 'aas-portal-project',
             version: '2.0.0',

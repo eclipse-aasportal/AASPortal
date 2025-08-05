@@ -8,12 +8,22 @@
 
 import upperFirst from 'lodash-es/upperFirst';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal, untracked } from '@angular/core';
 
-import { aas, AASDocument, getAbbreviation, getChildren, getConceptDescription, isFile, isReference, isSubmodel } from 'aas-core';
+import {
+    aas,
+    AASDocument,
+    getAbbreviation,
+    getChildren,
+    getConceptDescription,
+    getSemanticId,
+    isFile,
+    isReference,
+} from 'aas-core';
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { getSemanticId, isLangString, referenceToString } from '../../utilities';
+import { getUrl, isLangString, referenceToString } from '../../utilities';
 
 const collectionNames: Record<string, string> = {
     SubmodelElementCollection: 'value',
@@ -30,7 +40,8 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
 export interface BrowserProperty {
     name: string;
     value: string;
-    kind: 'text' | 'link';
+    url?: string;
+    kind: 'text' | 'link' | 'url';
 }
 
 export interface BrowserElementRef {
@@ -58,12 +69,11 @@ export interface BrowserItem {
     selector: 'fhg-browser',
     templateUrl: './browser.component.html',
     styleUrl: './browser.component.scss',
-    imports: [NgbPaginationModule, ConceptDescriptionComponent],
+    imports: [RouterLink, NgbPaginationModule, ConceptDescriptionComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BrowserComponent {
     private readonly path$ = signal<BrowserElement[]>([]);
-    private readonly conceptDescription$ = signal<aas.ConceptDescription | null>(null);
     private readonly env = signal<aas.Environment>({
         assetAdministrationShells: [],
         submodels: [],
@@ -91,8 +101,6 @@ export class BrowserComponent {
 
     public readonly document = input<AASDocument | null | undefined>(undefined);
 
-    public readonly open = output<BrowserItem>();
-
     public readonly path = this.path$.asReadonly();
 
     public readonly current = signal<BrowserElement | undefined>(undefined);
@@ -104,25 +112,6 @@ export class BrowserComponent {
     public readonly children = computed(() => this.current()?.children ?? []);
 
     public readonly conceptDescription = computed(() => this.current()?.conceptDescription);
-
-    private get idShortPath(): string {
-        const current = this.current()?.referable;
-        if (current === undefined) {
-            return '';
-        }
-
-        const path = this.path$();
-        if (path.length < 3) {
-            return '';
-        }
-
-        let idShortPath = '';
-        for (let i = 2, n = path.length; i < n; i++) {
-            idShortPath += path[i].referable.idShort + '.';
-        }
-
-        return idShortPath + current.idShort;
-    }
 
     public goUp(element: BrowserElement): void {
         const index = this.path$().indexOf(element);
@@ -138,22 +127,6 @@ export class BrowserComponent {
 
         this.path$.update(state => [...state, current]);
         this.current.set(this.createElement(element.referable));
-    }
-
-    public openProperty($event: MouseEvent, property: BrowserProperty): void {
-        const referable = this.current()?.referable;
-        if (!referable) {
-            return;
-        }
-
-        const submodel = isSubmodel(referable) ? referable : (this.path$()[1].referable as aas.Submodel);
-        if (isFile(referable) && referable.value && property.name === 'Value') {
-            this.open.emit({ smId: submodel.id, idShortPath: this.idShortPath, property: property.name });
-        } else if (property.name === 'SemanticId') {
-            this.open.emit({ smId: submodel.id, idShortPath: this.idShortPath, property: property.name });
-        }
-
-        $event.stopPropagation();
     }
 
     private createElement(referable: aas.Referable): BrowserElement {
@@ -189,7 +162,7 @@ export class BrowserComponent {
         name = upperFirst(name);
         if (typeof value === 'string') {
             if (isFile(referable) && name === 'Value') {
-                return [{ name, value, kind: 'link' }];
+                return [{ name, value, kind: 'url', url: getUrl(this.document()!, referable) }];
             }
 
             return [{ name, value, kind: 'text' }];

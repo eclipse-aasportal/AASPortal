@@ -51,8 +51,8 @@ export class SecuredImageComponent {
     );
 
     private loadImage(url: string): Observable<SafeResourceUrl> {
-        return this.auth.userId.pipe(
-            first(userId => userId !== undefined),
+        return this.auth.ready.pipe(
+            first(ready => ready === true),
             switchMap(() =>
                 this.httpClient
                     .get(url, { responseType: 'blob' })
