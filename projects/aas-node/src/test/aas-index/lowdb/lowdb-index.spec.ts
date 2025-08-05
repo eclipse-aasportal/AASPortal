@@ -15,7 +15,7 @@ import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../../app/variable.js';
 import { LowDbIndex } from '../../../app/aas-index/lowdb/lowdb-index.js';
 import { LowDbData } from '../../../app/aas-index/lowdb/lowdb-types.js';
-import { KeywordDirectory } from 'projects/aas-node/src/app/aas-index/keyword-directory.js';
+import { KeywordDirectory } from '../../../app/aas-index/keyword-directory.js';
 import { Logger } from '../../../app/logging/logger.js';
 
 describe('LowDbIndex', () => {

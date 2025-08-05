@@ -30,8 +30,8 @@ export class EndpointsApi {
      * @returns The requested AAS document.
      */
     public getDocument(id: string, endpoint?: string): Observable<AASDocument> {
-        return this.auth.userId.pipe(
-            first(userId => userId !== undefined),
+        return this.auth.ready.pipe(
+            first(ready => ready === true),
             mergeMap(() => {
                 const url = endpoint
                     ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`

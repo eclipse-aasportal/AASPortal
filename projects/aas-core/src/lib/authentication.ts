@@ -8,15 +8,15 @@
 
 import capitalize from 'lodash-es/capitalize.js';
 
-export type UserRole = 'guest' | 'editor' | 'admin';
+export type UserRole = 'reader' | 'editor' | 'admin' | undefined;
 
-export const priority: UserRole[] = ['guest', 'editor', 'admin'];
+export const priority: UserRole[] = ['reader', 'editor', 'admin'];
 
 /** The user roles. */
 export const USER_ROLES: Record<string, string> = {
     admin: 'admin',
     editor: 'editor',
-    guest: 'guest',
+    reader: 'reader',
 };
 
 /** The user profile. */
@@ -31,10 +31,10 @@ export interface UserProfile {
 
 /**  The credentials. */
 export interface Credentials {
-    /** A unique identifier. */
+    /** A unique identifier (e-mail). */
     id: string;
     /** The password. */
-    password?: string;
+    password: string;
 }
 
 /** Result of a login or profile update message. */
@@ -76,10 +76,8 @@ export function getUserNameFromEMail(email: string): string {
 /**
  * Determines whether the current user is authorized for the specified roles.
  * @param actual The actual role.
- * @param expected The expected role.
+ * @param expected The expected roles.
  */
-export function isUserAuthorized(actual: UserRole, expected: UserRole): boolean {
-    const i = priority.indexOf(expected);
-    const j = priority.indexOf(actual);
-    return i >= 0 && j >= 0 && i <= j;
+export function isUserAuthorized(actual: UserRole, expected: UserRole[]): boolean {
+    return expected.indexOf(actual) >= 0;
 }

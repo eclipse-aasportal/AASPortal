@@ -10,9 +10,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 
+import { WebSocketData } from 'aas-core';
 import { CacheService } from '../../lib/services/cache.service';
 import { IndexChangeService } from '../../lib/services/index-change.service';
-import { WebSocketData } from 'projects/aas-core/dist/types';
 
 describe('CacheService', () => {
     let service: CacheService;

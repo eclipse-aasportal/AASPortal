@@ -6,15 +6,12 @@
  *
  *****************************************************************************/
 
-import { JWTPayload } from 'aas-core';
+import { JWTPayload, noop } from 'aas-core';
 import jwt from 'jsonwebtoken';
-
-export const guestPayload: JWTPayload = { role: 'guest' };
 
 export const editorPayload: JWTPayload = { sub: 'john.doe@email.com', name: 'John', role: 'editor' };
 
 export function getToken(name?: string): string {
-    return name
-        ? jwt.sign(editorPayload, 'SecretSecretSecretSecretSecretSecret')
-        : jwt.sign(guestPayload as JWTPayload, 'SecretSecretSecretSecretSecretSecret');
+    noop(name);
+    return jwt.sign(editorPayload, 'SecretSecretSecretSecretSecretSecret');
 }

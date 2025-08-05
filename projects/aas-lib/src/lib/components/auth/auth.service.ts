@@ -11,18 +11,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import {
-    ApplicationError,
-    Credentials,
-    isUserAuthorized,
-    stringFormat,
-    UserProfile,
-    UserRole,
-    JWTPayload,
-    toBoolean,
-} from 'aas-core';
+import { ApplicationError, Credentials, stringFormat, UserProfile, UserRole, JWTPayload, toBoolean } from 'aas-core';
 
-import { NotifyService } from '../notify/notify.service';
 import { ERRORS } from '../../errors';
 import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-form.component';
 import { ProfileFormComponent, ProfileFormResult } from '../auth/profile-form/profile-form.component';
@@ -35,14 +25,13 @@ import { WINDOW } from '../../services/window.service';
 })
 export class AuthService {
     private readonly token$ = signal<string | undefined>(undefined);
-    private readonly payload$ = signal<JWTPayload>({ role: 'guest' });
-    private readonly userId$ = new BehaviorSubject<string | undefined>(undefined);
+    private readonly payload$ = signal<JWTPayload | undefined>(undefined);
+    private readonly ready$ = new BehaviorSubject(false);
 
     public constructor(
         private modal: NgbModal,
         private translate: TranslateService,
         private api: AuthApiService,
-        private notify: NotifyService,
         @Inject(WINDOW) private window: Window,
     ) {
         const stayLoggedIn = toBoolean(this.window.localStorage.getItem('.StayLoggedIn'));
@@ -50,30 +39,33 @@ export class AuthService {
         if (stayLoggedIn && token && this.isValid(token)) {
             const payload = jwtDecode(token) as JWTPayload;
             if (payload && payload.sub) {
-                this.loginUser(token, payload.sub).subscribe();
+                this.loginUser(token, payload.sub).subscribe({
+                    next: () => this.ready$.next(true),
+                    error: () => this.ready$.next(true),
+                });
+
                 return;
             }
         }
 
-        this.loginGuest().subscribe();
+        this.ready$.next(true);
     }
 
     /** Signals that an authentication was performed. */
-    public readonly userId = this.userId$.asObservable();
+    public readonly ready = this.ready$.asObservable();
 
     /** The e-mail of the current user. */
     public readonly email = computed(() => this.payload$()?.sub);
 
     /** The name or alias of the current user. */
-    public readonly name = computed(() => this.payload$()?.name ?? (this.translate.instant('GUEST_USER') as string));
+    public readonly name = computed(() => this.payload$()?.name);
 
     /** The current user role. */
-    public readonly role = computed(() => this.payload$()?.role ?? 'guest');
+    public readonly role = computed(() => this.payload$()?.role);
 
     /** Indicates whether the current user is authenticated. */
     public readonly authenticated = computed(() => {
-        const payload = this.payload$();
-        return payload.sub != null && (payload.role === 'editor' || payload.role === 'admin');
+        return this.payload$() ? true : false;
     });
 
     /** The current active payload. */
@@ -122,14 +114,14 @@ export class AuthService {
      * Ensures that the current user has the expected rights.
      * @param role The expected user role.
      */
-    public ensureAuthorized(role: UserRole): Observable<void> {
-        if (this.isAuthorized(role)) {
+    public ensureAuthorized(...roles: UserRole[]): Observable<void> {
+        if (this.isAuthorized(roles)) {
             return of(void 0);
         }
 
         return this.login().pipe(
             map(() => {
-                if (!this.isAuthorized(role)) {
+                if (!this.isAuthorized(roles)) {
                     throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
                 }
             }),
@@ -142,7 +134,10 @@ export class AuthService {
             return throwError(() => new Error('Invalid operation.'));
         }
 
-        return this.loginGuest();
+        this.window.localStorage.removeItem('.Token');
+        this.window.localStorage.removeItem('.StayLoggedIn');
+        this.payload$.set(undefined);
+        return of(void 0);
     }
 
     /**
@@ -212,15 +207,24 @@ export class AuthService {
             throw new Error('Invalid operation');
         }
 
-        return this.api.delete(payload.sub).pipe(mergeMap(() => this.loginGuest()));
+        return this.api.delete(payload.sub).pipe(mergeMap(() => this.logout()));
     }
 
     /**
      * Determines whether the current user is authorized for the specified roles.
      * @param expected The expected role, the current user must have.
      */
-    public isAuthorized(expected: UserRole): boolean {
-        return isUserAuthorized(this.role(), expected);
+    public isAuthorized(expected: UserRole[] | undefined): boolean {
+        if (!expected) {
+            return true;
+        }
+
+        const role = this.role();
+        if (!role) {
+            return false;
+        }
+
+        return expected.indexOf(role) >= 0;
     }
 
     /**
@@ -291,19 +295,7 @@ export class AuthService {
     private loginUser(token: string, id: string): Observable<void> {
         return this.api.getProfile(id).pipe(
             map(() => this.setPayload(token)),
-            catchError(() => this.loginGuest()),
-        );
-    }
-
-    private loginGuest(): Observable<void> {
-        this.window.localStorage.removeItem('.Token');
-        this.window.localStorage.removeItem('.StayLoggedIn');
-        return this.api.guest().pipe(
-            map(result => this.setPayload(result.token)),
-            catchError(error => {
-                this.notify.error(error);
-                return of(void 0);
-            }),
+            catchError(() => this.logout()),
         );
     }
 
@@ -321,6 +313,5 @@ export class AuthService {
         this.token$.set(token);
         const payload = jwtDecode(token) as JWTPayload;
         this.payload$.set(payload);
-        this.userId$.next(payload.sub || payload.role);
     }
 }

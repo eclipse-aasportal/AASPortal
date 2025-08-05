@@ -8,18 +8,39 @@
 
 import { cloneDeep } from 'lodash-es';
 import { describe, it, expect } from '@jest/globals';
+import { createSpyObj } from 'aas-jest';
 import { AASDocument } from '../lib/types.js';
-import * as doc from '../lib/document.js';
 import * as aas from '../lib/aas.js';
 import { testProperty, testSubmodel, testSubmodelElementCollection } from './assets/samples.js';
 import { aasEnvironment } from './assets/aas-environment.js';
+import {
+    equalDocument,
+    getAbsolutePath,
+    getChildren,
+    getIdShortPath,
+    getIEC61360Content,
+    getParent,
+    isAssetAdministrationShell,
+    isBlob,
+    isDescendant,
+    isMultiLanguageProperty,
+    isProperty,
+    isReferenceElement,
+    isSubmodel,
+    isSubmodelElement,
+    isSubmodelElementCollection,
+    isSubmodelElementList,
+    selectElement,
+    selectReferable,
+    selectSubmodel,
+} from '../lib/document.js';
 
-describe('Document', function () {
-    describe('equalDocument', function () {
+describe('Document', () => {
+    describe('equalDocument', () => {
         let a: AASDocument;
         let b: AASDocument;
 
-        beforeEach(function () {
+        beforeEach(() => {
             a = {
                 id: 'http://customer.com/aas/a',
                 endpoint: 'Test',
@@ -43,162 +64,262 @@ describe('Document', function () {
             };
         });
 
-        it('compares equal document', function () {
-            expect(doc.equalDocument(a, a)).toBeTruthy();
+        it('compares equal document', () => {
+            expect(equalDocument(a, a)).toBeTruthy();
         });
 
-        it('compares same documents', function () {
+        it('compares same documents', () => {
             const aa = cloneDeep(a);
-            expect(doc.equalDocument(a, aa)).toBeTruthy();
+            expect(equalDocument(a, aa)).toBeTruthy();
         });
 
-        it('compares different documents', function () {
-            expect(doc.equalDocument(a, b)).toBeFalsy();
+        it('compares different documents', () => {
+            expect(equalDocument(a, b)).toBeFalsy();
         });
     });
 
-    describe('getChildren', function () {
-        it('returns the submodel elements of a Submodel', function () {
-            expect(doc.getChildren(testSubmodel).length).toEqual(testSubmodel.submodelElements!.length);
+    describe('isSubmodelElement', () => {
+        it('indicates that "Submodel" is not a SubmodelElement', () => {
+            const submodel = createSpyObj<aas.Submodel>({}, { modelType: 'Submodel' });
+            expect(isSubmodelElement(submodel)).toBeFalsy();
         });
 
-        it('return the submodel elements of a SubmodelElementCollection', function () {
-            expect(doc.getChildren(testSubmodelElementCollection).length).toEqual(
+        it('indicates that "Property" is a SubmodelElement', () => {
+            const property = createSpyObj<aas.Submodel>({}, { modelType: 'Property' });
+            expect(isSubmodelElement(property)).toBeTruthy();
+        });
+
+        it('indicates that "ReferenceElement" is a SubmodelElement', () => {
+            const referenceElement = createSpyObj<aas.Submodel>({}, { modelType: 'ReferenceElement' });
+            expect(isSubmodelElement(referenceElement)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a SubmodelElement', () => {
+            expect(isSubmodelElement(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a SubmodelElement', () => {
+            expect(isSubmodelElement(undefined)).toBeFalsy();
+        });
+
+        it('indicates that "{}" is not a SubmodelElement', () => {
+            expect(isSubmodelElement({})).toBeFalsy();
+        });
+    });
+
+    describe('isAssetAdministrationShell', () => {
+        it('identifies an AssetAdministrationShell', () => {
+            const shell = createSpyObj<aas.AssetAdministrationShell>({}, { modelType: 'AssetAdministrationShell' });
+            expect(isAssetAdministrationShell(shell)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a AssetAdministrationShell', () => {
+            expect(isAssetAdministrationShell(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a AssetAdministrationShell', () => {
+            expect(isAssetAdministrationShell(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isProperty', () => {
+        it('identifies a Property', () => {
+            const property = createSpyObj<aas.Property>({}, { modelType: 'Property' });
+            expect(isProperty(property)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a Property', () => {
+            expect(isProperty(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a Property', () => {
+            expect(isProperty(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isBlob', () => {
+        it('identifies a Blob', () => {
+            const property = createSpyObj<aas.Blob>({}, { modelType: 'Blob' });
+            expect(isBlob(property)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a Blob', () => {
+            expect(isBlob(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a Blob', () => {
+            expect(isBlob(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isReferenceElement', () => {
+        it('identifies a ReferenceElement', () => {
+            const referenceElement = createSpyObj<aas.ReferenceElement>({}, { modelType: 'ReferenceElement' });
+            expect(isReferenceElement(referenceElement)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a ReferenceElement', () => {
+            expect(isReferenceElement(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a ReferenceElement', () => {
+            expect(isReferenceElement(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isSubmodelElementCollection', () => {
+        it('identifies a SubmodelElementCollection', () => {
+            const collection = createSpyObj<aas.SubmodelElementCollection>(
+                {},
+                { modelType: 'SubmodelElementCollection' },
+            );
+
+            expect(isSubmodelElementCollection(collection)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a SubmodelElementCollection', () => {
+            expect(isSubmodelElementCollection(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a SubmodelElementCollection', () => {
+            expect(isSubmodelElementCollection(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isSubmodelElementList', () => {
+        it('identifies a SubmodelElementList', () => {
+            const list = createSpyObj<aas.SubmodelElementList>({}, { modelType: 'SubmodelElementList' });
+            expect(isSubmodelElementList(list)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a SubmodelElementList', () => {
+            expect(isSubmodelElementList(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a SubmodelElementList', () => {
+            expect(isSubmodelElementList(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isSubmodel', () => {
+        it('identifies a Submodel', () => {
+            const submodel = createSpyObj<aas.ReferenceElement>({}, { modelType: 'Submodel' });
+            expect(isSubmodel(submodel)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a Submodel', () => {
+            expect(isSubmodel(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a Submodel', () => {
+            expect(isSubmodel(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('isMultiLanguageProperty', () => {
+        it('identifies a MultiLanguageProperty', () => {
+            const multiLanguageProperty = createSpyObj<aas.ReferenceElement>(
+                {},
+                { modelType: 'MultiLanguageProperty' },
+            );
+            expect(isMultiLanguageProperty(multiLanguageProperty)).toBeTruthy();
+        });
+
+        it('indicates that "null" is not a MultiLanguageProperty', () => {
+            expect(isMultiLanguageProperty(null)).toBeFalsy();
+        });
+
+        it('indicates that "undefined" is not a MultiLanguageProperty', () => {
+            expect(isMultiLanguageProperty(undefined)).toBeFalsy();
+        });
+    });
+
+    describe('getChildren', () => {
+        it('returns the submodel elements of a Submodel', () => {
+            expect(getChildren(testSubmodel).length).toEqual(testSubmodel.submodelElements!.length);
+        });
+
+        it('return the submodel elements of a SubmodelElementCollection', () => {
+            expect(getChildren(testSubmodelElementCollection).length).toEqual(
                 testSubmodelElementCollection.value!.length,
             );
         });
 
-        it('returns an empty array of a Property', function () {
-            expect(doc.getChildren(testProperty).length).toEqual(0);
+        it('returns an empty array of a Property', () => {
+            expect(getChildren(testProperty).length).toEqual(0);
         });
 
-        it('returns the submodels of an AssetAdministrationShell', function () {
-            expect(doc.getChildren(aasEnvironment.assetAdministrationShells[0], aasEnvironment)).toEqual(
+        it('returns the submodels of an AssetAdministrationShell', () => {
+            expect(getChildren(aasEnvironment.assetAdministrationShells[0], aasEnvironment)).toEqual(
                 aasEnvironment.submodels!,
             );
         });
     });
 
-    describe('resolveReference', function () {
-        let env: aas.Environment;
-
-        beforeEach(async function () {
-            env = aasEnvironment;
-        });
-
-        it('resolves a reference ', function () {
-            const reference: aas.Reference = {
-                type: 'ModelReference',
-                keys: [
-                    {
-                        type: 'Submodel',
-                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                    },
-                    {
-                        type: 'SubmodelElementCollection',
-                        value: 'OperatingManual',
-                    },
-                    {
-                        type: 'File',
-                        value: 'DigitalFile_PDF',
-                    },
-                ],
-            };
-
-            expect(doc.resolveReference(env, reference)).toBeDefined();
-        });
-
-        it('returns undefined for an invalid reference', function () {
-            const reference: aas.Reference = {
-                type: 'ModelReference',
-                keys: [
-                    {
-                        type: 'Submodel',
-                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                    },
-                    {
-                        type: 'SubmodelElementCollection',
-                        value: 'OperatingManual',
-                    },
-                    {
-                        type: 'File',
-                        value: 'unknown',
-                    },
-                ],
-            };
-
-            expect(doc.resolveReference(env, reference)).toBeUndefined();
-        });
-    });
-
-    describe('getIEC61360Content', function () {
+    describe('getIEC61360Content', () => {
         let env: aas.Environment;
         let property: aas.Property;
 
-        beforeEach(async function () {
+        beforeEach(async () => {
             env = aasEnvironment;
-            property = doc.selectElement(env, 'Documentation', 'OperatingManual', 'DocumentClassificationSystem')!;
+            property = selectElement(env, 'Documentation', 'OperatingManual.DocumentClassificationSystem')!;
         });
 
-        it('', function () {
-            expect(doc.getIEC61360Content(env, property)).toBeDefined();
+        it('', () => {
+            expect(getIEC61360Content(env, property)).toBeDefined();
         });
     });
 
-    describe('selectElement', function () {
+    describe('selectElement', () => {
         let env: aas.Environment;
 
-        beforeEach(async function () {
+        beforeEach(async () => {
             env = aasEnvironment;
         });
 
-        it('selects a Submodel', function () {
-            expect(doc.selectElement(env, 'TechnicalData')).toBeDefined();
+        it('selects a Submodel', () => {
+            expect(selectElement(env, 'TechnicalData')).toBeDefined();
         });
 
-        it('selects a Property in a Submodel', function () {
-            expect(doc.selectElement(env, 'TechnicalData', 'MaxTorque')).toBeDefined();
+        it('selects a Property in a Submodel', () => {
+            expect(selectElement(env, 'TechnicalData', 'MaxTorque')).toBeDefined();
         });
 
-        it('return undefined for an invalid path.', function () {
-            expect(doc.selectElement(env, 'TechnicalData', 'Unknown')).toBeUndefined();
+        it('return undefined for an invalid path.', () => {
+            expect(selectElement(env, 'TechnicalData', 'Unknown')).toBeUndefined();
         });
 
-        it('return undefined for an empty path.', function () {
-            expect(doc.selectElement(env)).toBeUndefined();
-        });
-
-        it('selects "Documentation/OperatingManual/DocumentId"', function () {
-            expect(doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')).toBeDefined();
+        it('selects "Documentation/OperatingManual/DocumentId"', () => {
+            expect(selectElement(env, 'Documentation', 'OperatingManual.DocumentId')).toBeDefined();
         });
     });
 
-    describe('getParent', function () {
+    describe('getParent', () => {
         let child: aas.Referable;
         let parent: aas.Referable;
 
-        beforeEach(function () {
-            parent = doc.selectElement(aasEnvironment, 'TechnicalData')!;
-            child = doc.selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
+        beforeEach(() => {
+            parent = selectElement(aasEnvironment, 'TechnicalData')!;
+            child = selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
         });
 
-        it('gets the parent of a child', function () {
-            expect(doc.getParent(aasEnvironment, child)).toEqual(parent);
+        it('gets the parent of a child', () => {
+            expect(getParent(aasEnvironment, child)).toEqual(parent);
         });
 
-        it('returns "undefined" for an identifiable', function () {
-            expect(doc.getParent(aasEnvironment, parent)).toBeUndefined();
+        it('returns "undefined" for an identifiable', () => {
+            expect(getParent(aasEnvironment, parent)).toBeUndefined();
         });
     });
 
-    describe('selectReferable', function () {
+    describe('selectReferable', () => {
         let env: aas.Environment;
 
-        beforeEach(function () {
+        beforeEach(() => {
             env = aasEnvironment;
         });
 
-        it('selects an AAS', function () {
+        it('selects an AAS', () => {
             const reference: aas.Reference = {
                 type: 'ModelReference',
                 keys: [
@@ -209,10 +330,10 @@ describe('Document', function () {
                 ],
             };
 
-            expect(doc.selectReferable(env, reference)).toEqual(env.assetAdministrationShells[0]);
+            expect(selectReferable(env, reference)).toEqual(env.assetAdministrationShells[0]);
         });
 
-        it('selects the "Documentation" submodel', function () {
+        it('selects the "Documentation" submodel', () => {
             const reference: aas.Reference = {
                 type: 'ModelReference',
                 keys: [
@@ -223,12 +344,12 @@ describe('Document', function () {
                 ],
             };
 
-            const submodel: aas.Submodel = doc.selectElement(env, 'Documentation')!;
-            expect(doc.selectReferable(env, reference)).toEqual(submodel);
+            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
+            expect(selectReferable(env, reference)).toEqual(submodel);
         });
 
-        it('selects the "DocumentId" property', function () {
-            const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
+        it('selects the "DocumentId" property', () => {
+            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
             const reference: aas.Reference = {
                 type: 'ModelReference',
                 keys: [
@@ -247,177 +368,88 @@ describe('Document', function () {
                 ],
             };
 
-            expect(doc.selectReferable(env, reference)).toEqual(property);
+            expect(selectReferable(env, reference)).toEqual(property);
         });
     });
 
-    describe('getParent', function () {
+    describe('getParent', () => {
         let env: aas.Environment;
 
-        beforeEach(function () {
+        beforeEach(() => {
             env = aasEnvironment;
         });
 
-        it('returns "OperatingManual" as parent of "DocumentId"', function () {
-            const collection: aas.SubmodelElementCollection = doc.selectElement(
-                env,
-                'Documentation',
-                'OperatingManual',
-            )!;
-            const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(doc.getParent(env, property)).toEqual(collection);
+        it('returns "OperatingManual" as parent of "DocumentId"', () => {
+            const collection: aas.SubmodelElementCollection = selectElement(env, 'Documentation', 'OperatingManual')!;
+            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
+            expect(getParent(env, property)).toEqual(collection);
         });
 
-        it('returns "undefined" while "Documentation" has no parent', function () {
-            const submodel: aas.Submodel = doc.selectElement(env, 'Documentation')!;
-            expect(doc.getParent(env, submodel)).toBeUndefined();
+        it('returns "undefined" while "Documentation" has no parent', () => {
+            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
+            expect(getParent(env, submodel)).toBeUndefined();
         });
     });
 
-    describe('isDescendent', function () {
+    describe('isDescendent', () => {
         let env: aas.Environment;
 
-        beforeEach(function () {
+        beforeEach(() => {
             env = aasEnvironment;
         });
 
-        it('indicates that "DocumentId" is a descendant of "OperatingManual"', function () {
-            const collection: aas.SubmodelElementCollection = doc.selectElement(
-                env,
-                'Documentation',
-                'OperatingManual',
-            )!;
-            const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(doc.isDescendant(env, collection, property)).toBeTruthy();
+        it('indicates that "DocumentId" is a descendant of "OperatingManual"', () => {
+            const collection: aas.SubmodelElementCollection = selectElement(env, 'Documentation', 'OperatingManual')!;
+            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
+            expect(isDescendant(env, collection, property)).toBeTruthy();
         });
 
-        it('indicates that "DocumentId" is a descendant of "Documentation"', function () {
-            const submodel: aas.Submodel = doc.selectElement(env, 'Documentation')!;
-            const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(doc.isDescendant(env, submodel, property)).toBeTruthy();
+        it('indicates that "DocumentId" is a descendant of "Documentation"', () => {
+            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
+            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
+            expect(isDescendant(env, submodel, property)).toBeTruthy();
         });
 
-        it('indicates that "MaxTorque" is not a descendant of "Documentation"', function () {
-            const submodel: aas.Submodel = doc.selectElement(env, 'Documentation')!;
-            const property: aas.Property = doc.selectElement(env, 'TechnicalData', 'MaxTorque')!;
-            expect(doc.isDescendant(env, submodel, property)).toBeFalsy();
+        it('indicates that "MaxTorque" is not a descendant of "Documentation"', () => {
+            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
+            const property: aas.Property = selectElement(env, 'TechnicalData', 'MaxTorque')!;
+            expect(isDescendant(env, submodel, property)).toBeFalsy();
         });
     });
 
-    describe('normalize', function () {
+    describe('selectElement', () => {
         let env: aas.Environment;
 
-        beforeEach(function () {
+        beforeEach(() => {
             env = aasEnvironment;
         });
 
-        it('bla', function () {
-            const collection: aas.SubmodelElementCollection = doc.selectElement(
-                env,
-                'Documentation',
-                'OperatingManual',
-            )!;
-            const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(doc.normalize(env, [collection, property])).toEqual([collection]);
+        it('return the submodel to which "DocumentId" belongs.', () => {
+            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
+            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
+            expect(selectSubmodel(env, property)).toEqual(submodel);
         });
     });
 
-    describe('selectSubmodel', function () {
-        let env: aas.Environment;
-
-        beforeEach(function () {
-            env = aasEnvironment;
-        });
-
-        it('return the submodel to which "DocumentId" belongs.', function () {
-            const property: aas.Property = doc.selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            const submodel: aas.Submodel = doc.selectElement(env, 'Documentation')!;
-            expect(doc.selectSubmodel(env, property)).toEqual(submodel);
-        });
-    });
-
-    describe('diff', function () {
-        let env: aas.Environment;
-
-        beforeEach(function () {
-            env = aasEnvironment;
-        });
-
-        it('determines no diffs if source and target equal', function () {
-            const target = env;
-            expect(doc.diff(env, target)).toEqual([]);
-        });
-
-        it('determines no diffs if target is a shallow copy of source', function () {
-            const target = { ...env };
-            expect(doc.diff(env, target)).toEqual([]);
-        });
-
-        it('determines no diffs if target is a deep clone of source', function () {
-            const target = { ...env };
-            expect(doc.diff(env, target)).toEqual([]);
-        });
-
-        it('detects a new submodel in source', function () {
-            const target = { ...env, submodels: env.submodels!.slice(1) };
-            expect(doc.diff(env, target)).toEqual([
-                {
-                    type: 'inserted',
-                    sourceIndex: 0,
-                    sourceElement: env.submodels![0],
-                },
-            ]);
-        });
-
-        it('detects a deleted submodel in source', function () {
-            const target = cloneDeep(env);
-            const source = { ...env, submodels: env.submodels!.slice(1) };
-            expect(doc.diff(source, target)).toEqual([
-                {
-                    type: 'deleted',
-                    destinationIndex: 0,
-                    destinationElement: target.submodels![0],
-                },
-            ]);
-        });
-
-        it('detects a changed property value', function () {
-            const target = env;
-            const source = cloneDeep(env);
-            const property: aas.Property = doc.selectElement(source, 'TechnicalData', 'MaxTorque')!;
-            property.value = '42';
-            expect(doc.diff(source, target)).toEqual([
-                {
-                    type: 'changed',
-                    destinationParent: doc.selectElement(target, 'TechnicalData'),
-                    destinationElement: doc.selectElement(target, 'TechnicalData', 'MaxTorque'),
-                    destinationIndex: 1,
-                    sourceParent: doc.selectElement(source, 'TechnicalData'),
-                    sourceElement: doc.selectElement(source, 'TechnicalData', 'MaxTorque'),
-                    sourceIndex: 1,
-                },
-            ]);
-        });
-    });
-
-    describe('getAbsolutePath', function () {
-        it('gets the absolute path of "MaxTorque"', function () {
-            const property: aas.Property = doc.selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
-            expect(doc.getAbsolutePath(property)).toEqual([
+    describe('getAbsolutePath', () => {
+        it('gets the absolute path of "MaxTorque"', () => {
+            const property: aas.Property = selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
+            expect(getAbsolutePath(property)).toEqual([
                 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
                 'MaxTorque',
             ]);
         });
     });
 
-    describe('getIdShortPath', function () {
-        it('gets the idShort path of "DocumentId"', function () {
-            const property: aas.Property = doc.selectElement(
+    describe('getIdShortPath', () => {
+        it('gets the idShort path of "DocumentId"', () => {
+            const property: aas.Property = selectElement(
                 aasEnvironment,
                 'Documentation',
                 'OperatingManual.DocumentId',
             )!;
-            expect(doc.getIdShortPath(property)).toEqual('OperatingManual.DocumentId');
+
+            expect(getIdShortPath(property)).toEqual('OperatingManual.DocumentId');
         });
     });
 });

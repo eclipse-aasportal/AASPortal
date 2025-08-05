@@ -39,9 +39,9 @@ export class StartService {
         @Inject(START_TILE_TYPES) private readonly types: StartTileType[],
         @Inject(START_TILES) tiles: StartTile[],
     ) {
-        this.auth.userId
+        this.auth.ready
             .pipe(
-                skipWhile(userId => userId === undefined),
+                skipWhile(ready => ready === false),
                 takeUntilDestroyed(),
                 mergeMap(() => this.auth.getCookie(cookieName)),
             )

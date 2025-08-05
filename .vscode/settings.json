@@ -14,6 +14,8 @@
         "Forschung",
         "IDREF",
         "IDREFS",
+        "IDTA",
+        "Informations",
         "IOSB",
         "irdi",
         "jszip",
@@ -44,9 +46,9 @@
         "uuid",
         "webdav",
         "xmldoc",
-        "ZVEI",
-        "IDTA"
+        "ZVEI"
     ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.eol": "\n",
     "jest.virtualFolders": [
         {

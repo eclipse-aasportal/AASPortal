@@ -55,16 +55,10 @@ describe('AuthService', function () {
         expect(auth).toBeTruthy();
     });
 
-    describe('loginAsync', function () {
+    describe('login', function () {
         it('returns a user token.', async function () {
             userStorage.read.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
             const result = await auth.login({ id: 'john.doe@email.com', password: '6iu3hbcc' });
-            expect(result?.token).toBeDefined();
-        });
-
-        it('returns a guest token.', async function () {
-            userStorage.read.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
-            const result = await auth.login();
             expect(result?.token).toBeDefined();
         });
 
@@ -89,7 +83,7 @@ describe('AuthService', function () {
         });
     });
 
-    describe('updateProfileAsync', function () {
+    describe('updateProfile', function () {
         let profile: UserProfile;
 
         beforeEach(function () {

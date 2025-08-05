@@ -1,0 +1,9 @@
+{
+    "extends": [
+        "../../typedoc.base.jsonc"
+    ],
+    "entryPoints": [
+        "src/public-api.ts"
+    ],
+    "tsconfig": "tsconfig.lib.json"
+}

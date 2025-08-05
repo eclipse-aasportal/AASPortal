@@ -17,7 +17,7 @@ import {
     convertToString,
     isBooleanType,
     parseDate,
-    toLocale,
+    toDisplayValue,
     toInvariant,
     parseNumber,
     toBoolean,
@@ -178,8 +178,8 @@ describe('Convert', () => {
         });
 
         it('recognizes as undefined', () => {
-            expect(determineType(null)).toBeUndefined;
-            expect(determineType(undefined)).toBeUndefined;
+            expect(determineType(null)).toBeUndefined();
+            expect(determineType(undefined)).toBeUndefined();
         });
 
         it('returns 42 as int', () => {
@@ -351,21 +351,49 @@ describe('Convert', () => {
         });
     });
 
-    describe('toLocale', () => {
+    describe('toDisplayValue', () => {
         it('converts 1234.56 to "de" 1.234,56', () => {
-            expect(toLocale('1234.56', 'xs:double', 'de')).toEqual('1.234,56');
+            expect(toDisplayValue('1234.56', 'xs:double', 'de')).toEqual('1.234,56');
+        });
+
+        it('converts 1234.56 km to "de" 1.234,56 km', () => {
+            expect(toDisplayValue('1234.56', 'xs:double', 'de', 'km')).toEqual('1.234,56 km');
         });
 
         it('converts 1234.56 to "en" 1,234.56', () => {
-            expect(toLocale('1234.56', 'xs:double', 'en')).toEqual('1,234.56');
+            expect(toDisplayValue('1234.56', 'xs:double', 'en')).toEqual('1,234.56');
         });
 
         it('converts double undefined to undefined', () => {
-            expect(toLocale(undefined, 'xs:double', 'en')).toBeUndefined;
+            expect(toDisplayValue(undefined, 'xs:double', 'en')).toBeUndefined();
         });
 
         it('converts double "invalid" to undefined', () => {
-            expect(toLocale(undefined, 'xs:double', 'en')).toBeUndefined;
+            expect(toDisplayValue(undefined, 'xs:double', 'en')).toBeUndefined();
+        });
+
+        it('converts an ISO format date to locale string "en"', () => {
+            const date = new Date();
+            const value = date.toISOString();
+            expect(toDisplayValue(value, 'xs:dateTime', 'en')).toEqual(date.toLocaleString('en'));
+        });
+
+        it('converts an ISO format date to locale date string "en"', () => {
+            const date = new Date();
+            const value = date.toISOString();
+            expect(toDisplayValue(value, 'xs:date', 'en')).toEqual(date.toLocaleDateString('en'));
+        });
+
+        it('converts an ISO format date to locale time string "en"', () => {
+            const date = new Date();
+            const value = date.toISOString();
+            expect(toDisplayValue(value, 'xs:time', 'en')).toEqual(date.toLocaleTimeString('en'));
+        });
+
+        it('converts an ISO format date to locale string "de"', () => {
+            const date = new Date();
+            const value = date.toISOString();
+            expect(toDisplayValue(value, 'xs:dateTime', 'de')).toEqual(date.toLocaleString('de'));
         });
     });
 
@@ -379,11 +407,11 @@ describe('Convert', () => {
         });
 
         it('converts double undefined to undefined', () => {
-            expect(toInvariant(undefined, 'xs:double', 'en')).toBeUndefined;
+            expect(toInvariant(undefined, 'xs:double', 'en')).toBeUndefined();
         });
 
         it('converts double "invalid" to undefined', () => {
-            expect(toInvariant(undefined, 'xs:double', 'en')).toBeUndefined;
+            expect(toInvariant(undefined, 'xs:double', 'en')).toBeUndefined();
         });
     });
 

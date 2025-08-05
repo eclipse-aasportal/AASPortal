@@ -10,7 +10,7 @@ import EventEmitter from 'events';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { AASIndex } from '../aas-index/aas-index.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../package/aas-api/aas-api-client.js';
+import { AASLabel } from '../package/api/api-client.js';
 
 type ScanTuple = { reference?: AASDocument; document?: AASDocument; error?: Error };
 

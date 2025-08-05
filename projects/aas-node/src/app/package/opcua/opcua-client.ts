@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { AASEndpoint, LiveRequest, aas, noop } from 'aas-core';
+import { AASEndpoint, LiveRequest, aas } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { OpcuaSubscription } from '../../live/opcua/opcua-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
@@ -127,11 +127,6 @@ export class OpcuaClient extends AASClient {
     }
 
     public override deletePackage(): Promise<string> {
-        return Promise.reject(new Error('Not implemented.'));
-    }
-
-    public override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
-        noop(id);
         return Promise.reject(new Error('Not implemented.'));
     }
 
