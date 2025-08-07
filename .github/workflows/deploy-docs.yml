@@ -18,7 +18,7 @@ jobs:
           node-version: 20 # or your version
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate TypeDoc documentation
         run: npm run docs
@@ -28,3 +28,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
+          publish_branch: gh-pages
