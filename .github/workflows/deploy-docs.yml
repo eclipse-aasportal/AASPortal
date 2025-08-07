@@ -21,7 +21,7 @@ jobs:
         run: npm install
 
       - name: TypeScript compile check
-        run: npx tsc --noEmit
+        run: npm run build --workspaces
 
       - name: Generate TypeDoc documentation
         run: npm run docs
