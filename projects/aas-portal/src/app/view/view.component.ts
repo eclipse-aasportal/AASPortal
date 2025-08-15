@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 import { ToolbarService } from 'aas-lib';
 
@@ -19,7 +19,10 @@ import { ToolbarService } from 'aas-lib';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewComponent implements OnDestroy {
-    public constructor(private readonly toolbar: ToolbarService) {}
+    private readonly toolbar = inject(ToolbarService);
+
+    public constructor() {
+    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

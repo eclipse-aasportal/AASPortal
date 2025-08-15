@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { convertToString } from 'aas-core';
 import { NotifyService } from 'aas-lib';
 import { DashboardChartItem, DashboardChartType } from '../dashboard-types';
-import { CommandHandlerService } from '../../aas/command-handler.service';
+import { CommandHandler } from '../../aas/command-handler';
 import { SetColorCommand } from '../commands/set-color-command';
 import { SetMinMaxCommand } from '../commands/set-min-max-command';
 import { DashboardService } from '../dashboard.service';
@@ -26,7 +26,7 @@ import { SetChartTypeCommand } from '../commands/set-chart-type-command';
 })
 export class ChartEditComponent {
     public constructor(
-        private readonly commandHandler: CommandHandlerService,
+        private readonly commandHandler: CommandHandler,
         private readonly notify: NotifyService,
         private readonly translate: TranslateService,
         private readonly service: DashboardService,
@@ -41,8 +41,8 @@ export class ChartEditComponent {
     public readonly item = input.required<DashboardChartItem>();
 
     public getColor(chart: DashboardChartItem): string {
-        const lable = chart.source();
-        return chart.sources.find(source => source.label === lable)?.color ?? '0xffffff';
+        const label = chart.source();
+        return chart.sources.find(source => source.label === label)?.color ?? '0xffffff';
     }
 
     public changeColor(chart: DashboardChartItem, color: string): void {

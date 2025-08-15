@@ -11,9 +11,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from '../../app/start/start.component';
+import { FakeLoader } from '../mocks';
 
 describe('StartComponent', () => {
     let start: jasmine.SpyObj<StartService>;
@@ -50,7 +51,7 @@ describe('StartComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

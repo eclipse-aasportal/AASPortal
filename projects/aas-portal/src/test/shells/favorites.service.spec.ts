@@ -9,10 +9,11 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthService } from 'aas-lib';
 import { AASDocument } from 'aas-core';
 import { FavoritesList, FavoritesService, FavoritesState } from '../../app/shells/favorites.service';
+import { FakeLoader } from '../mocks';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;
@@ -58,7 +59,7 @@ describe('FavoritesService', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

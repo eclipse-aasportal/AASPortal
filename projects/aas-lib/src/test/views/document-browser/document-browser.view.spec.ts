@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import {
@@ -27,6 +27,7 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { VIEW_ROUTES } from '../../../lib/types';
 import { viewRoutes} from '../../../lib/views/views-routes';
 import { DocumentBrowserView } from '../../../lib/views/document-browser/document-browser.view';
+import { FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-browser',
@@ -92,7 +93,7 @@ describe('DocumentBrowserView', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

@@ -28,9 +28,9 @@ export class AASClientFactory {
     ) {}
 
     /**
-     * Creates a concrete realization of an `AASSource`.
-     * @param url The URL of the container.
-     * @returns A new instance of .
+     * Creates a concrete realization of an endpoint client.
+     * @param endpoint The endpoint.
+     * @returns A new instance of an endpoint client.
      */
     public create(endpoint: AASEndpoint): AASClient {
         switch (endpoint.type) {
@@ -58,8 +58,7 @@ export class AASClientFactory {
 
     /**
      * Tests whether the specified URL is a valid and supported AAS endpoint.
-     * @param logger The logger.
-     * @param url The current URL.
+     * @param endpoint The endpoint to test.
      */
     public async testAsync(endpoint: AASEndpoint): Promise<void> {
         try {

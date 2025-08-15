@@ -13,7 +13,7 @@ import { FavoritesService } from '../favorites.service';
 import { messageToString } from 'aas-lib';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-interface FavoritesItem {
+export interface FavoritesItem {
     selected: boolean;
     active: boolean;
     name: string;

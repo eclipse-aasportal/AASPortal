@@ -10,7 +10,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY, Subject } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
 import { NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
@@ -22,6 +22,7 @@ import { DashboardChartItem, DashboardState } from '../../app/dashboard/dashboar
 import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
 
 import data from '../assets/test-pages.json';
+import { FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-chart-edit',
@@ -41,9 +42,6 @@ describe('DashboardComponent', () => {
     let start: jasmine.SpyObj<StartService>;
     let service: jasmine.SpyObj<DashboardService>;
     let window: jasmine.SpyObj<WindowService>;
-    const chart1 = '42';
-    const chart2 = '4711';
-    const chart3 = '0815';
 
     beforeEach(async () => {
         webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
@@ -100,16 +98,15 @@ describe('DashboardComponent', () => {
                 },
                 provideRouter([]),
                 provideZonelessChangeDetection(),
-            ],
-            imports: [
-                DashboardComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
+                    fallbackLang: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
+            imports: [],
         }).compileComponents();
 
         TestBed.overrideComponent(DashboardComponent, {
@@ -211,7 +208,7 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            let items = component.activePage().items;
+            const items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             expect(component.canMovePrevious()).toBeTrue();
             component.movePrevious();
@@ -222,7 +219,7 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            let items = component.activePage().items;
+            const items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             expect(component.canMoveNext()).toBeTrue();
             component.moveNext();
@@ -241,7 +238,7 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            let items = component.activePage().items;
+            const items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             component.delete();
             expect(service.updatePage).toHaveBeenCalled();

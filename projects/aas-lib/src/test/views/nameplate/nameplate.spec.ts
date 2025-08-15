@@ -7,9 +7,10 @@
  *****************************************************************************/
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { Nameplate } from '../../../lib/views/nameplate/nameplate';
+import { FakeLoader } from '../../mocks';
 
 describe('Nameplate', () => {
     let component: Nameplate;
@@ -22,7 +23,7 @@ describe('Nameplate', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
