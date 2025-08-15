@@ -9,7 +9,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -24,6 +24,7 @@ import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-q
 import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 
 import nameplate_3_0 from '../../assets/nameplate-3-0.json';
+import { FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -101,7 +102,7 @@ describe('NameplateView', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

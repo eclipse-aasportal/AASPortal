@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import trim from 'lodash-es/trim';
-import { Injectable, untracked } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { BehaviorSubject } from 'rxjs';
 import {
     aas,
     AASAbbreviation,
@@ -21,42 +22,46 @@ import {
 
 import { normalize } from '../../utilities';
 import { AASTreeNode } from './aas-tree-node';
-import { AASTreeStore } from './aas-tree.store';
 
-export type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
+type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
-export interface SearchQuery {
+interface SearchQuery {
     modelType: aas.ModelType;
     operator?: Operator;
     name?: string;
     value?: string | boolean;
 }
 
-export interface SearchTerm {
+interface SearchTerm {
     text?: string;
     query?: SearchQuery;
 }
 
+/** 
+ * Provides a service to find elements of an AAS document that match a search expression.
+ */
 @Injectable()
 export class AASTreeSearch {
+    private readonly translate = inject(TranslateService);
     private readonly loop = true;
     private terms: SearchTerm[] = [];
+    private matchIndex$ = signal(-1);
+    private nodes: AASTreeNode[] = [];
 
-    public constructor(
-        private readonly store: AASTreeStore,
-        private readonly translate: TranslateService,
-    ) {}
+    /** Marks a hit if the value is greater or equal to zero. */
+    public matchIndex = this.matchIndex$.asReadonly();
 
-    public find(referable: aas.Referable): void {
-        const rows = untracked(this.store.state$).rows;
-        const index = rows.findIndex(row => row.element === referable);
-        if (index >= 0) {
-            this.store.setMatchIndex(index);
+    /**
+     * Starts the search for nodes that match the specified search expression.
+     * @param nodes The nodes to be searched for.
+     * @param value The search expression.
+     */
+    public start(nodes: AASTreeNode[], value: string): void {
+        this.nodes = nodes;
+
+        if (!value) {
+            return;
         }
-    }
-
-    public start(value: string): void {
-        if (!value) return;
 
         const terms: SearchTerm[] = [];
         for (const expression of this.splitOr(value)) {
@@ -68,7 +73,7 @@ export class AASTreeSearch {
                         term.query = query;
                     }
                 } else {
-                    term.text = expression.toLocaleLowerCase(this.translate.currentLang);
+                    term.text = expression.toLocaleLowerCase(this.translate.getCurrentLang());
                 }
             }
 
@@ -81,28 +86,31 @@ export class AASTreeSearch {
             this.terms = terms;
             this.findFirst();
         } else {
-            this.store.setMatchIndex(-1);
+            this.matchIndex$.set(-1);
         }
     }
 
+    /**
+     * Searches for the next node that matches the search expression.
+     * @returns `true` if all nodes have been searched once; otherwise `false`.
+     */
     public findNext(): boolean {
         let completed = false;
-        const state = untracked(this.store.state$);
-        if (state.rows.length > 0 && this.terms.length > 0) {
+        if (this.nodes.length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = state.matchIndex < 0 ? 0 : state.matchIndex + 1;
-            if (i >= state.rows.length) {
+            let i = this.matchIndex$() < 0 ? 0 : this.matchIndex$() + 1;
+            if (i >= this.nodes.length) {
                 i = 0;
             }
 
             const start = i;
             while (this.loop) {
-                if (this.match(state.rows[i])) {
+                if (this.match(this.nodes[i])) {
                     match = true;
                     break;
                 }
 
-                if (++i >= state.rows.length) {
+                if (++i >= this.nodes.length) {
                     i = 0;
                     completed = true;
                 }
@@ -112,27 +120,30 @@ export class AASTreeSearch {
                 }
             }
 
-            this.store.setMatchIndex(match ? i : -1);
+            this.matchIndex$.set(match ? i : -1);
         }
 
         return completed;
     }
 
+    /**
+     * Searches for the previous node that corresponds to the search expression.
+     * @returns `true` if all nodes have been searched once; otherwise `false`.
+     */
     public findPrevious(): boolean {
         let completed = false;
-        const state = untracked(this.store.state$);
-        if (state.rows.length > 0 && this.terms.length > 0) {
+        if (this.nodes.length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = state.matchIndex <= 0 ? state.rows.length - 1 : state.matchIndex - 1;
+            let i = this.matchIndex$() <= 0 ? this.nodes.length - 1 : this.matchIndex$() - 1;
             const start = i;
             while (this.loop) {
-                if (this.match(state.rows[i])) {
+                if (this.match(this.nodes[i])) {
                     match = true;
                     break;
                 }
 
                 if (--i <= 0) {
-                    i = state.rows.length - 1;
+                    i = this.nodes.length - 1;
                     completed = true;
                 }
 
@@ -141,7 +152,7 @@ export class AASTreeSearch {
                 }
             }
 
-            this.store.setMatchIndex(match ? i : -1);
+            this.matchIndex$.set(match ? i : -1);
         }
 
         return completed;
@@ -152,18 +163,17 @@ export class AASTreeSearch {
     }
 
     private findFirst(): void {
-        const state = untracked(this.store.state$);
-        if (state.rows.length > 0 && this.terms.length > 0) {
+        if (this.nodes.length > 0 && this.terms.length > 0) {
             let match = false;
-            let i = state.matchIndex < 0 ? 0 : state.matchIndex;
+            let i = this.matchIndex$() < 0 ? 0 : this.matchIndex$();
             const start = i;
             while (this.loop) {
-                if (this.match(state.rows[i])) {
+                if (this.match(this.nodes[i])) {
                     match = true;
                     break;
                 }
 
-                if (++i >= state.rows.length) {
+                if (++i >= this.nodes.length) {
                     i = 0;
                 }
 
@@ -172,7 +182,7 @@ export class AASTreeSearch {
                 }
             }
 
-            this.store.setMatchIndex(match ? i : -1);
+            this.matchIndex$.set(match ? i : -1);
         }
     }
 

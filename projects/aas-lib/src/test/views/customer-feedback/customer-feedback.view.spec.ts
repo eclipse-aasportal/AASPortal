@@ -8,7 +8,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
@@ -20,6 +20,7 @@ import { encodeBase64Url } from '../../../lib/utilities';
 import { VIEW_ROUTES } from '../../../lib/types';
 import { viewRoutes} from '../../../lib/views/views-routes';
 import { CustomerFeedbackView } from '../../../lib/views/customer-feedback/customer-feedback.view';
+import { FakeLoader } from '../../mocks';
 
 describe('CustomerFeedbackView', () => {
     let start: jasmine.SpyObj<StartService>;
@@ -75,7 +76,7 @@ describe('CustomerFeedbackView', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

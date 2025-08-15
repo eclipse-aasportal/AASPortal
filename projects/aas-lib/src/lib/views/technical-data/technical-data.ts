@@ -57,7 +57,7 @@ export class TechnicalData {
 
         const generalInfo = getReferable(submodel, 'GeneralInformation');
         if (generalInfo) {
-            const dataSheet = createDataSheet(document, submodel, generalInfo, currentLang);
+            const dataSheet = createDataSheet(document, generalInfo, currentLang);
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }
@@ -65,8 +65,9 @@ export class TechnicalData {
 
         const productClassifications = getReferable(submodel, 'ProductClassifications');
         if (isSubmodelElementCollection(productClassifications) && productClassifications.value) {
-            for (const item of productClassifications.value) {
-                const dataSheet = createDataSheet(document, submodel, item, currentLang);
+            for (const item of productClassifications.value)
+                 {
+                const dataSheet = createDataSheet(document, item, currentLang);
                 if (dataSheet.items.length > 0) {
                     dataSheets.push(dataSheet);
                 }
@@ -76,7 +77,7 @@ export class TechnicalData {
         const technicalProperties = getReferable(submodel, 'TechnicalProperties');
         if (isSubmodelElementCollection(technicalProperties) && technicalProperties.value) {
             for (const item of technicalProperties.value) {
-                const dataSheet = createDataSheet(document, submodel, item, currentLang);
+                const dataSheet = createDataSheet(document, item, currentLang);
                 if (dataSheet.items.length > 0) {
                     dataSheets.push(dataSheet);
                 }
@@ -85,7 +86,7 @@ export class TechnicalData {
 
         const furtherInfo = getReferable(submodel, 'FurtherInformation');
         if (furtherInfo) {
-            const dataSheet = createDataSheet(document, submodel, furtherInfo, currentLang);
+            const dataSheet = createDataSheet(document, furtherInfo, currentLang);
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }

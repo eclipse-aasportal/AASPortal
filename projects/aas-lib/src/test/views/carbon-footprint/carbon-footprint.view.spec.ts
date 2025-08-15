@@ -10,7 +10,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { of } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
@@ -23,6 +23,7 @@ import { viewRoutes} from '../../../lib/views/views-routes';
 import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint.view';
 import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -80,7 +81,7 @@ describe('CarbonFootprintView', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

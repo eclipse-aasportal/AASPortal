@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { IndexChangeService } from 'aas-lib';
 import { AboutCardComponent } from '../../app/about/about-card.component';
+import { FakeLoader } from '../mocks';
 
 describe('AboutCardComponent', () => {
     let indexChange: jasmine.SpyObj<IndexChangeService>;
@@ -34,7 +35,7 @@ describe('AboutCardComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

@@ -9,7 +9,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -27,7 +27,7 @@ import {
     EndpointsApi,
     DownloadService,
     NotifyService,
-    OnlineState,
+    LiveState,
     SecuredImageComponent,
     StartService,
     ToolbarService,
@@ -35,9 +35,10 @@ import {
 
 import { AASComponent } from '../../app/aas/aas.component';
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
-import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
+import { FakeLoader } from '../mocks';
+import { AASState } from '../../app/aas/aas.state';
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -47,7 +48,7 @@ import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard
 })
 class TestAASTreeComponent {
     public document = input<AASDocument | null>(null);
-    public state = input<OnlineState | null>('offline');
+    public state = input<LiveState | null>('offline');
     public searchExpression = input('');
     public selected = input<aas.Referable[]>([torque, rotationSpeed]);
     public selectedChange = output<aas.Referable[]>();
@@ -78,7 +79,6 @@ class TestSecureImageComponent {
 describe('AASComponent', () => {
     let dashboard: jasmine.SpyObj<DashboardService>;
     let router: Router;
-    let store: AASStore;
     let api: jasmine.SpyObj<EndpointsApi>;
     let download: jasmine.SpyObj<DownloadService>;
     let start: jasmine.SpyObj<StartService>;
@@ -130,16 +130,14 @@ describe('AASComponent', () => {
                 provideHttpClientTesting(),
                 provideRouter([]),
                 provideZonelessChangeDetection(),
-            ],
-            imports: [
-                AASComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
+            imports: [AASComponent],
         }).compileComponents();
 
         TestBed.overrideComponent(AASComponent, {
@@ -151,9 +149,9 @@ describe('AASComponent', () => {
             },
         });
 
-        store = TestBed.inject(AASStore);
         router = TestBed.inject(Router);
-        store.document$.set(sampleDocument);
+        const state = TestBed.inject(AASState);
+        state.update({ document: sampleDocument });
     });
 
     it('should create', () => {
@@ -208,7 +206,7 @@ describe('AASComponent', () => {
         it('can add the selected properties to the dashboard', () => {
             const fixture = TestBed.createComponent(AASComponent);
             const component = fixture.componentInstance;
-            component.selectedElements.set([torque, rotationSpeed]);
+            component.setSelectedElements([torque, rotationSpeed]);
             spyOn(router, 'navigateByUrl').and.resolveTo(true);
             expect(component.canAddToDashboard()).toBeTrue();
             component.addToDashboard(DashboardChartType.BarVertical);

@@ -8,10 +8,11 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { Library } from 'aas-core';
 import { LicenseInfoComponent } from '../../../lib/components/license-info/license-info.component';
+import { FakeLoader } from '../../mocks';
 
 describe('LicenseInfoComponent', () => {
     let libraries: Library[];
@@ -22,10 +23,10 @@ describe('LicenseInfoComponent', () => {
             imports: [
                 LicenseInfoComponent,
                 TranslateModule.forRoot({
-                    defaultLanguage: 'en-us',
+                    fallbackLang: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

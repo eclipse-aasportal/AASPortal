@@ -9,10 +9,11 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TemplateService } from 'aas-lib';
 import { TemplateDescriptor } from 'aas-core';
 import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('NewElementFormComponent', () => {
     let api: jasmine.SpyObj<TemplateService>;
@@ -27,7 +28,7 @@ describe('NewElementFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

@@ -12,7 +12,7 @@ import { encodeBase64Url } from '../../utilities';
 
 /** The client side AAS provider service. */
 @Injectable()
-export class AASTreeApiService {
+export class AASTreeApi {
     public constructor(private readonly http: HttpClient) {}
     /**
      * Reads the value of an data element like `File` or `Blob`.

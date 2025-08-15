@@ -14,15 +14,18 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ShellsComponent } from './shells/shells.component';
 import { ViewComponent } from './view/view.component';
 import { StartComponent } from './start/start.component';
+import { activateViewGuard } from './view/activate-view.guard';
+import { activateAASGuard } from './aas/activate-aas.guard';
 
 export const routes: Routes = [
     { path: 'start', component: StartComponent },
     { path: 'shells', component: ShellsComponent },
-    { path: 'aas', component: AASComponent },
+    { path: 'aas', component: AASComponent, canActivate: [activateAASGuard] },
     {
         path: 'views',
         component: ViewComponent,
         children: viewRoutes,
+        canActivate: [activateViewGuard],
     },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'about', component: AboutComponent },

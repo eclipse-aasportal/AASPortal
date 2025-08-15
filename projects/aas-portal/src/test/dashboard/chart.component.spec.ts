@@ -8,10 +8,11 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { WebSocketFactoryService } from 'aas-lib';
 import { ChartComponent } from '../../app/dashboard/chart/chart.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { FakeLoader } from '../mocks';
 
 describe('ChartComponent', () => {
     let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
@@ -37,7 +38,7 @@ describe('ChartComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

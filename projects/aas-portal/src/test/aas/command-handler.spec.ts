@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { NotifyService } from 'aas-lib';
 import { noop } from 'aas-core';
 import { Command } from '../../app/types/command';
-import { CommandHandlerService } from '../../app/aas/command-handler.service';
+import { CommandHandler } from '../../app/aas/command-handler';
 
 class TestCommand extends Command {
     public constructor(
@@ -68,7 +68,7 @@ class FailCommand extends Command {
 }
 
 describe('CommandHandlerService', () => {
-    let service: CommandHandlerService;
+    let service: CommandHandler;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -82,7 +82,7 @@ describe('CommandHandlerService', () => {
             ],
         });
 
-        service = TestBed.inject(CommandHandlerService);
+        service = TestBed.inject(CommandHandler);
     });
 
     it('should be created', () => {

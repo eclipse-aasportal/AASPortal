@@ -8,12 +8,13 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AuthService } from 'aas-lib';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 
 import data from '../assets/test-pages.json';
+import { FakeLoader } from '../mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;
@@ -28,7 +29,7 @@ describe('DashboardService', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

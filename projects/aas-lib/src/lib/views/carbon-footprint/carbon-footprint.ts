@@ -196,7 +196,7 @@ export class CarbonFootprint {
         productCarbonFootprint: aas.SubmodelElementCollection,
         currentLang: string,
     ): DataSheetData {
-        return createDataSheet(untracked(this.document)!, submodel, productCarbonFootprint, currentLang, {
+        return createDataSheet(untracked(this.document)!, productCarbonFootprint, currentLang, {
             type: 'A',
             include: [
                 'PcfCO2eq',
@@ -221,7 +221,7 @@ export class CarbonFootprint {
         productCarbonFootprint: aas.SubmodelElementCollection,
         currentLang: string,
     ): DataSheetData {
-        return createDataSheet(untracked(this.document)!, submodel, productCarbonFootprint, currentLang, {
+        return createDataSheet(untracked(this.document)!, productCarbonFootprint, currentLang, {
             type: 'A',
             include: [
                 'PCFCO2eq',

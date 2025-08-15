@@ -9,12 +9,13 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { FavoriteComponent } from '../../../lib/components/favorite/favorite.component';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
+import { FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-img',
@@ -57,7 +58,7 @@ describe('FavoriteComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
