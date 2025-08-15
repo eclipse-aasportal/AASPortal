@@ -9,9 +9,10 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASEndpoint } from 'aas-core';
 import { AddEndpointFormComponent } from '../../app/shells/add-endpoint-form/add-endpoint-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('AddEndpointFormComponent', () => {
     let modal: NgbActiveModal;
@@ -24,7 +25,7 @@ describe('AddEndpointFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

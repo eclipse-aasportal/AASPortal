@@ -20,7 +20,7 @@ import {
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
-import { AASStore } from '../aas.store';
+import { AASState } from '../aas.state';
 
 export class DeleteCommand extends Command {
     private readonly elements: aas.Referable[];
@@ -28,7 +28,7 @@ export class DeleteCommand extends Command {
     private document: AASDocument;
 
     public constructor(
-        private readonly store: AASStore,
+        private readonly store: AASState,
         document: AASDocument,
         elements: aas.Referable | aas.Referable[],
     ) {
@@ -85,7 +85,7 @@ export class DeleteCommand extends Command {
             }
         }
 
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     private deleteFromShells(element: aas.Submodel) {
@@ -103,11 +103,11 @@ export class DeleteCommand extends Command {
     }
 
     protected onUndo(): void {
-        this.store.document$.set({ ...this.memento, modified: true });
+        this.store.update({ document: { ...this.memento, modified: true } });
     }
 
     protected onRedo(): void {
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     protected onAbort(): void {

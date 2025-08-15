@@ -9,8 +9,8 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, map, of, skipWhile } from 'rxjs';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { EMPTY, first, map, of } from 'rxjs';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
@@ -22,6 +22,7 @@ import { getToken } from '../../assets/json-web-token';
 import { LoginFormResult } from '../../../lib/components/auth/login-form/login-form.component';
 import { RegisterFormResult } from '../../../lib/components/auth/register-form/register-form.component';
 import { ProfileFormResult } from '../../../lib/components/auth/profile-form/profile-form.component';
+import { FakeLoader } from '../../mocks';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -54,7 +55,7 @@ describe('AuthService', () => {
                     TranslateModule.forRoot({
                         loader: {
                             provide: TranslateLoader,
-                            useClass: TranslateFakeLoader,
+                            useClass: FakeLoader,
                         },
                     }),
                 ],
@@ -260,7 +261,7 @@ describe('AuthService', () => {
                     TranslateModule.forRoot({
                         loader: {
                             provide: TranslateLoader,
-                            useClass: TranslateFakeLoader,
+                            useClass: FakeLoader,
                         },
                     }),
                 ],

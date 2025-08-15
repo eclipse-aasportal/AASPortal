@@ -9,9 +9,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas } from 'aas-core';
 import { EditElementFormComponent } from '../../app/aas/edit-element-form/edit-element-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('EditElementFormComponent', () => {
     let activeModal: jasmine.SpyObj<NgbActiveModal>;
@@ -30,7 +31,7 @@ describe('EditElementFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

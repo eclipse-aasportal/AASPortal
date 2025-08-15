@@ -8,37 +8,34 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { AASTreeStore } from '../../../lib/components/aas-tree/aas-tree.store';
+import { FakeLoader } from '../../mocks';
 
 describe('AASTreeSearch', () => {
     let search: AASTreeSearch;
-    let store: AASTreeStore;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
+                AASTreeSearch,
                 {
                     provide: NotifyService,
                     useValue: jasmine.createSpyObj<NotifyService>(['error']),
                 },
-                AASTreeStore,
                 provideZonelessChangeDetection(),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
-                }),
+                })
             ],
+            imports: [],
         });
 
-        store = TestBed.inject(AASTreeStore);
-        search = new AASTreeSearch(store, TestBed.inject(TranslateService));
+        search = TestBed.inject(AASTreeSearch);
     });
 
     it('should create', () => {

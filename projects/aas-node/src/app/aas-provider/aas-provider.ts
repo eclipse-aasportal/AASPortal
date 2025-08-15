@@ -245,7 +245,6 @@ export class AASProvider {
 
     /**
      * Updates an existing endpoint.
-     * @param endpointName The old endpoint name.
      * @param endpoint The endpoint to update.
      */
     public async updateEndpoint(endpoint: AASEndpoint): Promise<void> {

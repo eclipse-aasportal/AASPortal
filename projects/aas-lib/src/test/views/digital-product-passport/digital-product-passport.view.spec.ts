@@ -8,7 +8,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
@@ -23,6 +23,7 @@ import { DigitalProductPassportView } from '../../../lib/views/digital-product-p
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 
 import sample from '../../assets/dpp-sample.json';
+import { FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -78,7 +79,7 @@ describe('DigitalProductPassportView', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

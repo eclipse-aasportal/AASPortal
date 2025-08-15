@@ -290,17 +290,15 @@ export function getUrl(document: AASDocument, file: aas.File | undefined): strin
 }
 
 /**
- * Creates a data sheet.
+ * Creates a data sheet from the specified submodel, submodel element list or collection.
  * @param document The AAS document.
- * @param submodel The submodel.
- * @param sm The
+ * @param sm The submodel or submodel element.
  * @param lang The current language.
- * @param paths A list
+ * @param options The options to create the data sheet.
  * @returns An object of type `DataSheetData`.
  */
 export function createDataSheet(
     document: AASDocument,
-    submodel: aas.Submodel,
     sm: aas.SubmodelElement | aas.Submodel,
     lang: string,
     options?: DataSheetOptions,
@@ -640,4 +638,19 @@ export function toString(
     }
 
     return value ?? defaultValue;
+}
+
+/**
+ * Determines whether the specified object is empty.
+ * @param obj The current object.
+ * @returns `true` if the specified object is empty; otherwise `false`.
+ */
+export function isEmpty(obj: object): boolean {
+    for (const prop in obj) {
+        if (Object.hasOwn(obj, prop)) {
+            return false;
+        }
+    }
+
+    return true;
 }

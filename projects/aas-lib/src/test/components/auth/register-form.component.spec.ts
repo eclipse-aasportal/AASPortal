@@ -11,7 +11,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
@@ -21,6 +21,7 @@ import {
     RegisterFormComponent,
     RegisterFormResult,
 } from '../../../lib/components/auth/register-form/register-form.component';
+import { FakeLoader } from '../../mocks';
 
 describe('RegisterFormComponent', () => {
     let modal: NgbActiveModal;
@@ -34,7 +35,7 @@ describe('RegisterFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

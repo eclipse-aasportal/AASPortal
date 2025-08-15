@@ -8,11 +8,12 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import contactInformation from '../../assets/contact-information-1-0.json';
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
+import { FakeLoader } from '../../mocks';
 
 describe('ContactInformation', () => {
     let component: ContactInformation;
@@ -38,7 +39,7 @@ describe('ContactInformation', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

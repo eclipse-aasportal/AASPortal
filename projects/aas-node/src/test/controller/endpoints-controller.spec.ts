@@ -113,12 +113,12 @@ describe('EndpointsController', () => {
         expect(aasProvider.getCount).toHaveBeenCalledWith('Samples');
     });
 
-    it('POST: /api/v1/endpoints/{name}', async () => {
+    it('POST: /api/v1/endpoints', async () => {
         const endpoint: AASEndpoint = { name: 'Samples', url: 'file:///assets/samples', type: 'FileSystem' };
         aasProvider.addEndpoint.mockResolvedValue();
         auth.hasUser.mockResolvedValue(true);
         const response = await request(app)
-            .post('/api/v1/endpoints/U2FtcGxlcw')
+            .post('/api/v1/endpoints')
             .set('Authorization', `Bearer ${getToken('John')}`)
             .send(endpoint);
 

@@ -24,7 +24,7 @@ import {
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
-import { AASEndpoint, QueryParser, stringFormat } from 'aas-core';
+import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
 import {
     AASTable,
     AuthService,
@@ -43,7 +43,7 @@ import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-f
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
-import { ShellsService } from './shells.service';
+import { ShellsState } from './shells.state';
 import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
 import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
 
@@ -56,7 +56,7 @@ import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpo
 })
 export class ShellsComponent implements OnDestroy {
     public constructor(
-        private readonly service: ShellsService,
+        private readonly state: ShellsState,
         private readonly api: EndpointsService,
         private readonly router: Router,
         private readonly modal: NgbModal,
@@ -81,7 +81,7 @@ export class ShellsComponent implements OnDestroy {
 
     public readonly activeFavorites = this.favorites.active;
 
-    public readonly limit = this.service.limit;
+    public readonly limit = this.state.limit;
 
     public readonly favoritesLists = computed(() => ['', ...this.favorites.items().map(list => list.name)]);
 
@@ -90,15 +90,15 @@ export class ShellsComponent implements OnDestroy {
         return this.favorites.active() ? filterText : '';
     });
 
-    public readonly filterText = this.service.filterText;
+    public readonly filterText = this.state.filterText;
 
-    public readonly isFirstPage = computed(() => this.service.previous() === null);
+    public readonly isFirstPage = computed(() => this.state.previous() === null);
 
-    public readonly isLastPage = computed(() => this.service.next() === null);
+    public readonly isLastPage = computed(() => this.state.next() === null);
 
-    public readonly documents = this.service.documents.asReadonly();
+    public readonly documents = this.state.documents;
 
-    public readonly selected = this.service.selected;
+    public readonly selected = this.state.selected;
 
     public readonly someSelected = computed(() => this.selected().length > 0);
 
@@ -106,7 +106,7 @@ export class ShellsComponent implements OnDestroy {
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-        this.service.save().subscribe();
+        this.state.save().subscribe();
     }
 
     public setActiveFavorites(name: string): void {
@@ -114,8 +114,12 @@ export class ShellsComponent implements OnDestroy {
         this.favorites.save().subscribe();
     }
 
-    public setLimit(value: number): void {
-        this.service.setLimit(value);
+    public setLimit(limit: number): void {
+        this.state.update({ pageOptions: { limit, filterText: this.filterText() } });
+    }
+
+    public setSelected(documents: AASDocument[]): void {
+        this.state.update({ selected: documents });
     }
 
     public addEndpoint(): Observable<void> {
@@ -211,7 +215,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public downloadDocument(): Observable<void> {
-        return from(this.service.selected()).pipe(
+        return from(this.state.selected()).pipe(
             mergeMap(document =>
                 this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx'),
             ),
@@ -220,15 +224,15 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public deleteDocument(): Observable<void> {
-        if (this.service.selected().length === 0) {
+        if (this.state.selected().length === 0) {
             return EMPTY;
         }
 
         return of(this.favorites.active()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.service.selected(), activeFavorites);
-                    this.service.removeFavorites([...this.service.selected()]);
+                    this.favorites.remove(this.state.selected(), activeFavorites);
+                    this.removeFavorites([...this.state.selected()]);
                     return this.favorites.save();
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
@@ -236,14 +240,14 @@ export class ShellsComponent implements OnDestroy {
                             this.window.confirm(
                                 stringFormat(
                                     this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                                    this.service
+                                    this.state
                                         .selected()
                                         .map(item => item.idShort)
                                         .join(', '),
                                 ),
                             ),
                         ),
-                        mergeMap(result => from(result ? this.service.selected() : [])),
+                        mergeMap(result => from(result ? this.state.selected() : [])),
                         mergeMap(document => this.api.delete(document.id, document.endpoint)),
                         catchError(error => this.notify.error(error)),
                     );
@@ -253,7 +257,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public openView(view: Route): Promise<boolean> {
-        const documents = this.service.selected();
+        const documents = this.state.selected();
         if (documents.length === 0) {
             return Promise.resolve(false);
         }
@@ -274,18 +278,18 @@ export class ShellsComponent implements OnDestroy {
         ]);
     }
 
-    public setFilter(filter: string): void {
+    public setFilter(filterText: string): void {
         try {
-            filter = filter.trim();
-            if (filter.length >= 3) {
-                new QueryParser(filter).check();
+            filterText = filterText.trim();
+            if (filterText.length >= 3) {
+                new QueryParser(filterText).check();
             } else {
-                filter = '';
+                filterText = '';
             }
 
-            this.service.setFilterText(filter);
+            this.state.update({ pageOptions: { limit: this.state.limit(), filterText } });
             if (!this.favorites.active()) {
-                this.service.getFirstPage(filter);
+                this.state.getFirstPage(filterText);
             }
         } catch (error) {
             this.notify.error(error);
@@ -293,35 +297,35 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public firstPage(): void {
-        this.service.getFirstPage();
+        this.state.getFirstPage();
     }
 
     public previousPage(): void {
-        this.service.getPreviousPage();
+        this.state.getPreviousPage();
     }
 
     public nextPage(): void {
-        this.service.getNextPage();
+        this.state.getNextPage();
     }
 
     public lastPage(): void {
-        this.service.getLastPage();
+        this.state.getLastPage();
     }
 
     public addToFavorites(): Observable<void> {
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this.service.selected()];
+                modalRef.componentInstance.documents = [...this.state.selected()];
                 return from(modalRef.result);
             }),
             map(() => {
-                this.selected.set([]);
+                this.state.update({ selected: [] });
             }),
         );
     }
 
     public addToStart(): Observable<void> {
-        for (const document of this.service.selected()) {
+        for (const document of this.state.selected()) {
             this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
                 id: document.id,
                 endpoint: document.endpoint,
@@ -329,5 +333,17 @@ export class ShellsComponent implements OnDestroy {
         }
 
         return this.start.save();
+    }
+
+    private removeFavorites(favorites: AASDocument[]): void {
+        if (!this.favorites.active()) {
+            return;
+        }
+
+        const documents = this.documents().filter(document =>
+            favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
+        );
+
+        this.state.update({ documents });
     }
 }

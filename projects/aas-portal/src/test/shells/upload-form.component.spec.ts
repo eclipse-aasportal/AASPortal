@@ -12,8 +12,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { UploadFormComponent } from '../../app/shells/upload-form/upload-form.component';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
+import { FakeLoader } from '../mocks';
 
 describe('UploadFormComponent', () => {
     let component: UploadFormComponent;
@@ -34,7 +35,7 @@ describe('UploadFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

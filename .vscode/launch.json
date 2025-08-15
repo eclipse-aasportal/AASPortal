@@ -36,20 +36,6 @@
             }
         },
         {
-            "name": "Test aas-portal",
-            "type": "chrome",
-            "request": "attach",
-            "preLaunchTask": "test-aas-portal",
-            "url": "http://localhost:9876/debug.html",
-        },
-        {
-            "name": "Test aas-lib",
-            "type": "chrome",
-            "request": "attach",
-            "preLaunchTask": "test-aas-lib",
-            "url": "http://localhost:9876/debug.html",
-        },
-        {
             "name": "Test aas-node",
             "type": "node",
             "request": "launch",

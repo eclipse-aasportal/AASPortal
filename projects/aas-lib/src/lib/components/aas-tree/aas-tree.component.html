@@ -11,8 +11,8 @@
     <thead>
         <tr>
             <th class="aas-tree-th-checkbox">
-                <input type="checkbox" class="form-check-input" (change)="toggleSelections()"
-                    [disabled]="state() === 'online'" [indeterminate]="someSelected()" [checked]="everySelected()">
+                <input type="checkbox" class="form-check-input" (ngModelChange)="toggleSelections()"
+                    [disabled]="live() === 'online'" [indeterminate]="someSelected()" [ngModel]="everySelected()">
             </th>
             <th>
                 @if (expanded()) {
@@ -32,8 +32,8 @@
         @for (node of nodes(); track node.id) {
         <tr [ngClass]="visualState(node)" [id]="node.id">
             <td>
-                <input type="checkbox" class="form-check-input" (change)="toggleSelection(node)"
-                    [checked]="node.selected" [disabled]="state() === 'online'" />
+                <input type="checkbox" class="form-check-input" (ngModelChange)="toggleSelection(node)"
+                    [ngModel]="node.selected" [disabled]="live() === 'online'" />
             </td>
             @if (node.isLeaf) {
             <td>
@@ -54,9 +54,7 @@
                 @if (node.canOpen) {
                 <a [href]="getUrl(node)" target="_blank">{{node.value()}}</a>
                 } @else if (node.element.modelType === 'RelationshipElement') {
-                <div class="d-flex flex-column fs-9 me-2">
-                    <a [href]="getReferenceUrl(node.relationship?.first)">1.</a>
-                    <a [href]="getReferenceUrl(node.relationship?.second)">2.</a>
+                <div class="d-flex flex-column fs-9 me-2">ToDo...
                 </div>
                 } @else {
                 <div class="text-nowrap me-2">{{node.value()}}</div>

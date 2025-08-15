@@ -11,13 +11,14 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthResult } from 'aas-core';
 import { of } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
 import { ERRORS } from '../../../lib/errors';
 import { ProfileFormComponent } from '../../../lib/components/auth/profile-form/profile-form.component';
+import { FakeLoader } from '../../mocks';
 
 describe('ProfileFormComponent', () => {
     let modal: NgbActiveModal;
@@ -30,7 +31,7 @@ describe('ProfileFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

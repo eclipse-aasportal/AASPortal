@@ -7,31 +7,50 @@
  *****************************************************************************/
 
 import { computed, effect, Injectable, OnDestroy, signal, untracked } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, concat, EMPTY, from, map, mergeMap, Observable, of, skipWhile, Subscription } from 'rxjs';
 import { aas, AASDocument, AASDocumentId, AASPagedResult } from 'aas-core';
-import { AuthService, EndpointsApi, IndexChangeService, ViewMode } from 'aas-lib';
+import { AuthService, EndpointsApi, IndexChangeService } from 'aas-lib';
 import { FavoritesService } from './favorites.service';
-import { TranslateService } from '@ngx-translate/core';
 
-type ShellsState = {
+export type PageOptions = {
     limit: number;
     filterText: string;
 };
 
+export type ShellsData = {
+    pageOptions: PageOptions;
+    documents: AASDocument[];
+    selected: AASDocument[];
+    previous: AASDocumentId | null;
+    next: AASDocumentId | null;
+};
+
 const cookieName = 'v1.Shells';
 
-const initialState: ShellsState = {
-    limit: 10,
-    filterText: '',
+const initialData: ShellsData = {
+    pageOptions: {
+        limit: 10,
+        filterText: '',
+    },
+    documents: [],
+    selected: [],
+    previous: null,
+    next: null,
 };
 
 @Injectable({
     providedIn: 'root',
 })
-export class ShellsService implements OnDestroy {
-    private readonly state = signal(initialState);
+export class ShellsState implements OnDestroy {
+    private readonly data = signal(initialData);
     private readonly subscription = new Subscription();
+    private readonly pageOptions$ = signal(initialData.pageOptions);
+    private readonly documents$ = signal<AASDocument[]>(initialData.documents);
+    private readonly selected$ = signal<AASDocument[]>(initialData.selected);
+    private readonly previous$ = signal<AASDocumentId | null>(initialData.previous);
+    private readonly next$ = signal<AASDocumentId | null>(initialData.next);
 
     public constructor(
         private readonly auth: AuthService,
@@ -48,9 +67,7 @@ export class ShellsService implements OnDestroy {
             )
             .subscribe(value => {
                 if (value) {
-                    this.state.set(JSON.parse(value));
-                } else {
-                    this.state.update(state => ({ ...state, viewMode: ViewMode.List }));
+                    this.update({ pageOptions: JSON.parse(value) });
                 }
             });
 
@@ -72,40 +89,46 @@ export class ShellsService implements OnDestroy {
 
     public readonly active = this.favorites.active;
 
-    public readonly limit = computed(() => this.state().limit);
+    public readonly limit = computed(() => this.data().pageOptions.limit);
 
-    public readonly filterText = computed(() => this.state().filterText);
+    public readonly filterText = computed(() => this.data().pageOptions.filterText);
 
-    public readonly documents = signal<AASDocument[]>([]);
+    public readonly documents = this.documents$.asReadonly();
 
-    public readonly selected = signal<AASDocument[]>([]);
+    public readonly selected = this.selected$.asReadonly();
 
-    public readonly previous = signal<AASDocumentId | null>(null);
+    public readonly previous = this.previous$.asReadonly();
 
-    public readonly next = signal<AASDocumentId | null>(null);
+    public readonly next = this.next$.asReadonly();
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 
-    public setLimit(limit: number): void {
-        this.state.update(state => ({ ...state, limit }));
-    }
+    public update(newState: Partial<ShellsData>): void {
+        if (newState.pageOptions !== undefined) {
+            this.pageOptions$.set(newState.pageOptions);
+        }
 
-    public setFilterText(value: string): void {
-        this.state.update(state => ({ ...state, value }));
-    }
+        if (newState.documents) {
+            this.documents$.set(newState.documents);
+        }
 
-    public update(limit: number | undefined, filterText: string | undefined): void {
-        this.state.update(state => ({
-            ...state,
-            limit: limit ?? state.limit,
-            filterText: filterText ?? state.filterText,
-        }));
+        if (newState.selected) {
+            this.selected$.set(newState.selected);
+        }
+
+        if (newState.next) {
+            this.next$.set(newState.next);
+        }
+
+        if (newState.previous) {
+            this.previous$.set(newState.previous);
+        }
     }
 
     public save(): Observable<void> {
-        return this.auth.setCookie(cookieName, JSON.stringify(this.state()));
+        return this.auth.setCookie(cookieName, JSON.stringify(this.data().pageOptions));
     }
 
     public getFirstPage(filter?: string, limit?: number): void {
@@ -120,7 +143,7 @@ export class ShellsService implements OnDestroy {
                     limit: limit ?? untracked(this.limit),
                 },
                 filter,
-                this.translate.currentLang,
+                this.translate.getCurrentLang(),
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result, limit, filter)))
             .subscribe();
@@ -139,7 +162,7 @@ export class ShellsService implements OnDestroy {
                     limit: untracked(this.limit),
                 },
                 untracked(this.filterText),
-                this.translate.currentLang,
+                this.translate.getCurrentLang(),
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
@@ -153,7 +176,7 @@ export class ShellsService implements OnDestroy {
                     limit: untracked(this.limit),
                 },
                 untracked(this.filterText),
-                this.translate.currentLang,
+                this.translate.getCurrentLang(),
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
@@ -172,26 +195,14 @@ export class ShellsService implements OnDestroy {
                     limit: untracked(this.limit),
                 },
                 untracked(this.filterText),
-                this.translate.currentLang,
+                this.translate.getCurrentLang(),
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();
     }
 
-    public removeFavorites(favorites: AASDocument[]): void {
-        if (!this.favorites.active()) {
-            return;
-        }
-
-        const documents = this.documents().filter(document =>
-            favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
-        );
-
-        this.documents.set(documents);
-    }
-
     private getFavorites(documents: AASDocument[]): void {
-        this.documents.set(documents);
+        this.update({ documents });
         from(documents)
             .pipe(
                 mergeMap(document =>
@@ -279,22 +290,38 @@ export class ShellsService implements OnDestroy {
         );
     }
 
-    private setPage(result: AASPagedResult, limit: number | undefined, filter: string | undefined): void {
-        this.documents.set(result.documents);
-        this.previous.set(result.previous);
-        this.next.set(result.next);
-        this.update(limit, filter);
+    private setPage(result: AASPagedResult, limit: number | undefined, filterText: string | undefined): void {
+        const newState: Partial<ShellsData> = {
+            documents: result.documents,
+            previous: result.previous,
+            next: result.next,
+        };
+
+        if (limit !== undefined || filterText !== undefined) {
+            if (limit === undefined) {
+                limit = this.limit();
+            }
+
+            if (filterText === undefined) {
+                filterText = this.filterText();
+            }
+
+            newState.pageOptions = {
+                limit,
+                filterText,
+            };
+        }
+
+        this.update(newState);
     }
 
     private setContent(document: AASDocument, content: aas.Environment | null | undefined): void {
-        this.documents.update(state => {
-            const documents = [...state];
-            const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
-            if (index >= 0) {
-                documents[index] = { ...document, content };
-            }
+        const documents = [...this.documents()];
+        const index = documents.findIndex(item => item.endpoint === document.endpoint && item.id === document.id);
+        if (index >= 0) {
+            documents[index] = { ...document, content };
+        }
 
-            return documents;
-        });
+        this.update({ documents });
     }
 }

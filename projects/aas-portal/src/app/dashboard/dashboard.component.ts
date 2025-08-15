@@ -30,7 +30,7 @@ import {
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
-import { CommandHandlerService } from '../aas/command-handler.service';
+import { CommandHandler } from '../aas/command-handler';
 import { MovePreviousCommand } from './commands/move-previous-command';
 import { MoveNextCommand } from './commands/move-next-command';
 import { DeletePageCommand } from './commands/delete-page-command';
@@ -71,7 +71,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         private readonly notify: NotifyService,
         private readonly toolbar: ToolbarService,
         private readonly start: StartService,
-        private readonly commandHandler: CommandHandlerService,
+        private readonly commandHandler: CommandHandler,
         @Inject(WINDOW) private readonly window: Window,
     ) {
         super(api);

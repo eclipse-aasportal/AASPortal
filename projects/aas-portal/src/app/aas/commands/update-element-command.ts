@@ -9,7 +9,7 @@
 import { aas, AASDocument, selectReferable, noop } from 'aas-core';
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
-import { AASStore } from '../aas.store';
+import { AASState } from '../aas.state';
 
 export class UpdateElementCommand extends Command {
     private readonly origin: aas.SubmodelElement;
@@ -18,7 +18,7 @@ export class UpdateElementCommand extends Command {
     private document: AASDocument;
 
     public constructor(
-        private readonly store: AASStore,
+        private readonly store: AASState,
         document: AASDocument,
         origin: aas.SubmodelElement,
         element: aas.SubmodelElement,
@@ -36,15 +36,15 @@ export class UpdateElementCommand extends Command {
         const targetCollection = this.getChildren(this.document, this.origin);
         const index = sourceCollection.indexOf(this.origin);
         targetCollection[index] = this.element;
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     protected onUndo(): void {
-        this.store.document$.set({ ...this.memento, modified: true });
+        this.store.update({ document: { ...this.memento, modified: true } });
     }
 
     protected onRedo(): void {
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     protected onAbort(): void {

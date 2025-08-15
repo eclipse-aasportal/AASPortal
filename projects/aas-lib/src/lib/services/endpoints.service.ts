@@ -32,7 +32,7 @@ export class EndpointsService {
      * @param endpoint The AAS endpoint.
      */
     public addEndpoint(endpoint: AASEndpoint): Observable<void> {
-        return this.http.post<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint.name)}`, endpoint);
+        return this.http.post<void>('/api/v1/endpoints', endpoint);
     }
 
     /**

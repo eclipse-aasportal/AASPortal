@@ -8,13 +8,14 @@
 
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AppInfo } from 'aas-core';
 import { IndexChangeService, StartService, ToolbarService } from 'aas-lib';
 import { AboutComponent } from '../../app/about/about.component';
 import { AboutApiService } from '../../app/about/about-api.service';
+import { FakeLoader } from '../mocks';
 
 describe('AboutComponent', () => {
     let api: jasmine.SpyObj<AboutApiService>;
@@ -33,7 +34,7 @@ describe('AboutComponent', () => {
         };
 
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        start.save.and.returnValue(of(void 0))
+        start.save.and.returnValue(of(void 0));
 
         api = jasmine.createSpyObj<AboutApiService>(['getInfo', 'getMessages']);
         api.getInfo.and.returnValue(of(info));
@@ -68,7 +69,7 @@ describe('AboutComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

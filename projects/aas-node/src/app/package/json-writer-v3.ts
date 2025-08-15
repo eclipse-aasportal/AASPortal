@@ -24,7 +24,7 @@ export class JsonWriterV3 extends AASWriter {
 
     /**
      * Deserializes a Submodel or SubmodelElement from the specified source.
-     * @param data The serialized Submodel or SubmodelElement.
+     * @param source The source referable.
      * @returns The deserialized Submodel or SubmodelElement.
      */
     public convert(source: aas.Referable): aas.Referable {

@@ -9,11 +9,12 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ExtrasEndpointFormComponent } from '../../app/shells/extras-endpoint-form/extras-endpoint-form.component';
 import { ExtrasEndpointService } from '../../app/shells/extras-endpoint-form/extras-endpoint.service';
+import { FakeLoader } from '../mocks';
 
 describe('ExtrasEndpointFormComponent', () => {
     let service: jasmine.SpyObj<ExtrasEndpointService>;
@@ -37,7 +38,7 @@ describe('ExtrasEndpointFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
