@@ -19,58 +19,58 @@ import {
     convertBlobToBase64Async,
 } from '../lib/utilities';
 
-describe('convert', function () {
-    describe('basename', function () {
-        it('gets the file name of a file path', function () {
+describe('convert', () => {
+    describe('basename', () => {
+        it('gets the file name of a file path', () => {
             expect(basename('A:/hello/world/john.doe')).toEqual('john.doe');
         });
     });
 
-    describe('extension', function () {
-        it('gets the extension of a file path', function () {
+    describe('extension', () => {
+        it('gets the extension of a file path', () => {
             expect(extension('A:/hello/world/john.doe')).toEqual('.doe');
         });
 
-        it('gets "undefined" of no extension exits', function () {
+        it('gets "undefined" of no extension exits', () => {
             expect(extension('A:/hello/world/john-doe')).toBeUndefined();
         });
     });
 
-    describe('normalize', function () {
-        it('replaces all "\\" with "/"', function () {
+    describe('normalize', () => {
+        it('replaces all "\\" with "/"', () => {
             expect(normalize('A:\\hello/world\\john.doe')).toEqual('A:/hello/world/john.doe');
         });
     });
 
-    describe('messageToString', function () {
+    describe('messageToString', () => {
         let translate: jasmine.SpyObj<TranslateService>;
 
-        beforeEach(function () {
+        beforeEach(() => {
             translate = jasmine.createSpyObj<TranslateService>('TranslateService', ['instant'], {
                 currentLang: 'en-us',
             });
         });
 
-        it('converts a message of type string', function () {
+        it('converts a message of type string', () => {
             expect(messageToString('Hello World!', translate)).toEqual('Hello World!');
         });
 
-        it('converts an ApplicationError', function () {
+        it('converts an ApplicationError', () => {
             translate.instant.and.returnValue('Hello {0}!');
             const error = new ApplicationError('Hello World!', 'HELLO_WORLD', 'World');
             expect(messageToString(error, translate)).toEqual('Hello World!');
         });
     });
 
-    describe('encodeBase64Url', function () {
-        it('converts an URL to Base64Url string', function () {
+    describe('encodeBase64Url', () => {
+        it('converts an URL to Base64Url string', () => {
             const b64url = encodeBase64Url('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
             expect(b64url).toEqual('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw');
         });
     });
 
-    describe('decodeBase64Url', function () {
-        it('converts a Base64Url string to an URL', function () {
+    describe('decodeBase64Url', () => {
+        it('converts a Base64Url string to an URL', () => {
             const url = decodeBase64Url(
                 'aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw',
             );
@@ -78,18 +78,18 @@ describe('convert', function () {
         });
     });
 
-    describe('isBase64', function () {
-        it('indicates that "The quick brown fox jumps over the lazy dog." is not base64 encoded', function () {
+    describe('isBase64', () => {
+        it('indicates that "The quick brown fox jumps over the lazy dog." is not base64 encoded', () => {
             expect(isBase64('The quick brown fox jumps over the lazy dog.')).toBeFalse();
         });
 
-        it('indicates that "VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4=" is base64 encoded', function () {
+        it('indicates that "VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4=" is base64 encoded', () => {
             expect(isBase64('VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4=')).toBeTrue();
         });
     });
 
-    describe('convertBlobToBase64Async', function () {
-        it('converts the Blob content to a base64 encoded string', async function () {
+    describe('convertBlobToBase64Async', () => {
+        it('converts the Blob content to a base64 encoded string', async () => {
             const blob = new Blob(['Hello World!']);
             await expectAsync(convertBlobToBase64Async(blob)).toBeResolvedTo('SGVsbG8gV29ybGQh');
         });

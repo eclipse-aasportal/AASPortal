@@ -109,7 +109,7 @@ export const viewRoutes: ViewRoute[] = [
 
 /**
  * Returns the route that corresponds to the specified Submodel.
- * @param arg The current Submodel.
+ * @param submodel The current Submodel.
  * @param defaultRoute Indicates to return the default route.
  * @returns The route or `undefined`.
  */

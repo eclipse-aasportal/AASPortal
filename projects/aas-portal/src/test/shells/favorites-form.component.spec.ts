@@ -6,13 +6,14 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { FavoritesFormComponent } from '../../app/shells/favorites-form/favorites-form.component';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
+import { FakeLoader } from '../mocks';
 
 describe('FavoritesFormComponent', () => {
     let service: jasmine.SpyObj<FavoritesService>;
@@ -40,7 +41,7 @@ describe('FavoritesFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

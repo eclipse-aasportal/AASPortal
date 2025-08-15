@@ -52,12 +52,12 @@ export class LocalizeComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.subscription.add(this.translate.onLangChange.subscribe(this.onLangChange));
         const localeId = this.window.localStorage.getItem('.localeId');
-        if (localeId && this.translate.currentLang !== localeId) {
+        if (localeId && this.translate.getCurrentLang() !== localeId) {
             this.translate.use(localeId);
         }
 
-        if (!this.translate.currentLang) {
-            this.translate.use(this.translate.defaultLang);
+        if (!this.translate.getCurrentLang()) {
+            this.translate.use(this.translate.getFallbackLang() ?? 'en-us');
         }
     }
 

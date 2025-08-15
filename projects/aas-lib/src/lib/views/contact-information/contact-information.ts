@@ -55,7 +55,7 @@ export class ContactInformation {
 
         let index = 1;
         for (const element of submodel.submodelElements) {
-            const dataSheet = createDataSheet(document, submodel, element, currentLang, {
+            const dataSheet = createDataSheet(document, element, currentLang, {
                 name: `${getDisplayName(element, env, currentLang)} [${index}]`,
                 type: 'A',
                 include: [

@@ -13,7 +13,8 @@ import { aas, AASDocument } from 'aas-core';
 import { TechnicalData } from '../../../lib/views/technical-data/technical-data';
 
 import technicalData from '../../assets/technical-data-1-2.json';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { FakeLoader } from '../../mocks';
 
 describe('TechnicalData', () => {
     let component: TechnicalData;
@@ -39,7 +40,7 @@ describe('TechnicalData', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

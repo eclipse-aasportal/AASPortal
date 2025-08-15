@@ -63,7 +63,7 @@ export abstract class LeafView extends View {
         return item ? item[1] : undefined;
     });
 
-    /** */
+    /** The submodels and the corresponding AAS documents. */
     protected readonly tuples = signal<[AASDocument, aas.Submodel][]>([]);
 
     /** Initializes the current view. */

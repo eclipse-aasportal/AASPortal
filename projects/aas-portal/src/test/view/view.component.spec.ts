@@ -8,10 +8,11 @@
 
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ToolbarService } from 'aas-lib';
 
 import { ViewComponent } from '../../app/view/view.component';
+import { FakeLoader } from '../mocks';
 
 describe('ViewComponent', () => {
     beforeEach(async () => {
@@ -28,7 +29,7 @@ describe('ViewComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

@@ -20,8 +20,9 @@ import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
+import { FakeLoader } from '../mocks';
 
 describe('DownloadService', () => {
     let service: DownloadService;
@@ -34,7 +35,7 @@ describe('DownloadService', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

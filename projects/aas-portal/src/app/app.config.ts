@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { ApplicationConfig, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import {
     AuthInterceptor,
     CustomerFeedbackCardComponent,
@@ -21,25 +21,19 @@ import {
     viewRoutes,
 } from 'aas-lib';
 
-import { HttpLoaderFactory } from './http-loader-factory';
 import { routes } from './app.routes';
 import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideRouter(routes),
         provideHttpClient(withInterceptorsFromDi()),
-        importProvidersFrom(
-            TranslateModule.forRoot({
-                defaultLanguage: 'en-us',
-                loader: {
-                    provide: TranslateLoader,
-                    useFactory: HttpLoaderFactory,
-                    deps: [HttpClient],
-                },
-            }),
-        ),
+        provideTranslateService({
+            fallbackLang: 'en-us',
+            loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
+        }),
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         {
             provide: START_TILE_TYPES,

@@ -6,6 +6,10 @@
  *
  *****************************************************************************/
 
+/**
+ * Represents a node in a tree.
+ * @param TElement The base type of the encapsulated structure element.
+ */
 export abstract class TreeNode<TElement> {
     protected constructor(
         public readonly element: TElement,
@@ -18,17 +22,24 @@ export abstract class TreeNode<TElement> {
         public nextSibling: number,
     ) {}
 
+    /** Indicates whether the current node has children. */
     public get hasChildren(): boolean {
         return this.firstChild >= 0;
     }
 
+    /** Indicates whether the current node is a leaf or a composite. */
     public abstract get isLeaf(): boolean;
 }
 
+/** 
+ * Represents a structure of elements as a tree.
+ * @param TElement The base type of the structure elements.
+ * @param TNode The concrete `TreeNode` type.
+ */
 export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
-    public get expanded(): TNode[] {
+    public get nodes(): TNode[] {
         const nodes: TNode[] = [];
-        for (const root of this.getNodes().filter(node => node.level === 0)) {
+        for (const root of this.getContents().filter(node => node.level === 0)) {
             nodes.push(root);
             this.traverseNodes(root, nodes);
         }
@@ -36,14 +47,14 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
         return nodes;
     }
 
+    /** Gets or sets the current selected elements. */
     public get selectedElements(): TElement[] {
-        return this.getNodes()
+        return this.getContents()
             .filter(node => node.selected)
             .map(node => node.element);
     }
-
     public set selectedElements(elements: TElement[]) {
-        const nodes = [...this.getNodes()];
+        const nodes = [...this.getContents()];
         const set = new Set(elements);
         for (let i = 0, n = nodes.length; i < n; i++) {
             const row = nodes[i];
@@ -56,12 +67,17 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
             }
         }
 
-        this.setNodes(nodes);
+        this.setContents(nodes);
     }
 
+    /**
+     * Gets the children of the specified parent node.
+     * @param node The current node (parent).
+     * @returns An array containing the children.
+     */
     public getChildren(node: TNode): TNode[] {
         const children: TNode[] = [];
-        const nodes = this.getNodes();
+        const nodes = this.getContents();
         if (node.firstChild >= 0) {
             let child = nodes[node.firstChild];
             children.push(child);
@@ -74,12 +90,22 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
         return children;
     }
 
-    public get highlighted(): TNode[] {
-        return [];
-    }
-
+    /**
+     * Expands the node with the specified index.
+     * @param index The index of the node to expand.
+     */
+    public expand(index: number): void;
+    /**
+     * Expands the specified node.
+     * @param node The node to expand
+     */
+    public expand(node: TNode): void;
+    /**
+     * Expands the complete tree.
+     */
+    public expand(): void
     public expand(arg?: number | TNode): void {
-        const nodes = [...this.getNodes()];
+        const nodes = [...this.getContents()];
         if (nodes.length === 0) {
             return;
         }
@@ -114,19 +140,23 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
             }
         }
 
-        this.setNodes(nodes);
+        this.setContents(nodes);
     }
 
+    /**
+     * Collapses the specified node.
+     * @param node The node to collapse.
+     */
     public collapse(node?: TNode): void {
         let nodes: TNode[];
         if (node) {
-            nodes = [...this.getNodes()];
+            nodes = [...this.getContents()];
             const index = nodes.indexOf(node);
             const clone = this.cloneNode(node);
             clone.expanded = false;
             nodes[index] = clone;
         } else {
-            nodes = this.getNodes().map((node, index) => {
+            nodes = this.getContents().map((node, index) => {
                 if (index === 0) {
                     if (!node.expanded) {
                         const clone = this.cloneNode(node);
@@ -143,20 +173,28 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
             });
         }
 
-        this.setNodes(nodes);
+        this.setContents(nodes);
     }
 
+    /**
+     * Toggels the selection state of the specified node.
+     * - Press and hold the `ALT` key enables single selection mode.
+     * - Press and hold the `SHIFT` key enables the area selection mode.
+     * @param node The current node.
+     * @param altKey The state of the `ALT` key.
+     * @param shiftKey The state of the `SHIFT` key.
+     */
     public toggleSelected(node: TNode, altKey: boolean, shiftKey: boolean): void {
         let nodes: TNode[];
         if (altKey) {
-            nodes = this.getNodes().map(item =>
+            nodes = this.getContents().map(item =>
                 item === node ? this.clone(node, !node.selected) : item.selected ? this.clone(item, false) : item,
             );
         } else if (shiftKey) {
-            const index = this.getNodes().indexOf(node);
+            const index = this.getContents().indexOf(node);
             let begin = index;
             let end = index;
-            const selection = this.getNodes().map(row => row.selected);
+            const selection = this.getContents().map(row => row.selected);
             const last = selection.lastIndexOf(true);
             if (last >= 0) {
                 if (last > index) {
@@ -168,7 +206,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
                 }
             }
 
-            nodes = this.getNodes().map((node, i) => {
+            nodes = this.getContents().map((node, i) => {
                 if (i < begin || i > end) {
                     return node.selected ? this.clone(node, false) : node;
                 } else {
@@ -176,16 +214,21 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
                 }
             });
         } else {
-            nodes = [...this.getNodes()];
+            nodes = [...this.getContents()];
             const i = nodes.indexOf(node);
             nodes[i] = this.clone(node, !node.selected);
         }
 
-        this.setNodes(nodes);
+        this.setContents(nodes);
     }
 
+    /** 
+     * Toggles the selection state over all nodes:
+     * - Selects all nodes if no node or some but not all nodes are selected.
+     * - Deselects all nodes if all nodes are selected.
+     */
     public toggleSelections(): void {
-        const nodes = [...this.getNodes()];
+        const nodes = [...this.getContents()];
         if (nodes.length > 0) {
             const value = !nodes.every(row => row.selected);
             for (let index = 0, n = nodes.length; index < n; ++index) {
@@ -196,17 +239,27 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
             }
         }
 
-        this.setNodes(nodes);
+        this.setContents(nodes);
     }
 
+    /**
+     * Highlights the node with the specified index. Only one node in the tree can be highlighted at a time.
+     * @param index The index of the node to highlight.
+     */
+    public highlight(index: number): void;
+    /**
+     * Highligts the specified node. Only one node in the tree can be highlighted at a time.
+     * @param node The node to highlight.
+     */
+    public highlight(node: TNode): void;
     public highlight(arg: TNode | number): void {
-        const index = typeof arg === 'number' ? arg : this.getNodes().indexOf(arg);
+        const index = typeof arg === 'number' ? arg : this.getContents().indexOf(arg);
         this.updateHighlighted(index);
     }
 
-    protected abstract getNodes(): TNode[];
+    protected abstract getContents(): TNode[];
 
-    protected abstract setNodes(nodes: TNode[]): void;
+    protected abstract setContents(nodes: TNode[]): void;
 
     protected abstract cloneNode(node: TNode): TNode;
 
@@ -218,7 +271,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
     }
 
     private updateHighlighted(index: number): void {
-        const nodes = [...this.getNodes()];
+        const nodes = [...this.getContents()];
         for (let i = 0; i < nodes.length; i++) {
             const node = nodes[i];
             if (i === index) {
@@ -230,11 +283,11 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
             }
         }
 
-        this.setNodes(nodes);
+        this.setContents(nodes);
     }
 
     private traverseNodes(node: TNode, expanded: TNode[]): void {
-        const nodes = this.getNodes();
+        const nodes = this.getContents();
         if (node.firstChild >= 0 && node.expanded) {
             let child = nodes[node.firstChild];
             expanded.push(child);

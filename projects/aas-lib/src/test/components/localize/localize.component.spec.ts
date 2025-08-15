@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { LocalizeComponent } from '../../../lib/components/localize/localize.component';
 import { WINDOW, WindowService } from '../../../lib/services/window.service';
+import { FakeLoader } from '../../mocks';
 
 describe('LocalizeComponent', () => {
     let window: jasmine.SpyObj<Window>;
@@ -33,10 +34,10 @@ describe('LocalizeComponent', () => {
             imports: [
                 LocalizeComponent,
                 TranslateModule.forRoot({
-                    defaultLanguage: 'en-us',
+                    fallbackLang: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

@@ -31,7 +31,7 @@ export interface MessageEntry {
     classname?: string;
 }
 
-export type OnlineState = 'offline' | 'online';
+export type LiveState = 'offline' | 'online';
 
 export enum ViewMode {
     Undefined = '',

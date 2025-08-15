@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -23,6 +23,7 @@ import { AASDocument } from 'aas-core';
 import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
+import { FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-auth',
@@ -81,7 +82,7 @@ describe('MainComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

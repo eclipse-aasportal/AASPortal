@@ -8,8 +8,8 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of, Subject } from 'rxjs';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { AASDocument, WebSocketData } from 'aas-core';
 
@@ -19,35 +19,20 @@ import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { WebSocketFactoryService } from '../../../lib/services/web-socket-factory.service';
 import { TestWebSocketFactoryService } from '../../assets/test-web-socket-factory.service';
 import { WINDOW } from '../../../lib/services/window.service';
-import { AASTreeApiService } from '../../../lib/components/aas-tree/aas-tree-api.service';
-import { encodeBase64Url } from '../../../lib/utilities';
+import { AASTreeApi } from '../../../lib/components/aas-tree/aas-tree-api';
+import { FakeLoader } from '../../mocks';
 
 describe('AASTreeComponent', () => {
     let document: AASDocument;
     let webSocketSubject: Subject<WebSocketData>;
-    let api: jasmine.SpyObj<AASTreeApiService>;
-    let route: jasmine.SpyObj<ActivatedRoute>;
+    let api: jasmine.SpyObj<AASTreeApi>;
 
     beforeEach(async () => {
         document = sampleDocument;
         webSocketSubject = new Subject<WebSocketData>();
-        api = jasmine.createSpyObj<AASTreeApiService>(['getValueAsync']);
-
-        route = jasmine.createSpyObj<ActivatedRoute>(
-            {},
-            { queryParams: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
-        );
-
+        api = jasmine.createSpyObj<AASTreeApi>(['getValueAsync']);
         await TestBed.configureTestingModule({
-            imports: [
-                AASTreeComponent,
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
+            imports: [AASTreeComponent],
             providers: [
                 {
                     provide: NotifyService,
@@ -62,13 +47,19 @@ describe('AASTreeComponent', () => {
                     useValue: new TestWebSocketFactoryService(webSocketSubject),
                 },
                 {
-                    provide: AASTreeApiService,
+                    provide: AASTreeApi,
                     useValue: api,
                 },
                 {
                     provide: ActivatedRoute,
-                    useValue: route,
+                    useValue: {} as Partial<ActivatedRoute>,
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();
@@ -118,12 +109,12 @@ describe('AASTreeComponent', () => {
         expect(component.modified()).toEqual(document.modified ? document.modified : false);
     });
 
-    it('shows the current offline state', () => {
+    it('shows the current live state', () => {
         const fixture = TestBed.createComponent(AASTreeComponent);
         const component = fixture.componentInstance;
         fixture.componentRef.setInput('document', document);
         fixture.detectChanges();
-        expect(component.state()).toEqual('offline');
+        expect(component.live()).toEqual('offline');
     });
 
     it('indicates if no node is selected', () => {
@@ -225,7 +216,7 @@ describe('AASTreeComponent', () => {
             fixture.detectChanges();
             fixture.componentRef.setInput('searchExpression', 'max');
             fixture.detectChanges();
-            expect(component.matchRow()?.name).toEqual('MaxRotationSpeed');
+            expect(component.matchNode()?.name).toEqual('MaxRotationSpeed');
         });
 
         it('finds the first occurrence of "max" at row 7', () => {
@@ -249,7 +240,7 @@ describe('AASTreeComponent', () => {
             expect(component.matchIndex()).toEqual(8);
         });
 
-        it('finds the previous occurrence of "max" at row 25', () => {
+        it('finds the previous occurrence of "max" at row 8', () => {
             const fixture = TestBed.createComponent(AASTreeComponent);
             const component = fixture.componentInstance;
             fixture.componentRef.setInput('document', document);

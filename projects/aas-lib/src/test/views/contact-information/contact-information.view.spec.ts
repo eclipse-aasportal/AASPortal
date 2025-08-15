@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -25,6 +25,7 @@ import { ContactInformationView } from '../../../lib/views/contact-information/c
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
 
 import contactInformation from '../../assets/contact-information-1-0.json';
+import { FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -104,7 +105,7 @@ describe('ContactInformationsView', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

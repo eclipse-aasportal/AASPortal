@@ -13,13 +13,13 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { EndpointsApi, NotifyService } from 'aas-lib';
 import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
-import { AASStore } from '../../app/aas/aas.store';
+import { AASState } from '../../app/aas/aas.state';
 
 describe('NewElementCommand', () => {
     let command: NewElementCommand;
     let document: AASDocument;
     let submodel: aas.Submodel;
-    let store: AASStore;
+    let state: AASState;
 
     beforeEach(() => {
         document = cloneDeep(aasNoTechnicalData);
@@ -39,17 +39,17 @@ describe('NewElementCommand', () => {
             ],
         });
 
-        store = TestBed.inject(AASStore);
-        store.document$.set(document);
+        state = TestBed.inject(AASState);
+        state.update({ document });
     });
 
     beforeEach(() => {
-        command = new NewElementCommand(store, document, document.content!.assetAdministrationShells[0], submodel);
+        command = new NewElementCommand(state, document, document.content!.assetAdministrationShells[0], submodel);
         command.execute();
     });
 
     it('can be executed', () => {
-        const document = store.document$();
+        const document = state.document();
         const element = selectElement(document!.content!, 'TechnicalData');
         expect(element).toBeDefined();
     });
@@ -57,14 +57,14 @@ describe('NewElementCommand', () => {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document$();
+            const document = state.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
         }
 
         {
             command.redo();
-            const document = store.document$();
+            const document = state.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeDefined();
         }

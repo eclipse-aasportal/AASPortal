@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -20,7 +20,6 @@ import {
 
 import { AASDocument, WebSocketData, aas } from 'aas-core';
 import {
-    WINDOW,
     ViewMode,
     AuthService,
     NotifyService,
@@ -35,6 +34,7 @@ import {
 import { ShellsComponent } from '../../app/shells/shells.component';
 import { EndpointsService } from '../../../../aas-lib/src/lib/services/endpoints.service';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
+import { FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -50,7 +50,6 @@ class TestAASTable {
 }
 
 describe('ShellsComponent', () => {
-    let window: jasmine.SpyObj<Window>;
     let localStorage: jasmine.SpyObj<Storage>;
     let endpoints: jasmine.SpyObj<EndpointsService>;
     let documents: jasmine.SpyObj<EndpointsApi>;
@@ -63,7 +62,6 @@ describe('ShellsComponent', () => {
         start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
         localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
         localStorage.getItem.and.returnValue(null);
-        window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage });
         endpoints = jasmine.createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
         documents = jasmine.createSpyObj<EndpointsApi>(['getContent', 'getHierarchy', 'getDocuments']);
         documents.getDocuments.and.returnValue(
@@ -115,10 +113,6 @@ describe('ShellsComponent', () => {
                     useValue: documents,
                 },
                 {
-                    provide: WINDOW,
-                    useValue: window,
-                },
-                {
                     provide: FavoritesService,
                     useValue: favorites,
                 },
@@ -153,7 +147,7 @@ describe('ShellsComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

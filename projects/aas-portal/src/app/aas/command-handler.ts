@@ -13,7 +13,7 @@ import { Command } from '../types/command';
 @Injectable({
     providedIn: 'root',
 })
-export class CommandHandlerService {
+export class CommandHandler {
     private readonly commands = signal<Command[]>([]);
     private readonly position = signal(-1);
 
