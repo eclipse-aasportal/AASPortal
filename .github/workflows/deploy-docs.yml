@@ -3,7 +3,8 @@ name: Deploy TypeDoc to GitHub Pages
 on:
   push:
     branches: [development, ghpages-workflow] # or your default branch
-
+permissions:
+  contents: write
 jobs:
   deploy:
     runs-on: ubuntu-latest
