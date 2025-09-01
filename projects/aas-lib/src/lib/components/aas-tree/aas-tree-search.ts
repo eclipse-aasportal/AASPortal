@@ -9,7 +9,6 @@
 import trim from 'lodash-es/trim';
 import { inject, Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject } from 'rxjs';
 import {
     aas,
     AASAbbreviation,
@@ -37,7 +36,7 @@ interface SearchTerm {
     query?: SearchQuery;
 }
 
-/** 
+/**
  * Provides a service to find elements of an AAS document that match a search expression.
  */
 @Injectable()

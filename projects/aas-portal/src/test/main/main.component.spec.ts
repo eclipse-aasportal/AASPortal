@@ -6,8 +6,9 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
 import {
@@ -23,7 +24,7 @@ import { AASDocument } from 'aas-core';
 import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-auth',
@@ -52,14 +53,14 @@ class TestNotifyComponent {}
 
 describe('MainComponent', () => {
     let documentSubject: Subject<AASDocument | null>;
-    let toolbar: jasmine.SpyObj<ToolbarService>;
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let toolbar: jest.Mocked<ToolbarService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
 
     beforeEach(async () => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
-        toolbar = jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
-        indexChange = jasmine.createSpyObj<IndexChangeService>(['clear'], {
+        toolbar = createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
+        indexChange = createSpyObj<IndexChangeService>(['clear'], {
             documentCount: (() => 42) as Signal<number>,
             endpointCount: (() => 1) as Signal<number>,
             changedDocuments: (() => 0) as Signal<number>,
@@ -75,17 +76,16 @@ describe('MainComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
-                provideRouter([]),
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideRouter([]),
+                provideZonelessChangeDetection(),
             ],
+            imports: [],
         }).compileComponents();
 
         TestBed.overrideComponent(MainComponent, {

@@ -17,21 +17,25 @@
                     <table class="table table-sm table-striped table-borderless">
                         <tbody>
                             @for (item of items(); track item.title) {
-                            <tr class="align-middle">
-                                <td>
-                                    <img [src]="getPreviewSource(item)" height="48" (error)="item.preview = undefined">
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        @for(file of item.files; track file.name) {
-                                        <a [href]="file.url" target="_blank">{{file.name}}</a>
-                                        }
-                                    </div>
-                                </td>
-                                <td>{{item.title}}</td>
-                                <td>{{item.version}}</td>
-                                <td>{{item.status}}</td>
-                            </tr>
+                                <tr class="align-middle">
+                                    <td>
+                                        <img
+                                            [src]="getPreviewSource(item)"
+                                            height="48"
+                                            (error)="item.preview = undefined"
+                                        />
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            @for (file of item.files; track file.name) {
+                                                <a [href]="file.url" target="_blank">{{ file.name }}</a>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>{{ item.title }}</td>
+                                    <td>{{ item.version }}</td>
+                                    <td>{{ item.status }}</td>
+                                </tr>
                             }
                         </tbody>
                     </table>

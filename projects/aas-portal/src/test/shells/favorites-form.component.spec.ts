@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -13,13 +14,13 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { FavoritesFormComponent } from '../../app/shells/favorites-form/favorites-form.component';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('FavoritesFormComponent', () => {
-    let service: jasmine.SpyObj<FavoritesService>;
+    let service: jest.Mocked<FavoritesService>;
 
     beforeEach(async () => {
-        service = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save'], {
+        service = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save'], {
             active: signal(''),
             items: signal<FavoritesList[]>([]),
         });
@@ -28,7 +29,7 @@ describe('FavoritesFormComponent', () => {
             providers: [
                 {
                     provide: NgbActiveModal,
-                    useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
+                    useValue: createSpyObj<NgbActiveModal>(['close', 'dismiss']),
                 },
                 {
                     provide: FavoritesService,

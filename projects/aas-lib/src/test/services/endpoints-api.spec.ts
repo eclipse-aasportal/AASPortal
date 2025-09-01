@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -17,17 +18,18 @@ import { EndpointsApi } from '../../lib/services/endpoints-api';
 import { CacheService } from '../../lib/services/cache.service';
 
 import sample from '../assets/dpp-sample.json';
+import { createSpyObj, DoneFn } from '../mocks';
 
 describe('EndpointsApi', () => {
     let service: EndpointsApi;
     let httpTestingController: HttpTestingController;
-    let auth: jasmine.SpyObj<AuthService>;
-    let cache: jasmine.SpyObj<CacheService>;
+    let auth: jest.Mocked<AuthService>;
+    let cache: jest.Mocked<CacheService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['login'], { ready: of(true) });
-        cache = jasmine.createSpyObj<CacheService>(['get', 'set']);
-        cache.get.and.returnValue(undefined);
+        auth = createSpyObj<AuthService>(['login'], { ready: of(true) });
+        cache = createSpyObj<CacheService>(['get', 'set']);
+        cache.get.mockReturnValue(undefined);
         
         TestBed.configureTestingModule({
             providers: [

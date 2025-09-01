@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AASTreeSearch', () => {
     let search: AASTreeSearch;
@@ -22,7 +22,7 @@ describe('AASTreeSearch', () => {
                 AASTreeSearch,
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 provideZonelessChangeDetection(),
                 provideTranslateService({

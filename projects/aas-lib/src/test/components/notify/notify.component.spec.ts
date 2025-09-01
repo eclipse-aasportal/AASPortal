@@ -12,7 +12,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { NotifyComponent } from '../../../lib/components/notify/notify.component';
-import { FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('NotifyComponent', () => {
     beforeEach(async () => {
@@ -29,7 +29,7 @@ describe('NotifyComponent', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([])}),
+                    useValue: createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([])}),
                 },
                 provideZonelessChangeDetection(),
             ],

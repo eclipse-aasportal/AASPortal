@@ -6,27 +6,40 @@
  *
  *****************************************************************************/
 
-import { TestBed } from '@angular/core/testing';
+import { jest } from '@jest/globals';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from '../../app/start/start.component';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
+import { StartState, StartTileItem } from '../../app/start/start.state';
 
 describe('StartComponent', () => {
-    let start: jasmine.SpyObj<StartService>;
-    let sanitizer: jasmine.SpyObj<DomSanitizer>;
+    let start: jest.Mocked<StartService>;
+    let sanitizer: jest.Mocked<DomSanitizer>;
+    let state: Partial<StartState>;
+    let favorites: StartTileItem[];
+    let fixture: ComponentFixture<StartComponent>;
+    let component: StartComponent;
+    let items: WritableSignal<StartTileItem[]>;
 
     beforeEach(async () => {
-        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save'], {
+        start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save'], {
             tiles: signal([]),
         });
 
-        sanitizer = jasmine.createSpyObj<DomSanitizer>(['bypassSecurityTrustHtml']);
-        sanitizer.bypassSecurityTrustHtml.and.callFake(value => value as SafeHtml);
+        sanitizer = createSpyObj<DomSanitizer>(['bypassSecurityTrustHtml']);
+        sanitizer.bypassSecurityTrustHtml.mockImplementation(value => value as SafeHtml);
+        favorites = [
+            { id: '1', selected: signal(false) },
+            { id: '2', selected: signal(false) },
+            { id: '3', selected: signal(false) },
+        ] as StartTileItem[];
+
+        items = signal(favorites);
+        state = { welcome: signal('Welcome'), items };
 
         await TestBed.configureTestingModule({
             providers: [
@@ -36,47 +49,138 @@ describe('StartComponent', () => {
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
                 {
                     provide: DomSanitizer,
                     useValue: sanitizer,
                 },
-                provideHttpClient(),
-                provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                StartComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [StartComponent],
         }).compileComponents();
+
+        TestBed.overrideComponent(StartComponent, {
+            remove: {
+                providers: [StartState],
+            },
+            add: {
+                providers: [{ provide: StartState, useValue: state }],
+            },
+        });
+
+        fixture = TestBed.createComponent(StartComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(StartComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('has a toolbar', () => {
-        const fixture = TestBed.createComponent(StartComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
         expect(component.toolbarTemplate).toBeTruthy();
     });
 
-    it('has inital an empty start page', () => {
-        const fixture = TestBed.createComponent(StartComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        expect(component.isEmpty()).toBe(true);
-        expect(component.items()).toEqual([]);
+    describe('no selection', () => {
+        it('has nothing selected', () => {
+            expect(component.someSelected()).toBe(false);
+        });
+
+        it('disables can move left', () => {
+            expect(component.canMoveLeft()).toBe(false);
+        });
+
+        it('disables can move right', () => {
+            expect(component.canMoveRight()).toBe(false);
+        });
     });
+
+    describe('first favorite selection', () => {
+        beforeEach(() => {
+            favorites[0].selected.set(true);
+        });
+
+        it('has some selected', () => {
+            expect(component.someSelected()).toBe(true);
+        });
+
+        it('disables can move left', () => {
+            expect(component.canMoveLeft()).toBe(false);
+        });
+
+        it('disables can move right', () => {
+            expect(component.canMoveRight()).toBe(true);
+        });
+    });
+
+    describe('last favorite selection', () => {
+        beforeEach(() => {
+            favorites[2].selected.set(true);
+        });
+
+        it('has some selected', () => {
+            expect(component.someSelected()).toBe(true);
+        });
+
+        it('disables can move left', () => {
+            expect(component.canMoveLeft()).toBe(true);
+        });
+
+        it('disables can move right', () => {
+            expect(component.canMoveRight()).toBe(false);
+        });
+    });
+
+    describe('multiple selection', () => {
+        beforeEach(() => {
+            favorites[0].selected.set(true);
+            favorites[1].selected.set(true);
+        });
+
+        it('has some selected', () => {
+            expect(component.someSelected()).toBe(true);
+        });
+
+        it('disables can move left', () => {
+            expect(component.canMoveLeft()).toBe(false);
+        });
+
+        it('disables can move right', () => {
+            expect(component.canMoveRight()).toBe(false);
+        });
+    });
+
+    it('shows favorites', () => {
+        expect(component.isEmpty()).toBe(false);
+        expect(component.items()).toEqual(favorites);
+    });
+
+    it('shows a welcome page', () => {
+        items.set([]);
+        expect(component.isEmpty()).toBe(true);
+        expect(component.welcome()).toEqual('Welcome');
+    });
+
+    // describe('remove', () => {
+    //     it('removes the selected favorite', () => {
+    //         const fixture = TestBed.createComponent(StartComponent);
+    //         favorites[1].selected.set(true);
+    //         fixture.detectChanges();
+    //         const removeButton: HTMLButtonElement = fixture.debugElement.query(By.css('#AID_REMOVE')).nativeElement;
+    //         removeButton.click();
+    //         expect(removeButton.disabled).toBeFalsy();
+    //         expect(start.remove).toHaveBeenCalled();
+    //     });
+    // });
+
+    // describe('moveLeft', () => {});
+
+    // describe('moveLeft', () => {});
 });

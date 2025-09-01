@@ -6,96 +6,41 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { AASDocument, getSemanticId } from 'aas-core';
-import { CONTACT_INFORMATION_1_0 } from '../views-constants';
-import { DataSheetData } from '../../types';
-import { createDataSheet, getDisplayName } from '../../utilities';
+import { AASDocument } from 'aas-core';
+import { ContactInformationData, ContactInformationState } from './contact-information.state';
+import { ChildComponent } from '../../components/child-component';
 
 @Component({
     selector: 'fhg-contact-information',
+    providers: [ContactInformationState],
     imports: [NgbAccordionModule],
     templateUrl: './contact-information.html',
     styleUrl: './contact-information.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContactInformation {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
+export class ContactInformation extends ChildComponent<ContactInformationData, ContactInformationState> {
+    public constructor() {
+        super();
 
-    public constructor(translate: TranslateService) {
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+        effect(() => {
+            const document = this.document();
+            if (!document) {
+                return;
+            }
+
+            const value = untracked(this.state().document);
+            if (value === null || document.endpoint !== value.endpoint || document.id !== value.id) {
+                this.state().update({ document });
+            }
+        });
     }
+
+    public override readonly state = input.required<ContactInformationState>();
 
     public readonly document = input<AASDocument>();
 
-    private readonly submodel = computed(() => {
-        const env = this.document()?.content;
-        if (!env) {
-            return undefined;
-        }
-
-        return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
-    });
-
-    public readonly contacts = computed(() => {
-        const contacts: DataSheetData[] = [];
-        const currentLang = this.currentLang();
-        const document = this.document();
-        const submodel = this.submodel();
-        const env = document?.content;
-        if (!env || !submodel?.submodelElements) {
-            return contacts;
-        }
-
-        let index = 1;
-        for (const element of submodel.submodelElements) {
-            const dataSheet = createDataSheet(document, element, currentLang, {
-                name: `${getDisplayName(element, env, currentLang)} [${index}]`,
-                type: 'A',
-                include: [
-                    'RoleOfContactPerson',
-                    'NationalCode',
-                    'Language',
-                    'TimeZone',
-                    'CityTown',
-                    'Company',
-                    'Department',
-                    {
-                        type: 'join',
-                        idShortPath: 'Phone',
-                        join: ['TypeOfTelephone', 'TelephoneNumber', 'AvailableTime'],
-                        separator: ', ',
-                    },
-                    'Fax',
-                    'Email',
-                    'IPCommunication{00}',
-                    'Street',
-                    'Zipcode',
-                    'POBox',
-                    'ZipCodeOfPOBox',
-                    'StateCounty',
-                    {
-                        type: 'join',
-                        join: ['AcademicTitle', 'Title', 'FirstName', 'MiddleNames', 'NameOfContact'],
-                        separator: ' ',
-                    },
-                    'FurtherDetailsOfContact',
-                    'AddressOfAdditionalLink',
-                ],
-            });
-
-            if (dataSheet.items.length > 0) {
-                contacts.push(dataSheet);
-                ++index;
-            }
-        }
-
-        return contacts;
-    });
+    public readonly contacts = computed(() => this.state().contacts());
 }

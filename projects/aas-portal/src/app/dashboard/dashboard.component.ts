@@ -25,6 +25,7 @@ import {
     viewChildren,
     Inject,
     signal,
+    inject,
 } from '@angular/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
@@ -58,23 +59,21 @@ import {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
+    @Inject(WINDOW) private readonly window = inject(WINDOW);
+    private readonly service = inject(DashboardService);
+    private readonly activeRoute = inject(ActivatedRoute);
+    private readonly translate = inject(TranslateService);
+    private readonly webServiceFactory = inject(WebSocketFactoryService);
+    private readonly notify = inject(NotifyService);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
+    private readonly commandHandler = inject(CommandHandler);
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
     private live = false;
 
-    public constructor(
-        api: DashboardApiService,
-        private readonly service: DashboardService,
-        private readonly activeRoute: ActivatedRoute,
-        private readonly translate: TranslateService,
-        private readonly webServiceFactory: WebSocketFactoryService,
-        private readonly notify: NotifyService,
-        private readonly toolbar: ToolbarService,
-        private readonly start: StartService,
-        private readonly commandHandler: CommandHandler,
-        @Inject(WINDOW) private readonly window: Window,
-    ) {
-        super(api);
+    public constructor() {
+        super(inject(DashboardApiService));
 
         window.addEventListener('resize', this.updateViewPortSize);
 

@@ -23,7 +23,7 @@ import {
     UploadedFiles,
 } from 'tsoa';
 
-import { aas, AASDocument, AASEndpoint } from 'aas-core';
+import { aas, AASDocument, type AASEndpoint } from 'aas-core';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
