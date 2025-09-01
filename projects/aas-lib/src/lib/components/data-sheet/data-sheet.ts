@@ -21,7 +21,7 @@ import { DataSheetData } from '../../types';
 })
 export class DataSheet {
     /** The data to visualize as data sheet. */
-    public readonly dataSheet = input<DataSheetData>({ name: '', items: [] });
+    public readonly dataSheet = input<DataSheetData>({ name: '', items: [], collapsed: false });
 
     /** The data sheet items. */
     public readonly items = computed(() => this.dataSheet().items);

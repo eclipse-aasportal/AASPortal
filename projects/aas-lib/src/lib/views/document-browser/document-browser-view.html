@@ -1,0 +1,41 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+@if (isEmpty() === false) {
+    <div class="container container-md container-lg h-100">
+        <div class="d-flex flex-column text-center">
+            <div class="bg-primary text-center py-2 my-2 fs-5">{{ 'Browser.TITLE' | translate }}</div>
+            <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
+        </div>
+        <fhg-browser
+            [document]="document()"
+            [state]="browserState"
+        ></fhg-browser>
+    </div>
+} @else {
+    <div class="alert alert-info text-center mt-2" role="alert" translate>Browser.EMPTY</div>
+}
+
+<ng-template #browserToolbar>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
+    @if (count() >= 2) {
+        <div class="input-group my-1">
+            <ngb-pagination
+                [collectionSize]="count()"
+                [(page)]="index"
+                [pageSize]="1"
+                [directionLinks]="count() > 5"
+                [ellipses]="true"
+            />
+        </div>
+    }
+</ng-template>

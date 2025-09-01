@@ -6,22 +6,23 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { LocalizeComponent } from '../../../lib/components/localize/localize.component';
 import { WINDOW, WindowService } from '../../../lib/services/window.service';
-import { FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('LocalizeComponent', () => {
-    let window: jasmine.SpyObj<Window>;
-    let localStorage: jasmine.SpyObj<Storage>;
+    let window: jest.Mocked<WindowService>;
+    let localStorage: jest.Mocked<Storage>;
 
     beforeEach(async () => {
-        localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
-        localStorage.getItem.and.returnValue(null);
-        window = jasmine.createSpyObj<WindowService>(['confirm'], { localStorage });
+        localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
+        localStorage.getItem.mockReturnValue(null);
+        window = createSpyObj<WindowService>(['confirm'], { localStorage });
 
         await TestBed.configureTestingModule({
             providers: [
@@ -57,7 +58,7 @@ describe('LocalizeComponent', () => {
         const component = fixture.componentInstance;
         fixture.componentRef.setInput('languages', ['en-us', 'de-de']);
         fixture.detectChanges();
-        localStorage.getItem.and.returnValue(null);
+        localStorage.getItem.mockReturnValue(null);
         expect(component.cultures().map(item => item.localeId)).toEqual(['en-us', 'de-de']);
     });
 

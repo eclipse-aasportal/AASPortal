@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { MessageEntry } from '../../types';
 import { NotifyService } from './notify.service';
 import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
@@ -19,7 +19,7 @@ import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotifyComponent implements OnInit {
-    public constructor(private readonly notify: NotifyService) {}
+    private readonly notify = inject(NotifyService);
 
     public readonly messages = this.notify.messages;
 

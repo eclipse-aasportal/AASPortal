@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
@@ -14,23 +15,23 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ExtrasEndpointFormComponent } from '../../app/shells/extras-endpoint-form/extras-endpoint-form.component';
 import { ExtrasEndpointService } from '../../app/shells/extras-endpoint-form/extras-endpoint.service';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ExtrasEndpointFormComponent', () => {
-    let service: jasmine.SpyObj<ExtrasEndpointService>;
+    let service: jest.Mocked<ExtrasEndpointService>;
 
     beforeEach(async () => {
-        service = jasmine.createSpyObj<ExtrasEndpointService>(['getDocumentCount', 'getEndpoints', 'reset', 'scan']);
-        service.getEndpoints.and.returnValue(
+        service = createSpyObj<ExtrasEndpointService>(['getDocumentCount', 'getEndpoints', 'reset', 'scan']);
+        service.getEndpoints.mockReturnValue(
             of([
                 { name: 'Endpoint 1', url: 'http://endpoint/1', type: 'AAS_API', schedule: { type: 'manual' } },
                 { name: 'Endpoint 2', url: 'http://endpoint/2', type: 'AAS_API' },
             ]),
         );
 
-        service.getDocumentCount.and.returnValue(of(42));
-        service.reset.and.returnValue(of(void 0));
-        service.scan.and.returnValue(of(void 0));
+        service.getDocumentCount.mockReturnValue(of(42));
+        service.reset.mockReturnValue(of(void 0));
+        service.scan.mockReturnValue(of(void 0));
 
         await TestBed.configureTestingModule({
             providers: [NgbActiveModal, provideZonelessChangeDetection()],

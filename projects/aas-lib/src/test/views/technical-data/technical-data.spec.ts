@@ -8,13 +8,14 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { TechnicalData } from '../../../lib/views/technical-data/technical-data';
+import { FakeLoader } from '../../mocks';
+import { TechnicalDataState } from '../../../lib/views/technical-data/technical-data.state';
 
 import technicalData from '../../assets/technical-data-1-2.json';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { FakeLoader } from '../../mocks';
 
 describe('TechnicalData', () => {
     let component: TechnicalData;
@@ -34,19 +35,21 @@ describe('TechnicalData', () => {
         };
 
         await TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-            imports: [
-                TechnicalData,
-                TranslateModule.forRoot({
+            providers: [
+                TechnicalDataState,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [TechnicalData],
         }).compileComponents();
 
         fixture = TestBed.createComponent(TechnicalData);
+        fixture.componentRef.setInput('state', TestBed.inject(TechnicalDataState));
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
@@ -55,9 +58,15 @@ describe('TechnicalData', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should has a document', () => {
+    it('should have a document after input', () => {
         fixture.componentRef.setInput('document', document);
         fixture.detectChanges();
         expect(component.document()).toBeDefined();
+    });
+
+    it('should have data sheets after input', () => {
+        fixture.componentRef.setInput('document', document);
+        fixture.detectChanges();
+        expect(component.dataSheets().length).toBeGreaterThan(0);
     });
 });

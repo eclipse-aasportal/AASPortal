@@ -6,19 +6,20 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AuthResult } from 'aas-core';
 import { of } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
 import { ERRORS } from '../../../lib/errors';
 import { ProfileFormComponent } from '../../../lib/components/auth/profile-form/profile-form.component';
-import { FakeLoader } from '../../mocks';
+import { DoneFn, FakeLoader } from '../../mocks';
 
 describe('ProfileFormComponent', () => {
     let modal: NgbActiveModal;
@@ -26,18 +27,16 @@ describe('ProfileFormComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [
-                ProfileFormComponent,
-                TranslateModule.forRoot({
+            imports: [ProfileFormComponent],
+            providers: [
+                NgbModal,
+                NgbActiveModal,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
-            ],
-            providers: [
-                NgbModal,
-                NgbActiveModal,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
@@ -59,12 +58,12 @@ describe('ProfileFormComponent', () => {
         const fixture = TestBed.createComponent(ProfileFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        spyOn(modal, 'close').and.callFake((...args) => {
+        jest.spyOn(modal, 'close').mockImplementation((...args) => {
             expect(args[0]).toEqual({ token: 'new_token' });
             done();
         });
 
-        spyOn(api, 'updateProfile').and.returnValue(of({ token: 'new_token' } as AuthResult));
+        jest.spyOn(api, 'updateProfile').mockReturnValue(of({ token: 'new_token' } as AuthResult));
 
         component.initialize({ name: 'John', id: 'john.doe@email.com' });
         component.name.set('John Doe');

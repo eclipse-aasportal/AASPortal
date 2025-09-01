@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
@@ -18,6 +19,7 @@ import {
     StartTile,
     StartTileType,
 } from '../../lib/services/start.service';
+import { createSpyObj } from '../mocks';
 
 @Component({
     selector: 'fhg-test-card',
@@ -29,11 +31,11 @@ export class TestCardComponent {}
 
 describe('StartService', () => {
     let service: StartService;
-    let auth: jasmine.SpyObj<AuthService>;
+    let auth: jest.Mocked<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
-        auth.getCookie.and.returnValue(of(undefined));
+        auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
+        auth.getCookie.mockReturnValue(of(undefined));
         TestBed.configureTestingModule({
             providers: [
                 {
@@ -83,17 +85,17 @@ describe('StartService', () => {
 
     describe('add', () => {
         it('should add a new tile', () => {
-            expect(service.add('TestCard', 'newTestCard', {})).toBeTrue();
+            expect(service.add('TestCard', 'newTestCard', {})).toBe(true);
             expect(service.tiles().length).toBe(2);
         });
 
         it('should not add a tile with an unknown type', () => {
-            expect(service.add('UnknownCard', 'new', {})).toBeFalse();
+            expect(service.add('UnknownCard', 'new', {})).toBe(false);
             expect(service.tiles().length).toBe(1);
         });
 
         it('should not add a tile with an existing id', () => {
-            expect(service.add('TestCard', 'test', {})).toBeFalse();
+            expect(service.add('TestCard', 'test', {})).toBe(false);
             expect(service.tiles().length).toBe(1);
         });
     });
@@ -114,7 +116,7 @@ describe('StartService', () => {
 
     describe('save', () => {
         it('should save the tiles', done => {
-            auth.setCookie.and.returnValue(of(void 0));
+            auth.setCookie.mockReturnValue(of(void 0));
             service.add('TestCard', 'new', {});
             service.save().subscribe(() => {
                 expect(auth.setCookie).toHaveBeenCalled();

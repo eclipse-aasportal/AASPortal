@@ -17,6 +17,7 @@ import {
     TemplateRef,
     computed,
     effect,
+    inject,
     signal,
     viewChild,
 } from '@angular/core';
@@ -24,7 +25,7 @@ import {
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
-import { aas, AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
+import { AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
 import {
     AASTable,
     AuthService,
@@ -55,20 +56,20 @@ import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpo
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellsComponent implements OnDestroy {
-    public constructor(
-        private readonly state: ShellsState,
-        private readonly api: EndpointsService,
-        private readonly router: Router,
-        private readonly modal: NgbModal,
-        private readonly translate: TranslateService,
-        @Inject(WINDOW) private readonly window: Window,
-        private readonly notify: NotifyService,
-        private readonly toolbar: ToolbarService,
-        private readonly auth: AuthService,
-        private readonly download: DownloadService,
-        private readonly favorites: FavoritesService,
-        private readonly start: StartService,
-    ) {
+    @Inject(WINDOW) private readonly window = inject(WINDOW);
+    private readonly state = inject(ShellsState);
+    private readonly api = inject(EndpointsService);
+    private readonly router = inject(Router);
+    private readonly modal = inject(NgbModal);
+    private readonly translate = inject(TranslateService);
+    private readonly notify = inject(NotifyService);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly auth = inject(AuthService);
+    private readonly download = inject(DownloadService);
+    private readonly favorites = inject(FavoritesService);
+    private readonly start = inject(StartService);
+
+    public constructor() {
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {

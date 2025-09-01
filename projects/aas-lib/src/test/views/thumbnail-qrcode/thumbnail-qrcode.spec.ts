@@ -6,13 +6,15 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
-import { ThumbnailQRCode } from '../../..//lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { QR_CODE, ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { WINDOW, WindowService } from '../../../lib/services/window.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 
 import sample from '../../assets/dpp-sample.json';
+import { createSpyObj } from '../../mocks';
 
 @Component({
     selector: 'fhg-img',
@@ -31,10 +33,10 @@ export class TestSecuredImageComponent {
 describe('ThumbnailQRCode', () => {
     let component: ThumbnailQRCode;
     let fixture: ComponentFixture<ThumbnailQRCode>;
-    let window: jasmine.SpyObj<WindowService>;
+    let window: jest.Mocked<WindowService>;
 
     beforeEach(async () => {
-        window = jasmine.createSpyObj<WindowService>(['open'], {
+        window = createSpyObj<WindowService>(['open'], {
             location: { toString: () => 'https://www.fraunhofer.de' } as Location,
         });
 
@@ -44,6 +46,10 @@ describe('ThumbnailQRCode', () => {
                 {
                     provide: WINDOW,
                     useValue: window,
+                },
+                {
+                    provide: QR_CODE,
+                    useValue: { toCanvas: jest.fn() },
                 },
                 provideZonelessChangeDetection(),
             ],
@@ -69,6 +75,6 @@ describe('ThumbnailQRCode', () => {
     });
 
     it('provides a QR code', () => {
-        expect(component.qrCode()).toBeTruthy();
+        expect(component.qrCodeContainer()).toBeTruthy();
     });
 });

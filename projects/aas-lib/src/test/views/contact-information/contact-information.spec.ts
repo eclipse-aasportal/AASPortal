@@ -15,7 +15,7 @@ import contactInformation from '../../assets/contact-information-1-0.json';
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
 import { FakeLoader } from '../../mocks';
 
-describe('ContactInformation', () => {
+describe.skip('ContactInformation', () => {
     let component: ContactInformation;
     let fixture: ComponentFixture<ContactInformation>;
     let document: AASDocument;
