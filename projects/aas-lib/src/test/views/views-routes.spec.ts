@@ -219,7 +219,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(hasSpecificView(submodel)).toBeTrue();
+            expect(hasSpecificView(submodel)).toBe(true);
         });
 
         it('has no specific view for "Unknown"', () => {
@@ -238,7 +238,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(hasSpecificView(submodel)).toBeFalse();
+            expect(hasSpecificView(submodel)).toBe(false);
         });
 
         it('should has a specific OperationData view', () => {
@@ -257,7 +257,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(hasSpecificView(submodel)).toBeTrue();
+            expect(hasSpecificView(submodel)).toBe(true);
         });
     });
 });

@@ -8,15 +8,25 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { AASState } from '../../app/aas/aas.state';
+import { FakeLoader } from '../mocks';
 
 describe('AASState', () => {
     let service: AASState;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
+            providers: [
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+                provideZonelessChangeDetection(),
+            ],
         });
 
         service = TestBed.inject(AASState);

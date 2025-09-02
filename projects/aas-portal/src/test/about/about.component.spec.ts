@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -15,12 +16,12 @@ import { AppInfo } from 'aas-core';
 import { IndexChangeService, StartService, ToolbarService } from 'aas-lib';
 import { AboutComponent } from '../../app/about/about.component';
 import { AboutApiService } from '../../app/about/about-api.service';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('AboutComponent', () => {
-    let api: jasmine.SpyObj<AboutApiService>;
-    let start: jasmine.SpyObj<StartService>;
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let api: jest.Mocked<AboutApiService>;
+    let start: jest.Mocked<StartService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
 
     beforeEach(async () => {
         const info: AppInfo = {
@@ -33,16 +34,13 @@ describe('AboutComponent', () => {
             libraries: [],
         };
 
-        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        start.save.and.returnValue(of(void 0));
+        start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        start.save.mockReturnValue(of(void 0));
 
-        api = jasmine.createSpyObj<AboutApiService>(['getInfo', 'getMessages']);
-        api.getInfo.and.returnValue(of(info));
-        api.getMessages.and.returnValue(of([]));
-        indexChange = jasmine.createSpyObj<IndexChangeService>(
-            {},
-            { documentCount: signal(42), endpointCount: signal(2) },
-        );
+        api = createSpyObj<AboutApiService>(['getInfo', 'getMessages']);
+        api.getInfo.mockReturnValue(of(info));
+        api.getMessages.mockReturnValue(of([]));
+        indexChange = createSpyObj<IndexChangeService>({}, { documentCount: signal(42), endpointCount: signal(2) });
 
         await TestBed.configureTestingModule({
             providers: [
@@ -52,7 +50,7 @@ describe('AboutComponent', () => {
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                    useValue: createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
                 {
                     provide: StartService,

@@ -6,12 +6,14 @@
  *
  *****************************************************************************/
 
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { AASDocument } from 'aas-core';
 import { AASTreeNode } from './aas-tree-node';
-import { ChildState } from '../../child-state';
+import { ChildState } from '../child-state';
+import { TranslateService } from '@ngx-translate/core';
 
 export type AASTreeData = {
-    document: { endpoint?: string; id?: string };
+    document: AASDocument | null;
     expanded: boolean;
     matchIndex: number;
     contents: AASTreeNode[];
@@ -19,15 +21,15 @@ export type AASTreeData = {
 };
 
 const initialState: AASTreeData = {
-    document: {},
+    document: null,
     expanded: false,
     matchIndex: 0,
     contents: [],
     nodes: [],
 };
 
-/** 
- * Represents the state of the AASTree component. 
+/**
+ * Represents the state handler of the AASTree component.
  */
 @Injectable()
 export class AASTreeState extends ChildState<AASTreeData> {
@@ -37,16 +39,20 @@ export class AASTreeState extends ChildState<AASTreeData> {
     private readonly tree$ = signal({ contents: initialState.contents, nodes: initialState.nodes });
 
     public constructor() {
-        super(initialState);
+        super(inject(TranslateService));
     }
 
     public readonly document = this.document$.asReadonly();
+
     public readonly expanded = this.expanded$.asReadonly();
+
     public readonly matchIndex = this.matchIndex$.asReadonly();
+
     public readonly contents = computed(() => this.tree$().contents);
+
     public readonly nodes = computed(() => this.tree$().nodes);
 
-    protected updating(newState: Partial<AASTreeData>): AASTreeData {
+    public update(newState: Partial<AASTreeData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }
@@ -65,21 +71,5 @@ export class AASTreeState extends ChildState<AASTreeData> {
                 nodes: newState.nodes ?? state.nodes,
             }));
         }
-
-        return {
-            document: this.document$(),
-            expanded: this.expanded$(),
-            matchIndex: this.matchIndex$(),
-            contents: this.contents(),
-            nodes: this.nodes(),
-        };
-    }
-
-    protected initializing(state: AASTreeData | undefined): void {
-        state = state ?? initialState;
-        this.document$.set(state.document);
-        this.expanded$.set(state.expanded);
-        this.matchIndex$.set(state.matchIndex);
-        this.tree$.set({ contents: state.contents, nodes: state.nodes });
     }
 }

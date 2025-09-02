@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { NotifyService } from 'aas-lib';
 import { Command } from '../types/command';
 
@@ -14,10 +14,9 @@ import { Command } from '../types/command';
     providedIn: 'root',
 })
 export class CommandHandler {
+    private readonly notify = inject(NotifyService);
     private readonly commands = signal<Command[]>([]);
     private readonly position = signal(-1);
-
-    public constructor(private notify: NotifyService) {}
 
     public execute(command: Command): void {
         if (!command) {

@@ -8,12 +8,14 @@
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { TestBed } from '@angular/core/testing';
 import { aas, AASDocument, selectElement } from 'aas-core';
 import { EndpointsApi, NotifyService } from 'aas-lib';
 import { UpdateElementCommand } from '../../app/aas/commands/update-element-command';
 import { sampleDocument } from '../../test/assets/sample-document';
 import { AASState } from '../../app/aas/aas.state';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('SetValueCommand', () => {
     let command: UpdateElementCommand;
@@ -32,12 +34,18 @@ describe('SetValueCommand', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: EndpointsApi,
-                    useValue: jasmine.createSpyObj<EndpointsApi>(['getContent', 'getDocument', 'putDocument']),
+                    useValue: createSpyObj<EndpointsApi>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
                 provideZonelessChangeDetection(),
             ],
         });

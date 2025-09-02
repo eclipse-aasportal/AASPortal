@@ -6,19 +6,20 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { AuthComponent } from '../../../lib/components/auth/auth.component';
-import { FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AuthComponent', () => {
-    let auth: jasmine.SpyObj<AuthService>;
+    let auth: jest.Mocked<AuthService>;
 
     beforeEach(async () => {
-        auth = jasmine.createSpyObj<AuthService>(['login'], {
+        auth = createSpyObj<AuthService>(['login'], {
             name: signal<string | undefined>(undefined),
             authenticated: signal(false),
         });
@@ -31,7 +32,7 @@ describe('AuthComponent', () => {
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info']),
+                    useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
                 provideZonelessChangeDetection(),
             ],

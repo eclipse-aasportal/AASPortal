@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { computed, effect, Injectable, OnDestroy, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, OnDestroy, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, concat, EMPTY, from, map, mergeMap, Observable, of, skipWhile, Subscription } from 'rxjs';
@@ -51,14 +51,13 @@ export class ShellsState implements OnDestroy {
     private readonly selected$ = signal<AASDocument[]>(initialData.selected);
     private readonly previous$ = signal<AASDocumentId | null>(initialData.previous);
     private readonly next$ = signal<AASDocumentId | null>(initialData.next);
+    private readonly auth = inject(AuthService);
+    private readonly translate = inject(TranslateService);
+    private readonly favorites = inject(FavoritesService);
+    private readonly api = inject(EndpointsApi);
+    private readonly indexChange = inject(IndexChangeService);
 
-    public constructor(
-        private readonly auth: AuthService,
-        private readonly translate: TranslateService,
-        private readonly favorites: FavoritesService,
-        private readonly api: EndpointsApi,
-        private readonly indexChange: IndexChangeService,
-    ) {
+    public constructor() {
         this.auth.ready
             .pipe(
                 skipWhile(ready => ready === false),

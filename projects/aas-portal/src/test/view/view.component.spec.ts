@@ -8,11 +8,11 @@
 
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { ToolbarService } from 'aas-lib';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { ToolbarService, VIEW_ROUTES, viewRoutes } from 'aas-lib';
 
 import { ViewComponent } from '../../app/view/view.component';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ViewComponent', () => {
     beforeEach(async () => {
@@ -20,19 +20,21 @@ describe('ViewComponent', () => {
             providers: [
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                ViewComponent,
-                TranslateModule.forRoot({
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [ViewComponent],
         }).compileComponents();
     });
 

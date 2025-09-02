@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -60,8 +61,8 @@ describe('LoginFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const result: LoginFormResult = { token: 'a_token', stayLoggedIn: true };
-        spyOn(modal, 'close').and.callFake((...args) => expect(args[0]).toEqual(result));
-        spyOn(api, 'login').and.returnValue(of({ token: 'a_token' }));
+        jest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
+        jest.spyOn(api, 'login').mockReturnValue(of({ token: 'a_token' }));
 
         component.userId.set('john.doe@email.com');
         component.password.set('1234.Abcd');
@@ -119,8 +120,8 @@ describe('LoginFormComponent', () => {
         const fixture = TestBed.createComponent(LoginFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        spyOn(modal, 'close').and.returnValue();
-        spyOn(api, 'login').and.returnValue(throwError(() => new Error('Unknown user')));
+        jest.spyOn(modal, 'close').mockReturnValue();
+        jest.spyOn(api, 'login').mockReturnValue(throwError(() => new Error('Unknown user')));
 
         component.userId.set('unknown.user@email.com');
         component.password.set('1234.abcd');
@@ -133,7 +134,7 @@ describe('LoginFormComponent', () => {
         const fixture = TestBed.createComponent(LoginFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        spyOn(api, 'resetPassword').and.returnValue(of(void 0));
+        jest.spyOn(api, 'resetPassword').mockReturnValue(of(void 0));
         component.userId.set('john.doe@email.com');
         await component.resetPassword();
         expect(component.messages().length).toEqual(1);
@@ -164,7 +165,7 @@ describe('LoginFormComponent', () => {
         const fixture = TestBed.createComponent(LoginFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        spyOn(modal, 'close').and.callFake((...args) =>
+        jest.spyOn(modal, 'close').mockImplementation((...args) =>
             expect(args[0]).toEqual({ action: 'register' } as LoginFormResult),
         );
 

@@ -8,7 +8,7 @@
 
 <div class="d-flex flex-row justify-content-around align-items-center mb-2">
     <div class="me-1">
-        <fhg-img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height"></fhg-img>
+        <img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height" (error)="thumbnail.set('/assets/resources/aas-idta.png')">
     </div>
     <div class="ms-1">
         <canvas #qrCode></canvas>
