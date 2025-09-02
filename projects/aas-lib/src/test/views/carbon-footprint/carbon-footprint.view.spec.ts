@@ -24,7 +24,7 @@ import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-
 import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { createSpyObj, FakeLoader } from '../../mocks';
-import { CarbonFootprintState } from 'projects/aas-lib/src/lib/views/carbon-footprint/carbon-footprint.state';
+import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -72,7 +72,7 @@ describe('CarbonFootprintView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
-            { queryParams: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
         );
 
         api.getDocument.mockReturnValue(of(document));
@@ -120,4 +120,8 @@ describe('CarbonFootprintView', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should provide a state for the CarbonFootprint component', () => {
+        expect(component.carbonFootprintState).toBeInstanceOf(CarbonFootprintState);
+    })
 });

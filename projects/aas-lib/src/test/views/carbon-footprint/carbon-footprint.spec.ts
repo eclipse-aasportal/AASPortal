@@ -70,4 +70,28 @@ describe('CarbonFootprint', () => {
     it('should has document items', () => {
         expect(component.items()).toBeDefined();
     });
+
+    it('should has totalPcfCO2eq', () => {
+        expect(component.totalPcfCO2eq()).toEqual('0 undefined');
+    });
+
+    it('should has index', () => {
+        expect(component.index()).toEqual(1);
+    });
+
+    it('should has carbonFootprint', () => {
+        expect(component.carbonFootprint()).toBeDefined();
+    });
+
+    it('should has collapsed', () => {
+        expect(component.collapsed()).toBe(false);
+    });
+
+    it('should has items length of 1', () => {
+        expect(component.count()).toEqual(1);
+    });
+
+    it('should has count', () => {
+        expect(component.count()).toEqual(1);
+    });
 });
