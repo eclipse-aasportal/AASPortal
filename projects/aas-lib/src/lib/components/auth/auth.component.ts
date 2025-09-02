@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NotifyService } from '../notify/notify.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
@@ -20,10 +20,8 @@ import { AuthService } from './auth.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {
-    public constructor(
-        private auth: AuthService,
-        private notify: NotifyService,
-    ) {}
+    private readonly auth = inject(AuthService);
+    private readonly notify = inject(NotifyService);
 
     public readonly userAuthenticated = this.auth.authenticated;
 

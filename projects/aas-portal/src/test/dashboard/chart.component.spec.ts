@@ -6,21 +6,22 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { WebSocketFactoryService } from 'aas-lib';
 import { ChartComponent } from '../../app/dashboard/chart/chart.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ChartComponent', () => {
-    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
-    let api: jasmine.SpyObj<DashboardApiService>;
+    let webSocketFactory: jest.Mocked<WebSocketFactoryService>;
+    let api: jest.Mocked<DashboardApiService>;
 
     beforeEach(async () => {
-        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
-        api = jasmine.createSpyObj<DashboardApiService>(['getBlobValue']);
+        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
+        api = createSpyObj<DashboardApiService>(['getBlobValue']);
 
         await TestBed.configureTestingModule({
             providers: [

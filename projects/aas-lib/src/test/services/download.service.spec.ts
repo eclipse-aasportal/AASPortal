@@ -6,15 +6,8 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { DOCUMENT, provideZonelessChangeDetection } from '@angular/core';
-/******************************************************************************
- *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
- * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
- * zur Foerderung der angewandten Forschung e.V.
- *
- *****************************************************************************/
-
 import { DownloadService } from '../../lib/services/download.service';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -22,7 +15,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY } from 'rxjs';
-import { FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('DownloadService', () => {
     let service: DownloadService;
@@ -42,7 +35,7 @@ describe('DownloadService', () => {
             providers: [
                 {
                     provide: DOCUMENT,
-                    useValue: jasmine.createSpyObj<Document>(['createElement']),
+                    useValue: createSpyObj<Document>(['createElement']),
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
@@ -65,7 +58,7 @@ describe('DownloadService', () => {
 
     describe('uploadPackages', () => {
         it('POST: /api/v1/endpoints/:name/documents/:id', () => {
-            const file = jasmine.createSpyObj<File>(['arrayBuffer', 'slice', 'stream', 'text']);
+            const file = createSpyObj<File>(['arrayBuffer', 'slice', 'stream', 'text']);
 
             service.uploadPackages('Samples', file).subscribe();
             const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/packages');
@@ -76,7 +69,7 @@ describe('DownloadService', () => {
 
     describe('downloadPackage', () => {
         it('downloads an AASX package file', () => {
-            const spy = spyOn(httpClient, 'get').and.returnValue(EMPTY);
+            const spy = jest.spyOn(httpClient, 'get').mockReturnValue(EMPTY);
             service.downloadPackage(
                 'Samples',
                 'https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237',
@@ -89,7 +82,7 @@ describe('DownloadService', () => {
 
     describe('download', () => {
         it('downloads a file resource', () => {
-            const spy = spyOn(httpClient, 'get').and.returnValue(EMPTY);
+            const spy = jest.spyOn(httpClient, 'get').mockReturnValue(EMPTY);
             service.download('http://localhost/folder/file', 'Test.txt');
             expect(spy).toHaveBeenCalled();
         });

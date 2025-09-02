@@ -6,18 +6,25 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input, Signal } from '@angular/core';
-import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { toSignal } from '@angular/core/rxjs-interop';
 
-import { AASDocument, getReferable, getSemanticId, isSubmodelElementCollection } from 'aas-core';
+import { AASDocument } from 'aas-core';
 
-import { DataSheetData } from '../../types';
-import { createDataSheet } from '../../utilities';
 import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { TECHNICAL_DATA_1_2 } from '../views-constants';
+import { ChildComponent } from '../../components/child-component';
+import { TechnicalDataData, TechnicalDataState } from './technical-data.state';
 
+/**
+ * TechnicalData component for displaying technical data sheets based on the
+ * IDTA submodel template "Generic Frame for Technical Data for Industrial Equipment in Manufacturing".
+ *
+ * This component manages the rendering and state synchronization of technical data
+ * from an AASDocument, including product classifications, technical properties,
+ * general and further information. It reacts to document changes and updates the
+ * displayed data sheets accordingly.
+ */
 @Component({
     selector: 'fhg-technical-data',
     imports: [TranslateModule, NgbAccordionModule, DataSheet],
@@ -25,73 +32,35 @@ import { TECHNICAL_DATA_1_2 } from '../views-constants';
     styleUrl: './technical-data.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TechnicalData {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
+export class TechnicalData extends ChildComponent<TechnicalDataData, TechnicalDataState> {
+    public constructor() {
+        super();
 
-    public constructor(translate: TranslateService) {
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+        effect(() => {
+            const document = this.document();
+            if (!document) {
+                return;
+            }
+
+            const value = untracked(this.state().document);
+            if (value === null || document.endpoint !== value.endpoint || document.id !== value.id) {
+                this.state().update({ document });
+            }
+        });
     }
 
+    /**
+     * State manager for technical data, required input.
+     */
+    public override state = input.required<TechnicalDataState>();
+
+    /**
+     * Input for the current AASDocument.
+     */
     public readonly document = input<AASDocument>();
 
-    public readonly submodel = computed(() => {
-        const env = this.document()?.content;
-        if (!env) {
-            return undefined;
-        }
-
-        return env.submodels.find(submodel => getSemanticId(submodel) === TECHNICAL_DATA_1_2);
-    });
-
-    public readonly dataSheets = computed(() => {
-        const dataSheets: DataSheetData[] = [];
-        const currentLang = this.currentLang();
-        const submodel = this.submodel();
-        const document = this.document();
-        const env = document?.content;
-        if (!submodel?.submodelElements || !env) {
-            return dataSheets;
-        }
-
-        const generalInfo = getReferable(submodel, 'GeneralInformation');
-        if (generalInfo) {
-            const dataSheet = createDataSheet(document, generalInfo, currentLang);
-            if (dataSheet.items.length > 0) {
-                dataSheets.push(dataSheet);
-            }
-        }
-
-        const productClassifications = getReferable(submodel, 'ProductClassifications');
-        if (isSubmodelElementCollection(productClassifications) && productClassifications.value) {
-            for (const item of productClassifications.value)
-                 {
-                const dataSheet = createDataSheet(document, item, currentLang);
-                if (dataSheet.items.length > 0) {
-                    dataSheets.push(dataSheet);
-                }
-            }
-        }
-
-        const technicalProperties = getReferable(submodel, 'TechnicalProperties');
-        if (isSubmodelElementCollection(technicalProperties) && technicalProperties.value) {
-            for (const item of technicalProperties.value) {
-                const dataSheet = createDataSheet(document, item, currentLang);
-                if (dataSheet.items.length > 0) {
-                    dataSheets.push(dataSheet);
-                }
-            }
-        }
-
-        const furtherInfo = getReferable(submodel, 'FurtherInformation');
-        if (furtherInfo) {
-            const dataSheet = createDataSheet(document, furtherInfo, currentLang);
-            if (dataSheet.items.length > 0) {
-                dataSheets.push(dataSheet);
-            }
-        }
-
-        return dataSheets;
-    });
+    /**
+     * Computed list of technical data sheets for rendering.
+     */
+    public readonly dataSheets = computed(() => this.state().dataSheets());
 }

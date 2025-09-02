@@ -29,6 +29,7 @@ import {
     getUnit,
     toDisplayValue,
     getChildren,
+    getSemanticId,
 } from 'aas-core';
 
 import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } from './types';
@@ -305,6 +306,7 @@ export function createDataSheet(
 ): DataSheetData {
     const dataSheet: DataSheetData = {
         name: '',
+        collapsed: false,
         items: [],
     };
 
@@ -653,4 +655,26 @@ export function isEmpty(obj: object): boolean {
     }
 
     return true;
+}
+
+/**
+ * Returns the first occurrence of a submodel whose semantic ID matches one from the specified list.
+ * @param document The current AAS document.
+ * @param semanticIds A list of semantic IDs.
+ * @returns A submodel or `undefined`.
+ */
+export function findSubmodel(document: AASDocument, semanticIds: string[]): aas.Submodel | undefined {
+    const env = document?.content;
+    if (!env) {
+        return undefined;
+    }
+
+    return env.submodels.find(submodel => {
+        const semanticId = getSemanticId(submodel);
+        if (!semanticId) {
+            return false;
+        }
+
+        return semanticIds.indexOf(semanticId) >= 0;
+    });
 }

@@ -90,6 +90,38 @@
                 "--testPathPattern",
                 "${fileBasename}"
             ]
-        }
+        },
+        {
+            "name": "Debug current aas-lib test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "aas-lib",
+                "--testPathPatterns",
+                "--coverage=false",
+                "${fileBasename}"
+            ]
+        },
+        {
+            "name": "Debug current aas-portal test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "aas-portal",
+                "--testPathPatterns",
+                "--coverage=false",
+                "${fileBasename}"
+            ]
+        },
     ]
 }

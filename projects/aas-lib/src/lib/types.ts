@@ -99,7 +99,7 @@ export interface DataSheetItem {
 
 export interface DataSheetData {
     name?: string;
-    level?: number;
+    collapsed: boolean;
     items: DataSheetItem[];
 }
 

@@ -9,7 +9,6 @@
 import { NgClass, NgStyle } from '@angular/common';
 import { Route, RouterLink } from '@angular/router';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -19,10 +18,8 @@ import {
     input,
     output,
     DOCUMENT,
-    Signal,
     untracked,
     inject,
-    model,
 } from '@angular/core';
 
 import {
@@ -53,9 +50,9 @@ import { findRouteForShell, findRouteForSubmodel } from '../../views/views-route
 
 import { AASTreeApi } from './aas-tree-api';
 import { WINDOW } from '../../services/window.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { AASTreeData, AASTreeState } from './aas-tree.state';
+import { ChildComponent } from '../child-component';
 
 /**
  * Presents the contents of an Asset Administration Shell as a tree.
@@ -64,61 +61,52 @@ import { AASTreeData, AASTreeState } from './aas-tree.state';
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    imports: [FormsModule, RouterLink, NgClass, NgStyle, TranslateModule],
+    imports: [FormsModule, RouterLink, NgClass, NgStyle],
     providers: [AASTreeSearch, AASTreeApi, AASTreeState],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AASTreeComponent implements OnDestroy {
+export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> implements OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, AASTreeNode>();
-    private readonly currentLang: Signal<string>;
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly search = inject(AASTreeSearch);
     private readonly window = inject(WINDOW);
     private readonly dom = inject(DOCUMENT);
-    private readonly translate = inject(TranslateService);
     private readonly notify = inject(NotifyService);
     private readonly webSocketFactory = inject(WebSocketFactoryService);
-    private readonly state = inject(AASTreeState);
     private shiftKey = false;
     private altKey = false;
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor() {
-        this.langChange = toSignal(this.translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? this.translate.getCurrentLang());
+        super();
 
         effect(() => {
-            this.state.initialize(this.data());
-        });
-
-        effect(() => {
-            this.data.set(this.state.state());
-        });
-
-        effect(() => {
-            this.search.start(untracked(this.state.contents), this.searchExpression());
+            this.search.start(untracked(this.state().contents), this.searchExpression());
         });
 
         effect(() => {
             const document = this.document();
-            const { endpoint, id } = untracked(this.state.document);
-            if (document?.endpoint !== endpoint || document?.id !== id) {
+            const value = untracked(this.state().document);
+            if (value === null || document?.endpoint !== value.endpoint || document?.id !== value.id) {
                 this.update(document);
             }
         });
 
         effect(() => {
             const currentLang = this.currentLang();
-            untracked(this.state.contents).forEach(node => node.value.set(getValue(node.element, currentLang)));
+            untracked(this.state().contents).forEach(node => node.value.set(getValue(node.element, currentLang)));
         });
 
         effect(() => {
-            this.live() === 'online' ? this.goOnline() : this.goOffline();
+            if (this.live() === 'online') {
+                this.goOnline();
+            } else {
+                this.goOffline();
+            }
         });
 
         effect(() => {
-            const contents = this.state.contents();
+            const contents = this.state().contents();
             this.selected.emit(contents.filter(node => node.selected).map(item => item.element));
         });
 
@@ -129,7 +117,9 @@ export class AASTreeComponent implements OnDestroy {
 
         effect(() => {
             const row = this.matchNode();
-            if (!row) return;
+            if (!row) {
+                return;
+            }
 
             setTimeout(() => {
                 const element = this.dom.getElementById(row.id);
@@ -140,6 +130,9 @@ export class AASTreeComponent implements OnDestroy {
         this.window.addEventListener('keyup', this.keyup);
         this.window.addEventListener('keydown', this.keydown);
     }
+
+    /** The state management service. */
+    public override readonly state = input.required<AASTreeState>();
 
     /** The AAS document. */
     public readonly document = input<AASDocument | null>(null);
@@ -153,9 +146,6 @@ export class AASTreeComponent implements OnDestroy {
     /** The selected AAS structure elements. */
     public readonly selected = output<aas.Referable[]>();
 
-    /** The state of the AASTree child component. */
-    public readonly data = model<AASTreeData>();
-
     /** Indicates whether the current AAS can provide live data. */
     public readonly onlineReady = computed(() => this.document()?.onlineReady ?? false);
 
@@ -167,21 +157,21 @@ export class AASTreeComponent implements OnDestroy {
 
     /** Indicates whether at least one node is selected, but not all nodes. */
     public readonly someSelected = computed(() => {
-        const contents = this.state.contents();
+        const contents = this.state().contents();
         return contents.length > 0 && contents.some(node => node.selected) && !contents.every(row => row.selected);
     });
 
     /** Indicates whether all nodes are selected. */
     public readonly everySelected = computed(() => {
-        const contents = this.state.contents();
+        const contents = this.state().contents();
         return contents.length > 0 && contents.every(node => node.selected);
     });
 
     /** The visible nodes of the tree. */
-    public readonly nodes = this.state.nodes;
+    public readonly nodes = computed(() => this.state().nodes());
 
     /** Indicates whether the tree is fully expanded. */
-    public readonly expanded = this.state.expanded;
+    public readonly expanded = computed(() => this.state().expanded());
 
     /** The index of the current node that matches a search expression. */
     public readonly matchIndex = this.search.matchIndex;
@@ -189,7 +179,7 @@ export class AASTreeComponent implements OnDestroy {
     /** The current node that matches a search expression. */
     public readonly matchNode = computed(() => {
         const matchIndex = this.search.matchIndex();
-        const contents = untracked(this.state.contents);
+        const contents = untracked(this.state().contents);
         return matchIndex >= 0 ? contents[matchIndex] : undefined;
     });
 
@@ -236,7 +226,7 @@ export class AASTreeComponent implements OnDestroy {
             }
         } else {
             this.expandAll();
-            this.state.update({ expanded: true });
+            this.state().update({ expanded: true });
         }
     }
 
@@ -247,23 +237,23 @@ export class AASTreeComponent implements OnDestroy {
             }
         } else {
             this.collapseAll();
-            this.state.update({ expanded: false });
+            this.state().update({ expanded: false });
         }
     }
 
     public toggleSelections(): void {
-        const tree = new AASTree(this.state.contents());
+        const tree = new AASTree(this.state().contents());
         tree.toggleSelections();
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
         });
     }
 
     public toggleSelection(node: AASTreeNode): void {
-        const tree = new AASTree(this.state.contents());
+        const tree = new AASTree(this.state().contents());
         tree.toggleSelected(node, this.altKey, this.shiftKey);
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
         });
@@ -341,31 +331,31 @@ export class AASTreeComponent implements OnDestroy {
         this.search.findPrevious();
     }
 
-    public toString(value: aas.Reference | undefined): string {
-        if (!value) {
-            return '-';
-        }
+    // public toString(value: aas.Reference | undefined): string {
+    //     if (!value) {
+    //         return '-';
+    //     }
 
-        return value.keys.map(key => key.value).join('.');
-    }
+    //     return value.keys.map(key => key.value).join('.');
+    // }
 
     private expandNode(node: AASTreeNode): void {
-        const tree = new AASTree(untracked(this.state.contents));
+        const tree = new AASTree(untracked(this.state().contents));
         tree.expand(node);
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
         });
     }
 
     private highlightNode(matchIndex: number): void {
-        const tree = new AASTree(untracked(this.state.contents));
+        const tree = new AASTree(untracked(this.state().contents));
         if (matchIndex >= 0) {
             tree.expand(matchIndex);
         }
 
         tree.highlight(matchIndex);
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
             matchIndex,
@@ -373,27 +363,27 @@ export class AASTreeComponent implements OnDestroy {
     }
 
     private collapseRow(row: AASTreeNode): void {
-        const tree = new AASTree(untracked(this.state.contents));
+        const tree = new AASTree(untracked(this.state().contents));
         tree.collapse(row);
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
         });
     }
 
     private collapseAll(): void {
-        const tree = new AASTree(untracked(this.state.contents));
+        const tree = new AASTree(untracked(this.state().contents));
         tree.collapse();
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
         });
     }
 
     private expandAll(): void {
-        const tree = new AASTree(untracked(this.state.contents));
+        const tree = new AASTree(untracked(this.state().contents));
         tree.expand();
-        this.state.update({
+        this.state().update({
             contents: tree.contents,
             nodes: tree.nodes,
         });
@@ -402,15 +392,15 @@ export class AASTreeComponent implements OnDestroy {
     private update(document: AASDocument | null): void {
         if (document) {
             const tree = AASTree.from(document, untracked(this.currentLang));
-            this.state.update({
-                document: { endpoint: document.endpoint, id: document.id },
+            this.state().update({
+                document,
                 matchIndex: -1,
                 contents: tree.contents,
                 nodes: tree.nodes,
             });
         } else {
-            this.state.update({
-                document: {},
+            this.state().update({
+                document: null,
                 matchIndex: -1,
                 contents: [],
                 nodes: [],
@@ -453,7 +443,11 @@ export class AASTreeComponent implements OnDestroy {
 
     private goOnline(): void {
         try {
-            this.prepareOnline(this.state.contents().filter(node => node.selected));
+            this.prepareOnline(
+                this.state()
+                    .contents()
+                    .filter(node => node.selected),
+            );
             this.play();
         } catch {
             this.stop();

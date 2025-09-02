@@ -9,18 +9,20 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    computed,
     effect,
     ElementRef,
-    Inject,
+    inject,
+    InjectionToken,
     input,
+    linkedSignal,
     viewChild,
 } from '@angular/core';
 import QRCode from 'qrcode';
 import { AASDocument } from 'aas-core';
 import { WINDOW } from '../../services/window.service';
 import { encodeBase64Url } from '../../utilities';
-import { SecuredImageComponent } from '../../components/secured-image/secured-image.component';
+
+export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { factory: () => QRCode });
 
 /**
  * Displays a thumbnail of the current Asset Administration Shell
@@ -28,33 +30,35 @@ import { SecuredImageComponent } from '../../components/secured-image/secured-im
  */
 @Component({
     selector: 'fhg-thumbnail-qrcode',
-    imports: [SecuredImageComponent],
     templateUrl: './thumbnail-qrcode.html',
     styleUrl: './thumbnail-qrcode.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThumbnailQRCode {
-    public constructor(@Inject(WINDOW) private readonly window: Window) {
+    public constructor() {
+        const window = inject(WINDOW);
+        const qrCode = inject(QR_CODE);
+
         effect(() => {
-            const qrCode = this.qrCode();
-            const url = this.window.location.toString();
-            if (qrCode) {
-                QRCode.toCanvas(qrCode.nativeElement, url);
+            const canvas = this.qrCodeContainer();
+            const url = window.location.toString();
+            if (canvas) {
+                qrCode.toCanvas(canvas.nativeElement, url);
             }
         });
     }
 
     /** The canvas element that displays the QR code. */
-    public readonly qrCode = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
+    public readonly qrCodeContainer = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
 
     /** The AAS document. */
     public readonly document = input<AASDocument>();
 
     /** The URL of the thumbnail. */
-    public readonly thumbnail = computed(() => {
+    public readonly thumbnail = linkedSignal(() => {
         const document = this.document();
-        if (document === undefined) {
-            return '';
+        if (!document) {
+            return '/assets/resources/aas-idta.png';
         }
 
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;

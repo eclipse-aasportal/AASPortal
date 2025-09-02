@@ -6,18 +6,20 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NotifyService } from 'aas-lib';
 import { noop } from 'aas-core';
 import { Command } from '../../app/types/command';
 import { CommandHandler } from '../../app/aas/command-handler';
+import { createSpyObj } from '../mocks';
 
 class TestCommand extends Command {
     public constructor(
-        private spy?: jasmine.Spy,
-        private undoSpy?: jasmine.Spy,
-        private redoSpy?: jasmine.Spy,
+        private spy?: jest.Mock,
+        private undoSpy?: jest.Mock,
+        private redoSpy?: jest.Mock,
     ) {
         super('TestCommand');
     }
@@ -46,7 +48,7 @@ class TestCommand extends Command {
 }
 
 class FailCommand extends Command {
-    public constructor(private abortSpy: jasmine.Spy) {
+    public constructor(private abortSpy: jest.Mock) {
         super('TestCommand');
     }
 
@@ -67,7 +69,7 @@ class FailCommand extends Command {
     }
 }
 
-describe('CommandHandlerService', () => {
+describe('CommandHandler', () => {
     let service: CommandHandler;
 
     beforeEach(() => {
@@ -76,7 +78,7 @@ describe('CommandHandlerService', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 provideZonelessChangeDetection(),
             ],
@@ -90,27 +92,27 @@ describe('CommandHandlerService', () => {
     });
 
     it('indicates that undo is not possible', () => {
-        expect(service.canUndo()).toBeFalse();
+        expect(service.canUndo()).toBe(false);
     });
 
     it('indicates that redo is not possible', () => {
-        expect(service.canRedo()).toBeFalse();
+        expect(service.canRedo()).toBe(false);
     });
 
     it('can execute a command', () => {
-        const spy = jasmine.createSpy('execute');
+        const spy = jest.fn();
         service.execute(new TestCommand(spy));
         expect(spy).toHaveBeenCalled();
     });
 
     it('can undo/redo a command', () => {
-        const undoSpy = jasmine.createSpy('undo');
-        const redoSpy = jasmine.createSpy('redo');
+        const undoSpy = jest.fn();
+        const redoSpy = jest.fn();
         service.execute(new TestCommand(undefined, undoSpy, redoSpy));
-        expect(service.canUndo()).toBeTrue();
+        expect(service.canUndo()).toBe(true);
         service.undo();
         expect(undoSpy).toHaveBeenCalled();
-        expect(service.canRedo()).toBeTrue();
+        expect(service.canRedo()).toBe(true);
         service.redo();
         expect(redoSpy).toHaveBeenCalled();
     });
@@ -119,12 +121,12 @@ describe('CommandHandlerService', () => {
         service.execute(new TestCommand());
         service.execute(new TestCommand());
         service.clear();
-        expect(service.canUndo()).toBeFalse();
-        expect(service.canRedo()).toBeFalse();
+        expect(service.canUndo()).toBe(false);
+        expect(service.canRedo()).toBe(false);
     });
 
     it('aborts a failed command', () => {
-        const abortSpy = jasmine.createSpy('abort');
+        const abortSpy = jest.fn();
         expect(() => service.execute(new FailCommand(abortSpy))).toThrow();
         expect(abortSpy).toHaveBeenCalled();
     });

@@ -9,15 +9,15 @@
 import { aas, AASDocument, getSemanticId, isEnvironment, isSubmodel } from 'aas-core';
 
 import { ViewRoute, ViewRouteMap, ViewRouteResult } from '../types';
-import { CarbonFootprintView } from './carbon-footprint/carbon-footprint.view';
-import { ContactInformationView } from './contact-information/contact-information.view';
-import { CustomerFeedbackView } from './customer-feedback/customer-feedback.view';
-import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport.view';
-import { DocumentBrowserView } from './document-browser/document-browser.view';
-import { HandoverDocumentationView } from './handover-documentation/handover-documentation.view';
-import { NameplateView } from './nameplate/nameplate.view';
+import { CarbonFootprintView } from './carbon-footprint/carbon-footprint-view';
+import { ContactInformationView } from './contact-information/contact-information-view';
+import { CustomerFeedbackView } from './customer-feedback/customer-feedback-view';
+import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport-view';
+import { DocumentBrowserView } from './document-browser/document-browser-view';
+import { HandoverDocumentationView } from './handover-documentation/handover-documentation-view';
+import { NameplateView } from './nameplate/nameplate-view';
 import { OperationalDataView } from './operational-data/operational-data-view';
-import { TechnicalDataView } from './technical-data/technical-data.view';
+import { TechnicalDataView } from './technical-data/technical-data-view';
 import {
     CARBON_FOOTPRINT_0_9,
     CARBON_FOOTPRINT_1_0,

@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { EMPTY, first, map, of } from 'rxjs';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -22,17 +23,17 @@ import { getToken } from '../../assets/json-web-token';
 import { LoginFormResult } from '../../../lib/components/auth/login-form/login-form.component';
 import { RegisterFormResult } from '../../../lib/components/auth/register-form/register-form.component';
 import { ProfileFormResult } from '../../../lib/components/auth/profile-form/profile-form.component';
-import { FakeLoader } from '../../mocks';
+import { createSpyObj, DoneFn, FakeLoader } from '../../mocks';
 
 describe('AuthService', () => {
     let service: AuthService;
-    let window: jasmine.SpyObj<Window>;
-    let api: jasmine.SpyObj<AuthApiService>;
+    let window: jest.Mocked<Window>;
+    let api: jest.Mocked<AuthApiService>;
     let modal: NgbModal;
 
     describe('anonym', () => {
         beforeEach(() => {
-            api = jasmine.createSpyObj<AuthApiService>([
+            api = createSpyObj<AuthApiService>([
                 'login',
                 'register',
                 'getProfile',
@@ -43,22 +44,15 @@ describe('AuthService', () => {
                 'deleteCookie',
             ]);
 
-            api.getCookies.and.returnValue(EMPTY);
+            api.getCookies.mockReturnValue(EMPTY);
 
-            const localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
+            const localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
 
-            localStorage.getItem.and.returnValue(null);
-            window = jasmine.createSpyObj<Window>(['confirm'], { localStorage });
+            localStorage.getItem.mockReturnValue(null);
+            window = createSpyObj<Window>(['confirm'], { localStorage });
 
             TestBed.configureTestingModule({
-                imports: [
-                    TranslateModule.forRoot({
-                        loader: {
-                            provide: TranslateLoader,
-                            useClass: FakeLoader,
-                        },
-                    }),
-                ],
+                imports: [],
                 providers: [
                     {
                         provide: WINDOW,
@@ -66,12 +60,18 @@ describe('AuthService', () => {
                     },
                     {
                         provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                        useValue: createSpyObj<NotifyService>(['error']),
                     },
                     {
                         provide: AuthApiService,
                         useValue: api,
                     },
+                    provideTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useClass: FakeLoader,
+                        },
+                    }),
                     provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
                     provideZonelessChangeDetection(),
@@ -86,22 +86,22 @@ describe('AuthService', () => {
             expect(service).toBeTruthy();
             expect(service.payload()).toBeUndefined();
             expect(service.email()).toBeUndefined();
-            expect(service.authenticated()).toBeFalse();
+            expect(service.authenticated()).toBe(false);
             expect(service.name()).toBeUndefined();
             expect(service.role()).toBeUndefined();
         });
 
         describe('isAuthorized', () => {
             it('indicates that a guest is authorized as guest', () => {
-                expect(service.isAuthorized(undefined)).toBeTrue();
+                expect(service.isAuthorized(undefined)).toBe(true);
             });
 
             it('indicates that a guest is not authorized as editor', () => {
-                expect(service.isAuthorized(['editor'])).toBeFalse();
+                expect(service.isAuthorized(['editor'])).toBe(false);
             });
 
             it('indicates that a guest is not authorized as admin', () => {
-                expect(service.isAuthorized(['admin'])).toBeFalse();
+                expect(service.isAuthorized(['admin'])).toBe(false);
             });
         });
 
@@ -113,14 +113,14 @@ describe('AuthService', () => {
             });
 
             it('can login as arguments', function (done: DoneFn) {
-                api.login.and.returnValue(of({ token: newToken }));
+                api.login.mockReturnValue(of({ token: newToken }));
                 service
                     .login({ id: 'john.doe@email.com', password: 'password' })
                     .pipe(map(() => service.payload()))
                     .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBeTrue();
+                        expect(service.authenticated()).toBe(true);
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
                         done();
@@ -128,10 +128,10 @@ describe('AuthService', () => {
             });
 
             it('can login via form', function (done: DoneFn) {
-                api.login.and.returnValue(of({ token: newToken }));
+                api.login.mockReturnValue(of({ token: newToken }));
 
-                spyOn(modal, 'open').and.returnValue(
-                    jasmine.createSpyObj<NgbModalRef>(
+                jest.spyOn(modal, 'open').mockReturnValue(
+                    createSpyObj<NgbModalRef>(
                         {},
                         {
                             result: new Promise<LoginFormResult>(resolve =>
@@ -147,7 +147,7 @@ describe('AuthService', () => {
                     .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBeTrue();
+                        expect(service.authenticated()).toBe(true);
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
                         done();
@@ -163,7 +163,7 @@ describe('AuthService', () => {
             });
 
             it('allows registering a new user via arguments', function (done: DoneFn) {
-                api.register.and.returnValue(of({ token: newToken }));
+                api.register.mockReturnValue(of({ token: newToken }));
 
                 service
                     .register({
@@ -175,7 +175,7 @@ describe('AuthService', () => {
                     .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBeTrue();
+                        expect(service.authenticated()).toBe(true);
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
                         done();
@@ -183,10 +183,10 @@ describe('AuthService', () => {
             });
 
             it('allows registering a new user via form', function (done: DoneFn) {
-                api.register.and.returnValue(of({ token: newToken }));
+                api.register.mockReturnValue(of({ token: newToken }));
 
-                spyOn(modal, 'open').and.returnValue(
-                    jasmine.createSpyObj<NgbModalRef>(
+                jest.spyOn(modal, 'open').mockReturnValue(
+                    createSpyObj<NgbModalRef>(
                         {},
                         {
                             result: new Promise<RegisterFormResult>(resolve =>
@@ -202,7 +202,7 @@ describe('AuthService', () => {
                     .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBeTrue();
+                        expect(service.authenticated()).toBe(true);
                         expect(service.name()).toEqual('John');
                         expect(service.role()).toEqual('editor');
                         done();
@@ -233,7 +233,7 @@ describe('AuthService', () => {
 
         beforeEach(() => {
             token = getToken('John');
-            api = jasmine.createSpyObj<AuthApiService>([
+            api = createSpyObj<AuthApiService>([
                 'login',
                 'register',
                 'getCookie',
@@ -245,15 +245,15 @@ describe('AuthService', () => {
                 'delete',
             ]);
 
-            api.getProfile.and.returnValue(of({ id: 'john.doe@email.com', name: 'John Doe' }));
+            api.getProfile.mockReturnValue(of({ id: 'john.doe@email.com', name: 'John Doe' }));
 
-            const localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
+            const localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
 
-            localStorage.getItem.and.callFake(name => {
+            localStorage.getItem.mockImplementation(name => {
                 return name === '.StayLoggedIn' ? 'true' : token;
             });
 
-            window = jasmine.createSpyObj<Window>(['confirm'], { localStorage });
+            window = createSpyObj<Window>(['confirm'], { localStorage });
 
             TestBed.configureTestingModule({
                 declarations: [],
@@ -272,7 +272,7 @@ describe('AuthService', () => {
                     },
                     {
                         provide: NotifyService,
-                        useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                        useValue: createSpyObj<NotifyService>(['error']),
                     },
                     {
                         provide: AuthApiService,
@@ -292,7 +292,7 @@ describe('AuthService', () => {
             expect(service).toBeTruthy();
             expect(service.payload()).toBeTruthy();
             expect(service.email()).toEqual('john.doe@email.com');
-            expect(service.authenticated()).toBeTrue();
+            expect(service.authenticated()).toBe(true);
             expect(service.name()).toEqual('John');
             expect(service.role()).toEqual('editor');
         });
@@ -303,15 +303,15 @@ describe('AuthService', () => {
 
         describe('isAuthorized', () => {
             it('indicates that the user is authorized as guest', () => {
-                expect(service.isAuthorized(undefined)).toBeTrue();
+                expect(service.isAuthorized(undefined)).toBe(true);
             });
 
             it('indicates that a guest is authorized as editor', () => {
-                expect(service.isAuthorized(['editor'])).toBeTrue();
+                expect(service.isAuthorized(['editor'])).toBe(true);
             });
 
             it('indicates that a guest is not authorized as admin', () => {
-                expect(service.isAuthorized(['admin'])).toBeFalse();
+                expect(service.isAuthorized(['admin'])).toBe(false);
             });
         });
 
@@ -322,7 +322,7 @@ describe('AuthService', () => {
                 service.logout().subscribe(value => {
                     expect(value).toBeUndefined();
                     expect(service.email()).toBeUndefined();
-                    expect(service.authenticated()).toBeFalse();
+                    expect(service.authenticated()).toBe(false);
                     expect(service.name()).toBeUndefined();
                     expect(service.role()).toBeUndefined();
                     done();
@@ -330,7 +330,7 @@ describe('AuthService', () => {
             });
         });
 
-        describe('updateUserProfileAsync', () => {
+        describe('updateUserProfile', () => {
             let newToken: string;
             let guestToken: string;
 
@@ -339,7 +339,7 @@ describe('AuthService', () => {
             });
 
             it('updates the user profile via argument', (done: DoneFn) => {
-                api.updateProfile.and.returnValue(of({ token: newToken }));
+                api.updateProfile.mockReturnValue(of({ token: newToken }));
 
                 service
                     .updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' })
@@ -347,7 +347,7 @@ describe('AuthService', () => {
                     .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBeTrue();
+                        expect(service.authenticated()).toBe(true);
                         expect(service.name()).toEqual('John Doe');
                         expect(service.role()).toEqual('editor');
                         done();
@@ -355,13 +355,13 @@ describe('AuthService', () => {
             });
 
             it('updates the user profile via form', (done: DoneFn) => {
-                api.updateProfile.and.returnValue(of({ token: newToken }));
-                spyOn(modal, 'open').and.returnValue(
-                    jasmine.createSpyObj<NgbModalRef>(
+                api.updateProfile.mockReturnValue(of({ token: newToken }));
+                jest.spyOn(modal, 'open').mockReturnValue(
+                    createSpyObj<NgbModalRef>(
                         {},
                         {
                             result: new Promise<ProfileFormResult>(resolve => resolve({ token: newToken })),
-                            componentInstance: { initialize: jasmine.createSpy() },
+                            componentInstance: { initialize: jest.fn() },
                         },
                     ),
                 );
@@ -372,7 +372,7 @@ describe('AuthService', () => {
                     .subscribe(value => {
                         expect(value).toBeTruthy();
                         expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBeTrue();
+                        expect(service.authenticated()).toBe(true);
                         expect(service.name()).toEqual('John Doe');
                         expect(service.role()).toEqual('editor');
                         done();
@@ -380,14 +380,14 @@ describe('AuthService', () => {
             });
 
             it('deletes a user via form', (done: DoneFn) => {
-                api.delete.and.returnValue(of(void 0));
-                window.confirm.and.returnValue(true);
-                spyOn(modal, 'open').and.returnValue(
-                    jasmine.createSpyObj<NgbModalRef>(
+                api.delete.mockReturnValue(of(void 0));
+                window.confirm.mockReturnValue(true);
+                jest.spyOn(modal, 'open').mockReturnValue(
+                    createSpyObj<NgbModalRef>(
                         {},
                         {
                             result: new Promise<ProfileFormResult>(resolve => resolve({ action: 'deleteUser' })),
-                            componentInstance: { initialize: jasmine.createSpy() },
+                            componentInstance: { initialize: jest.fn() },
                         },
                     ),
                 );
@@ -398,7 +398,7 @@ describe('AuthService', () => {
                     .subscribe(value => {
                         expect(value).toBeUndefined();
                         expect(service.email()).toBeUndefined();
-                        expect(service.authenticated()).toBeFalse();
+                        expect(service.authenticated()).toBe(false);
                         expect(service.name()).toBeUndefined();
                         expect(service.role()).toBeUndefined();
                         done();
@@ -408,7 +408,7 @@ describe('AuthService', () => {
 
         describe('getCookie', () => {
             it('returns the value of "Cookie1"', (done: DoneFn) => {
-                api.getCookie.and.returnValue(
+                api.getCookie.mockReturnValue(
                     of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
                 );
 
@@ -424,20 +424,20 @@ describe('AuthService', () => {
 
         describe('checkCookie', () => {
             it('indicates that "Cookie1" exist', (done: DoneFn) => {
-                api.getCookie.and.returnValue(
+                api.getCookie.mockReturnValue(
                     of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
                 );
 
                 service.checkCookie('Cookie1').subscribe(value => {
-                    expect(value).toBeTrue();
+                    expect(value).toBe(true);
                     done();
                 });
             });
 
             it('indicates that "Unknown" not exist', (done: DoneFn) => {
-                api.getCookie.and.returnValue(of(undefined));
+                api.getCookie.mockReturnValue(of(undefined));
                 service.checkCookie('Unknown').subscribe(value => {
-                    expect(value).toBeFalse();
+                    expect(value).toBe(false);
                     done();
                 });
             });
@@ -445,7 +445,7 @@ describe('AuthService', () => {
 
         describe('deleteCookie', () => {
             it('deletes a cookie', (done: DoneFn) => {
-                api.deleteCookie.and.returnValue(of(void 0));
+                api.deleteCookie.mockReturnValue(of(void 0));
                 service.deleteCookie('Cookie1').subscribe(() => {
                     expect(api.deleteCookie).toHaveBeenCalledWith('john.doe@email.com', 'Cookie1');
                     done();

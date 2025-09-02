@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable, signal } from '@angular/core';
-import { AASTreeData, LiveState } from 'aas-lib';
+import { AASTreeState, LiveState } from 'aas-lib';
 import { aas, AASDocument, equalArray } from 'aas-core';
 
 export type AASData = {
@@ -38,15 +38,16 @@ export class AASState {
     public readonly document = this.document$.asReadonly();
 
     /** Indicates the current live state. */
-    public readonly live= this.live$.asReadonly();
+    public readonly live = this.live$.asReadonly();
 
     /** The current search or filter expression. */
-    public readonly searchExpression = this.searchExpression$.asReadonly();;
+    public readonly searchExpression = this.searchExpression$.asReadonly();
 
     /** The selected elements. */
     public readonly selectedElements = this.selectedElements$.asReadonly();
 
-    public readonly treeState = signal<AASTreeData | undefined>(undefined);
+    /** The state handler of the AASTree child component. */
+    public readonly treeState = new AASTreeState();
 
     public update(newState: Partial<AASData>): void {
         if (newState.document !== undefined) {

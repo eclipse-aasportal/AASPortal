@@ -31,7 +31,7 @@ export abstract class TreeNode<TElement> {
     public abstract get isLeaf(): boolean;
 }
 
-/** 
+/**
  * Represents a structure of elements as a tree.
  * @param TElement The base type of the structure elements.
  * @param TNode The concrete `TreeNode` type.
@@ -103,7 +103,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
     /**
      * Expands the complete tree.
      */
-    public expand(): void
+    public expand(): void;
     public expand(arg?: number | TNode): void {
         const nodes = [...this.getContents()];
         if (nodes.length === 0) {
@@ -222,7 +222,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
         this.setContents(nodes);
     }
 
-    /** 
+    /**
      * Toggles the selection state over all nodes:
      * - Selects all nodes if no node or some but not all nodes are selected.
      * - Deselects all nodes if all nodes are selected.
