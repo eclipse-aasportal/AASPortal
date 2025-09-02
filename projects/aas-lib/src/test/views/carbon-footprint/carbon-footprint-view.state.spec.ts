@@ -10,13 +10,32 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
+import { aas, AASDocument } from 'aas-core';
 import { CarbonFootprintViewState } from '../../../lib/views/carbon-footprint/carbon-footprint-view.state';
 import { FakeLoader } from '../../mocks';
+import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
+
+import carbon_footprint_1_0 from '../../assets/carbon-footprint-1-0.json';
 
 describe('CarbonFootprintViewState', () => {
     let service: CarbonFootprintViewState;
+    let document: AASDocument;
+    let submodel: aas.Submodel;
 
     beforeEach(() => {
+        document = {
+            address: '',
+            crc32: 0,
+            idShort: 'CarbonFootprint',
+            readonly: false,
+            timestamp: 0,
+            id: 'https://admin-shell.io/idta/aas/CarbonFootprintAAS/1/0',
+            endpoint: 'Test',
+            content: carbon_footprint_1_0 as aas.Environment,
+        };
+
+        submodel = document.content!.submodels[0];
+
         TestBed.configureTestingModule({
             providers: [
                 provideTranslateService({
@@ -29,11 +48,20 @@ describe('CarbonFootprintViewState', () => {
                 provideZonelessChangeDetection(),
             ],
         });
+
         service = TestBed.inject(CarbonFootprintViewState);
+        service.update({ tuples: [[document, submodel]] });
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
-        expect(service.carbonFootprintState).toBeDefined();
+    });
+
+    it('should provide a state for the CarbonFootprint component', () => {
+        expect(service.carbonFootprintState).toBeInstanceOf(CarbonFootprintState);
+    });
+
+    it('should provide tuples', () => {
+        expect(service.tuples()).toEqual([[document, submodel]]);
     });
 });
