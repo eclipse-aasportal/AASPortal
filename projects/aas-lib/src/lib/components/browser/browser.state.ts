@@ -29,7 +29,7 @@ export interface BrowserElement {
     name: string;
     referable: aas.Referable;
     conceptDescription?: aas.ConceptDescription;
-    collection?: string;
+    collectionName?: string;
     properties: BrowserProperty[];
     children: BrowserElementRef[];
 }
@@ -56,6 +56,9 @@ const initialState: BrowserData = {
     path: [],
 };
 
+/**
+ * State management service for the browser component.
+ */
 @Injectable()
 export class BrowserState extends ChildState<BrowserData> {
     private readonly path$ = signal(initialState.path);
@@ -75,6 +78,10 @@ export class BrowserState extends ChildState<BrowserData> {
     /** The current Asset Administration Shell environment. */
     public readonly env = this.env$.asReadonly();
 
+    /**
+     * Updates the state with the provided new state.
+     * @param newState The new state to set.
+     */
     public override update(newState: Partial<BrowserData>): void {
         if (newState.current !== undefined) {
             this.current$.set(newState.current);
