@@ -17,6 +17,9 @@ export const initialState: ContactInformationViewData = {
     tuples: [],
 };
 
+/**
+ * The state of the Contact Information view.
+ */
 @Injectable({
     providedIn: 'root',
 })
@@ -24,6 +27,8 @@ export class ContactInformationViewState extends LeafViewState<ContactInformatio
     public constructor() {
         super(initialState);
     }
+
+    /** The state of the Contact Information component. */
     public readonly contactInformationState = new ContactInformationState();
 
     protected override updating(newState: Partial<ContactInformationViewData>): void {

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
-import { inject, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
