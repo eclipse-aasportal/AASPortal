@@ -11,7 +11,8 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { FakeLoader } from '../../mocks';
 
-import { BrowserState } from '../../../lib/components/browser/browser.state';
+import { BrowserData, BrowserElement, BrowserState } from '../../../lib/components/browser/browser.state';
+import { aas } from 'projects/aas-core/dist/types';
 
 describe('BrowserState', () => {
     let service: BrowserState;
@@ -41,7 +42,52 @@ describe('BrowserState', () => {
             conceptDescriptions: [],
             submodels: [],
         });
-        
+
         expect(service.path()).toEqual([]);
+    });
+
+    describe('update', () => {
+        it('should update the state with new values', () => {
+            const env: aas.Environment = {
+                assetAdministrationShells: [
+                    {
+                        assetInformation: {
+                            assetKind: 'Instance',
+                        },
+                        id: 'id',
+                        idShort: 'idShort',
+                        modelType: 'SubmodelElementCollection',
+                    },
+                ],
+                conceptDescriptions: [{
+                    id: 'cdId',
+                    idShort: 'cdIdShort',
+                    modelType: 'SubmodelElementCollection'
+                }],
+                submodels: [{
+                    id: 'smId',
+                    idShort: 'smIdShort',
+                    modelType: 'SubmodelElementCollection'
+                }],
+            };
+
+            const current: BrowserElement = {
+                name: '',
+                referable: {
+                    idShort: '',
+                    modelType: 'SubmodelElementCollection'
+                },
+                properties: [],
+                children: []
+            };
+
+            const path: BrowserElement[] = [current];
+
+            const newState: Partial<BrowserData> = { env, current, path };
+            service.update(newState);
+            expect(service.env()).toEqual(newState.env);
+            expect(service.current()).toEqual(newState.current);
+            expect(service.path()).toEqual(newState.path);
+        });
     });
 });
