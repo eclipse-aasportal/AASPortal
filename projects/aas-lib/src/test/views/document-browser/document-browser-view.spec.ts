@@ -7,13 +7,13 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
-import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { first, of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 
-import { AASDocument } from 'aas-core';
+import { aas, AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 import { BrowserComponent } from '../../../lib/components/browser/browser.component';
@@ -23,6 +23,20 @@ import { VIEW_ROUTES } from '../../../lib/types';
 import { viewRoutes } from '../../../lib/views/views-routes';
 import { DocumentBrowserView } from '../../../lib/views/document-browser/document-browser-view';
 import { createSpyObj, FakeLoader } from '../../mocks';
+import { BrowserState } from '../../../lib/components/browser/browser.state';
+import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+
+import sampleDocument from '../../assets/sample-document.json';
+
+@Component({
+    selector: 'fhg-thumbnail-qrcode',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestThumbnailQRCode {
+    public readonly document = input<AASDocument>();
+}
 
 @Component({
     selector: 'fhg-browser',
@@ -32,31 +46,38 @@ import { createSpyObj, FakeLoader } from '../../mocks';
 })
 export class TestBrowserComponent {
     public readonly document = input<AASDocument | null | undefined>(undefined);
+    public readonly state = input<BrowserState>();
 }
 
 describe('DocumentBrowserView', () => {
+    let fixture: ComponentFixture<DocumentBrowserView>;
+    let component: DocumentBrowserView;
     let api: jest.Mocked<EndpointsApi>;
     let route: jest.Mocked<ActivatedRoute>;
     let start: jest.Mocked<StartService>;
+    let document: AASDocument;
 
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument']);
         start = createSpyObj<StartService>(['add', 'save']);
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://localhost/aas') }) },
+            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168') }) },
         );
 
-        api.getDocument.mockReturnValue(
-            of({
+        document ={
                 address: '',
                 crc32: 0,
-                idShort: '',
+                idShort: 'ExampleMotor',
                 readonly: false,
                 timestamp: 0,
-                id: 'http://localhost/aas',
+                id: 'http://customer.com/aas/9175_7013_7091_9168',
                 endpoint: 'endpoint',
-            } satisfies AASDocument),
+                content: sampleDocument as aas.Environment,
+            };
+
+        api.getDocument.mockReturnValue(
+            of(document)
         );
 
         await TestBed.configureTestingModule({
@@ -81,33 +102,57 @@ describe('DocumentBrowserView', () => {
                     provide: VIEW_ROUTES,
                     useValue: viewRoutes,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                DocumentBrowserView,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [DocumentBrowserView],
         }).compileComponents();
 
         TestBed.overrideComponent(DocumentBrowserView, {
             remove: {
-                imports: [BrowserComponent],
+                imports: [BrowserComponent, ThumbnailQRCode],
             },
             add: {
-                imports: [TestBrowserComponent],
+                imports: [TestBrowserComponent, TestThumbnailQRCode],
             },
         });
+
+        fixture = TestBed.createComponent(DocumentBrowserView);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(DocumentBrowserView);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
         expect(component).toBeTruthy();
+    });
+
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
+    it('provides a state for the Browser component', () => {
+        expect(component.browserState).toBeDefined();
+    });
+
+    it('indicates that 1 document is available', () => {
+        expect(component.count()).toBe(1);
+    });
+
+    it('shows the document with index 1', () => {
+        expect(component.index()).toBe(1);
+    });
+
+    it('adds a favorite to the start page', (done) => {
+        start.add.mockReturnValue(true);
+        start.save.mockReturnValue(of(void 0));
+        component.addToStart().pipe(first()).subscribe(() => {
+            expect(start.add).toHaveBeenCalled();
+            done();
+        })
     });
 });

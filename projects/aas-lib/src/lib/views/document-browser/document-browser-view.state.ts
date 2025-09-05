@@ -20,11 +20,18 @@ const initialState: DocumentBrowserData = {
 @Injectable({
     providedIn: 'root',
 })
-export class DocumentBrowserState extends CompositeViewState<DocumentBrowserData> {
+/**
+ * `DocumentBrowserState` manages the state for the `DocumentBrowserView`.
+ * It extends `CompositeViewState` and holds the `BrowserState` instance.
+ */
+export class DocumentBrowserViewState extends CompositeViewState<DocumentBrowserData> {
     public constructor() {
         super(initialState);
     }
 
+    /**
+     * The `BrowserState` instance used by the `BrowserComponent` to manage the browsing state.
+     */
     public readonly browserState = new BrowserState();
 
     protected override updating(newState: Partial<DocumentBrowserData>): void {

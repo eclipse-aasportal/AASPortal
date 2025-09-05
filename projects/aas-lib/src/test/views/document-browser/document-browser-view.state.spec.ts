@@ -10,16 +10,15 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
-import { DocumentBrowserState } from '../../../lib/views/document-browser/document-browser.state';
+import { DocumentBrowserViewState } from '../../../lib/views/document-browser/document-browser-view.state';
 import { FakeLoader } from '../../mocks';
 
-describe('DocumentBrowserState', () => {
-    let service: DocumentBrowserState;
+describe('DocumentBrowserViewState', () => {
+    let service: DocumentBrowserViewState;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                DocumentBrowserState,
                 provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
@@ -27,13 +26,17 @@ describe('DocumentBrowserState', () => {
                     },
                 }),
                 provideZonelessChangeDetection(),
-            ]
+            ],
         });
 
-        service = TestBed.inject(DocumentBrowserState);
+        service = TestBed.inject(DocumentBrowserViewState);
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
+    });
+
+    it('should provide a state for Browser component', () => {
+        expect(service.browserState).toBeDefined();
     });
 });
