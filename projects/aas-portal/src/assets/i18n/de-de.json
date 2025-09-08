@@ -195,6 +195,7 @@
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
+        "HINT_CONTAINER_NETWORKING": "💡 Wenn AASPortal in einem Container ausgeführt wird und sich Ihr Endpunkt auf dem Host befindet, verwenden Sie 'host.containers.internal' (Podman) oder 'host.docker.internal' (Docker) anstelle von 'localhost'.",
         "ADVANCED_SETTINGS": "Erweiterte Einstellungen",
         "SCHEDULE": "Endpunkt-Index aktualisieren",
         "DISABLED": "deaktiviert",
