@@ -15,7 +15,7 @@ jobs:
     # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
 #
     steps:
       - uses: actions/checkout@v3

@@ -1,15 +1,16 @@
 # Getting Started
 ## Prerequisites
 - Visual Studio Code
-- Node.js v18.10.0
+- Node.js v22.12.0
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
-*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of four workspaces:
-- aas-portal: The browser app of *AASPortal*.
-- aas-node: The Node.js app of *AASPortal*.
-- aas-lib: UI components and services in an Angular library.
-- common: Types and functions used by aas-portal and aas-node.
+*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of five workspaces:
+- **aas-core**: Shared types, utilities, and AAS data models used across workspaces
+- **aas-portal**: The browser app of *AASPortal*. It's an Angular-based frontend application using Bootstrap 5 and NgRx state management
+- **aas-node**: Node.js/Express.js backend with REST API, authentication (JWT), and OpenAPI/Swagger documentation
+- **aas-lib**: Angular library containing reusable UI components and services
+- **fhg-jest**: Custom Jest configuration utilities
 
 ```txt
 aasportal
