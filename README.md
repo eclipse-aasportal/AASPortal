@@ -35,7 +35,7 @@ Then open http://localhost/ in your browser.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/FraunhoferIOSB/AASPortal.git
+   git clone https://github.com/eclipse-aasportal/AASPortal.git
    cd AASPortal
    ```
 
