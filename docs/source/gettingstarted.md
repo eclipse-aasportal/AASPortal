@@ -17,6 +17,8 @@ aasportal
   ├── projects
   │     ├── aas-core
   │     │     └── package.json
+  │     ├── aas-jest
+  │     │     └── package.json
   │     ├── aas-lib
   │     │     └── package.json
   │     ├── aas-node
