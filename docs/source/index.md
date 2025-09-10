@@ -23,6 +23,14 @@ Architecture <architecture.md>
 
 ```{toctree} 
 :hidden:
+:caption: Development
+:maxdepth: 3
+Workspaces <workspaces.md>
+Development Guide <development.md>
+```
+
+```{toctree} 
+:hidden:
 :caption: Usage
 :maxdepth: 3
 usage.md
