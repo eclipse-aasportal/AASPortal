@@ -10,7 +10,7 @@ AASPortal uses npm workspaces to organize code into distinct, reusable packages.
 | [aas-portal](#aas-portal) | Frontend application | Angular 19, NgRx | `dist/browser/` |
 | [aas-node](#aas-node) | Backend API server | Express.js, esbuild | `dist/` |
 | [aas-lib](#aas-lib) | Reusable UI components | Angular Library | `dist/` |
-| [fhg-jest](#fhg-jest) | Test configuration | Jest utilities | `dist/` |
+| [aas-jest](#aas-jest) | Test configuration | Jest utilities | `dist/` |
 
 ---
 
@@ -181,9 +181,9 @@ ng build aas-lib --watch           # Watch mode development
 
 ---
 
-## fhg-jest
+## aas-jest
 
-**Location**: `projects/fhg-jest/`
+**Location**: `projects/aas-jest/`
 **Purpose**: Custom Jest configuration and utilities for the monorepo
 
 ### Key Features
@@ -203,7 +203,7 @@ src/
 ### Usage in Workspaces
 ```javascript
 // In workspace jest.config.js
-const baseConfig = require('fhg-jest');
+const baseConfig = require('aas-jest');
 
 module.exports = {
     ...baseConfig,
@@ -213,8 +213,8 @@ module.exports = {
 
 ### Development Commands
 ```bash
-npm run build -w fhg-jest          # Build Jest utilities
-npm run test -w fhg-jest           # Test the utilities
+npm run build -w aas-jest          # Build Jest utilities
+npm run test -w aas-jest           # Test the utilities
 ```
 
 ---
@@ -225,7 +225,7 @@ npm run test -w fhg-jest           # Test the utilities
 ```
 aas-portal → aas-lib → aas-core
 aas-node → aas-core
-fhg-jest → (used by all for testing)
+aas-jest → (used by all for testing)
 ```
 
 ### Shared Dependencies
@@ -239,7 +239,7 @@ fhg-jest → (used by all for testing)
 ### Build Order
 Due to dependencies, build in this order:
 1. `aas-core` (no dependencies)
-2. `fhg-jest` (no dependencies)
+2. `aas-jest` (no dependencies)
 3. `aas-lib` (depends on aas-core)
 4. `aas-portal` (depends on aas-lib, aas-core)
 5. `aas-node` (depends on aas-core)
@@ -260,7 +260,7 @@ npm run build -ws
 ## Testing Strategy
 
 ### Backend Testing (Jest)
-- **Unit Tests**: `aas-core`, `aas-node`, `fhg-jest`
+- **Unit Tests**: `aas-core`, `aas-node`, `aas-jest`
 - **Test Location**: `src/**/*.spec.ts`
 - **Coverage**: Reports generated in `reports/`
 

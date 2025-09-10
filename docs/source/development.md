@@ -80,7 +80,7 @@ AASPortal uses different build tools optimized for each workspace:
 | aas-portal | Angular CLI | Browser Bundle | `ng build --watch` |
 | aas-node | esbuild | ESM | `esbuild --watch` |
 | aas-lib | ng-packagr | Angular Package | `ng build --watch` |
-| fhg-jest | TypeScript Compiler | CommonJS | `tsc --watch` |
+| aas-jest | TypeScript Compiler | CommonJS | `tsc --watch` |
 
 ### Development Build Commands
 
@@ -141,7 +141,7 @@ NODE_ENV=production npm run build   # Production optimized
 **Backend Tests (Jest)**
 ```bash
 # Run all backend tests
-npm run test -w aas-core -w aas-node -w fhg-jest
+npm run test -w aas-core -w aas-node -w aas-jest
 
 # Watch mode
 npm run test -w aas-node -- --watch

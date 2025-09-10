@@ -62,7 +62,7 @@ AASPortal uses npm workspaces with the following structure:
 - **aas-portal**: Angular frontend application
 - **aas-node**: Node.js/Express.js backend API
 - **aas-lib**: Reusable Angular UI components
-- **fhg-jest**: Custom Jest configuration
+- **aas-jest**: Custom Jest configuration
 
 ### Working with Workspaces
 Use workspace-specific commands:

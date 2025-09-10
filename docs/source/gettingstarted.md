@@ -10,7 +10,7 @@
 - **aas-portal**: The browser app of *AASPortal*. It's an Angular-based frontend application using Bootstrap 5 and NgRx state management
 - **aas-node**: Node.js/Express.js backend with REST API, authentication (JWT), and OpenAPI/Swagger documentation
 - **aas-lib**: Angular library containing reusable UI components and services
-- **fhg-jest**: Custom Jest configuration utilities
+- **aas-jest**: Custom Jest configuration utilities
 
 ```txt
 aasportal
