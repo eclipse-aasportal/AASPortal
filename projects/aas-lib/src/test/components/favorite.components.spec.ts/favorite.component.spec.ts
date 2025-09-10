@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
@@ -15,7 +16,7 @@ import { AuthService } from '../../../lib/components/auth/auth.service';
 import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
-import { FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-img',
@@ -32,14 +33,14 @@ export class TestSecuredImageComponent {
 }
 
 describe('FavoriteComponent', () => {
-    let api: jasmine.SpyObj<EndpointsApi>;
-    let auth: jasmine.SpyObj<AuthService>;
-    let start: jasmine.SpyObj<StartService>;
+    let api: jest.Mocked<EndpointsApi>;
+    let auth: jest.Mocked<AuthService>;
+    let start: jest.Mocked<StartService>;
 
     beforeEach(async () => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
-        api = jasmine.createSpyObj<EndpointsApi>(['getDocument']);
-        start = jasmine.createSpyObj<StartService>(['add', 'save']);
+        auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
+        api = createSpyObj<EndpointsApi>(['getDocument']);
+        start = createSpyObj<StartService>(['add', 'save']);
 
         await TestBed.configureTestingModule({
             providers: [

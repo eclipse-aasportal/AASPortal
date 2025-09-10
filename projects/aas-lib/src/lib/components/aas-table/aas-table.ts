@@ -13,7 +13,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
-    Inject,
     WritableSignal,
     computed,
     effect,

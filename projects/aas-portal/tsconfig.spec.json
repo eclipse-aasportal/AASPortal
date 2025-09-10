@@ -2,9 +2,14 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./out-tsc/spec"
+        "isolatedModules": false,
+        "module": "ES2022",
+        "types": [
+            "jest",
+            "node"
+        ],
     },
     "include": [
-        "src/test/**/*.ts"
+        "src/**/*.ts"
     ]
 }

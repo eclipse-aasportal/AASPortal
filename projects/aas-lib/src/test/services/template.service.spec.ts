@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -15,6 +16,7 @@ import { TemplateDescriptor, aas } from 'aas-core';
 
 import { NotifyService } from '../../lib/components/notify/notify.service';
 import { TemplateService } from '../../lib/services/template.service';
+import { createSpyObj, DoneFn } from '../mocks';
 
 describe('TemplateService', () => {
     let service: TemplateService;
@@ -27,7 +29,7 @@ describe('TemplateService', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
@@ -68,7 +70,7 @@ describe('TemplateService', () => {
                 modelType: 'Property',
             };
 
-            spyOn(http, 'get').and.returnValue(of(property));
+            jest.spyOn(http, 'get').mockReturnValue(of(property));
 
             service.getTemplate({ type: 'file', address: 'submodel-element/property.json' }).subscribe(value => {
                 expect(value).toEqual(property);

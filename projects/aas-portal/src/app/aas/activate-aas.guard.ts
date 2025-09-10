@@ -10,7 +10,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn } from '@angular/router';
 import { AASState } from './aas.state';
 
-export const activateAASGuard: CanActivateFn = (route, state) => {  
+export const activateAASGuard: CanActivateFn = (route, state) => {
     if (state.url === '/aas') {
         const componentState = inject(AASState);
         return componentState.document() !== null;

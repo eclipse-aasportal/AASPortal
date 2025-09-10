@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { computed, Signal, signal } from '@angular/core';
+import { Signal, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AASDocument } from 'aas-core';
-import { encodeBase64Url } from '../utilities';
 import { EndpointsApi } from '../services/endpoints-api';
 import { ViewRoute, ViewRouteName } from '../types';
 
@@ -40,16 +39,6 @@ export abstract class View {
 
     /** The current active AAS document. */
     public abstract readonly document: Signal<AASDocument | undefined>;
-
-    /** The thumbnail URL of the current active AAS document. */
-    public readonly thumbnail = computed(() => {
-        const document = this.document();
-        if (!document) {
-            return '';
-        }
-
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
-    });
 
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;

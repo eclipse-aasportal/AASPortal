@@ -25,14 +25,17 @@
 
 <ng-template #startToolbar>
     <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="remove().subscribe()" [disabled]="!hasSelected()">
+        <button id="AID_REMOVE" class="btn btn-primary" type="button" (click)="remove().subscribe()"
+            [disabled]="!someSelected()">
             <i class="bi bi-trash"></i>
         </button>
-        <button class="btn btn-primary" type="button" (click)="moveLeft().subscribe()" [disabled]="!canMoveLeft()">
+        <button id="AID_MOVE_LEFT" class="btn btn-primary" type="button" (click)="moveLeft().subscribe()"
+            [disabled]="!canMoveLeft()">
             <i class="bi bi-arrow-left"></i>
         </button>
-        <button class="btn btn-primary" type="button" (click)="moveRight().subscribe()" [disabled]="!canMoveRight()">
+        <button id="AID_MOVE_RIGHT" class="btn btn-primary" type="button" (click)="moveRight().subscribe()"
+            [disabled]="!canMoveRight()">
             <i class="bi bi-arrow-right"></i>
         </button>
-   </div>
+    </div>
 </ng-template>

@@ -6,20 +6,23 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AASTreeApi } from '../../../lib/components/aas-tree/aas-tree-api';
+import { createSpyObj } from '../../mocks';
 
 describe('AASTreeApiService', () => {
     let service: AASTreeApi;
     let httpTestingController: HttpTestingController;
-    let auth: jasmine.SpyObj<AuthService>;
+    let auth: jest.Mocked<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['login']);
+        auth = createSpyObj<AuthService>(['login']);
         TestBed.configureTestingModule({
             declarations: [],
             imports: [],

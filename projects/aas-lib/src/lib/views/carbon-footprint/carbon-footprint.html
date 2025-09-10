@@ -11,34 +11,23 @@
         <h2 ngbAccordionHeader>
             <button ngbAccordionButton>
                 <span translate>CarbonFootprint.CARBON_FOOTPRINT_DATA</span>
-                <span class="ms-2 fs-4 fw-bold">{{totalPcfCO2eq()}}</span>
+                <span class="ms-2 fs-4 fw-bold">{{ totalPcfCO2eq() }}</span>
                 <span class="ms-2 fs-6 fw-bold" translate>CarbonFootprint.TOTAL_PSFCO2EQ</span>
             </button>
         </h2>
         <div ngbAccordionCollapse>
             <div ngbAccordionBody>
                 <ng-template>
-                    <ngb-pagination [collectionSize]="count()" [(page)]="index"
-                        [pageSize]="1" [directionLinks]="count() > 5" />
+                    <ngb-pagination
+                        [collectionSize]="count()"
+                        [page]="index()"
+                        (pageChange)="setIndex($event)"
+                        [pageSize]="1"
+                        [directionLinks]="count() > 5"
+                    />
                     <fhg-data-sheet [dataSheet]="carbonFootprint()"></fhg-data-sheet>
                 </ng-template>
             </div>
         </div>
     </div>
 </div>
-<!-- 
-<div ngbAccordion>
-    @for (item of items(); track item; let i = $index) {
-    <div ngbAccordionItem [collapsed]="i !== 0">
-        <h2 ngbAccordionHeader>
-            <button ngbAccordionButton>{{item.name}}</button>
-        </h2>
-        <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-                <ng-template>
-                    <fhg-data-sheet [dataSheet]="item"></fhg-data-sheet> </ng-template>
-            </div>
-        </div>
-    </div>
-    }
-</div> -->

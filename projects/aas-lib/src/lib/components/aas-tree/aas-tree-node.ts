@@ -43,8 +43,8 @@ import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../../utilities';
 import { hasSpecificView } from '../../views/views-routes';
 
-/** 
- * Represents a node in the tree structure of Asset Administration Shell. 
+/**
+ * Represents a node in the tree structure of Asset Administration Shell.
  */
 export class AASTreeNode extends TreeNode<aas.Referable> {
     public constructor(
@@ -72,8 +72,8 @@ export class AASTreeNode extends TreeNode<aas.Referable> {
     }
 }
 
-/** 
- * Represents the structure of an Asset Administration Shell as a tree. 
+/**
+ * Represents the structure of an Asset Administration Shell as a tree.
  */
 export class AASTree extends Tree<aas.Referable, AASTreeNode> {
     private _contents: AASTreeNode[];
