@@ -184,37 +184,46 @@ ng build aas-lib --watch           # Watch mode development
 ## aas-jest
 
 **Location**: `projects/aas-jest/`
-**Purpose**: Custom Jest configuration and utilities for the monorepo
+**Purpose**: Jest testing utilities and helper functions for the monorepo
 
 ### Key Features
-- **Shared Jest Config**: Common test configuration across workspaces
-- **Custom Matchers**: AAS-specific test utilities
-- **TypeScript Support**: Pre-configured ts-jest setup
-- **Coverage Configuration**: Standardized coverage reporting
+- **Testing Utilities**: Custom helper functions for Jest tests
+- **Spy Object Creation**: Enhanced spy object creation with TypeScript support
+- **TypeScript Support**: Pre-configured TypeScript compilation
+- **ESM Module Support**: Modern ES modules with Jest integration
 
-### Configuration Structure
+### Project Structure
 ```
-src/
-├── jest.config.js      # Base Jest configuration
-├── setup.ts           # Test setup utilities
-└── matchers/          # Custom Jest matchers
+projects/aas-jest/
+├── src/lib/
+│   ├── index.ts           # Main exports
+│   └── create-spy-obj.ts  # Spy object creation utilities
+├── jest.config.js         # Jest configuration
+├── package.json          # Package configuration
+├── tsconfig.json         # TypeScript config
+└── esbuild.*.js          # Build configurations
 ```
 
-### Usage in Workspaces
-```javascript
-// In workspace jest.config.js
-const baseConfig = require('aas-jest');
+### Usage in Tests
+```typescript
+// Import testing utilities
+import { createSpyObj, fail } from 'aas-jest';
 
-module.exports = {
-    ...baseConfig,
-    // Workspace-specific overrides
-};
+// Create type-safe spy objects
+const mockService = createSpyObj<MyService>(['method1', 'method2']);
+
+// Use fail() function in tests
+if (someCondition) {
+    fail(); // Equivalent to expect(false).toBe(true)
+}
 ```
 
 ### Development Commands
 ```bash
-npm run build -w aas-jest          # Build Jest utilities
-npm run test -w aas-jest           # Test the utilities
+npm run build -w aas-jest          # Build TypeScript to ESM + bundle
+npm run build:debug -w aas-jest    # Build with debug info and source maps
+npm run lint -w aas-jest           # ESLint validation
+npm run format -w aas-jest         # Auto-fix linting issues
 ```
 
 ---
