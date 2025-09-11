@@ -1,5 +1,17 @@
 # Architecture and Design
-## Main Package
+## Workspace Architecture
+
+AASPortal is a **monorepo** using npm workspaces with 5 distinct packages:
+
+| Workspace | Description | Technology Stack |
+|-----------|-------------|------------------|
+| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM |
+| **aas-portal** | Angular frontend application | Angular 19, NgRx, Bootstrap 5 |
+| **aas-node** | Express.js backend API server | Express.js, JWT, OpenAPI/Swagger |
+| **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
+| **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
+
+# Main Package
 ![Main](./images/main.png "Main")
 
 ## AASPortal
