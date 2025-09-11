@@ -7,7 +7,7 @@ AASPortal uses npm workspaces to organize code into distinct, reusable packages.
 | Workspace | Purpose | Technology | Build Output |
 |-----------|---------|------------|--------------|
 | [aas-core](#aas-core) | Shared types and utilities | TypeScript, ESM | `dist/` |
-| [aas-portal](#aas-portal) | Frontend application | Angular 19, NgRx | `dist/browser/` |
+| [aas-portal](#aas-portal) | Frontend application | Angular 20.1.6, NgRx | `dist/browser/` |
 | [aas-node](#aas-node) | Backend API server | Express.js, esbuild | `dist/` |
 | [aas-lib](#aas-lib) | Reusable UI components | Angular Library | `dist/` |
 | [aas-jest](#aas-jest) | Test configuration | Jest utilities | `dist/` |
@@ -28,11 +28,14 @@ AASPortal uses npm workspaces to organize code into distinct, reusable packages.
 ### API Structure
 ```
 src/lib/
-├── aas.ts              # Core AAS interfaces and types
-├── types.ts            # Common utility types
-├── convert/            # Data conversion utilities
-├── digitization/       # Digitization-specific types
-└── localization/       # Multi-language support
+├── aas.ts                 # Core AAS interfaces and types
+├── types.ts               # Common utility types
+├── convert.ts             # Data conversion utilities
+├── document.ts            # Document handling and validation
+├── query-parser.ts        # AAS query parsing utilities
+├── authentication.ts      # Authentication types and utilities
+├── cache.ts               # Caching utilities
+└── index.ts               # Main exports
 ```
 
 ### Usage Example
@@ -62,7 +65,7 @@ npm run lint -w aas-core          # ESLint validation
 **Purpose**: Angular-based frontend application for AAS visualization and management
 
 ### Key Features
-- **Angular 19**: Latest Angular framework with signals support
+- **Angular 20.1.6**: Latest Angular framework with signals support
 - **NgRx State Management**: Reactive state management pattern
 - **Bootstrap 5 UI**: Responsive design with ng-bootstrap components
 - **Multi-language Support**: i18n with ngx-translate
@@ -72,16 +75,20 @@ npm run lint -w aas-core          # ESLint validation
 ```
 src/app/
 ├── aas/                # AAS-specific components and services
+├── about/              # About page components
 ├── dashboard/          # Main dashboard feature module
+├── main/               # Main application layout
 ├── shells/             # Shell management components
-├── shared/             # Shared components and utilities
-└── stores/             # NgRx feature stores
+├── start/              # Start page components
+├── view/               # View components
+└── types/              # TypeScript type definitions
 ```
 
 ### State Management Structure
-- `aas.store.ts` - AAS entity state management
-- `dashboard.store.ts` - Dashboard-specific state
-- `shells.store.ts` - Shell collection management
+- `aas/aas.state.ts` - AAS entity state management
+- `shells/shells.state.ts` - Shell collection management
+- `start/start.state.ts` - Start page state
+- `view/view.state.ts` - View state management
 
 ### Development Commands
 ```bash
@@ -108,12 +115,18 @@ ng test aas-portal --watch=false  # Run tests once
 ### API Structure
 ```
 src/app/
+├── aas-index/         # AAS indexing services
 ├── aas-provider/      # AAS data source providers
-├── authentication/    # JWT and user management
+├── auth/              # JWT and user management
+├── controller/        # API route controllers
+├── file-storage/      # File storage abstraction
 ├── live/              # Real-time data subscriptions
+├── logging/           # Logging utilities
 ├── package/           # AASX package handling
+├── routes/            # Express.js route definitions
 ├── scan/              # Background scanning services
-└── routes/            # Express.js route definitions
+├── template/          # Template management
+└── types/             # TypeScript definitions
 ```
 
 ### Environment Variables
@@ -152,11 +165,17 @@ Access Swagger UI at: `http://localhost/api-docs`
 ### Component Structure
 ```
 src/lib/
-├── aas-tree/           # Hierarchical AAS tree component
-├── aas-table/          # Data table components
-├── auth/               # Authentication components
-├── license-info/       # License information component
-└── shared/             # Shared utilities and services
+├── components/         # UI components
+│   ├── aas-tree/       # Hierarchical AAS tree component
+│   ├── aas-table/      # Data table components
+│   ├── auth/           # Authentication components
+│   ├── browser/        # File browser components
+│   ├── license-info/   # License information component
+│   └── notify/         # Notification components
+├── services/           # Shared business logic services
+├── views/              # AAS-specific view components
+├── pipes/              # Angular pipes
+└── directives/         # Angular directives
 ```
 
 ### Usage Example

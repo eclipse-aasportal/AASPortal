@@ -17,7 +17,7 @@ The project follows a modular workspace architecture:
 - **aas-jest**: Custom Jest configuration utilities
 
 ### Key Technologies
-- Frontend: Angular 19, NgRx, Bootstrap 5, ng-bootstrap, Chart.js
+- Frontend: Angular 20.1.6, NgRx, Bootstrap 5, ng-bootstrap, Chart.js
 - Backend: Express.js, MongoDB (user storage), MariaDB (AAS index), JWT authentication
 - Build: esbuild (backend), Angular CLI (frontend), TypeScript, ESM modules
 - Infrastructure: Docker, OPC UA support, WebDAV, file system endpoints
