@@ -108,8 +108,8 @@ ng test aas-portal --watch=false  # Run tests once
 ### API Structure
 ```
 src/app/
-├── aas-provider/       # AAS data source providers
-├── authentication/     # JWT and user management
+├── aas-provider/      # AAS data source providers
+├── authentication/    # JWT and user management
 ├── live/              # Real-time data subscriptions
 ├── package/           # AASX package handling
 ├── scan/              # Background scanning services
@@ -118,9 +118,9 @@ src/app/
 
 ### Environment Variables
 ```bash
-AAS_NODE_PORT=80                    # Server port
-ENDPOINTS=["file:///samples"]       # Initial AAS endpoints
-USER_STORAGE=mongodb://localhost/   # User database URL
+AAS_NODE_PORT=80                   # Server port
+ENDPOINTS=["file:///samples"]      # Initial AAS endpoints
+USER_STORAGE=mongodb://localhost/  # User database URL
 JWT_SECRET=your-secret-key         # JWT signing key
 CORS_ORIGIN=*                      # CORS configuration
 ```
@@ -184,46 +184,37 @@ ng build aas-lib --watch           # Watch mode development
 ## aas-jest
 
 **Location**: `projects/aas-jest/`
-**Purpose**: Jest testing utilities and helper functions for the monorepo
+**Purpose**: Custom Jest configuration and utilities for the monorepo
 
 ### Key Features
-- **Testing Utilities**: Custom helper functions for Jest tests
-- **Spy Object Creation**: Enhanced spy object creation with TypeScript support
-- **TypeScript Support**: Pre-configured TypeScript compilation
-- **ESM Module Support**: Modern ES modules with Jest integration
+- **Shared Jest Config**: Common test configuration across workspaces
+- **Custom Matchers**: AAS-specific test utilities
+- **TypeScript Support**: Pre-configured ts-jest setup
+- **Coverage Configuration**: Standardized coverage reporting
 
-### Project Structure
+### Configuration Structure
 ```
-projects/aas-jest/
-├── src/lib/
-│   ├── index.ts           # Main exports
-│   └── create-spy-obj.ts  # Spy object creation utilities
-├── jest.config.js         # Jest configuration
-├── package.json          # Package configuration
-├── tsconfig.json         # TypeScript config
-└── esbuild.*.js          # Build configurations
+src/
+├── jest.config.js     # Base Jest configuration
+├── setup.ts           # Test setup utilities
+└── matchers/          # Custom Jest matchers
 ```
 
-### Usage in Tests
-```typescript
-// Import testing utilities
-import { createSpyObj, fail } from 'aas-jest';
+### Usage in Workspaces
+```javascript
+// In workspace jest.config.js
+const baseConfig = require('aas-jest');
 
-// Create type-safe spy objects
-const mockService = createSpyObj<MyService>(['method1', 'method2']);
-
-// Use fail() function in tests
-if (someCondition) {
-    fail(); // Equivalent to expect(false).toBe(true)
-}
+module.exports = {
+    ...baseConfig,
+    // Workspace-specific overrides
+};
 ```
 
 ### Development Commands
 ```bash
-npm run build -w aas-jest          # Build TypeScript to ESM + bundle
-npm run build:debug -w aas-jest    # Build with debug info and source maps
-npm run lint -w aas-jest           # ESLint validation
-npm run format -w aas-jest         # Auto-fix linting issues
+npm run build -w aas-jest          # Build Jest utilities
+npm run test -w aas-jest           # Test the utilities
 ```
 
 ---
