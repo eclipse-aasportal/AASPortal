@@ -49,6 +49,7 @@ npm run start
 
 # Podman
 npm run podman
+```
 
 ## Start AASPortal
 The following command creates and executes a composed Docker image:
