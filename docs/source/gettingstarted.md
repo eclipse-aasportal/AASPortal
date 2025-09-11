@@ -28,13 +28,18 @@ aasportal
   └── package.json
 
 ```
+### Using Docker/Podman (Easiest)
 
-## Docker(hub)
-The easiest way to run AASPortal locally, is using the latest "all in one" image from Dockerhub:
+Run the all-in-one image from DockerHub:
+```bash
+# Docker
+docker run -p 80:80 fraunhoferiosb/aasportal_aio
 
-`docker run -p 80:80 fraunhoferiosb/aasportal_aio`
+# Podman
+podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio
+```
 
-Then go to http://localhost/ in your browser and enjoy.
+Then open http://localhost/ in your browser.
 
 ## Setup Visual Studio Code
 The preferred development environment is Visual Studio Code. Clone *AASPortal*'s GIT repository. Open aasportal in Visual Studio Code. In a terminal window execute the the following commands:
