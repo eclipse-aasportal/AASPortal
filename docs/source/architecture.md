@@ -11,6 +11,7 @@ AASPortal is a **monorepo** using npm workspaces with 5 distinct packages:
 | **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
 | **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
 
+$${\color{red}Red}$$aas-jest is missing in image!
 ![Main](./images/main.png "Main")
 
 ## AASPortal
