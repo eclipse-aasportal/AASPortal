@@ -196,9 +196,9 @@ ng build aas-lib --watch           # Watch mode development
 ```
 projects/aas-jest/
 ├── src/lib/
-│   ├── index.ts           # Main exports
-│   └── create-spy-obj.ts  # Spy object creation utilities
-├── jest.config.js         # Jest configuration
+│   ├── index.ts          # Main exports
+│   └── create-spy-obj.ts # Spy object creation utilities
+├── jest.config.js        # Jest configuration
 ├── package.json          # Package configuration
 ├── tsconfig.json         # TypeScript config
 └── esbuild.*.js          # Build configurations
