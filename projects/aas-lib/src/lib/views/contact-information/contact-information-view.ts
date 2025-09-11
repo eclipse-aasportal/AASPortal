@@ -9,7 +9,7 @@
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -28,7 +28,12 @@ import { ContactInformation } from './contact-information';
 import { VIEW_ROUTES } from '../../types';
 import { ContactInformationViewState } from './contact-information-view.state';
 import { LeafView } from '../leaf-view';
+import { StartService } from '../../services/start.service';
+import { encodeBase64Url } from '../../utilities';
 
+/**
+ * Provides a view for contact information submodels.
+ */
 @Component({
     selector: 'fhg-contact-information-view',
     templateUrl: './contact-information-view.html',
@@ -38,7 +43,11 @@ import { LeafView } from '../leaf-view';
 })
 export class ContactInformationView extends LeafView<ContactInformationViewState> implements OnInit, OnDestroy {
     private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
 
+    /**
+     * Creates a new instance of the ContactInformationView.
+     */
     public constructor() {
         super(
             inject(ActivatedRoute),
@@ -56,8 +65,14 @@ export class ContactInformationView extends LeafView<ContactInformationViewState
         });
     }
 
+    /**
+     * Template reference for the toolbar.
+     */
     public readonly toolbarTemplate = viewChild<TemplateRef<ContactInformationView>>('toolbar');
 
+    /**
+     * Exposes the current state of the contact information section.
+     */
     public readonly contactInformationState = this.state.contactInformationState;
 
     public ngOnInit(): void {
@@ -69,6 +84,18 @@ export class ContactInformationView extends LeafView<ContactInformationViewState
     }
 
     public addToStart(): Observable<void> {
-        return EMPTY;
+        const document = this.document();
+        if (document === undefined) {
+            return of(void 0);
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        const href = `/views/ContactInformation;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
+        if (!this.start.add('Favorite', `CIV#${endpoint}#${id}`, { endpoint, id, href })) {
+            return of(void 0);
+        }
+
+        return this.start.save();
     }
 }

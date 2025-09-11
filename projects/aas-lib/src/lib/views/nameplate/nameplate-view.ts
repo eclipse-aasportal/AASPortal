@@ -10,7 +10,7 @@ import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-transla
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -20,7 +20,6 @@ import {
     OnDestroy,
     OnInit,
     Signal,
-    signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
@@ -28,7 +27,7 @@ import {
 import { aas, AASDocument, getReferable } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { encodeBase64Url, getDisplayName, toString } from '../../utilities';
+import { encodeBase64Url, getDisplayName, getDisplayValue } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
@@ -38,7 +37,7 @@ import { LeafView } from '../leaf-view';
 import { NameplateViewState } from './nameplate-view.state';
 
 /**
- * Provides a view for submodels that belong to the template "Digital Nameplate for industrial equipment".
+ * Provides a view for submodels that belong to the IDTA specification "Digital Nameplate for industrial equipment".
  */
 @Component({
     selector: 'fhg-nameplate-view',
@@ -50,8 +49,6 @@ import { NameplateViewState } from './nameplate-view.state';
 export class NameplateView extends LeafView<NameplateViewState> implements OnInit, OnDestroy {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
-    private readonly nameplates = signal<[AASDocument, aas.Submodel][]>([]);
-    private readonly nameplate = computed(() => this.nameplates().at(this.index() - 1));
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
 
@@ -75,10 +72,14 @@ export class NameplateView extends LeafView<NameplateViewState> implements OnIni
         });
     }
 
-    /** The toolbar. */
+    /**
+     * A `TemplateRef` for the nameplate toolbar. It is used to set the toolbar content.
+     */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('nameplateToolbar');
 
-    /** The state of the nameplate child component. */
+    /**
+     * The state of the nameplate child component.
+     */
     public readonly nameplateState = this.state.nameplateState;
 
     public ngOnInit(): void {
@@ -89,63 +90,75 @@ export class NameplateView extends LeafView<NameplateViewState> implements OnIni
         this.toolbar.clear();
     }
 
+    /**
+     * Adds the current handover documentation view to the start service as a favorite.
+     * @returns An `Observable<void>` that completes when the nameplate is successfully added to the start service and saved.
+     * Returns `EMPTY` if the nameplate is undefined or if adding to the start service fails.
+     */
     public addToStart(): Observable<void> {
-        const nameplate = this.nameplate();
-        if (nameplate === undefined) {
-            return EMPTY;
+        const nameplate = this.submodel();
+        const document = this.document();
+        if (nameplate === undefined || document === undefined) {
+            return of(void 0);
         }
 
-        const endpoint = nameplate[0].endpoint;
-        const id = nameplate[0].id;
-        const details = this.getFavoriteDetails(nameplate[0], nameplate[1]);
-        const notes = this.getFavoriteNotes(nameplate[1]);
-        const href = `/view/Nameplate?endpoint=${encodeBase64Url(endpoint)}&id=${encodeBase64Url(id)}`;
+        const endpoint = document.endpoint;
+        const id = document.id;
+        const details = this.getFavoriteDetails(document, nameplate, [
+            'ManufacturerName',
+            'ManufacturerProductType',
+            'ManufacturerProductFamily',
+            'ProductArticleNumberOfManufacturer',
+            'SerialNumber',
+        ]);
+
+        const notes = this.getFavoriteNotes(document, nameplate, ['ManufacturerProductDesignation']);
+        const href = `/views/Nameplate;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
         if (!this.start.add('Favorite', `DNP#${endpoint}#${id}`, { endpoint, id, details, notes, href })) {
-            return EMPTY;
+            return of(void 0);
         }
 
         return this.start.save();
     }
 
-    private getFavoriteDetails(document: AASDocument, nameplate: aas.Submodel): { name: string; value: string }[] {
+    private getFavoriteDetails(
+        document: AASDocument,
+        nameplate: aas.Submodel,
+        idShortPaths: string[],
+    ): { name: string; value: string }[] {
         const details: { name: string; value: string }[] = [];
-        const manufacturerName = getReferable<aas.Property>(nameplate, 'ManufacturerName');
         const currentLang = this.currentLang();
-        if (manufacturerName?.value) {
-            details.push({
-                name: getDisplayName(manufacturerName, document.content, currentLang),
-                value: manufacturerName.value,
-            });
-        }
+        for (const idShortPath of idShortPaths) {
+            const submodelElement = getReferable(nameplate, idShortPath);
+            if (!submodelElement) {
+                continue;
+            }
 
-        const productType = toString(nameplate, 'ManufacturerProductType', currentLang);
-        if (productType) {
-            details.push({ name: 'DigitalNameplate.ManufacturerProductType', value: productType });
-        }
-
-        const productFamily = toString(nameplate, 'ManufacturerProductFamily', currentLang);
-        if (productFamily) {
-            details.push({ name: 'DigitalNameplate.ManufacturerProductFamily', value: productFamily });
-        }
-
-        const articleNumber = toString(nameplate, 'ProductArticleNumberOfManufacturer', currentLang);
-        if (articleNumber) {
-            details.push({ name: 'DigitalNameplate.ProductArticleNumberOfManufacturer', value: articleNumber });
-        }
-
-        const serialNumber = toString(nameplate, 'SerialNumber', currentLang);
-        if (serialNumber) {
-            details.push({ name: 'DigitalNameplate.SerialNumber', value: serialNumber });
+            const value = getDisplayValue(submodelElement, currentLang, document.content);
+            if (value) {
+                details.push({
+                    name: getDisplayName(submodelElement, document.content, currentLang),
+                    value,
+                });
+            }
         }
 
         return details;
     }
 
-    private getFavoriteNotes(submodel: aas.Submodel): string[] {
+    private getFavoriteNotes(document: AASDocument, submodel: aas.Submodel, idShortPaths: string[]): string[] {
         const notes: string[] = [];
-        const designation = toString(submodel, 'ManufacturerProductDesignation', this.currentLang());
-        if (designation) {
-            notes.push(designation);
+        const currentLang = this.currentLang();
+        for (const idShortPath of idShortPaths) {
+            const submodelElement = getReferable(submodel, idShortPath);
+            if (!submodelElement) {
+                continue;
+            }
+
+            const value = getDisplayValue(submodelElement, currentLang, document.content);
+            if (value) {
+                notes.push(value);
+            }
         }
 
         return notes;

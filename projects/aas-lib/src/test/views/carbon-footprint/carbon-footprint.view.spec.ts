@@ -9,7 +9,7 @@
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { of } from 'rxjs';
+import { first, of } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
@@ -78,8 +78,11 @@ describe('CarbonFootprintView', () => {
         api.getDocument.mockReturnValue(of(document));
 
         await TestBed.configureTestingModule({
-            imports: [CarbonFootprintView],
             providers: [
+                {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
                 {
                     provide: ToolbarService,
                     useValue: createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
@@ -102,9 +105,10 @@ describe('CarbonFootprintView', () => {
                         useClass: FakeLoader,
                     },
                 }),
-                provideRouter([]),
+
                 provideZonelessChangeDetection(),
             ],
+            imports: [CarbonFootprintView],
         }).compileComponents();
 
         TestBed.overrideComponent(CarbonFootprintView, {
@@ -121,7 +125,31 @@ describe('CarbonFootprintView', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
     it('should provide a state for the CarbonFootprint component', () => {
         expect(component.carbonFootprintState).toBeInstanceOf(CarbonFootprintState);
-    })
+    });
+
+    it('indicates that 1 document is available', () => {
+        expect(component.count()).toBe(1);
+    });
+
+    it('shows the document with index 1', () => {
+        expect(component.index()).toBe(1);
+    });
+
+    it('adds a favorite to the start page', done => {
+        start.add.mockReturnValue(true);
+        start.save.mockReturnValue(of(void 0));
+        component
+            .addToStart()
+            .pipe(first())
+            .subscribe(() => {
+                expect(start.add).toHaveBeenCalled();
+                done();
+            });
+    });
 });

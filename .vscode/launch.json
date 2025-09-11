@@ -102,9 +102,9 @@
                 "test",
                 "-w",
                 "aas-lib",
-                "--testPathPatterns",
-                "--coverage=false",
-                "${fileBasename}"
+                "--testPathPattern",
+                "${fileBasename}",
+                "--coverage=false"
             ]
         },
         {
@@ -118,7 +118,7 @@
                 "test",
                 "-w",
                 "aas-portal",
-                "--testPathPatterns",
+                "--testPathPattern",
                 "--coverage=false",
                 "${fileBasename}"
             ]
