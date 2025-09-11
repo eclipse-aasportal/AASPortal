@@ -16,7 +16,7 @@ import { NameplateData, NameplateState } from './nameplate.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**
- * Provides a component for a submodel that belongs to the specification "Digital Nameplate for industrial equipment".
+ * Provides a component for submodels that belong to the IDTA specification "Digital Nameplate for industrial equipment".
  * Version 2.0 and 3.0 are supported.
  */
 @Component({
@@ -43,7 +43,7 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> {
         });
     }
 
-    /** The state handler. */
+    /** The state management service. */
     public override state = input.required<NameplateState>();
 
     /** The active AAS document. */

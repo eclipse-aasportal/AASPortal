@@ -23,6 +23,9 @@ const initialState: ContactInformationData = {
     document: null,
 };
 
+/**
+ * Manages the state for the Contact Information component.
+ */
 @Injectable()
 export class ContactInformationState extends ChildState<ContactInformationData> {
     private readonly document$ = signal(initialState.document);
@@ -40,8 +43,14 @@ export class ContactInformationState extends ChildState<ContactInformationData> 
         return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
     });
 
+    /**
+     * The current active AAS document.
+     */
     public readonly document = this.document$.asReadonly();
 
+    /**
+     * The computed list of contact data sheets.
+     */
     public readonly contacts = computed(() => {
         const contacts: DataSheetData[] = [];
         const currentLang = this.translate.getCurrentLang();

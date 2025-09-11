@@ -17,7 +17,9 @@ import { ViewRoute, ViewRouteName } from '../types';
 import { View } from './view';
 import { LeafViewData, LeafViewState } from './leaf-view-state';
 
-/**  Represents a specific view for a submodel. */
+/**
+ * Represents a specific view for a submodel.
+ */
 export abstract class LeafView<TState extends LeafViewState<LeafViewData>> extends View {
     private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
@@ -33,11 +35,13 @@ export abstract class LeafView<TState extends LeafViewState<LeafViewData>> exten
         this.tuples = this.state.tuples;
     }
 
+    /** The current active AAS document. */
     public override readonly document = computed(() => {
         const item = this.tuple();
         return item ? item[0] : undefined;
     });
 
+    /** The number of available AAS documents. */
     public override readonly count = computed(() => this.tuples().length);
 
     /** The version of the current active submodel. */

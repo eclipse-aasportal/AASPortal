@@ -19,6 +19,7 @@ import {
     isSubmodelElementList,
     toDisplayValue,
 } from 'aas-core';
+
 import { ChildState } from '../../components/child-state';
 import { basename, extension, findSubmodel, getUrl } from '../../utilities';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
@@ -49,6 +50,9 @@ const initialState: HandoverDocumentationData = {
     items: [],
 };
 
+/**
+ * Manages the state of the HandoverDocumentation component.
+ */
 @Injectable()
 export class HandoverDocumentationState extends ChildState<HandoverDocumentationData> {
     private readonly document$ = signal(initialState.document);
