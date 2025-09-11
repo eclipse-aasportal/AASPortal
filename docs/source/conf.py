@@ -3,7 +3,7 @@
 # -- Project information
 
 project = 'AASPortal'
-copyright = '2023, Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.'
+copyright = '2025, Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.'
 author = 'Fraunhofer IOSB-INA'
 
 release = '0.1'
