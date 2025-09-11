@@ -108,8 +108,8 @@ ng test aas-portal --watch=false  # Run tests once
 ### API Structure
 ```
 src/app/
-├── aas-provider/       # AAS data source providers
-├── authentication/     # JWT and user management
+├── aas-provider/      # AAS data source providers
+├── authentication/    # JWT and user management
 ├── live/              # Real-time data subscriptions
 ├── package/           # AASX package handling
 ├── scan/              # Background scanning services
@@ -118,9 +118,9 @@ src/app/
 
 ### Environment Variables
 ```bash
-AAS_NODE_PORT=80                    # Server port
-ENDPOINTS=["file:///samples"]       # Initial AAS endpoints
-USER_STORAGE=mongodb://localhost/   # User database URL
+AAS_NODE_PORT=80                   # Server port
+ENDPOINTS=["file:///samples"]      # Initial AAS endpoints
+USER_STORAGE=mongodb://localhost/  # User database URL
 JWT_SECRET=your-secret-key         # JWT signing key
 CORS_ORIGIN=*                      # CORS configuration
 ```
@@ -195,7 +195,7 @@ ng build aas-lib --watch           # Watch mode development
 ### Configuration Structure
 ```
 src/
-├── jest.config.js      # Base Jest configuration
+├── jest.config.js     # Base Jest configuration
 ├── setup.ts           # Test setup utilities
 └── matchers/          # Custom Jest matchers
 ```
