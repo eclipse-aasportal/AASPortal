@@ -7,10 +7,10 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
-import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { first, of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
 
@@ -51,6 +51,8 @@ export class TestHandoverDocumentation {
 }
 
 describe('HandoverDocumentationView', () => {
+    let fixture: ComponentFixture<HandoverDocumentationView>;
+    let component: HandoverDocumentationView;
     let api: jest.Mocked<EndpointsApi>;
     let start: jest.Mocked<StartService>;
     let route: jest.Mocked<ActivatedRoute>;
@@ -99,16 +101,16 @@ describe('HandoverDocumentationView', () => {
                     provide: VIEW_ROUTES,
                     useValue: viewRoutes,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                HandoverDocumentationView,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
+            ],
+            imports: [
+                HandoverDocumentationView,
             ],
         }).compileComponents();
 
@@ -116,12 +118,41 @@ describe('HandoverDocumentationView', () => {
             remove: { imports: [HandoverDocumentation, ThumbnailQRCode] },
             add: { imports: [TestHandoverDocumentation, TestThumbnailQRCode] },
         });
+
+        fixture = TestBed.createComponent(HandoverDocumentationView);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(HandoverDocumentationView);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
         expect(component).toBeTruthy();
+    });
+
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
+    it('should provide the state for the HandoverDocumentation component', () => {
+        expect(component.handoverDocumentationState).toBeInstanceOf(HandoverDocumentationState);
+    });
+
+    it('indicates that 1 document is available', () => {
+        expect(component.count()).toBe(1);
+    });
+
+    it('shows the document with index 1', () => {
+        expect(component.index()).toBe(1);
+    });
+
+    it('adds a favorite to the start page', done => {
+        start.add.mockReturnValue(true);
+        start.save.mockReturnValue(of(void 0));
+        component
+            .addToStart()
+            .pipe(first())
+            .subscribe(() => {
+                expect(start.add).toHaveBeenCalled();
+                done();
+            });
     });
 });

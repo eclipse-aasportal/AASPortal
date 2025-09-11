@@ -42,7 +42,6 @@ describe('CarbonFootprintState', () => {
                         useClass: FakeLoader,
                     },
                 }),
-
                 provideZonelessChangeDetection(),
             ],
         });

@@ -11,7 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { first, of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
@@ -125,5 +125,30 @@ describe('TechnicalDataView', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
+    it('provides a state for the Browser component', () => {
+        expect(component.technicalDataState).toBeInstanceOf(TechnicalDataState);
+    });
+
+    it('indicates that 1 document is available', () => {
+        expect(component.count()).toBe(1);
+    });
+
+    it('shows the document with index 1', () => {
+        expect(component.index()).toBe(1);
+    });
+
+    it('adds a favorite to the start page', (done) => {
+        start.add.mockReturnValue(true);
+        start.save.mockReturnValue(of(void 0));
+        component.addToStart().pipe(first()).subscribe(() => {
+            expect(start.add).toHaveBeenCalled();
+            done();
+        })
     });
 });

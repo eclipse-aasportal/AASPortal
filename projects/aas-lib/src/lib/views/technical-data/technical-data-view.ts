@@ -9,7 +9,7 @@
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -28,6 +28,8 @@ import { TechnicalData } from './technical-data';
 import { VIEW_ROUTES } from '../../types';
 import { TechnicalDataViewState } from './technical-data-view.state';
 import { LeafView } from '../leaf-view';
+import { StartService } from '../../services/start.service';
+import { encodeBase64Url } from '../../utilities';
 
 @Component({
     selector: 'fhg-technical-data-view',
@@ -38,6 +40,7 @@ import { LeafView } from '../leaf-view';
 })
 export class TechnicalDataView extends LeafView<TechnicalDataViewState> implements OnInit, OnDestroy {
     private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
 
     public constructor() {
         super(
@@ -68,7 +71,23 @@ export class TechnicalDataView extends LeafView<TechnicalDataViewState> implemen
         this.toolbar.clear();
     }
 
+    /**
+     * Adds the current handover documentation view to the start service as a favorite.
+     * @returns An `Observable<void>`.
+     */
     public addToStart(): Observable<void> {
-        return EMPTY;
+        const document = this.document();
+        if (document === undefined) {
+            return of(void 0);
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        const href = `/views/TechnicalData;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
+        if (!this.start.add('Favorite', `TDV#${endpoint}#${id}`, { endpoint, id, href })) {
+            return of(void 0);
+        }
+
+        return this.start.save();
     }
 }
