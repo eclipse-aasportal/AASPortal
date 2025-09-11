@@ -9,7 +9,7 @@
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -28,8 +28,12 @@ import { HandoverDocumentation } from './handover-documentation';
 import { LeafView } from '../leaf-view';
 import { VIEW_ROUTES } from '../../types';
 import { HandoverDocumentationViewState } from './handover-documentation-view.state';
+import { StartService } from '../../services/start.service';
+import { encodeBase64Url } from '../../utilities';
 
-/** Provides a specific view for the handover documentation submodel. */
+/**
+ * Provides a view for submodels that correspond to the IDTA specification "Handover documentation".
+ */
 @Component({
     selector: 'fhg-handover-documentation-view',
     templateUrl: './handover-documentation-view.html',
@@ -39,6 +43,7 @@ import { HandoverDocumentationViewState } from './handover-documentation-view.st
 })
 export class HandoverDocumentationView extends LeafView<HandoverDocumentationViewState> implements OnInit, OnDestroy {
     private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
 
     public constructor() {
         super(
@@ -57,8 +62,14 @@ export class HandoverDocumentationView extends LeafView<HandoverDocumentationVie
         });
     }
 
+    /**
+     * The template for the toolbar.
+     */
     public readonly toolbarTemplate = viewChild<TemplateRef<HandoverDocumentationView>>('toolbar');
 
+    /**
+     * The state of the handover documentation.
+     */
     public readonly handoverDocumentationState = this.state.handoverDocumentationState;
 
     public ngOnInit(): void {
@@ -69,7 +80,23 @@ export class HandoverDocumentationView extends LeafView<HandoverDocumentationVie
         this.toolbar.clear();
     }
 
+    /**
+     * Adds the current handover documentation view to the start service as a favorite.
+     * @returns An `Observable<void>`.
+     */
     public addToStart(): Observable<void> {
-        return EMPTY;
+        const document = this.document();
+        if (document === undefined) {
+            return of(void 0);
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        const href = `/views/HandoverDocumentation;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
+        if (!this.start.add('Favorite', `HOD#${endpoint}#${id}`, { endpoint, id, href })) {
+            return of(void 0);
+        }
+
+        return this.start.save();
     }
 }

@@ -12,8 +12,8 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { CarbonFootprintViewState } from '../../../lib/views/carbon-footprint/carbon-footprint-view.state';
-import { FakeLoader } from '../../mocks';
 import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
+import { FakeLoader } from '../../mocks';
 
 import carbon_footprint_1_0 from '../../assets/carbon-footprint-1-0.json';
 
@@ -44,7 +44,6 @@ describe('CarbonFootprintViewState', () => {
                         useClass: FakeLoader,
                     },
                 }),
-
                 provideZonelessChangeDetection(),
             ],
         });

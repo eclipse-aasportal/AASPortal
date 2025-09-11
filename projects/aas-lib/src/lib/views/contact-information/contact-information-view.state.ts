@@ -18,19 +18,27 @@ export const initialState: ContactInformationViewData = {
 };
 
 /**
- * The state of the Contact Information view.
+ * Manages the state for the Contact Information view.
  */
 @Injectable({
     providedIn: 'root',
 })
 export class ContactInformationViewState extends LeafViewState<ContactInformationViewData> {
+    /**
+     * Creates a new instance of the ContactInformationViewState.
+     */
     public constructor() {
         super(initialState);
     }
 
-    /** The state of the Contact Information component. */
+    /**
+     * The state of the Contact Information component.
+     */
     public readonly contactInformationState = new ContactInformationState();
 
+    /**
+     * Called when the state is being updated. No operation is performed.
+     */
     protected override updating(newState: Partial<ContactInformationViewData>): void {
         noop(newState);
     }
