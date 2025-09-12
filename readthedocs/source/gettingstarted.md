@@ -65,6 +65,14 @@ or the name (idShort) of the AAS
 
 AASPortal is a **monorepo** using npm workspaces with 5 distinct packages:
 
+| Workspace | Description | Technology Stack |
+|-----------|-------------|------------------|
+| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM |
+| **aas-portal** | Angular frontend application | Angular 20.1.6, NgRx, Bootstrap 5 |
+| **aas-node** | Express.js backend API server | Express.js, JWT, OpenAPI/Swagger |
+| **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
+| **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
+
 ```txt
 aasportal
   ├── projects
@@ -79,16 +87,7 @@ aasportal
   │     └── aas-portal
   │          └── package.json
   └── package.json
-
 ```
-
-| Workspace | Description | Technology Stack |
-|-----------|-------------|------------------|
-| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM |
-| **aas-portal** | Angular frontend application | Angular 20.1.6, NgRx, Bootstrap 5 |
-| **aas-node** | Express.js backend API server | Express.js, JWT, OpenAPI/Swagger |
-| **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
-| **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
 
 ## Development Commands
 
