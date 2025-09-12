@@ -21,7 +21,7 @@ import {
 
 /**
  * Provides a component for submodels that belong to the IDTA specification "Handover Documentation".
- * Version 2.0 and 3.0 are supported.
+ * Version 1.2 and 2.0 are supported.
  */
 @Component({
     selector: 'fhg-handover-documentation',
