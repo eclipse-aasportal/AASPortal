@@ -153,7 +153,7 @@ npm run lint -- --fix  # Auto-fix linting issues
 
 ## Changelog
 
-You can find the detailed changelog [here](docs/source/changelog/changelog.md).
+You can find the detailed changelog [here](readthedocs/source/changelog/changelog.md).
 
 ## Contributors
 

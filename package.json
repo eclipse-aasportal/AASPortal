@@ -33,7 +33,7 @@
         "aas-node:build:debug": "npm run build:debug -w=aas-core -w=aas-node",
         "serve": "npm run build && node --env-file projects/aas-node/.env projects/aas-node/dist/aas-node.js",
         "test:docker": "docker build -f Dockerfile.test -t test --progress=plain . &> build.log",
-        "docs": "rimraf ./docs && typedoc"
+        "docs": "rimraf ./readthedocs && typedoc"
     },
     "repository": {
         "type": "git",

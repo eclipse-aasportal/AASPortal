@@ -5,11 +5,11 @@ build:
   tools:
     python: "3.11"
 
-# Build from the docs/ directory with Sphinx
+# Build from the readthedocs/ directory with Sphinx
 sphinx:
-  configuration: docs/source/conf.py
+  configuration: readthedocs/source/conf.py
 
 # Explicitly set the version of Python and its requirements
 python:
   install:
-    - requirements: docs/requirements.txt
+    - requirements: readthedocs/requirements.txt
