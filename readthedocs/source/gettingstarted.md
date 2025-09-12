@@ -6,7 +6,6 @@
 - **Git** (for version control)
 
 ## Getting Started
-You can find a detailed documentation :blue_book: [here](https://aasportal.readthedocs.io/)
 
 ### Using Docker/Podman (Easiest)
 
