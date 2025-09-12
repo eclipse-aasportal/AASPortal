@@ -10,6 +10,7 @@
         "podman": "podman build -f Dockerfile -t aasportal . && podman run -d --name AASPortal -p 80:80 --restart=always aasportal",
         "start:podman-aio": "podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio",
         "header": "node --no-warnings --loader ts-node/esm copyright-header.ts",
+        "header:markdown": "node --no-warnings --loader ts-node/esm update-markdown-copyright.ts",
         "coverage": "node --no-warnings --loader ts-node/esm coverage-summary.ts",
         "user-db": "docker run -p 27017:27017 -d --name aasportal-users -e MONGO_INITDB_DATABASE=aasportal-users mongo",
         "user-db:podman": "podman run -p 27017:27017 -d --name aasportal-users -e MONGO_INITDB_DATABASE=aasportal-users docker.io/mongo",
