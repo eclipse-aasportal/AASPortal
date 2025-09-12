@@ -43,11 +43,4 @@ usage.md
 about/about.md
 ```
 
-```{toctree}
-:hidden:
-:caption: Changelog
-:maxdepth: 2
-changelog/changelog.md
-```
-
 [![Documentation Status](https://readthedocs.org/projects/fpethig-rtd-tutorial/badge/?version=latest "Documentation Status")](https://fpethig-rtd-tutorial.readthedocs.io/en/latest/?badge=latest)
