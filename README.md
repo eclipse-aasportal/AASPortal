@@ -122,9 +122,9 @@ npm run compose:up         # Full multi-service setup
 
 When adding AAS endpoints that run on the host machine (localhost), remember that containers have isolated networking:
 
-** Problem**: `http://localhost:5001` fails with "invalid or not supported AAS endpoint"
+**Problem**: `http://localhost:5001` fails with "invalid or not supported AAS endpoint"
 
-** Solution**: Use container-to-host networking:
+**Solution**: Use container-to-host networking:
 - **Podman**: `http://host.containers.internal:5001`
 - **Docker**: `http://host.docker.internal:5001`
 - **Alternative**: Use the host's actual IP address instead of localhost
