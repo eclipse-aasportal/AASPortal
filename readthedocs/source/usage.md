@@ -73,5 +73,30 @@ All AAS where *ProductionDate* is between *12/24/2022* and *12/31/2022*:
 | -------------- | ---------------------------------------------------------------- |
 | AASXServer     | `http://<Host IP>:51310`                                         |
 | AAS Registry   | `http://<Host IP>:50000/registry/api/v1/registry/`               |
-| OPC UA (I4AAS) | `opc.tcp://<Host IP>:30001/I4AASServer`                     |
+| OPC UA (I4AAS) | `opc.tcp://<Host IP>:30001/I4AASServer`                          |
 | Files          | `file:///samples`                                                |
+
+## Troubleshooting
+
+### Container Networking Issues
+
+When adding AAS endpoints that run on the host machine (localhost), remember that containers have isolated networking:
+
+**❌ Problem**: `http://localhost:5001` fails with "invalid or not supported AAS endpoint"
+
+**✅ Solution**: Use container-to-host networking:
+- **Podman**: `http://host.containers.internal:5001`
+- **Docker**: `http://host.docker.internal:5001`
+- **Alternative**: Use the host's actual IP address instead of localhost
+
+**Example endpoint URLs for containerized AASPortal:**
+```bash
+# ✅ Correct
+http://host.containers.internal:5001       # Podman
+http://host.docker.internal:5001           # Docker
+http://192.168.1.100:5001                  # Host IP
+
+# ❌ Wrong
+http://localhost:5001                       # Container's localhost
+http://127.0.0.1:5001                      # Container's loopback
+```

@@ -1,6 +1,6 @@
 # AASPortal [![Documentation Status](https://readthedocs.org/projects/aasportal/badge/?version=latest "Documentation Status")](https://aasportal.readthedocs.io/en/latest/?badge=latest)
 
-![AASPortal Logo <](./docs/source/images/AASPortal_mid.png "AASPortal Logo")
+![AASPortal Logo <](./readthedocs/source/images/AASPortal_mid.png "AASPortal Logo")
 
 **AASPortal** is a Node.js based web portal for the visualization and management of Asset Administration Shells (AAS). The implementation uses the concepts of the document "Details of the Asset Administration Shell" published on https://www.plattform-i40.de and licensed under Creative Commons CC BY 4.0. 
 Check out the [Getting Started](./docs/source/gettingstarted.md) section to learn how to setup Visual Studio Code and start using and developing the *AASPortal*. Learn more about the [Architecture](./docs/source/architecture.md) of *AASPortal*, and check out the [Usage](./docs/source/usage.md) section to learn about available search filters for AAS and which Endpoints can be connected to the *AASPortal*.
@@ -87,7 +87,7 @@ npm run coverage              # Generate coverage reports
 
 ### Code Quality
 ```bash
-npm run lint                  # Lint all workspaces
+npm run lint                 # Lint all workspaces
 npm run format               # Format all workspaces
 npm run lint -w aas-portal   # Lint specific workspace
 ```
@@ -150,10 +150,6 @@ npm run test -w aas-core -- --verbose
 npm run format  # Auto-format code
 npm run lint -- --fix  # Auto-fix linting issues
 ```
-
-## Changelog
-
-You can find the detailed changelog [here](readthedocs/source/changelog/changelog.md).
 
 ## Contributors
 
