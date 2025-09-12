@@ -41,16 +41,15 @@ podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio
 
 Then open http://localhost/ in your browser.
 
-## Setup Visual Studio Code
-The preferred development environment is Visual Studio Code. Clone *AASPortal*'s GIT repository. Open aasportal in Visual Studio Code. In a terminal window execute the the following commands:
+Or build a complete image from the Dockerfile, run the entire AASPortal application in a container, expose the application on port 80 (intended for production-like deployment) using
 
-`npm install`
+```bash
+# Docker
+npm run start
 
-and
-
-`npm run build -ws`
-
-restart Visual Studio Code.
+# Podman
+npm run podman
+```
 
 ## Start AASPortal
 The following command creates and executes a composed Docker image:
@@ -60,6 +59,31 @@ The following command creates and executes a composed Docker image:
 Open one of the supported web browsers and go to the Web site:
 
     http://localhost/
+
+### Local Development Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/FraunhoferIOSB/AASPortal.git
+   cd AASPortal
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Build all workspaces:**
+   ```bash
+   npm run build -ws
+   ```
+
+4. **Start the development server:**
+   ```bash
+   npm run serve
+   ```
+
+5. **Open http://localhost/ in your browser**
 
 Alternatively, the application can be started by specifying an Asset Administration Shell:
 
