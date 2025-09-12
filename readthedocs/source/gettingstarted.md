@@ -41,8 +41,21 @@ podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio
 
 Then open http://localhost/ in your browser.
 
-Or build a complete image from the Dockerfile, run the entire AASPortal application in a container, expose the application on port 80 (intended for production-like deployment) using
+### Container Development Setup
 
+AASPortal uses a unified `docker-compose.yml` that works seamlessly with both Docker and Podman:
+
+```bash
+# Using Docker
+docker compose up -d           # Start all services
+docker compose down             # Stop all services
+
+# Using Podman (identical commands)
+podman compose up -d            # Start all services
+podman compose down             # Stop all services
+```
+
+Alternatively, build a complete single-container image using npm scripts:
 ```bash
 # Docker
 npm run start

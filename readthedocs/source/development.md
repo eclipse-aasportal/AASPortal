@@ -307,17 +307,27 @@ export class LoggingInterceptor implements HttpInterceptor {
 
 **Debug Container Issues:**
 ```bash
-# Check container logs
+# Check container logs (compose services)
+docker compose logs            # All services
+docker compose logs aas-portal # Specific service
+podman compose logs            # All services (Podman)
+podman compose logs aas-portal # Specific service (Podman)
+
+# Check single container logs
 docker logs AASPortal
 podman logs AASPortal
 
 # Interactive shell in container
-docker exec -it AASPortal /bin/sh
-podman exec -it AASPortal /bin/sh
+docker exec -it aas-portal /bin/sh
+podman exec -it aas-portal /bin/sh
 
 # Network debugging
 docker network ls
 podman network ls
+
+# Compose service status
+docker compose ps
+podman compose ps
 ```
 
 ## Code Standards

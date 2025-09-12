@@ -95,20 +95,27 @@ npm run test -ws              # All workspaces
 
 ## Container Development
 
-The project supports both Docker and Podman:
+The project uses a unified `docker-compose.yml` that works seamlessly with both Docker and Podman.
 
-### Docker Commands
+### Using Compose (Recommended)
 ```bash
-npm run start              # Build and run complete Docker setup
-npm run user-db            # Start MongoDB for user storage
-npm run compose:up         # Full multi-service setup with docker-compose
+# Docker
+docker compose up -d       # Start all services
+docker compose down        # Stop all services
+docker compose logs        # View logs
+
+# Podman (identical commands)
+podman compose up -d       # Start all services
+podman compose down        # Stop all services  
+podman compose logs        # View logs
 ```
 
-### Podman Commands
+### Alternative npm scripts
 ```bash
-npm run start:podman       # Build and run complete Podman setup
-npm run user-db:podman     # Start MongoDB for user storage
-npm run compose:up:podman  # Full multi-service setup with podman-compose
+npm run start              # Build and run complete Docker setup
+npm run user-db            # Start MongoDB for user storage (Docker)
+npm run user-db:podman     # Start MongoDB for user storage (Podman)
+npm run compose:up         # Full multi-service setup
 ```
 
 ### Container Networking

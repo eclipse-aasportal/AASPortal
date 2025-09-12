@@ -94,18 +94,26 @@ npm run lint -w aas-portal   # Lint specific workspace
 
 ### Container Development
 
-**Docker:**
+AASPortal uses a unified `docker-compose.yml` that works seamlessly with both Docker and Podman:
+
 ```bash
-npm run start              # Build and run complete Docker setup
-npm run user-db            # Start MongoDB for user storage
-npm run compose:up         # Full multi-service setup
+# Using Docker
+docker compose up -d            # Start all services
+docker compose down             # Stop all services
+docker compose logs             # View logs
+
+# Using Podman (identical commands)
+podman compose up -d            # Start all services  
+podman compose down             # Stop all services
+podman compose logs             # View logs
 ```
 
-**Podman:**
+**Alternative npm scripts:**
 ```bash
-npm run start:podman       # Build and run complete Podman setup
-npm run user-db:podman     # Start MongoDB for user storage
-npm run compose:up:podman  # Full multi-service setup
+npm run start              # Build and run complete Docker setup
+npm run user-db            # Start MongoDB for user storage (Docker)
+npm run user-db:podman     # Start MongoDB for user storage (Podman)
+npm run compose:up         # Full multi-service setup
 ```
 
 ## Troubleshooting
