@@ -5,29 +5,9 @@
 - **Docker Desktop 4.x OR Podman Desktop** (for containerized development)
 - **Git** (for version control)
 
-*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of five workspaces:
-- **aas-core**: Shared types, utilities, and AAS data models used across workspaces
-- **aas-portal**: The browser app of *AASPortal*. It's an Angular-based frontend application using Bootstrap 5 and NgRx state management
-- **aas-node**: Node.js/Express.js backend with REST API, authentication (JWT), and OpenAPI/Swagger documentation
-- **aas-lib**: Angular library containing reusable UI components and services
-- **aas-jest**: Custom Jest configuration utilities
+## Getting Started
+You can find a detailed documentation :blue_book: [here](https://aasportal.readthedocs.io/)
 
-```txt
-aasportal
-  ├── projects
-  │     ├── aas-core
-  │     │     └── package.json
-  │     ├── aas-jest
-  │     │     └── package.json
-  │     ├── aas-lib
-  │     │     └── package.json
-  │     ├── aas-node
-  │     │     └── package.json
-  │     └── aas-portal
-  │          └── package.json
-  └── package.json
-
-```
 ### Using Docker/Podman (Easiest)
 
 Run the all-in-one image from DockerHub:
@@ -41,43 +21,11 @@ podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio
 
 Then open http://localhost/ in your browser.
 
-### Container Development Setup
-
-AASPortal uses a unified `docker-compose.yml` that works seamlessly with both Docker and Podman:
-
-```bash
-# Using Docker
-docker compose up -d            # Start all services
-docker compose down             # Stop all services
-
-# Using Podman (identical commands)
-podman compose up -d            # Start all services
-podman compose down             # Stop all services
-```
-
-Alternatively, build a complete single-container image using npm scripts:
-```bash
-# Docker
-npm run start
-
-# Podman
-npm run podman
-```
-
-## Start AASPortal
-The following command creates and executes a composed Docker image:
-
-`npm run start`
-
-Open one of the supported web browsers and go to the Web site:
-
-    http://localhost/
-
 ### Local Development Setup
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/FraunhoferIOSB/AASPortal.git
+   git clone https://github.com/eclipse-aasportal/AASPortal.git
    cd AASPortal
    ```
 
@@ -113,6 +61,84 @@ the identification base64URL encoded
 or the name (idShort) of the AAS
 
     http://localhost/?id=Bosch_NexoPistolGripNutrunner
+
+## Workspace Architecture
+
+AASPortal is a **monorepo** using npm workspaces with 5 distinct packages:
+
+```txt
+aasportal
+  ├── projects
+  │     ├── aas-core
+  │     │     └── package.json
+  │     ├── aas-jest
+  │     │     └── package.json
+  │     ├── aas-lib
+  │     │     └── package.json
+  │     ├── aas-node
+  │     │     └── package.json
+  │     └── aas-portal
+  │          └── package.json
+  └── package.json
+
+```
+
+| Workspace | Description | Technology Stack |
+|-----------|-------------|------------------|
+| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM |
+| **aas-portal** | Angular frontend application | Angular 20.1.6, NgRx, Bootstrap 5 |
+| **aas-node** | Express.js backend API server | Express.js, JWT, OpenAPI/Swagger |
+| **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
+| **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
+
+## Development Commands
+
+### Building
+```bash
+npm run build                 # Build all workspaces (production)
+npm run build:debug           # Build all workspaces (development)
+npm run lib:build             # Build only aas-core and aas-lib
+npm run aas-portal:build      # Build frontend dependencies + aas-portal
+npm run aas-node:build        # Build backend dependencies + aas-node
+```
+
+### Testing
+```bash
+npm run test                  # Run tests in all workspaces
+npm run test -w aas-core      # Run tests for specific workspace
+npm run coverage              # Generate coverage reports
+```
+
+### Code Quality
+```bash
+npm run lint                 # Lint all workspaces
+npm run format               # Format all workspaces
+npm run lint -w aas-portal   # Lint specific workspace
+```
+
+### Container Development
+
+AASPortal uses a unified `docker-compose.yml` that works seamlessly with both Docker and Podman:
+
+```bash
+# Using Docker
+docker compose up -d            # Start all services
+docker compose down             # Stop all services
+docker compose logs             # View logs
+
+# Using Podman (identical commands)
+podman compose up -d            # Start all services  
+podman compose down             # Stop all services
+podman compose logs             # View logs
+```
+
+**Alternative npm scripts:**
+```bash
+npm run start              # Build and run complete Docker setup
+npm run user-db            # Start MongoDB for user storage (Docker)
+npm run user-db:podman     # Start MongoDB for user storage (Podman)
+npm run compose:up         # Full multi-service setup
+```
 
 ## AASNode 
 AASNode is a Node.js server application based on the Express framework. The main feature of AASNode is the provision of Asset Administration Shells from different data sources (AASX server, OPC UA server, file system). AASNode can read Asset Administration Shells in JSON, XML and OPC UA format. An Asset Administration Shell is always provided to a web client (AASPortal) in JSON version 3 format.
