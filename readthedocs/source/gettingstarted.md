@@ -47,7 +47,7 @@ AASPortal uses a unified `docker-compose.yml` that works seamlessly with both Do
 
 ```bash
 # Using Docker
-docker compose up -d           # Start all services
+docker compose up -d            # Start all services
 docker compose down             # Stop all services
 
 # Using Podman (identical commands)
