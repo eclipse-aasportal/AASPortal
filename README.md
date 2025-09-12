@@ -87,7 +87,7 @@ npm run coverage              # Generate coverage reports
 
 ### Code Quality
 ```bash
-npm run lint                  # Lint all workspaces
+npm run lint                 # Lint all workspaces
 npm run format               # Format all workspaces
 npm run lint -w aas-portal   # Lint specific workspace
 ```
