@@ -1,9 +1,9 @@
 # Getting Started
 ## Prerequisites
-- Visual Studio Code
-- Node.js v22.12.0
-- GIT 2.36.0.windows.1
-- Docker Desktop 4.x
+- **Node.js v22.12.0** (required for development)
+- **Visual Studio Code** (recommended IDE)
+- **Docker Desktop 4.x OR Podman Desktop** (for containerized development)
+- **Git** (for version control)
 
 *AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of five workspaces:
 - **aas-core**: Shared types, utilities, and AAS data models used across workspaces
