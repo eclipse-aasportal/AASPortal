@@ -97,6 +97,6 @@ http://host.docker.internal:5001           # Docker
 http://192.168.1.100:5001                  # Host IP
 
 # ❌ Wrong
-http://localhost:5001                       # Container's localhost
+http://localhost:5001                      # Container's localhost
 http://127.0.0.1:5001                      # Container's loopback
 ```
