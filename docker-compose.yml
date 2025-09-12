@@ -1,6 +1,6 @@
 services:
   aasportal-users:
-    image: mongo
+    image: docker.io/mongo:latest
     container_name: aasportal-users
     restart: always
     ports:
@@ -13,7 +13,7 @@ services:
       - MONGO_INITDB_DATABASE=aasportal-users
 
   aasportal-index:
-    image: mariadb
+    image: docker.io/mariadb:latest
     container_name: aasportal-index
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
@@ -41,7 +41,7 @@ services:
       - 3306:3306
 
   aasportal-cloud-db:
-    image: mariadb
+    image: docker.io/mariadb:latest
     container_name: aasportal-cloud-db
     restart: always
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
@@ -54,12 +54,12 @@ services:
       - MYSQL_USER=nextcloud
 
   aasportal-cloud:
-    image: nextcloud
+    image: docker.io/nextcloud:latest
     container_name: aasportal-cloud
     restart: always
     ports:
       - 8080:80
-    links:
+    depends_on:
       - aasportal-cloud-db
     volumes:
       - nextcloud:/var/www/html
