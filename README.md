@@ -151,10 +151,6 @@ npm run format  # Auto-format code
 npm run lint -- --fix  # Auto-fix linting issues
 ```
 
-## Changelog
-
-You can find the detailed changelog [here](readthedocs/source/changelog/changelog.md).
-
 ## Contributors
 
 | Name                | Github Account                                              |
