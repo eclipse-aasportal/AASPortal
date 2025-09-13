@@ -23,7 +23,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: sudo apt update && sudo apt install chromium-browser && export CHROME_BIN='/usr/bin/chromium-browser'
       - run: npm ci --unsafe-perm=true --allow-root
       - run: npm run build
       - run: npm run test
