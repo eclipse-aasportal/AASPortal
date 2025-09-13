@@ -1,6 +1,6 @@
 {
     "name": "aas-portal-project",
-    "version": "3.2.0-development.4",
+    "version": "3.2.0-development.5",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
@@ -26,7 +26,7 @@
         "serve": "npm run build && node --env-file projects/aas-node/.env projects/aas-node/dist/aas-node.js",
         "test:docker": "docker build -f Dockerfile.test -t test --progress=plain . &> build.log",
         "test:podman": "podman build -f Dockerfile.test -t test --progress=plain . &> build.log",
-         "docs": "rimraf ./docs && typedoc"
+        "docs": "rimraf ./docs && typedoc"
     },
     "repository": {
         "type": "git",
