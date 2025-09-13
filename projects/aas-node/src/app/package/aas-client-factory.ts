@@ -96,22 +96,19 @@ export class AASClientFactory {
             }
         } catch (error) {
             let message = `"${endpoint.url}" addresses an invalid or not supported AAS endpoint.`;
-            
-            // Add networking hints for common container networking issues
             if (endpoint.url.includes('localhost') || endpoint.url.includes('127.0.0.1')) {
                 message += ` Hint: If AASPortal is running in a container and your AAS endpoint is on the host machine, try using 'host.containers.internal' (Podman) or 'host.docker.internal' (Docker) instead of 'localhost'.`;
-            } else if (endpoint.url.includes('192.168.') || endpoint.url.includes('10.0.') || endpoint.url.includes('172.16.')) {
+            } else if (
+                endpoint.url.includes('192.168.') ||
+                endpoint.url.includes('10.0.') ||
+                endpoint.url.includes('172.16.')
+            ) {
                 message += ` Hint: Ensure the endpoint is accessible from within the container network.`;
             }
-            
-            // Log the underlying error for debugging
-            this.logger.debug(`Endpoint validation failed for ${endpoint.url}: ${error?.message || 'Unknown error'}`);
-            
-            throw new ApplicationError(
-                message,
-                ERRORS.InvalidContainerUrl,
-                endpoint.url,
-            );
+
+            this.logger.error(`Endpoint validation failed for ${endpoint.url}: ${error?.message || 'Unknown error'}`);
+
+            throw new ApplicationError(message, ERRORS.InvalidContainerUrl, endpoint.url);
         }
     }
 }
