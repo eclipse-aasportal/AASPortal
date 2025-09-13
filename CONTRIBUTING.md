@@ -8,7 +8,7 @@ Don't forget to rate the project! Thanks again!
 ## Getting Started
 
 ### Prerequisites
-- Node.js v22.12.0
+- Node.js v22.16.0
 - Visual Studio Code (recommended)
 - Docker Desktop 4.x OR Podman Desktop
 
