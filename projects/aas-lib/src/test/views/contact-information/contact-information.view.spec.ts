@@ -10,7 +10,7 @@ import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateParser, provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -24,9 +24,10 @@ import { viewRoutes } from '../../../lib/views/views-routes';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { ContactInformationView } from '../../../lib/views/contact-information/contact-information-view';
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
+import { ContactInformationState } from '../../../lib/views/contact-information/contact-information.state';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 import contactInformation from '../../assets/contact-information-1-0.json';
-import { createSpyObj, FakeLoader } from '../../mocks';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -122,5 +123,13 @@ describe.skip('ContactInformationsView', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
+    it('should provide a state for the CarbonFootprint component', () => {
+        expect(component.contactInformationState).toBeInstanceOf(ContactInformationState);
     });
 });

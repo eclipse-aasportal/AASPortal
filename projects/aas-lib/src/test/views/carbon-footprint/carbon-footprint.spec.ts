@@ -80,15 +80,11 @@ describe('CarbonFootprint', () => {
     });
 
     it('should has carbonFootprint', () => {
-        expect(component.carbonFootprint()).toBeDefined();
+        expect(component.item()).toBeDefined();
     });
 
     it('should has collapsed', () => {
         expect(component.collapsed()).toBe(false);
-    });
-
-    it('should has items length of 1', () => {
-        expect(component.count()).toEqual(1);
     });
 
     it('should has count', () => {

@@ -20,7 +20,8 @@ import {
 } from './handover-documentation.state';
 
 /**
- * Provides a specific view for a handover documentation submodel.
+ * Provides a component for submodels that belong to the IDTA specification "Handover Documentation".
+ * Version 1.2 and 2.0 are supported.
  */
 @Component({
     selector: 'fhg-handover-documentation',
@@ -46,15 +47,24 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
         });
     }
 
+    /**
+     * The state of the handover documentation component.
+     */
     public override state = input.required<HandoverDocumentationState>();
 
-    /** The current active AAS document. */
+    /**
+     * The current active AAS document.
+     */
     public readonly document = input<AASDocument>();
 
-    /** Indicates the accordion item is collapsed or expanded. */
+    /**
+     * Indicates the accordion item is collapsed or expanded.
+     */
     public readonly collapsed = input(false);
 
-    /** The document items. */
+    /**
+     * The document items.
+     */
     public readonly items = computed(() => this.state().items());
 
     /**

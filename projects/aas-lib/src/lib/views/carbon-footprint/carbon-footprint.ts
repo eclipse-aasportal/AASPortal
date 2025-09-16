@@ -17,7 +17,7 @@ import { CarbonFootprintData, CarbonFootprintState } from './carbon-footprint.st
 import { ChildComponent } from '../../components/child-component';
 
 /**
- * Provides a component for a submodel that belongs to the specification "Carbon Footprint".
+ * Provides a component for a submodel that belongs to the IDTA specification "Carbon Footprint".
  * Version 0.9 and 1.0 are supported.
  */
 @Component({
@@ -45,30 +45,46 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonF
         });
     }
 
-    /** The AAS document. */
+    /**
+     * The AAS document.
+     */
     public readonly document = input<AASDocument>();
 
-    /** Indicates whether the first carbon footprint item is collapsed. */
+    /**
+     * A flag indicating whether the component is collapsed.
+     */
     public readonly collapsed = input(false);
 
-    /** The state of the carbon footprint component. */
+    /**
+     * The state of the carbon footprint component.
+     */
     public override readonly state = input.required<CarbonFootprintState>();
 
-    /** The total product carbon footprint. */
+    /**
+     * The total product carbon footprint.
+     */
     public readonly totalPcfCO2eq = computed(() => this.state().totalPcfCO2eq());
 
-    /** The available product carbon footprint items. */
+    /**
+     * The available product carbon footprint items.
+     */
     public readonly items = computed(() => this.state().items());
 
-    /** The current active carbon footprint item. */
-    public readonly carbonFootprint = computed(() => {
+    /**
+     * The current active carbon footprint item.
+     */
+    public readonly item = computed(() => {
         return this.state().items()[this.state().index() - 1];
     });
 
-    /** The index of the current active carbon footprint item. */
+    /**
+     * The index of the current active carbon footprint item.
+     */
     public readonly index = computed(() => this.state().index());
 
-    /** The number of carbon footprint items. */
+    /**
+     * The number of carbon footprint items.
+     */
     public readonly count = computed(() => this.state().items().length);
 
     /**

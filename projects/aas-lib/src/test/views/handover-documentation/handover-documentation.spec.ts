@@ -66,14 +66,14 @@ describe('HandoverDocumentation', () => {
     });
 
     it('should has a document', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
         expect(component.document()).toBeDefined();
     });
 
     it('should has document items', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
         expect(component.items()).toBeDefined();
+    });
+
+    it('should has collapsed', () => {
+        expect(component.collapsed()).toBe(false);
     });
 });

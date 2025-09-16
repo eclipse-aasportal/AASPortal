@@ -597,10 +597,10 @@ export function toDisplayName(name: string): string {
 
 /**
  * Gets the display value of a submodel element.
- * @param submodel The submodel to which the proerty belongs.
+ * @param submodel The current submodel.
  * @param idShortPath The path to the submodel element.
  * @param lang The current language.
- * @param env The AAS environment used to get the unit.
+ * @param env The AAS environment used to get the concept description.
  * @param defaultValue A default value if no value exists.
  * @returns The display value.
  */
@@ -612,6 +612,27 @@ export function toString(
     defaultValue: string = '',
 ): string {
     const referable = getReferable(submodel, idShortPath);
+    if (!referable) {
+        return defaultValue;
+    }
+
+    return getDisplayValue(referable, lang, env, defaultValue);
+}
+
+/**
+ * Gets the display value of a referable element.
+ * @param referable The referable element.
+ * @param lang The current language.
+ * @param env The AAS environment used to get the concept description.
+ * @param defaultValue A default value if no value exists.
+ * @returns The display value.
+ */
+export function getDisplayValue(
+    referable: aas.Referable,
+    lang: string,
+    env?: aas.Environment | null,
+    defaultValue: string = '',
+): string {
     let value: string | undefined;
     if (isProperty(referable)) {
         let unit: string | undefined;

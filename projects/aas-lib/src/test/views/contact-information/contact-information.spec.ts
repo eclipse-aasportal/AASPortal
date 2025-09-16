@@ -8,14 +8,16 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
-import contactInformation from '../../assets/contact-information-1-0.json';
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
+import { ContactInformationState } from '../../../lib/views/contact-information/contact-information.state';
 import { FakeLoader } from '../../mocks';
 
-describe.skip('ContactInformation', () => {
+import contactInformation from '../../assets/contact-information-1-0.json';
+
+describe('ContactInformation', () => {
     let component: ContactInformation;
     let fixture: ComponentFixture<ContactInformation>;
     let document: AASDocument;
@@ -33,19 +35,22 @@ describe.skip('ContactInformation', () => {
         };
 
         await TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-            imports: [
-                ContactInformation,
-                TranslateModule.forRoot({
+            providers: [
+                ContactInformationState,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [ContactInformation],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ContactInformation);
+        fixture.componentRef.setInput('state', TestBed.inject(ContactInformationState));
+        fixture.componentRef.setInput('document', document);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
@@ -55,8 +60,6 @@ describe.skip('ContactInformation', () => {
     });
 
     it('should has a document', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
         expect(component.document()).toBeDefined();
     });
 });
