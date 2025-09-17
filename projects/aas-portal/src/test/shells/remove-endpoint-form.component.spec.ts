@@ -6,33 +6,37 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { jest } from '@jest/globals';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { RemoveEndpointFormComponent } from '../../app/shells/remove-endpoint-form/remove-endpoint-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('RemoveEndpointFormComponent', () => {
-    let component: RemoveEndpointFormComponent;
-    let fixture: ComponentFixture<RemoveEndpointFormComponent>;
     let modal: NgbActiveModal;
-    let form: HTMLFormElement;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [NgbActiveModal],
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [NgbActiveModal, provideZonelessChangeDetection()],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
-        });
+        }).compileComponents();
 
-        fixture = TestBed.createComponent(RemoveEndpointFormComponent);
-        component = fixture.componentInstance;
+        modal = TestBed.inject(NgbActiveModal);
+    });
+
+    it('should create', () => {
+        const fixture = TestBed.createComponent(RemoveEndpointFormComponent);
+        const component = fixture.componentInstance;
         component.endpoints.set([
             { name: 'Samples', url: 'http://localhost:1234', selected: false },
             { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
@@ -40,17 +44,21 @@ describe('RemoveEndpointFormComponent', () => {
         ]);
 
         fixture.detectChanges();
-
-        modal = TestBed.inject(NgbActiveModal);
-        form = fixture.debugElement.nativeElement.querySelector('form');
-    });
-
-    it('should create', () => {
         expect(component).toBeTruthy();
     });
 
     it('allows deleting the "Samples" registry', () => {
-        spyOn(modal, 'close').and.callFake(result => {
+        const fixture = TestBed.createComponent(RemoveEndpointFormComponent);
+        const component = fixture.componentInstance;
+        component.endpoints.set([
+            { name: 'Samples', url: 'http://localhost:1234', selected: false },
+            { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
+            { name: 'AAS Registry', url: 'http://localhost:1236', selected: false },
+        ]);
+
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
+        jest.spyOn(modal, 'close').mockImplementation(result => {
             expect(result).toEqual(['Samples']);
         });
 
@@ -65,9 +73,19 @@ describe('RemoveEndpointFormComponent', () => {
     });
 
     it('Display message if no element selected.', () => {
-        spyOn(modal, 'close');
+        const fixture = TestBed.createComponent(RemoveEndpointFormComponent);
+        const component = fixture.componentInstance;
+        component.endpoints.set([
+            { name: 'Samples', url: 'http://localhost:1234', selected: false },
+            { name: 'I4AAS Server', url: 'http://localhost:1235', selected: false },
+            { name: 'AAS Registry', url: 'http://localhost:1236', selected: false },
+        ]);
+
+        fixture.detectChanges();
+        const form = fixture.debugElement.nativeElement.querySelector('form');
+        jest.spyOn(modal, 'close');
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages().length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBe(true);
     });
 });

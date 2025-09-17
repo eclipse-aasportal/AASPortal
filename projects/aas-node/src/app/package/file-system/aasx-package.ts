@@ -34,14 +34,14 @@ export class AasxPackage extends AASPackage {
 
         this.source = source as AasxDirectory;
         this.file = file;
-        this.zip = this.loadAsync();
+        this.zip = this.load();
     }
 
-    public async createDocumentAsync(): Promise<AASDocument> {
+    public async createDocument(): Promise<AASDocument> {
         let document: AASDocument;
         const format = extname(this.file);
         if (format === '.aasx') {
-            const reader = await this.createReaderAsync();
+            const reader = await this.createReader();
             const environment = reader.readEnvironment();
             const id = environment.assetAdministrationShells[0].id;
             document = {
@@ -69,16 +69,15 @@ export class AasxPackage extends AASPackage {
     }
 
     public override async getEnvironment(): Promise<aas.Environment> {
-        return (await this.createReaderAsync()).readEnvironment();
+        return (await this.createReader()).readEnvironment();
     }
 
-    public override async setEnvironmentAsync(env: aas.Environment): Promise<string[]> {
+    public override async setEnvironment(id: string, env: aas.Environment): Promise<void> {
         const writer = new XmlWriterV3();
         const xml = writer.write(env);
-        const path = await this.getOriginNameAsync();
+        const path = await this.getOriginName();
         (await this.zip).file(path, xml, { compression: 'DEFLATE' });
-        await this.saveAsync();
-        return [`${this.file} successfully written.`];
+        await this.save();
     }
 
     public override async openReadStream(_: aas.Environment, file: aas.File): Promise<NodeJS.ReadableStream> {
@@ -97,7 +96,7 @@ export class AasxPackage extends AASPackage {
 
     public override async getThumbnail(): Promise<NodeJS.ReadableStream> {
         let stream: NodeJS.ReadableStream | undefined;
-        const relationships = await this.getRelationshipsAsync('_rels/.rels');
+        const relationships = await this.getRelationships('_rels/.rels');
         for (const relationship of relationships) {
             if (
                 relationship.getAttribute('Type') ===
@@ -120,16 +119,16 @@ export class AasxPackage extends AASPackage {
         return stream;
     }
 
-    private async createReaderAsync(): Promise<AASReader> {
-        const name = await this.getOriginNameAsync();
+    private async createReader(): Promise<AASReader> {
+        const name = await this.getOriginName();
         const extension = extname(name);
         switch (extension) {
             case '.xml': {
-                const xml = await this.getZipEntryAsync(name);
+                const xml = await this.getZipEntry(name);
                 return createXmlReader(xml);
             }
             case '.json': {
-                const env = JSON.parse(await this.getZipEntryAsync(name));
+                const env = JSON.parse(await this.getZipEntry(name));
                 return createJsonReader(env);
             }
             default:
@@ -137,14 +136,14 @@ export class AasxPackage extends AASPackage {
         }
     }
 
-    private async loadAsync(): Promise<jszip> {
+    private async load(): Promise<jszip> {
         const data = await this.source.readFile(this.file);
         return await jszip.loadAsync(data);
     }
 
-    private async getOriginNameAsync(): Promise<string> {
+    private async getOriginName(): Promise<string> {
         if (this.originName === null) {
-            const relationships = await this.getRelationshipsAsync('aasx/_rels/aasx-origin.rels');
+            const relationships = await this.getRelationships('aasx/_rels/aasx-origin.rels');
             for (const relationship of relationships) {
                 const type = relationship.getAttribute('Type');
                 if (
@@ -168,14 +167,14 @@ export class AasxPackage extends AASPackage {
         return this.originName;
     }
 
-    private async getRelationshipsAsync(path: string): Promise<Element[]> {
-        const xml = await this.getZipEntryAsync(path);
+    private async getRelationships(path: string): Promise<Element[]> {
+        const xml = await this.getZipEntry(path);
         const document = new DOMParser().parseFromString(xml);
         const select = xpath.useNamespaces({ opnxml: 'http://schemas.openxmlformats.org/package/2006/relationships' });
         return select('/opnxml:Relationships/opnxml:Relationship', document) as Element[];
     }
 
-    private async getZipEntryAsync(path: string, contentType?: jszip.OutputType): Promise<string> {
+    private async getZipEntry(path: string, contentType?: jszip.OutputType): Promise<string> {
         if (path.charAt(0) === '/') {
             path = path.slice(1);
         }
@@ -193,7 +192,7 @@ export class AasxPackage extends AASPackage {
         return (await file.async(contentType)) as string;
     }
 
-    private async saveAsync(): Promise<void> {
+    private async save(): Promise<void> {
         const zip = await this.zip;
         await new Promise<void>((resolve, reject) => {
             zip.generateNodeStream({ type: 'nodebuffer', streamFiles: true })

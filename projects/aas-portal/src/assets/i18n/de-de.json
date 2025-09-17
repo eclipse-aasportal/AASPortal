@@ -85,17 +85,12 @@
     "LABEL_VALUE_TYPE": "Wertetyp",
     "LABEL_AAS_URL": "AAS Endpunkt",
     "LABEL_SERVER_URL": "Server Endpunkt",
-    "LABEL_CHART_TYPE": "Diagrammtyp",
-    "LABEL_COLOR": "Farbe",
     "LABEL_UPLOAD_CONTAINER": "Ziel",
     "LABEL_OVERWRITE_FILE": "Überschreiben",
-    "LABEL_MIN": "Min",
-    "LABEL_MAX": "Max",
     "LABEL_MIME_TYPE": "MIME-Typ",
     "LABEL_VIEWS": "Sichten",
     "LABEL_CATEGORY": "Kategorie",
     "LABEL_SEMANTIC_ID": "Semantik ID",
-    "LABEL_EDIT_MODE": "Bearbeiten",
     "PLEASE_WAIT": "Bitte warten...",
     "PLACEHOLDER_EMAIL": "E-Mail-Adresse eingeben",
     "PLACEHOLDER_PASSWORD": "Passwort eingeben",
@@ -132,7 +127,6 @@
     "INFO_NEW_PASSWORD_SENT": "Ein neues Passwort wurde an '{0}' gesendet",
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} wurde erfolgreich heruntergeladen.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} wurde erfolgreich hochgeladen.",
-    "INFO_EMPTY_DASHBOARD": "Das Dashboard ist leer.",
     "INFO_NO_SHELL_AVAILABLE": "Keine Verwaltungsschale ausgewählt.",
     "INFO_NO_SUBMODEL": "Kein Submodel verfügbar.",
     "INFO_NO_SHELLS_AVAILABLE": "Keine Verwaltungsschalen verfügbar.",
@@ -142,16 +136,12 @@
     "CONFIRM_DELETE_FILES": "{0} Dateien unwiderruflich löschen?",
     "CONFIRM_DELETE_USER": "Möchten Sie das Konto '{0}' löschen?",
     "CONFIRM_DELETE_DOCUMENT": "Möchten Sie wirklich die Dokumente {0} löschen?",
-    "PROMPT_DASHBOARD_NAME": "Geben Sie einen Namen für das Dashboard ein.",
     "TIP_PASSWORD_SEND_VIA_EMAIL": "An '{{email}}' wird ein neues Password gesendet.",
     "VALUE_ORDER": "{0} vom {1}",
     "ROUTE_FILE_SYSTEM": "Dateisystem",
     "ROUTE_OPC_UA": "OPC UA",
     "ALERT_SUCCESS": "Erfolg!",
     "ALERT_FAILED": "Fehlgeschlagen!",
-    "OPTION_TIMELINE_CHART": "Zeitdiagramm",
-    "OPTION_BAR_VERTICAL_CHART": "Balkendiagramm vertikal",
-    "OPTION_BAR_HORIZONTAL_CHART": "Balkendiagramm horizontal",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
     "Main": {
@@ -177,10 +167,32 @@
         "DigitalProductPassport": "Produktpass",
         "CustomerFeedback": "Nutzer-Feedback",
         "Nameplate": "Typenschild",
-        "HandoverDocumentation": "Übergabedokumentation"
+        "HandoverDocumentation": "Übergabedokumentation",
+        "OperationalData": "Operative Daten",
+        "Browser": "Browser",
+        "ContactInformations": "Kontaktinformationen",
+        "CarbonFootprint": "CO2-Fußabdruck",
+        "TechnicalData": "Technische Daten"
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
+    },
+    "Dashboard": {
+        "EMPTY": "Das Dashboard ist leer.",
+        "LABEL_NAME": "Name",
+        "LABEL_COLOR": "Farbe",
+        "LABEL_CHART_TYPE": "Typ",
+        "LABEL_EDIT_MODE": "Bearbeiten",
+        "Line": "Zeitdiagramm",
+        "BarVertical": "Balkendiagramm vertikal",
+        "BarHorizontal": "Balkendiagramm horizontal",
+        "TimeSeries": "Zeitserie",
+        "LABEL_MIN": "Min",
+        "LABEL_MAX": "Max",
+        "PROMPT_DASHBOARD_NAME": "Geben Sie einen Namen für das Dashboard ein."
+    },
+    "Chart": {
+        "SHOW": "Anzeigen..."
     },
     "AddEndpointForm": {
         "CAPTION": "AAS-Endpunkt hinzufügen",
@@ -195,6 +207,7 @@
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
+        "HINT_CONTAINER_NETWORKING": "💡 Wenn AASPortal in einem Container ausgeführt wird und sich Ihr Endpunkt auf dem Host befindet, verwenden Sie 'host.containers.internal' (Podman) oder 'host.docker.internal' (Docker) anstelle von 'localhost'.",
         "ADVANCED_SETTINGS": "Erweiterte Einstellungen",
         "SCHEDULE": "Endpunkt-Index aktualisieren",
         "DISABLED": "deaktiviert",
@@ -255,7 +268,9 @@
         "Hacptics": "Haptik",
         "Acustics": "Akustik",
         "Assembly_Installation": "Montage & Installation",
-        "Material": "Material"
+        "Material": "Material",
+        "TITLE": "Nutzer-Feedback",
+        "SHOW": "Anzeigen..."
     },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
@@ -278,57 +293,21 @@
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
     },
-    "DigitalProductPassport": {
-        "EMPTY": "Ups...",
-        "Name": "Name",
-        "Description": "Beschreibung",
-        "BANNER": "Fraunhofer IOSB-INA DPPPortal",
-        "CAPTION": "Product Passport",
-        "TYPE": "Type",
-        "SERIAL_NUMBER": "Seriennummer",
-        "NAMEPLATE_DATA": "Typenschild",
+    "CarbonFootprint": {
+        "TITLE": "CO2-Fußabdruck",
         "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
-        "TOTAL_PSFCO2EQ": "CO2-eq GWP100",
+        "TOTAL_PSFCO2EQ": "GWP100"
+    },
+    "DigitalProductPassport": {
+        "BANNER": "Fraunhofer IOSB-INA DPPPortal",
+        "CAPTION": "Produktpass",
+        "Description": "Beschreibung",
         "DOCUMENTATION": "Dokumentation",
-        "ManufacturerProductFamily": "Produktfamilie",
-        "ManufacturerProductType": "Produkttyp",
-        "ManufacturerProductDesignation": "Produktbezeichnung",
-        "OrderCodeOfManufacturer": "Bestellnummer",
-        "SerialNumber": "Seriennummer",
-        "DateOfManufacture": "Herstellungsdatum",
-        "ManufacturerName": "Hersteller",
-        "URIOfTheProduct": "URI des Produkts",
-        "FirstName": "Vorname",
-        "NameOfContact": "Name",
-        "Language": "Sprache",
-        "TelephoneNumber": "Telefonnummer",
-        "EmailAddress": "E-Mail",
-        "Company": "Unternehmen",
-        "Street": "Straße",
-        "Zipcode": "Postleitzahl",
-        "CityTown": "Stadt",
-        "StateCounty": "Land",
-        "NationalCode": "Länderkennung",
-        "TimeZone": "Zeitzone",
-        "PCFGoodsAddressHandover": "Übergabeadresse",
-        "PCFCalculationMethod": "Berechnungsmethode",
-        "PCFCO2eq": "CO2-Äquivalent",
-        "PCFLifeCyclePhase1": "Lebenszyklusphase A1",
-        "PCFLifeCyclePhase2": "Lebenszyklusphase A2",
-        "PCFLifeCyclePhase3": "Lebenszyklusphase A3",
-        "PCFLifeCyclePhase4": "Lebenszyklusphase A4",
-        "PCFLifeCyclePhase5": "Lebenszyklusphase B1",
-        "PCFLifeCyclePhase6": "Lebenszyklusphase B2",
-        "PCFLifeCyclePhase7": "Lebenszyklusphase B3",
-        "PCFLifeCyclePhase8": "Lebenszyklusphase B5",
-        "PCFLifeCyclePhase9": "Lebenszyklusphase B6",
-        "PCFLifeCyclePhase10": "Lebenszyklusphase B7",
-        "PCFLifeCyclePhase11": "Lebenszyklusphase C1",
-        "PCFLifeCyclePhase12": "Lebenszyklusphase C2",
-        "PCFLifeCyclePhase13": "Lebenszyklusphase C3",
-        "PCFLifeCyclePhase14": "Lebenszyklusphase C4",
-        "PCFLifeCyclePhase15": "Lebenszyklusphase D",
-        "PCFLifeCyclePhase16": "Lebenszyklusphase A1-A3"
+        "EMPTY": "Kein Produktpass verfügbar.",
+        "Name": "Name",
+        "NAMEPLATE_DATA": "Typenschild",
+        "SERIAL_NUMBER": "Seriennummer",
+        "TYPE": "Type"
     },
     "Favorite": {
         "ID_SHORT": "ID-Short",
@@ -345,13 +324,24 @@
         "ABOUT": "Info über..."
     },
     "HandoverDocumentation": {
+        "TITLE": "Übergabedocumentation",
         "EMPTY": "Keine Übergabedokumente verfügbar."
     },
-    "DigitalNameplate": {
-        "ManufacturerName": "Hersteller",
-        "ManufacturerProductType": "Typ",
-        "ManufacturerProductFamily": "Familie",
-        "ProductArticleNumberOfManufacturer": "Art.-Nr.",
-        "SerialNumber":"Serien-Nr."
+    "Browser": {
+        "TITLE": "AAS-Browser",
+        "EMPTY": "Keine Verwalungsschale verfügbar."
+    },
+    "Nameplate": {
+        "GENERAL": "Allgemein",
+        "TITLE": "Digitales Typenschild"
+    },
+    "TechnicalData": {
+        "TITLE": "Technische Daten"
+    },
+    "ContactInformations": {
+        "TITLE": "Kontaktdaten"
+    },
+    "OperationalData": {
+        "TITLE": "Betriebsdaten"
     }
 }

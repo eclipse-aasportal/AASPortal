@@ -1,0 +1,54 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="p-1">
+    <div class="row mb-2">
+        <label class="col-sm-3 col-form-lable text-nowrap" [for]="'source-lable-' + item().id"
+            translate>Dashboard.LABEL_NAME</label>
+        <div class="col-sm-9">
+            <select class="form-select" [id]="'source-lable-' + item().id" [(ngModel)]="item().source">
+                @for (source of item().sources; track source) {
+                <option [ngValue]="source.label">{{source.label}}</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label class="col-sm-3 col-form-lable text-nowrap" [for]="'color-' + item().id"
+            translate>Dashboard.LABEL_COLOR</label>
+        <div class="col-sm-9">
+            <input #colorInput type="color" class="form-control form-control-color" [id]="'color-' + + item().id"
+                [value]="getColor(item())" (change)="changeColor(item(), colorInput.value)">
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label class="col-sm-3 col-form-lable text-nowrap" [for]="'chart-type-' + item().id"
+            translate>Dashboard.LABEL_CHART_TYPE</label>
+        <div class="col-sm-9">
+            <select class="form-select" [id]="'chart-type-' + item().id" [(ngModel)]="item().chartType">
+                @for (chartType of chartTypes(); track chartType) {
+                <option [ngValue]="chartType">{{'Dashboard.' + chartType | translate}}</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <label [for]="'min' + item().id" class="col-sm-3 col-form-label" translate>Dashboard.LABEL_MIN</label>
+        <div class="col-sm-9">
+            <input #inputMin type="text" class="form-control" [id]="'min' + item().id" [value]="getMin(item())"
+                (change)="changeMin(item(), inputMin.value)">
+        </div>
+    </div>
+    <div class="row">
+        <label [for]="'max' + item().id" class="col-sm-3 col-form-label" translate>Dashboard.LABEL_MAX</label>
+        <div class="col-sm-9">
+            <input #inputMax type="text" class="form-control" [id]="'max' + item().id" [value]="getMax(item())"
+                (change)="changeMax(item(), inputMax.value)">
+        </div>
+    </div>
+</div>

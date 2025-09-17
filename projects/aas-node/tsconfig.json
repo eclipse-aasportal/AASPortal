@@ -6,7 +6,6 @@
         "declaration": false,
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
-        "skipLibCheck": true,
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,
         "lib": [

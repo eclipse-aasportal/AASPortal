@@ -6,46 +6,48 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { aas } from 'aas-core';
 import { EditElementFormComponent } from '../../app/aas/edit-element-form/edit-element-form.component';
+import { createSpyObj, DoneFn, FakeLoader } from '../mocks';
 
 describe('EditElementFormComponent', () => {
-    let component: EditElementFormComponent;
-    let fixture: ComponentFixture<EditElementFormComponent>;
-    let activeModal: jasmine.SpyObj<NgbActiveModal>;
+    let activeModal: jest.Mocked<NgbActiveModal>;
 
-    beforeEach(() => {
-        activeModal = jasmine.createSpyObj('NgbActiveModal', ['close']);
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        activeModal = createSpyObj<NgbActiveModal>(['close']);
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NgbActiveModal,
                     useValue: activeModal,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(EditElementFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(EditElementFormComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 
     describe('Property', () => {
+        let component: EditElementFormComponent;
+        let fixture: ComponentFixture<EditElementFormComponent>;
         let property: aas.Property;
 
         beforeEach(() => {
@@ -56,12 +58,14 @@ describe('EditElementFormComponent', () => {
                 valueType: 'xs:string',
             };
 
+            fixture = TestBed.createComponent(EditElementFormComponent);
+            component = fixture.componentInstance;
             component.initialize(property);
             fixture.detectChanges();
         });
 
         it('allows editing a string Property', (done: DoneFn) => {
-            activeModal.close.and.callFake(result => {
+            activeModal.close.mockImplementation(result => {
                 expect((result as aas.Property).value).toEqual('Hello World!');
                 done();
             });
@@ -78,7 +82,7 @@ describe('EditElementFormComponent', () => {
         });
 
         it('allows changing the category to PARAMETER', (done: DoneFn) => {
-            activeModal.close.and.callFake(result => {
+            activeModal.close.mockImplementation(result => {
                 expect((result as aas.Property).category).toEqual('PARAMETER');
                 done();
             });
@@ -95,7 +99,7 @@ describe('EditElementFormComponent', () => {
         });
 
         it('allows changing the value type to "double"', (done: DoneFn) => {
-            activeModal.close.and.callFake(result => {
+            activeModal.close.mockImplementation(result => {
                 expect((result as aas.Property).valueType).toEqual('xs:double');
                 done();
             });
@@ -113,6 +117,8 @@ describe('EditElementFormComponent', () => {
     });
 
     describe('MultiLanguageProperty', () => {
+        let component: EditElementFormComponent;
+        let fixture: ComponentFixture<EditElementFormComponent>;
         let property: aas.MultiLanguageProperty;
 
         beforeEach(() => {
@@ -123,12 +129,14 @@ describe('EditElementFormComponent', () => {
                 value: [{ language: 'de', text: 'Hallo Welt!' }],
             };
 
+            fixture = TestBed.createComponent(EditElementFormComponent);
+            component = fixture.componentInstance;
             component.initialize(property);
             fixture.detectChanges();
         });
 
         it('allows editing an existing locale text', (done: DoneFn) => {
-            activeModal.close.and.callFake(result => {
+            activeModal.close.mockImplementation(result => {
                 const expected: aas.LangString[] = [{ language: 'de', text: 'Hallo Mond!' }];
                 expect((result as aas.MultiLanguageProperty).value).toEqual(expected);
                 done();
@@ -139,7 +147,7 @@ describe('EditElementFormComponent', () => {
         });
 
         it('allows removing an existing locale text', (done: DoneFn) => {
-            activeModal.close.and.callFake(result => {
+            activeModal.close.mockImplementation(result => {
                 const expected: aas.LangString[] = [];
                 expect((result as aas.MultiLanguageProperty).value).toEqual(expected);
                 done();
@@ -150,7 +158,7 @@ describe('EditElementFormComponent', () => {
         });
 
         it('allows adding a new locale text', (done: DoneFn) => {
-            activeModal.close.and.callFake(result => {
+            activeModal.close.mockImplementation(result => {
                 const expected: aas.LangString[] = [
                     { language: 'de', text: 'Hallo Welt!' },
                     { language: 'en', text: 'Hello World!' },

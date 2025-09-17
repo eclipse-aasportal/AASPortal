@@ -4,6 +4,7 @@
         "AASPORTAL",
         "aasv",
         "aasv3",
+        "aasx",
         "angewandten",
         "autohide",
         "classname",
@@ -14,6 +15,9 @@
         "Forschung",
         "IDREF",
         "IDREFS",
+        "IDTA",
+        "Informations",
+        "inoutput",
         "IOSB",
         "irdi",
         "jszip",
@@ -26,6 +30,7 @@
         "NMTOKEN",
         "NMTOKENS",
         "nodebuffer",
+        "opcua",
         "opnxml",
         "owncloud",
         "PCFCO2",
@@ -37,6 +42,7 @@
         "selbstaendige",
         "Sematics",
         "submodel",
+        "submodels",
         "tseslint",
         "tsoa",
         "tsyringe",
@@ -44,23 +50,40 @@
         "uuid",
         "webdav",
         "xmldoc",
-        "ZVEI",
-        "IDTA"
+        "ZVEI"
     ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.eol": "\n",
-    "jest.debugMode": true,
     "jest.virtualFolders": [
         {
             "name": "aas-core",
             "rootPath": "./projects/aas-core",
             "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals",
         },
         {
             "name": "aas-node",
             "rootPath": "./projects/aas-node",
             "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+        },
+        {
+            "name": "aas-lib",
+            "rootPath": "./projects/aas-lib",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+        },
+        {
+            "name": "aas-portal",
+            "rootPath": "./projects/aas-portal",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
         }
-    ]
+    ],
+    "[scss]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }

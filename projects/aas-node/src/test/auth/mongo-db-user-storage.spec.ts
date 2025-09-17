@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import { MongoDBUserStorage, UserCookies } from '../../app/auth/mongo-db-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
 import { describe, beforeAll, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
 import mongoose from 'mongoose';
 
@@ -61,17 +61,17 @@ describe('MongoDBUserStorage', () => {
 
         it('indicates that john.doe@email.com exists', async () => {
             jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
-            await expect(userStorage.existAsync('john.doe@email.com')).resolves.toBe(true);
+            await expect(userStorage.exist('john.doe@email.com')).resolves.toBe(true);
         });
 
         it('indicates that unknown@email.com does not exist', async () => {
             jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify());
-            await expect(userStorage.existAsync('unknown@email.com')).resolves.toBe(false);
+            await expect(userStorage.exist('unknown@email.com')).resolves.toBe(false);
         });
 
         it('reads the data of john.doe@email.com', async () => {
             jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
-            const user = (await userStorage.readAsync('john.doe@email.com'))!;
+            const user = (await userStorage.read('john.doe@email.com'))!;
             expect(user).toBeDefined();
             expect(user.id).toEqual(johnDoe.id);
             expect(user.name).toEqual(johnDoe.name);
@@ -81,19 +81,19 @@ describe('MongoDBUserStorage', () => {
 
         it('reads "undefined" for an unknown user', async () => {
             jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify());
-            await expect(userStorage.readAsync('unknown@email.com')).resolves.toBe(undefined);
+            await expect(userStorage.read('unknown@email.com')).resolves.toBe(undefined);
         });
 
         it('updates the data of john.doe@email.com', async () => {
             const save = jest.fn<() => Promise<void>>();
             jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe, save));
-            await userStorage.writeAsync('john.doe@email.com', { ...johnDoe });
+            await userStorage.write('john.doe@email.com', { ...johnDoe });
             expect(save).toHaveBeenCalled;
         });
 
         it('deletes john.doe@email.com', async () => {
             jest.spyOn(userStorage.userModel, 'findOneAndDelete').mockReturnValue(getPromisify(johnDoe));
-            await expect(userStorage.deleteAsync('john.doe@email.com')).resolves.toBe(true);
+            await expect(userStorage.delete('john.doe@email.com')).resolves.toBe(true);
         });
 
         function getInstance(user: UserData, save?: () => Promise<void>): UserDataInstance {
@@ -138,17 +138,17 @@ describe('MongoDBUserStorage', () => {
         describe('checkCookieAsync', () => {
             it('indicates that "Cookie1" for john.doe@email.com exist', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
-                await expect(userStorage.checkCookieAsync('john.doe@email.com', 'Cookie1')).resolves.toBe(true);
+                await expect(userStorage.checkCookie('john.doe@email.com', 'Cookie1')).resolves.toBe(true);
             });
 
             it('indicates that "unknown" for john.doe@email.com not exist', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
-                await expect(userStorage.checkCookieAsync('john.doe@email.com', 'unknown')).resolves.toBe(false);
+                await expect(userStorage.checkCookie('john.doe@email.com', 'unknown')).resolves.toBe(false);
             });
 
             it('indicates that "Cookie1" for jane.doe@email.com not exist', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance());
-                await expect(userStorage.checkCookieAsync('jane.doe@email.com', 'Cookie1')).resolves.toBe(false);
+                await expect(userStorage.checkCookie('jane.doe@email.com', 'Cookie1')).resolves.toBe(false);
             });
         });
 
@@ -156,7 +156,7 @@ describe('MongoDBUserStorage', () => {
             it('returns the value of "Cookie1" for john.doe@email.com', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
-                await expect(userStorage.getCookieAsync('john.doe@email.com', 'Cookie1')).resolves.toEqual({
+                await expect(userStorage.getCookie('john.doe@email.com', 'Cookie1')).resolves.toEqual({
                     name: 'Cookie1',
                     data: 'The quick brown fox jumps over the lazy dog.',
                 });
@@ -165,13 +165,13 @@ describe('MongoDBUserStorage', () => {
             it('returns "undefined" for "unknown" for john.doe@email.com', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
-                await expect(userStorage.getCookieAsync('john.doe@email.com', 'unknown')).resolves.toBeUndefined();
+                await expect(userStorage.getCookie('john.doe@email.com', 'unknown')).resolves.toBeUndefined();
             });
 
             it('returns "undefined" for "Cookie1" for jane.doe@email.com', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance());
 
-                await expect(userStorage.getCookieAsync('jane.doe@email.com', 'unknown')).resolves.toBeUndefined();
+                await expect(userStorage.getCookie('jane.doe@email.com', 'unknown')).resolves.toBeUndefined();
             });
         });
 
@@ -179,7 +179,7 @@ describe('MongoDBUserStorage', () => {
             it('returns all cookies for john.doe@email.com', async () => {
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
-                await expect(userStorage.getCookiesAsync('john.doe@email.com')).resolves.toEqual([
+                await expect(userStorage.getCookies('john.doe@email.com')).resolves.toEqual([
                     {
                         name: 'Cookie1',
                         data: 'The quick brown fox jumps over the lazy dog.',
@@ -197,7 +197,7 @@ describe('MongoDBUserStorage', () => {
                 const save = jest.fn<() => Promise<void>>();
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
 
-                await userStorage.setCookieAsync('john.doe@email.com', 'Cookie3', 'Hello World!');
+                await userStorage.setCookie('john.doe@email.com', 'Cookie3', 'Hello World!');
                 expect(save).toHaveBeenCalled();
             });
 
@@ -205,7 +205,7 @@ describe('MongoDBUserStorage', () => {
                 const save = jest.fn<() => Promise<void>>();
                 jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
 
-                await userStorage.setCookieAsync('john.doe@email.com', 'Cookie2', 'Hello World!');
+                await userStorage.setCookie('john.doe@email.com', 'Cookie2', 'Hello World!');
                 expect(save).toHaveBeenCalled();
             });
         });
@@ -218,10 +218,10 @@ describe('MongoDBUserStorage', () => {
                     getInstance(userCookies, save, deleteOne),
                 );
 
-                await userStorage.deleteCookieAsync('john.doe@email.com', 'Cookie1');
+                await userStorage.deleteCookie('john.doe@email.com', 'Cookie1');
                 expect(save).toHaveBeenCalled();
 
-                await userStorage.deleteCookieAsync('john.doe@email.com', 'Cookie2');
+                await userStorage.deleteCookie('john.doe@email.com', 'Cookie2');
                 expect(deleteOne).toHaveBeenCalled();
             });
         });

@@ -6,33 +6,42 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { ToolbarService, VIEW_ROUTES, viewRoutes } from 'aas-lib';
 
 import { ViewComponent } from '../../app/view/view.component';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ViewComponent', () => {
-    let component: ViewComponent;
-    let fixture: ComponentFixture<ViewComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                TranslateModule.forRoot({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: ToolbarService,
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
-        });
-
-        fixture = TestBed.createComponent(ViewComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+            imports: [ViewComponent],
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(ViewComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

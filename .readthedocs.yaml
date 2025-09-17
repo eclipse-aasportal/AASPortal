@@ -7,9 +7,9 @@ build:
 
 # Build from the docs/ directory with Sphinx
 sphinx:
-  configuration: docs/source/conf.py
+  configuration: read-the-docs/source/conf.py
 
 # Explicitly set the version of Python and its requirements
 python:
   install:
-    - requirements: docs/requirements.txt
+    - requirements: read-the-docs/requirements.txt

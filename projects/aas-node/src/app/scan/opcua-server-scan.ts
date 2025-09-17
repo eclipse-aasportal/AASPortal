@@ -14,7 +14,7 @@ import { OpcuaClient } from '../package/opcua/opcua-client.js';
 import { OpcuaPackage } from '../package/opcua/opcua-package.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../package/aas-api/aas-api-client.js';
+import { AASLabel } from '../package/api/api-client.js';
 
 export class OpcuaServerScan extends AASServerScan {
     private readonly logger: Logger;
@@ -52,7 +52,7 @@ export class OpcuaServerScan extends AASServerScan {
             const nodeId = description.nodeId.toString();
             try {
                 const opcuaPackage = new OpcuaPackage(this.logger, this.server, nodeId, dataTypes);
-                const document = await opcuaPackage.createDocumentAsync();
+                const document = await opcuaPackage.createDocument();
                 ids.push({ id: document.id, idShort: document.idShort });
                 this.map.set(document.id, document);
             } catch (error) {
@@ -84,7 +84,7 @@ export class OpcuaServerScan extends AASServerScan {
 
     private async isFolderAsync(obj: ReferenceDescription): Promise<boolean> {
         const type = (await this.readQualifiedName(obj)).name;
-        return type === 'FolderType' || type === 'AASEnvironmentType';
+        return type === 'FolderType' || type === 'AASEnvironmentType' || obj.browseName.name === 'AASEnvironment';
     }
 
     private async isAASTypeAsync(obj: ReferenceDescription): Promise<boolean> {

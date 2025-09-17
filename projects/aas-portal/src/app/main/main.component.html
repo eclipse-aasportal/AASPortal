@@ -11,30 +11,31 @@
         <nav class="navbar navbar-expand-sm bg-white">
             <div class="container-fluid">
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
-                    <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="">
+                    <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="Fraunhofer">
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbar">
-                    <ul ngbNav #nav="ngbNav" [activeId]="route.fragment | async" class="navbar-nav me-auto">
+                <button class="navbar-toggler" type="button"
+                    (click)="isMenuCollapsed.set(!isMenuCollapsed())"><span class="navbar-toggler-icon"></span></button>
+                <div [ngbCollapse]="isMenuCollapsed()" class="collapse navbar-collapse">
+                    <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
                         @for (link of links(); track link) {
-                        <li [ngbNavItem]="link.id">
-                            <a ngbNavLink routerLink="{{link.url}}" routerLinkActive="active">{{link.name |
+                        <li [ngbNavItem]="link.id" class="nav-item">
+                            <a ngbNavLink class="nav-item" routerLink="{{link.url}}" routerLinkActive="active"
+                                (click)="isMenuCollapsed.set(true)">{{link.name |
                                 translate}}</a>
                         </li>
                         }
                     </ul>
-                    <fhg-localize class="text-primary" [languages]="['en-us', 'de-de']"></fhg-localize>
-                    <fhg-auth class="text-primary me-2"></fhg-auth>
-                    <div class="ms-2">
-                        <img class="object-fit-contain" src="/assets/aas-portal.svg" width="67" height="40" alt="AASPortal">
+                    <div class="d-flex align-items-center me-1">
+                        <fhg-localize class="text-primary m-1" [languages]="languages()"></fhg-localize>
+                        <fhg-auth class="text-primary m-1"></fhg-auth>
+                        <img class="m-1 d-none d-md-block object-fit-contain" src="/assets/aas-portal.svg" width="67"
+                            height="40" alt="AASPortal">
                     </div>
                 </div>
             </div>
         </nav>
     </div>
-    <div class="fhg-main-toolbar">
+    <div class="fhg-main-toolbar border-bottom border-1 mb-1">
         <div class="btn-toolbar mx-2" role="toolbar">
             <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
         </div>
@@ -43,20 +44,16 @@
     <div class="fhg-main-content">
         <router-outlet></router-outlet>
     </div>
-    <div class="fhg-main-statusbar d-flex flex-row-reverse p-2">
-        <div class="ts-x-small">© {{year()}} Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
-        <span class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
-            <span>{{documentCount()}}</span>
-            <span>&nbsp;</span>
+    <div class="fhg-main-statusbar">
+        <div class="fs-9 text-nowrap text-truncate">© {{year()}} Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
+        <div class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
+            <span>{{documentCount()}}&nbsp;</span>
             <span translate>Main.SHELLS</span>
             @if (changedDocuments() > 0) {
-            <span>&nbsp;</span>
-            <span>{{changedDocuments()}}</span>
+            <span>&nbsp;{{changedDocuments()}}</span>
             }
-            <span>&nbsp;/&nbsp;</span>
-            <span>{{endpointCount()}}</span>
-            <span>&nbsp;</span>
+            <span>&nbsp;/&nbsp;{{endpointCount()}}&nbsp;</span>
             <span translate>Main.ENDPOINTS</span>
-        </span>
+        </div>
     </div>
 </div>

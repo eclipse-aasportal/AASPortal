@@ -6,40 +6,39 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { jest } from '@jest/globals';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TemplateService } from 'aas-lib';
-import { signal } from '@angular/core';
 import { TemplateDescriptor } from 'aas-core';
+import { NewElementFormComponent } from '../../app/aas/new-element-form/new-element-form.component';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('NewElementFormComponent', () => {
-    let component: NewElementFormComponent;
-    let fixture: ComponentFixture<NewElementFormComponent>;
-    let api: jasmine.SpyObj<TemplateService>;
+    let api: jest.Mocked<TemplateService>;
 
-    beforeEach(() => {
-        api = jasmine.createSpyObj<TemplateService>(['getTemplate'], { templates: signal<TemplateDescriptor[]>([]) });
+    beforeEach(async () => {
+        api = createSpyObj<TemplateService>(['getTemplate'], { templates: signal<TemplateDescriptor[]>([]) });
 
-        TestBed.configureTestingModule({
-            providers: [NgbActiveModal, { provide: TemplateService, useValue: api }],
+        await TestBed.configureTestingModule({
+            providers: [NgbActiveModal, { provide: TemplateService, useValue: api }, provideZonelessChangeDetection()],
             imports: [
+                NewElementFormComponent,
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
-        });
-
-        fixture = TestBed.createComponent(NewElementFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(NewElementFormComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 });

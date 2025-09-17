@@ -4,6 +4,10 @@
 # But not TS and JS files
 !**/*.ts
 !**/*.js
+!**/*.css
+!**/*.scss
+!**/*.html
+!**/*.json
 
 # Check subdirectories too
 !*/

@@ -28,9 +28,9 @@ import {
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
-import { AASIndex } from '../aas-index/aas-index.js';
+import { AAS_INDEX, AASIndex } from '../aas-index/aas-index.js';
 import { ScanResultKind, ScanResult, ScanEndpointResult } from '../types/scan-result.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
 import { ScanEndpointData } from '../types/worker-data.js';
 import { SocketClient } from '../live/socket-client.js';
@@ -53,10 +53,10 @@ export class AASProvider {
 
     public constructor(
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
         @inject(AASClientFactory) private readonly clientFactory: AASClientFactory,
-        @inject('AASIndex') private readonly index: AASIndex,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
         this.parallel.on('message', this.parallelOnMessage);
@@ -95,7 +95,7 @@ export class AASProvider {
      * @param language The current language.
      * @returns A page of documents.
      */
-    public getDocumentsAsync(cursor: AASCursor, filter?: string, language?: string): Promise<AASPagedResult> {
+    public getDocuments(cursor: AASCursor, filter?: string, language?: string): Promise<AASPagedResult> {
         const minFilterLength = 3;
         if (filter && filter.length >= minFilterLength) {
             return this.index.getDocuments(cursor, filter, language ?? 'en');
@@ -109,7 +109,7 @@ export class AASProvider {
      * @param endpoint The endpoint name.
      * @returns The total count of documents.
      */
-    public getCountAsync(endpoint?: string): Promise<number> {
+    public getCount(endpoint?: string): Promise<number> {
         return this.index.getCount(endpoint);
     }
 
@@ -119,9 +119,9 @@ export class AASProvider {
      * @param endpointName The endpoint name.
      * @returns The AAS document with the specified identifier.
      */
-    public async getDocumentAsync(id: string, endpointName?: string): Promise<AASDocument> {
+    public async getDocument(id: string, endpointName?: string): Promise<AASDocument> {
         const document = await this.index.get(endpointName, id);
-        document.content = await this.getDocumentContentAsync(document);
+        document.content = await this.getDocumentContent(document);
         return document;
     }
 
@@ -131,9 +131,9 @@ export class AASProvider {
      * @param id The AAS identifier.
      * @returns The AAS environment.
      */
-    public async getContentAsync(endpointName: string, id: string): Promise<aas.Environment> {
+    public async getContent(endpointName: string, id: string): Promise<aas.Environment> {
         const document = await this.index.get(endpointName, id);
-        return this.getDocumentContentAsync(document);
+        return await this.getDocumentContent(document);
     }
 
     /**
@@ -142,7 +142,7 @@ export class AASProvider {
      * @param id The AAS identifier.
      * @returns A readable stream.
      */
-    public async getThumbnailAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
+    public async getThumbnail(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
@@ -204,7 +204,7 @@ export class AASProvider {
                     }
                 }
             } else if (isBlob(dataElement)) {
-                const value = await client.getBlobValueAsync(document.content, smId, idShortPath);
+                const value = await client.getBlobValue(document.content, smId, idShortPath);
                 const readable = new Readable();
                 readable.push(JSON.stringify({ value }));
                 readable.push(null);
@@ -223,7 +223,7 @@ export class AASProvider {
      * Adds a new endpoint.
      * @param endpoint The endpoint to add.
      */
-    public async addEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+    public async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.clientFactory.testAsync(endpoint);
         await this.index.addEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
@@ -245,12 +245,10 @@ export class AASProvider {
 
     /**
      * Updates an existing endpoint.
-     * @param endpointName The old endpoint name.
      * @param endpoint The endpoint to update.
      */
-    public async updateEndpointAsync(endpoint: AASEndpoint): Promise<void> {
+    public async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
         const old = await this.index.updateEndpoint(endpoint);
-
         let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
         if (task) {
             if (task.handle) {
@@ -263,20 +261,23 @@ export class AASProvider {
 
         const oldType = old.schedule?.type;
         const newType = endpoint.schedule?.type;
-        if (oldType !== newType) {
-            if (newType === 'disabled') {
-                await this.index.clear(endpoint.name);
-            } else if (oldType === 'manual' || oldType === 'disabled') {
-                task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
-            }
+        if (oldType !== newType && newType === 'disabled') {
+            await this.index.clear(endpoint.name);
+            return;
         }
+
+        if (newType === 'manual') {
+            return;
+        }
+
+        task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
     }
 
     /**
      * Removes the endpoint with the specified name.
      * @param endpointName The name of the registry to remove.
      */
-    public async removeEndpointAsync(endpointName: string): Promise<void> {
+    public async removeEndpoint(endpointName: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
             await this.index.removeEndpoint(endpoint.name);
@@ -299,7 +300,7 @@ export class AASProvider {
     /**
      * Restores the default AAS server configuration.
      */
-    public async resetAsync(): Promise<void> {
+    public async reset(): Promise<void> {
         if (this.resetRequested) {
             return;
         }
@@ -322,13 +323,12 @@ export class AASProvider {
     }
 
     /**
-     * Updates an Asset Administration Shell.
+     * Updates the content of an AAS document.
      * @param endpointName The endpoint name.
-     * @param id The AAS identifier.
-     * @param content The new document content.
-     * @returns
+     * @param id The unique AAS identifier.
+     * @param content The modified elements of the document content.
      */
-    public async updateDocumentAsync(endpointName: string, id: string, content: aas.Environment): Promise<string[]> {
+    public async updateDocument(endpointName: string, id: string, content: aas.Environment): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (!document) {
@@ -338,15 +338,7 @@ export class AASProvider {
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
-            const pkg = client.createPackage(document.address, document.idShort);
-            if (!document.content) {
-                document.content = await pkg.getEnvironment();
-                if (this.cache.has(document.endpoint, document.id)) {
-                    this.cache.set(document.endpoint, document.id, document.content);
-                }
-            }
-
-            return await pkg.setEnvironmentAsync(content, document.content);
+            await client.createPackage(document.address, document.idShort).setEnvironment(document.id, content);
         } finally {
             await client.close();
         }
@@ -358,13 +350,13 @@ export class AASProvider {
      * @param id The AAS identifier.
      * @returns A readable stream.
      */
-    public async getPackageAsync(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
+    public async getPackage(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
-            return await client.getPackageAsync(id, document.address);
+            return await client.getPackage(id, document.address);
         } finally {
             await client.close();
         }
@@ -375,7 +367,7 @@ export class AASProvider {
      * @param endpointName The name of the destination endpoint.
      * @param files A list of AASX package files.
      */
-    public async addPackagesAsync(endpointName: string, files: Express.Multer.File[]): Promise<void> {
+    public async addPackages(endpointName: string, files: Express.Multer.File[]): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (!endpoint) {
             throw new ApplicationError(
@@ -389,7 +381,7 @@ export class AASProvider {
         try {
             await source.open();
             for (const file of files) {
-                await source.postPackageAsync(file);
+                await source.postPackage(file);
             }
         } finally {
             await source.close();
@@ -401,13 +393,13 @@ export class AASProvider {
      * @param endpointName The endpoint name.
      * @param id The AAS identification.
      */
-    public async deletePackageAsync(endpointName: string, id: string): Promise<void> {
+    public async deletePackage(endpointName: string, id: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         const document = await this.index.get(endpointName, id);
         if (document) {
             const client = this.clientFactory.create(endpoint);
             try {
-                await client.deletePackageAsync(document.id, document.address);
+                await client.deletePackage(document.id, document.address);
                 await this.index.remove(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
@@ -442,20 +434,21 @@ export class AASProvider {
     }
 
     /**
-     *
-     * @param endpointName The endpoint name.
-     * @param id The AAS identifier.
-     * @returns
+     * Gets all AAS documents of a hierarchy.
+     * @param endpoint The endpoint name of the root document.
+     * @param id The AAS identifier of the root document.
+     * @returns All AAS documents of a hierarchy.
      */
-    public async getHierarchyAsync(endpointName: string, id: string): Promise<AASDocument[]> {
-        const document = await this.index.get(endpointName, id);
+    public async getHierarchy(endpoint: string, id: string): Promise<AASDocument[]> {
+        const document = await this.index.get(endpoint, id);
         const root: AASDocument = { ...document, parentId: null, content: null };
         const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
         return nodes;
     }
 
-    /** Starts a scan of the AAS endpoint with the specified name.
+    /**
+     * Starts a scan of the AAS endpoint with the specified name.
      * @param name The name of the endpoint.
      */
     public async startEndpointScan(name: string): Promise<void> {
@@ -552,7 +545,6 @@ export class AASProvider {
                 }
 
                 const task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
-                this.taskHandler.set(task);
                 task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
             }
         } catch (error) {
@@ -569,7 +561,7 @@ export class AASProvider {
         if (schedule.type === 'every') {
             const values = schedule.values;
             if (values && values.length > 0 && typeof values[0] === 'number') {
-                const timeout = end - start - values[0];
+                const timeout = values[0] - (end - start);
                 return timeout >= 0 ? timeout : values[0];
             }
         }
@@ -637,12 +629,6 @@ export class AASProvider {
             );
         }
 
-        if (result.messages) {
-            this.logger.start(`scan ${task.endpointName ?? 'undefined'}`);
-            result.messages.forEach(message => this.logger.log(message));
-            this.logger.stop();
-        }
-
         if (this.resetRequested) {
             this.taskHandler.delete(task.id);
         }
@@ -696,7 +682,7 @@ export class AASProvider {
     }
 
     private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
-        const content = parent.content ?? (await this.getDocumentContentAsync(parent));
+        const content = parent.content ?? (await this.getDocumentContent(parent));
         for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
             const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
             for (const assetId of assetIds) {
@@ -750,7 +736,7 @@ export class AASProvider {
         }
     }
 
-    private async getDocumentContentAsync(document: AASDocument): Promise<aas.Environment> {
+    private async getDocumentContent(document: AASDocument): Promise<aas.Environment> {
         let env = this.cache.get(document.endpoint, document.id);
         if (env) {
             return env;

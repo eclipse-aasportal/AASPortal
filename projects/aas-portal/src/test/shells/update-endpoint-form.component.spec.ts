@@ -6,34 +6,34 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { UpdateEndpointFormComponent } from '../../app/shells/update-endpoint-form/update-endpoint-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('UpdateEndpointFormComponent', () => {
-    let component: UpdateEndpointFormComponent;
-    let fixture: ComponentFixture<UpdateEndpointFormComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [NgbActiveModal],
-            imports: [
-                TranslateModule.forRoot({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [
+                NgbActiveModal,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
-        });
-
-        fixture = TestBed.createComponent(UpdateEndpointFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+            imports: [UpdateEndpointFormComponent],
+        }).compileComponents();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(UpdateEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

@@ -23,7 +23,10 @@ export class Variable {
         this.CONTENT_ROOT = path.resolve(process.env.CONTENT_ROOT ?? './');
         this.WEB_ROOT = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
         this.ASSETS = path.resolve(process.env.ASSETS ?? './assets');
-        this.ENDPOINTS = process.env.ENDPOINTS ? JSON.parse(process.env.ENDPOINTS) : ['file:///samples?name=Samples'];
+        this.ENDPOINTS = process.env.ENDPOINTS
+            ? JSON.parse(process.env.ENDPOINTS)
+            : ['file:///endpoints/samples?name=Samples'];
+
         this.SCAN_TEMPLATES_TIMEOUT = process.env.SCAN_TEMPLATES_TIMEOUT
             ? Number(process.env.SCAN_TEMPLATES_TIMEOUT)
             : 3600000;
@@ -39,6 +42,7 @@ export class Variable {
         this.AAS_INDEX = process.env.AAS_INDEX;
         this.AAS_NODE_USERNAME = process.env.AAS_NODE_USERNAME ?? 'aas-server';
         this.AAS_NODE_PASSWORD = process.env.AAS_NODE_PASSWORD ?? 'aas-server';
+        this.LOG_LEVEL = (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Info';
     }
 
     /** The secret for HS256 encryption or the private key file for RS256 encryption. */
@@ -106,4 +110,7 @@ export class Variable {
 
     /** The root password. */
     public readonly AAS_NODE_PASSWORD: string;
+
+    /** The logging level. */
+    public readonly LOG_LEVEL: 'Error' | 'Warning' | 'Info';
 }

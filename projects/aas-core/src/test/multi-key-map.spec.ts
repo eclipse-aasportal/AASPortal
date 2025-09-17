@@ -81,7 +81,7 @@ describe('MultiKeyMap', () => {
     });
 
     it('throw an error if a value already exists', () => {
-        expect(() => map.set(321, 'Hello World!')).toThrowError();
+        expect(() => map.set(321, 'Hello World!')).toThrow();
     });
 
     it('returns all keys', () => {

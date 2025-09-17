@@ -11,7 +11,7 @@ import fs, { Dirent } from 'fs';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
 import { resolve, sep } from 'path/posix';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 
 describe('LocalFileStorage', () => {
     let storage: LocalFileStorage;
@@ -56,7 +56,8 @@ describe('LocalFileStorage', () => {
         });
 
         it('returns the directory contents', async () => {
-            jest.spyOn(fs.promises, 'readdir').mockResolvedValue(files);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            jest.spyOn(fs.promises, 'readdir').mockResolvedValue(files as any);
             await expect(storage.readDir('./')).resolves.toEqual([
                 { name: 'A', path: '/A', type: 'file' },
                 { name: 'B', path: '/B', type: 'directory' },

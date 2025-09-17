@@ -16,6 +16,8 @@ $primary: #009374;
 $info: #1f82c0;
 $danger: #c52523;
 
+$enable-negative-margins: true;
+
 // 3. Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
 @import "../../../node_modules/bootstrap/scss/variables";
 @import "../../../node_modules/bootstrap/scss/variables-dark";
@@ -105,18 +107,22 @@ th[sortable].desc:before {
     margin-left: 0px;
 }
 
-.ts-small {
+.fs-7 {
     font-size: small;
 }
 
-.ts-smaller {
+.fs-8 {
     font-size: smaller;
 }
 
-.ts-x-small {
+.fs-9 {
     font-size: x-small;
 }
 
-.ts-xx-small {
+.fs-10 {
     font-size: xx-small;
+}
+
+.fhg-w-4 {
+    width: 1rem;
 }

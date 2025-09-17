@@ -57,20 +57,20 @@ export abstract class AASClient {
      * @param aasIdentifier The AAS identifier.
      * @returns A readable stream.
      */
-    public abstract getPackageAsync(aasIdentifier: string, name: string): Promise<NodeJS.ReadableStream>;
+    public abstract getPackage(aasIdentifier: string, name: string): Promise<NodeJS.ReadableStream>;
 
     /**
      * Uploads an AASX package.
      * @param file The AASX package file.
      */
-    public abstract postPackageAsync(file: Express.Multer.File): Promise<string>;
+    public abstract postPackage(file: Express.Multer.File): Promise<string>;
 
     /**
      * Delete an aasx package from the current source.
      * @param aasId The AAS identifier.
      * @param name The name of the package in the source.
      */
-    public abstract deletePackageAsync(aasId: string, name: string): Promise<string>;
+    public abstract deletePackage(aasId: string, name: string): Promise<string>;
 
     /**
      * Invokes the specified operation synchronously.
@@ -87,7 +87,7 @@ export abstract class AASClient {
      * @param idShortPath The path from the Submodel to the Blob element.
      * @returns The Blob value.
      */
-    public abstract getBlobValueAsync(
+    public abstract getBlobValue(
         env: aas.Environment,
         submodelId: string,
         idShortPath: string,

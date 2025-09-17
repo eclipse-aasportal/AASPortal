@@ -7,17 +7,19 @@
  *****************************************************************************/
 
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { aas, AASDocument, selectElement } from 'aas-core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { NotifyService } from 'aas-lib';
+import { EndpointsApi, NotifyService } from 'aas-lib';
 import { DeleteCommand } from '../../app/aas/commands/delete-command';
 import { sampleDocument } from '../../test/assets/sample-document';
-import { AASStore } from '../../app/aas/aas.store';
-import { AASApiService } from '../../app/aas/aas-api.service';
+import { AASState } from '../../app/aas/aas.state';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('DeleteCommand', () => {
     let command: DeleteCommand;
-    let store: AASStore;
+    let state: AASState;
     let document: AASDocument;
 
     beforeEach(() => {
@@ -25,18 +27,25 @@ describe('DeleteCommand', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AASApiService,
-                    useValue: jasmine.createSpyObj<AASApiService>(['getContent', 'getDocument', 'putDocument']),
+                    provide: EndpointsApi,
+                    useValue: createSpyObj<EndpointsApi>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+                provideZonelessChangeDetection(),
             ],
         });
 
-        store = TestBed.inject(AASStore);
+        state = TestBed.inject(AASState);
         document = cloneDeep(sampleDocument);
-        store.document$.set(document);
+        state.update({ document });
     });
 
     describe('delete Submodel', () => {
@@ -44,12 +53,12 @@ describe('DeleteCommand', () => {
 
         beforeEach(() => {
             submodel = selectElement(document!.content!, 'TechnicalData')!;
-            command = new DeleteCommand(store, document, submodel);
+            command = new DeleteCommand(state, document, submodel);
             command.execute();
         });
 
         it('can be executed', () => {
-            const document = store.document$();
+            const document = state.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
             const submodels = document?.content?.assetAdministrationShells[0].submodels;
@@ -60,7 +69,7 @@ describe('DeleteCommand', () => {
         it('can be undone/redone', () => {
             {
                 command.undo();
-                const document = store.document$();
+                const document = state.document();
                 const element = selectElement(document!.content!, 'TechnicalData');
                 expect(element).toBeDefined();
                 const submodels = document?.content?.assetAdministrationShells[0].submodels;
@@ -70,7 +79,7 @@ describe('DeleteCommand', () => {
 
             {
                 command.redo();
-                const document = store.document$();
+                const document = state.document();
                 const element = selectElement(document!.content!, 'TechnicalData');
                 expect(element).toBeUndefined();
                 const submodels = document?.content?.assetAdministrationShells[0].submodels;
@@ -85,12 +94,12 @@ describe('DeleteCommand', () => {
 
         beforeEach(() => {
             property = selectElement(document.content!, 'TechnicalData', 'MaxRotationSpeed')!;
-            command = new DeleteCommand(store, document, property);
+            command = new DeleteCommand(state, document, property);
             command.execute();
         });
 
         it('can be executed', () => {
-            const document = store.document$();
+            const document = state.document();
             const element = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed');
             expect(element).toBeUndefined();
         });
@@ -98,14 +107,14 @@ describe('DeleteCommand', () => {
         it('can be undone/redone', () => {
             {
                 command.undo();
-                const document = store.document$();
+                const document = state.document();
                 const element = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed');
                 expect(element).toBeDefined();
             }
 
             {
                 command.redo();
-                const document = store.document$();
+                const document = state.document();
                 const element = selectElement(document!.content!, 'TechnicalData', 'MaxRotationSpeed');
                 expect(element).toBeUndefined();
             }

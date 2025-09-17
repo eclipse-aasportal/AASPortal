@@ -6,32 +6,39 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { of } from 'rxjs';
+import { AuthService } from 'aas-lib';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
-import { DashboardStore } from '../../app/dashboard/dashboard.store';
+
+import data from '../assets/test-pages.json';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;
-    let store: jasmine.SpyObj<DashboardStore>;
+    let auth: jest.Mocked<AuthService>;
 
     beforeEach(() => {
-        store = jasmine.createSpyObj<DashboardStore>(['getPage'], { pages: [] });
+        auth = createSpyObj<AuthService>(['getCookie'], { ready: of(true) });
+        auth.getCookie.mockReturnValue(of(JSON.stringify(data)));
 
         TestBed.configureTestingModule({
-            imports: [
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
+            imports: [],
             providers: [
                 {
-                    provide: DashboardStore,
-                    useValue: store,
+                    provide: AuthService,
+                    useValue: auth,
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+                provideZonelessChangeDetection(),
             ],
         });
 
@@ -40,5 +47,35 @@ describe('DashboardService', () => {
 
     it('should be created', () => {
         expect(service).toBeTruthy();
+    });
+
+    it('returns the pages', () => {
+        expect(service.pages().length).toBe(2);
+    });
+
+    it('returns the active page', () => {
+        expect(service.activePage().name).toEqual('Test');
+    });
+
+    it('indicates that editMode is false', () => {
+        expect(service.editMode()).toBe(false);
+    });
+
+    it('gets a memento', () => {
+        expect(service.getMemento()).toEqual(JSON.stringify(data));
+    });
+
+    it('sets a memento', () => {
+        const data = [
+            {
+                name: 'Dashboard 1',
+                items: [],
+                requests: [],
+                active: true,
+            },
+        ];
+
+        service.setMemento(JSON.stringify(data));
+        expect(service.toString(service.pages())).toEqual(JSON.stringify(data));
     });
 });

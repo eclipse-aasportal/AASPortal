@@ -13,14 +13,14 @@ import {
     getParent,
     isAssetAdministrationShell,
     isSubmodel,
-    normalize,
     selectSubmodel,
     noop,
+    isDescendant,
 } from 'aas-core';
 
 import cloneDeep from 'lodash-es/cloneDeep';
 import { Command } from '../../types/command';
-import { AASStore } from '../aas.store';
+import { AASState } from '../aas.state';
 
 export class DeleteCommand extends Command {
     private readonly elements: aas.Referable[];
@@ -28,7 +28,7 @@ export class DeleteCommand extends Command {
     private document: AASDocument;
 
     public constructor(
-        private readonly store: AASStore,
+        private readonly store: AASState,
         document: AASDocument,
         elements: aas.Referable | aas.Referable[],
     ) {
@@ -48,7 +48,7 @@ export class DeleteCommand extends Command {
             },
         };
 
-        this.elements = Array.isArray(elements) ? normalize(document.content, elements, item => item) : [elements];
+        this.elements = Array.isArray(elements) ? this.normalize(document.content, elements) : [elements];
     }
 
     protected onExecute(): void {
@@ -85,7 +85,7 @@ export class DeleteCommand extends Command {
             }
         }
 
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     private deleteFromShells(element: aas.Submodel) {
@@ -103,14 +103,35 @@ export class DeleteCommand extends Command {
     }
 
     protected onUndo(): void {
-        this.store.document$.set({ ...this.memento, modified: true });
+        this.store.update({ document: { ...this.memento, modified: true } });
     }
 
     protected onRedo(): void {
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     protected onAbort(): void {
         noop();
+    }
+
+    private normalize(env: aas.Environment, elements: aas.Referable[]): aas.Referable[] {
+        let items: aas.Referable[] = elements;
+        let temp: aas.Referable[] = [];
+        for (let i = 0; i < items.length; ++i) {
+            for (let j = 0; j < items.length; j++) {
+                if (i !== j) {
+                    if (items[i] !== items[j] && !isDescendant(env, items[i], items[j])) {
+                        temp.push(items[j]);
+                    }
+                } else {
+                    temp.push(items[i]);
+                }
+            }
+
+            items = temp;
+            temp = [];
+        }
+
+        return items;
     }
 }
