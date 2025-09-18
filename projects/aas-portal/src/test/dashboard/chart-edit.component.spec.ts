@@ -6,9 +6,10 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { NotifyService } from 'aas-lib';
 import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
@@ -16,14 +17,15 @@ import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardState } from '../../app/dashboard/dashboard-types';
 
 import data from '../assets/test-pages.json';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ChartEditComponent', () => {
-    let service: jasmine.SpyObj<DashboardService>;
+    let service: jest.Mocked<DashboardService>;
     let pages: DashboardState;
 
     beforeEach(async () => {
         pages = DashboardService.fromString(JSON.stringify(data));
-        service = jasmine.createSpyObj<DashboardService>(['getMemento', 'setMemento', 'updatePage', 'save'], {
+        service = createSpyObj<DashboardService>(['getMemento', 'setMemento', 'updatePage', 'save'], {
             editMode: signal(false),
             pages: signal(pages).asReadonly(),
             activePage: signal(pages[1]).asReadonly(),
@@ -37,7 +39,7 @@ describe('ChartEditComponent', () => {
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 provideZonelessChangeDetection(),
             ],
@@ -46,7 +48,7 @@ describe('ChartEditComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

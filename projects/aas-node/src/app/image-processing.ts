@@ -15,7 +15,6 @@ export class ImageProcessing {
      * @param source The source stream of the image.
      * @param width The new with of the image.
      * @param height The new height of the image.
-     * @param  target The target stream.
      * @returns The resized image.
      */
     public static async resizeAsync(

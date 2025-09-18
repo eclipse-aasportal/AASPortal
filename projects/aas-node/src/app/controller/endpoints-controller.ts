@@ -23,7 +23,7 @@ import {
     UploadedFiles,
 } from 'tsoa';
 
-import { aas, AASDocument, AASEndpoint } from 'aas-core';
+import { aas, AASDocument, type AASEndpoint } from 'aas-core';
 
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
@@ -63,25 +63,20 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint name or `undefined`.
      * @returns The total number of AAS documents.
      */
-    @Get('{name}/documents/count')
+    @Get('{endpoint}/documents/count')
     @OperationId('getDocumentCount')
-    public async getDocumentCount(@Path() name: string): Promise<{ count: number }> {
-        return { count: await this.aasProvider.getCount(decodeBase64Url(name)) };
+    public async getDocumentCount(@Path() endpoint: string): Promise<{ count: number }> {
+        return { count: await this.aasProvider.getCount(decodeBase64Url(endpoint)) };
     }
 
     /**
      * @summary Adds a new endpoint.
-     * @param name The endpoint name.
      * @param endpoint The endpoint data.
      */
-    @Post('{name}')
+    @Post('')
     @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('addEndpoint')
-    public async addEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
-        if (decodeBase64Url(name) !== endpoint.name) {
-            throw new Error('Invalid URL.');
-        }
-
+    public async addEndpoint(@Body() endpoint: AASEndpoint): Promise<void> {
         await this.aasProvider.addEndpoint(endpoint);
     }
 
@@ -218,8 +213,7 @@ export class EndpointsController extends Controller {
      * @param id The document or AAS identifier (Base64-URL encoded).
      * @param smId The Submodel identifier (Base64-URL encoded).
      * @param path The idShort path to the Data Element.
-     * @param width The image width if the value represents an image.
-     * @param height The image height if the value represenst an image.
+     * @param queryParams The required image `width` and or `height`.
      */
     @Get('{endpoint}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
     @OperationId('getDataElementValue')

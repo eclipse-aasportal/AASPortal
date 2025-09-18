@@ -9,6 +9,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, TemplateRef } from '@angular/core';
 import { ToolbarService } from '../../lib/services/toolbar.service';
+import { createSpyObj } from '../mocks';
 
 describe('ToolbarService', () => {
     let service: ToolbarService;
@@ -28,7 +29,7 @@ describe('ToolbarService', () => {
         });
 
         it('sets a new toolbar', async () => {
-            const template = jasmine.createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
+            const template = createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
             await service.set(template);
             expect(service.toolbarTemplate()).toEqual(template);
         });
@@ -36,7 +37,7 @@ describe('ToolbarService', () => {
 
     describe('clear', () => {
         beforeEach(() => {
-            const template = jasmine.createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
+            const template = createSpyObj<TemplateRef<unknown>>(['createEmbeddedView']);
             service.set(template);
         });
 

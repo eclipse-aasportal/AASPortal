@@ -42,6 +42,11 @@
                 (input)="inputValue()">
         </div>
         @if (selectedItem().type === 'AAS_API') {
+        <div class="alert alert-info mt-2 small" role="alert">
+            <span translate>AddEndpointForm.HINT_CONTAINER_NETWORKING</span>
+        </div>
+        }
+        @if (selectedItem().type === 'AAS_API') {
         <button type="button" class="btn btn-primary btn-sm mt-4 mb-2" (click)="collapse.toggle()"
             [attr.aria-expanded]="isCollapsed() === false" aria-controls="collapseExample" translate>
             AddEndpointForm.ADVANCED_SETTINGS

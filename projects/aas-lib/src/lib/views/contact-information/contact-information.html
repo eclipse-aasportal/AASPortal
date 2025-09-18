@@ -8,7 +8,7 @@
 
 <div ngbAccordion>
     @for (contact of contacts(); track contact; let i = $index) {
-    <div ngbAccordionItem [collapsed]="i !== 0">
+    <div ngbAccordionItem [collapsed]="contact.collapsed">
         <h2 ngbAccordionHeader>
             <button ngbAccordionButton>{{contact.name}}</button>
         </h2>

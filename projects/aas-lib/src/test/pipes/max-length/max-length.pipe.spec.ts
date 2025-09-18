@@ -8,7 +8,6 @@
 
 import { MaxLengthPipe } from "../../../lib/pipes/max-length.pipe";
 
-
 describe('MaxLengthPipe', () => {
     it('create an instance', () => {
         const pipe = new MaxLengthPipe();
