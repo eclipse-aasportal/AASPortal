@@ -58,10 +58,6 @@ export class TaskHandler {
         return this._tasks.get(taskId);
     }
 
-    public set(task: Task) {
-        this._tasks.set(task.id, task);
-    }
-
     public empty(owner: object): boolean {
         for (const task of this._tasks.values()) {
             if (task.owner === owner) {
@@ -75,7 +71,7 @@ export class TaskHandler {
     public createTask(endpointName: string, owner: object, type: 'ScanEndpoint' | 'ScanTemplates'): Task {
         const id = this.nextTaskId;
         ++this.nextTaskId;
-        return {
+        const task: Task = {
             id,
             type,
             endpointName,
@@ -84,6 +80,10 @@ export class TaskHandler {
             start: 0,
             end: 0,
         };
+
+        this._tasks.set(id, task);
+
+        return task;
     }
 
     public find(endpointName: string, type: 'ScanEndpoint' | 'ScanTemplates'): Task | undefined {

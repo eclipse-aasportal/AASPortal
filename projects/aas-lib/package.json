@@ -5,11 +5,13 @@
     "type": "module",
     "scripts": {
         "ng": "ng",
-        "test": "ng test aas-lib",
+        "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
+        "watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=false --watch",
         "build": "ng build aas-lib",
         "build:debug": "ng build aas-lib --configuration development",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "ng lint aas-lib",
-        "format": "ng lint aas-lib --fix"
+        "format": "ng lint aas-lib --fix",
+        "docs": "typedoc --out docs"
     }
 }

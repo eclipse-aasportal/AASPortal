@@ -1,0 +1,86 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        @for (item of path(); track item) {
+            <li class="breadcrumb-item">
+                <button class="btn btn-link p-0" type="button" (click)="goUp(item)">{{ item.name }}</button>
+            </li>
+        }
+        <li class="breadcrumb-item active" aria-current="page">{{ current()?.name }}</li>
+    </ol>
+</nav>
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (property of properties(); track property) {
+            <tr>
+                <td class="text-nowrap align-middle fw-semibold">{{ property.name }}</td>
+                @switch (property.kind) {
+                    @case ('url') {
+                        <td>
+                            <a [href]="property.url" target="_blank">{{ property.value }}</a>
+                        </td>
+                    }
+                    @case ('link') {
+                        <a [routerLink]="property.url">{{ property.value }}</a>
+                    }
+                    @default {
+                        <td>{{ property.value }}</td>
+                    }
+                }
+            </tr>
+        }
+        @if (conceptDescription()) {
+            <tr>
+                <td colspan="2">
+                    <fhg-cd [conceptDescription]="conceptDescription()"></fhg-cd>
+                </td>
+            </tr>
+        }
+        @if (children().length > 0) {
+            <tr>
+                <td colspan="2">
+                    <table class="table table-sm table-striped mb-0 caption-top">
+                        <caption>
+                            {{
+                                collectionName()
+                            }}
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 48px">#</th>
+                                <th scope="col" style="width: 48px"></th>
+                                <th scope="col">Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (child of children(); track child; let i = $index) {
+                                <tr>
+                                    <th scope="row">{{ i + 1 }}</th>
+                                    <td class="text-info fw-semibold">{{ child.abbreviation }}</td>
+                                    <td>
+                                        <button class="btn btn-link p-0 border-0" type="button" (click)="goDown(child)">
+                                            {{ child.name }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

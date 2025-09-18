@@ -7,8 +7,7 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Controller, Get, OperationId, Path, Query, Route, Security, Tags } from 'tsoa';
-import { Logger } from '../logging/logger.js';
+import { Controller, Get, OperationId, Path, Query, Route, Tags } from 'tsoa';
 import { AASDocument, AASPagedResult } from 'aas-core';
 import { AASProvider } from '../aas-provider/aas-provider.js';
 import { decodeBase64Url } from '../convert.js';
@@ -17,10 +16,7 @@ import { decodeBase64Url } from '../convert.js';
 @Route('/api/v1/documents')
 @Tags('Documents')
 export class DocumentsController extends Controller {
-    public constructor(
-        @inject('Logger') private readonly logger: Logger,
-        @inject(AASProvider) private readonly aasProvider: AASProvider,
-    ) {
+    public constructor(@inject(AASProvider) private readonly aasProvider: AASProvider) {
         super();
     }
 
@@ -28,43 +24,31 @@ export class DocumentsController extends Controller {
      * Returns a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
      * @param cursor The current cursor.
      * @param filter A filter expression.
+     * @param language The filter expression language.
      * @returns A page of AAS documents.
      */
     @Get('')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocuments')
     public async getDocuments(
         @Query() cursor: string,
         @Query() filter?: string,
         @Query() language?: string,
     ): Promise<AASPagedResult> {
-        try {
-            this.logger.start('getDocuments');
-            if (filter) {
-                filter = decodeBase64Url(filter);
-            }
-
-            return await this.aasProvider.getDocumentsAsync(JSON.parse(decodeBase64Url(cursor)), filter, language);
-        } finally {
-            this.logger.stop();
+        if (filter) {
+            filter = decodeBase64Url(filter);
         }
+
+        return await this.aasProvider.getDocuments(JSON.parse(decodeBase64Url(cursor)), filter, language);
     }
 
     /**
-     * The total count of AAS documents over all endpoints or a specified endpoint.
-     * @param endpoint The endpoint name or `undefined`.
-     * @returns The total number of AAS documents.
+     * The total count of AAS documents over all endpoints.
+     * @returns The total count of AAS documents.
      */
     @Get('count')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
-        try {
-            this.logger.start('getCount');
-            return { count: await this.aasProvider.getCountAsync() };
-        } finally {
-            this.logger.stop();
-        }
+        return { count: await this.aasProvider.getCount() };
     }
 
     /**
@@ -73,14 +57,8 @@ export class DocumentsController extends Controller {
      * @returns The first occurrence of an AAS document with the specified identifier.
      */
     @Get('{id}')
-    @Security('bearerAuth', ['guest'])
     @OperationId('getDocument')
     public async getDocument(@Path() id: string): Promise<AASDocument> {
-        try {
-            this.logger.start('getDocument');
-            return await this.aasProvider.getDocumentAsync(decodeBase64Url(id));
-        } finally {
-            this.logger.stop();
-        }
+        return await this.aasProvider.getDocument(decodeBase64Url(id));
     }
 }

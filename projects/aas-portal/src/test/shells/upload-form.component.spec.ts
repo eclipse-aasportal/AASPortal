@@ -6,13 +6,15 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { UploadFormComponent } from '../../app/shells/upload-form/upload-form.component';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideHttpClient } from '@angular/common/http';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('UploadFormComponent', () => {
     let component: UploadFormComponent;
@@ -23,18 +25,17 @@ describe('UploadFormComponent', () => {
             providers: [
                 {
                     provide: NgbActiveModal,
-                    useValue: jasmine.createSpyObj<NgbActiveModal>(['close', 'dismiss']),
+                    useValue: createSpyObj<NgbActiveModal>(['close', 'dismiss']),
                 },
-                provideHttpClient(),
-                provideHttpClientTesting(),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
             ],
         });
 

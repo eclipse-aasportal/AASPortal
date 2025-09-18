@@ -2,25 +2,26 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "compileOnSave": false,
     "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
         "baseUrl": "./",
-        "target": "ES2022",
-        "downlevelIteration": true,
-        "module": "NodeNext",
-        "moduleResolution": "nodenext",
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "isolatedModules": true,
+        "module": "ES2022",
+        "moduleResolution": "node",
         "noFallthroughCasesInSwitch": true,
-        "noImplicitAny": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
-        "sourceMap": true,
-        "experimentalDecorators": true,
+        "noPropertyAccessFromIndexSignature": false,
         "resolveJsonModule": true,
-        "esModuleInterop": true,
-        "useDefineForClassFields": false,
-        "useUnknownInCatchVariables": false,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "ES2022",
+        "useUnknownInCatchVariables": false
     },
     "ts-node": {
         "esm": true
-      }
+    }
 }

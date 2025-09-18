@@ -7,64 +7,36 @@
  *****************************************************************************/
 
 import { Command } from '../../types/command';
-import {
-    DashboardChart,
-    DashboardItem,
-    DashboardItemType,
-    DashboardRow,
-    DashboardState,
-    DashboardStore,
-} from '../dashboard.store';
+import { DashboardService } from '../dashboard.service';
 
 export abstract class DashboardCommand extends Command {
-    private preState!: DashboardState;
-    private postState!: DashboardState;
+    private preState!: string;
+    private postState!: string;
 
     protected constructor(
         name: string,
-        protected readonly store: DashboardStore,
+        protected readonly service: DashboardService,
     ) {
         super(name);
     }
 
     protected onExecute(): void {
-        this.preState = this.store.memento;
+        this.preState = this.service.getMemento();
         this.executing();
-        this.postState = this.store.memento;
+        this.postState = this.service.getMemento();
     }
 
     protected abstract executing(): void;
 
     protected onUndo(): void {
-        this.store.memento = this.preState;
+        this.service.setMemento(this.preState);
     }
 
     protected onRedo(): void {
-        this.store.memento = this.postState;
+        this.service.setMemento(this.postState);
     }
 
     protected onAbort(): void {
-        this.store.memento = this.preState;
-    }
-
-    protected isChart(item: DashboardItem): item is DashboardChart {
-        return item.type === DashboardItemType.Chart;
-    }
-
-    protected getRows(grid: DashboardItem[][]): DashboardRow[] {
-        return grid.map(row => ({
-            columns: row.map(item => ({
-                id: item.id,
-                item: item,
-                itemType: item.type,
-            })),
-        }));
-    }
-
-    protected validateItems(grid: DashboardItem[][]): void {
-        grid.forEach((row, y) => {
-            row.forEach((item, x) => (item.positions[0].x = x));
-            row.forEach(item => (item.positions[0].y = y));
-        });
+        this.service.setMemento(this.preState);
     }
 }

@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { inject, singleton } from 'tsyringe';
 import { Variable } from '../variable.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 
 @singleton()
 export class KeywordDirectory {
@@ -18,7 +18,7 @@ export class KeywordDirectory {
 
     public constructor(
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
     ) {
         const file = path.resolve(this.variable.ASSETS, 'keywords.json');
         if (!fs.existsSync(file)) {

@@ -257,7 +257,9 @@ export class JsonReaderV2 extends AASReader {
 
         if (ancestors && (!property.category || property.category === 'VARIABLE')) {
             const smId = encodeBase64Url((ancestors[0] as aas.Submodel).id);
-            property.nodeId = `${smId}.${[...ancestors, property].map(item => item.idShort).join('/')}`;
+            const idShortPath = ancestors.map(ancestor => ancestor.idShort).slice(1);
+            idShortPath.push(property.idShort);
+            property.nodeId = `${smId}#${idShortPath.join('.')}`;
         }
 
         return property;

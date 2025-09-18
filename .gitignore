@@ -24,12 +24,14 @@ nginx
 node_modules
 build
 dist
+docs
 coverage
 **/users
 mongo-volume
 
 # Miscellaneous
 .angular
+out-tsc
 .sass-cache/9
 connect.lock
 coverage
@@ -44,6 +46,7 @@ swagger.json
 swagger.yaml
 /projects/aas-node/src/app/routes
 /projects/ass-node/src/assets/app-info.json
+/projects/aas-portal/src/start
 
 # System files
 .DS_Store

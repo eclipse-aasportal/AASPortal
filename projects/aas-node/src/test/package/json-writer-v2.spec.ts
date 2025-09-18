@@ -8,7 +8,7 @@
 
 import { describe, beforeEach, it, expect } from '@jest/globals';
 import { JsonWriterV2 } from '../../app/package/json-writer-v2.js';
-import env from '../assets/aas-environment.js';
+import { aasEnvironment } from '../assets/aas-environment.js';
 
 describe('JsonWriterV2', function () {
     describe('writeEnvironment', function () {
@@ -19,7 +19,7 @@ describe('JsonWriterV2', function () {
         });
 
         it('is not implemented', () => {
-            expect(() => writer.write(env)).toThrowError();
+            expect(() => writer.write(aasEnvironment)).toThrow();
         });
     });
 
@@ -31,11 +31,11 @@ describe('JsonWriterV2', function () {
         });
 
         it('does not support writing an AAS', () => {
-            expect(() => writer.convert(env.assetAdministrationShells[0])).toThrowError();
+            expect(() => writer.convert(aasEnvironment.assetAdministrationShells[0])).toThrow();
         });
 
         it('writes a submodel', () => {
-            expect(writer.convert(env.submodels[0])).toBeDefined();
+            expect(writer.convert(aasEnvironment.submodels[0])).toBeDefined();
         });
     });
 });

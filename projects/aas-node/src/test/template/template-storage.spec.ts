@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { TemplateDescriptor, aas } from 'aas-core';
 import { TemplateStorage } from '../../app/template/template-storage.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { Logger } from '../../app/logging/logger.js';
 import { FileStorage } from '../../app/file-storage/file-storage.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';

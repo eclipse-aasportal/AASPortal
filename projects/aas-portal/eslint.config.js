@@ -11,7 +11,7 @@ export default [
             ecmaVersion: 2022,
             sourceType: 'module',
         },
-        ignores: ['src/test/assets/**/*'],
+        ignores: ['src/test/**/*'],
         rules: {
             '@angular-eslint/directive-selector': [
                 'error',

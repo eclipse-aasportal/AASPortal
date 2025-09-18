@@ -8,40 +8,40 @@
 
 import { inject, singleton } from 'tsyringe';
 import { AASEndpoint, ApplicationError } from 'aas-core';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { AASClient } from './aas-client.js';
 import { AasxDirectory } from './file-system/aasx-directory.js';
-import { AASApiClientV0 } from './aas-api/aas-api-client-v0.js';
-import { AASApiClientV3 } from './aas-api/aas-api-client-v3.js';
+import { ApiClientV0 } from './api/api-client-v0.js';
+import { ApiClientV3 } from './api/api-client-v3.js';
 import { OpcuaClient } from './opcua/opcua-client.js';
 import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
-import { AASApiClientV1 } from './aas-api/aas-api-client-v1.js';
+import { ApiClientV1 } from './api/api-client-v1.js';
 import { HttpClient } from '../http-client.js';
 
 @singleton()
 export class AASClientFactory {
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
         @inject(HttpClient) private readonly http: HttpClient,
     ) {}
 
     /**
-     * Creates a concrete realization of an `AASSource`.
-     * @param url The URL of the container.
-     * @returns A new instance of .
+     * Creates a concrete realization of an endpoint client.
+     * @param endpoint The endpoint.
+     * @returns A new instance of an endpoint client.
      */
     public create(endpoint: AASEndpoint): AASClient {
         switch (endpoint.type) {
             case 'AAS_API':
                 switch (endpoint.version) {
                     case 'v3':
-                        return new AASApiClientV3(this.logger, this.http, endpoint);
+                        return new ApiClientV3(this.logger, this.http, endpoint);
                     case 'v1':
-                        return new AASApiClientV1(this.logger, this.http, endpoint);
+                        return new ApiClientV1(this.logger, this.http, endpoint);
                     case 'v0':
-                        return new AASApiClientV0(this.logger, this.http, endpoint);
+                        return new ApiClientV0(this.logger, this.http, endpoint);
                     default:
                         throw new Error(`AASX server version ${endpoint.version} is not supported.`);
                 }
@@ -58,8 +58,7 @@ export class AASClientFactory {
 
     /**
      * Tests whether the specified URL is a valid and supported AAS endpoint.
-     * @param logger The logger.
-     * @param url The current URL.
+     * @param endpoint The endpoint to test.
      */
     public async testAsync(endpoint: AASEndpoint): Promise<void> {
         try {
@@ -67,13 +66,13 @@ export class AASClientFactory {
                 case 'AAS_API':
                     switch (endpoint.version) {
                         case 'v3':
-                            await new AASApiClientV3(this.logger, this.http, endpoint).test();
+                            await new ApiClientV3(this.logger, this.http, endpoint).test();
                             break;
                         case 'v1':
-                            await new AASApiClientV1(this.logger, this.http, endpoint).test();
+                            await new ApiClientV1(this.logger, this.http, endpoint).test();
                             break;
                         case 'v0':
-                            await new AASApiClientV0(this.logger, this.http, endpoint).test();
+                            await new ApiClientV0(this.logger, this.http, endpoint).test();
                             break;
                         default:
                             throw new Error(`AASX server version ${endpoint.version} is not supported.`);
@@ -95,12 +94,21 @@ export class AASClientFactory {
                 default:
                     throw new Error('Not implemented.');
             }
-        } catch {
-            throw new ApplicationError(
-                `"${endpoint.url}" addresses an invalid or not supported AAS endpoint.`,
-                ERRORS.InvalidContainerUrl,
-                endpoint.url,
-            );
+        } catch (error) {
+            let message = `"${endpoint.url}" addresses an invalid or not supported AAS endpoint.`;
+            if (endpoint.url.includes('localhost') || endpoint.url.includes('127.0.0.1')) {
+                message += ` Hint: If AASPortal is running in a container and your AAS endpoint is on the host machine, try using 'host.containers.internal' (Podman) or 'host.docker.internal' (Docker) instead of 'localhost'.`;
+            } else if (
+                endpoint.url.includes('192.168.') ||
+                endpoint.url.includes('10.0.') ||
+                endpoint.url.includes('172.16.')
+            ) {
+                message += ` Hint: Ensure the endpoint is accessible from within the container network.`;
+            }
+
+            this.logger.error(`Endpoint validation failed for ${endpoint.url}: ${error?.message || 'Unknown error'}`);
+
+            throw new ApplicationError(message, ERRORS.InvalidContainerUrl, endpoint.url);
         }
     }
 }

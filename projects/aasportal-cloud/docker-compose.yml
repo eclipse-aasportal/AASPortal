@@ -22,7 +22,7 @@ services:
     restart: always
     ports:
       - 8080:80
-    links:
+    depends_on:
       - aasportal-cloud-db
     volumes:
       - nextcloud:/var/www/html

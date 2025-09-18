@@ -9,18 +9,20 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { UserStorageFactory } from './auth/user-storage-factory.js';
-import { LoggerFactory } from './logging/logger-factory.js';
-import { FileLogger } from './logging/file-logger.js';
 import { WSNode } from './ws-node.js';
 import { AASProvider } from './aas-provider/aas-provider.js';
 import { AASIndexFactory } from './aas-index/aas-index-factory.js';
 import { TemplateStorage } from './template/template-storage.js';
+import { LOGGER } from './logging/logger.js';
+import { ConsoleLogger } from './logging/console-logger.js';
+import { Variable } from './variable.js';
+import { AAS_INDEX } from './aas-index/aas-index.js';
+import { USER_STORAGE } from './auth/user-storage.js';
 
 container.registerInstance('USERS_DIR', './users');
-container.registerSingleton('Logger', FileLogger);
-container.register('AASIndex', { useFactory: c => new AASIndexFactory(c).create() });
-container.register('UserStorage', { useFactory: c => new UserStorageFactory(c).create() });
-container.register('winston.Logger', { useFactory: () => new LoggerFactory().create() });
+container.register(LOGGER, { useFactory: c => new ConsoleLogger(c.resolve(Variable).LOG_LEVEL) });
+container.register(AAS_INDEX, { useFactory: c => new AASIndexFactory(c).create() });
+container.register(USER_STORAGE, { useFactory: c => new UserStorageFactory(c).create() });
 
 container.afterResolution(
     AASProvider,

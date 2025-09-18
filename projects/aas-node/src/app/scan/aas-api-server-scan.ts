@@ -8,16 +8,16 @@
 
 import { AASDocument } from 'aas-core';
 import { Logger } from '../logging/logger.js';
-import { AASApiClient, AASLabel } from '../package/aas-api/aas-api-client.js';
-import { AASApiPackage } from '../package/aas-api/aas-api-package.js';
+import { ApiClient, AASLabel } from '../package/api/api-client.js';
+import { ApiPackage } from '../package/api/api-package.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
 
 export class AASApiServerScan extends AASServerScan {
     private readonly logger: Logger;
-    private readonly client: AASApiClient;
+    private readonly client: ApiClient;
 
-    public constructor(logger: Logger, server: AASApiClient) {
+    public constructor(logger: Logger, server: ApiClient) {
         super();
 
         this.logger = logger;
@@ -32,8 +32,8 @@ export class AASApiServerScan extends AASServerScan {
     }
 
     protected override createDocument(id: AASLabel): Promise<AASDocument> {
-        const aasPackage = new AASApiPackage(this.logger, this.client, id.id, id.idShort);
-        return aasPackage.createDocumentAsync();
+        const aasPackage = new ApiPackage(this.logger, this.client, id.id, id.idShort);
+        return aasPackage.createDocument();
     }
 
     protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {

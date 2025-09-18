@@ -6,23 +6,20 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { signal } from '@angular/core';
+import { jest } from '@jest/globals';
+import { TestBed } from '@angular/core/testing';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { IndexChangeService } from 'aas-lib';
 import { AboutCardComponent } from '../../app/about/about-card.component';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('AboutCardComponent', () => {
-    let component: AboutCardComponent;
-    let fixture: ComponentFixture<AboutCardComponent>;
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
 
     beforeEach(async () => {
-        indexChange = jasmine.createSpyObj<IndexChangeService>(
-            {},
-            { documentCount: signal(42), endpointCount: signal(2) },
-        );
+        indexChange = createSpyObj<IndexChangeService>({}, { documentCount: signal(42), endpointCount: signal(2) });
 
         await TestBed.configureTestingModule({
             providers: [
@@ -30,23 +27,22 @@ describe('AboutCardComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
+                provideZonelessChangeDetection(),
             ],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
         }).compileComponents();
-
-        fixture = TestBed.createComponent(AboutCardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(AboutCardComponent);
+        const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
 });

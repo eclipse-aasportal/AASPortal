@@ -24,15 +24,17 @@ export class JsonWriterV3 extends AASWriter {
 
     /**
      * Deserializes a Submodel or SubmodelElement from the specified source.
-     * @param data The serialized Submodel or SubmodelElement.
+     * @param source The source referable.
      * @returns The deserialized Submodel or SubmodelElement.
      */
     public convert(source: aas.Referable): aas.Referable {
         switch (source.modelType) {
             case 'AssetAdministrationShell':
-                throw new Error('Invalid operation.');
+                return this.writeAssetAdministrationShell(source as aas.AssetAdministrationShell);
             case 'Submodel':
                 return this.writeSubmodel(source as aas.Submodel);
+            case 'ConceptDescription':
+                return this.writeConceptDescription(source as aas.ConceptDescription);
             default:
                 return this.writeSubmodelElement(source as aas.SubmodelElement);
         }

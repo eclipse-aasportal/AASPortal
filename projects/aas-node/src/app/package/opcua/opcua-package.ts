@@ -17,7 +17,7 @@ import { Logger } from '../../logging/logger.js';
 import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
-import { AASDocument, aas } from 'aas-core';
+import { AASDocument, aas, noop } from 'aas-core';
 import { OpcuaReader } from './opcua-reader.js';
 
 export class OpcuaPackage extends AASPackage {
@@ -33,7 +33,7 @@ export class OpcuaPackage extends AASPackage {
         this.dataTypes = dataTypes ?? new OpcuaDataTypeDictionary();
     }
 
-    public async createDocumentAsync(): Promise<AASDocument> {
+    public async createDocument(): Promise<AASDocument> {
         const component = await this.crawlAsync();
         if (component.typeDefinition !== 'AASAssetAdministrationShellType') {
             throw new Error(`${this.nodeId}: ${component.typeDefinition} is an unexpected type definition.`);
@@ -62,7 +62,8 @@ export class OpcuaPackage extends AASPackage {
         return await reader.readEnvironment();
     }
 
-    public override setEnvironmentAsync(): Promise<string[]> {
+    public override setEnvironment(id: string, env: aas.Environment): Promise<void> {
+        noop(id, env);
         return Promise.reject(new Error('Not implemented.'));
     }
 
@@ -146,15 +147,7 @@ export class OpcuaPackage extends AASPackage {
     }
 
     private getIdentifier(component: OPCUAComponent): string {
-        let id = this.readIdentifier(component);
-        if (!id) {
-            id = this.nodeId;
-            this.logger.debug(
-                `Unable to read AAS identifier for '${component.browseName}' in '${this.server.endpoint}'.'`,
-            );
-        }
-
-        return id;
+        return this.readIdentifier(component) ?? this.nodeId;
     }
 
     private readIdentifier(component: OPCUAComponent): string | undefined {

@@ -1,12 +1,12 @@
 # Creates an all-in-one Docker image
-FROM node:22.12.0-alpine AS build
+FROM node:22.16.0-alpine AS build
 WORKDIR /usr/src/app
 COPY . .
-RUN npm install
+RUN npm ci
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
 RUN npm run build
 
-FROM node:22.12.0-alpine AS aasportal
+FROM node:22.16.0-alpine AS aasportal
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/projects/aas-node/package.json package.json
@@ -16,6 +16,7 @@ COPY --from=build /usr/src/app/projects/aas-node/dist/ .
 COPY --from=build /usr/src/app/projects/aas-core/dist/ node_modules/aas-core/dist/
 COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-core/package.json
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ wwwroot/
+COPY --from=build /usr/src/app/welcome/ wwwroot/assets/welcome/
 ENV NODE_LOG=./log/debug.log
 ENV AAS_NODE_PORT=80
 ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]

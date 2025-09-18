@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { LiveNode } from 'aas-core';
+import { LiveNode, noop } from 'aas-core';
 import { OpcuaSocketItem } from './opcua-socket-item.js';
 import { OpcuaClient } from '../../package/opcua/opcua-client.js';
 import { Logger } from '../../logging/logger.js';
@@ -95,15 +95,15 @@ export class OpcuaSubscription extends SocketSubscription {
     }
 
     private onSubscriptionStarted = (subscriptionId: number): void => {
-        this.logger.debug(`Subscription ${subscriptionId} started.`);
+        noop(subscriptionId);
     };
 
     private onSubscriptionKeepAlive = (): void => {
-        this.logger.debug(`Subscription ${this.subscription?.subscriptionId} keep alive.`);
+        noop();
     };
 
     private onSubscriptionTerminated = (): void => {
-        this.logger.debug(`Subscription ${this.subscription?.subscriptionId} terminated.`);
+        noop();
     };
 
     private onSubscriptionError = (error: Error): void => {

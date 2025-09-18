@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
 import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
@@ -36,12 +36,14 @@ export interface LinkDescriptor {
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.scss'],
     imports: [
+        CommonModule,
         RouterOutlet,
         RouterLink,
         RouterLinkActive,
         AsyncPipe,
-        NgbNavModule,
         NgTemplateOutlet,
+        NgbNavModule,
+        NgbCollapseModule,
         TranslateModule,
         NotifyComponent,
         LocalizeComponent,
@@ -50,46 +52,22 @@ export interface LinkDescriptor {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent {
-    public constructor(
-        public readonly route: ActivatedRoute,
-        private readonly toolbar: ToolbarService,
-        private readonly indexChange: IndexChangeService,
-    ) {}
+    protected readonly route = inject(ActivatedRoute);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly indexChange = inject(IndexChangeService);
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 
     public readonly links = signal<LinkDescriptor[]>([
-        {
-            id: LinkId.START,
-            name: 'Main.START',
-            url: '/start',
-        },
-        {
-            id: LinkId.SHELLS,
-            name: 'Main.SHELLS',
-            url: '/shells',
-        },
-        {
-            id: LinkId.AAS,
-            name: 'Main.AAS',
-            url: '/aas',
-        },
-        {
-            id: LinkId.VIEW,
-            name: 'Main.VIEW',
-            url: '/view',
-        },
-        {
-            id: LinkId.DASHBOARD,
-            name: 'Main.DASHBOARD',
-            url: '/dashboard',
-        },
-        {
-            id: LinkId.ABOUT,
-            name: 'Main.ABOUT',
-            url: '/about',
-        },
+        { id: LinkId.START, name: 'Main.START', url: '/start' },
+        { id: LinkId.SHELLS, name: 'Main.SHELLS', url: '/shells' },
+        { id: LinkId.AAS, name: 'Main.AAS', url: '/aas' },
+        { id: LinkId.VIEW, name: 'Main.VIEW', url: '/views' },
+        { id: LinkId.DASHBOARD, name: 'Main.DASHBOARD', url: '/dashboard' },
+        { id: LinkId.ABOUT, name: 'Main.ABOUT', url: '/about' },
     ]).asReadonly();
+
+    public readonly languages = signal(['en-us', 'de-de']).asReadonly();
 
     public readonly version = signal(environment.version).asReadonly();
 
@@ -98,6 +76,8 @@ export class MainComponent {
     public readonly documentCount = this.indexChange.documentCount;
 
     public readonly changedDocuments = this.indexChange.changedDocuments;
+
+    public readonly isMenuCollapsed = signal(true);
 
     public readonly year = signal(new Date().getFullYear());
 

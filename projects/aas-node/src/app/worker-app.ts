@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { Logger } from './logging/logger.js';
+import { LOGGER, Logger } from './logging/logger.js';
 import { ScanResult, ScanResultKind } from './types/scan-result.js';
 import { toUint8Array } from './convert.js';
 import { EndpointScan } from './endpoint-scan.js';
@@ -18,7 +18,7 @@ import { WorkerData, isScanEndpointData, isScanTemplatesData } from './types/wor
 @singleton()
 export class WorkerApp {
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(EndpointScan) private readonly endpointScan: EndpointScan,
         @inject(TemplateScan) private readonly templateScan: TemplateScan,
     ) {}
@@ -33,7 +33,6 @@ export class WorkerApp {
         }
 
         try {
-            this.logger.start(`Scan ${data.taskId}`);
             if (isScanEndpointData(data)) {
                 await this.endpointScan.scanAsync(data);
             } else if (isScanTemplatesData(data)) {
@@ -42,7 +41,6 @@ export class WorkerApp {
         } catch (error) {
             this.logger.error(error);
         } finally {
-            this.logger.stop();
             parentPort.postMessage(toUint8Array(this.createEndResult(data)));
         }
     };
@@ -52,7 +50,6 @@ export class WorkerApp {
             type: 'ScanEndResult',
             taskId: data.taskId,
             kind: ScanResultKind.End,
-            messages: this.logger.getMessages(),
         };
     }
 }

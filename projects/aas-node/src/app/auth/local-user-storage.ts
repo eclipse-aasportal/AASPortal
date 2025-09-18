@@ -13,7 +13,7 @@ import fs from 'fs';
 import { Cookie } from 'aas-core';
 import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { slash } from '../convert.js';
 
 @injectable()
@@ -21,7 +21,7 @@ export class LocalUserStorage extends UserStorage {
     private readonly usersDirectory: string;
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject('USERS_DIR') usersDirectory: string,
     ) {
         super();
@@ -33,16 +33,16 @@ export class LocalUserStorage extends UserStorage {
         }
     }
 
-    public existAsync(userId: string): Promise<boolean> {
+    public exist(userId: string): Promise<boolean> {
         return new Promise<boolean>(resolve => resolve(fs.existsSync(this.getUserDir(userId))));
     }
 
-    public async readAsync(userId: string): Promise<UserData | undefined> {
+    public async read(userId: string): Promise<UserData | undefined> {
         const userFile = this.getUserFile(userId);
         return fs.existsSync(userFile) ? await this.readUserData(userFile) : undefined;
     }
 
-    public async writeAsync(userId: string, data: UserData): Promise<void> {
+    public async write(userId: string, data: UserData): Promise<void> {
         const dir = this.getUserDir(userId);
         if (!fs.existsSync(dir)) {
             await fs.promises.mkdir(dir);
@@ -51,7 +51,7 @@ export class LocalUserStorage extends UserStorage {
         await fs.promises.writeFile(this.getUserFile(userId), JSON.stringify(data));
     }
 
-    public async deleteAsync(userId: string): Promise<boolean> {
+    public async delete(userId: string): Promise<boolean> {
         const dir = this.getUserDir(userId);
         if (fs.existsSync(dir)) {
             await fs.promises.rm(dir, { recursive: true });
@@ -61,7 +61,7 @@ export class LocalUserStorage extends UserStorage {
         return false;
     }
 
-    public async checkCookieAsync(userId: string, name: string): Promise<boolean> {
+    public async checkCookie(userId: string, name: string): Promise<boolean> {
         const file = this.getCookiesFile(userId);
         if (fs.existsSync(file)) {
             const cookies = await this.readCookies(file);
@@ -71,7 +71,7 @@ export class LocalUserStorage extends UserStorage {
         return false;
     }
 
-    public async getCookieAsync(userId: string, name: string): Promise<Cookie | undefined> {
+    public async getCookie(userId: string, name: string): Promise<Cookie | undefined> {
         const file = this.getCookiesFile(userId);
         if (fs.existsSync(file)) {
             const cookies = await this.readCookies(file);
@@ -81,7 +81,7 @@ export class LocalUserStorage extends UserStorage {
         return undefined;
     }
 
-    public async getCookiesAsync(userId: string): Promise<Cookie[]> {
+    public async getCookies(userId: string): Promise<Cookie[]> {
         const file = this.getCookiesFile(userId);
         if (fs.existsSync(file)) {
             const cookies = await this.readCookies(file);
@@ -91,7 +91,7 @@ export class LocalUserStorage extends UserStorage {
         return [];
     }
 
-    public async setCookieAsync(userId: string, name: string, data: string): Promise<void> {
+    public async setCookie(userId: string, name: string, data: string): Promise<void> {
         const file = this.getCookiesFile(userId);
         const cookies = fs.existsSync(file) ? await this.readCookies(file) : [];
         const index = cookies.findIndex(cookie => cookie.name === name);
@@ -104,7 +104,7 @@ export class LocalUserStorage extends UserStorage {
         await fs.promises.writeFile(file, JSON.stringify(cookies));
     }
 
-    public async deleteCookieAsync(userId: string, name: string): Promise<void> {
+    public async deleteCookie(userId: string, name: string): Promise<void> {
         const file = this.getCookiesFile(userId);
         const cookies = fs.existsSync(file) ? await this.readCookies(file) : [];
         const index = cookies.findIndex(cookie => cookie.name === name);

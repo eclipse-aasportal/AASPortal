@@ -6,59 +6,29 @@
  *
  *****************************************************************************/
 
-import { aas } from 'aas-core';
+import { aas, Cache } from 'aas-core';
 
 /**
  * Provides an AAS cache with a 2nd chance strategy.
  */
-export class AASCache {
-    private first = new Map<string, aas.Environment>();
-    private second = new Map<string, aas.Environment>();
-
-    public constructor(private readonly size: number = 100) {}
-
-    public has(endpointName: string, id: string): boolean {
-        const key = endpointName + '#' + id;
-        return this.first.has(key) || this.second.has(key);
+export class AASCache extends Cache<string, aas.Environment> {
+    public constructor(size: number = 100) {
+        super(size);
     }
 
-    public get(endpointName: string, id: string): aas.Environment | undefined {
-        const key = endpointName + '#' + id;
-        let env = this.first.get(key);
-        if (!env) {
-            env = this.second.get(key);
-        }
-
-        return env;
+    public has(endpoint: string, id: string): boolean {
+        return this.hasItem(endpoint + '#' + id);
     }
 
-    public set(endpointName: string, id: string, env: aas.Environment): void {
-        const key = endpointName + '#' + id;
-        if (this.first.has(key)) {
-            this.first.set(key, env);
-        } else if (this.second.has(key)) {
-            this.second.set(key, env);
-        } else {
-            if (this.first.size >= this.size) {
-                this.second = this.first;
-                this.first = new Map<string, aas.Environment>();
-            }
-
-            this.first.set(key, env);
-        }
+    public get(endpoint: string, id: string): aas.Environment | undefined {
+        return this.getItem(endpoint + '#' + id);
     }
 
-    public remove(endpointName: string, id: string): void {
-        const key = endpointName + '#' + id;
-        if (this.first.has(key)) {
-            this.first.delete(key);
-        } else if (this.second.has(key)) {
-            this.second.delete(key);
-        }
+    public set(endpoint: string, id: string, env: aas.Environment): void {
+        this.setItem(endpoint + '#' + id, env);
     }
 
-    public clear(): void {
-        this.first.clear();
-        this.second.clear();
+    public remove(endpoint: string, id: string): boolean {
+        return this.removeItem(endpoint + '#' + id);
     }
 }

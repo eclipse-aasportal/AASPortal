@@ -12,7 +12,7 @@ import { AasxPackage } from '../package/file-system/aasx-package.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
 import { AASServerScan } from './aas-server-scan.js';
 import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../package/aas-api/aas-api-client.js';
+import { AASLabel } from '../package/api/api-client.js';
 
 export class DirectoryScan extends AASServerScan {
     private readonly map = new Map<string, AASDocument>();
@@ -45,7 +45,7 @@ export class DirectoryScan extends AASServerScan {
         for (const file of result.result) {
             try {
                 const aasxPackage = new AasxPackage(this.logger, this.source, file);
-                const document = await aasxPackage.createDocumentAsync();
+                const document = await aasxPackage.createDocument();
                 ids.push({ id: document.id, idShort: document.idShort });
                 this.map.set(document.id, document);
             } catch (error) {

@@ -20,7 +20,7 @@ export abstract class AASPackage {
     }
 
     /** Gets the document that contains an Asset Administration Shell. */
-    public abstract createDocumentAsync(): Promise<AASDocument>;
+    public abstract createDocument(): Promise<AASDocument>;
 
     /**
      * Gets the thumbnail of the current Asset Administration Shell.
@@ -42,11 +42,11 @@ export abstract class AASPackage {
     public abstract getEnvironment(): Promise<aas.Environment>;
 
     /**
-     * Applies the state of the source document into the destination document.
-     * @param env The new AAS environment.
-     * @param reference The previous state.
+     * Updates or creates the elements contained in the specified AAS environment.
+     * @param id The unique identifier of the AAS to which the environment belongs.
+     * @param env The AAS environment.
      */
-    public abstract setEnvironmentAsync(env: aas.Environment, reference?: aas.Environment): Promise<string[]>;
+    public abstract setEnvironment(id: string, env: aas.Environment): Promise<void>;
 
     protected normalize(path: string): string {
         path = path.replace(/\\/g, '/');
@@ -60,9 +60,9 @@ export abstract class AASPackage {
     }
 
     protected async streamToBase64(stream: NodeJS.ReadableStream): Promise<string> {
-        const chunks = [];
+        const chunks: Buffer[] = [];
         for await (const chunk of stream) {
-            chunks.push(Buffer.from(chunk));
+            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk, 'utf-8') : Buffer.from(chunk));
         }
 
         return 'data:image/png;base64,' + Buffer.concat(chunks).toString('base64');
@@ -83,39 +83,53 @@ export abstract class AASPackage {
         for (const submodel of env.submodels) {
             for (const referable of flat(submodel)) {
                 switch (referable.modelType) {
-                    case 'Property':
-                        {
-                            const property: aas.Property = { ...(referable as aas.Property) };
-                            if (property.category !== 'CONSTANT' && property.category !== 'PARAMETER') {
-                                delete property.value;
-                            }
+                    case 'Property': {
+                        const property: aas.Property = { ...(referable as aas.Property) };
+                        if (property.category !== 'CONSTANT' && property.category !== 'PARAMETER') {
+                            delete property.value;
+                        }
 
-                            crc.add(JSON.stringify(property));
-                        }
+                        crc.add(JSON.stringify(property));
                         break;
-                    case 'Submodel':
-                        {
-                            const sm: aas.Submodel = { ...(referable as aas.Submodel) };
-                            delete sm.submodelElements;
-                            crc.add(JSON.stringify(sm));
-                        }
+                    }
+                    case 'Submodel': {
+                        const sm: aas.Submodel = { ...(referable as aas.Submodel) };
+                        delete sm.submodelElements;
+                        crc.add(JSON.stringify(sm));
                         break;
-                    case 'SubmodelElementCollection':
-                        {
-                            const collection: aas.SubmodelElementCollection = {
-                                ...(referable as aas.SubmodelElementCollection),
-                            };
-                            delete collection.value;
-                            crc.add(JSON.stringify(collection));
-                        }
+                    }
+                    case 'SubmodelElementCollection': {
+                        const collection: aas.SubmodelElementCollection = {
+                            ...(referable as aas.SubmodelElementCollection),
+                        };
+                        delete collection.value;
+                        crc.add(JSON.stringify(collection));
                         break;
-                    case 'SubmodelElementList':
-                        {
-                            const list: aas.SubmodelElementList = { ...(referable as aas.SubmodelElementList) };
-                            delete list.value;
-                            crc.add(JSON.stringify(list));
-                        }
+                    }
+                    case 'SubmodelElementList': {
+                        const list: aas.SubmodelElementList = { ...(referable as aas.SubmodelElementList) };
+                        delete list.value;
+                        crc.add(JSON.stringify(list));
                         break;
+                    }
+                    case 'AnnotatedRelationshipElement': {
+                        const element: aas.AnnotatedRelationshipElement = {
+                            ...(referable as aas.AnnotatedRelationshipElement),
+                        };
+
+                        delete element.annotations;
+                        crc.add(JSON.stringify(element));
+                        break;
+                    }
+                    case 'Entity': {
+                        const entity: aas.Entity = {
+                            ...(referable as aas.Entity),
+                        };
+
+                        delete entity.statements;
+                        crc.add(JSON.stringify(entity));
+                        break;
+                    }
                     default:
                         crc.add(JSON.stringify(referable));
                         break;

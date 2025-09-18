@@ -73,7 +73,7 @@ export class OpcuaClient extends AASClient {
         return this.session;
     }
 
-    public async test(): Promise<void> {
+    public override async test(): Promise<void> {
         if (this.reentry === 0) {
             try {
                 await this.open();
@@ -83,7 +83,7 @@ export class OpcuaClient extends AASClient {
         }
     }
 
-    public async open(): Promise<void> {
+    public override async open(): Promise<void> {
         if (this.reentry === 0) {
             this.client = OPCUAClient.create(this.options as OPCUAClientOptions);
             await this.client.connect(this.endpoint.url);
@@ -93,7 +93,7 @@ export class OpcuaClient extends AASClient {
         ++this.reentry;
     }
 
-    public async close(): Promise<void> {
+    public override async close(): Promise<void> {
         if (this.reentry > 0) {
             --this.reentry;
             if (this.reentry === 0) {
@@ -114,23 +114,23 @@ export class OpcuaClient extends AASClient {
         return new OpcuaPackage(this.logger, this, args[0]);
     }
 
-    public createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {
+    public override createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {
         return new OpcuaSubscription(this.logger, client, this, message.nodes);
     }
 
-    public getPackageAsync(): Promise<NodeJS.ReadableStream> {
-        throw new Error('Not implemented.');
+    public override getPackage(): Promise<NodeJS.ReadableStream> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
-    public postPackageAsync(): Promise<string> {
-        throw new Error('Not implemented.');
+    public override postPackage(): Promise<string> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
-    public deletePackageAsync(): Promise<string> {
-        throw new Error('Not implemented.');
+    public override deletePackage(): Promise<string> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
-    public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public override async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
         const inputArguments: Array<VariantOptions> = [];
         if (operation.inputVariables) {
             for (const inputVariable of operation.inputVariables) {
@@ -157,8 +157,8 @@ export class OpcuaClient extends AASClient {
         return operation;
     }
 
-    public getBlobValueAsync(): Promise<string | undefined> {
-        throw new Error('Not implemented.');
+    public override getBlobValue(): Promise<string | undefined> {
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     private resolveOpcuaClientOptions(options: OPCUAClientOptions): OPCUAClientOptions {

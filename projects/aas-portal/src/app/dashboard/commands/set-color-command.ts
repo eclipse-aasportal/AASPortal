@@ -6,30 +6,31 @@
  *
  *****************************************************************************/
 
-import cloneDeep from 'lodash-es/cloneDeep';
-import { DashboardItem, DashboardPage, DashboardStore } from '../dashboard.store';
 import { DashboardCommand } from './dashboard-command';
+import { DashboardService } from '../dashboard.service';
+import { DashboardChartItem, DashboardPage } from '../dashboard-types';
 
 export class SetColorCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private page: DashboardPage,
-        private item: DashboardItem,
-        private index: number,
+        private item: DashboardChartItem,
         private color: string,
     ) {
-        super('Set color', store);
+        super('Set color', service);
     }
 
     protected executing(): void {
-        const page = cloneDeep(this.page);
-        const item = page.items[this.page.items.indexOf(this.item)];
-
-        if (this.isChart(item)) {
-            item.sources[this.index].color = this.color;
-            this.store.update(page);
-        } else {
-            throw new Error('Not implemented.');
+        const i = this.page.items.indexOf(this.item);
+        if (i < 0) {
+            throw new Error('INVALID_OPERATION');
         }
+
+        const index = this.item.sources.findIndex(item => item.label === this.item.source());
+        const source = this.item.sources[index];
+        const page = { ...this.page, items: [...this.page.items] };
+        page.items[i] = { ...this.item, sources: [...this.item.sources] };
+        page.items[i].sources[index] = { ...source, color: this.color };
+        this.service.updatePage(page);
     }
 }
