@@ -33,7 +33,6 @@ export abstract class ApiClient extends AASClient {
      * @param logger The logger.
      * @param http The HTTP client.
      * @param endpoint AAS endpoint.
-     * @param name The endpoint name.
      */
     public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
         super(logger, endpoint);
@@ -125,8 +124,8 @@ export abstract class ApiClient extends AASClient {
 
     /**
      * Opens the specified file from the AASX server.
-     * @param env The environment of the AAS.
-     * @param address The file.
+     * @param shell The AAS that contains the file element.
+     * @param file The file.
      * @returns A readable stream.
      */
     public abstract openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream>;

@@ -6,28 +6,31 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASEndpoint } from 'aas-core';
 import { AddEndpointFormComponent } from '../../app/shells/add-endpoint-form/add-endpoint-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('AddEndpointFormComponent', () => {
     let modal: NgbActiveModal;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [NgbActiveModal, provideZonelessChangeDetection()],
-            imports: [
-                AddEndpointFormComponent,
-                TranslateModule.forRoot({
+            providers: [
+                NgbActiveModal,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [AddEndpointFormComponent],
         }).compileComponents();
 
         modal = TestBed.inject(NgbActiveModal);
@@ -46,7 +49,7 @@ describe('AddEndpointFormComponent', () => {
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
+        jest.spyOn(modal, 'close').mockImplementation(result => (endpoint = result));
 
         component.selectItem(component.items()[3]);
         component.name.set('My endpoint');
@@ -65,7 +68,7 @@ describe('AddEndpointFormComponent', () => {
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
+        jest.spyOn(modal, 'close').mockImplementation(result => (endpoint = result));
 
         component.selectItem(component.items()[3]);
         component.name.set('My endpoint');
@@ -83,7 +86,7 @@ describe('AddEndpointFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        spyOn(modal, 'close');
+        jest.spyOn(modal, 'close');
 
         component.selectItem(component.items()[3]);
         component.name.set('');
@@ -91,7 +94,7 @@ describe('AddEndpointFormComponent', () => {
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages().length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBe(true);
     });
 
     it('ignores AAS endpoint Name: "My endpoint", URL: "file:///"', () => {
@@ -99,7 +102,7 @@ describe('AddEndpointFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        spyOn(modal, 'close');
+        jest.spyOn(modal, 'close');
 
         component.selectItem(component.items()[3]);
         component.name.set('My endpoint');
@@ -107,7 +110,7 @@ describe('AddEndpointFormComponent', () => {
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages().length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBe(true);
     });
 
     it('submits AAS endpoint Name: "I4AAS Server", URL: "opc.tcp://localhost:30001/I4AASServer"', () => {
@@ -116,7 +119,7 @@ describe('AddEndpointFormComponent', () => {
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
+        jest.spyOn(modal, 'close').mockImplementation(result => (endpoint = result));
 
         component.selectItem(component.items()[1]);
         component.name.set('I4AAS Server');
@@ -134,7 +137,7 @@ describe('AddEndpointFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        spyOn(modal, 'close');
+        jest.spyOn(modal, 'close');
 
         component.selectItem(component.items()[1]);
         component.name.set('I4AAS Server');
@@ -142,7 +145,7 @@ describe('AddEndpointFormComponent', () => {
 
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages().length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBe(true);
     });
 
     it('submits AASX server Name: "AASX Server", URL: "http://localhost:50001/"', () => {
@@ -151,7 +154,7 @@ describe('AddEndpointFormComponent', () => {
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
+        jest.spyOn(modal, 'close').mockImplementation(result => (endpoint = result));
 
         component.selectItem(component.items()[0]);
         component.name.set('AASX Server');
@@ -170,7 +173,7 @@ describe('AddEndpointFormComponent', () => {
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
         let endpoint: AASEndpoint | undefined;
-        spyOn(modal, 'close').and.callFake(result => (endpoint = result));
+        jest.spyOn(modal, 'close').mockImplementation(result => (endpoint = result));
 
         component.selectItem(component.items()[2]);
         component.name.set('WebDAV Server');

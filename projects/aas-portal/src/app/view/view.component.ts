@@ -6,11 +6,16 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { ToolbarService } from 'aas-lib';
+import { ToolbarService, VIEW_ROUTES } from 'aas-lib';
+import { ViewState } from './view.state';
 
+/**
+ * The View page. Provides a container for a specific view of a submodel or an Asset Administration Shell with
+ * a composition of specific submodels.
+ */
 @Component({
     selector: 'fhg-view',
     templateUrl: './view.component.html',
@@ -19,9 +24,17 @@ import { ToolbarService } from 'aas-lib';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewComponent implements OnDestroy {
-    public constructor(private readonly toolbar: ToolbarService) {}
+    private readonly toolbar = inject(ToolbarService);
+    private readonly state = inject(ViewState);
+    private readonly viewRoutes = inject(VIEW_ROUTES);
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
+    }
+
+    protected setViewComponent(component: object): void {
+        const className = component.constructor.name;
+        const activeView = this.viewRoutes.find(item => item.component?.name === className);
+        this.state.update({ activeView });
     }
 }

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
@@ -52,11 +52,9 @@ export interface LinkDescriptor {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent {
-    public constructor(
-        public readonly route: ActivatedRoute,
-        private readonly toolbar: ToolbarService,
-        private readonly indexChange: IndexChangeService,
-    ) {}
+    protected readonly route = inject(ActivatedRoute);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly indexChange = inject(IndexChangeService);
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 

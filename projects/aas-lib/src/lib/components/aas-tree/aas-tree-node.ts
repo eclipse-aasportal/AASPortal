@@ -8,6 +8,7 @@
 
 import isEqual from 'lodash-es/isEqual';
 import isEmpty from 'lodash-es/isEmpty';
+import { signal, WritableSignal } from '@angular/core';
 import {
     AASDocument,
     aas,
@@ -28,7 +29,6 @@ import {
     isProperty,
     isRange,
     isReferenceElement,
-    isRelationshipElement,
     isSubmodel,
     isSubmodelElement,
     isSubmodelElementCollection,
@@ -41,26 +41,28 @@ import {
 
 import { Tree, TreeNode } from '../tree';
 import { basename, normalize } from '../../utilities';
-import { signal, WritableSignal } from '@angular/core';
 import { hasSpecificView } from '../../views/views-routes';
 
+/**
+ * Represents a node in the tree structure of Asset Administration Shell.
+ */
 export class AASTreeNode extends TreeNode<aas.Referable> {
     public constructor(
-        public readonly id: string,
         element: aas.Referable,
+        parent: number,
+        level: number,
         expanded: boolean,
         selected: boolean,
         highlighted: boolean,
-        level: number,
+        firstChild: number,
+        nextSibling: number,
+        public readonly id: string,
         public readonly abbreviation: string,
         public readonly name: string,
         public readonly typeInfo: string,
         public readonly value: WritableSignal<string | boolean | undefined>,
         public readonly isLeaf: boolean,
         public readonly canOpen: boolean,
-        parent: number,
-        firstChild: number,
-        nextSibling: number,
     ) {
         super(element, parent, level, expanded, selected, highlighted, firstChild, nextSibling);
     }
@@ -68,9 +70,112 @@ export class AASTreeNode extends TreeNode<aas.Referable> {
     public override get hasChildren(): boolean {
         return this.firstChild >= 0;
     }
+}
 
-    public get relationship(): aas.RelationshipElement | undefined {
-        return isRelationshipElement(this.element) ? this.element : undefined;
+/**
+ * Represents the structure of an Asset Administration Shell as a tree.
+ */
+export class AASTree extends Tree<aas.Referable, AASTreeNode> {
+    private _contents: AASTreeNode[];
+
+    public constructor(contents: AASTreeNode[]) {
+        super();
+
+        this._contents = contents;
+    }
+
+    public get contents(): AASTreeNode[] {
+        return this._contents;
+    }
+
+    public static from(document: AASDocument | null, language: string): AASTree {
+        if (!document || !document.content) {
+            return new AASTree([]);
+        }
+
+        return new AASTree(new TreeInitialize(document.content, language).get());
+    }
+
+    public update(referable: aas.Referable): void {
+        noop(referable);
+    }
+
+    protected override getContents(): AASTreeNode[] {
+        return this._contents;
+    }
+
+    protected override setContents(nodes: AASTreeNode[]): void {
+        this._contents = nodes;
+    }
+
+    protected override cloneNode(node: AASTreeNode): AASTreeNode {
+        return new AASTreeNode(
+            node.element,
+            node.parent,
+            node.level,
+            node.expanded,
+            node.selected,
+            node.highlighted,
+            node.firstChild,
+            node.nextSibling,
+            node.id,
+            node.abbreviation,
+            node.name,
+            node.typeInfo,
+            node.value,
+            node.isLeaf,
+            node.canOpen,
+        );
+    }
+}
+
+/**
+ * Gets a value that corresponds to the specified referable.
+ * @param referable The current referable.
+ * @param localeId  The current language.
+ * @returns A `boolean` or `string` expression that represents the specified referable.
+ */
+export function getValue(referable: aas.Referable | null, localeId: string): boolean | string | undefined {
+    if (!referable) {
+        return '';
+    }
+
+    if (isBlob(referable)) {
+        return referable.value ? `${referable.value.length}` : '...';
+    }
+
+    if (isFile(referable)) {
+        return referable.value ? basename(normalize(referable.value)) : '-';
+    }
+
+    if (isMultiLanguageProperty(referable)) {
+        return getLocaleValue(referable.value, localeId) ?? '-';
+    }
+
+    if (isProperty(referable)) {
+        return getPropertyValue(referable, localeId);
+    }
+
+    if (isRange(referable)) {
+        return `${convertToString(referable.min, localeId)} ... ${convertToString(referable.max, localeId)}`;
+    }
+
+    if (isReferenceElement(referable)) {
+        return referenceToString(referable.value);
+    }
+
+    return '';
+
+    function getPropertyValue(property: aas.Property, localeId: string): string | boolean | undefined {
+        if (isBooleanType(property.valueType)) {
+            return toBoolean(property.value);
+        } else {
+            return toDisplayValue(property.value, property.valueType, localeId);
+        }
+    }
+
+    function referenceToString(reference: aas.Reference | undefined): string {
+        return reference?.keys.map(key => key.value).join('.') ?? '-';
     }
 }
 
@@ -142,21 +247,21 @@ class TreeInitialize {
         }
 
         return new AASTreeNode(
-            `row_${this.nodes.length + 1}`,
             element,
+            parent,
+            level,
             expanded,
             false,
             false,
-            level,
+            -1,
+            -1,
+            `row_${this.nodes.length + 1}`,
             getAbbreviation(element.modelType) ?? '',
             element.idShort,
             this.getTypeInfo(element),
-            signal(this.getValue(element, this.language)),
+            signal(getValue(element, this.language)),
             isLeaf,
             canOpen,
-            parent,
-            -1,
-            -1,
         );
     }
 
@@ -267,46 +372,6 @@ class TreeInitialize {
         return { type: 'ModelReference', keys };
     }
 
-    private getValue(referable: aas.Referable | null, localeId: string): boolean | string | undefined {
-        if (!referable) {
-            return '';
-        }
-
-        if (isBlob(referable)) {
-            return referable.value ? `${referable.value.length}` : '...';
-        }
-
-        if (isFile(referable)) {
-            return referable.value ? basename(normalize(referable.value)) : '-';
-        }
-
-        if (isMultiLanguageProperty(referable)) {
-            return getLocaleValue(referable.value, localeId) ?? '-';
-        }
-
-        if (isProperty(referable)) {
-            return this.getPropertyValue(referable, localeId);
-        }
-
-        if (isRange(referable)) {
-            return `${convertToString(referable.min, localeId)} ... ${convertToString(referable.max, localeId)}`;
-        }
-
-        if (isReferenceElement(referable)) {
-            return this.referenceToString(referable.value);
-        }
-
-        return '';
-    }
-
-    private getPropertyValue(property: aas.Property, localeId: string): string | boolean | undefined {
-        if (isBooleanType(property.valueType)) {
-            return toBoolean(property.value);
-        } else {
-            return toDisplayValue(property.value, property.valueType, localeId);
-        }
-    }
-
     private getTypeInfo(referable: aas.Referable | null): string {
         if (!referable) {
             return '-';
@@ -381,63 +446,5 @@ class TreeInitialize {
         }
 
         return '-';
-    }
-
-    private referenceToString(reference: aas.Reference | undefined): string {
-        return reference?.keys.map(key => key.value).join('.') ?? '-';
-    }
-}
-
-export class AASTree extends Tree<aas.Referable, AASTreeNode> {
-    private _nodes: AASTreeNode[];
-
-    public constructor(nodes: AASTreeNode[]) {
-        super();
-
-        this._nodes = nodes;
-    }
-
-    public get nodes(): AASTreeNode[] {
-        return this._nodes;
-    }
-
-    public static from(document: AASDocument | null, language: string): AASTree {
-        if (!document || !document.content) {
-            return new AASTree([]);
-        }
-
-        return new AASTree(new TreeInitialize(document.content, language).get());
-    }
-
-    public update(referable: aas.Referable): void {
-        noop(referable);
-    }
-
-    protected override getNodes(): AASTreeNode[] {
-        return this._nodes;
-    }
-
-    protected override setNodes(nodes: AASTreeNode[]): void {
-        this._nodes = nodes;
-    }
-
-    protected override cloneNode(node: AASTreeNode): AASTreeNode {
-        return new AASTreeNode(
-            node.id,
-            node.element,
-            node.expanded,
-            node.selected,
-            node.highlighted,
-            node.level,
-            node.abbreviation,
-            node.name,
-            node.typeInfo,
-            node.value,
-            node.isLeaf,
-            node.canOpen,
-            node.parent,
-            node.firstChild,
-            node.nextSibling,
-        );
     }
 }

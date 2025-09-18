@@ -2,29 +2,26 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "compileOnSave": false,
     "compilerOptions": {
-      "baseUrl": "./",
-      "target": "ES2022",
-      "module": "preserve",
-      "forceConsistentCasingInFileNames": true,
-      "skipLibCheck": true,
-      "strict": true,
-      "noFallthroughCasesInSwitch": true,
-      "noImplicitAny": true,
-      "noImplicitOverride": true,
-      "noImplicitReturns": true,
-      "sourceMap": true,
-      "experimentalDecorators": true,
-      "resolveJsonModule": true,
-      "esModuleInterop": true,
-      "useDefineForClassFields": false,
-      "useUnknownInCatchVariables": false,
-      "paths": {
-        "lib/*": [
-          "./src/lib/*"
-        ]
-      }
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": "./",
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "isolatedModules": true,
+        "module": "ES2022",
+        "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": false,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "ES2022",
+        "useUnknownInCatchVariables": false
     },
     "ts-node": {
         "esm": true
-      }
+    }
 }

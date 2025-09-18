@@ -26,6 +26,7 @@ describe('DataSheet', () => {
         component = fixture.componentInstance;
         fixture.componentRef.setInput('dataSheet', {
             name: 'Caption',
+            collapsed: false,
             items: [
                 {
                     idShort: 'string',

@@ -6,12 +6,14 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { RemoveEndpointFormComponent } from '../../app/shells/remove-endpoint-form/remove-endpoint-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('RemoveEndpointFormComponent', () => {
     let modal: NgbActiveModal;
@@ -23,7 +25,7 @@ describe('RemoveEndpointFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
@@ -56,7 +58,7 @@ describe('RemoveEndpointFormComponent', () => {
 
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        spyOn(modal, 'close').and.callFake(result => {
+        jest.spyOn(modal, 'close').mockImplementation(result => {
             expect(result).toEqual(['Samples']);
         });
 
@@ -81,9 +83,9 @@ describe('RemoveEndpointFormComponent', () => {
 
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        spyOn(modal, 'close');
+        jest.spyOn(modal, 'close');
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
-        expect(component.messages().length > 0).toBeTrue();
+        expect(component.messages().length > 0).toBe(true);
     });
 });

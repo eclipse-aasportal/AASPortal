@@ -6,8 +6,9 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -20,7 +21,6 @@ import {
 
 import { AASDocument, WebSocketData, aas } from 'aas-core';
 import {
-    WINDOW,
     ViewMode,
     AuthService,
     NotifyService,
@@ -30,11 +30,12 @@ import {
     IndexChangeService,
     EndpointsApi,
     ToolbarService,
+    EndpointsService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
-import { EndpointsService } from '../../../../aas-lib/src/lib/services/endpoints.service';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -50,23 +51,21 @@ class TestAASTable {
 }
 
 describe('ShellsComponent', () => {
-    let window: jasmine.SpyObj<Window>;
-    let localStorage: jasmine.SpyObj<Storage>;
-    let endpoints: jasmine.SpyObj<EndpointsService>;
-    let documents: jasmine.SpyObj<EndpointsApi>;
-    let favorites: jasmine.SpyObj<FavoritesService>;
-    let auth: jasmine.SpyObj<AuthService>;
-    let start: jasmine.SpyObj<StartService>;
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let localStorage: jest.Mocked<Storage>;
+    let endpoints: jest.Mocked<EndpointsService>;
+    let documents: jest.Mocked<EndpointsApi>;
+    let favorites: jest.Mocked<FavoritesService>;
+    let auth: jest.Mocked<AuthService>;
+    let start: jest.Mocked<StartService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
 
     beforeEach(async () => {
-        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
-        localStorage.getItem.and.returnValue(null);
-        window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage });
-        endpoints = jasmine.createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
-        documents = jasmine.createSpyObj<EndpointsApi>(['getContent', 'getHierarchy', 'getDocuments']);
-        documents.getDocuments.and.returnValue(
+        start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
+        localStorage.getItem.mockReturnValue(null);
+        endpoints = createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
+        documents = createSpyObj<EndpointsApi>(['getContent', 'getHierarchy', 'getDocuments']);
+        documents.getDocuments.mockReturnValue(
             of({
                 previous: null,
                 next: null,
@@ -74,7 +73,7 @@ describe('ShellsComponent', () => {
             }),
         );
 
-        documents.getContent.and.returnValue(
+        documents.getContent.mockReturnValue(
             of({
                 assetAdministrationShells: [],
                 submodels: [],
@@ -82,19 +81,19 @@ describe('ShellsComponent', () => {
             } as aas.Environment),
         );
 
-        favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+        favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
             active: signal(''),
             items: signal<FavoritesList[]>([]),
         });
 
-        auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
+        auth = createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
             ready: of(true),
         });
 
-        auth.getCookie.and.returnValue(of(undefined));
-        auth.setCookie.and.returnValue(of(undefined));
+        auth.getCookie.mockReturnValue(of(undefined));
+        auth.setCookie.mockReturnValue(of(undefined));
 
-        indexChange = jasmine.createSpyObj<IndexChangeService>(
+        indexChange = createSpyObj<IndexChangeService>(
             {},
             {
                 message: of({
@@ -115,10 +114,6 @@ describe('ShellsComponent', () => {
                     useValue: documents,
                 },
                 {
-                    provide: WINDOW,
-                    useValue: window,
-                },
-                {
                     provide: FavoritesService,
                     useValue: favorites,
                 },
@@ -128,15 +123,15 @@ describe('ShellsComponent', () => {
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>(['downloadPackage']),
+                    useValue: createSpyObj<DownloadService>(['downloadPackage']),
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
                 {
                     provide: StartService,
@@ -153,7 +148,7 @@ describe('ShellsComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

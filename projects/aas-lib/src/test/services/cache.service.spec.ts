@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
@@ -13,14 +14,15 @@ import { Subject } from 'rxjs';
 import { WebSocketData } from 'aas-core';
 import { CacheService } from '../../lib/services/cache.service';
 import { IndexChangeService } from '../../lib/services/index-change.service';
+import { createSpyObj, DoneFn } from '../mocks';
 
 describe('CacheService', () => {
     let service: CacheService;
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
     let message = new Subject<WebSocketData>();
 
     beforeEach(() => {
-        indexChange = jasmine.createSpyObj<IndexChangeService>(['clear'], { message: message.asObservable() });
+        indexChange = createSpyObj<IndexChangeService>(['clear'], { message: message.asObservable() });
 
         TestBed.configureTestingModule({
             providers: [

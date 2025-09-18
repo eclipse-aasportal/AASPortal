@@ -25,12 +25,13 @@ import {
     viewChildren,
     Inject,
     signal,
+    inject,
 } from '@angular/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
-import { CommandHandlerService } from '../aas/command-handler.service';
+import { CommandHandler } from '../aas/command-handler';
 import { MovePreviousCommand } from './commands/move-previous-command';
 import { MoveNextCommand } from './commands/move-next-command';
 import { DeletePageCommand } from './commands/delete-page-command';
@@ -58,23 +59,21 @@ import {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
+    @Inject(WINDOW) private readonly window = inject(WINDOW);
+    private readonly service = inject(DashboardService);
+    private readonly activeRoute = inject(ActivatedRoute);
+    private readonly translate = inject(TranslateService);
+    private readonly webServiceFactory = inject(WebSocketFactoryService);
+    private readonly notify = inject(NotifyService);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
+    private readonly commandHandler = inject(CommandHandler);
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
     private live = false;
 
-    public constructor(
-        api: DashboardApiService,
-        private readonly service: DashboardService,
-        private readonly activeRoute: ActivatedRoute,
-        private readonly translate: TranslateService,
-        private readonly webServiceFactory: WebSocketFactoryService,
-        private readonly notify: NotifyService,
-        private readonly toolbar: ToolbarService,
-        private readonly start: StartService,
-        private readonly commandHandler: CommandHandlerService,
-        @Inject(WINDOW) private readonly window: Window,
-    ) {
-        super(api);
+    public constructor() {
+        super(inject(DashboardApiService));
 
         window.addEventListener('resize', this.updateViewPortSize);
 

@@ -6,21 +6,20 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { IndexChangeService } from 'aas-lib';
 import { AboutCardComponent } from '../../app/about/about-card.component';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('AboutCardComponent', () => {
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
 
     beforeEach(async () => {
-        indexChange = jasmine.createSpyObj<IndexChangeService>(
-            {},
-            { documentCount: signal(42), endpointCount: signal(2) },
-        );
+        indexChange = createSpyObj<IndexChangeService>({}, { documentCount: signal(42), endpointCount: signal(2) });
 
         await TestBed.configureTestingModule({
             providers: [
@@ -34,7 +33,7 @@ describe('AboutCardComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
