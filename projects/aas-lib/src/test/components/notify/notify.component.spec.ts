@@ -8,10 +8,11 @@
 
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { NotifyComponent } from '../../../lib/components/notify/notify.component';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('NotifyComponent', () => {
     beforeEach(async () => {
@@ -21,14 +22,14 @@ describe('NotifyComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([])}),
+                    useValue: createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([])}),
                 },
                 provideZonelessChangeDetection(),
             ],

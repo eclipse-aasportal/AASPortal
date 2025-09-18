@@ -8,8 +8,9 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
+import { FakeLoader } from '../../mocks';
 
 describe('NotifyService', () => {
     let service: NotifyService;
@@ -21,7 +22,7 @@ describe('NotifyService', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

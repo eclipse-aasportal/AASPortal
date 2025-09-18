@@ -92,26 +92,6 @@
                         "buildTarget": "aas-portal:build"
                     }
                 },
-                "test": {
-                    "builder": "@angular/build:karma",
-                    "options": {
-                        "polyfills": [
-                            "@angular/localize/init"
-                        ],
-                        "tsConfig": "projects/aas-portal/tsconfig.spec.json",
-                        "karmaConfig": "projects/aas-portal/karma.conf.cjs",
-                        "inlineStyleLanguage": "scss",
-                        "codeCoverage": true,
-                        "assets": [
-                            "projects/aas-portal/src/favicon.ico",
-                            "projects/aas-portal/src/assets"
-                        ],
-                        "styles": [
-                            "projects/aas-portal/src/styles.scss"
-                        ],
-                        "scripts": []
-                    }
-                },
                 "lint": {
                     "builder": "@angular-eslint/builder:lint",
                     "options": {
@@ -143,15 +123,6 @@
                         }
                     },
                     "defaultConfiguration": "production"
-                },
-                "test": {
-                    "builder": "@angular/build:karma",
-                    "options": {
-                        "tsConfig": "projects/aas-lib/tsconfig.spec.json",
-                        "karmaConfig": "projects/aas-lib/karma.conf.cjs",
-                        "codeCoverage": true,
-                        "polyfills": []
-                    }
                 },
                 "lint": {
                     "builder": "@angular-eslint/builder:lint",

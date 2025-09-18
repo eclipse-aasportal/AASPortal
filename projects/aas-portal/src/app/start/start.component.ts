@@ -6,99 +6,62 @@
  *
  *****************************************************************************/
 
-import { marked } from 'marked';
-import { catchError, EMPTY, from, map, Observable, of, switchMap } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
 import {
     ChangeDetectionStrategy,
     Component,
     effect,
     OnDestroy,
     TemplateRef,
-    Type,
     viewChild,
     computed,
-    WritableSignal,
-    signal,
+    inject,
 } from '@angular/core';
 
-import { StartService, StartTile, ToolbarService } from 'aas-lib';
+import { StartService, ToolbarService } from 'aas-lib';
+import { StartState, StartTileItem } from './start.state';
 
-export interface StartTileItem extends StartTile {
-    component: Type<unknown>;
-    selected: WritableSignal<boolean>;
-    tile: StartTile;
-}
-
-const errorWelcome = `# Sorry
-The welcome page is currently not available.
-`;
-
+/**
+ * The Start page. Provides a favorites page or, if no favorites are available, a welcome page.
+ */
 @Component({
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrl: './start.component.scss',
-    imports: [NgComponentOutlet, TranslateModule],
+    imports: [NgComponentOutlet],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy {
-    private readonly items$ = signal<StartTileItem[]>([]);
+    private readonly state = inject(StartState);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
 
-    public constructor(
-        private readonly http: HttpClient,
-        private readonly translate: TranslateService,
-        private readonly sanitizer: DomSanitizer,
-        private readonly toolbar: ToolbarService,
-        private readonly start: StartService,
-    ) {
+    public constructor() {
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {
                 this.toolbar.set(template);
             }
         });
-
-        effect(() => {
-            const tiles = this.start.tiles();
-            this.items$.update(state => {
-                const map = new Map(state.map(item => [item.tile, item]));
-                const newState: StartTileItem[] = [];
-                for (const tile of tiles) {
-                    const item = map.get(tile);
-                    if (item !== undefined) {
-                        newState.push(item);
-                    } else {
-                        const type = this.start.getType(tile.type);
-                        if (type === undefined) {
-                            continue;
-                        }
-
-                        newState.push({
-                            ...tile,
-                            tile,
-                            component: type.component,
-                            selected: signal(false),
-                        });
-                    }
-                }
-
-                return newState;
-            });
-        });
     }
 
+    /** The specific Start page toolbar. */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
 
-    public readonly items = this.items$.asReadonly();
+    /** The available favorites. */
+    public readonly items = this.state.items;
 
+    /** The welcome page. */
+    public readonly welcome = this.state.welcome;
+
+    /** Indicates whether favorites exist. */
     public readonly isEmpty = computed(() => this.items().length === 0);
 
-    public readonly hasSelected = computed(() => this.items().some(item => item.selected()));
+    /** Indicates whether at least one favorite is selected. */
+    public readonly someSelected = computed(() => this.items().some(item => item.selected()));
 
+    /** Determines whether a single selected favorite can be moved to the left. */
     public readonly canMoveLeft = computed(() => {
         const indexes = this.items()
             .map((item, index) => ({ item, index }))
@@ -108,6 +71,7 @@ export class StartComponent implements OnDestroy {
         return indexes.length === 1 && indexes[0] > 0;
     });
 
+    /** Determines whether a single selected favorite can be moved to the right. */
     public readonly canMoveRight = computed(() => {
         const length = this.items().length;
         const indexes = this.items()
@@ -118,35 +82,17 @@ export class StartComponent implements OnDestroy {
         return indexes.length === 1 && indexes[0] < length - 1;
     });
 
-    public readonly welcome = toSignal(
-        from(this.translate.onLangChange).pipe(
-            map(event => event.lang),
-            switchMap(lang =>
-                this.http.get(`/assets/welcome/${lang}/welcome.md`, { responseType: 'text' }).pipe(
-                    catchError(() => {
-                        return this.http
-                            .get('/assets/welcome/en-us/welcome.md', { responseType: 'text' })
-                            .pipe(catchError(() => of(errorWelcome)));
-                    }),
-                    switchMap(md => {
-                        const result = marked.parse(md);
-                        return typeof result === 'string' ? of(result) : from(result);
-                    }),
-                    map(html => this.sanitizer.bypassSecurityTrustHtml(html)),
-                ),
-            ),
-        ),
-    );
-
     public ngOnDestroy(): void {
         this.toolbar.clear();
     }
 
+    /** Toggles the selection of a favorite.  */
     public toggleSelected($event: MouseEvent, item: StartTileItem): void {
         item.selected.update(state => !state);
         $event.stopPropagation();
     }
 
+    /** Removes the selected favorites from the start page.*/
     public remove(): Observable<void> {
         const selectedItems = this.items().filter(item => item.selected());
         if (selectedItems.length === 0) {
@@ -157,6 +103,7 @@ export class StartComponent implements OnDestroy {
         return this.start.save();
     }
 
+    /** Moves a selected favorite to the right. */
     public moveLeft(): Observable<void> {
         const index = this.items().findIndex(item => item.selected());
         if (index === -1 || index === 0) {
@@ -174,6 +121,7 @@ export class StartComponent implements OnDestroy {
         return this.start.save();
     }
 
+    /** Moves a selected favorite to the right. */
     public moveRight(): Observable<void> {
         const index = this.items().findIndex(item => item.selected());
         if (index === -1 || index === this.items().length - 1) {

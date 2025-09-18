@@ -9,7 +9,7 @@
 import { isAbsolute, resolve } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { inject, singleton } from 'tsyringe';
-import { AppInfo } from 'aas-core';
+import { type AppInfo } from 'aas-core';
 import { Variable } from './variable.js';
 import { LOGGER, Logger } from './logging/logger.js';
 

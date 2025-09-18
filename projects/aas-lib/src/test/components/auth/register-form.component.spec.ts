@@ -6,23 +6,25 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
 import { ERRORS } from '../../../lib/errors';
 import { getToken } from '../../assets/json-web-token';
+import { FakeLoader } from '../../mocks';
 import {
     RegisterFormComponent,
     RegisterFormResult,
 } from '../../../lib/components/auth/register-form/register-form.component';
 
-describe('RegisterFormComponent', () => {
+describe('RegisterFormComponent', () => {   
     let modal: NgbActiveModal;
     let api: AuthApiService;
     let token: string;
@@ -34,7 +36,7 @@ describe('RegisterFormComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
@@ -64,8 +66,8 @@ describe('RegisterFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const result: RegisterFormResult = { stayLoggedIn: true, token: token };
-        spyOn(modal, 'close').and.callFake((...args) => expect(args[0]).toEqual(result));
-        spyOn(api, 'register').and.returnValue(of({ token }));
+        jest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
+        jest.spyOn(api, 'register').mockReturnValue(of({ token }));
 
         component.userId.set('john.doe@email.com');
         component.name.set('John Doe');

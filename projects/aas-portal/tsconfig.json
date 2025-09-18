@@ -2,18 +2,13 @@
     "extends": "../../tsconfig.json",
     "compileOnSave": false,
     "compilerOptions": {
-        "outDir": "./dist/out-tsc",
-        "moduleResolution": "bundler",
-        "module": "ES2022",
-        "declaration": false,
-        "importHelpers": true,
+        "outDir": "./build",
         "lib": [
             "ES2022",
             "dom"
         ],
         "types": [
-            "@angular/localize",
-            "jasmine"
+            "jest"
         ],
         "paths": {
             "aas-lib": [
@@ -25,6 +20,14 @@
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,
         "strictInputAccessModifiers": true,
+        "typeCheckHostBindings": true,
         "strictTemplates": true
+    },
+    "ts-node": {
+        "compilerOptions": {
+            "types": [
+                "node"
+            ]
+        }
     }
 }

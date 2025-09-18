@@ -28,9 +28,9 @@ export class AASClientFactory {
     ) {}
 
     /**
-     * Creates a concrete realization of an `AASSource`.
-     * @param url The URL of the container.
-     * @returns A new instance of .
+     * Creates a concrete realization of an endpoint client.
+     * @param endpoint The endpoint.
+     * @returns A new instance of an endpoint client.
      */
     public create(endpoint: AASEndpoint): AASClient {
         switch (endpoint.type) {
@@ -58,8 +58,7 @@ export class AASClientFactory {
 
     /**
      * Tests whether the specified URL is a valid and supported AAS endpoint.
-     * @param logger The logger.
-     * @param url The current URL.
+     * @param endpoint The endpoint to test.
      */
     public async testAsync(endpoint: AASEndpoint): Promise<void> {
         try {
@@ -95,12 +94,21 @@ export class AASClientFactory {
                 default:
                     throw new Error('Not implemented.');
             }
-        } catch {
-            throw new ApplicationError(
-                `"${endpoint.url}" addresses an invalid or not supported AAS endpoint.`,
-                ERRORS.InvalidContainerUrl,
-                endpoint.url,
-            );
+        } catch (error) {
+            let message = `"${endpoint.url}" addresses an invalid or not supported AAS endpoint.`;
+            if (endpoint.url.includes('localhost') || endpoint.url.includes('127.0.0.1')) {
+                message += ` Hint: If AASPortal is running in a container and your AAS endpoint is on the host machine, try using 'host.containers.internal' (Podman) or 'host.docker.internal' (Docker) instead of 'localhost'.`;
+            } else if (
+                endpoint.url.includes('192.168.') ||
+                endpoint.url.includes('10.0.') ||
+                endpoint.url.includes('172.16.')
+            ) {
+                message += ` Hint: Ensure the endpoint is accessible from within the container network.`;
+            }
+
+            this.logger.error(`Endpoint validation failed for ${endpoint.url}: ${error?.message || 'Unknown error'}`);
+
+            throw new ApplicationError(message, ERRORS.InvalidContainerUrl, endpoint.url);
         }
     }
 }

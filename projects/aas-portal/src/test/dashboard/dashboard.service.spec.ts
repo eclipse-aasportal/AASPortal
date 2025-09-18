@@ -6,37 +6,38 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AuthService } from 'aas-lib';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 
 import data from '../assets/test-pages.json';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;
-    let auth: jasmine.SpyObj<AuthService>;
+    let auth: jest.Mocked<AuthService>;
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie'], { ready: of(true) });
-        auth.getCookie.and.returnValue(of(JSON.stringify(data)));
+        auth = createSpyObj<AuthService>(['getCookie'], { ready: of(true) });
+        auth.getCookie.mockReturnValue(of(JSON.stringify(data)));
 
         TestBed.configureTestingModule({
-            imports: [
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
+            imports: [],
             providers: [
                 {
                     provide: AuthService,
                     useValue: auth,
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
                 provideZonelessChangeDetection(),
             ],
         });
@@ -57,7 +58,7 @@ describe('DashboardService', () => {
     });
 
     it('indicates that editMode is false', () => {
-        expect(service.editMode()).toBeFalse();
+        expect(service.editMode()).toBe(false);
     });
 
     it('gets a memento', () => {

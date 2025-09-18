@@ -9,6 +9,7 @@
     ],
     "name": "AASPortal",
     "includeVersion": false,
+    "includeHierarchySummary": true,
     "exclude": [
         "**/node_modules/**/*",
         "**/dist/**/*",

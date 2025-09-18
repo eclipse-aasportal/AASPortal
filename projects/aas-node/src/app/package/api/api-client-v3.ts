@@ -182,12 +182,12 @@ export class ApiClientV3 extends ApiClient {
     }
 
     public async deletePackage(aasId: string): Promise<string> {
-        const descriptors: PackageDescriptor[] = await this.http.get(
+        const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
             this.endpoint.headers,
         );
 
-        const packageId = encodeBase64Url(descriptors[0].packageId);
+        const packageId = encodeBase64Url(result.result[0].packageId);
         return await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 

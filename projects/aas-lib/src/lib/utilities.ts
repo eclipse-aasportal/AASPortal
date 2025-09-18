@@ -29,6 +29,7 @@ import {
     getUnit,
     toDisplayValue,
     getChildren,
+    getSemanticId,
 } from 'aas-core';
 
 import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } from './types';
@@ -290,23 +291,22 @@ export function getUrl(document: AASDocument, file: aas.File | undefined): strin
 }
 
 /**
- * Creates a data sheet.
+ * Creates a data sheet from the specified submodel, submodel element list or collection.
  * @param document The AAS document.
- * @param submodel The submodel.
- * @param sm The
+ * @param sm The submodel or submodel element.
  * @param lang The current language.
- * @param paths A list
+ * @param options The options to create the data sheet.
  * @returns An object of type `DataSheetData`.
  */
 export function createDataSheet(
     document: AASDocument,
-    submodel: aas.Submodel,
     sm: aas.SubmodelElement | aas.Submodel,
     lang: string,
     options?: DataSheetOptions,
 ): DataSheetData {
     const dataSheet: DataSheetData = {
         name: '',
+        collapsed: false,
         items: [],
     };
 
@@ -597,10 +597,10 @@ export function toDisplayName(name: string): string {
 
 /**
  * Gets the display value of a submodel element.
- * @param submodel The submodel to which the proerty belongs.
+ * @param submodel The current submodel.
  * @param idShortPath The path to the submodel element.
  * @param lang The current language.
- * @param env The AAS environment used to get the unit.
+ * @param env The AAS environment used to get the concept description.
  * @param defaultValue A default value if no value exists.
  * @returns The display value.
  */
@@ -612,6 +612,27 @@ export function toString(
     defaultValue: string = '',
 ): string {
     const referable = getReferable(submodel, idShortPath);
+    if (!referable) {
+        return defaultValue;
+    }
+
+    return getDisplayValue(referable, lang, env, defaultValue);
+}
+
+/**
+ * Gets the display value of a referable element.
+ * @param referable The referable element.
+ * @param lang The current language.
+ * @param env The AAS environment used to get the concept description.
+ * @param defaultValue A default value if no value exists.
+ * @returns The display value.
+ */
+export function getDisplayValue(
+    referable: aas.Referable,
+    lang: string,
+    env?: aas.Environment | null,
+    defaultValue: string = '',
+): string {
     let value: string | undefined;
     if (isProperty(referable)) {
         let unit: string | undefined;
@@ -640,4 +661,41 @@ export function toString(
     }
 
     return value ?? defaultValue;
+}
+
+/**
+ * Determines whether the specified object is empty.
+ * @param obj The current object.
+ * @returns `true` if the specified object is empty; otherwise `false`.
+ */
+export function isEmpty(obj: object): boolean {
+    for (const prop in obj) {
+        if (Object.hasOwn(obj, prop)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Returns the first occurrence of a submodel whose semantic ID matches one from the specified list.
+ * @param document The current AAS document.
+ * @param semanticIds A list of semantic IDs.
+ * @returns A submodel or `undefined`.
+ */
+export function findSubmodel(document: AASDocument, semanticIds: string[]): aas.Submodel | undefined {
+    const env = document?.content;
+    if (!env) {
+        return undefined;
+    }
+
+    return env.submodels.find(submodel => {
+        const semanticId = getSemanticId(submodel);
+        if (!semanticId) {
+            return false;
+        }
+
+        return semanticIds.indexOf(semanticId) >= 0;
+    });
 }

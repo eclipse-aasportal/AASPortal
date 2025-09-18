@@ -24,6 +24,7 @@ nginx
 node_modules
 build
 dist
+docs
 coverage
 **/users
 mongo-volume

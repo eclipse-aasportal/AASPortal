@@ -11,7 +11,7 @@ import {
     Component,
     computed,
     effect,
-    Inject,
+    inject,
     OnDestroy,
     OnInit,
     Signal,
@@ -39,7 +39,7 @@ import {
     WebSocketData,
 } from 'aas-core';
 
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, Observable } from 'rxjs';
 import { getDisplayName, getUrl } from '../../utilities';
@@ -47,8 +47,9 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { LeafView } from '../view-leaf';
-import { VIEW_ROUTES, ViewRoute } from '../../types';
+import { VIEW_ROUTES } from '../../types';
+import { LeafView } from '../leaf-view';
+import { OperationalDataViewState } from './operational-data-view.state';
 
 export type GroupItem = {
     idShort: string;
@@ -69,25 +70,26 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     imports: [NgbAccordionModule, ThumbnailQRCode],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OperationalDataView extends LeafView implements OnInit, OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
+export class OperationalDataView extends LeafView<OperationalDataViewState> implements OnInit, OnDestroy {
     private readonly map = new Map<string, GroupItem>();
+    private readonly toolbar = inject(ToolbarService);
+    private readonly webSocketFactory = inject(WebSocketFactoryService);
+    private readonly currentLang: Signal<string>;
     private liveNodes: LiveNode[] = [];
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
-    public constructor(
-        route: ActivatedRoute,
-        api: EndpointsApi,
-        @Inject(VIEW_ROUTES) viewRoutes: ViewRoute[],
-        translate: TranslateService,
-        private readonly toolbar: ToolbarService,
-        private readonly webSocketFactory: WebSocketFactoryService,
-    ) {
-        super(route, api, viewRoutes, 'OperationalData');
+    public constructor() {
+        super(
+            inject(ActivatedRoute),
+            inject(EndpointsApi),
+            inject(VIEW_ROUTES),
+            'OperationalData',
+            inject(OperationalDataViewState),
+        );
 
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
+        const translate = inject(TranslateService);
+        const langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => langChange()?.lang ?? translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -120,9 +122,9 @@ export class OperationalDataView extends LeafView implements OnInit, OnDestroy {
         const stack: aas.Referable[] = [];
         stack.push(operationalData);
         while (stack.length > 0) {
-            const referale = stack.pop()!;
-            groups.push(this.createGroup(referale, getChildren(referale)));
-            for (const child of getChildren(referale)) {
+            const referable = stack.pop()!;
+            groups.push(this.createGroup(referable, getChildren(referable)));
+            for (const child of getChildren(referable)) {
                 if ((isSubmodelElementCollection(child) || isSubmodelElementList(child)) && child.value) {
                     stack.push(child);
                 }
