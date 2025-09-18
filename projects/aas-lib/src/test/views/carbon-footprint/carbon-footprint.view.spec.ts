@@ -9,8 +9,8 @@
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { of } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { first, of } from 'rxjs';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
@@ -19,10 +19,12 @@ import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 import carbon_footprint_0_9 from '../../assets/carbon-footprint-0-9.json';
 import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes} from '../../../lib/views/views-routes';
-import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint.view';
+import { viewRoutes } from '../../../lib/views/views-routes';
+import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint-view';
 import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { createSpyObj, FakeLoader } from '../../mocks';
+import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -43,19 +45,20 @@ export class TestThumbnailQRCode {
 export class TestCarbonFootprint {
     public readonly document = input<AASDocument>();
     public readonly collapsed = input(true);
+    public readonly state = input<CarbonFootprintState>();
 }
 
 describe('CarbonFootprintView', () => {
     let component: CarbonFootprintView;
     let fixture: ComponentFixture<CarbonFootprintView>;
-    let api: jasmine.SpyObj<EndpointsApi>;
-    let start: jasmine.SpyObj<StartService>;
-    let route: jasmine.SpyObj<ActivatedRoute>;
+    let api: jest.Mocked<EndpointsApi>;
+    let start: jest.Mocked<StartService>;
+    let route: jest.Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
-        api = jasmine.createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
-        start = jasmine.createSpyObj<StartService>(['add', 'save']);
+        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
+        start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
             crc32: 0,
@@ -67,27 +70,22 @@ describe('CarbonFootprintView', () => {
             content: carbon_footprint_0_9 as aas.Environment,
         };
 
-        route = jasmine.createSpyObj<ActivatedRoute>(
+        route = createSpyObj<ActivatedRoute>(
             {},
-            { queryParams: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
         );
 
-        api.getDocument.and.returnValue(of(document));
+        api.getDocument.mockReturnValue(of(document));
 
         await TestBed.configureTestingModule({
-            imports: [
-                CarbonFootprintView,
-                TranslateModule.forRoot({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
-                    },
-                }),
-            ],
             providers: [
                 {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
+                {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                    useValue: createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
                 },
                 {
                     provide: StartService,
@@ -101,9 +99,16 @@ describe('CarbonFootprintView', () => {
                     provide: VIEW_ROUTES,
                     useValue: viewRoutes,
                 },
-                provideRouter([]),
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+
                 provideZonelessChangeDetection(),
             ],
+            imports: [CarbonFootprintView],
         }).compileComponents();
 
         TestBed.overrideComponent(CarbonFootprintView, {
@@ -118,5 +123,33 @@ describe('CarbonFootprintView', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
+    it('should provide a state for the CarbonFootprint component', () => {
+        expect(component.carbonFootprintState).toBeInstanceOf(CarbonFootprintState);
+    });
+
+    it('indicates that 1 document is available', () => {
+        expect(component.count()).toBe(1);
+    });
+
+    it('shows the document with index 1', () => {
+        expect(component.index()).toBe(1);
+    });
+
+    it('adds a favorite to the start page', done => {
+        start.add.mockReturnValue(true);
+        start.save.mockReturnValue(of(void 0));
+        component
+            .addToStart()
+            .pipe(first())
+            .subscribe(() => {
+                expect(start.add).toHaveBeenCalled();
+                done();
+            });
     });
 });

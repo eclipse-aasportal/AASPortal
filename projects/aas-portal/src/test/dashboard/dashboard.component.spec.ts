@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY, Subject } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
 import { NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
@@ -22,6 +23,7 @@ import { DashboardChartItem, DashboardState } from '../../app/dashboard/dashboar
 import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
 
 import data from '../assets/test-pages.json';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-chart-edit',
@@ -37,34 +39,28 @@ export class TestChartEditComponent {
 
 describe('DashboardComponent', () => {
     let webSocketSubject: WebSocketSubject<WebSocketData>;
-    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
-    let start: jasmine.SpyObj<StartService>;
-    let service: jasmine.SpyObj<DashboardService>;
-    let window: jasmine.SpyObj<WindowService>;
-    const chart1 = '42';
-    const chart2 = '4711';
-    const chart3 = '0815';
+    let webSocketFactory: jest.Mocked<WebSocketFactoryService>;
+    let start: jest.Mocked<StartService>;
+    let service: jest.Mocked<DashboardService>;
+    let window: jest.Mocked<WindowService>;
 
     beforeEach(async () => {
         webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
-        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
-        webSocketFactory.create.and.returnValue(webSocketSubject);
-        start = jasmine.createSpyObj<StartService>(['add', 'save']);
+        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
+        webSocketFactory.create.mockReturnValue(webSocketSubject);
+        start = createSpyObj<StartService>(['add', 'save']);
 
         const pages: DashboardState = DashboardService.fromString(JSON.stringify(data));
 
-        service = jasmine.createSpyObj<DashboardService>(
-            ['getMemento', 'setMemento', 'save', 'updatePage', 'deletePage'],
-            {
-                editMode: signal(false),
-                pages: signal(pages).asReadonly(),
-                activePage: signal(pages[1]).asReadonly(),
-            },
-        );
+        service = createSpyObj<DashboardService>(['getMemento', 'setMemento', 'save', 'updatePage', 'deletePage'], {
+            editMode: signal(false),
+            pages: signal(pages).asReadonly(),
+            activePage: signal(pages[1]).asReadonly(),
+        });
 
-        service.save.and.returnValue(EMPTY);
+        service.save.mockReturnValue(EMPTY);
 
-        window = jasmine.createSpyObj<WindowService>(['prompt', 'addEventListener', 'removeEventListener'], {
+        window = createSpyObj<WindowService>(['prompt', 'addEventListener', 'removeEventListener'], {
             innerWidth: 700,
         });
 
@@ -76,11 +72,11 @@ describe('DashboardComponent', () => {
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: DashboardApiService,
-                    useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
+                    useValue: createSpyObj<DashboardApiService>(['getBlobValue']),
                 },
                 {
                     provide: WINDOW,
@@ -88,7 +84,7 @@ describe('DashboardComponent', () => {
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set']),
                 },
                 {
                     provide: StartService,
@@ -100,16 +96,15 @@ describe('DashboardComponent', () => {
                 },
                 provideRouter([]),
                 provideZonelessChangeDetection(),
-            ],
-            imports: [
-                DashboardComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
+                    fallbackLang: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
+            imports: [],
         }).compileComponents();
 
         TestBed.overrideComponent(DashboardComponent, {
@@ -191,7 +186,7 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            expect(component.editMode()).toBeFalse();
+            expect(component.editMode()).toBe(false);
         });
     });
 
@@ -204,16 +199,16 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            expect(component.editMode()).toBeTrue();
+            expect(component.editMode()).toBe(true);
         });
 
         it('can move item[1] to the left', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            let items = component.activePage().items;
+            const items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
-            expect(component.canMovePrevious()).toBeTrue();
+            expect(component.canMovePrevious()).toBe(true);
             component.movePrevious();
             expect(service.updatePage).toHaveBeenCalled();
         });
@@ -222,9 +217,9 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            let items = component.activePage().items;
+            const items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
-            expect(component.canMoveNext()).toBeTrue();
+            expect(component.canMoveNext()).toBe(true);
             component.moveNext();
             expect(service.updatePage).toHaveBeenCalled();
         });
@@ -241,7 +236,7 @@ describe('DashboardComponent', () => {
             const fixture = TestBed.createComponent(DashboardComponent);
             const component = fixture.componentInstance;
             fixture.detectChanges();
-            let items = component.activePage().items;
+            const items = component.activePage().items;
             component.toggleSelection(undefined, items[1]);
             component.delete();
             expect(service.updatePage).toHaveBeenCalled();

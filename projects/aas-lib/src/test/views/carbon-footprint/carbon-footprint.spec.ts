@@ -6,24 +6,28 @@
  *
  *****************************************************************************/
 
+import '@angular/localize/init';
+import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
-import { WINDOW, WindowService } from '../../../lib/services/window.service';
+
+import { WindowService } from '../../../lib/services/window.service';
+import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
+import { createSpyObj, FakeLoader } from '../../mocks';
+import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
 
 import carbon_footprint_1_0 from '../../assets/carbon-footprint-1-0.json';
-import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
-import { CARBON_FOOTPRINT_1_0 } from '../../../lib/views/views-constants';
 
 describe('CarbonFootprint', () => {
     let component: CarbonFootprint;
     let fixture: ComponentFixture<CarbonFootprint>;
-    let window: jasmine.SpyObj<WindowService>;
+    let window: jest.Mocked<WindowService>;
     let document: AASDocument;
 
     beforeEach(async () => {
-        window = jasmine.createSpyObj<WindowService>(['open'], {
+        window = createSpyObj<WindowService>(['open'], {
             location: { toString: () => 'https://www.fraunhofer.de' } as Location,
         });
 
@@ -39,48 +43,51 @@ describe('CarbonFootprint', () => {
         };
 
         await TestBed.configureTestingModule({
-            imports: [
-                CarbonFootprint,
-                TranslateModule.forRoot({
+            imports: [CarbonFootprint],
+            providers: [
+                CarbonFootprintState,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
-            ],
-            providers: [
-                {
-                    provide: WINDOW,
-                    useValue: window,
-                },
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(CarbonFootprint);
-        component = fixture.componentInstance;
+        fixture.componentRef.setInput('state', TestBed.inject(CarbonFootprintState));
+        fixture.componentRef.setInput('document', document);
         fixture.detectChanges();
+        component = fixture.componentInstance;
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should has a submodel', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
-        expect(component.submodel()).toBeDefined();
-    });
-
-    it('should has a semanticId', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
-        expect(component.semanticId()).toEqual(CARBON_FOOTPRINT_1_0);
-    });
-
     it('should has document items', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
         expect(component.items()).toBeDefined();
+    });
+
+    it('should has totalPcfCO2eq', () => {
+        expect(component.totalPcfCO2eq()).toEqual('0 undefined');
+    });
+
+    it('should has index', () => {
+        expect(component.index()).toEqual(1);
+    });
+
+    it('should has carbonFootprint', () => {
+        expect(component.item()).toBeDefined();
+    });
+
+    it('should has collapsed', () => {
+        expect(component.collapsed()).toBe(false);
+    });
+
+    it('should has count', () => {
+        expect(component.count()).toEqual(1);
     });
 });

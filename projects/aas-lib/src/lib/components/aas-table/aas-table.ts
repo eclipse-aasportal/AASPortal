@@ -13,7 +13,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
-    Inject,
     WritableSignal,
     computed,
     effect,
@@ -28,7 +27,6 @@ import { AASDocument } from 'aas-core';
 import { MaxLengthPipe } from '../../pipes/max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
 import { encodeBase64Url } from '../../utilities';
-import { WINDOW } from '../../services/window.service';
 
 /** Represents an AASDocument in the AASTable. */
 export class AASTableRow {
@@ -38,13 +36,12 @@ export class AASTableRow {
     ) {
         this.selected = signal(selected);
         this.thumbnail = this.document.thumbnail;
+        this.trackId = this.document.endpoint + '.' + this.document.id;
     }
 
     public readonly selected: WritableSignal<boolean>;
 
-    public get trackId(): string {
-        return this.document.endpoint + '.' + this.document.id;
-    }
+    public readonly trackId: string;
 
     public get id(): string {
         return this.document.id;
@@ -94,7 +91,6 @@ export class AASTable {
 
     public constructor(
         private readonly router: Router,
-        @Inject(WINDOW) private readonly window: Window,
         private readonly translate: TranslateService,
     ) {
         effect(() => {

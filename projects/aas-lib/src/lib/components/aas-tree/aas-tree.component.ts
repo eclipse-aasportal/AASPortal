@@ -8,20 +8,18 @@
 
 import { NgClass, NgStyle } from '@angular/common';
 import { Route, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
-    Inject,
     OnDestroy,
-    OnInit,
     computed,
     effect,
     input,
     output,
     DOCUMENT,
+    untracked,
+    inject,
 } from '@angular/core';
 
 import {
@@ -39,60 +37,68 @@ import {
     isReferenceElement,
     isOperation,
     isSubmodel,
-    equalDocument,
     isAssetAdministrationShell,
 } from 'aas-core';
 
-import { AASTree, AASTreeNode } from './aas-tree-node';
-import { OnlineState } from '../../types';
+import { AASTree, AASTreeNode, getValue } from './aas-tree-node';
+import { LiveState } from '../../types';
 import { AASTreeSearch } from './aas-tree-search';
-import { basename, encodeBase64Url } from '../../utilities';
+import { encodeBase64Url } from '../../utilities';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { LogType, NotifyService } from '../notify/notify.service';
 import { findRouteForShell, findRouteForSubmodel } from '../../views/views-routes';
 
-import { AASTreeApiService } from './aas-tree-api.service';
-import { AASTreeStore } from './aas-tree.store';
-import { WINDOW, WindowService } from '../../services/window.service';
+import { AASTreeApi } from './aas-tree-api';
+import { WINDOW } from '../../services/window.service';
+import { FormsModule } from '@angular/forms';
+import { AASTreeData, AASTreeState } from './aas-tree.state';
+import { ChildComponent } from '../child-component';
 
+/**
+ * Presents the contents of an Asset Administration Shell as a tree.
+ */
 @Component({
     selector: 'fhg-aas-tree',
     templateUrl: './aas-tree.component.html',
     styleUrls: ['./aas-tree.component.scss'],
-    imports: [RouterLink, NgClass, NgStyle, TranslateModule],
-    providers: [AASTreeSearch, AASTreeApiService],
+    imports: [FormsModule, RouterLink, NgClass, NgStyle],
+    providers: [AASTreeSearch, AASTreeApi, AASTreeState],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AASTreeComponent implements OnInit, OnDestroy {
+export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> implements OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, AASTreeNode>();
-    private readonly subscription = new Subscription();
-
+    private readonly search = inject(AASTreeSearch);
+    private readonly window = inject(WINDOW);
+    private readonly dom = inject(DOCUMENT);
+    private readonly notify = inject(NotifyService);
+    private readonly webSocketFactory = inject(WebSocketFactoryService);
+    private shiftKey = false;
+    private altKey = false;
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
-    public constructor(
-        private readonly store: AASTreeStore,
-        private readonly searching: AASTreeSearch,
-        @Inject(WINDOW) private readonly window: WindowService,
-        @Inject(DOCUMENT) private readonly dom: Document,
-        private readonly translate: TranslateService,
-        private readonly notify: NotifyService,
-        private readonly webSocketFactory: WebSocketFactoryService,
-    ) {
+    public constructor() {
+        super();
+
         effect(() => {
-            this.searching.start(this.searchExpression());
+            this.search.start(untracked(this.state().contents), this.searchExpression());
         });
 
         effect(() => {
             const document = this.document();
-            if (!equalDocument(document, this.store.document)) {
-                this.store.document = document;
-                this.updateRows(document);
+            const value = untracked(this.state().document);
+            if (value === null || document?.endpoint !== value.endpoint || document?.id !== value.id) {
+                this.update(document);
             }
         });
 
         effect(() => {
-            if (this.state() === 'online') {
+            const currentLang = this.currentLang();
+            untracked(this.state().contents).forEach(node => node.value.set(getValue(node.element, currentLang)));
+        });
+
+        effect(() => {
+            if (this.live() === 'online') {
                 this.goOnline();
             } else {
                 this.goOffline();
@@ -100,19 +106,20 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         });
 
         effect(() => {
-            this.selected.emit(this.store.selectedElements$());
+            const contents = this.state().contents();
+            this.selected.emit(contents.filter(node => node.selected).map(item => item.element));
         });
 
         effect(() => {
-            const matchIndex = this.matchIndex();
-            if (matchIndex >= 0) {
-                this.store.expandRow(matchIndex);
+            const matchIndex = this.search.matchIndex();
+            this.highlightNode(matchIndex);
+        });
+
+        effect(() => {
+            const row = this.matchNode();
+            if (!row) {
+                return;
             }
-        });
-
-        effect(() => {
-            const row = this.matchRow();
-            if (!row) return;
 
             setTimeout(() => {
                 const element = this.dom.getElementById(row.id);
@@ -124,39 +131,56 @@ export class AASTreeComponent implements OnInit, OnDestroy {
         this.window.addEventListener('keydown', this.keydown);
     }
 
+    /** The state management service. */
+    public override readonly state = input.required<AASTreeState>();
+
+    /** The AAS document. */
     public readonly document = input<AASDocument | null>(null);
 
-    public readonly state = input<OnlineState>('offline');
+    /** The current live status. */
+    public readonly live = input<LiveState>('offline');
 
+    /** The current search expression. */
     public readonly searchExpression = input<string>('');
 
+    /** The selected AAS structure elements. */
     public readonly selected = output<aas.Referable[]>();
 
+    /** Indicates whether the current AAS can provide live data. */
     public readonly onlineReady = computed(() => this.document()?.onlineReady ?? false);
 
+    /** Indicates whether the current AAS can be edited. */
     public readonly readonly = computed(() => this.document()?.readonly ?? true);
 
+    /** Indicates whether the AAS is modified. */
     public readonly modified = computed(() => this.document()?.modified ?? false);
 
+    /** Indicates whether at least one node is selected, but not all nodes. */
     public readonly someSelected = computed(() => {
-        const rows = this.store.state$().rows;
-        return rows.length > 0 && rows.some(row => row.selected) && !rows.every(row => row.selected);
+        const contents = this.state().contents();
+        return contents.length > 0 && contents.some(node => node.selected) && !contents.every(row => row.selected);
     });
 
+    /** Indicates whether all nodes are selected. */
     public readonly everySelected = computed(() => {
-        const rows = this.store.state$().rows;
-        return rows.length > 0 && rows.every(row => row.selected);
+        const contents = this.state().contents();
+        return contents.length > 0 && contents.every(node => node.selected);
     });
 
-    public readonly nodes = computed(() => this.store.state$().nodes);
+    /** The visible nodes of the tree. */
+    public readonly nodes = computed(() => this.state().nodes());
 
-    public readonly expanded = computed(() => this.store.state$().expanded);
+    /** Indicates whether the tree is fully expanded. */
+    public readonly expanded = computed(() => this.state().expanded());
 
-    public readonly matchIndex = computed(() => this.store.state$().matchIndex);
+    /** The index of the current node that matches a search expression. */
+    public readonly matchIndex = this.search.matchIndex;
 
-    public readonly matchRow = computed(() => {
-        const state = this.store.state$();
-        return state.matchIndex >= 0 ? state.rows[state.matchIndex] : undefined;
+    /** The current node that matches a search expression. */
+    public readonly matchNode = computed(() => {
+        const matchIndex = this.search.matchIndex();
+        const contents = untracked(this.state().contents);
+        return matchIndex >= 0 ? contents[matchIndex] : undefined;
     });
 
     public readonly message = computed(() => {
@@ -168,23 +192,14 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
             return stringFormat(
                 this.translate.instant('INFO_AAS_OFFLINE'),
-                new Date(document.timestamp).toLocaleString(this.translate.currentLang),
+                new Date(document.timestamp).toLocaleString(untracked(this.currentLang)),
             );
         }
 
         return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
     });
 
-    public ngOnInit(): void {
-        this.subscription.add(
-            this.translate.onLangChange.subscribe(() => {
-                this.updateRows(this.document());
-            }),
-        );
-    }
-
     public ngOnDestroy(): void {
-        this.subscription.unsubscribe();
         this.webSocketSubject?.unsubscribe();
         this.window.removeEventListener('keyup', this.keyup);
         this.window.removeEventListener('keydown', this.keydown);
@@ -207,35 +222,45 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     public expand(node?: AASTreeNode): void {
         if (node) {
             if (!node.expanded) {
-                this.store.expandRow(node);
+                this.expandNode(node);
             }
         } else {
-            this.store.expand();
-            this.store.state$.update(state => ({ ...state, expanded: true }));
+            this.expandAll();
+            this.state().update({ expanded: true });
         }
     }
 
     public collapse(node?: AASTreeNode): void {
         if (node) {
             if (node.expanded) {
-                this.store.collapseRow(node);
+                this.collapseRow(node);
             }
         } else {
-            this.store.collapse();
-            this.store.state$.update(state => ({ ...state, expanded: false }));
+            this.collapseAll();
+            this.state().update({ expanded: false });
         }
     }
 
     public toggleSelections(): void {
-        this.store.toggleSelections();
+        const tree = new AASTree(this.state().contents());
+        tree.toggleSelections();
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+        });
     }
 
     public toggleSelection(node: AASTreeNode): void {
-        this.store.toggleSelected(node, this.store.altKey, this.store.shiftKey);
+        const tree = new AASTree(this.state().contents());
+        tree.toggleSelected(node, this.altKey, this.shiftKey);
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+        });
     }
 
     public getReferenceUrl(reference: aas.Reference | string | undefined): string | undefined {
-        if (!reference || this.state() === 'online') {
+        if (!reference || this.live() === 'online') {
             return undefined;
         }
 
@@ -276,7 +301,7 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     public getRouterLink(node: AASTreeNode): unknown[] | undefined {
         const document = this.document();
         const identifiable = node.element;
-        if (node === undefined || this.state() === 'online' || document === null) {
+        if (node === undefined || this.live() === 'online' || document === null) {
             return undefined;
         }
 
@@ -299,60 +324,115 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     }
 
     public findNext(): void {
-        this.searching.findNext();
+        this.search.findNext();
     }
 
     public findPrevious(): void {
-        this.searching.findPrevious();
+        this.search.findPrevious();
     }
 
-    public toString(value: aas.Reference | undefined): string {
-        if (!value) {
-            return '-';
+    // public toString(value: aas.Reference | undefined): string {
+    //     if (!value) {
+    //         return '-';
+    //     }
+
+    //     return value.keys.map(key => key.value).join('.');
+    // }
+
+    private expandNode(node: AASTreeNode): void {
+        const tree = new AASTree(untracked(this.state().contents));
+        tree.expand(node);
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+        });
+    }
+
+    private highlightNode(matchIndex: number): void {
+        const tree = new AASTree(untracked(this.state().contents));
+        if (matchIndex >= 0) {
+            tree.expand(matchIndex);
         }
 
-        return value.keys.map(key => key.value).join('.');
+        tree.highlight(matchIndex);
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+            matchIndex,
+        });
     }
 
-    private updateRows(document: AASDocument | null): void {
-        try {
-            if (document) {
-                const tree = AASTree.from(document, this.translate.currentLang);
-                this.store.state$.update(state => ({
-                    ...state,
-                    matchIndex: -1,
-                    rows: tree.nodes,
-                    nodes: tree.expanded,
-                }));
-            } else {
-                this.store.state$.update(state => ({
-                    ...state,
-                    matchIndex: -1,
-                    rows: [],
-                    nodes: [],
-                }));
-            }
-        } catch (error) {
-            this.notify.error(error);
+    private collapseRow(row: AASTreeNode): void {
+        const tree = new AASTree(untracked(this.state().contents));
+        tree.collapse(row);
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+        });
+    }
+
+    private collapseAll(): void {
+        const tree = new AASTree(untracked(this.state().contents));
+        tree.collapse();
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+        });
+    }
+
+    private expandAll(): void {
+        const tree = new AASTree(untracked(this.state().contents));
+        tree.expand();
+        this.state().update({
+            contents: tree.contents,
+            nodes: tree.nodes,
+        });
+    }
+
+    private update(document: AASDocument | null): void {
+        if (document) {
+            const tree = AASTree.from(document, untracked(this.currentLang));
+            this.state().update({
+                document,
+                matchIndex: -1,
+                contents: tree.contents,
+                nodes: tree.nodes,
+            });
+        } else {
+            this.state().update({
+                document: null,
+                matchIndex: -1,
+                contents: [],
+                nodes: [],
+            });
         }
     }
 
     private getFileURL(file: aas.File): string | undefined {
-        if (!file.value || this.state() === 'online') {
+        if (this.live() === 'online') {
             return undefined;
         }
 
-        const { url } = this.resolveFile(file);
-        if (url === undefined) {
-            return;
+        const document = this.document();
+        if (!document?.content || !file.value) {
+            return undefined;
         }
 
-        return url;
+        const submodel = selectSubmodel(document.content, file);
+        if (!submodel) {
+            return undefined;
+        }
+
+        const smId = encodeBase64Url(submodel.id);
+        const path = getIdShortPath(file);
+        const name = encodeBase64Url(document.endpoint);
+        const id = encodeBase64Url(document.id);
+        return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
     }
 
     private getBlobUrl(blob: aas.Blob): string | undefined {
         const document = this.document();
-        if (!document || !blob.parent || this.state() === 'online') {
+        if (!document || !blob.parent || this.live() === 'online') {
             return undefined;
         }
 
@@ -363,7 +443,11 @@ export class AASTreeComponent implements OnInit, OnDestroy {
 
     private goOnline(): void {
         try {
-            this.prepareOnline(this.store.rows.filter(row => row.selected));
+            this.prepareOnline(
+                this.state()
+                    .contents()
+                    .filter(node => node.selected),
+            );
             this.play();
         } catch {
             this.stop();
@@ -420,19 +504,20 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     }
 
     private onMessage = (data: WebSocketData): void => {
-        if (data.type === 'LiveNode[]') {
-            for (const node of data.data as LiveNode[]) {
-                const row = this.map.get(node.nodeId);
-                if (row === undefined) {
-                    continue;
-                }
+        if (data.type !== 'LiveNode[]') {
+            return;
+        }
 
-                row.value.set(
-                    typeof node.value === 'boolean'
-                        ? node.value
-                        : convertToString(node.value, this.translate.currentLang),
-                );
+        const currentLang = untracked(this.currentLang);
+        for (const liveNode of data.data as LiveNode[]) {
+            const node = this.map.get(liveNode.nodeId);
+            if (node === undefined) {
+                continue;
             }
+
+            node.value.set(
+                typeof liveNode.value === 'boolean' ? liveNode.value : convertToString(liveNode.value, currentLang),
+            );
         }
     };
 
@@ -441,30 +526,12 @@ export class AASTreeComponent implements OnInit, OnDestroy {
     };
 
     private keyup = () => {
-        this.store.shiftKey = false;
-        this.store.altKey = false;
+        this.shiftKey = false;
+        this.altKey = false;
     };
 
     private keydown = (event: KeyboardEvent) => {
-        this.store.shiftKey = event.shiftKey;
-        this.store.altKey = event.altKey;
+        this.shiftKey = event.shiftKey;
+        this.altKey = event.altKey;
     };
-
-    private resolveFile(file: aas.File): { url?: string; name?: string } {
-        const value: { url?: string; name?: string } = {};
-        const document = this.document();
-        if (document?.content && file.value) {
-            const submodel = selectSubmodel(document.content, file);
-            if (submodel) {
-                const smId = encodeBase64Url(submodel.id);
-                const path = getIdShortPath(file);
-                value.name = basename(file.value);
-                const name = encodeBase64Url(document.endpoint);
-                const id = encodeBase64Url(document.id);
-                value.url = `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
-            }
-        }
-
-        return value;
-    }
 }

@@ -1,0 +1,163 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import '@angular/localize/init';
+import { jest } from '@jest/globals';
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { of } from 'rxjs';
+import { AASDocument } from 'aas-core';
+
+import { EndpointsApi } from '../../../lib/services/endpoints-api';
+import { ToolbarService } from '../../../lib/services/toolbar.service';
+import { StartService } from '../../../lib/services/start.service';
+import { encodeBase64Url } from '../../../lib/utilities';
+import { VIEW_ROUTES } from '../../../lib/types';
+import { viewRoutes } from '../../../lib/views/views-routes';
+import { DigitalProductPassportView } from '../../../lib/views/digital-product-passport/digital-product-passport-view';
+import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
+import { createSpyObj, FakeLoader } from '../../mocks';
+import { Nameplate } from '../../../lib/views/nameplate/nameplate';
+import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
+import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
+import { NameplateState } from '../../../lib/views/nameplate/nameplate.state';
+import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
+import { HandoverDocumentationState } from '../../../lib/views/handover-documentation/handover-documentation.state';
+
+import sample from '../../assets/dpp-sample.json';
+
+@Component({
+    selector: 'fhg-thumbnail-qrcode',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestThumbnailQRCode {
+    public readonly document = input<AASDocument>();
+}
+
+@Component({
+    selector: 'fhg-nameplate',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestNameplate {
+    public readonly document = input<AASDocument>();
+    public readonly state = input<NameplateState>()
+}
+
+@Component({
+    selector: 'fhg-carbon-footprint',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestCarbonFootprint {
+    public readonly document = input<AASDocument>();
+    public readonly state = input<CarbonFootprintState>()
+}
+
+@Component({
+    selector: 'fhg-handover-documentation',
+    template: '<div></div>',
+    styleUrls: [],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestHandoverDocumentation {
+    public readonly document = input<AASDocument>();
+    public readonly collapsed = input<boolean>();
+    public readonly state = input<HandoverDocumentationState>()
+}
+
+describe('DigitalProductPassportView', () => {
+    let api: jest.Mocked<EndpointsApi>;
+    let start: jest.Mocked<StartService>;
+    let route: jest.Mocked<ActivatedRoute>;
+
+    beforeEach(async () => {
+        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
+        start = createSpyObj<StartService>(['add', 'save']);
+        route = createSpyObj<ActivatedRoute>(
+            {},
+            { params: of({ endpoint: encodeBase64Url(sample.endpoint), id: encodeBase64Url(sample.id) }) },
+        );
+
+        api.getDocument.mockReturnValue(of(sample as AASDocument));
+
+        await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
+                {
+                    provide: ToolbarService,
+                    useValue: createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
+                {
+                    provide: EndpointsApi,
+                    useValue: api,
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: viewRoutes,
+                },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+                provideZonelessChangeDetection(),
+            ],
+            imports: [DigitalProductPassportView],
+        }).compileComponents();
+
+        TestBed.overrideComponent(DigitalProductPassportView, {
+            remove: { imports: [ThumbnailQRCode, Nameplate, CarbonFootprint, HandoverDocumentation] },
+            add: { imports: [TestThumbnailQRCode, TestNameplate, TestCarbonFootprint, TestHandoverDocumentation] },
+        });
+    });
+
+    it('should create', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component).toBeTruthy();
+    });
+
+    it('mainData', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.mainData().productType).toEqual('tortoise');
+        expect(component.mainData().serialNumber).toEqual('00000001');
+        expect(component.mainData().uriOfTheProduct).toEqual('https://smartfactory-owl.de/3dl/__turtle/__00000001');
+    });
+
+    it('hazardStatement', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.hazardStatement()).toEqual('Choking Hazard!');
+    });
+
+    it('hazardSymbol', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.hazardSymbol).toBeTruthy();
+    });
+});

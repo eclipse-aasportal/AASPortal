@@ -8,17 +8,17 @@
 
 <div ngbAccordion>
     @for (dataSheet of dataSheets(); track dataSheet; let i = $index) {
-    <div ngbAccordionItem [collapsed]="i !== 0">
-        <h2 ngbAccordionHeader>
-            <button ngbAccordionButton>{{dataSheet.name}}</button>
-        </h2>
-        <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-                <ng-template>
-                    <fhg-data-sheet [dataSheet]="dataSheet"></fhg-data-sheet>
-                </ng-template>
+        <div ngbAccordionItem [collapsed]="i !== 0">
+            <h2 ngbAccordionHeader>
+                <button ngbAccordionButton>{{ dataSheet.name }}</button>
+            </h2>
+            <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                    <ng-template>
+                        <fhg-data-sheet [dataSheet]="dataSheet"></fhg-data-sheet>
+                    </ng-template>
+                </div>
             </div>
         </div>
-    </div>
     }
 </div>

@@ -8,12 +8,13 @@
 
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTable } from '../../../lib/components/aas-table/aas-table';
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { createDocument } from '../../assets/test-document';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AASTableComponent', () => {
     let document1: AASDocument;
@@ -29,7 +30,7 @@ describe('AASTableComponent', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error', 'info', 'log']),
+                    useValue: createSpyObj<NotifyService>(['error', 'info', 'log']),
                 },
                 provideZonelessChangeDetection(),
             ],
@@ -38,7 +39,7 @@ describe('AASTableComponent', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],

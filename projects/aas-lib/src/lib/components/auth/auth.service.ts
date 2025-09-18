@@ -112,7 +112,7 @@ export class AuthService {
 
     /**
      * Ensures that the current user has the expected rights.
-     * @param role The expected user role.
+     * @param roles The expected user roles.
      */
     public ensureAuthorized(...roles: UserRole[]): Observable<void> {
         if (this.isAuthorized(roles)) {

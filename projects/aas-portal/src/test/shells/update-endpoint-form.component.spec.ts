@@ -9,22 +9,24 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { UpdateEndpointFormComponent } from '../../app/shells/update-endpoint-form/update-endpoint-form.component';
+import { FakeLoader } from '../mocks';
 
 describe('UpdateEndpointFormComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [NgbActiveModal, provideZonelessChangeDetection()],
-            imports: [
-                UpdateEndpointFormComponent,
-                TranslateModule.forRoot({
+            providers: [
+                NgbActiveModal,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [UpdateEndpointFormComponent],
         }).compileComponents();
     });
 

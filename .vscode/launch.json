@@ -36,20 +36,6 @@
             }
         },
         {
-            "name": "Test aas-portal",
-            "type": "chrome",
-            "request": "attach",
-            "preLaunchTask": "test-aas-portal",
-            "url": "http://localhost:9876/debug.html",
-        },
-        {
-            "name": "Test aas-lib",
-            "type": "chrome",
-            "request": "attach",
-            "preLaunchTask": "test-aas-lib",
-            "url": "http://localhost:9876/debug.html",
-        },
-        {
             "name": "Test aas-node",
             "type": "node",
             "request": "launch",
@@ -104,6 +90,38 @@
                 "--testPathPattern",
                 "${fileBasename}"
             ]
-        }
+        },
+        {
+            "name": "Debug current aas-lib test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "aas-lib",
+                "--testPathPattern",
+                "${fileBasename}",
+                "--coverage=false"
+            ]
+        },
+        {
+            "name": "Debug current aas-portal test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "aas-portal",
+                "--testPathPattern",
+                "--coverage=false",
+                "${fileBasename}"
+            ]
+        },
     ]
 }

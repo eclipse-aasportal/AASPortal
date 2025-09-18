@@ -6,17 +6,19 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthService } from 'aas-lib';
 import { AASDocument } from 'aas-core';
 import { FavoritesList, FavoritesService, FavoritesState } from '../../app/shells/favorites.service';
+import { createSpyObj, DoneFn, FakeLoader } from '../mocks';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;
-    let auth: jasmine.SpyObj<AuthService>;
+    let auth: jest.Mocked<AuthService>;
     const favorite: AASDocument = {
         address: 'http://localhost/aas',
         crc32: 0,
@@ -40,10 +42,10 @@ describe('FavoritesService', () => {
     };
 
     beforeEach(() => {
-        auth = jasmine.createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
-        auth.getCookie.and.returnValue(of(JSON.stringify(state)));
-        auth.setCookie.and.returnValue(of(void 0));
-        auth.deleteCookie.and.returnValue(of(void 0));
+        auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
+        auth.getCookie.mockReturnValue(of(JSON.stringify(state)));
+        auth.setCookie.mockReturnValue(of(void 0));
+        auth.deleteCookie.mockReturnValue(of(void 0));
 
         TestBed.configureTestingModule({
             providers: [
@@ -58,7 +60,7 @@ describe('FavoritesService', () => {
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
@@ -85,11 +87,11 @@ describe('FavoritesService', () => {
 
     describe('has', () => {
         it('has "My Favorites"', () => {
-            expect(service.has('My Favorites')).toBeTrue();
+            expect(service.has('My Favorites')).toBe(true);
         });
 
         it('has not "Unknown"', () => {
-            expect(service.has('Unknown')).toBeFalse();
+            expect(service.has('Unknown')).toBe(false);
         });
     });
 

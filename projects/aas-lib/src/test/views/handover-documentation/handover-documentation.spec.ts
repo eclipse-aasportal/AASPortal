@@ -6,12 +6,14 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
-import { HANDOVER_DOCUMENTATION_1_2 } from '../../../lib/views/views-constants';
+import { FakeLoader } from '../../mocks';
+import { HandoverDocumentationState } from '../../../lib/views/handover-documentation/handover-documentation.state';
 
 import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
 
@@ -19,6 +21,7 @@ describe('HandoverDocumentation', () => {
     let component: HandoverDocumentation;
     let fixture: ComponentFixture<HandoverDocumentation>;
     let document: AASDocument;
+    let state: Partial<HandoverDocumentationState>;
 
     beforeEach(async () => {
         document = {
@@ -32,20 +35,28 @@ describe('HandoverDocumentation', () => {
             content: handoverDocumentation_1_2 as aas.Environment,
         };
 
+        state = {
+            items: signal([]).asReadonly(),
+            document: signal(null).asReadonly(),
+            update: jest.fn(),
+        };
+
         await TestBed.configureTestingModule({
-            imports: [
-                HandoverDocumentation,
-                TranslateModule.forRoot({
+            imports: [HandoverDocumentation],
+            providers: [
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
-            providers: [provideZonelessChangeDetection()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(HandoverDocumentation);
+        fixture.componentRef.setInput('state', state);
+        fixture.componentRef.setInput('document', document);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
@@ -55,26 +66,14 @@ describe('HandoverDocumentation', () => {
     });
 
     it('should has a document', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
         expect(component.document()).toBeDefined();
     });
 
-    it('should has a submodel', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
-        expect(component.submodel()).toBeDefined();
-    });
-
-    it('should has a semanticId', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
-        expect(component.semanticId()).toEqual(HANDOVER_DOCUMENTATION_1_2);
-    });
-
     it('should has document items', () => {
-        fixture.componentRef.setInput('document', document);
-        fixture.detectChanges();
         expect(component.items()).toBeDefined();
+    });
+
+    it('should has collapsed', () => {
+        expect(component.collapsed()).toBe(false);
     });
 });
