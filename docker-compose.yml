@@ -59,8 +59,6 @@ services:
     restart: always
     ports:
       - 8080:80
-    links:
-      - aasportal-cloud-db
     volumes:
       - nextcloud:/var/www/html
     environment:
@@ -71,6 +69,8 @@ services:
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
       - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
+    depends_on:
+      - aasportal-cloud-db
 
   aas-node:
     container_name: aas-node
