@@ -1,5 +1,5 @@
 # Creates an all-in-one Docker image
-ARG NODE_IMAGE=${NODE_IMAGE}
+ARG NODE_IMAGE=node:22.16.0-alpine
 
 FROM $NODE_IMAGE AS build
 WORKDIR /usr/src/app
