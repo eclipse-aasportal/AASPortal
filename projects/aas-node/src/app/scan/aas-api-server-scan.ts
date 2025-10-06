@@ -6,12 +6,11 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'aas-core';
+import { AASDocument, PagedResult } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { ApiClient, AASLabel } from '../package/api/api-client.js';
 import { ApiPackage } from '../package/api/api-package.js';
 import { AASServerScan } from './aas-server-scan.js';
-import { PagedResult } from '../types/paged-result.js';
 
 export class AASApiServerScan extends AASServerScan {
     private readonly logger: Logger;

@@ -76,9 +76,9 @@ export interface AASDocumentId {
 
 /** Represents an Asset Administration Shell */
 export interface AASDocument extends AASDocumentId {
-    /** The address of the AAS in the container. */
+    /** The address of the AAS in the endpoint. */
     address: string;
-    /** The root element of the AAS structure (content), `null` if the content is not loaded or
+    /** The document content of type `Environment`, `null` if the content is not loaded or
      * `undefined` if the content is not available. */
     content?: aas.Environment | null;
     /** Checksum to detect changes. */
@@ -227,4 +227,30 @@ export interface AASNodeMessage {
     endpoint?: AASEndpoint;
     /** The document if type `Added`, `Removed` or `Changed` */
     document?: AASDocument;
+}
+
+/**
+ * Additional information for the client to, e.g. fetch the next part of the result set.
+ */
+export interface PagingMetadata {
+    /**
+     * The cursor for the next part of the result set. No cursor attribute means that the end of
+     * the result set has been reached.
+     */
+    cursor?: string;
+}
+
+/**
+ * An object connecting the actual list of returned items with metadata information to,
+ * e.g. fetch the next part of the result set.
+ */
+export interface PagedResult<T> {
+    /**
+     * List of returned items.
+     */
+    result: T[];
+    /**
+     * Additional information for the client to, e.g. fetch the next part of the result set.
+     */
+    paging_metadata: PagingMetadata;
 }

@@ -10,6 +10,7 @@ import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import {
     AuthInterceptor,
     CustomerFeedbackCardComponent,
@@ -24,7 +25,6 @@ import {
 import { routes } from './app.routes';
 import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
-import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 export const appConfig: ApplicationConfig = {
     providers: [

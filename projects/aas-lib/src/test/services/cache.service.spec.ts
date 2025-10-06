@@ -6,32 +6,17 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Subject } from 'rxjs';
 
-import { WebSocketData } from 'aas-core';
 import { CacheService } from '../../lib/services/cache.service';
-import { IndexChangeService } from '../../lib/services/index-change.service';
-import { createSpyObj, DoneFn } from '../mocks';
 
 describe('CacheService', () => {
     let service: CacheService;
-    let indexChange: jest.Mocked<IndexChangeService>;
-    let message = new Subject<WebSocketData>();
 
     beforeEach(() => {
-        indexChange = createSpyObj<IndexChangeService>(['clear'], { message: message.asObservable() });
-
         TestBed.configureTestingModule({
-            providers: [
-                {
-                    provide: IndexChangeService,
-                    useValue: indexChange,
-                },
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideZonelessChangeDetection()],
         });
 
         service = TestBed.inject(CacheService);
@@ -75,13 +60,9 @@ describe('CacheService', () => {
             service.set('http://the/answer/to/all/questions', 42);
         });
 
-        it('clears the cache if the IndexChangeService receives a message', (done: DoneFn) => {
-            message.subscribe(() => {
-                expect(service.get('http://the/answer/to/all/questions')).toBeUndefined();
-                done();
-            });
-
-            message.next({ type: 'AnyMessage', data: 42 } satisfies WebSocketData);
+        it('clears the cache', () => {
+            service.clear();
+            expect(service.get('http://the/answer/to/all/questions')).toBeUndefined();
         });
     });
 });

@@ -65,7 +65,7 @@ export class WSNode extends EventEmitter {
         });
 
         this.server.listen(this.variable.AAS_NODE_PORT, () => {
-            this.logger.info(`AAS-Server listening on ${this.variable.AAS_NODE_PORT}`);
+            this.logger.info(`AASNode listening on ${this.variable.AAS_NODE_PORT}`);
         });
     }
 

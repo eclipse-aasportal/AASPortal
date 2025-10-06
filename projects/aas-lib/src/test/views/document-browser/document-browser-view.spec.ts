@@ -45,7 +45,8 @@ export class TestThumbnailQRCode {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestBrowserComponent {
-    public readonly document = input<AASDocument | null | undefined>(undefined);
+    public readonly env = input<aas.Environment | null | undefined>(undefined);
+    public readonly endpoint = input<string | null>(null)
     public readonly state = input<BrowserState>();
 }
 

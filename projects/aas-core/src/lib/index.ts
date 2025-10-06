@@ -20,6 +20,12 @@ export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
 export * from './cache.js';
+export * as common from './aas-core/common.js';
+export * as constants from './aas-core/constants.js';
+export * as jsonization from './aas-core/jsonization.js';
+export * as stringification from './aas-core/stringification.js';
+export * as types from './aas-core/types.js';
+export * as verification from './aas-core/verification.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function noop(...args: unknown[]) {}
