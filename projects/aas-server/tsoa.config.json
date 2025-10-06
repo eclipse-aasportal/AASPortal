@@ -1,0 +1,36 @@
+{
+    "entryFile": "src/app/app.ts",
+    "noImplicitAdditionalProperties": "ignore",
+    "controllerPathGlobs": [
+        "src/app/controller/*controller.ts"
+    ],
+    "spec": {
+        "outputDirectory": "./src/assets",
+        "specVersion": 3,
+        "basePath": "/api/v3",
+        "schemes": [
+            "http"
+        ],
+        "securityDefinitions": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            },
+            "api_key": {
+                "type": "apiKey",
+                "name": "access_token",
+                "in": "query"
+            }
+        },
+        "yaml": false
+    },
+    "routes": {
+        "routesDir": "./src/app/routes",
+        "basePath": "/api/v3",
+        "iocModule": "src/app/controller/ioc-container",
+        "middleware": "express",
+        "authenticationModule": "./src/app/controller/authentication",
+        "esm": true
+    }
+}

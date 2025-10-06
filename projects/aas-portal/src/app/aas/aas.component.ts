@@ -54,6 +54,21 @@ import { DashboardChartType, DashboardPage } from '../dashboard/dashboard-types'
     imports: [TranslateModule, FormsModule, AASTreeComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/**
+ * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
+ * Handles document viewing, live mode operations, dashboard integration, and element manipulation.
+ *
+ * @remarks
+ * This component provides features including:
+ * - Document viewing and modification
+ * - Live mode controls (play/stop)
+ * - Dashboard integration
+ * - Element creation, editing, and deletion
+ * - Undo/Redo operations
+ * - Search functionality
+ * - Document synchronization
+ * - Download capabilities
+ */
 export class AASComponent implements OnInit, OnDestroy {
     private readonly state = inject(AASState);
     private readonly router = inject(Router);
@@ -70,14 +85,18 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public constructor() {
         effect(() => {
-            const aasToolbar = this.aasToolbar();
-            if (aasToolbar !== undefined) {
-                this.toolbar.set(aasToolbar);
+            const toolbarTemplate = this.toolbarTemplate();
+            if (toolbarTemplate !== undefined) {
+                this.toolbar.set(toolbarTemplate);
             }
         });
     }
 
-    public readonly aasToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
+    /**
+     * A template reference that defines the toolbar layout.
+     * Accessed via ViewChild decorator targeting an element with the 'toolbar' template reference variable.
+     */
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public readonly treeState = this.state.treeState;
 
@@ -126,10 +145,27 @@ export class AASComponent implements OnInit, OnDestroy {
         return document != null && !document.readonly && document.modified ? document.modified : false;
     });
 
+    /**
+     * Computed signal that determines if a new element can be created.
+     * Returns true if exactly one element is selected, false otherwise.
+     * @readonly
+     * @returns {Signal<boolean>} A signal indicating whether a new element can be created
+     */
     public readonly canNewElement = computed(() => this.selectedElements().length === 1);
 
+    /**
+     * Computed signal that determines if editing is allowed for the selected elements.
+     * Returns true when exactly one element is selected, false otherwise.
+     *
+     * @returns {Signal<boolean>} A signal containing true if exactly one element is selected, false otherwise
+     */
     public readonly canEditElement = computed(() => this.selectedElements().length === 1);
 
+    /**
+     * Computed signal that determines if the selected elements can be deleted.
+     * Returns true if there are selected elements and none of them are Asset Administration Shells.
+     * @returns {boolean} True if elements can be deleted, false otherwise.
+     */
     public readonly canDeleteElement = computed(() => {
         const selectedElements = this.selectedElements();
         return (
@@ -137,6 +173,17 @@ export class AASComponent implements OnInit, OnDestroy {
         );
     });
 
+    /**
+     * Computed signal that determines if selected elements can be added to the dashboard.
+     *
+     * @returns {boolean} True if:
+     * - A dashboard page is selected
+     * - At least one element is selected
+     * - All selected elements are either number properties or time series
+     *
+     * @remarks
+     * This is used to enable/disable dashboard-related functionality based on the current selection state.
+     */
     public readonly canAddToDashboard = computed(() => {
         const selectedElements = this.selectedElements();
         return (
@@ -147,7 +194,7 @@ export class AASComponent implements OnInit, OnDestroy {
     });
 
     public ngOnInit(): void {
-        this.route.queryParams.pipe(first()).subscribe(params => {
+        this.route.params.pipe(first()).subscribe(params => {
             if (params.search) {
                 this.state.update({ searchExpression: params.search });
             }
@@ -166,6 +213,12 @@ export class AASComponent implements OnInit, OnDestroy {
         this.toolbar.clear();
     }
 
+    /**
+     * Retrieves the thumbnail image URL for the current document.
+     *
+     * @returns {string} The URL of the thumbnail image. If no thumbnail is set in the document,
+     * returns the default AAS thumbnail path '/assets/resources/aas-idta.png'
+     */
     public getThumbnail(): string {
         const thumbnail = this.document()?.thumbnail;
         if (thumbnail) {
@@ -175,10 +228,19 @@ export class AASComponent implements OnInit, OnDestroy {
         return '/assets/resources/aas-idta.png';
     }
 
+    /**
+     * Clears the thumbnail of the current document by setting it to undefined.
+     * This method updates the document state while preserving other document properties.
+     */
     public clearThumbnail(): void {
         this.state.update({ document: { ...this.document()!, thumbnail: undefined } });
     }
 
+    /**
+     * Initiates live mode by updating the state to 'online'.
+     * Changes the current state to indicate that the system is actively running.
+     * @public
+     */
     public play(): void {
         this.state.update({ live: 'online' });
     }
@@ -187,6 +249,14 @@ export class AASComponent implements OnInit, OnDestroy {
         this.state.update({ live: 'offline' });
     }
 
+    /**
+     * Adds a chart to the active dashboard page based on the selected elements and chart type.
+     * Navigates to the dashboard view after adding the chart.
+     *
+     * @param chartType - The type of chart to be added to the dashboard
+     * @returns void
+     * @throws No explicit throws, but will silently return if document or page is null
+     */
     public addToDashboard(chartType: string): void {
         const document = this.state.document();
         const page = this.dashboard.activePage();
@@ -198,10 +268,19 @@ export class AASComponent implements OnInit, OnDestroy {
         this.router.navigate(['/dashboard'], { queryParams: { page } });
     }
 
+    /**
+     * Sets the active page in the dashboard.
+     * @param page - The dashboard page object to be set as active
+     * @throws {Error} When page object is invalid or undefined
+     */
     public setDashboardPage(page: DashboardPage): void {
         this.dashboard.setActivePage(page.name);
     }
 
+    /**
+     * Updates the search expression.
+     * @param value - The new search expression string to be set
+     */
     public setSearchExpression(value: string): void {
         this.state.update({ searchExpression: value });
     }
@@ -228,10 +307,18 @@ export class AASComponent implements OnInit, OnDestroy {
         );
     }
 
+    /**
+     * Executes an undo operation using the command handler.
+     * Reverts the last executed command in the command history.
+     */
     public undo(): void {
         this.commandHandler.undo();
     }
 
+    /**
+     * Executes a redo operation on the command handler.
+     * This method restores the state that was undone by the last undo operation.
+     */
     public redo(): void {
         this.commandHandler.redo();
     }

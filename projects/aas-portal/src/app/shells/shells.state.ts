@@ -104,6 +104,15 @@ export class ShellsState implements OnDestroy {
         this.subscription.unsubscribe();
     }
 
+    /**
+     * Updates the state with new data.
+     * @param newState - A partial object containing the state properties to update
+     * @property {PageOptions} [newState.pageOptions] - New page options to set
+     * @property {Document[]} [newState.documents] - New documents array to set
+     * @property {Document} [newState.selected] - New selected document to set
+     * @property {string} [newState.next] - New next page URL to set
+     * @property {string} [newState.previous] - New previous page URL to set
+     */
     public update(newState: Partial<ShellsData>): void {
         if (newState.pageOptions !== undefined) {
             this.pageOptions$.set(newState.pageOptions);
@@ -126,10 +135,30 @@ export class ShellsState implements OnDestroy {
         }
     }
 
+    /**
+     * Saves the current page options to a cookie.
+     *
+     * @returns An Observable that resolves to void when the cookie has been set successfully.
+     */
     public save(): Observable<void> {
         return this.auth.setCookie(cookieName, JSON.stringify(this.data().pageOptions));
     }
 
+    /**
+     * Retrieves the first page of documents based on the provided filter and limit.
+     * If no filter is provided, uses the current untracked filter text.
+     *
+     * @param filter - Optional string to filter the documents
+     * @param limit - Optional number to limit the amount of documents per page
+     * @returns void
+     *
+     * @remarks
+     * This method makes an API call to get documents with the following:
+     * - No previous page reference (starts from beginning)
+     * - Uses provided limit or falls back to untracked limit
+     * - Applies language settings from translation service
+     * - Pipes the result through setPageAndLoadContents
+     */
     public getFirstPage(filter?: string, limit?: number): void {
         if (filter === undefined) {
             filter = untracked(this.filterText);
@@ -148,6 +177,15 @@ export class ShellsState implements OnDestroy {
             .subscribe();
     }
 
+    /**
+     * Retrieves the next page of documents based on current pagination settings and filter criteria.
+     * If no documents are currently available, the method returns without performing any operation.
+     * The method makes an API call to fetch documents and processes the results by setting the page
+     * and loading contents.
+     *
+     * @throws {Error} Potential errors from API call or content loading operations
+     * @returns {void}
+     */
     public getNextPage(): void {
         const documents = untracked(this.documents);
         if (documents.length === 0) {
@@ -167,6 +205,13 @@ export class ShellsState implements OnDestroy {
             .subscribe();
     }
 
+    /**
+     * Retrieves the last page of documents using the API.
+     * Makes an API call with a null 'next' parameter and the current limit to get the final page.
+     * The results are then processed to update the page and load contents.
+     * Uses the current filter text and language settings.
+     * @returns void
+     */
     public getLastPage(): void {
         this.api
             .getDocuments(
@@ -181,6 +226,17 @@ export class ShellsState implements OnDestroy {
             .subscribe();
     }
 
+    /**
+     * Retrieves the previous page of documents based on current pagination settings.
+     * This method makes an API call to fetch documents using the current 'previous' cursor,
+     * limit, filter text, and language settings. If there are no documents currently loaded,
+     * the method returns early without making any requests.
+     *
+     * The retrieved documents are then processed through setPageAndLoadContents and the
+     * results are subscribed to update the current state.
+     *
+     * @returns {void}
+     */
     public getPreviousPage(): void {
         const documents = untracked(this.documents);
         if (documents.length === 0) {

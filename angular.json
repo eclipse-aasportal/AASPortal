@@ -103,6 +103,96 @@
                 }
             }
         },
+        "aas-browser": {
+            "projectType": "application",
+            "schematics": {
+                "@schematics/angular:component": {
+                    "style": "scss"
+                }
+            },
+            "root": "projects/aas-browser",
+            "sourceRoot": "projects/aas-browser/src",
+            "prefix": "fhg",
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:application",
+                    "options": {
+                        "outputPath": "projects/aas-browser/dist",
+                        "index": "projects/aas-browser/src/index.html",
+                        "browser": "projects/aas-browser/src/main.ts",
+                        "polyfills": [
+                            "@angular/localize/init"
+                        ],
+                        "tsConfig": "projects/aas-browser/tsconfig.app.json",
+                        "inlineStyleLanguage": "scss",
+                        "assets": [
+                            "projects/aas-browser/src/assets"
+                        ],
+                        "styles": [
+                            "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                            "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
+                            "projects/aas-browser/src/styles.scss"
+                        ],
+                        "scripts": []
+                    },
+                    "configurations": {
+                        "production": {
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "1MB",
+                                    "maximumError": "2MB"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "4kB",
+                                    "maximumError": "8kB"
+                                }
+                            ],
+                            "outputHashing": "all"
+                        },
+                        "development": {
+                            "optimization": false,
+                            "extractLicenses": false,
+                            "sourceMap": true,
+                            "fileReplacements": [
+                                {
+                                    "replace": "projects/aas-browser/src/environments/environment.ts",
+                                    "with": "projects/aas-browser/src/environments/environment.development.ts"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "serve": {
+                    "builder": "@angular/build:dev-server",
+                    "configurations": {
+                        "production": {
+                            "buildTarget": "aas-browser:build:production",
+                            "proxyConfig": "projects/aas-browser/proxy.conf.json"
+                        },
+                        "development": {
+                            "buildTarget": "aas-browser:build:development",
+                            "proxyConfig": "projects/aas-browser/proxy.conf.json"
+                        }
+                    },
+                    "defaultConfiguration": "development"
+                },
+                "extract-i18n": {
+                    "builder": "@angular/build:extract-i18n"
+                },
+                "lint": {
+                    "builder": "@angular-eslint/builder:lint",
+                    "options": {
+                        "lintFilePatterns": [
+                            "projects/aas-browser/src/**/*.ts",
+                            "projects/aas-browser/src/**/*.html"
+                        ]
+                    }
+                }
+            }
+        },
         "aas-lib": {
             "projectType": "library",
             "root": "projects/aas-lib",
