@@ -3,14 +3,14 @@ services:
     image: mongo
     container_name: aasportal-users
     restart: always
-    ports:
-      - 27017:27017
     volumes:
-      - mongodata:/data/db
+      - aasportal-users:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_DATABASE=aasportal-users
+    ports:
+      - 27017:27017
 
   aasportal-index:
     image: mariadb
@@ -30,7 +30,7 @@ services:
       timeout: 30s
     volumes:
       - ./projects/aasportal-index/schema.sql:/docker-entrypoint-initdb.d/1.sql
-      - sqldata:/var/lib/mysql
+      - aasportal-index:/var/lib/mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -57,10 +57,10 @@ services:
     image: nextcloud
     container_name: aasportal-cloud
     restart: always
-    ports:
-      - 8080:80
+    depends_on:
+      - aasportal-cloud-db
     volumes:
-      - nextcloud:/var/www/html
+      - aasportal-cloud:/var/www/html
     environment:
       - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
       - MYSQL_DATABASE=nextcloud
@@ -69,18 +69,36 @@ services:
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
       - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
-    depends_on:
-      - aasportal-cloud-db
+    ports:
+      - 8080:80
+
+  aas-server:
+    container_name: aas-server
+    build:
+      context: .
+      dockerfile: ./Dockerfile.aas-server
+      args:
+        - NODE_IMAGE=${NODE_IMAGE}
+    volumes:
+      - aas-server:/data
+    environment:
+      - AAS_SERVER_PORT=${AAS_SERVER_PORT}
+    ports:
+      - 50010:50010
 
   aas-node:
     container_name: aas-node
     build:
       context: .
       dockerfile: ./Dockerfile.aas-node
+      args:
+        - NODE_IMAGE=${NODE_IMAGE}
     environment:
+      - AAS_NODE_PORT=${AAS_NODE_PORT}
       - USER_STORAGE=${USER_STORAGE}
       - AAS_INDEX=${AAS_INDEX}
       - TEMPLATE_STORAGE=${TEMPLATE_STORAGE}
+      - ENDPOINTS=${ENDPOINTS}
     ports:
       - 1337:1337
   
@@ -89,12 +107,16 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.aas-portal
+      args:
+        - NODE_IMAGE=${NODE_IMAGE}
+        - NGINX_IMAGE=${NGINX_IMAGE}
     restart: always
     ports:
       - 80:80
 
 volumes:
-  mongodata:
-  sqldata:
+  aasportal-users:
+  aasportal-index:
   nextcloud_db:
-  nextcloud:
+  aasportal-cloud:
+  aas-server:

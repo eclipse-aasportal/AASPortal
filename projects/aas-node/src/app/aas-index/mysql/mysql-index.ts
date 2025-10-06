@@ -18,13 +18,13 @@ import {
     AASDocumentId,
     isIdentifiable,
     AASPagedResult,
+    PagedResult,
 } from 'aas-core';
 
 import { AASIndex } from '../aas-index.js';
 import { Variable } from '../../variable.js';
 import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
-import { PagedResult } from '../../types/paged-result.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { Logger } from '../../logging/logger.js';
 import { urlToString } from '../../convert.js';

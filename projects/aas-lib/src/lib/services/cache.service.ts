@@ -6,23 +6,15 @@
  *
  *****************************************************************************/
 
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Cache } from 'aas-core';
-import { IndexChangeService } from './index-change.service';
-import { Subscription } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
-export class CacheService extends Cache<string, unknown> implements OnDestroy {
-    private subscription: Subscription;
-
-    public constructor(private readonly indexChange: IndexChangeService) {
+export class CacheService extends Cache<string, unknown> {
+    public constructor() {
         super(100);
-
-        this.subscription = this.indexChange.message.subscribe(() => {
-            this.clear();
-        });
     }
 
     public get<TValue>(url: string): TValue | undefined {
@@ -31,9 +23,5 @@ export class CacheService extends Cache<string, unknown> implements OnDestroy {
 
     public set<TValue>(url: string, value: TValue): void {
         this.setItem(url, value);
-    }
-
-    public ngOnDestroy(): void {
-        this.subscription.unsubscribe();
     }
 }

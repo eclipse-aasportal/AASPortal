@@ -8,7 +8,7 @@
 
 import FormData from 'form-data';
 import { createReadStream } from 'fs';
-import { aas, AASEndpoint, ApplicationError, getIdShortPath, noop, selectSubmodel } from 'aas-core';
+import { aas, AASEndpoint, ApplicationError, getIdShortPath, noop, PagedResult, selectSubmodel } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
 import { ApiClient, AASLabel } from './api-client.js';
@@ -19,7 +19,6 @@ import { JsonWriterV2 } from '../json-writer-v2.js';
 import { ERRORS } from '../../errors.js';
 import { JsonReaderV3 } from '../json-reader-v3.js';
 import { HttpClient } from '../../http-client.js';
-import { PagedResult } from '../../types/paged-result.js';
 
 interface PackageDescriptor {
     aasIds: string[];

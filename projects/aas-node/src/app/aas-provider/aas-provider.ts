@@ -25,6 +25,7 @@ import {
     AASEndpointSchedule,
     isFile,
     isBlob,
+    convertToString,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -71,7 +72,9 @@ export class AASProvider {
     public start(wsServer: WSNode): void {
         this.wsServer = wsServer;
         this.wsServer.on('message', this.onClientMessage);
-        this.initializeIndex().then(() => setTimeout(this.startScan, 100));
+        this.initializeIndex()
+            .then(() => setTimeout(this.startScan, 100))
+            .catch(error => this.logger.error(error));
     }
 
     /**
@@ -480,13 +483,18 @@ export class AASProvider {
         await this.initializeIndex();
         this.cache.clear();
         await this.startScan();
-        this.logger.info('AAS Server configuration restored.');
+        this.logger.info('AASNode configuration restored.');
     }
 
     private async initializeIndex(): Promise<void> {
-        if ((await this.index.getEndpointCount()) === 0) {
-            for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
+        if ((await this.index.getEndpointCount()) > 0) {
+            return;
+        }
+
+        for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
+            try {
                 await this.index.addEndpoint(endpoint);
+                this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) added.`);
                 this.wsServer.notify('IndexChange', {
                     type: 'AASNodeMessage',
                     data: {
@@ -494,6 +502,10 @@ export class AASProvider {
                         endpoint: endpoint,
                     } as AASNodeMessage,
                 });
+            } catch (error) {
+                this.logger.error(
+                    `Adding endpoint ${endpoint.name} (${endpoint.url}) failed: ${convertToString(error)}`,
+                );
             }
         }
     }

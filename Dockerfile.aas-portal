@@ -1,11 +1,14 @@
 # Dockerfile to build client app
-FROM node:22.16.0-alpine AS build
+ARG NGINX_IMAGE
+ARG NODE_IMAGE
+
+FROM $NODE_IMAGE AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
 RUN npm run aas-portal:build
 
-FROM nginx:latest AS aas-portal
+FROM $NGINX_IMAGE AS aas-portal
 #possibility to check host & port availability of other containers via netcat
 RUN apt-get update -y && apt-get install -y netcat-openbsd
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ /usr/share/nginx/html/

@@ -6,14 +6,13 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, noop } from 'aas-core';
+import { aas, AASEndpoint, noop, PagedResult } from 'aas-core';
 import { Logger } from '../../logging/logger.js';
 import { JsonReaderV2 } from '../json-reader-v2.js';
 import { ApiClient, AASLabel } from './api-client.js';
 import { JsonWriterV2 } from '../json-writer-v2.js';
 import * as aasV2 from '../../types/aas-v2.js';
 import { HttpClient } from '../../http-client.js';
-import { PagedResult } from '../../types/paged-result.js';
 
 interface AASList {
     aaslist: string[];

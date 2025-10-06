@@ -1,0 +1,11 @@
+{
+    "/api": {
+        "target": "http://localhost:50010",
+        "secure": false
+    },
+    "/websocket": {
+        "target": "ws://localhost:50010",
+        "secure": false,
+        "ws": true
+    }
+}

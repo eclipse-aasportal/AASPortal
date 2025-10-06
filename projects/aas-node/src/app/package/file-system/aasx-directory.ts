@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, ApplicationError, noop } from 'aas-core';
+import { aas, AASEndpoint, ApplicationError, noop, PagedResult } from 'aas-core';
 import { extname, join } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
@@ -16,7 +16,6 @@ import { AASPackage } from '../aas-package.js';
 import { AASClient } from '../aas-client.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
-import { PagedResult } from '../../types/paged-result.js';
 
 /** Provides a file system based endpoint. */
 export class AasxDirectory extends AASClient {

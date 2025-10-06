@@ -6,7 +6,16 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
+import {
+    aas,
+    AASEndpoint,
+    convertFromString,
+    DefaultType,
+    getSemanticId,
+    LiveRequest,
+    PagedResult,
+    traverse,
+} from 'aas-core';
 
 import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
@@ -16,7 +25,6 @@ import { AASPackage } from '../aas-package.js';
 import { AASClient } from '../aas-client.js';
 import { ApiPackage } from './api-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
-import { PagedResult } from '../../types/paged-result.js';
 
 interface PropertyValue {
     value: string;
