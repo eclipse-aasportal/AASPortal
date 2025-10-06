@@ -41,11 +41,9 @@
     "CMD_DELETE_USER": "Delete user account...",
     "CMD_SHOW_LICENSE_TEXT": "Show license text",
     "CMD_HIDE_LICENSE_TEXT": "Hide license text",
-    "COLUMN_NAME": "Name",
     "COLUMN_MODEL_TYPE": "Model type",
     "COLUMN_SIZE": "Size",
     "COLUMN_MODIFIED": "Date of modification",
-    "COLUMN_ID": "ID",
     "COLUMN_URL": "URL",
     "COLUMN_VALUE": "Value",
     "COLUMN_DATA_TYPE": "DataType",
@@ -130,7 +128,6 @@
     "INFO_DOWNLOAD_FILE_SUCCESS": "{0} was downloaded successfully.",
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} was uploaded successfully.",
     "INFO_NO_SHELL_AVAILABLE": "No Asset Administration Shell selected.",
-    "INFO_NO_SHELLS_AVAILABLE": "No Asset Administration Shells available.",
     "INFO_EMPTY_DISPLAY": "No elements available for display.",
     "INFO_AAS_OFFLINE": "The Asset Administration Shell is offline. Last update: {0}",
     "CONFIRM_DELETE_FILE": "Permanently delete {0}?",
@@ -194,6 +191,12 @@
     },
     "Chart": {
         "SHOW": "Show..."
+    },
+    "AASTable": {
+        "COLUMN_NAME": "Name",
+        "COLUMN_ID": "ID",
+        "COLUMN_ENDPOINT": "Endpoint",
+        "INFO_NO_SHELLS_AVAILABLE": "No Asset Administration Shells available."
     },
     "AddEndpointForm": {
         "CAPTION": "Add AAS Endpoint",

@@ -16,6 +16,7 @@ import {
     AASPagedResult,
     ApplicationError,
     BaseValueType,
+    PagedResult,
     aas,
     flat,
     isIdentifiable,
@@ -27,7 +28,6 @@ import { Variable } from '../../variable.js';
 import { ERRORS } from '../../errors.js';
 import { LowDbData, LowDbDocument, LowDbElement } from './lowdb-types.js';
 import { decodeBase64Url, encodeBase64Url } from '../../convert.js';
-import { PagedResult } from '../../types/paged-result.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { Logger } from '../../logging/logger.js';
 

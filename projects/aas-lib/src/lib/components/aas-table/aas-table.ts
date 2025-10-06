@@ -7,15 +7,16 @@
  *****************************************************************************/
 
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
     WritableSignal,
     computed,
     effect,
+    inject,
     input,
     model,
     signal,
@@ -77,31 +78,26 @@ export class AASTableRow {
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.html',
     styleUrls: ['./aas-table.scss'],
-    imports: [FormsModule, NgbTooltip, MaxLengthPipe, TranslateModule],
+    imports: [FormsModule, NgbTooltip, MaxLengthPipe, TranslateDirective, TranslatePipe, RouterLink],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTable {
+    private readonly translate = inject(TranslateService);
     private readonly _rows = computed(() => {
         const selected = new Set(untracked(this.selected));
-        return this.documents().map(document => {
-            const row = new AASTableRow(document, selected.has(document));
-            return row;
-        });
+        return this.documents().map(document => new AASTableRow(document, selected.has(document)));
     });
 
-    public constructor(
-        private readonly router: Router,
-        private readonly translate: TranslateService,
-    ) {
+    public constructor() {
         effect(() => {
             const selected = new Set(this.selected());
             untracked(this._rows).forEach(row => row.selected.set(selected.has(row.document)));
         });
     }
 
-    public readonly documents = input<AASDocument[]>([]);
-
     public readonly selected = model<AASDocument[]>([]);
+
+    public readonly documents = input<AASDocument[]>([]);
 
     public readonly filter = input('');
 
@@ -134,13 +130,8 @@ export class AASTable {
         return '/assets/resources/aas-idta.png';
     }
 
-    public open(row: AASTableRow): void {
-        this.router.navigate(['/aas'], {
-            queryParams: {
-                endpoint: encodeBase64Url(row.endpoint),
-                id: encodeBase64Url(row.id),
-            },
-        });
+    public getRouterLink(row: AASTableRow): unknown[] | undefined {
+        return ['/aas', { endpoint: encodeBase64Url(row.endpoint), id: encodeBase64Url(row.id) }];
     }
 
     public getToolTip(row: AASTableRow): string {

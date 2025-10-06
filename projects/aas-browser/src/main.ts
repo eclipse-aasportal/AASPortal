@@ -6,11 +6,8 @@
  *
  *****************************************************************************/
 
-export type PagedResultPagingMetadata = {
-    cursor?: string;
-};
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { AppComponent } from './app/app.component';
 
-export type PagedResult<T> = {
-    result: T[];
-    paging_metadata: PagedResultPagingMetadata;
-};
+bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));

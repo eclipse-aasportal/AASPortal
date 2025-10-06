@@ -63,20 +63,6 @@ class TestAASTreeComponent {
     }
 }
 
-@Component({
-    selector: 'fhg-img',
-    template: '<div></div>',
-    styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-class TestSecureImageComponent {
-    public readonly src = input.required<string>();
-    public readonly alt = input<string | undefined>();
-    public readonly classname = input<string | undefined>();
-    public readonly width = input<number | undefined>();
-    public readonly height = input<number | undefined>();
-}
-
 describe('AASComponent', () => {
     let dashboard: jest.Mocked<DashboardService>;
     let router: Router;
@@ -143,10 +129,10 @@ describe('AASComponent', () => {
 
         TestBed.overrideComponent(AASComponent, {
             remove: {
-                imports: [AASTreeComponent, SecuredImageComponent],
+                imports: [AASTreeComponent],
             },
             add: {
-                imports: [TestAASTreeComponent, TestSecureImageComponent],
+                imports: [TestAASTreeComponent],
             },
         });
 

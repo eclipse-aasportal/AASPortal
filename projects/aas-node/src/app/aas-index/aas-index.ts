@@ -12,6 +12,7 @@ import {
     AASDocumentId,
     AASEndpoint,
     AASPagedResult,
+    PagedResult,
     aas,
     baseType,
     getAbbreviation,
@@ -22,7 +23,6 @@ import {
     toBoolean,
 } from 'aas-core';
 
-import { PagedResult } from '../types/paged-result.js';
 import { KeywordDirectory } from './keyword-directory.js';
 import { LangString } from '../types/aas-v2.js';
 import { InjectionToken } from 'tsyringe';

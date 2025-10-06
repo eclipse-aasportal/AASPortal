@@ -6,12 +6,11 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'aas-core';
+import { AASDocument, PagedResult } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { AasxPackage } from '../package/file-system/aasx-package.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
 import { AASServerScan } from './aas-server-scan.js';
-import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/api/api-client.js';
 
 export class DirectoryScan extends AASServerScan {
