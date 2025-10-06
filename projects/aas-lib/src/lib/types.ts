@@ -128,3 +128,10 @@ export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;
 export type ViewRouteResult = { route?: ViewRoute; map?: ViewRouteMap };
 
 export const VIEW_ROUTES = new InjectionToken<ViewRoute[]>('ViewRoutes');
+
+export interface ApiUrl {
+    join(path: string, queryParams?: Record<string, string>): string;
+    getFileUrl(submodelId: string, idShortPath: string, endpoint?: string | null): string;
+}
+
+export const API_URL = new InjectionToken<ApiUrl>('API URL');

@@ -55,6 +55,25 @@ import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpo
     imports: [AASTable, NgClass, TranslateModule, NgbModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/**
+ * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
+ * Provides functionality for:
+ * - Document management (upload, download, delete)
+ * - Endpoint management (add, update, remove)
+ * - Favorites management
+ * - Document filtering and pagination
+ * - View navigation
+ * - Toolbar integration
+ *
+ * Key features:
+ * - Document selection and bulk operations
+ * - Favorites list management
+ * - Pagination controls
+ * - Search filtering with query parsing
+ * - Authorization checks for privileged operations
+ * - Integration with start menu and toolbar
+ * - Modal dialogs for user interactions
+ */
 export class ShellsComponent implements OnDestroy {
     @Inject(WINDOW) private readonly window = inject(WINDOW);
     private readonly state = inject(ShellsState);
@@ -78,7 +97,7 @@ export class ShellsComponent implements OnDestroy {
         });
     }
 
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('shellsToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public readonly activeFavorites = this.favorites.active;
 
@@ -110,19 +129,43 @@ export class ShellsComponent implements OnDestroy {
         this.state.save().subscribe();
     }
 
-    public setActiveFavorites(name: string): void {
+    /**
+     * Sets the specified favorite list as active and persists the change.
+     * @param name - The name of the favorite list to set as active
+     */
+    public setActiveFavoriteList(name: string): void {
         this.favorites.setActive(name);
         this.favorites.save().subscribe();
     }
 
+    /**
+     * Updates the page options in the state with a new limit value.
+     * @param limit - The number of items to display per page
+     */
     public setLimit(limit: number): void {
         this.state.update({ pageOptions: { limit, filterText: this.filterText() } });
     }
 
+    /**
+     * Updates the state by setting the selected documents.
+     * @param documents - An array of AASDocument objects to be set as selected
+     */
     public setSelected(documents: AASDocument[]): void {
         this.state.update({ selected: documents });
     }
 
+    /**
+     * Adds a new AAS endpoint after ensuring user authorization.
+     * The method performs the following steps:
+     * 1. Verifies that the user has 'editor' privileges
+     * 2. Retrieves existing endpoints
+     * 3. Opens a modal dialog for endpoint configuration
+     * 4. Adds the new endpoint if user confirms the dialog
+     *
+     * @returns An Observable that completes when the endpoint is successfully added,
+     *          or emits an error if the operation fails. Returns EMPTY if user cancels the operation.
+     * @throws Will be caught and handled by the notification service
+     */
     public addEndpoint(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => this.api.getEndpoints()),
@@ -143,6 +186,19 @@ export class ShellsComponent implements OnDestroy {
         );
     }
 
+    /**
+     * Updates an AAS endpoint after user authorization and endpoint selection.
+     *
+     * This method performs the following steps:
+     * 1. Ensures the user has 'editor' authorization
+     * 2. Retrieves available endpoints
+     * 3. Opens a modal dialog for endpoint selection and updates
+     * 4. Processes the user's selection and updates the endpoint
+     *
+     * @returns An Observable that completes when the endpoint is updated, or emits an error if the operation fails
+     *
+     * @throws Error if unauthorized, endpoint retrieval fails, or update operation fails
+     */
     public updateEndpoint(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => this.api.getEndpoints()),
@@ -163,6 +219,20 @@ export class ShellsComponent implements OnDestroy {
         );
     }
 
+    /**
+     * Removes one or multiple endpoints after user selection through a modal dialog.
+     * This operation requires editor authorization.
+     *
+     * The process includes:
+     * 1. Verifying user authorization
+     * 2. Fetching available endpoints
+     * 3. Displaying a selection modal
+     * 4. Processing user selection
+     * 5. Removing selected endpoints
+     *
+     * @returns An Observable that completes when the endpoint removal process is finished
+     * @throws Handled by the notification service if any error occurs during the process
+     */
     public removeEndpoint(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => this.api.getEndpoints()),

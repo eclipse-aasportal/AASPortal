@@ -3,7 +3,7 @@
         "../../typedoc.base.jsonc"
     ],
     "entryPoints": [
-        "src/lib/index.ts"
+        "src/lib/**/*.ts"
     ],
     "tsconfig": "tsconfig.lib.json"
 }

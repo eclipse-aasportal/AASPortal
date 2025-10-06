@@ -41,7 +41,7 @@ export function urlToString(url: URL | string | undefined): string {
     return temp.toString();
 }
 
-export function toUint8Array<T extends object>(data: T): Uint8Array {
+export function toUint8Array<T extends object>(data: T): Uint8Array<ArrayBuffer> {
     return Uint8Array.from(Buffer.from(JSON.stringify(data)));
 }
 

@@ -1,0 +1,22 @@
+div.w-4 {
+    min-width: 16px;
+    width: 16px;
+}
+
+div.w-9 {
+    min-width: 36px;
+    width: 36px;
+}
+
+div.wh-4 {
+    width: 16px;
+    height: 16px;
+}
+
+.hover-element {
+    visibility: hidden;
+}
+
+.list-group-item:hover .hover-element {
+    visibility: visible;
+}

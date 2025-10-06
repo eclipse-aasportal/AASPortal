@@ -1,0 +1,41 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="overflow-auto h-100 px-2">
+    <ul class="list-group">
+        @for (item of items(); track item.id) {
+        <li class="list-group-item">
+            <fhg-cd [conceptDescription]="item"></fhg-cd>
+        </li>
+        }
+    </ul>
+</div>
+
+<ng-template #conceptDescriptionsToolbar>
+    <div class="input-group me-2 my-1">
+        <button type="button" class="btn btn-primary" (click)="firstPage()">
+            <i class="bi bi-chevron-bar-left"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <select class="form-select" [(ngModel)]="limit">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="30">30</option>
+            <option [ngValue]="40">40</option>
+            <option [ngValue]="50">50</option>
+        </select>
+        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage()">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="lastPage()">
+            <i class="bi bi-chevron-bar-right"></i>
+        </button>
+    </div>
+</ng-template>

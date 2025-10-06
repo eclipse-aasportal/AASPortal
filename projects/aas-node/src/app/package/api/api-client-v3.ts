@@ -20,6 +20,7 @@ import {
     isConceptDescription,
     traverse,
     getSemanticId,
+    PagedResult,
 } from 'aas-core';
 
 import { encodeBase64Url } from '../../convert.js';
@@ -29,7 +30,6 @@ import { JsonReaderV3 } from '../json-reader-v3.js';
 import { JsonWriterV3 } from '../json-writer-v3.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
-import { PagedResult } from '../../types/paged-result.js';
 
 interface PackageDescriptor {
     aasIds: string[];

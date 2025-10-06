@@ -42,11 +42,9 @@
     "CMD_SHOW_LICENSE_TEXT": "Lizenztext anzeigen",
     "CMD_HIDE_LICENSE_TEXT": "Lizenztext verbergen",
     "COLUMN_VARIANT": "Variante",
-    "COLUMN_NAME": "Name",
     "COLUMN_MODEL_TYPE": "Modeltyp",
     "COLUMN_SIZE": "Größe",
     "COLUMN_MODIFIED": "Änderungsdatum",
-    "COLUMN_ID": "ID",
     "COLUMN_URL": "URL",
     "COLUMN_VALUE": "Wert",
     "COLUMN_DATA_TYPE": "Datentyp",
@@ -129,7 +127,6 @@
     "INFO_UPLOAD_AASX_FILE_SUCCESS": "{0} wurde erfolgreich hochgeladen.",
     "INFO_NO_SHELL_AVAILABLE": "Keine Verwaltungsschale ausgewählt.",
     "INFO_NO_SUBMODEL": "Kein Submodel verfügbar.",
-    "INFO_NO_SHELLS_AVAILABLE": "Keine Verwaltungsschalen verfügbar.",
     "INFO_EMPTY_DISPLAY": "Keine Elemente zur Anzeige verfügbar.",
     "INFO_AAS_OFFLINE": "Die Verwaltungsschale ist offline. Letzte Aktualisierung: {0}",
     "CONFIRM_DELETE_FILE": "{0} unwiderruflich löschen?",
@@ -193,6 +190,12 @@
     },
     "Chart": {
         "SHOW": "Anzeigen..."
+    },
+    "AASTable": {
+        "COLUMN_NAME": "Name",
+        "COLUMN_ID": "ID",
+        "COLUMN_ENDPOINT": "Endpunkt",
+        "INFO_NO_SHELLS_AVAILABLE": "Keine Verwaltungsschalen verfügbar."
     },
     "AddEndpointForm": {
         "CAPTION": "AAS-Endpunkt hinzufügen",

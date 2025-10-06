@@ -7,13 +7,12 @@
  *****************************************************************************/
 
 import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescription } from 'node-opcua';
-import { AASDocument, noop } from 'aas-core';
+import { AASDocument, noop, PagedResult } from 'aas-core';
 import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../package/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../package/opcua/opcua-client.js';
 import { OpcuaPackage } from '../package/opcua/opcua-package.js';
 import { AASServerScan } from './aas-server-scan.js';
-import { PagedResult } from '../types/paged-result.js';
 import { AASLabel } from '../package/api/api-client.js';
 
 export class OpcuaServerScan extends AASServerScan {

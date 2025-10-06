@@ -13,6 +13,7 @@
         "Einrichtung",
         "Foerderung",
         "Forschung",
+        "identifiables",
         "IDREF",
         "IDREFS",
         "IDTA",
@@ -20,6 +21,8 @@
         "inoutput",
         "IOSB",
         "irdi",
+        "Jsonable",
+        "jsonization",
         "jszip",
         "lcid",
         "Lemgo",
@@ -78,6 +81,18 @@
             "rootPath": "./projects/aas-portal",
             "runMode": "on-demand",
             "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+        },
+        {
+            "name": "aas-server",
+            "rootPath": "./projects/aas-server",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
+        },
+        {
+            "name": "aas-browser",
+            "rootPath": "./projects/aas-browser",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache"
         }
     ],
     "[scss]": {
