@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { inject, Injectable, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { aas, PagedResult } from 'aas-core';
@@ -15,7 +23,7 @@ export interface ShellsData {
     items: ShellsDataItem[];
 }
 
-export interface HttpValue {
+export interface ShellsPage {
     cursor: Cursor | undefined;
     items: ShellsDataItem[];
 }
@@ -25,7 +33,7 @@ export interface HttpValue {
 export class ShellsService {
     private readonly apiUrl = inject(API_URL);
 
-    private readonly parse = (data: unknown): HttpValue => {
+    private readonly parse = (data: unknown): ShellsPage => {
         const result = data as PagedResult<aas.AssetAdministrationShell>;
         const items: ShellsDataItem[] = [];
         if (result.result) {
@@ -48,19 +56,20 @@ export class ShellsService {
         return { items, cursor };
     };
 
-    /** The maximum number of items per page.  */
+    /**
+     * The maximum number of items per page.
+     */
     public readonly limit = signal(30);
 
-    /** The request for loading a page. */
+    /**
+     * The request for loading a page.
+     */
     public readonly cursor = signal<Cursor | undefined>(undefined);
 
-    /** */
-    public get current(): Cursor | undefined {
-        return this.value.value().cursor;
-    }
-
-    /** */
-    public readonly value = httpResource(
+    /**
+     * The current page.
+     */
+    public readonly page = httpResource(
         () => {
             const cursor = this.cursor();
             const limit = this.limit();

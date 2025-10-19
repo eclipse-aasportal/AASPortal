@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import * as aasv2 from '../../../app/types/aas-v2.js';
+import { aasV2 } from 'aas-package';
 
 export default {
     "assetAdministrationShells": [
@@ -7069,4 +7069,4 @@ export default {
       }
     ],
     "conceptDescriptions": []
-  } as unknown as aasv2.AssetAdministrationShellEnvironment;
+  } as unknown as aasV2.AssetAdministrationShellEnvironment;

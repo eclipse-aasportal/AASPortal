@@ -24,9 +24,9 @@ import {
 } from 'tsoa';
 
 import { aas, AASDocument, type AASEndpoint } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
-import { AASProvider } from '../aas-provider/aas-provider.js';
-import { decodeBase64Url } from '../convert.js';
+import { AASProvider } from '../provider/aas-provider.js';
 
 @injectable()
 @Route('/api/v1/endpoints')

@@ -36,26 +36,26 @@ export class ShellsComponent {
 
     public readonly shellsToolbar = viewChild<TemplateRef<unknown>>('shellsToolbar');
 
-    public readonly items = this.state.value.value;
+    public readonly items = this.state.page.value;
 
     public readonly limit = this.state.limit;
 
     public readonly isFirstPage = computed(() => {
-        const current = this.state.current;
-        return !current?.previous;
+        const current = this.state.page.value().cursor;
+        return current?.previous == null;
     });
 
     public readonly isLastPage = computed(() => {
-        const current = this.state.current;
-        return current && current.previous && !current.next;
+        const current = this.state.page.value().cursor;
+        return current?.next == null;
     });
 
-    public firstPage(): void {
+    public getFirstPage(): void {
         this.state.cursor.set({});
     }
 
-    public previousPage(): void {
-        const current = this.state.current;
+    public getPreviousPage(): void {
+        const current = this.state.page.value().cursor;
         if (!current?.previous) {
             return;
         }
@@ -63,8 +63,8 @@ export class ShellsComponent {
         this.state.cursor.set({ previous: current.previous });
     }
 
-    public nextPage(): void {
-        const current = this.state.current;
+    public getNextPage(): void {
+        const current = this.state.page.value().cursor;
         if (!current?.next) {
             return;
         }
@@ -72,7 +72,7 @@ export class ShellsComponent {
         this.state.cursor.set({ next: current.next });
     }
 
-    public lastPage(): void {
+    public getLastPage(): void {
         this.state.cursor.set({ next: null, previous: null });
     }
 

@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, StatusCodes, Variant } from 'node-opcua';
 import { createSpyObj } from 'aas-jest';
 import { LiveRequest, aas } from 'aas-core';
-import { OpcuaClient } from '../../../app/package/opcua/opcua-client.js';
+import { OpcuaClient } from '../../../app/client/opcua/opcua-client.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
@@ -113,12 +113,6 @@ describe('OpcuaClient', () => {
         });
     });
 
-    describe('createPackage', () => {
-        it('creates a new OpcuaPackage instance', () => {
-            expect(server.createPackage('ns=1;i=42')).toBeTruthy();
-        });
-    });
-
     describe('createSubscription', () => {
         it('creates a new OpcuaSubscription instance', () => {
             const request: LiveRequest = {
@@ -144,7 +138,7 @@ describe('OpcuaClient', () => {
 
     describe('postPackage', () => {
         it('is not implemented', async () => {
-            await expect(() => server.postPackage()).rejects.toThrow();
+            await expect(() => server.insertPackage()).rejects.toThrow();
         });
     });
 

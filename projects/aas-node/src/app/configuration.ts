@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { AASEndpoint, getEndpointName, getEndpointType } from 'aas-core';
-import { decodeBase64Url } from './convert.js';
+import { decodeBase64Url } from 'aas-package';
 
 /** The AASNode configuration. */
 export interface AASNodeConfiguration {

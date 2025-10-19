@@ -57,15 +57,21 @@ Then open http://localhost/ in your browser.
 
 ## Workspace Architecture
 
-AASPortal is a **monorepo** using npm workspaces with 5 distinct packages:
+AASPortal is a **monorepo** using npm workspaces with the following distinct packages:
 
-| Workspace | Description | Technology Stack |
-|-----------|-------------|------------------|
-| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM |
-| **aas-portal** | Angular frontend application | Angular 20.1.6, NgRx, Bootstrap 5 |
-| **aas-node** | Express.js backend API server | Express.js, JWT, OpenAPI/Swagger |
-| **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
-| **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
+![AASPortal package diagram <](./read-the-docs/source/images/PackageDiagram.png "AASPortal package diagram")
+
+The technology stack for the entire project is: Typescript, ESM (ECMAScript modules) and Jest as test framework.
+
+| Workspace       | Description| Technology Stack |
+|-----------------|------------|------------------|
+| **aas-core**    | Provides platform neutral type definitions, AAS data models and utility functions. | AAS core 3.0 |
+| **aas-package** | Node.js library for handling an AASX package file. | Node.js, JSZip |
+| **aas-node**    | The AASPortal backend server application. | Express.js, OpenAPI/Swagger (TSOA), WebDav-Client |
+| **aas-lib**     | Angular library | Angular 20.x, Bootstrap 5 |
+| **aas-portal**  | The AASPortal Web application | Angular 20.x, Bootstrap 5 |
+| **aas-server**  | An AAS server application with an API that is conform to the IDTA Part 2 specification. | Node.js, Express.js, OpenAPI/Swagger (TSOA) |
+| **aas-browser** | Front-end application for the AASServer for browsing its content. | Angular 20.x, Bootstrap 5 |
 
 ## Development Commands
 

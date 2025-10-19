@@ -21,7 +21,7 @@ import { createSpyObj } from 'aas-jest';
 import { sampleDocument } from '../assets/sample-document.js';
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
-import { AASProvider } from '../../app/aas-provider/aas-provider.js';
+import { AASProvider } from '../../app/provider/aas-provider.js';
 import { Variable } from '../../app/variable.js';
 import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';

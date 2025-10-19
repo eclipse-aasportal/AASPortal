@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import { v4 as uuid } from 'uuid';
 import { resolve } from 'path';
 import fs from 'fs';
-import { Database } from '../app/data/database.js';
+import { Database } from '../app/db/database.js';
 import { createSpyObj } from './create-spy-obj.js';
 import { Variable } from '../app/variable.js';
 

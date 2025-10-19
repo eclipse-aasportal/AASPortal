@@ -12,7 +12,7 @@ import { createSpyObj, DoneFn } from 'aas-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { ApiClient } from '../../../app/package/api/api-client.js';
+import { ApiClient } from '../../../app/client/api/api-client.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
 
 describe('HttpSubscription', function () {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { convertToString, stringFormat } from '../utilities.js';
+import { convertToString, stringFormat } from 'aas-core';
 import { Logger, LogLevel } from './logger.js';
 
 /** Provides a logger that writes messages to `stdout` and `stderr`. */

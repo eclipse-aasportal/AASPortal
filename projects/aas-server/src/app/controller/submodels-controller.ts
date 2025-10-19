@@ -24,10 +24,10 @@ import {
     UploadedFile,
 } from 'tsoa';
 
-import { aas, PagedResult } from 'aas-core';
+import { aas, extensionToMimeType, PagedResult, toSubmodel } from 'aas-core';
 
 import { type ExtentModifier, type LevelModifier } from '../types.js';
-import { decodeBase64Url, mimeType, toSubmodel } from '../utilities.js';
+import { decodeBase64Url } from '../utilities.js';
 import { SubmodelRepository } from '../submodel-repository.js';
 
 /**
@@ -96,7 +96,7 @@ export class SubmodelsController extends Controller {
             idShortPath,
         );
 
-        this.setHeader('Content-Type', contentType ?? mimeType(filename));
+        this.setHeader('Content-Type', contentType ?? extensionToMimeType(filename));
         this.setHeader('Content-Disposition', `attachment; filename=${filename}`);
         if (size) {
             this.setHeader('Content-Length', size.toString());

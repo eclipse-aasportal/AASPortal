@@ -12,7 +12,7 @@ import { LocalUserStorage } from './local-user-storage.js';
 import { Variable } from '../variable.js';
 import { MongoDBUserStorage } from './mongo-db-user-storage.js';
 import { LOGGER, Logger } from '../logging/logger.js';
-import { urlToString } from '../convert.js';
+import { urlToString } from '../utilities.js';
 
 /* istanbul ignore next */
 export class UserStorageFactory {

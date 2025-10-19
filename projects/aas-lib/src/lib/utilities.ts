@@ -103,22 +103,6 @@ export async function resolveError(error: unknown, translate: TranslateService):
 }
 
 /**
- * Replaces all `\` in the specified path with `/`.
- * @param path The path.
- * @returns The normalized file path.
- */
-export function normalize(path: string): string {
-    path = path.replace(/\\/g, '/');
-    if (path.charAt(0) === '/') {
-        path = path.slice(1);
-    } else if (path.startsWith('./')) {
-        path = path.slice(2);
-    }
-
-    return path;
-}
-
-/**
  * Gets the file name of the specified file path.
  * @param path The file path.
  * @returns The file name.

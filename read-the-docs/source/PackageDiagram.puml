@@ -1,0 +1,44 @@
+@startuml PackageDiagram
+top to bottom direction
+skinparam linetype polyline
+    
+package "AASPortal" <<package>> as AASPortalProject {
+    package "aas-portal" <<workspace>> as AASPortal {
+        component "aas-portal" as PortalApp
+    }
+
+    package "aas-browser" <<workspace>> as AASBrowser {
+        component "aas-browser" as BrowserApp
+    }
+
+    package "aas-server" <<workspace>> as AASServer {
+        component "aas-server" as ServerApp
+    }
+
+    package "aas-node" <<workspace>> as AASNode {
+        component "aas-node" as NodeApp
+    }
+
+    package "aas-lib" <<workspace>> as AASLib {
+        component "aas-lib" as NgLib
+    }
+
+    package "aas-package" <<workspace>> as AASPackage {
+        component "aas-package" as PackageLib
+    }
+    
+    package "aas-core" <<workspace>> as AASCore {
+        component "aas-core" as CoreLib
+    }
+    note left of CoreLib
+        Used from all workspaces.
+    end note
+
+    PortalApp ..> NgLib : use
+    BrowserApp ..> NgLib : use
+    NodeApp ..> PackageLib : use
+    ServerApp ..> PackageLib : use
+    NgLib ..> CoreLib : use
+    PackageLib ..> CoreLib : use
+}
+@enduml
