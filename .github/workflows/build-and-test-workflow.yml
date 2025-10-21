@@ -10,6 +10,7 @@ on:
 #
 jobs:
   build:
+    name: Build and Test
     runs-on: ubuntu-latest
 
     # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
