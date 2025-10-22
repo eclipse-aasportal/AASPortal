@@ -1,3 +1,4 @@
+import { getSemanticId } from 'aas-core';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -88,6 +89,11 @@ export class NameplateView extends LeafView<NameplateViewState> implements OnIni
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
+    }
+
+    public getSemanticId(){
+        if(!this.submodel()) return "";
+        return this.submodel()?.semanticId?.keys[0].value;
     }
 
     /**

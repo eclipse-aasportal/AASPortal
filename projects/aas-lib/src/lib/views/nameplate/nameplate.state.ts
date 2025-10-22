@@ -48,7 +48,6 @@ export class NameplateState extends ChildState<NameplateData> {
             if (!submodel) {
                 return;
             }
-
             this.update({ submodel, dataSheets: this.createDataSheets(document, submodel) });
         });
 
@@ -103,7 +102,12 @@ export class NameplateState extends ChildState<NameplateData> {
                 {
                     type: 'format',
                     idShortPath: 'AddressInformation',
-                    format: '{Street}, {NationalCode}-{ZipCode} {CityTown}',
+                    format: '{Street} {NationalCode}-{ZipCode} {CityTown}',
+                },
+                {
+                    type: 'format',
+                    idShortPath: 'PhysicalAddress',
+                    format: '{Street} {CountryCode}-{Zip} {CityTown}',
                 },
             ],
         });
