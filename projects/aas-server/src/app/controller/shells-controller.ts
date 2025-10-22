@@ -24,11 +24,11 @@ import {
     UploadedFile,
 } from 'tsoa';
 
-import { aas, PagedResult } from 'aas-core';
+import { aas, extensionToMimeType, PagedResult, toAssetAdministrationShell } from 'aas-core';
 
 import { type LevelModifier, type ExtentModifier } from '../types.js';
 import { ShellRepository } from '../shell-repository.js';
-import { decodeBase64Url, mimeType, toAssetAdministrationShell } from '../utilities.js';
+import { decodeBase64Url } from '../utilities.js';
 
 /**
  * @summary Asset Administration Shell Repository Interface.
@@ -95,7 +95,7 @@ export class ShellsController extends Controller {
     @SuccessResponse(200)
     public async getThumbnail(@Path() aasId: string): Promise<NodeJS.ReadableStream> {
         const { filename, readable, size, contentType } = await this.repository.getThumbnail(decodeBase64Url(aasId));
-        this.setHeader('Content-Type', contentType ?? mimeType(filename));
+        this.setHeader('Content-Type', contentType ?? extensionToMimeType(filename));
         this.setHeader('Content-Disposition', `attachment; filename=${filename}`);
         if (size) {
             this.setHeader('Content-Length', size.toString());
@@ -218,7 +218,7 @@ export class ShellsController extends Controller {
             idShortPath,
         );
 
-        this.setHeader('Content-Type', contentType ?? mimeType(filename));
+        this.setHeader('Content-Type', contentType ?? extensionToMimeType(filename));
         this.setHeader('Content-Disposition', `attachment; filename=${filename}`);
         if (size) {
             this.setHeader('Content-Length', size.toString());

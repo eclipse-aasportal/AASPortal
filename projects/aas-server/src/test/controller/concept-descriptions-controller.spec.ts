@@ -14,7 +14,7 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import multer from 'multer';
-import { aas, jsonization, types } from 'aas-core';
+import { aas, jsonization, toJsonValue } from 'aas-core';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
@@ -23,7 +23,7 @@ import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { ConceptDescriptionRepository } from '../../app/concept-description-repository.js';
-import { encodeBase64Url, toJsonValue } from '../../app/utilities.js';
+import { encodeBase64Url } from '../../app/utilities.js';
 import { Authentication } from '../../app/controller/authentication.js';
 
 describe('ConceptDescriptionsController', () => {

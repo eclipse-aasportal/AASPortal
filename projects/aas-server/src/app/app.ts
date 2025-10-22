@@ -90,7 +90,7 @@ export class App {
         this.app.get('/login', async (req, res) => {
             const state = generateRandomString(24);
             const code_verifier = generateRandomString(43);
-            const code_challange = await generateCodeChallenge(code_verifier);
+            const code_challenge = await generateCodeChallenge(code_verifier);
             this.verifiers.set(state, code_verifier);
             const authUrl = new URL(this.variable.KEYCLOAK_AUTHORIZATION_URL);
             authUrl.searchParams.set('response_type', 'code');
@@ -99,8 +99,7 @@ export class App {
             authUrl.searchParams.set('state', state);
             authUrl.searchParams.set('scope', 'openid');
             authUrl.searchParams.set('code_challenge_method', 'S256');
-            authUrl.searchParams.set('code_challenge', code_challange);
-
+            authUrl.searchParams.set('code_challenge', code_challenge);
             res.redirect(authUrl.href);
         });
 
@@ -151,7 +150,10 @@ export class App {
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
         this.app.get('/', this.getIndex);
-        this.app.use(express.static(this.variable.WEB_ROOT));
+        if (this.variable.ENABLE_STATIC_FILES) {
+            this.app.use(express.static(this.variable.WEB_ROOT));
+        }
+
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
     }

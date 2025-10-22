@@ -12,7 +12,6 @@ import {
     encodeBase64Url,
     basename,
     messageToString,
-    normalize,
     decodeBase64Url,
     isBase64,
     extension,
@@ -34,12 +33,6 @@ describe('convert', () => {
 
         it('gets "undefined" of no extension exits', () => {
             expect(extension('A:/hello/world/john-doe')).toBeUndefined();
-        });
-    });
-
-    describe('normalize', () => {
-        it('replaces all "\\" with "/"', () => {
-            expect(normalize('A:\\hello/world\\john.doe')).toEqual('A:/hello/world/john.doe');
         });
     });
 

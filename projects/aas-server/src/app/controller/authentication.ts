@@ -10,9 +10,9 @@ import type express from 'express';
 import jwt from 'jsonwebtoken';
 import jwksClient, { type JwksClient } from 'jwks-rsa';
 import { container, inject, singleton } from 'tsyringe';
+import { noop } from 'aas-core';
 
 import { Variable } from '../variable.js';
-import { noop } from '../utilities.js';
 
 export type ErrorReason = 'INVALID_SECURITY_TYPE' | 'NO_TOKEN' | 'MISSING_SCOPES' | 'INVALID_TOKEN' | 'INTERNAL_ERROR';
 

@@ -8,19 +8,20 @@
 
 import path from 'path';
 import fs from 'fs';
-import { PagedResult, types } from 'aas-core';
-
 import { inject, singleton } from 'tsyringe';
-import { AasxPackage } from './aasx-package.js';
-import { Database } from './data/database.js';
+import { PagedResult, types } from 'aas-core';
+import { FileResult } from 'aas-package';
+
+import { Database } from './db/database.js';
 import { Variable } from './variable.js';
-import { FileResult, PackageDescription } from './types.js';
+import { PackageDescription } from './types.js';
 import { LOGGER, Logger } from './logging/logger.js';
-import { DatabaseEnvironment } from './data/database-types.js';
-import { AddPackageCommand } from './data/commands/add-package-command.js';
-import { UpdatePackageCommand } from './data/commands/update-package-command.js';
-import { DeletePackageCommand } from './data/commands/delete-package-command.js';
+import { DatabaseEnvironment } from './db/database-types.js';
+import { AddPackageCommand } from './db/commands/add-package-command.js';
+import { UpdatePackageCommand } from './db/commands/update-package-command.js';
+import { DeletePackageCommand } from './db/commands/delete-package-command.js';
 import { HttpCache } from './http-cache.js';
+import { AasxPackage } from './aasx-package.js';
 
 @singleton()
 export class PackageRepository {
@@ -60,14 +61,15 @@ export class PackageRepository {
         const tmpFile = path.join(this.db.tmpDir, path.basename(file));
         await fs.promises.copyFile(file, tmpFile);
         const env = await this.createEnvironment(item.environment);
-        const aasx = new AasxPackage(tmpFile);
+        const aasx = await AasxPackage.createFromFile(tmpFile);
         await aasx.setEnvironment(env);
         await aasx.save();
 
         const filename = item.filename;
+        const value = item.filename;
         const readable = fs.createReadStream(tmpFile);
         const size = (await fs.promises.stat(tmpFile)).size;
-        return { filename, readable, size };
+        return { filename, value, readable, size };
     }
 
     public async add(sourceFile: string, filename: string): Promise<string> {
@@ -78,7 +80,7 @@ export class PackageRepository {
     }
 
     public async update(packageId: string, path: string, filename: string): Promise<void> {
-        const aasx = new AasxPackage(path);
+        const aasx = await AasxPackage.createFromFile(path);
         const env = await aasx.getEnvironment();
         const command = new UpdatePackageCommand(this.db, packageId, path, filename, env);
         await this.db.execute(command);
@@ -100,7 +102,7 @@ export class PackageRepository {
         for (const entry of await fs.promises.readdir(dir, { withFileTypes: true })) {
             if (entry.isFile() && entry.name.endsWith('.aasx')) {
                 try {
-                    await this.add(path.join(entry.path, entry.name), entry.name);
+                    await this.add(path.join(entry.parentPath, entry.name), entry.name);
                     this.logger.info(`${entry.name} imported.`);
                 } catch (error) {
                     this.logger.error(error);

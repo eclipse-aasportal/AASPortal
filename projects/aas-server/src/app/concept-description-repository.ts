@@ -9,11 +9,11 @@
 import { inject, singleton } from 'tsyringe';
 import { aas, PagedResult, types } from 'aas-core';
 
-import { Database } from './data/database.js';
+import { Database } from './db/database.js';
 import { Variable } from './variable.js';
-import { AddConceptDescriptionCommand } from './data/commands/add-concept-description-command.js';
+import { AddConceptDescriptionCommand } from './db/commands/add-concept-description-command.js';
 import { HttpCache } from './http-cache.js';
-import { DeleteConceptDescriptionCommand } from './data/commands/delete-concept-description-command.js';
+import { DeleteConceptDescriptionCommand } from './db/commands/delete-concept-description-command.js';
 
 @singleton()
 export class ConceptDescriptionRepository {

@@ -8,18 +8,16 @@
 
 import { extname, join } from 'path/posix';
 import { AASEndpoint, TemplateDescriptor, aas } from 'aas-core';
+import { createJsonReader, createXmlReader } from 'aas-package';
 import { LOGGER, Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { Variable } from '../variable.js';
-import { createJsonReader } from '../package/create-json-reader.js';
-import { createXmlReader } from '../package/create-xml-reader.js';
-import { AasxDirectory } from '../package/file-system/aasx-directory.js';
-import { ScanTemplatesData } from '../types/worker-data.js';
-import { ScanResult, ScanTemplatesResult } from '../types/scan-result.js';
-import { Parallel } from '../aas-provider/parallel.js';
-import { Task, TaskHandler } from '../aas-provider/task-handler.js';
+import { ScanResult, ScanTemplatesData, ScanTemplatesResult } from '../types.js';
+import { Parallel } from '../provider/parallel.js';
+import { Task, TaskHandler } from '../provider/task-handler.js';
+import { AasxPackage } from '../client/fs/aasx-package.js';
 
 @singleton()
 export class TemplateStorage {
@@ -87,15 +85,7 @@ export class TemplateStorage {
     };
 
     private async readFromAasx(file: string): Promise<aas.Environment> {
-        let source: AasxDirectory | undefined;
-        try {
-            source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
-            await source.open();
-            const pkg = source.createPackage(file);
-            return await pkg.getEnvironment();
-        } finally {
-            await source?.close();
-        }
+        return (await AasxPackage.createFromFile(file)).getEnvironment();
     }
 
     private async readFromXml(path: string): Promise<aas.Environment> {

@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { beforeEach, describe, it, expect } from '@jest/globals';
-import { KeyList } from '../app/data/key-list.js';
-import { KeyListItem } from '../app/data/database-types.js';
+import { KeyList } from '../app/db/key-list.js';
+import { KeyListItem } from '../app/db/database-types.js';
 
 describe('KeyList', () => {
     let recycler: KeyList;

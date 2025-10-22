@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import type { AuthResult, Cookie, Credentials, UserProfile } from 'aas-core';
 import { Body, Controller, Delete, Get, Hidden, OperationId, Path, Post, Put, Route, Security, Tags } from 'tsoa';
+import type { AuthResult, Cookie, Credentials, UserProfile } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
 import { AuthService } from '../auth/auth-service.js';
-import { decodeBase64Url } from '../convert.js';
 
 @injectable()
 @Route('/api/v1')

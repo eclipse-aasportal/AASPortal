@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Launch aas-portal",
             "type": "chrome",
@@ -65,20 +66,7 @@
             "url": "http://localhost:4200/"
         },
         {
-            "name": "Test aas-node",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "test",
-                "-w",
-                "aas-node"
-            ],
-        },
-        {
-            "name": "Debug aas-node test",
+            "name": "Debug current aas-node test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -89,24 +77,12 @@
                 "-w",
                 "aas-node",
                 "--testPathPattern",
-                "${fileBasename}"
+                "${fileBasename}",
+                "--coverage=false"
             ],
         },
         {
-            "name": "Test aas-core",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "test",
-                "-w",
-                "aas-core"
-            ]
-        },
-        {
-            "name": "Debug aas-core test",
+            "name": "Debug current aas-core test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -117,7 +93,24 @@
                 "-w",
                 "aas-core",
                 "--testPathPattern",
-                "${fileBasename}"
+                "${fileBasename}",
+                "--coverage=false"
+            ]
+        },
+        {
+            "name": "Debug current aas-package test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test",
+                "-w",
+                "aas-package",
+                "--testPathPattern",
+                "${fileBasename}",
+                "--coverage=false"
             ]
         },
         {
@@ -148,8 +141,8 @@
                 "-w",
                 "aas-portal",
                 "--testPathPattern",
-                "--coverage=false",
-                "${fileBasename}"
+                "${fileBasename}",
+                "--coverage=false"
             ]
         },
         {
@@ -164,7 +157,8 @@
                 "-w",
                 "aas-browser",
                 "--testPathPatterns",
-                "${fileBasename}"
+                "${fileBasename}",
+                "--coverage=false",
             ]
         },
         {
@@ -179,7 +173,8 @@
                 "-w",
                 "aas-server",
                 "--testPathPatterns",
-                "${fileBasename}"
+                "${fileBasename}",
+                "--coverage=false",
             ]
         }
     ]

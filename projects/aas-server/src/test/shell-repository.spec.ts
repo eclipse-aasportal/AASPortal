@@ -30,7 +30,7 @@ describe('ShellRepository', () => {
         );
 
         cache = new HttpCache(variable);
-        packageBuilder = createSpyObj<AasxPackageBuilder>(['create']);
+        packageBuilder = createSpyObj<AasxPackageBuilder>(['build']);
     });
 
     describe('getShells', () => {
