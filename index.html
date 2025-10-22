@@ -44,7 +44,9 @@ Check out the <a href="media/gettingstarted.md">Getting Started</a> section to l
 <p><strong>Open <a href="http://localhost/">http://localhost/</a> in your browser</strong></p>
 </li>
 </ol>
-<h2 id="workspace-architecture" class="tsd-anchor-link">Workspace Architecture<a href="#workspace-architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>AASPortal is a <strong>monorepo</strong> using npm workspaces with 5 distinct packages:</p>
+<h2 id="workspace-architecture" class="tsd-anchor-link">Workspace Architecture<a href="#workspace-architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>AASPortal is a <strong>monorepo</strong> using npm workspaces with the following distinct packages:</p>
+<p><img src="media/PackageDiagram.png" alt="AASPortal package diagram &lt;" title="AASPortal package diagram"></p>
+<p>The technology stack for the entire project is: Typescript, ESM (ECMAScript modules) and Jest as test framework.</p>
 <table>
 <thead>
 <tr>
@@ -56,28 +58,38 @@ Check out the <a href="media/gettingstarted.md">Getting Started</a> section to l
 <tbody>
 <tr>
 <td><strong>aas-core</strong></td>
-<td>Shared types, utilities, and AAS data models</td>
-<td>TypeScript, ESM</td>
+<td>Provides platform neutral type definitions, AAS data models and utility functions.</td>
+<td>AAS core 3.0</td>
 </tr>
 <tr>
-<td><strong>aas-portal</strong></td>
-<td>Angular frontend application</td>
-<td>Angular 20.1.6, NgRx, Bootstrap 5</td>
+<td><strong>aas-package</strong></td>
+<td>Node.js library for handling an AASX package file.</td>
+<td>Node.js, JSZip</td>
 </tr>
 <tr>
 <td><strong>aas-node</strong></td>
-<td>Express.js backend API server</td>
-<td>Express.js, JWT, OpenAPI/Swagger</td>
+<td>The AASPortal backend server application.</td>
+<td>Express.js, OpenAPI/Swagger (TSOA), WebDav-Client</td>
 </tr>
 <tr>
 <td><strong>aas-lib</strong></td>
-<td>Reusable Angular UI components</td>
-<td>Angular Library, ng-bootstrap</td>
+<td>Angular library</td>
+<td>Angular 20.x, Bootstrap 5</td>
 </tr>
 <tr>
-<td><strong>aas-jest</strong></td>
-<td>Custom Jest configuration utilities</td>
-<td>Jest, TypeScript</td>
+<td><strong>aas-portal</strong></td>
+<td>The AASPortal Web application</td>
+<td>Angular 20.x, Bootstrap 5</td>
+</tr>
+<tr>
+<td><strong>aas-server</strong></td>
+<td>An AAS server application with an API that is conform to the IDTA Part 2 specification.</td>
+<td>Node.js, Express.js, OpenAPI/Swagger (TSOA)</td>
+</tr>
+<tr>
+<td><strong>aas-browser</strong></td>
+<td>Front-end application for the AASServer for browsing its content.</td>
+<td>Angular 20.x, Bootstrap 5</td>
 </tr>
 </tbody>
 </table>
