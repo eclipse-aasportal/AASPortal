@@ -11,9 +11,11 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     aas,
     AASDocument,
+    getLocaleValue,
     getReferable,
     getSemanticId,
     isFile,
+    isMultiLanguageProperty,
     isProperty,
     isSubmodelElementCollection,
     isSubmodelElementList,
@@ -23,6 +25,7 @@ import {
 import { ChildState } from '../../components/child-state';
 import { basename, extension, findSubmodel, getUrl } from '../../utilities';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
+import { reference } from '@popperjs/core';
 
 export type FileItem = {
     name: string;
@@ -33,8 +36,14 @@ export type FileItem = {
 export type DocumentationItem = {
     preview: string | undefined;
     title: string;
+    subtitle: string;
+    language: string;
+    organization: string;
+    summary: string;
+    keywords: string;
     version: string;
     status: string;
+    statusDate: string,
     files: FileItem[];
 };
 
@@ -125,7 +134,6 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
         if (!submodel.submodelElements) {
             return items;
         }
-
         for (const sme of submodel.submodelElements) {
             if (isSubmodelElementCollection(sme) && getSemanticId(sme) === documentId && sme.value) {
                 for (const documentVersion of sme.value.filter(
@@ -135,8 +143,14 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
                         const item: DocumentationItem = {
                             preview: this.getPreview(getReferable(documentVersion, 'PreviewFile')),
                             title: this.toExpression(getReferable(documentVersion, 'Title'), ''),
+                            subtitle: this.toExpression(getReferable(documentVersion, 'SubTitle'), ''),
+                            summary: this.toExpression(getReferable(documentVersion, 'Summary'), ''),
+                            organization: this.toExpression(getReferable(documentVersion, 'OrganizationOfficialName'), ''),
+                            language: this.toExpression(getReferable(documentVersion, 'Language'), ''),
+                            keywords: this.toExpression(getReferable(documentVersion, 'KeyWords'), ''),
                             version: this.toExpression(getReferable(documentVersion, 'DocumentVersionId')),
                             status: this.toExpression(getReferable(documentVersion, 'StatusValue')),
+                            statusDate: this.toExpression(getReferable(documentVersion, 'StatusSetDate')),
                             files: [],
                         };
 
@@ -161,39 +175,58 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
 
     private createItemsV2Dot0(submodel: aas.Submodel): DocumentationItem[] {
         const items: DocumentationItem[] = [];
+        //Unfortunately the IDTA have wrong semIds in their template
+        //Expecting people not to notice, I am adding those wrong semanticIds as alternatives
         const documentId = '0173-1#02-ABI500#003/0173-1#01-AHF579#003*01';
+        const altDocumentId = '0173-1#02-ABI500#003';
         const documentVersionId = '0173-1#02-ABI503#003/0173-1#01-AHF582#003*01';
+        const altDocumentVersionId = '0173-1#02-ABI503#003';
         if (!submodel.submodelElements) {
             return items;
         }
-
         for (const documents of submodel.submodelElements) {
-            if (isSubmodelElementList(documents) && getSemanticId(documents) === documentId && documents.value) {
-                for (const documentVersion of documents.value.filter(
-                    element => getSemanticId(element) === documentVersionId,
-                )) {
-                    if (isSubmodelElementCollection(documentVersion) && documentVersion.value) {
-                        const item: DocumentationItem = {
-                            preview: this.getPreview(getReferable(documentVersion, 'PreviewFile')),
-                            title: this.toExpression(getReferable(documentVersion, 'Title')),
-                            version: this.toExpression(getReferable(documentVersion, 'DocumentVersionId')),
-                            status: this.toExpression(getReferable(documentVersion, 'StatusValue')),
-                            files: [],
-                        };
+            if (isSubmodelElementList(documents) && (getSemanticId(documents) === documentId || getSemanticId(documents) === altDocumentId) && documents.value) {
+                for(const document of documents.value){
+                    if(isSubmodelElementCollection(document) && document.value){
+                        for (const documentVersions of document.value.filter(
+                            element => getSemanticId(element) === documentVersionId || getSemanticId(element) === altDocumentVersionId
+                        )) {
+                            if (isSubmodelElementList(documentVersions) && documentVersions.value) {
+                                //Version 2.0 supports multiple Versions for a single Document
+                                //Add every Version seperately
+                                for(const documentVersion of documentVersions.value){
+                                    const item: DocumentationItem = {
+                                        preview: this.getPreview(getReferable(documentVersion, 'PreviewFile')),
+                                        title: this.toExpression(getReferable(documentVersion, 'Title'), ''),
+                                        subtitle: this.toExpression(getReferable(documentVersion, 'SubTitle'), ''),
+                                        organization: this.toExpression(getReferable(documentVersion, 'OrganizationOfficialName'), ''),
+                                        language: this.toExpression(getReferable(documentVersion, 'Language'), ''),
+                                        summary: this.toExpression(getReferable(documentVersion, 'Description'), ''),
+                                        keywords: this.toExpression(getReferable(documentVersion, 'KeyWords'), ''),
+                                        version: this.toExpression(getReferable(documentVersion, 'DocumentVersionId')),
+                                        status: this.toExpression(getReferable(documentVersion, 'StatusValue')),
+                                        statusDate: this.toExpression(getReferable(documentVersion, 'StatusSetDate')),
+                                        files: [],
+                                    };
 
-                        const digitalFiles = getReferable(documentVersion, 'DigitalFiles');
-                        if (isSubmodelElementList(digitalFiles) && digitalFiles.value) {
-                            for (const digitalFile of digitalFiles.value) {
-                                if (isFile(digitalFile) && digitalFile.value) {
-                                    item.files.push(this.createFileItem(digitalFile));
+                                    const digitalFiles = getReferable(documentVersion, 'DigitalFiles');
+                                    if (isSubmodelElementList(digitalFiles) && digitalFiles.value) {
+                                        for (const digitalFile of digitalFiles.value) {
+                                            if (isFile(digitalFile) && digitalFile.value) {
+                                                item.files.push(this.createFileItem(digitalFile));
+                                            }
+                                        }
+                                    }
+
+                                    if (item.files.length) {
+                                        items.push(item);
+                                    }
                                 }
+
                             }
                         }
-
-                        if (item.files.length) {
-                            items.push(item);
-                        }
                     }
+                    
                 }
             }
         }
@@ -208,6 +241,10 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
 
         if (isProperty(referable)) {
             return toDisplayValue(referable.value, referable.valueType, this.translate.getCurrentLang()) ?? '-';
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            return getLocaleValue(referable.value, this.translate.getCurrentLang()) ?? '-';
         }
 
         if (isFile(referable)) {

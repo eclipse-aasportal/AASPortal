@@ -6,9 +6,10 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, untracked, ViewChild } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
+import { Modal } from 'bootstrap';
 
 import { AASDocument } from 'aas-core';
 
@@ -18,6 +19,7 @@ import {
     HandoverDocumentationData,
     HandoverDocumentationState,
 } from './handover-documentation.state';
+import { DocumentPopupComponent } from "./document-popup/document-popup.component";
 
 /**
  * Provides a component for submodels that belong to the IDTA specification "Handover Documentation".
@@ -30,7 +32,25 @@ import {
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> {
+export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> implements AfterViewInit{
+
+    @ViewChild('modal') modalComponent!: DocumentPopupComponent;
+    bootstrapModal!: Modal;
+
+    clickedItem: DocumentationItem =  {
+        preview: '',
+        title: 'test',
+        subtitle: "",
+        summary: "",
+        organization: "",
+        language: "",
+        keywords: "",
+        version: '',
+        status: '',
+        statusDate: '',        
+        files: []
+    };
+
     public constructor() {
         super();
 
@@ -45,6 +65,17 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
                 this.state().update({ document });
             }
         });
+    }
+
+    ngAfterViewInit() {
+        this.bootstrapModal = new Modal(
+            document.getElementById(this.modalComponent.modalId)!
+        );
+    }
+
+    openModal(item: DocumentationItem) {
+        this.clickedItem = item;
+        this.bootstrapModal.show();
     }
 
     /**
@@ -89,5 +120,21 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
             default:
                 return '/assets/resources/file-earmark.svg';
         }
+    }
+
+    public getDocumentTitle(item: DocumentationItem): string {
+
+        if(item.title) return item.title;
+
+        if(!item.files || item.files.length <= 0) return "N/A";
+
+        return item.files[0].name;
+    }
+
+    public openFile(item: DocumentationItem){
+        if(!item) return;
+        if(!item.files || item.files.length <= 0) return;
+
+        window.open(item.files[0].url, '_blank');
     }
 }

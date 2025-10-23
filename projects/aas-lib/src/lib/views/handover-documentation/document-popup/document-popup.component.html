@@ -1,0 +1,53 @@
+<div class="modal fade" [id]="modalId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title">{{ getTitle() }}</h5>
+                    <h6>{{body.subtitle}}</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ng-content>
+                    <div class="row">
+                        <div class="col">
+                            <div class="d-flex flex-column data-entry">
+                                <label class="label">Language</label>
+                                <p>{{body.language}}</p>
+                            </div>
+                            <div class="d-flex flex-column data-entry">
+                                <label class="label">Summary</label>
+                                <p>{{body.summary}}</p>
+                            </div>
+                            <div class="d-flex flex-column data-entry">
+                                <label class="label">Keywords</label>
+                                <p>{{body.keywords}}</p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <img [src]="getPreviewSource(body)"
+                                class="popup-img"
+                                (error)="body.preview = undefined" />
+                        </div>
+
+                    </div>
+                    
+                    <hr/>
+                    <div class="d-flex flex-column data-entry">
+                        <label class="label">Organization</label>
+                        <p>{{body.organization}}</p>
+                    </div>
+                    <div class="d-flex flex-column data-entry">
+                        <label class="label">Status</label>
+                        <p>{{body.status}} - {{body.statusDate}}</p>
+                    </div>
+                </ng-content>
+            </div>
+            <div class="modal-footer d-flex flex-row">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="openFile()">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
