@@ -8,12 +8,11 @@
 
 import { inject, singleton } from 'tsyringe';
 import path from 'path';
-import { aas, isFile, PagedResult, types } from 'aas-core';
+import { aas, ApplicationError, isFile, PagedResult, types } from 'aas-core';
 import { FileResult } from 'aas-package';
 
 import { Database } from './db/database.js';
 import { ExtentModifier, LevelModifier } from './types.js';
-import { ApplicationError } from './application-error.js';
 import { ERROR } from './error.js';
 import { AddSubmodelCommand } from './db/commands/add-submodel-command.js';
 import { UpdateAttachmentCommand } from './db/commands/update-attachment-command.js';
@@ -82,7 +81,7 @@ export class SubmodelRepository {
             }
         }
 
-        throw new ApplicationError(`File ${id}.${idShortPath} has no attachment.`, ERROR.FILE_HAS_NO_ATTACHMENT, 404);
+        throw new ApplicationError(ERROR.FILE_HAS_NO_ATTACHMENT, { id, idShortPath }, 404);
     }
 
     public async updateSubmodelElementAttachment(
@@ -123,8 +122,11 @@ export class SubmodelRepository {
             element = selectSubmodelElement(submodel, idShortPath);
             if (!element) {
                 throw new ApplicationError(
-                    `The Submodel Element ${smId}.${idShortPath} does not exist.`,
                     ERROR.SUBMODEL_ELEMENT_DOES_NOT_EXIST,
+                    {
+                        id: smId,
+                        idShortPath,
+                    },
                     404,
                 );
             }

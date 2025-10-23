@@ -15,6 +15,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
+    DOCUMENT,
     OnDestroy,
     OnInit,
     TemplateRef,
@@ -24,12 +25,11 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, jsonization, toJsonValue, isSubmodel } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
     decodeBase64Url,
-    DownloadService,
     NotifyService,
     StartService,
     ToolbarService,
@@ -46,6 +46,7 @@ import { NewElementFormComponent } from './new-element-form/new-element-form.com
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AASState } from './aas.state';
 import { DashboardChartType, DashboardPage } from '../dashboard/dashboard-types';
+import { JsonValue } from 'projects/aas-core/dist/types/aas-core/jsonization';
 
 @Component({
     selector: 'fhg-aas',
@@ -77,11 +78,11 @@ export class AASComponent implements OnInit, OnDestroy {
     private readonly notify = inject(NotifyService);
     private readonly dashboard = inject(DashboardService);
     private readonly api = inject(EndpointsApi);
-    private readonly download = inject(DownloadService);
     private readonly commandHandler = inject(CommandHandler);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly auth = inject(AuthService);
+    private readonly dom = inject(DOCUMENT);
 
     public constructor() {
         effect(() => {
@@ -390,17 +391,25 @@ export class AASComponent implements OnInit, OnDestroy {
         );
     }
 
-    public downloadDocument(): Observable<void> {
-        return of(this.state.document()).pipe(
-            mergeMap(document => {
-                if (!document) {
-                    return EMPTY;
-                }
+    /**
+     * Download the current state's document content or a single selected submodel as a JSON file.
+     */
+    public download(): void {
+        try {
+            const document = this.state.document();
+            if (!document || !document.content) {
+                return;
+            }
 
-                return this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx');
-            }),
-            catchError(error => this.notify.error(error)),
-        );
+            const selectedElements = this.selectedElements();
+            if (selectedElements.length === 1 && isSubmodel(selectedElements[0])) {
+                this.downloadSubmodel(selectedElements[0]);
+            } else {
+                this.downloadEnvironment(document.idShort, document.content);
+            }
+        } catch (error) {
+            this.notify.error(error);
+        }
     }
 
     public addToStart(): Observable<void> {
@@ -421,6 +430,27 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public setSelectedElements(selectedElements: aas.Referable[]): void {
         this.state.update({ selectedElements });
+    }
+
+    private downloadSubmodel(submodel: aas.Submodel) {
+        const sm = jsonization.submodelFromJsonable(toJsonValue(submodel)).mustValue();
+        this.downloadJson(submodel.idShort, jsonization.toJsonable(sm));
+    }
+
+    private downloadEnvironment(baseName: string, content: aas.Environment) {
+        const env = jsonization.environmentFromJsonable(toJsonValue(content)).mustValue();
+        this.downloadJson(baseName, jsonization.toJsonable(env));
+    }
+
+    private downloadJson(baseName: string, value: JsonValue): void {
+        const contentStr = JSON.stringify(value, null, 4);
+        const blob = new Blob([contentStr], { type: 'application/json' });
+        const filename = `${baseName}.json`;
+        const a = this.dom.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.setAttribute('download', filename);
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {

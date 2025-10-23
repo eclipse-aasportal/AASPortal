@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { v4 as uuid } from 'uuid';
-import { aas, types } from 'aas-core';
+import { aas, ApplicationError, types } from 'aas-core';
 
 import { DatabaseEnvironment, DatabaseKey, PackageItem, IdentifiableItem } from '../database-types.js';
 import { DatabaseCommand } from '../database-command.js';
@@ -16,7 +16,6 @@ import { IdentifiableTable } from '../identifiable-table.js';
 import { PackageTable } from '../package-table.js';
 import { KeyList } from '../key-list.js';
 import { hasSubmodel, referenceToString } from '../../utilities.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { AasxPackage } from '../../aasx-package.js';
 
@@ -81,10 +80,7 @@ export class AddPackageCommand extends DatabaseCommand<string> {
                 for (const submodelRef of aas.submodels) {
                     const id = referenceToString(submodelRef);
                     if (!hasSubmodel(env, id) && !this.database.submodels.findKey(id)) {
-                        throw new ApplicationError(
-                            `The submodel "${id}" is not contained in the AAS environment nor in the database.`,
-                            ERROR.SUBMODEL_NOT_CONTAINED,
-                        );
+                        throw new ApplicationError(ERROR.SUBMODEL_NOT_CONTAINED, undefined, 400);
                     }
                 }
             }
@@ -94,7 +90,7 @@ export class AddPackageCommand extends DatabaseCommand<string> {
     private async addIdentifiables(
         table: IdentifiableTable<aas.Identifiable>,
         identifiables: types.IIdentifiable[],
-        id: DatabaseKey,
+        packageKey: DatabaseKey,
     ): Promise<DatabaseKey[]> {
         const keys: DatabaseKey[] = [];
         for (const identifiable of identifiables) {
@@ -106,7 +102,7 @@ export class AddPackageCommand extends DatabaseCommand<string> {
                     key,
                     id: identifiable.id,
                     idShort: identifiable.idShort,
-                    packageKeys: [id],
+                    packageKeys: [packageKey],
                 };
 
                 const index = key % this.table.pageSize;
@@ -122,13 +118,17 @@ export class AddPackageCommand extends DatabaseCommand<string> {
                 await table.setKey(identifiable.id, key);
                 await table.writeFile(identifiable, key);
             } else {
+                if (identifiable.modelType() === types.ModelType.AssetAdministrationShell) {
+                    throw new ApplicationError(ERROR.AAS_ALREADY_EXISTS, { id: identifiable.id }, 409);
+                }
+
                 const page = await table.getEditablePage(key);
                 const item = page.items[key % this.table.pageSize];
                 if (item === null) {
                     throw new Error('Invalid operation.');
                 }
 
-                new KeyList(item.packageKeys).add(id);
+                new KeyList(item.packageKeys).add(packageKey);
             }
 
             keys.push(key);

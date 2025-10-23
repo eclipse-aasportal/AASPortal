@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, jsonization, types } from 'aas-core';
-import { ApplicationError } from '../application-error.js';
+import { aas, ApplicationError, jsonization, types } from 'aas-core';
 import { ERROR } from '../error.js';
 import { DatabaseKey, DatabaseTableData } from './database-types.js';
 import { Database } from './database.js';
@@ -21,11 +20,7 @@ export class SubmodelTable extends IdentifiableTable<aas.Submodel> {
     public async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(
-                `A Submodel with the identifier ${id} does not exists.`,
-                ERROR.SUBMODEL_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.SUBMODEL_DOES_NOT_EXIST, { id }, 404);
         }
 
         return key;

@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { first, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -24,13 +24,11 @@ import {
     ViewMode,
     AuthService,
     NotifyService,
-    DownloadService,
     AASTable,
     StartService,
     IndexChangeService,
     EndpointsApi,
     ToolbarService,
-    EndpointsService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
@@ -51,9 +49,10 @@ class TestAASTable {
 }
 
 describe('ShellsComponent', () => {
+    let fixture: ComponentFixture<ShellsComponent>;
+    let component: ShellsComponent;
     let localStorage: jest.Mocked<Storage>;
-    let endpoints: jest.Mocked<EndpointsService>;
-    let documents: jest.Mocked<EndpointsApi>;
+    let api: jest.Mocked<EndpointsApi>;
     let favorites: jest.Mocked<FavoritesService>;
     let auth: jest.Mocked<AuthService>;
     let start: jest.Mocked<StartService>;
@@ -63,9 +62,17 @@ describe('ShellsComponent', () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
         localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
         localStorage.getItem.mockReturnValue(null);
-        endpoints = createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
-        documents = createSpyObj<EndpointsApi>(['getContent', 'getHierarchy', 'getDocuments']);
-        documents.getDocuments.mockReturnValue(
+        api = createSpyObj<EndpointsApi>([
+            'addEndpoint',
+            'deleteDocument',
+            'getEndpoints',
+            'removeEndpoint',
+            'getContent',
+            'getHierarchy',
+            'getDocuments',
+            'downloadPackage',
+        ]);
+        api.getDocuments.mockReturnValue(
             of({
                 previous: null,
                 next: null,
@@ -73,7 +80,7 @@ describe('ShellsComponent', () => {
             }),
         );
 
-        documents.getContent.mockReturnValue(
+        api.getContent.mockReturnValue(
             of({
                 assetAdministrationShells: [],
                 submodels: [],
@@ -106,12 +113,8 @@ describe('ShellsComponent', () => {
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: EndpointsService,
-                    useValue: endpoints,
-                },
-                {
                     provide: EndpointsApi,
-                    useValue: documents,
+                    useValue: api,
                 },
                 {
                     provide: FavoritesService,
@@ -124,10 +127,6 @@ describe('ShellsComponent', () => {
                 {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
-                },
-                {
-                    provide: DownloadService,
-                    useValue: createSpyObj<DownloadService>(['downloadPackage']),
                 },
                 {
                     provide: ToolbarService,
@@ -162,12 +161,25 @@ describe('ShellsComponent', () => {
                 imports: [TestAASTable],
             },
         });
+
+        fixture = TestBed.createComponent(ShellsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(ShellsComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
         expect(component).toBeTruthy();
+        expect(component.files()).toBeUndefined();
+        expect(component.limit()).toBe(10);
+        expect(component.favoritesLists()).toEqual(['']);
+        expect(component.activeFavoritesList()).toBe('');
+        expect(component.selected()).toEqual([]);
+        expect(component.someSelected()).toBe(false);
+        expect(component.views().length).toBeGreaterThan(0);
+        expect(component.filter()).toBe('');
+        expect(component.filterText()).toBe('');
+        expect(component.documents()).toEqual([]);
+        expect(component.isFirstPage()).toBe(true);
+        expect(component.isLastPage()).toBe(true);
     });
 });

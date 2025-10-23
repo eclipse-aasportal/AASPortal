@@ -45,7 +45,7 @@ describe('DocumentsController', () => {
             'getPackage',
             'getDocument',
             'getDocuments',
-            'addPackages',
+            'insertPackages',
             'deletePackage',
             'getDataElementValue',
             'invoke',

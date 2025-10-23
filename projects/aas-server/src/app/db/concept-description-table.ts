@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { aas, jsonization, types } from 'aas-core';
+import { aas, ApplicationError, jsonization, types } from 'aas-core';
 import { DatabaseKey, DatabaseTableData } from './database-types.js';
 import { Database } from './database.js';
 import { IdentifiableTable } from './identifiable-table.js';
-import { ApplicationError } from '../application-error.js';
 import { ERROR } from '../error.js';
 
 export class ConceptDescriptionTable extends IdentifiableTable<aas.ConceptDescription> {
@@ -21,11 +20,7 @@ export class ConceptDescriptionTable extends IdentifiableTable<aas.ConceptDescri
     public async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(
-                `A Concept Description with the identifier ${id} does not exists.`,
-                ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST, { id }, 404);
         }
 
         return key;

@@ -13,7 +13,7 @@ import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstra
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'aas-core';
 import { messageToString } from '../../../utilities';
-import { ERRORS } from '../../../errors';
+import { ERRORS } from '../../../messages';
 import { AuthApiService } from '../auth-api.service';
 
 export interface ProfileFormResult {

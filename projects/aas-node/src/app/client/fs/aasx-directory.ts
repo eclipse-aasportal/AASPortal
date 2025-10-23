@@ -123,11 +123,7 @@ export class AasxDirectory extends AASClient {
         const path = join(this.root, file.filename);
         const exists = await this.fileStorage.exists(path);
         if (exists) {
-            throw new ApplicationError(
-                `A file with the name '${path}' already exists.`,
-                ERRORS.FileAlreadyExists,
-                file.filename,
-            );
+            throw new ApplicationError(ERRORS.FileAlreadyExists, { file: file.fieldname }, 409);
         }
 
         try {

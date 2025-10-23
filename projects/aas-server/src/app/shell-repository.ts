@@ -9,12 +9,11 @@
 import path from 'path';
 import fs from 'fs';
 import { inject, singleton } from 'tsyringe';
-import { aas, extensionToMimeType, jsonization, PagedResult, toJsonValue, types } from 'aas-core';
+import { aas, ApplicationError, extensionToMimeType, jsonization, PagedResult, toJsonValue, types } from 'aas-core';
 import { FileResult } from 'aas-package';
 
 import { Database } from './db/database.js';
 import { ExtentModifier, LevelModifier } from './types.js';
-import { ApplicationError } from './application-error.js';
 import { ERROR } from './error.js';
 import { AddPackageCommand } from './db/commands/add-package-command.js';
 import { UpdateThumbnailCommand } from './db/commands/update-thumbnail-command.js';
@@ -73,11 +72,7 @@ export class ShellRepository {
         const shell = await this.getShell(id);
         const file = shell.assetInformation.defaultThumbnail?.path;
         if (!file) {
-            throw new ApplicationError(
-                `The AAS with the identifier ${id} has no thumbnail.`,
-                ERROR.THUMBNAIL_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.THUMBNAIL_DOES_NOT_EXIST, { id }, 404);
         }
 
         let contentType = shell.assetInformation.defaultThumbnail?.contentType;

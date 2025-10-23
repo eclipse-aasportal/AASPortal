@@ -177,11 +177,10 @@ export class ApiClientV1 extends ApiClient {
         );
 
         if (!result.executionResult.success) {
-            throw new ApplicationError(
-                `Invoking the operation ${operation.idShort} failed: {0}`,
-                ERRORS.InvokeOperationFailed,
-                result.executionResult.messages?.map(message => message.text).join(' ') ?? 'No messages.',
-            );
+            throw new ApplicationError(ERRORS.InvokeOperationFailed, {
+                idShort: opr.idShort,
+                message: result.executionResult.messages?.map(message => message.text).join(' '),
+            });
         }
 
         const reader = new JsonReaderV3();

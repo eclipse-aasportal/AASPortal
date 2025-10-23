@@ -11,7 +11,7 @@
         <nav class="navbar navbar-expand-sm bg-white">
             <div class="container-fluid">
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
-                    <img src="/assets/fhg-logo.svg" width="40" alt="Fraunhofer">
+                    <img src="/assets/fhg-logo.svg" width="40" alt="Fraunhofer" />
                 </a>
                 <button class="navbar-toggler" type="button" (click)="isMenuCollapsed.set(!isMenuCollapsed())">
                     <span class="navbar-toggler-icon"></span>
@@ -19,14 +19,20 @@
                 <div [ngbCollapse]="isMenuCollapsed()" class="collapse navbar-collapse">
                     <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
                         @for (link of links(); track link) {
-                        <li [ngbNavItem]="link.id" class="nav-item">
-                            <a ngbNavLink class="nav-item" routerLink="{{link.url}}" routerLinkActive="active"
-                                (click)="isMenuCollapsed.set(true)">{{link.name}}</a>
-                        </li>
+                            <li [ngbNavItem]="link.id" class="nav-item">
+                                <a
+                                    ngbNavLink
+                                    class="nav-item"
+                                    routerLink="{{ link.url }}"
+                                    routerLinkActive="active"
+                                    (click)="isMenuCollapsed.set(true)"
+                                    >{{ link.name }}</a
+                                >
+                            </li>
                         }
                     </ul>
                     <div class="bg-light">
-                        <img class="img-fluid" src="/assets/aas-portal.svg" width="67" height="40" alt="">
+                        <img class="img-fluid" src="/assets/aas-portal.svg" width="67" height="40" alt="" />
                     </div>
                 </div>
             </div>
@@ -36,16 +42,17 @@
         <div class="btn-toolbar mx-2" role="toolbar">
             <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
         </div>
-        <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
+        <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200"></fhg-notify>
     </div>
     <div class="fhg-main-content mt-1">
         <router-outlet></router-outlet>
     </div>
     <div class="fhg-main-statusbar d-flex flex-row justify-content-end ts-small p-2">
-        <div class="badge text-bg-light ms-1">packages: {{stats().packages}}</div>
-        <div class="badge text-bg-light ms-1">shells: {{stats().shells}}</div>
-        <div class="badge text-bg-light ms-1">submodels: {{stats().submodels}}</div>
-        <div class="badge text-bg-light ms-1">concept descriptions: {{stats().conceptDescriptions}}</div>
-        <div class="badge text-bg-light ms-1">© {{year()}} Fraunhofer IOSB-INA - AASServer (v{{version()}})</div>
+        <fhg-progress></fhg-progress>
+        <div class="badge text-bg-light ms-1">packages: {{ stats().packages }}</div>
+        <div class="badge text-bg-light ms-1">shells: {{ stats().shells }}</div>
+        <div class="badge text-bg-light ms-1">submodels: {{ stats().submodels }}</div>
+        <div class="badge text-bg-light ms-1">concept descriptions: {{ stats().conceptDescriptions }}</div>
+        <div class="badge text-bg-light ms-1">© {{ year() }} Fraunhofer IOSB-INA - AASServer (v{{ version() }})</div>
     </div>
 </div>

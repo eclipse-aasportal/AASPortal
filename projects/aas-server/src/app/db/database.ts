@@ -10,10 +10,9 @@ import { inject, singleton } from 'tsyringe';
 import path, { join } from 'path';
 import fs from 'fs';
 
-import { aas, PagedResult, noop } from 'aas-core';
+import { aas, PagedResult, noop, ApplicationError } from 'aas-core';
 import { PackageDescription, Stats, WebSocketData } from '../types.js';
 import { Variable } from '../variable.js';
-import { ApplicationError } from '../application-error.js';
 import { ERROR } from '../error.js';
 import { DatabaseData, DatabaseKey, PackageItem } from './database-types.js';
 import { PackageTable } from './package-table.js';
@@ -37,7 +36,7 @@ export class Database {
     private readonly connection: Promise<Connection>;
     private _hasDatabase = true;
     private memento?: Memento;
-    private reentry = 0;
+    private commandActive = false;
     private wsServer?: WSServer;
 
     public constructor(@inject(Variable) private readonly variable: Variable) {
@@ -73,62 +72,64 @@ export class Database {
     }
 
     public async begin(): Promise<void> {
-        await this.connection;
-        if (this.reentry === 0) {
-            this.memento = {
-                addedFiles: [],
-                deletedFiles: [],
-                updatedFiles: [],
-            };
+        if (this.commandActive) {
+            throw new Error('Command already active.');
         }
 
-        ++this.reentry;
+        this.commandActive = true;
+        await this.connection;
+        this.memento = {
+            addedFiles: [],
+            deletedFiles: [],
+            updatedFiles: [],
+        };
     }
 
     public async commit(): Promise<void> {
-        const data = (await this.connection).data;
-        if (this.reentry === 0) {
-            return;
+        if (!this.commandActive) {
+            throw new Error('No command active.');
         }
 
-        --this.reentry;
-        if (this.reentry === 0) {
-            await this.packages.commit();
-            await this.shells.commit();
-            await this.submodels.commit();
-            await this.conceptDescriptions.commit();
+        const data = (await this.connection).data;
+        await this.packages.commit();
+        await this.shells.commit();
+        await this.submodels.commit();
+        await this.conceptDescriptions.commit();
 
-            if (this.memento) {
-                if (this.memento.deletedFiles) {
-                    for (const deletedFile of this.memento.deletedFiles) {
-                        try {
-                            await fs.promises.unlink(deletedFile);
-                        } catch {
-                            noop();
-                        }
+        if (this.memento) {
+            if (this.memento.deletedFiles) {
+                for (const deletedFile of this.memento.deletedFiles) {
+                    try {
+                        await fs.promises.unlink(deletedFile);
+                    } catch {
+                        noop();
                     }
                 }
-
-                if (this.memento.updatedFiles) {
-                    for (const [backup] of this.memento.updatedFiles) {
-                        try {
-                            await fs.promises.unlink(backup);
-                        } catch {
-                            noop();
-                        }
-                    }
-                }
-
-                this.memento = undefined;
             }
 
-            await this.write(data);
+            if (this.memento.updatedFiles) {
+                for (const [backup] of this.memento.updatedFiles) {
+                    try {
+                        await fs.promises.unlink(backup);
+                    } catch {
+                        noop();
+                    }
+                }
+            }
+
+            this.memento = undefined;
         }
+
+        await this.write(data);
+        this.commandActive = false;
     }
 
     public async abort(): Promise<void> {
+        if (!this.commandActive) {
+            return;
+        }
+
         const connection = await this.connection;
-        this.reentry = 0;
         connection.data = await this.read();
         await this.packages.abort();
         await this.shells.abort();
@@ -158,6 +159,8 @@ export class Database {
 
             this.memento = undefined;
         }
+
+        this.commandActive = false;
     }
 
     public async execute<TResult>(command: DatabaseCommand<TResult>): Promise<TResult> {
@@ -233,11 +236,7 @@ export class Database {
         await this.connection;
         const key = await this.submodels.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(
-                `A Submodel with the identifier ${id} does not exists.`,
-                ERROR.SUBMODEL_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.SUBMODEL_DOES_NOT_EXIST, { id }, 404);
         }
 
         return await this.submodels.readJson(key);
@@ -252,11 +251,7 @@ export class Database {
         await this.connection;
         const key = await this.conceptDescriptions.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(
-                `A Concept Description with the identifier ${id} does not exists.`,
-                ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST, { id }, 404);
         }
 
         return await this.conceptDescriptions.readJson(key);
