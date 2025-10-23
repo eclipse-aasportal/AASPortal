@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { aas, jsonization, toJsonValue, types } from 'aas-core';
+import { aas, ApplicationError, jsonization, toJsonValue, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { DatabaseKey, IdentifiableItem, TablePage } from '../database-types.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { SubmodelTable } from '../submodel-table.js';
 
@@ -29,7 +28,7 @@ export class AddSubmodelCommand extends DatabaseCommand<types.Submodel> {
     public override async execute(): Promise<types.Submodel> {
         const result = jsonization.submodelFromJsonable(toJsonValue(this.submodel));
         if (result.error) {
-            throw new ApplicationError(result.error.message, ERROR.DESERIALIZATION_ERROR);
+            throw new ApplicationError(ERROR.DESERIALIZATION_ERROR, { message: result.error.message });
         }
 
         if (!result.value) {
@@ -42,11 +41,7 @@ export class AddSubmodelCommand extends DatabaseCommand<types.Submodel> {
     private async add(sm: types.Submodel): Promise<types.Submodel> {
         let key = await this.table.getKey(sm.id);
         if (key) {
-            throw new ApplicationError(
-                `A Submodel with the identifier ${sm.id} already exists.`,
-                ERROR.SUBMODEL_ALREADY_EXISTS,
-                409,
-            );
+            throw new ApplicationError(ERROR.SUBMODEL_ALREADY_EXISTS, { id: sm.id }, 409);
         }
 
         key = this.table.createKey();

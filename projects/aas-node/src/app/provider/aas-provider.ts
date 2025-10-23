@@ -368,28 +368,35 @@ export class AASProvider {
     }
 
     /**
-     * Uploads one or more AASX packages.
-     * @param endpointName The name of the destination endpoint.
-     * @param files A list of AASX package files.
+     * Inserts an AASX package file into the AAS endpoint identified by the given name.
+     *
+     * @param endpointName - The name of the AAS endpoint to which the package should be uploaded.
+     * @param file - The file object provided by Express/Multer containing the package data to insert.
+     *
+     * @returns A promise that resolves when the insert operation completes successfully.
+     *
+     * @throws {ApplicationError} If no endpoint with the specified name exists. The error uses
+     *   ERRORS.EndpointDoesNotExist and includes the provided endpointName as context.
+     * @throws {Error} If opening the client, inserting the package, or closing the client fails.
+     *
+     * @remarks
+     * - The client is always closed in a finally block to avoid leaving open connections,
+     *   even if an error occurs during open or insert.
+     * - Caller is responsible for ensuring the Multer file contains valid package content
+     *   as expected by the underlying client's insertPackage implementation.
      */
-    public async addPackages(endpointName: string, files: Express.Multer.File[]): Promise<void> {
+    public async insertPackages(endpointName: string, file: Express.Multer.File): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (!endpoint) {
-            throw new ApplicationError(
-                `An AAS container with the name "${endpointName}" does not exist.`,
-                ERRORS.ContainerDoesNotExist,
-                endpointName,
-            );
+            throw new ApplicationError(ERRORS.EndpointDoesNotExist, { endpoint: endpointName }, 404);
         }
 
-        const source = this.clientFactory.create(endpoint);
+        const client = this.clientFactory.create(endpoint);
         try {
-            await source.open();
-            for (const file of files) {
-                await source.insertPackage(file);
-            }
+            await client.open();
+            await client.insertPackage(file);
         } finally {
-            await source.close();
+            await client.close();
         }
     }
 

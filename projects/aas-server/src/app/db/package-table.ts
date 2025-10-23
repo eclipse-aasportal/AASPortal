@@ -8,11 +8,11 @@
 
 import path from 'path';
 import fs from 'fs';
+import { ApplicationError } from 'aas-core';
 import { DatabaseKey, DatabaseTableData, PackageItem } from './database-types.js';
 import { Database } from './database.js';
 import { DatabaseTable } from './database-table.js';
 import { PackageDescription } from '../types.js';
-import { ApplicationError } from '../application-error.js';
 import { ERROR } from '../error.js';
 
 export class PackageTable extends DatabaseTable<PackageItem, PackageDescription> {
@@ -23,11 +23,7 @@ export class PackageTable extends DatabaseTable<PackageItem, PackageDescription>
     public async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(
-                `An AASX package with the identifier ${id} does not exist.`,
-                ERROR.AASX_PACKAGE_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.AASX_PACKAGE_DOES_NOT_EXIST, { id }, 404);
         }
 
         return key;

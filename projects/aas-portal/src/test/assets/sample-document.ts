@@ -158,7 +158,7 @@ const content: object = {
                         ]
                     },
                     "kind": "Instance",
-                    "valueType": "langString",
+                    "valueType": "xs:string",
                     "value": "I40 Capable Servo Motor (EN)"
                 },
                 {
@@ -413,7 +413,7 @@ const content: object = {
                                 ]
                             },
                             "kind": "Instance",
-                            "valueType": "langString",
+                            "valueType": "xs:string",
                             "value": "Operation (EN) Bedienung (DE)",
                             "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassName"
                         },
@@ -533,7 +533,7 @@ const content: object = {
                                 ]
                             },
                             "kind": "Instance",
-                            "valueType": "langString",
+                            "valueType": "xs:string",
                             "value": "Operating Manual Servo Motor",
                             "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Title"
                         },
@@ -695,7 +695,7 @@ const content: object = {
                     "dataSpecificationContent": {
                         "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
-                        "dataType": "ENTITY",
+                        "dataType": "STRING",
                         "definition": [
                             {
                                 "language": "DE",
@@ -1630,7 +1630,7 @@ const sampleNoTechnicalData: object = {
                         ]
                     },
                     "kind": "Instance",
-                    "valueType": "langString",
+                    "valueType": "xs:string",
                     "value": "I40 Capable Servo Motor (EN)"
                 },
                 {
@@ -1782,7 +1782,7 @@ const sampleNoTechnicalData: object = {
                                 ]
                             },
                             "kind": "Instance",
-                            "valueType": "langString",
+                            "valueType": "xs:string",
                             "value": "Operation (EN) Bedienung (DE)",
                             "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassName"
                         },
@@ -1902,7 +1902,7 @@ const sampleNoTechnicalData: object = {
                                 ]
                             },
                             "kind": "Instance",
-                            "valueType": "langString",
+                            "valueType": "xs:string",
                             "value": "Operating Manual Servo Motor",
                             "nodeId": "aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Title"
                         },
@@ -2064,7 +2064,7 @@ const sampleNoTechnicalData: object = {
                     "dataSpecificationContent": {
                         "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
-                        "dataType": "ENTITY",
+                        "dataType": "STRING",
                         "definition": [
                             {
                                 "language": "DE",

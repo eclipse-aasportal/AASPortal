@@ -8,12 +8,11 @@
 
 import fs from 'fs';
 import { dirname, join } from 'path/posix';
-import { extensionToMimeType, types } from 'aas-core';
+import { ApplicationError, extensionToMimeType, types } from 'aas-core';
 
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { checkSubmodelIsReferenced, normalize, selectISubmodelElement } from '../../utilities.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { KeyList } from '../key-list.js';
 import { AasxPackage } from '../../aasx-package.js';
@@ -41,7 +40,7 @@ export class UpdateAttachmentCommand extends DatabaseCommand<void> {
         const submodel = await this.database.submodels.readSubmodel(key);
         const element = selectISubmodelElement(submodel, this.idShortPath);
         if (!(element instanceof types.File)) {
-            throw new ApplicationError(`"${this.idShortPath}" does not reference a File.`, ERROR.INVALID_ID_SHORT_PATH);
+            throw new ApplicationError(ERROR.INVALID_ID_SHORT_PATH, { idShortPath: this.idShortPath });
         }
 
         const oldValue = normalize(element.value);

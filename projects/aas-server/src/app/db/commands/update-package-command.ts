@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { aas, types } from 'aas-core';
+import { aas, ApplicationError, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { DatabaseEnvironment, DatabaseKey, IdentifiableItem, PackageItem } from '../database-types.js';
 import { Database } from '../database.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { PackageTable } from '../package-table.js';
 import { IdentifiableTable } from '../identifiable-table.js';
@@ -45,11 +44,7 @@ export class UpdatePackageCommand extends DatabaseCommand<boolean> {
         const page = await this.table.getEditablePage(this.packageKey);
         const item = page.items[this.packageKey % this.table.pageSize];
         if (item === null) {
-            throw new ApplicationError(
-                `An AASX package with the identifier ${this.packageId} does not exist.`,
-                ERROR.AASX_PACKAGE_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.AASX_PACKAGE_DOES_NOT_EXIST, { packageId: this.packageId }, 404);
         }
 
         return item;

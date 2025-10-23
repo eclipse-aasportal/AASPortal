@@ -174,8 +174,7 @@ export class ApiClientV3 extends ApiClient {
 
         await fs.promises.rename(file.path, path.join(path.dirname(file.path), file.originalname));
         formData.append('file', fs.createReadStream(aasxFile));
-        const result = await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
-        return result;
+        return await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
     }
 
     public async deletePackage(aasId: string): Promise<string> {
@@ -215,11 +214,10 @@ export class ApiClientV3 extends ApiClient {
         );
 
         if (!result.success) {
-            throw new ApplicationError(
-                `Invoking the operation ${operation.idShort} failed: {0}`,
-                ERRORS.InvokeOperationFailed,
-                result.messages?.map(message => message.text).join(' ') ?? 'No messages.',
-            );
+            throw new ApplicationError(ERRORS.InvokeOperationFailed, {
+                idShort: operation.idShort,
+                message: result.messages?.map(message => message.text).join(' '),
+            });
         }
 
         return { ...operation, outputVariables: result.outputVariables, inoutputVariables: result.inoutputVariables };

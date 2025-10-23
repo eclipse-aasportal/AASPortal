@@ -50,7 +50,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
             return key;
         }
 
-        return recycler.push();
+        return recycler.pop();
     }
 
     public findKey(id: string): Promise<DatabaseKey | undefined> {

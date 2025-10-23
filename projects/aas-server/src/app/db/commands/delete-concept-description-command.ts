@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
+import { ApplicationError } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { ConceptDescriptionTable } from '../concept-description-table.js';
 
@@ -27,11 +27,7 @@ export class DeleteConceptDescriptionCommand extends DatabaseCommand<void> {
     public override async execute(): Promise<void> {
         const key = await this.table.findKey(this.id);
         if (!key) {
-            throw new ApplicationError(
-                `A Concept Description with the identifier ${this.id} does not exist.`,
-                ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST, { id: this.id }, 404);
         }
 
         const index = key % this.table.pageSize;

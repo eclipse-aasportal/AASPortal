@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { aas } from 'aas-core';
+import { aas, ApplicationError } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { DatabaseKey } from '../database-types.js';
 import { Database } from '../database.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { IdentifiableTable } from '../identifiable-table.js';
 import { PackageTable } from '../package-table.js';
@@ -35,8 +34,10 @@ export class DeletePackageCommand extends DatabaseCommand<void> {
         const item = page.items[index];
         if (item === null) {
             throw new ApplicationError(
-                `An AASX package with the identifier ${this.packageId} does not exist.`,
                 ERROR.AASX_PACKAGE_DOES_NOT_EXIST,
+                {
+                    packageId: this.packageId,
+                },
                 404,
             );
         }

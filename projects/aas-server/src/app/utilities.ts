@@ -9,6 +9,7 @@
 import { Readable } from 'stream';
 import {
     aas,
+    ApplicationError,
     isAnnotatedRelationshipElement,
     isEntity,
     isSubmodel,
@@ -18,7 +19,6 @@ import {
 } from 'aas-core';
 
 import { Cursor, ExtentModifier, LevelModifier } from './types.js';
-import { ApplicationError } from './application-error.js';
 import { ERROR } from './error.js';
 
 export function decodeBase64Url(data: string): string {
@@ -93,10 +93,7 @@ export function checkSubmodelIsReferenced(aas: aas.AssetAdministrationShell, smI
         !aas.submodels ||
         !aas.submodels.flatMap(reference => reference.keys).some(key => key.type === 'Submodel' && key.value === smId)
     ) {
-        throw new ApplicationError(
-            `The AAS "${aas.id}" does not reference the Submodel "${smId}".`,
-            ERROR.SUBMODEL_NOT_REFERENCED,
-        );
+        throw new ApplicationError(ERROR.SUBMODEL_NOT_REFERENCED, { id: aas.id, submodelId: smId });
     }
 }
 

@@ -55,7 +55,7 @@ describe('EndpointsController', () => {
             'getContent',
             'getPackage',
             'getDocument',
-            'addPackages',
+            'insertPackages',
             'deletePackage',
             'getDataElementValue',
             'invoke',
@@ -202,10 +202,10 @@ describe('EndpointsController', () => {
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxl/packages')
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
+            .attach('file', resolve('./src/test/assets/samples/example-motor.aasx'));
 
         expect(response.statusCode).toBe(204);
-        expect(aasProvider.addPackages).toHaveBeenCalled();
+        expect(aasProvider.insertPackages).toHaveBeenCalled();
     });
 
     it('DELETE: /api/v1/endpoints/{name}/packages/{id}', async () => {

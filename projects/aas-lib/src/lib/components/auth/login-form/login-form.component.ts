@@ -6,18 +6,17 @@
  *
  *****************************************************************************/
 
+import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Credentials, isValidEMail, isValidPassword, stringFormat } from 'aas-core';
-import isEmpty from 'lodash-es/isEmpty';
+import { Credentials, isValidEMail, isValidPassword } from 'aas-core';
 
 import { messageToString } from '../../../utilities';
-import { ERRORS } from '../../../errors';
-import { INFO } from '../../../info';
 import { MessageEntry } from '../../../types';
 import { AuthApiService } from '../auth-api.service';
+import { INFO, ERRORS } from '../../../messages';
 
 export interface LoginFormResult {
     action?: string;
@@ -55,13 +54,13 @@ export class LoginFormComponent {
         this.clearMessages();
         if (!this.newPasswordSent) {
             if (isEmpty(this.userId())) {
-                this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
+                this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
             } else if (!isValidEMail(this.userId())) {
-                this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
+                this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL, { id: this.userId() }));
             } else {
                 try {
                     this.pushMessage(
-                        stringFormat(this.translate.instant(INFO.NEW_PASSWORD_SENT), this.userId),
+                        this.translate.instant(INFO.NEW_PASSWORD_SENT, { id: this.userId }),
                         'bg-info w-100',
                     );
                 } catch (error) {
@@ -80,9 +79,9 @@ export class LoginFormComponent {
     public submit(): void {
         this.clearMessages();
         if (isEmpty(this.userId())) {
-            this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
+            this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
         } else if (!isValidEMail(this.userId())) {
-            this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
+            this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL));
         } else if (isEmpty(this.password())) {
             this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
         } else if (!isValidPassword(this.password())) {

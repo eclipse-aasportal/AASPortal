@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { aas, types, jsonization, toJsonValue } from 'aas-core';
+import { aas, types, jsonization, toJsonValue, ApplicationError } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { IdentifiableItem } from '../database-types.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { ConceptDescriptionTable } from '../concept-description-table.js';
 
@@ -29,7 +28,7 @@ export class AddConceptDescriptionCommand extends DatabaseCommand<types.ConceptD
     public override async execute(): Promise<types.ConceptDescription> {
         const result = jsonization.conceptDescriptionFromJsonable(toJsonValue(this.conceptDescription));
         if (result.error) {
-            throw new ApplicationError(result.error.message, ERROR.DESERIALIZATION_ERROR);
+            throw new ApplicationError(ERROR.DESERIALIZATION_ERROR);
         }
 
         if (!result.value) {
@@ -42,11 +41,7 @@ export class AddConceptDescriptionCommand extends DatabaseCommand<types.ConceptD
     private async add(cd: types.ConceptDescription): Promise<types.ConceptDescription> {
         let key = await this.table.findKey(cd.id);
         if (key) {
-            throw new ApplicationError(
-                `A Concept Description with the identifier ${cd.id} already exists.`,
-                ERROR.CONCEPT_DESCRIPTION_ALREADY_EXISTS,
-                409,
-            );
+            throw new ApplicationError(ERROR.CONCEPT_DESCRIPTION_ALREADY_EXISTS, { id: cd.id }, 409);
         }
 
         key = this.table.createKey();

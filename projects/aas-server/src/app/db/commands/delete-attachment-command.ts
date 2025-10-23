@@ -6,10 +6,9 @@
  *
  *****************************************************************************/
 
-import { types } from 'aas-core';
+import { ApplicationError, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { ApplicationError } from '../../application-error.js';
 import { ERROR } from '../../error.js';
 import { checkSubmodelIsReferenced, selectISubmodelElement } from '../../utilities.js';
 import { KeyList } from '../key-list.js';
@@ -36,7 +35,7 @@ export class DeleteAttachmentCommand extends DatabaseCommand<void> {
         const submodel = await this.database.submodels.readSubmodel(key);
         const element = selectISubmodelElement(submodel, this.idShortPath);
         if (!(element instanceof types.File)) {
-            throw new ApplicationError(`"${this.idShortPath}" does not reference a File.`, ERROR.INVALID_ID_SHORT_PATH);
+            throw new ApplicationError(ERROR.INVALID_ID_SHORT_PATH, { idShortPath: this.idShortPath });
         }
 
         const value = element.value;

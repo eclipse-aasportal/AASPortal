@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import isElement from 'lodash-es/isElement';
 import { Injectable, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import { resolveError } from '../../utilities';
+import { noop } from 'aas-core';
 import { MessageEntry } from '../../types';
-import { stringFormat } from 'aas-core';
+import { messageToString } from '../../utilities';
 
 export enum LogType {
     Error,
@@ -34,39 +34,44 @@ export class NotifyService {
      * Displays an error message.
      * @param error The error message.
      */
-    public async error(error: unknown): Promise<void> {
-        if (error) {
-            const text = await resolveError(error, this.translate);
-            this._messages.update(values => [
-                ...values,
-                {
-                    header: this.translate.instant('CAPTION_ERROR'),
-                    text: text,
-                    classname: 'bg-danger',
-                    autohide: false,
-                    delay: 5000,
-                },
-            ]);
+    public async error(error: unknown, args?: Record<string, string | number | boolean | undefined>): Promise<void> {
+        if (!error) {
+            return;
         }
+
+        const text = typeof error === 'string' ? this.translate.instant(error, args) : await this.resolveError(error);
+
+        this._messages.update(values => [
+            ...values,
+            {
+                header: this.translate.instant('CAPTION_ERROR'),
+                text,
+                classname: 'bg-danger',
+                autohide: false,
+                delay: 5000,
+            },
+        ]);
     }
 
     /**
      * Displays an information to the user.
      * @param message The message.
      */
-    public info(message: string, ...args: unknown[]): void {
-        if (message && !isElement(message)) {
-            this._messages.update(values => [
-                ...values,
-                {
-                    header: this.translate.instant('CAPTION_INFO'),
-                    text: stringFormat(this.translate.instant(message), args),
-                    classname: 'bg-info',
-                    autohide: true,
-                    delay: 5000,
-                },
-            ]);
+    public info(message: string, args?: Record<string, string | number | boolean | undefined>): void {
+        if (!message) {
+            return;
         }
+
+        this._messages.update(values => [
+            ...values,
+            {
+                header: this.translate.instant('CAPTION_INFO'),
+                text: this.translate.instant(message, args),
+                classname: 'bg-info',
+                autohide: true,
+                delay: 5000,
+            },
+        ]);
     }
 
     /**
@@ -106,5 +111,25 @@ export class NotifyService {
                     break;
             }
         }
+    }
+
+    private async resolveError(error: unknown): Promise<string> {
+        let message = error;
+        if (error instanceof HttpErrorResponse) {
+            if (error.error instanceof Blob) {
+                if (error.error.type === 'application/json') {
+                    try {
+                        const buffer = await error.error.arrayBuffer();
+                        message = JSON.parse(new TextDecoder().decode(buffer));
+                    } catch {
+                        noop();
+                    }
+                }
+            } else {
+                message = error.error;
+            }
+        }
+
+        return messageToString(message, this.translate);
     }
 }

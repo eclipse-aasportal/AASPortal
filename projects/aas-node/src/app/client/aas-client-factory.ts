@@ -108,7 +108,7 @@ export class AASClientFactory {
 
             this.logger.error(`Endpoint validation failed for ${endpoint.url}: ${error?.message || 'Unknown error'}`);
 
-            throw new ApplicationError(message, ERRORS.InvalidContainerUrl, endpoint.url);
+            throw new ApplicationError(ERRORS.InvalidEndpointUrl, { message, url: endpoint.url });
         }
     }
 }

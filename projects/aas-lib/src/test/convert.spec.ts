@@ -52,8 +52,8 @@ describe('convert', () => {
         });
 
         it('converts an ApplicationError', () => {
-            translate.instant.mockReturnValue('Hello {0}!');
-            const error = new ApplicationError('Hello World!', 'HELLO_WORLD', 'World');
+            translate.instant.mockReturnValue('Hello World!');
+            const error = new ApplicationError('HELLO_WORLD', { arg: 'World' });
             expect(messageToString(error, translate)).toEqual('Hello World!');
         });
     });

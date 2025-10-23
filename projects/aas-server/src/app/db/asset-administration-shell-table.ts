@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { aas, jsonization, types } from 'aas-core';
+import { aas, ApplicationError, jsonization, types } from 'aas-core';
 import { DatabaseKey, DatabaseTableData } from './database-types.js';
 import { Database } from './database.js';
 import { IdentifiableTable } from './identifiable-table.js';
-import { ApplicationError } from '../application-error.js';
 import { ERROR } from '../error.js';
 
 export class AssetAdministrationShellTable extends IdentifiableTable<aas.AssetAdministrationShell> {
@@ -21,11 +20,7 @@ export class AssetAdministrationShellTable extends IdentifiableTable<aas.AssetAd
     public async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(
-                `An AAS with the identifier ${id} does not exist.`,
-                ERROR.ASSET_ADMINISTRATION_SHELL_DOES_NOT_EXIT,
-                404,
-            );
+            throw new ApplicationError(ERROR.AAS_DOES_NOT_EXIST, { statusCode: 400, id });
         }
 
         return key;

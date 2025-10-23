@@ -16,12 +16,10 @@ export function parseUrl(url: string): URL {
     try {
         return new URL(url);
     } catch (error) {
-        throw new ApplicationError(
-            `"${url}" is an invalid URL: ${error?.message}`,
-            ERRORS.InvalidURL,
+        throw new ApplicationError(ERRORS.InvalidURL, {
             url,
-            error?.message,
-        );
+            message: error?.message,
+        });
     }
 }
 

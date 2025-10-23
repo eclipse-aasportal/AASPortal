@@ -28,7 +28,7 @@ import {
 } from 'aas-core';
 
 import { messageToString } from '../../utilities';
-import { ERRORS } from '../../errors';
+import { ERRORS } from '../../messages';
 import { OperationCallFormApiService } from './operation-call-form-api.service';
 
 export interface VariableItem {
@@ -125,13 +125,11 @@ export class OperationCallFormComponent {
                         : toInvariant(item.value, item.type as aas.DataTypeDefXsd, this.translate.currentLang);
 
                 if (value == null) {
-                    throw new ApplicationError(
-                        `The expression '${element.value}' for the variable '${element.idShort}' cannot be converted to the type '${element.valueType}'`,
-                        ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION,
-                        element.value,
-                        element.idShort,
-                        element.valueType,
-                    );
+                    throw new ApplicationError(ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION, {
+                        value: element.value,
+                        idShort: element.idShort,
+                        valueType: element.valueType,
+                    });
                 }
 
                 element.value = value;
@@ -158,11 +156,7 @@ export class OperationCallFormComponent {
                 }
 
                 if (!valueType) {
-                    throw new ApplicationError(
-                        `The data type of the variable "${source.idShort}" is undefined.`,
-                        ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE,
-                        source.idShort,
-                    );
+                    throw new ApplicationError(ERRORS.UNKNOWN_VARIABLE_VALUE_TYPE, { idShort: source.idShort });
                 }
 
                 let value = source.value;

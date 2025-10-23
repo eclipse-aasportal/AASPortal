@@ -98,11 +98,7 @@ export class LowDbIndex extends AASIndex {
 
     public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
-            throw new ApplicationError(
-                `An endpoint with the name "${endpoint.name}" already exists.`,
-                ERRORS.RegistryAlreadyExists,
-                endpoint.name,
-            );
+            throw new ApplicationError(ERRORS.RegistryAlreadyExists, { endpoint: endpoint.name }, 409);
         }
 
         this.db.data.endpoints.push(endpoint);

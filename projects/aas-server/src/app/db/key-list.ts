@@ -8,6 +8,21 @@
 
 import { DatabaseKey, KeyListItem } from './database-types.js';
 
+/**
+ * Maintains a compact, ordered collection of DatabaseKey values using
+ * single-key entries or inclusive ranges. The internal representation is an
+ * array of KeyListItem where each item is either a single DatabaseKey (number)
+ * or a two-element tuple [start, end] representing an inclusive range of keys.
+ *
+ * The class implements Iterable<DatabaseKey> and yields every key in ascending
+ * order, expanding ranges into their constituent keys when iterated.
+ *
+ * Invariants and behavior:
+ * - Items are stored in ascending order with no overlaps.
+ * - Adjacent keys or ranges are merged whenever possible (e.g. ... 3, 4 ... => [3,4]).
+ * - Single-key ranges are stored as plain numbers rather than one-element tuples
+ *   (i.e. [x, x] is normalized to x).
+ */
 export class KeyList implements Iterable<DatabaseKey> {
     public constructor(private readonly items: KeyListItem[]) {}
 
@@ -23,13 +38,29 @@ export class KeyList implements Iterable<DatabaseKey> {
         }
     }
 
+    /**
+     * Indicates whether the key list contains no items.
+     *
+     * @returns True if the list has no items; otherwise false.
+     */
     public get isEmpty(): boolean {
         return this.items.length === 0;
     }
 
-    public push(): DatabaseKey {
+    /**
+     * Removes and returns a database key from the end of the internal items collection.
+     * - If the last item is a number, that number is removed from the collection and returned.
+     * - If the last item is a two-element tuple [start, current]:
+     *   - The current value is returned.
+     *   - The current value is decremented in-place.
+     *   - If, after decrementing, start and current are equal, the tuple is replaced by the start value (converted to a number) at the end of the collection.
+     *
+     * @returns The extracted database key.
+     * @throws Error if the internal items collection is empty.
+     */
+    public pop(): DatabaseKey {
         if (this.items.length === 0) {
-            throw new Error('Invalid operation');
+            throw new Error('KeyList is empty.');
         }
 
         const item = this.items[this.items.length - 1];
@@ -47,6 +78,16 @@ export class KeyList implements Iterable<DatabaseKey> {
         return key;
     }
 
+    /**
+     * Insert a DatabaseKey into this list while preserving the list's ordering.
+     * - If no existing item is found (findIndex returns -1), the key is appended.
+     * - If the first existing item is greater than the key (index === 0), the key is prepended.
+     * - Otherwise the key is inserted immediately before the first greater item.
+     *
+     * @param key - The DatabaseKey to insert. It must be comparable with the items
+     *              in the list using the > operator.
+     * @returns void
+     */
     public add(key: DatabaseKey): void {
         const index = this.items.findIndex(item => {
             if (typeof item === 'number') {
@@ -65,6 +106,12 @@ export class KeyList implements Iterable<DatabaseKey> {
         }
     }
 
+    /**
+     * Returns the DatabaseKey at the given zero-based index from this iterable collection, or `undefined` if the index is out of range.
+     *
+     * @param index - Zero-based index of the element to retrieve.
+     * @returns The DatabaseKey located at the specified index, or `undefined` when the index is out of bounds.
+     */
     public at(index: number): DatabaseKey | undefined {
         let i = 0;
         for (const value of this) {
@@ -74,9 +121,31 @@ export class KeyList implements Iterable<DatabaseKey> {
 
             ++i;
         }
+
         return undefined;
     }
 
+    /**
+     * Remove a single key from the internal key list.
+     *
+     * Behavior:
+     * - If an item is a single number equal to `key`, that entry is removed.
+     * - If an item is an inclusive range that contains `key`:
+     *   - If `key` equals the start of the range, the start is incremented (start = key + 1).
+     *   - If `key` equals the end of the range, the end is decremented (end = key - 1).
+     *   - If `key` is strictly inside the range, the range is split into two ranges:
+     *     left = [start, key - 1] and right = [key + 1, end]; the current entry is replaced
+     *     with the left part and the right part is inserted immediately after.
+     * - Any range that collapses to a single value is stored as a number instead of a tuple.
+     *
+     * Side effects:
+     * - Mutates this.items in place using splice and direct index assignment.
+     *
+     * Complexity: O(n) in the number of items.
+     *
+     * @param key - The key to remove from the list.
+     * @returns true if the key was found and removed; false if the key was not present.
+     */
     public remove(key: DatabaseKey): boolean {
         for (let i = 0, n = this.items.length; i < n; i++) {
             const item = this.items[i];
