@@ -15,7 +15,6 @@ export class ApiUrlService implements ApiUrl {
     public constructor(window: WindowService) {
         this.baseUrl = new URL(window.location.origin);
         this.baseUrl.pathname = environment.basePath;
-        this.baseUrl.port = environment.port;
     }
 
     public join(path: string, queryParams?: Record<string, string>): string {
@@ -29,7 +28,9 @@ export class ApiUrlService implements ApiUrl {
         return url.toString();
     }
 
-    public getFileUrl(submodelId: string, idShortPath: string): string {
-        return this.join(`submodels/${encodeBase64Url(submodelId)}/submodel-elements/${idShortPath}/attachment`);
+    public getFileUrl(id: string, submodelId: string, idShortPath: string, endpoint: string): string {
+        return this.join(
+            `endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/submodels/${encodeBase64Url(submodelId)}/submodel-elements/${idShortPath}/value`,
+        );
     }
 }

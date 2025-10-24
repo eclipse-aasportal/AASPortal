@@ -99,7 +99,7 @@ export class ApiClientV1 extends ApiClient {
             conceptDescriptions,
         };
 
-        return new JsonReaderV2(sourceEnv).readEnvironment();
+        return new JsonReaderV2(sourceEnv, true).readEnvironment();
     }
 
     public setEnvironment(id: string, env: aas.Environment): Promise<void> {

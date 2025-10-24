@@ -88,7 +88,7 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
      * It can be null or undefined. When a new environment is provided, the component updates its state
      * to reflect the content of the document.
      */
-    public readonly env = input<aas.Environment | null | undefined>(undefined);
+    public readonly env = input<aas.Environment | undefined>(undefined);
 
     /**
      * The name of the AAS endpoint. A value is required in a multi endpoint application.
@@ -197,14 +197,15 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
         name = upperFirst(name);
         if (typeof value === 'string') {
             if (isFile(referable) && name === 'Value') {
+                const aas = this.env()!.assetAdministrationShells[0];
                 const submodel = isSubmodel(referable) ? referable : (this.state().path()[1].referable as aas.Submodel);
-                const idShortPath = this.idShortPath ? this.idShortPath + '.' + referable.idShort : referable.idShort;
+                const idShortPath = this.getIdShortPath(referable);
                 return [
                     {
                         name,
                         value,
                         kind: 'url',
-                        url: this.apiUrl.getFileUrl(submodel.id, idShortPath, this.endpoint()),
+                        url: this.apiUrl.getFileUrl(aas.id, submodel.id, idShortPath, this.endpoint()),
                     },
                 ];
             }
@@ -247,22 +248,19 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
         return [];
     }
 
-    private get idShortPath(): string {
+    private getIdShortPath(referable: aas.Referable): string {
         const current = this.current()?.referable;
         if (current === undefined) {
             return '';
         }
 
         const path = this.state().path();
-        if (path.length < 3) {
-            return '';
-        }
-
-        const idShortPath: string[] = [];
+        const idShortPath: string[] = [current.idShort];
         for (let i = 2, n = path.length; i < n; i++) {
             idShortPath.push(path[i].referable.idShort);
         }
 
+        idShortPath.push(referable.idShort);
         return idShortPath.join('.');
     }
 }
