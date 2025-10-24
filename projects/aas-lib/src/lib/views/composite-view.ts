@@ -36,8 +36,17 @@ export abstract class CompositeView<TState extends CompositeViewState<CompositeV
     protected readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
     public override readonly document = computed(() => {
-        const item = this.tuple();
-        return item ? item[0] : undefined;
+        const tuple = this.tuple();
+        return tuple ? tuple[0] : undefined;
+    });
+
+    public readonly content = computed(() => {
+        const content = this.document()?.content;
+        if (!content) {
+            return undefined;
+        }
+
+        return content;
     });
 
     /** Returns the version of the current AAS. */

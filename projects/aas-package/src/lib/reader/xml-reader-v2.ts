@@ -328,7 +328,7 @@ export class XmlReaderV2 extends AASReader {
 
     private readProperty(node: Element, ancestors: aas.Referable[]): aas.Property {
         const valueNode = this.selectNode('./aas:value', node);
-        let value = valueNode?.textContent;
+        const value = valueNode?.textContent;
 
         const valueTypeNode = this.selectNode('./aas:valueType', node);
         let valueType: aas.DataTypeDefXsd | undefined;
@@ -342,7 +342,6 @@ export class XmlReaderV2 extends AASReader {
 
         if (!valueType) {
             valueType = 'xs:string';
-            value = '!!! Undefined value type !!!';
         }
 
         const property: aas.Property = { ...this.readSubmodelElementType(node, ancestors), valueType };
@@ -410,8 +409,13 @@ export class XmlReaderV2 extends AASReader {
     }
 
     private readMultiLanguageProperty(node: Element, ancestors: aas.Referable[]): aas.MultiLanguageProperty {
-        const langString = this.readLangString('./aas:value', node) ?? [];
-        return { ...this.readSubmodelElementType(node, ancestors), value: langString };
+        const mlp: aas.MultiLanguageProperty = { ...this.readSubmodelElementType(node, ancestors) };
+        const value = this.readLangString('./aas:value', node);
+        if (value) {
+            mlp.value = value;
+        }
+
+        return mlp;
     }
 
     private readReferenceElement(node: Element, ancestors: aas.Referable[]): aas.ReferenceElement {

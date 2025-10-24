@@ -121,7 +121,7 @@
                         ]
                     },
                     "kind": "Instance",
-                    "valueType": "langString",
+                    "valueType": "xs:string",
                     "value": "I40 Capable Servo Motor (EN)"
                 },
                 {
@@ -291,7 +291,7 @@
                                 ]
                             },
                             "kind": "Instance",
-                            "valueType": "langString",
+                            "valueType": "xs:string",
                             "value": "Operation (EN) Bedienung (DE)"
                         },
                         {
@@ -355,7 +355,7 @@
                                 ]
                             },
                             "kind": "Instance",
-                            "valueType": "langString",
+                            "valueType": "xs:string",
                             "value": "Operating Manual Servo Motor"
                         },
                         {
@@ -469,7 +469,7 @@
                     "dataSpecificationContent": {
                         "modelType": "DataSpecificationIec61360",
                         "preferredName": [],
-                        "dataType": "ENTITY",
+                        "dataType": "STRING",
                         "definition": [
                             {
                                 "language": "DE",

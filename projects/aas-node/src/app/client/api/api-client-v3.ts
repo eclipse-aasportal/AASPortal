@@ -110,7 +110,7 @@ export class ApiClientV3 extends ApiClient {
             conceptDescriptions,
         };
 
-        return new JsonReaderV3(env).readEnvironment();
+        return new JsonReaderV3(env, true).readEnvironment();
     }
 
     public override async setEnvironment(id: string, env: aas.Environment): Promise<void> {

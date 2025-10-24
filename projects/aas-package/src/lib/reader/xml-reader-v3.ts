@@ -40,7 +40,7 @@ export class XmlReaderV3 extends AASReader {
         const namespaces: { [key: string]: string } = {};
         for (const prefix in nsMap) {
             const uri = nsMap[prefix];
-            if (uri === 'https://admin-shell.io/aas/3/0') {
+            if (uri === 'https://admin-shell.io/aas/3/0' || uri === 'https://admin-shell.io/aas/3/1') {
                 namespaces['aas'] = uri;
             }
         }
@@ -565,8 +565,18 @@ export class XmlReaderV3 extends AASReader {
     }
 
     private readMultiLanguageProperty(node: Element, ancestors: aas.Referable[]): aas.MultiLanguageProperty {
-        const value = this.readLangStrings('./aas:value', node) ?? [];
-        return { ...this.readSubmodelElementType(node, ancestors), value };
+        const mlp: aas.MultiLanguageProperty = { ...this.readSubmodelElementType(node, ancestors) };
+        const value = this.readLangStrings('./aas:value/aas:langStringTextType', node);
+        if (value) {
+            mlp.value = value;
+        }
+
+        const valueId = this.readReference(this.selectNode('./aas:valueId', node));
+        if (valueId) {
+            mlp.valueId = valueId;
+        }
+
+        return mlp;
     }
 
     private readOperation(node: Element, ancestors: aas.Referable[]): aas.Operation {
@@ -676,14 +686,14 @@ export class XmlReaderV3 extends AASReader {
             referable.category = category;
         }
 
+        const displayName = this.readLangStrings('./aas:displayName/aas:langStringNameType', node);
+        if (displayName) {
+            referable.displayName = displayName;
+        }
+
         const description = this.readLangStrings('./aas:description/aas:langStringTextType', node);
         if (description) {
             referable.description = description;
-        }
-
-        const displayName = this.readLangStrings('./aas:displayName/aas:langStringTextType', node);
-        if (displayName) {
-            referable.displayName = displayName;
         }
 
         return referable;
@@ -713,8 +723,18 @@ export class XmlReaderV3 extends AASReader {
     }
 
     private readHasSemantics(node: Element): aas.HasSemantics {
+        const hasSemantics: aas.HasSemantics = {};
         const semanticId = this.readReference(this.selectNode('./aas:semanticId', node));
-        return semanticId ? { semanticId } : {};
+        if (semanticId) {
+            hasSemantics.semanticId = semanticId;
+        }
+
+        const supplementalSemanticIds = this.readReferences('./aas:supplementalSemanticIds/aas:reference', node);
+        if (supplementalSemanticIds.length > 0) {
+            hasSemantics.supplementalSemanticIds = supplementalSemanticIds;
+        }
+
+        return hasSemantics;
     }
 
     private readHasKind(node: Element): aas.HasKind {

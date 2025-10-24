@@ -150,16 +150,16 @@ export function createXmlReader(xml: string, createReferenceToParent: boolean = 
     const nsMap = (document.documentElement as HTMLDocumentElement)._nsMap ?? {};
     for (const prefix in nsMap) {
         const uri = nsMap[prefix];
-        if (uri === 'http://www.admin-shell.io/aas/1/0') {
-            return new XmlReaderV1(document, createReferenceToParent);
+        if (uri.startsWith('https://admin-shell.io/aas/3/')) {
+            return new XmlReaderV3(document, createReferenceToParent);
         }
 
         if (uri === 'http://www.admin-shell.io/aas/2/0') {
             return new XmlReaderV2(document, createReferenceToParent);
         }
 
-        if (uri === 'https://admin-shell.io/aas/3/0') {
-            return new XmlReaderV3(document, createReferenceToParent);
+        if (uri === 'http://www.admin-shell.io/aas/1/0') {
+            return new XmlReaderV1(document, createReferenceToParent);
         }
     }
 
@@ -190,11 +190,11 @@ export function createJsonReader(data: object, createReferenceToParent: boolean 
     }
 
     if (isSubmodelElement(data)) {
-        return new JsonReaderV3();
+        return new JsonReaderV3(undefined, createReferenceToParent);
     }
 
     if (isSubmodelElementV2(data)) {
-        return new JsonReaderV2();
+        return new JsonReaderV2(undefined, createReferenceToParent);
     }
 
     throw new Error('Not implemented.');

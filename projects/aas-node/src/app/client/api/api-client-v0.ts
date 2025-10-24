@@ -46,7 +46,7 @@ export class ApiClientV0 extends ApiClient {
             this.resolve(`/aas/${idShort}/aasenv`),
         );
 
-        return new JsonReaderV2(sourceEnv).readEnvironment();
+        return new JsonReaderV2(sourceEnv, true).readEnvironment();
     }
 
     public override async setEnvironment(id: string, env: aas.Environment): Promise<void> {
