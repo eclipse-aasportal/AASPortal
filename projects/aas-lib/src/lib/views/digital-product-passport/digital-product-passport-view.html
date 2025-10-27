@@ -28,12 +28,18 @@
                 </div>
             }
         </div>
+        <hr/>
+         <label class="label">Nameplate</label>
         <div class="mt-3">
             <fhg-nameplate [document]="document()" [state]="nameplateState"></fhg-nameplate>
         </div>
+        <hr/>
+         <label class="label">Carbon Footprint</label>
         <div class="mt-3">
-            <fhg-carbon-footprint [document]="document()" [state]="carbonFootprintState"></fhg-carbon-footprint>
+            <fhg-carbon-footprint [isDigitalProductPassport]="true" [document]="document()" [state]="carbonFootprintState"></fhg-carbon-footprint>
         </div>
+        <hr/>
+         <label class="label">Documents</label>
         <div class="mt-3">
             <fhg-handover-documentation
                 [document]="document()"
