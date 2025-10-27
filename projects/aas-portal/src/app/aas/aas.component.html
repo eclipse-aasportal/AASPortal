@@ -6,52 +6,120 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="fhg-aas-container px-2">
+<div class="container h-100 w-100 px-2" style="overflow-y:auto">
+
+    <!-- Header of AAS View -->
     @if (document()) {
         <div class="fhg-aas-header">
-            <div class="d-flex flex-row">
+            <div class="d-flex flex-row flex-wrap align-items-center justify-content-center">
+                <!-- Header of the header -->
+                <div class="container h-100 align-self-start">
+                    <div class="d-flex flex-column text-center">
+                        <div class="bg-primary text-center py-2 my-2 fs-5">
+                            <div class="d-flex flex-column data-entry">
+                                <label style="font-size: 15px;">{{address()}}</label>
+                                <label style="font-size: 20px;">{{idShort()}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="border border-secondary rounded p-1">
                     <img
                         class="img-fluid"
-                        [src]="getThumbnail()"
-                        width="88"
-                        height="88"
+                        [src]="thumbnail()"
                         alt="thumbnail"
                         (error)="clearThumbnail()"
+                        style="max-height: 180px;"
                     />
                 </div>
-                <div class="d-flex flex-row ps-1">
-                    <div class="d-flex flex-column">
-                        <div class="fw-bold text-end small text-nowrap" translate>LABEL_ADDRESS</div>
-                        <div class="fw-bold text-end small text-nowrap" translate>LABEL_AAS_ID_SHORT</div>
-                        <div class="fw-bold text-end small text-nowrap" translate>LABEL_AAS_ID</div>
-                        <div class="fw-bold text-end small text-nowrap" translate>LABEL_VERSION</div>
-                        <div class="fw-bold text-end small text-nowrap" translate>LABEL_ASSET_ID</div>
+                <div>
+                    <div class="d-flex flex-column mt-1 mx-4">
+                        <label class="label">AAS View</label>
+                        <button [routerLink]="openShellView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
                     </div>
-                    <div class="d-flex flex-column flex-grow-1 ps-1">
-                        <div class="small text-nowrap">{{ address() }}</div>
-                        <div class="small text-nowrap">{{ idShort() }}</div>
-                        <div class="small text-nowrap">{{ id() }}</div>
-                        <div class="small text-nowrap">{{ version() }}</div>
-                        <div class="small text-nowrap">{{ assetId() }}</div>
+                    <div class="d-flex flex-column mt-1 mx-4">
+                        <label class="label">AAS Browser</label>
+                        <button [routerLink]="openShellView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
+                    </div>
+                </div>
+
+
+                <div class="d-flex flex-column ps-1">
+                    <div class="col-md-6 p-1 d-flex flex-column mt-0">
+                        <label class="label" translate>LABEL_VERSION</label>
+                        <label class="ms-2">{{version()}}</label>
+                    </div>
+                    <div class="col-md-6 p-1 d-flex flex-column mt-0">
+                        <label class="label" translate>LABEL_AAS_ID</label>
+                        <label class="ms-2">{{id()}}</label>
+                    </div>
+                    <div class="col-md-6 p-1 d-flex flex-column mt-0">
+                        <label class="label" translate>LABEL_ASSET_ID</label>
+                        <label class="ms-2">{{assetId()}}</label>
                     </div>
                 </div>
             </div>
         </div>
     }
+
+    <!-- Body of AAS View -->
     <div class="fhg-aas-document">
-        <fhg-aas-tree
-            #aasTree
-            [live]="live()"
-            [searchExpression]="searchExpression()"
-            [document]="document()"
-            (selected)="setSelectedElements($event)"
-            [state]="treeState"
-        >
-        </fhg-aas-tree>
+          <!-- Tab headers -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="submodels-tab" data-bs-toggle="tab" data-bs-target="#submodels"
+                    type="button" role="tab" aria-controls="submodels" aria-selected="true">
+                Submodels
+            </button>
+            </li>
+            <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tree-tab" data-bs-toggle="tab" data-bs-target="#tree"
+                    type="button" role="tab" aria-controls="tree" aria-selected="false">
+                AAS Tree
+            </button>
+            </li>
+        </ul>
+
+          <!-- Tab content -->
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="submodels" role="tabpanel" aria-labelledby="submodels-tab">
+                <div class="d-flex flex-row flex-wrap">
+                    @for (submodel of getSubmodels(); track submodel) {
+                        <div class="d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black rounded-3 align-items-center bg-primary-subtle">
+                            <div class="me-4 text-secondary" style="font-size: 3.5rem;">
+                                <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
+                            </div>
+                            <div class="me-4">
+                                <label  style="font-size:14px; overflow-wrap: anywhere; word-break: break-word;">{{getSubmodelSemanticId(submodel)}}</label>
+                                <h4>{{submodel.idShort}}</h4>
+                            </div>
+                            <div>
+                                <button [routerLink]="openSubmodelView(submodel)" type="button" class="btn btn-primary" style="font-size: 1.5rem;"><i class="bi bi-box-arrow-up-right"></i></button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tree" role="tabpanel" aria-labelledby="tree-tab">
+               <fhg-aas-tree
+                    #aasTree
+                    [live]="live()"
+                    [searchExpression]="searchExpression()"
+                    [document]="document()"
+                    (selected)="setSelectedElements($event)"
+                    [state]="treeState"
+                >
+                </fhg-aas-tree>
+            </div>
+        </div>
     </div>
+
+
 </div>
 
+<!-- Toolbar -->
 <ng-template #toolbar>
     <div class="input-group me-2 my-1">
         <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
@@ -142,11 +210,11 @@
             (ngModelChange)="setSearchExpression($event)"
             [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate"
         />
-        <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
+        <!-- <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
             <i class="bi bi-chevron-down"></i>
         </button>
         <button type="button" class="btn btn-primary" (click)="aasTree.findPrevious()">
             <i class="bi bi-chevron-up"></i>
-        </button>
+        </button> -->
     </div>
 </ng-template>
