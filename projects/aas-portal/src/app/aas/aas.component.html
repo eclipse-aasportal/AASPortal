@@ -29,7 +29,7 @@
                         class="img-fluid"
                         [src]="thumbnail()"
                         alt="thumbnail"
-                        (error)="clearThumbnail()"
+                        (error)="thumbnail.set('/assets/resources/aas-idta.png')"
                         style="max-height: 180px;"
                     />
                 </div>
@@ -40,7 +40,7 @@
                     </div>
                     <div class="d-flex flex-column mt-1 mx-4">
                         <label class="label">AAS Browser</label>
-                        <button [routerLink]="openShellView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
+                        <button [routerLink]="openBrowserView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
                     </div>
                 </div>
 
@@ -92,7 +92,7 @@
                             </div>
                             <div class="me-4">
                                 <label  style="font-size:14px; overflow-wrap: anywhere; word-break: break-word;">{{getSubmodelSemanticId(submodel)}}</label>
-                                <h4>{{submodel.idShort}}</h4>
+                                <h4 style="overflow-wrap: anywhere; word-break: break-word;">{{submodel.idShort}}</h4>
                             </div>
                             <div>
                                 <button [routerLink]="openSubmodelView(submodel)" type="button" class="btn btn-primary" style="font-size: 1.5rem;"><i class="bi bi-box-arrow-up-right"></i></button>

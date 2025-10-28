@@ -27,7 +27,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, jsonization, isSubmodel } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, jsonization, isSubmodel, toJsonValue } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
@@ -574,6 +574,20 @@ export class AASComponent implements OnInit, OnDestroy {
         
         return [
             `/views/${route.path}`,
+            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
+        ];
+
+    }
+
+    openBrowserView(){
+        const endpoint = this.document()?.endpoint;
+        if(endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if(id === undefined) return undefined;
+        
+        return [
+            `/views/Browser`,
             { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
         ];
 
