@@ -14,10 +14,11 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { API_URL, ToolbarService } from 'aas-lib';
 
 import { ShellsComponent } from '../app/shells/shells.component';
-import { createSpyObj } from './mocks';
+import { createSpyObj, FakeLoader } from './mocks';
 import { ShellsService } from '../app/shells.service';
 import { Cursor } from '../app/types';
 import { ApiUrlService } from '../app/api-url.service';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 describe('ShellsComponent', () => {
     beforeEach(async () => {
@@ -38,6 +39,12 @@ describe('ShellsComponent', () => {
                     provide: API_URL,
                     useValue: createSpyObj<ApiUrlService>(['join']),
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
                 provideRouter([]),
                 provideHttpClient(),
                 provideHttpClientTesting(),
