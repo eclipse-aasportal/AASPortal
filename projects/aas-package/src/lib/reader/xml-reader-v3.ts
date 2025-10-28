@@ -521,21 +521,18 @@ export class XmlReaderV3 extends AASReader {
     }
 
     private readRelationshipElement(node: Element, ancestors: aas.Referable[]): aas.RelationshipElement {
+        const relationship: aas.RelationshipElement = this.readSubmodelElementType(node, ancestors);
         const first = this.readReference(this.selectNode('./aas:first', node));
-        if (!first) {
-            throw new Error('RelationshipElement.first');
+        if (first) {
+            relationship.first = first;
         }
 
         const second = this.readReference(this.selectNode('./aas:second', node));
-        if (!second) {
-            throw new Error('RelationshipElement.second');
+        if (second) {
+            relationship.second = second;
         }
 
-        return {
-            ...this.readSubmodelElementType(node, ancestors),
-            first,
-            second,
-        };
+        return relationship;
     }
 
     private readFile(node: Element, ancestors: aas.Referable[]): aas.File {

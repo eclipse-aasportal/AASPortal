@@ -48,14 +48,13 @@ export class AASServerScanFactory {
                         throw new Error('Not implemented.');
                 }
 
-                return new AASApiServerScan(this.logger, source);
+                return new AASApiServerScan(source);
             }
             case 'OPC_UA':
-                return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint));
+                return new OpcuaServerScan(new OpcuaClient(this.logger, endpoint));
             case 'WebDAV':
             case 'FileSystem':
                 return new DirectoryScan(
-                    this.logger,
                     new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint),
                 );
             default:

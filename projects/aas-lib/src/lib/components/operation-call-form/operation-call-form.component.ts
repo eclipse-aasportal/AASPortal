@@ -11,7 +11,7 @@ import { catchError, EMPTY, map, mergeMap, Observable, of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import {
     AASDocument,
     getLocaleValue,
@@ -44,7 +44,7 @@ export interface VariableItem {
     selector: 'fhg-operation-call',
     templateUrl: './operation-call-form.component.html',
     styleUrls: ['./operation-call-form.component.scss'],
-    imports: [NgbToast, FormsModule, TranslateModule],
+    imports: [NgbToast, FormsModule, TranslateDirective],
     providers: [OperationCallFormApiService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

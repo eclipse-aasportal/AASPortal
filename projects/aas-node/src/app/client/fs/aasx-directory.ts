@@ -7,7 +7,8 @@
  *****************************************************************************/
 
 import { aas, AASEndpoint, ApplicationError, noop, normalize, PagedResult } from 'aas-core';
-import { extname, join } from 'path/posix';
+import { basename } from 'path';
+import * as posix from 'path/posix';
 import { readFile } from 'fs/promises';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
@@ -16,7 +17,9 @@ import { AASClient } from '../aas-client.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 
-/** Provides a file system based endpoint. */
+/**
+ * Provides a file system based endpoint.
+ */
 export class AasxDirectory extends AASClient {
     private readonly root: string;
     private reentry = 0;
@@ -67,8 +70,8 @@ export class AasxDirectory extends AASClient {
         }
     }
 
-    public close(): Promise<void> {
-        return new Promise(resolve => {
+    public async close(): Promise<void> {
+        await new Promise<void>(resolve => {
             if (this.reentry > 0) {
                 --this.reentry;
             }
@@ -106,12 +109,16 @@ export class AasxDirectory extends AASClient {
         return stream;
     }
 
+    public override async determineAddress(aasxFile: string): Promise<string | undefined> {
+        return await Promise.resolve(basename(aasxFile));
+    }
+
     public override createSubscription(): SocketSubscription {
         throw new Error('Not implemented.');
     }
 
     public override async getPackage(_: string, name: string): Promise<NodeJS.ReadableStream> {
-        const path = join(this.root, name);
+        const path = posix.join(this.root, name);
         if (!(await this.fileStorage.exists(path))) {
             throw new Error(`The file '${path}' does not exist.`);
         }
@@ -119,17 +126,17 @@ export class AasxDirectory extends AASClient {
         return this.fileStorage.createReadStream(path);
     }
 
-    public override async insertPackage(file: Express.Multer.File): Promise<string> {
-        const path = join(this.root, file.filename);
+    public override async insertPackage(file: string): Promise<void> {
+        const filename = basename(file);
+        const path = posix.join(this.root, filename);
         const exists = await this.fileStorage.exists(path);
         if (exists) {
-            throw new ApplicationError(ERRORS.FileAlreadyExists, { file: file.fieldname }, 409);
+            throw new ApplicationError(ERRORS.FileAlreadyExists, { file: filename }, 409);
         }
 
         try {
-            const buffer = await readFile(file.path);
+            const buffer = await readFile(file);
             await this.fileStorage.writeFile(path, buffer);
-            return `${file.filename} successfully written`;
         } catch (error) {
             if (await this.fileStorage.exists(path)) {
                 await this.fileStorage.delete(path);
@@ -139,10 +146,9 @@ export class AasxDirectory extends AASClient {
         }
     }
 
-    public override async deletePackage(_: string, name: string): Promise<string> {
-        const path = join(this.root, name);
+    public override async deletePackage(_: string, name: string): Promise<void> {
+        const path = posix.join(this.root, name);
         await this.fileStorage.delete(path);
-        return `${path} successfully deleted`;
     }
 
     public override invoke(): Promise<aas.Operation> {
@@ -157,15 +163,15 @@ export class AasxDirectory extends AASClient {
         const entries = await this.fileStorage.readDir(dir);
         for (const entry of entries) {
             if (entry.type === 'directory') {
-                await this.readDirAsync(join(dir, entry.name), join(path, entry.name), files);
-            } else if (extname(entry.name) === '.aasx') {
-                files.push(join(path, entry.name));
+                await this.readDirAsync(posix.join(dir, entry.name), posix.join(path, entry.name), files);
+            } else if (posix.extname(entry.name) === '.aasx') {
+                files.push(posix.join(path, entry.name));
             }
         }
     }
 
     private async openAasxPackage(filename: string): Promise<AasxPackage> {
-        const buffer = await this.fileStorage.readFile(join(this.root, filename));
+        const buffer = await this.fileStorage.readFile(posix.join(this.root, filename));
         return await AasxPackage.createFromBuffer(buffer);
     }
 }

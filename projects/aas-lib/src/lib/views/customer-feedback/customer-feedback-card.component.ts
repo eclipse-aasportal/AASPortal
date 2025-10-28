@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
 import { ScoreComponent } from '../../components/score/score.component';
 import { GeneralItem } from './customer-feedback.types';
@@ -18,7 +18,7 @@ import { GeneralItem } from './customer-feedback.types';
     templateUrl: './customer-feedback-card.component.html',
     styleUrl: './customer-feedback-card.component.scss',
     standalone: true,
-    imports: [ScoreComponent, DecimalPipe, TranslateModule],
+    imports: [ScoreComponent, DecimalPipe, TranslateDirective, TranslatePipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerFeedbackCardComponent {

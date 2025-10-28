@@ -7,19 +7,12 @@
  *****************************************************************************/
 
 import { AASDocument, PagedResult } from 'aas-core';
-import { Logger } from '../logging/logger.js';
 import { ApiClient } from '../client/api/api-client.js';
 import { AASServerScan } from './aas-server-scan.js';
 
 export class AASApiServerScan extends AASServerScan {
-    private readonly logger: Logger;
-    private readonly client: ApiClient;
-
-    public constructor(logger: Logger, client: ApiClient) {
+    public constructor(private readonly client: ApiClient) {
         super();
-
-        this.logger = logger;
-        this.client = client;
     }
 
     protected override open(): Promise<void> {

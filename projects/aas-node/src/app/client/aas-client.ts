@@ -31,12 +31,13 @@ export abstract class AASClient {
 
     public async createDocument(address: string): Promise<AASDocument> {
         const environment = await this.getEnvironment(address);
+        const aas = environment.assetAdministrationShells[0];
         const document: AASDocument = {
-            id: environment.assetAdministrationShells[0].id,
+            id: aas.id,
             endpoint: this.endpoint.name,
             address: address,
-            idShort: environment.assetAdministrationShells[0].idShort,
-            assetId: environment.assetAdministrationShells[0].assetInformation.globalAssetId,
+            idShort: aas.idShort,
+            assetId: aas.assetInformation.globalAssetId,
             readonly: this.readOnly,
             onlineReady: true,
             content: environment,
@@ -52,22 +53,48 @@ export abstract class AASClient {
         return document;
     }
 
-    /** Tests the connection to the AAS source. */
+    /**
+     * Tests the connection to the AAS endpoint.
+     */
     public abstract test(): Promise<void>;
 
-    /** Opens the container. */
+    /**
+     * Opens a connection to the AAS endpoint.
+     */
     public abstract open(): Promise<void>;
 
-    /** Closes the container. */
+    /**
+     * Closes the connection to the AAS endpoint.
+     */
     public abstract close(): Promise<void>;
 
+    /**
+     * Gets the thumbnail of the AAS package with the specified address.
+     * @param address The address of the package in the AAS endpoint.
+     */
     public abstract getThumbnail(address: string): Promise<NodeJS.ReadableStream | undefined>;
 
+    /**
+     * Gets the AAS environment contained in the package with the specified address.
+     * @param address The address of the package in the AAS endpoint.
+     */
     public abstract getEnvironment(address: string): Promise<aas.Environment>;
 
+    /**
+     * Sets a new AAS environment in the package with the specified address.
+     * @param address The address of the package in the AAS endpoint.
+     * @param env The AAS environment.
+     */
     public abstract setEnvironment(address: string, env: aas.Environment): Promise<void>;
 
+    /**
+     * Opens a readable stream.
+     * @param address The address of the package in the AAS endpoint.
+     * @param file The File element to read the content.
+     */
     public abstract openRead(address: string, file: aas.File): Promise<NodeJS.ReadableStream>;
+
+    public abstract determineAddress(aasxFile: string): Promise<string | undefined>;
 
     /**
      * Creates a WebSocket subscription.
@@ -93,14 +120,14 @@ export abstract class AASClient {
      * Uploads an AASX package.
      * @param file The AASX package file.
      */
-    public abstract insertPackage(file: Express.Multer.File): Promise<string>;
+    public abstract insertPackage(file: string): Promise<void>;
 
     /**
      * Delete an aasx package from the current source.
      * @param id The AAS identifier.
      * @param name The name of the package in the source.
      */
-    public abstract deletePackage(id: string, name: string): Promise<string>;
+    public abstract deletePackage(id: string, name: string): Promise<void>;
 
     /**
      * Invokes the specified operation synchronously.

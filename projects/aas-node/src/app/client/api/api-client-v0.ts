@@ -79,11 +79,11 @@ export class ApiClientV0 extends ApiClient {
         throw new Error('Not implemented.');
     }
 
-    public override insertPackage(): Promise<string> {
+    public override insertPackage(): Promise<void> {
         throw new Error('Not implemented.');
     }
 
-    public override deletePackage(): Promise<string> {
+    public override deletePackage(): Promise<void> {
         throw new Error('Not implemented.');
     }
 

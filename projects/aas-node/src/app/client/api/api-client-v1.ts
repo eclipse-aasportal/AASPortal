@@ -8,6 +8,7 @@
 
 import FormData from 'form-data';
 import { createReadStream } from 'fs';
+import { basename } from 'path';
 import { aas, AASEndpoint, ApplicationError, getIdShortPath, noop, PagedResult, selectSubmodel } from 'aas-core';
 
 import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2 } from 'aas-package';
@@ -122,7 +123,7 @@ export class ApiClientV1 extends ApiClient {
         return this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${idShortPath}`).href;
     }
 
-    public async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
+    public override async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
         const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
@@ -133,14 +134,14 @@ export class ApiClientV1 extends ApiClient {
         return await this.http.getResponse(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public insertPackage(file: Express.Multer.File): Promise<string> {
+    public override async insertPackage(file: string): Promise<void> {
         const formData = new FormData();
-        formData.append('file', createReadStream(file.path));
-        formData.append('fileName', file.filename);
-        return this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        formData.append('file', createReadStream(file));
+        formData.append('fileName', basename(file));
+        await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
     }
 
-    public async deletePackage(aasIdentifier: string): Promise<string> {
+    public override async deletePackage(aasIdentifier: string): Promise<void> {
         const aasId = encodeBase64Url(aasIdentifier);
         const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
@@ -148,7 +149,7 @@ export class ApiClientV1 extends ApiClient {
         );
 
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        return await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {

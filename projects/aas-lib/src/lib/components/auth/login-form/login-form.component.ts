@@ -10,7 +10,7 @@ import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { Credentials, isValidEMail, isValidPassword } from 'aas-core';
 
 import { messageToString } from '../../../utilities';
@@ -28,7 +28,7 @@ export interface LoginFormResult {
     selector: 'fhg-login',
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss'],
-    imports: [NgbToast, FormsModule, TranslateModule],
+    imports: [NgbToast, FormsModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginFormComponent {

@@ -219,14 +219,22 @@ export type AASNodeMessageType =
     | 'Reset';
 
 /** Server message. */
-export interface AASNodeMessage {
+export type AASNodeMessage = {
     /** The type of change. */
     type: AASNodeMessageType;
-    /** The endpoint if type `EndpointAdded`, `EndpointRemoved`. */
-    endpoint?: AASEndpoint;
-    /** The document if type `Added`, `Removed` or `Changed` */
-    document?: AASDocument;
-}
+} & (
+    | {
+          type: 'Reset';
+      }
+    | {
+          type: 'Added' | 'Removed' | 'Update' | 'Offline';
+          document: AASDocument;
+      }
+    | {
+          type: 'EndpointAdded' | 'EndpointRemoved';
+          endpoint: AASEndpoint;
+      }
+);
 
 /**
  * Additional information for the client to, e.g. fetch the next part of the result set.

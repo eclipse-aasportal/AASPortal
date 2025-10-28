@@ -7,7 +7,8 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { extname } from 'path/posix';
+import fs from 'fs';
+import path from 'path';
 import { Readable } from 'stream';
 import {
     AASDocument,
@@ -197,7 +198,7 @@ export class AASProvider {
                 }
 
                 stream = await client.openRead(document.address, dataElement);
-                const extension = dataElement.value ? extname(dataElement.value).toLowerCase() : '';
+                const extension = dataElement.value ? path.extname(dataElement.value).toLowerCase() : '';
                 const imageOptions = options as { width?: number; height?: number };
                 if (dataElement.contentType.startsWith('image/')) {
                     if (imageOptions?.width || imageOptions?.height) {
@@ -394,7 +395,19 @@ export class AASProvider {
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
-            await client.insertPackage(file);
+            const aasxFile = path.join(path.dirname(file.path), file.originalname);
+            if (fs.existsSync(aasxFile)) {
+                await fs.promises.unlink(aasxFile);
+            }
+
+            await fs.promises.rename(file.path, aasxFile);
+            await client.insertPackage(aasxFile);
+            const address = await client.determineAddress(aasxFile);
+            if (address) {
+                const document = await client.createDocument(address);
+                await this.index.add(document);
+                this.notify({ type: 'Added', document });
+            }
         } finally {
             await client.close();
         }

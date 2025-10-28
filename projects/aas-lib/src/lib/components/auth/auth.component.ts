@@ -9,14 +9,14 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NotifyService } from '../notify/notify.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { AuthService } from './auth.service';
 
 @Component({
     selector: 'fhg-auth',
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
-    imports: [NgbModule, TranslateModule],
+    imports: [NgbModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {

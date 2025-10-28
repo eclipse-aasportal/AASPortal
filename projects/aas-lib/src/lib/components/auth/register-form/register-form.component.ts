@@ -11,7 +11,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { isValidEMail, isValidPassword, UserProfile, getUserNameFromEMail } from 'aas-core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AuthApiService } from '../auth-api.service';
 import { ERRORS } from '../../../messages';
@@ -26,7 +26,7 @@ export interface RegisterFormResult {
     selector: 'fhg-register',
     templateUrl: './register-form.component.html',
     styleUrls: ['./register-form.component.scss'],
-    imports: [NgbToast, FormsModule, TranslateModule],
+    imports: [NgbToast, FormsModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {

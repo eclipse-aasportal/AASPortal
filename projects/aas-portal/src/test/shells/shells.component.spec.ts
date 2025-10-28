@@ -8,7 +8,7 @@
 
 import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { first, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -140,17 +140,15 @@ describe('ShellsComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                ShellsComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [ShellsComponent],
         }).compileComponents();
 
         TestBed.overrideComponent(ShellsComponent, {
