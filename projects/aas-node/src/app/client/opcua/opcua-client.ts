@@ -158,15 +158,20 @@ export class OpcuaClient extends AASClient {
         }
     }
 
+    public override async determineAddress(aasxFile: string): Promise<string | undefined> {
+        noop(aasxFile);
+        return await Promise.resolve(undefined);
+    }
+
     public override getPackage(): Promise<NodeJS.ReadableStream> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override insertPackage(): Promise<string> {
+    public override insertPackage(): Promise<void> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override deletePackage(): Promise<string> {
+    public override deletePackage(): Promise<void> {
         return Promise.reject(new Error('Not implemented.'));
     }
 

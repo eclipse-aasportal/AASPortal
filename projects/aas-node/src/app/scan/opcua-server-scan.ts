@@ -8,21 +8,15 @@
 
 import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescription } from 'node-opcua';
 import { AASDocument, noop, PagedResult } from 'aas-core';
-import { Logger } from '../logging/logger.js';
 import { OpcuaDataTypeDictionary } from '../client/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../client/opcua/opcua-client.js';
 import { AASServerScan } from './aas-server-scan.js';
 
 export class OpcuaServerScan extends AASServerScan {
-    private readonly logger: Logger;
-    private readonly client: OpcuaClient;
     private readonly map = new Map<string, AASDocument>();
 
-    public constructor(logger: Logger, client: OpcuaClient) {
+    public constructor(private readonly client: OpcuaClient) {
         super();
-
-        this.logger = logger;
-        this.client = client;
     }
 
     protected override open(): Promise<void> {

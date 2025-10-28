@@ -20,7 +20,7 @@ export class AssetAdministrationShellTable extends IdentifiableTable<aas.AssetAd
     public async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
-            throw new ApplicationError(ERROR.AAS_DOES_NOT_EXIST, { statusCode: 400, id });
+            throw new ApplicationError(ERROR.AAS_DOES_NOT_EXIST, { id }, 400);
         }
 
         return key;

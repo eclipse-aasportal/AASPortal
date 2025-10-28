@@ -346,19 +346,14 @@ export class JsonReaderV2 extends AASReader {
         source: aasv2.RelationshipElement,
         ancestors: aas.Referable[],
     ): aas.RelationshipElement {
-        if (!source.first) {
-            throw new Error('RelationshipElement.first');
+        const relationship: aas.RelationshipElement = this.readSubmodelElementType(source, ancestors);
+        if (source.first) {
+            relationship.first = this.readReference(source.first);
         }
 
-        if (!source.second) {
-            throw new Error('RelationshipElement.second');
+        if (source.second) {
+            relationship.second = this.readReference(source.second);
         }
-
-        const relationship: aas.RelationshipElement = {
-            ...this.readSubmodelElementType(source, ancestors),
-            first: this.readReference(source.first),
-            second: this.readReference(source.second),
-        };
 
         return relationship;
     }

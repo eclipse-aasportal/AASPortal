@@ -6,13 +6,25 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, TemplateRef, viewChild, inject } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    TemplateRef,
+    viewChild,
+    inject,
+    ElementRef,
+    model,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { encodeBase64Url, ToolbarService } from 'aas-lib';
+import { encodeBase64Url, NotifyService, ProgressService, ToolbarService } from 'aas-lib';
 
 import { ShellsDataItem, ShellsService } from './shells.service';
 import { MaxLengthPipe } from '../max-length.pipe';
+import { catchError, concatMap, EMPTY, map, Observable, of } from 'rxjs';
+import { HttpEventType } from '@angular/common/http';
 
 @Component({
     selector: 'fhg-shells',
@@ -24,6 +36,8 @@ import { MaxLengthPipe } from '../max-length.pipe';
 export class ShellsComponent {
     private readonly toolbar = inject(ToolbarService);
     private readonly state = inject(ShellsService);
+    private readonly progress = inject(ProgressService);
+    private readonly notify = inject(NotifyService);
 
     public constructor() {
         effect(() => {
@@ -32,9 +46,45 @@ export class ShellsComponent {
                 this.toolbar.set(shellsToolbar);
             }
         });
+
+        effect(() => {
+            const files = this.files();
+            const inputFiles = this.inputFiles();
+            if (!files || !inputFiles) {
+                return;
+            }
+
+            const fileList = inputFiles.nativeElement.files;
+            if (!fileList) {
+                return;
+            }
+
+            this.progress.begin();
+            this.uploadPackages(Array.from(fileList)).subscribe({
+                error: () => {
+                    this.progress.end();
+                    this.files.set(undefined);
+                },
+                complete: () => {
+                    this.progress.end();
+                    this.files.set(undefined);
+                },
+            });
+        });
     }
 
     public readonly shellsToolbar = viewChild<TemplateRef<unknown>>('shellsToolbar');
+
+    public readonly inputFiles = viewChild<ElementRef<HTMLInputElement>>('inputFiles');
+
+    /**
+     * The files selected for upload.
+     */
+    public readonly files = model<string[]>();
+
+    public readonly someSelected = computed(() => {
+        return false;
+    });
 
     public readonly items = this.state.page.value;
 
@@ -86,5 +136,38 @@ export class ShellsComponent {
 
     public getLink(item: ShellsDataItem): string {
         return `/shells/${encodeBase64Url(item.id)}`;
+    }
+
+    public downloadPackages(): void {
+        throw new Error('Method not implemented.');
+    }
+
+    public deletePackages(): void {
+        throw new Error('Method not implemented.');
+    }
+
+    private uploadPackages(files: File[]): Observable<void> {
+        return of(...files).pipe(
+            concatMap(file => {
+                const inputFiles = this.inputFiles()?.nativeElement.files;
+                if (!inputFiles) {
+                    return EMPTY;
+                }
+
+                return this.state.uploadPackage(file).pipe(
+                    catchError(error => {
+                        this.notify.error(error);
+                        return of();
+                    }),
+                    map(event => {
+                        if (event.type === HttpEventType.UploadProgress) {
+                            this.progress.set(Math.round((event.loaded / event.total!) * 100), file.name);
+                        } else if (event.type === HttpEventType.Response) {
+                            this.notify.info('Info.FILE_SUCCESSFULLY_UPLOADED', { file: file.name });
+                        }
+                    }),
+                );
+            }),
+        );
     }
 }

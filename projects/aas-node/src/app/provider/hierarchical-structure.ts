@@ -80,6 +80,10 @@ export class HierarchicalStructure extends HierarchicalStructureElement {
     }
 
     private selectChildNode(hasPart: aas.RelationshipElement): aas.Entity | undefined {
+        if (!hasPart.first || !hasPart.second) {
+            return undefined;
+        }
+
         const first = selectReferable(this.env, hasPart.first);
         const second = selectReferable(this.env, hasPart.second);
         if (isEntity(first) && isEntity(second)) {

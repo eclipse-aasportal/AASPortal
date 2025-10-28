@@ -7,17 +7,13 @@
  *****************************************************************************/
 
 import { AASDocument, PagedResult } from 'aas-core';
-import { Logger } from '../logging/logger.js';
 import { AasxDirectory } from '../client/fs/aasx-directory.js';
 import { AASServerScan } from './aas-server-scan.js';
 
 export class DirectoryScan extends AASServerScan {
     private readonly map = new Map<string, AASDocument>();
 
-    public constructor(
-        private readonly logger: Logger,
-        private readonly client: AasxDirectory,
-    ) {
+    public constructor(private readonly client: AasxDirectory) {
         super();
     }
 

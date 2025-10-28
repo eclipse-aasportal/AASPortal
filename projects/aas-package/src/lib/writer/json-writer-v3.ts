@@ -464,19 +464,17 @@ export class JsonWriterV3 extends AASWriter {
     }
 
     private writeRelationshipElement(source: aas.RelationshipElement): aas.RelationshipElement {
-        if (!source.first) {
-            throw new Error('RelationshipElement.first');
-        }
-
-        if (!source.second) {
-            throw new Error('RelationshipElement.second');
-        }
-
         const relationship: aas.RelationshipElement = {
             ...this.writeSubmodelElementType(source),
-            first: this.writeReference(source.first),
-            second: this.writeReference(source.second),
         };
+
+        if (source.first) {
+            relationship.first = this.writeReference(source.first);
+        }
+
+        if (source.second) {
+            relationship.second = this.writeReference(source.second);
+        }
 
         return relationship;
     }

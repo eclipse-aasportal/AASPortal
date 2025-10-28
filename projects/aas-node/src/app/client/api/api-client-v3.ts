@@ -9,7 +9,6 @@
 import FormData from 'form-data';
 import cloneDeep from 'lodash-es/cloneDeep.js';
 import fs from 'fs';
-import path from 'path';
 import { encodeBase64Url, JsonReaderV3, JsonWriterV3 } from 'aas-package';
 import {
     aas,
@@ -147,7 +146,7 @@ export class ApiClientV3 extends ApiClient {
         return await this.http.getResponse(url, this.endpoint.headers);
     }
 
-    public resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
+    public override resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
         const aasId = encodeBase64Url(shell.id);
         const index = nodeId.indexOf('#');
         const smId = nodeId.substring(0, index);
@@ -155,7 +154,7 @@ export class ApiClientV3 extends ApiClient {
         return this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}`).href;
     }
 
-    public async getPackage(aasId: string): Promise<NodeJS.ReadableStream> {
+    public override async getPackage(aasId: string): Promise<NodeJS.ReadableStream> {
         const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
             this.endpoint.headers,
@@ -165,26 +164,20 @@ export class ApiClientV3 extends ApiClient {
         return await this.http.getResponse(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public async insertPackage(file: Express.Multer.File): Promise<string> {
+    public override async insertPackage(file: string): Promise<void> {
         const formData = new FormData();
-        const aasxFile = path.join(path.dirname(file.path), file.originalname);
-        if (fs.existsSync(aasxFile)) {
-            await fs.promises.unlink(aasxFile);
-        }
-
-        await fs.promises.rename(file.path, path.join(path.dirname(file.path), file.originalname));
-        formData.append('file', fs.createReadStream(aasxFile));
-        return await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        formData.append('file', fs.createReadStream(file));
+        await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
     }
 
-    public async deletePackage(aasId: string): Promise<string> {
+    public override async deletePackage(aasId: string): Promise<void> {
         const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
             this.endpoint.headers,
         );
 
         const packageId = encodeBase64Url(result.result[0].packageId);
-        return await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {

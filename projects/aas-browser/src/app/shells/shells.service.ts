@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { inject, Injectable, signal } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { HttpClient, HttpEvent, httpResource } from '@angular/common/http';
 import { aas, PagedResult } from 'aas-core';
 import { API_URL, decodeBase64Url, encodeBase64Url } from 'aas-lib';
 
 import { Cursor } from '../types';
+import { Observable } from 'rxjs';
 
 export interface ShellsDataItem {
     id: string;
@@ -32,6 +33,7 @@ export interface ShellsPage {
 @Injectable({ providedIn: 'root' })
 export class ShellsService {
     private readonly apiUrl = inject(API_URL);
+    private readonly http = inject(HttpClient);
 
     private readonly parse = (data: unknown): ShellsPage => {
         const result = data as PagedResult<aas.AssetAdministrationShell>;
@@ -85,4 +87,13 @@ export class ShellsService {
             parse: this.parse,
         },
     );
+
+    public uploadPackage(file: File): Observable<HttpEvent<object>> {
+        const data = new FormData();
+        data.append('file', file);
+        return this.http.post(this.apiUrl.join(`packages`), data, {
+            reportProgress: true,
+            observe: 'events',
+        });
+    }
 }

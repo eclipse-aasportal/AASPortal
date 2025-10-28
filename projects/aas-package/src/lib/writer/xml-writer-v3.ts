@@ -494,8 +494,13 @@ export class XmlWriterV3 extends AASWriter {
     }
 
     private writeRelationshipElement(relationship: aas.RelationshipElement, node: Node) {
-        this.writeReference(relationship.first, this.appendChild(node, 'first'));
-        this.writeReference(relationship.second, this.appendChild(node, 'second'));
+        if (relationship.first) {
+            this.writeReference(relationship.first, this.appendChild(node, 'first'));
+        }
+
+        if (relationship.second) {
+            this.writeReference(relationship.second, this.appendChild(node, 'second'));
+        }
     }
 
     private writeSubmodelElementCollection(collection: aas.SubmodelElementCollection, node: Node) {

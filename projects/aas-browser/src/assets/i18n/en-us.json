@@ -1,2 +1,13 @@
 {
+    "Error": {
+        "AAS_ALREADY_EXISTS": "An AAS with the identifier '{{id}}' already exists.",
+        "AAS_NOT_FOUND": "An asset administration shell with the identification '{{id}}' does not exist.",
+        "INVALID_AASX_PACKAGE": "'{{file}}' is an invalid AASX package.",
+        "UPLOAD_AASX_FILE_FAILED": "Uploading the AASX file {{file}} failed: {{message}}",
+        "UPLOAD_FAILED": "Uploading and opening the file {{file}} failed. {{message}}"
+    },
+    "Info": {
+        "FILE_SUCCESSFULLY_DOWNLOADED": "{{file}} was successfully downloaded.",
+        "FILE_SUCCESSFULLY_UPLOADED": "{{file}} was successfully uploaded."
+    }
 }

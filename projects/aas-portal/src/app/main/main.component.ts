@@ -9,7 +9,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
 import {
@@ -18,6 +18,7 @@ import {
     IndexChangeService,
     LocalizeComponent,
     NotifyComponent,
+    ProgressComponent,
     ToolbarService,
 } from 'aas-lib';
 
@@ -52,10 +53,12 @@ export interface LinkDescriptor {
         NgTemplateOutlet,
         NgbNavModule,
         NgbCollapseModule,
-        TranslateModule,
+        TranslateDirective,
+        TranslatePipe,
         NotifyComponent,
         LocalizeComponent,
         AuthComponent,
+        ProgressComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

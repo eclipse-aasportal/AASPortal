@@ -112,20 +112,19 @@
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
     "Error": {
         "AAS_ALREADY_EXISTS": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert bereits.",
-        "AAS_NOT_FOUND": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert nicht.",
+        "AAS_DOES_NOT_EXIST": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert nicht.",
         "DASHBOARD_PAGE_ALREADY_EXISTS": "Ein Dashboard mit dem Namen '{{name}}' existiert bereits.",
         "EMAIL_REQUIRED": "E-Mail erforderlich.",
         "EMPTY_ENDPOINT_NAME": "Geben Sie einen eindeutigen Namen für den AAS-Endpunkt ein.",
         "ENDPOINT_ALREADY_EXIST": "Ein AAS-Endpunkt mit dem Namen '{{endpoint}' existiert bereits.",
+        "ENDPOINT_DOES_NOT_EXIST": "Der AAS Endpunkz {{endpoint}} existiert nicht.",
         "INVALID_AASX_PACKAGE": "'{0}' ist ein ungültiges AASX Package.",
-        "INVALID_ENDPOINT_URL": "'{0}' adressiert eine ungülig oder nicht unterstützte VWS-Ressoure.",
         "INVALID_CREDENTIALS": "Ungültige Zugangsdaten.",
         "INVALID_EMAIL": "'{{id}}' ist keine gültige E-Mail.",
+        "INVALID_ENDPOINT_URL": "'{0}' adressiert eine ungülig oder nicht unterstützte VWS-Ressoure.",
         "INVALID_OPERATION_VARIABLE_EXPRESSION": "Der Ausdruck '{0}' für die Variable '{1}' kann nicht in den Typ '{2}' konvertiert werden.",
         "INVALID_PASSWORD": "Das Passwort genügt nicht den geforderten Richtlinien. Es muss mindestens acht Zeichen lang sein und darf keine führenden und nachfolgenden Leerzeichen enthalten.",
         "INVALID_URL": "'{0}' ist eine ungültige URL.",
-        "MAX_POSITIONS_EXCEEDED": "Es können maximal {max} Artikel bestellt werden.",
-        "MAX_QUANTITY_EXCEEDED": "Die Stückzahl eines Artikels ist auf {0} begrenzt.",
         "NO_ELEMENT_SELECTED": "Mindestens ein Element muss ausgewählt sein.",
         "PASSWORD_EXPIRED": "Das Password ist abgelaufen.",
         "PASSWORD_REQUIRED": "Passwort erforderlich.",
@@ -135,7 +134,7 @@
         "UNKNOWN_USER": "Der Benutzer {{id}} ist unbekannt.",
         "UNKNOWN_VARIABLE_VALUE_TYPE": "Der Datentyp der Variable '{0}' ist unbestimmt.'",
         "UPLOAD_AASX_FILE_FAILED": "Der Upload der AASX Datei {{file}} ist fehlgeschlagen: {{message}}",
-        "UPLOAD_FAILED": "Das Hochladen und öffnen der Datei {0} ist fehlgeschlagen. {1}",
+        "UPLOAD_FAILED": "Das Hochladen und öffnen der Datei {{file}} ist fehlgeschlagen. {{message}}",
         "USER_ALREADY_EXISTS": "Zu dieser E-Mail existiert bereits ein Konto."
     },
     "Info": {
@@ -146,13 +145,19 @@
         "NO_SHELL_AVAILABLE": "Keine Verwaltungsschale ausgewählt."
     },
     "Main": {
+        "AAS": "VWS",
+        "ABOUT": "Über",
+        "DASHBOARD": "Dashboard",
+        "DATA_PROTECTION_POLICY": "Datenschutzerklärung",
+        "DATA_PROTECTION_POLICY_URL": "https://www.fraunhofer.de/de/datenschutzerklaerung.html",
         "ENDPOINTS": "Endpunkte",
+        "GTC": "AGB",
+        "GTC_URL": "https://www.fraunhofer.de/de/agb.html",
+        "PUBLISHING_NOTES": "Impressum",
+        "PUBLISHING_NOTES_URL": "https://www.fraunhofer.de/de/impressum.html",
         "SHELLS": "Verwaltungsschalen",
         "START": "Start",
-        "VIEW": "Sicht",
-        "AAS": "VWS",
-        "DASHBOARD": "Dashboard",
-        "ABOUT": "Über"
+        "VIEW": "Sicht"
     },
     "Start": {
         "EMPTY": "Die START-Seite ist leer."

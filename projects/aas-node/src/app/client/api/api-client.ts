@@ -23,6 +23,7 @@ import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
 import { AASClient } from '../aas-client.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
+import { AasxPackage } from '../fs/aasx-package.js';
 
 interface PropertyValue {
     value: string;
@@ -72,6 +73,12 @@ export abstract class ApiClient extends AASClient {
 
             resolve();
         });
+    }
+
+    public override async determineAddress(aasxFile: string): Promise<string | undefined> {
+        const aasxPackage = await AasxPackage.createFromFile(aasxFile);
+        const env = await aasxPackage.getEnvironment();
+        return env.assetAdministrationShells.at(0)?.id;
     }
 
     /**
