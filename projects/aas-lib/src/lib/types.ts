@@ -21,6 +21,7 @@ export interface Environment {
     version: string;
     homepage: string;
     author: string;
+    basePath: string;
 }
 
 export interface MessageEntry {
@@ -129,9 +130,20 @@ export type ViewRouteResult = { route?: ViewRoute; map?: ViewRouteMap };
 
 export const VIEW_ROUTES = new InjectionToken<ViewRoute[]>('ViewRoutes');
 
+/**
+ * URL resolver.
+ */
 export interface ApiUrl {
     join(path: string, queryParams?: Record<string, string>): string;
-    getFileUrl(submodelId: string, idShortPath: string, endpoint?: string | null): string;
+
+    /**
+     * Gets the URL of a File resource.
+     * @param id - The AAS identifier.
+     * @param submodelId - The submodel identifier.
+     * @param idShortPath - The idShort path of the File element.
+     * @param endpoint - Optional the name of the AAS endpoint.
+     */
+    getFileUrl(id: string, submodelId: string, idShortPath: string, endpoint?: string): string;
 }
 
 export const API_URL = new InjectionToken<ApiUrl>('API URL');

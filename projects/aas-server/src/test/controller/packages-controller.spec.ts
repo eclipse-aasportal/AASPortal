@@ -84,6 +84,7 @@ describe('PackagesController', () => {
         const file = resolve('./src/test/assets/example-motor.aasx');
         repository.getPackage.mockResolvedValue({
             filename: 'example-motor.aasx',
+            value: 'example-motor.aasx',
             readable: fs.createReadStream(file),
             size: fs.statSync(file).size,
         });

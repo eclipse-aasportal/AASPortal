@@ -7,14 +7,13 @@
  *****************************************************************************/
 
 import isEmpty from 'lodash-es/isEmpty.js';
-import { AASEndpointType } from './types.js';
+import { AASEndpointType, ErrorData } from './types.js';
 
 export * from './document.js';
 export * from './types.js';
 export * from './authentication.js';
 export * from './convert.js';
 export * as aas from './aas.js';
-export * from './application-error.js';
 export * from './multi-key-map.js';
 export * from './keyed-list.js';
 export * from './crc32.js';
@@ -185,4 +184,24 @@ export function getEndpointType(url: string | URL): AASEndpointType {
         default:
             throw new Error(`Protocol "${url.protocol}" is not supported.`);
     }
+}
+
+/**
+ * Type guard that determines whether a given value conforms to the ErrorData shape.
+ *
+ * Checks for the presence of the required properties used to identify an ErrorData:
+ * - message
+ * - name
+ * - type
+ *
+ * @param value - The value to inspect.
+ * @returns `true` if the value appears to be an ErrorData; otherwise `false`.
+ */
+export function isErrorData(value: unknown): value is ErrorData {
+    if (!value) {
+        return false;
+    }
+
+    const errorData = value as ErrorData;
+    return errorData.message !== undefined && errorData.name !== undefined && errorData.type !== undefined;
 }

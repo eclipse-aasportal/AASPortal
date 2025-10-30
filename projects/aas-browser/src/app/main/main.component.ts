@@ -12,7 +12,14 @@ import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { noop, WebSocketData } from 'aas-core';
-import { CacheService, NotifyComponent, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import {
+    CacheService,
+    NotifyComponent,
+    ProgressComponent,
+    ToolbarService,
+    WebSocketFactoryService,
+    WINDOW,
+} from 'aas-lib';
 
 import { environment } from '../../environments/environment';
 import { Stats } from '../types';
@@ -44,6 +51,7 @@ export interface LinkDescriptor {
         NgbCollapseModule,
         AsyncPipe,
         NotifyComponent,
+        ProgressComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

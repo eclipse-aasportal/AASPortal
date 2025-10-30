@@ -8,18 +8,19 @@
 
 import { inject, singleton } from 'tsyringe';
 import path from 'path';
-import { aas, PagedResult, types } from 'aas-core';
-import { Database } from './data/database.js';
-import { FileResult, ExtentModifier, LevelModifier } from './types.js';
-import { AasxPackage } from './aasx-package.js';
-import { ApplicationError } from './application-error.js';
+import { aas, ApplicationError, isFile, PagedResult, types } from 'aas-core';
+import { FileResult } from 'aas-package';
+
+import { Database } from './db/database.js';
+import { ExtentModifier, LevelModifier } from './types.js';
 import { ERROR } from './error.js';
-import { AddSubmodelCommand } from './data/commands/add-submodel-command.js';
-import { UpdateAttachmentCommand } from './data/commands/update-attachment-command.js';
-import { DeleteAttachmentCommand } from './data/commands/delete-attachment-command.js';
-import { KeyList } from './data/key-list.js';
+import { AddSubmodelCommand } from './db/commands/add-submodel-command.js';
+import { UpdateAttachmentCommand } from './db/commands/update-attachment-command.js';
+import { DeleteAttachmentCommand } from './db/commands/delete-attachment-command.js';
+import { KeyList } from './db/key-list.js';
 import { HttpCache } from './http-cache.js';
-import { isFile, processSerializationModifier, selectSubmodelElement } from './utilities.js';
+import { processSerializationModifier, selectSubmodelElement } from './utilities.js';
+import { AasxPackage } from './aasx-package.js';
 
 @singleton()
 export class SubmodelRepository {
@@ -67,15 +68,20 @@ export class SubmodelRepository {
         const element = selectSubmodelElement(submodel, idShortPath);
         if (isFile(element) && element.value) {
             for (const packageId of new KeyList(item.packageKeys)) {
-                const aasx = new AasxPackage(this.db.packages.getFilePath(packageId));
-                const readable = await aasx.read(element.value);
+                const aasx = await AasxPackage.createFromFile(this.db.packages.getFilePath(packageId));
+                const readable = aasx.read(element.value);
                 if (readable) {
-                    return { readable, filename: path.basename(element.value), contentType: element.contentType };
+                    return {
+                        readable,
+                        filename: path.basename(element.value),
+                        value: element.value,
+                        contentType: element.contentType,
+                    };
                 }
             }
         }
 
-        throw new ApplicationError(`File ${id}.${idShortPath} has no attachment.`, ERROR.FILE_HAS_NO_ATTACHMENT, 404);
+        throw new ApplicationError(ERROR.FILE_HAS_NO_ATTACHMENT, { id, idShortPath }, 404);
     }
 
     public async updateSubmodelElementAttachment(
@@ -116,8 +122,11 @@ export class SubmodelRepository {
             element = selectSubmodelElement(submodel, idShortPath);
             if (!element) {
                 throw new ApplicationError(
-                    `The Submodel Element ${smId}.${idShortPath} does not exist.`,
                     ERROR.SUBMODEL_ELEMENT_DOES_NOT_EXIST,
+                    {
+                        id: smId,
+                        idShortPath,
+                    },
                     404,
                 );
             }

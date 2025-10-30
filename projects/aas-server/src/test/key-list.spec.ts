@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { beforeEach, describe, it, expect } from '@jest/globals';
-import { KeyList } from '../app/data/key-list.js';
-import { KeyListItem } from '../app/data/database-types.js';
+import { KeyList } from '../app/db/key-list.js';
+import { KeyListItem } from '../app/db/database-types.js';
 
 describe('KeyList', () => {
     let recycler: KeyList;
@@ -73,34 +73,34 @@ describe('KeyList', () => {
     describe('push', () => {
         it('throws an Error if empty', () => {
             recycler = new KeyList([]);
-            expect(() => recycler.push()).toThrow();
+            expect(() => recycler.pop()).toThrow();
         });
 
         it('[42] => []', () => {
             const recycled: KeyListItem[] = [42];
             recycler = new KeyList(recycled);
-            expect(recycler.push()).toEqual(42);
+            expect(recycler.pop()).toEqual(42);
             expect(recycled).toEqual([]);
         });
 
         it('[2, 42, 55] => [2, 42]', () => {
             const recycled: KeyListItem[] = [2, 42, 55];
             recycler = new KeyList(recycled);
-            expect(recycler.push()).toEqual(55);
+            expect(recycler.pop()).toEqual(55);
             expect(recycled).toEqual([2, 42]);
         });
 
         it('[[5...55]] => [[5...54]]', () => {
             const recycled: KeyListItem[] = [[5, 55]];
             recycler = new KeyList(recycled);
-            expect(recycler.push()).toEqual(55);
+            expect(recycler.pop()).toEqual(55);
             expect(recycled).toEqual([[5, 54]]);
         });
 
         it('[[54...55]] => [54]', () => {
             const recycled: KeyListItem[] = [[54, 55]];
             recycler = new KeyList(recycled);
-            expect(recycler.push()).toEqual(55);
+            expect(recycler.pop()).toEqual(55);
             expect(recycled).toEqual([54]);
         });
     });

@@ -33,19 +33,8 @@ export type PackageDescription = {
     packageId: string;
 };
 
-export interface HTMLDocumentElement extends HTMLElement {
-    _nsMap: { [key: string]: string };
-}
-
-export type FileResult = {
-    filename: string;
-    readable: NodeJS.ReadableStream;
-    size?: number;
-    contentType?: string;
-};
-
 /**
- * Represents the current position in the tabel.
+ * Represents the current position in the table.
  * - if previous and next are undefined, this indicates that the cursor is at the beginning.
  * - if previous and or next are `null`, this indicates that the cursor is at the end.
  */

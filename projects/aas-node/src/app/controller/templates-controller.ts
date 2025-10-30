@@ -9,8 +9,8 @@
 import { inject, injectable } from 'tsyringe';
 import { Controller, Get, OperationId, Route, Security, Tags } from 'tsoa';
 import { aas, TemplateDescriptor } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 import { TemplateStorage } from '../template/template-storage.js';
-import { decodeBase64Url } from '../convert.js';
 
 /**
  * Asset Administration Shell referable templates.

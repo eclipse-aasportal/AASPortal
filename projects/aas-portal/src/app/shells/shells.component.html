@@ -21,8 +21,8 @@
             <i class="bi bi-star"></i>
         </button>
         <select
-            [ngClass]="activeFavorites() ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
-            [ngModel]="activeFavorites()"
+            [ngClass]="activeFavoritesList() ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
+            [ngModel]="activeFavoritesList()"
             (ngModelChange)="setActiveFavoriteList($event)"
         >
             @for (option of favoritesLists(); track option; let i = $index) {
@@ -42,12 +42,12 @@
             <i class="bi bi-house-add"></i>
         </button>
     </div>
-    @if (!activeFavorites()) {
+    @if (!activeFavoritesList()) {
         <div class="input-group me-2 my-1">
-            <button type="button" class="btn btn-primary" (click)="firstPage()">
+            <button type="button" class="btn btn-primary" (click)="getFirstPage()">
                 <i class="bi bi-chevron-bar-left"></i>
             </button>
-            <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
+            <button type="button" class="btn btn-primary" (click)="getPreviousPage()" [disabled]="isFirstPage()">
                 <i class="bi bi-chevron-left"></i>
             </button>
             <select class="form-select" [ngModel]="limit()" (ngModelChange)="setLimit($event)">
@@ -57,10 +57,10 @@
                 <option [ngValue]="40">40</option>
                 <option [ngValue]="50">50</option>
             </select>
-            <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage()">
+            <button type="button" class="btn btn-primary" (click)="getNextPage()" [disabled]="isLastPage()">
                 <i class="bi bi-chevron-right"></i>
             </button>
-            <button type="button" class="btn btn-primary" (click)="lastPage()">
+            <button type="button" class="btn btn-primary" (click)="getLastPage()">
                 <i class="bi bi-chevron-bar-right"></i>
             </button>
         </div>
@@ -79,13 +79,23 @@
         </div>
     </div>
     <div class="btn-group me-2 my-1">
-        <button type="button" class="btn btn-primary" (click)="uploadDocument().subscribe()">
+        <button class="btn btn-primary ms-2" type="button" id="AID_OPEN_FILE" (click)="inputFiles.click()">
             <i class="bi bi-upload"></i>
         </button>
+        <input
+            #inputFiles
+            class="form-control"
+            type="file"
+            id="AID_INPUT_FILE"
+            accept=".aasx"
+            [multiple]="true"
+            [(ngModel)]="files"
+            hidden
+        />
         <button
             type="button"
             class="btn btn-primary"
-            (click)="downloadDocument().subscribe()"
+            (click)="downloadPackages().subscribe()"
             [disabled]="someSelected() === false"
         >
             <i class="bi bi-download"></i>
@@ -93,7 +103,7 @@
         <button
             type="button"
             class="btn btn-primary"
-            (click)="deleteDocument().subscribe()"
+            (click)="deletePackages().subscribe()"
             [disabled]="someSelected() === false"
         >
             <i class="bi bi-trash"></i>
@@ -119,12 +129,14 @@
         </div>
         <input
             #textInput
-            type="text"
+            type="search"
             class="form-control"
-            [value]="filterText()"
             [placeholder]="'Shells.PLACEHOLDER_FILTER' | translate"
-            (change)="setFilter(textInput.value)"
+            [ngModel]="filterText()"
+            (ngModelChange)="setFilterText($event)"
+            [ngModelOptions]="{ updateOn: 'blur' }"
             (keydown.enter)="textInput.blur()"
+            (search)="setFilterText('')"
         />
     </div>
 </ng-template>

@@ -34,13 +34,14 @@ import {
     isSubmodelElementCollection,
     isSubmodelElementList,
     noop,
+    normalize,
     selectReferable,
     toBoolean,
     toDisplayValue,
 } from 'aas-core';
 
 import { Tree, TreeNode } from '../tree';
-import { basename, normalize } from '../../utilities';
+import { basename } from '../../utilities';
 import { hasSpecificView } from '../../views/views-routes';
 
 /**

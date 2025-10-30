@@ -175,11 +175,10 @@ export interface DirEntry {
 
 /**  */
 export interface ErrorData {
-    method: string;
     type: string;
     name: string;
     message: string;
-    args: unknown[];
+    args?: Record<string, string | number | boolean | undefined>;
 }
 
 /** Defines the message types. */
@@ -220,14 +219,22 @@ export type AASNodeMessageType =
     | 'Reset';
 
 /** Server message. */
-export interface AASNodeMessage {
+export type AASNodeMessage = {
     /** The type of change. */
     type: AASNodeMessageType;
-    /** The endpoint if type `EndpointAdded`, `EndpointRemoved`. */
-    endpoint?: AASEndpoint;
-    /** The document if type `Added`, `Removed` or `Changed` */
-    document?: AASDocument;
-}
+} & (
+    | {
+          type: 'Reset';
+      }
+    | {
+          type: 'Added' | 'Removed' | 'Update' | 'Offline';
+          document: AASDocument;
+      }
+    | {
+          type: 'EndpointAdded' | 'EndpointRemoved';
+          endpoint: AASEndpoint;
+      }
+);
 
 /**
  * Additional information for the client to, e.g. fetch the next part of the result set.
@@ -253,4 +260,25 @@ export interface PagedResult<T> {
      * Additional information for the client to, e.g. fetch the next part of the result set.
      */
     paging_metadata: PagingMetadata;
+}
+
+/**
+ * Represents an application-level error with an associated name, optional HTTP status code,
+ * and optional contextual arguments. Extends the built-in Error to preserve stack traces
+ * and standard error behavior while carrying additional metadata for error handling and responses.
+ *
+ * @param name - The error name/message that describes the error.
+ * @param args - Optional error message arguments (string|number|boolean).
+ * @param statusCode - Optional numeric status code (e.g. HTTP status). Defaults to 500.
+ */
+export class ApplicationError extends Error {
+    public constructor(
+        name: string,
+        public readonly args?: Record<string, string | number | boolean | undefined>,
+        public readonly statusCode = 500,
+    ) {
+        super(name);
+
+        this.name = name;
+    }
 }

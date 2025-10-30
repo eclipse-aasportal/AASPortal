@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -33,7 +33,7 @@ import { encodeBase64Url } from '../../utilities';
 
 @Component({
     selector: 'fhg-technical-data-view',
-    imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, TechnicalData],
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, TechnicalData],
     templateUrl: './technical-data-view.html',
     styleUrl: './technical-data-view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

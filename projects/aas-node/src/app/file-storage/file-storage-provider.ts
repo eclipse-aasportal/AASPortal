@@ -13,7 +13,7 @@ import { LocalFileStorage } from './local-file-storage.js';
 import { Variable } from '../variable.js';
 import { WebDAVStorage } from './webdav-storage.js';
 import { LOGGER, Logger } from '../logging/logger.js';
-import { urlToString } from '../convert.js';
+import { urlToString } from '../utilities.js';
 
 @singleton()
 export class FileStorageProvider {

@@ -9,8 +9,8 @@
 import { describe, beforeEach, it, expect, beforeAll } from '@jest/globals';
 import path from 'path/posix';
 import fs from 'fs';
-import { LowDbQuery } from '../../../app/aas-index/lowdb/lowdb-query.js';
-import { LowDbData, LowDbDocument, LowDbElement } from '../../../app/aas-index/lowdb/lowdb-types.js';
+import { LowDbQuery } from '../../../app/index/lowdb/lowdb-query.js';
+import { LowDbData, LowDbDocument, LowDbElement } from '../../../app/index/lowdb/lowdb-types.js';
 
 describe('LowDbQuery', () => {
     describe('text search', () => {

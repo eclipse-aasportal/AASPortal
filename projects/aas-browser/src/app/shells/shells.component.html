@@ -1,25 +1,41 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
 <div class="overflow-auto h-100 px-2">
     <ul class="list-group">
         @for (item of items().items; track item.id) {
-        <li class="list-group-item list-group-item-action">
-            <div class="d-flex flex-row align-items-center">
-                <img class="img-fluid ms-2" width="40" height="40" [src]="getThumbnailSource(item)" [alt]="item.idShort"
-                    (error)="item.thumbnail = undefined" />
-                <a class="text-nowrap ms-2" [routerLink]="getLink(item)">{{item.idShort}}</a>
-                <div class="text-nowrap text-body-tertiary d-none d-lg-block ms-2"><span>[</span><span>{{item.id |
-                        max:80}}</span><span>]</span></div>
-            </div>
-        </li>
+            <li class="list-group-item list-group-item-action">
+                <div class="d-flex flex-row align-items-center">
+                    <img
+                        class="img-fluid ms-2"
+                        width="40"
+                        height="40"
+                        [src]="getThumbnailSource(item)"
+                        [alt]="item.idShort"
+                        (error)="item.thumbnail = undefined"
+                    />
+                    <a class="text-nowrap ms-2" [routerLink]="getLink(item)">{{ item.idShort }}</a>
+                    <div class="text-nowrap text-body-tertiary d-none d-lg-block ms-2">
+                        <span>[</span><span>{{ item.id | max: 80 }}</span
+                        ><span>]</span>
+                    </div>
+                </div>
+            </li>
         }
     </ul>
 </div>
 
 <ng-template #shellsToolbar>
     <div class="input-group me-2 my-1">
-        <button type="button" class="btn btn-primary" (click)="firstPage()">
+        <button type="button" class="btn btn-primary" (click)="getFirstPage()">
             <i class="bi bi-chevron-bar-left"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="previousPage()" [disabled]="isFirstPage()">
+        <button type="button" class="btn btn-primary" (click)="getPreviousPage()" [disabled]="isFirstPage()">
             <i class="bi bi-chevron-left"></i>
         </button>
         <select class="form-select" [(ngModel)]="limit">
@@ -29,11 +45,43 @@
             <option [ngValue]="40">40</option>
             <option [ngValue]="50">50</option>
         </select>
-        <button type="button" class="btn btn-primary" (click)="nextPage()" [disabled]="isLastPage()">
+        <button type="button" class="btn btn-primary" (click)="getNextPage()" [disabled]="isLastPage()">
             <i class="bi bi-chevron-right"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="lastPage()">
+        <button type="button" class="btn btn-primary" (click)="getLastPage()">
             <i class="bi bi-chevron-bar-right"></i>
         </button>
     </div>
+        <div class="btn-group me-2 my-1">
+        <button class="btn btn-primary ms-2" type="button" id="AID_OPEN_FILE" (click)="inputFiles.click()">
+            <i class="bi bi-upload"></i>
+        </button>
+        <input
+            #inputFiles
+            class="form-control"
+            type="file"
+            id="AID_INPUT_FILE"
+            accept=".aasx"
+            [multiple]="true"
+            [(ngModel)]="files"
+            hidden
+        />
+        <button
+            type="button"
+            class="btn btn-primary"
+            (click)="downloadPackages()"
+            [disabled]="someSelected() === false"
+        >
+            <i class="bi bi-download"></i>
+        </button>
+        <button
+            type="button"
+            class="btn btn-primary"
+            (click)="deletePackages()"
+            [disabled]="someSelected() === false"
+        >
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+
 </ng-template>

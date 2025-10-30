@@ -9,21 +9,22 @@
 import path from 'path';
 import fs from 'fs';
 import { inject, singleton } from 'tsyringe';
-import { aas, jsonization, PagedResult, types } from 'aas-core';
-import { Database } from './data/database.js';
-import { ExtentModifier, FileResult, LevelModifier } from './types.js';
-import { AasxPackage } from './aasx-package.js';
-import { ApplicationError } from './application-error.js';
+import { aas, ApplicationError, extensionToMimeType, jsonization, PagedResult, toJsonValue, types } from 'aas-core';
+import { FileResult } from 'aas-package';
+
+import { Database } from './db/database.js';
+import { ExtentModifier, LevelModifier } from './types.js';
 import { ERROR } from './error.js';
-import { AddPackageCommand } from './data/commands/add-package-command.js';
-import { UpdateThumbnailCommand } from './data/commands/update-thumbnail-command.js';
-import { DeleteThumbnailCommand } from './data/commands/delete-thumbnail-command.js';
-import { KeyList } from './data/key-list.js';
-import { checkSubmodelIsReferenced, extensionToMimeType, toJsonValue } from './utilities.js';
+import { AddPackageCommand } from './db/commands/add-package-command.js';
+import { UpdateThumbnailCommand } from './db/commands/update-thumbnail-command.js';
+import { DeleteThumbnailCommand } from './db/commands/delete-thumbnail-command.js';
+import { KeyList } from './db/key-list.js';
 import { SubmodelRepository } from './submodel-repository.js';
 import { HttpCache } from './http-cache.js';
+import { UpdateShellCommand } from './db/commands/update-shell-command.js';
+import { checkSubmodelIsReferenced } from './utilities.js';
+import { AasxPackage } from './aasx-package.js';
 import { AasxPackageBuilder } from './aasx-package-builder.js';
-import { UpdateShellCommand } from './data/commands/update-shell-command.js';
 
 @singleton()
 export class ShellRepository {
@@ -71,11 +72,7 @@ export class ShellRepository {
         const shell = await this.getShell(id);
         const file = shell.assetInformation.defaultThumbnail?.path;
         if (!file) {
-            throw new ApplicationError(
-                `The AAS with the identifier ${id} has no thumbnail.`,
-                ERROR.THUMBNAIL_DOES_NOT_EXIST,
-                404,
-            );
+            throw new ApplicationError(ERROR.THUMBNAIL_DOES_NOT_EXIST, { id }, 404);
         }
 
         let contentType = shell.assetInformation.defaultThumbnail?.contentType;
@@ -83,9 +80,9 @@ export class ShellRepository {
             contentType = extensionToMimeType(path.extname(file));
         }
 
-        const aasx = new AasxPackage(this.db.packages.getFilePath(packageId));
-        const readable = await aasx.read(file);
-        return { filename: path.basename(file), readable, contentType };
+        const aasx = await AasxPackage.createFromFile(this.db.packages.getFilePath(packageId));
+        const readable = aasx.read(file);
+        return { filename: path.basename(file), value: file, readable, contentType };
     }
 
     public async updateThumbnail(aasId: string, path: string, filename: string): Promise<void> {
@@ -116,7 +113,7 @@ export class ShellRepository {
 
         const value = result.mustValue();
         const env = new types.Environment([value], [], []);
-        await this.packageBuilder.create(sourceFile, env);
+        await this.packageBuilder.build(sourceFile, env);
 
         const command = new AddPackageCommand(this.db, sourceFile, filename, env);
         await this.db.execute(command);

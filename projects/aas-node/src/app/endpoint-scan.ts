@@ -10,12 +10,11 @@ import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { LOGGER, Logger } from './logging/logger.js';
 import { AASDocument } from 'aas-core';
-import { ScanEndpointData } from './types/worker-data.js';
-import { ScanEndpointResult, ScanResultKind } from './types/scan-result.js';
-import { toUint8Array } from './convert.js';
+import { ScanEndpointData, ScanEndpointResult, ScanResultKind } from './types.js';
+import { toUint8Array } from './utilities.js';
 import { AASServerScanFactory } from './scan/aas-server-scan-factory.js';
 import { Variable } from './variable.js';
-import { AAS_INDEX, AASIndex } from './aas-index/aas-index.js';
+import { AAS_INDEX, AASIndex } from './index/aas-index.js';
 
 @singleton()
 export class EndpointScan {

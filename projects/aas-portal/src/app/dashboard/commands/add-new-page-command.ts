@@ -23,11 +23,7 @@ export class AddNewPageCommand extends DashboardCommand {
     protected executing(): void {
         const name = this.pageName?.trim();
         if (!name && this.service.pages().some(page => page.name === name)) {
-            throw new ApplicationError(
-                `A page with the name "${name}" already exists.`,
-                ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
-                name,
-            );
+            throw new ApplicationError(ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS, { name }, 409);
         }
 
         this.addNewPage(name);

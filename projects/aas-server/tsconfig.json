@@ -12,7 +12,8 @@
             "ES2022"
         ],
         "types": [
-            "node"
+            "node",
+            "jest"
         ]
     }
 }

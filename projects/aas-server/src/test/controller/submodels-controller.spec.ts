@@ -16,7 +16,8 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import multer from 'multer';
-import { aas, jsonization } from 'aas-core';
+import { aas, jsonization, toJsonValue } from 'aas-core';
+import { FileResult } from 'aas-package';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
@@ -26,8 +27,7 @@ import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { SubmodelRepository } from '../../app/submodel-repository.js';
-import { FileResult } from '../../app/types.js';
-import { encodeBase64Url, toJsonValue } from '../../app/utilities.js';
+import { encodeBase64Url } from '../../app/utilities.js';
 
 describe('SubmodelsController', () => {
     let app: Express;
@@ -128,7 +128,8 @@ describe('SubmodelsController', () => {
     it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
         const file = resolve('./src/test/assets/Test.pdf');
         const fileResult: FileResult = {
-            filename: 'filename',
+            filename: 'Test.pdf',
+            value: 'Test.pdf',
             readable: fs.createReadStream(file),
         };
 

@@ -8,14 +8,14 @@
 
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Library } from 'aas-core';
 
 @Component({
     selector: 'fhg-license-info',
     templateUrl: './license-info.component.html',
     styleUrls: ['./license-info.component.scss'],
-    imports: [NgbCollapseModule, TranslateModule],
+    imports: [NgbCollapseModule, TranslatePipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LicenseInfoComponent {
