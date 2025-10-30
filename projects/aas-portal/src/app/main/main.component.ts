@@ -18,6 +18,7 @@ import {
     IndexChangeService,
     LocalizeComponent,
     NotifyComponent,
+    ThemeToggleComponent,
     ToolbarService,
 } from 'aas-lib';
 
@@ -56,6 +57,7 @@ export interface LinkDescriptor {
         NotifyComponent,
         LocalizeComponent,
         AuthComponent,
+        ThemeToggleComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
