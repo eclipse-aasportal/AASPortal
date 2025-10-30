@@ -19,6 +19,7 @@ import {
     LocalizeComponent,
     NotifyComponent,
     ProgressComponent,
+    ThemeToggleComponent,
     ToolbarService,
 } from 'aas-lib';
 
@@ -59,6 +60,7 @@ export interface LinkDescriptor {
         LocalizeComponent,
         AuthComponent,
         ProgressComponent,
+        ThemeToggleComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

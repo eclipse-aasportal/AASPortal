@@ -8,7 +8,7 @@
 
 <div class="fhg-main-page bg-body-secondary">
     <div class="fhg-main-navbar">
-        <nav class="navbar navbar-expand-sm bg-white">
+        <nav class="navbar navbar-expand-sm bg-body">
             <div class="container-fluid">
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
                     <img src="/assets/fhg-logo.svg" style="width: 40px" alt="Fraunhofer" />
@@ -32,6 +32,7 @@
                         }
                     </ul>
                     <div class="d-flex align-items-center me-1">
+                        <fhg-theme-toggle class="text-primary m-1"></fhg-theme-toggle>
                         <fhg-localize class="text-primary m-1" [languages]="languages()"></fhg-localize>
                         <fhg-auth class="text-primary m-1"></fhg-auth>
                         <img
