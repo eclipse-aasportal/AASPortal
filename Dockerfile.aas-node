@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
-RUN npm run aas-node:build
+RUN npm run build -w=aas-core -w=aas-package -w=aas-node
 
 FROM $NODE_IMAGE AS aas-node
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
@@ -17,6 +17,8 @@ COPY --from=build /usr/src/app/projects/aas-node/src/assets assets/
 COPY --from=build /usr/src/app/projects/aas-node/dist/ .
 COPY --from=build /usr/src/app/projects/aas-core/dist/ node_modules/aas-core/dist/
 COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-core/package.json
+COPY --from=build /usr/src/app/projects/aas-package/dist/ node_modules/aas-package/dist/
+COPY --from=build /usr/src/app/projects/aas-package/package.json node_modules/aas-package/package.json
 
 EXPOSE 1337
 CMD ["node", "aas-node.js" ]
