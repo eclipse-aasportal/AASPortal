@@ -1,18 +1,20 @@
 # Architecture and Design
 ## Workspace Architecture
 
-AASPortal is a **monorepo** using npm workspaces with 5 distinct packages:
+AASPortal is a **monorepo** using npm workspaces with the following distinct packages:
+
+![AASPortal package diagram](./images/PackageDiagram.png "AASPortal package diagram")
 
 | Workspace | Description | Technology Stack |
 |-----------|-------------|------------------|
-| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM |
-| **aas-portal** | Angular frontend application | Angular 19, NgRx, Bootstrap 5 |
+| **aas-core** | Shared types, utilities, and AAS data models | TypeScript, ESM, AAS Core 3.0 |
+| **aas-package** | AASX package file reader/writer library | TypeScript, JSZip, xpath |
+| **aas-portal** | Angular frontend application | Angular 20.x, NgRx, Bootstrap 5 |
 | **aas-node** | Express.js backend API server | Express.js, JWT, OpenAPI/Swagger |
-| **aas-lib** | Reusable Angular UI components | Angular Library, ng-bootstrap |
+| **aas-lib** | Reusable Angular UI components | Angular 20.x Library, ng-bootstrap |
+| **aas-server** | AAS server (IDTA Part 2 compliant) | Express.js, OpenAPI/Swagger (TSOA) |
+| **aas-browser** | Frontend for AAS server | Angular 20.x, Bootstrap 5 |
 | **aas-jest** | Custom Jest configuration utilities | Jest, TypeScript |
-
-aas-jest is missing in image!
-![Main](./images/main.png "Main")
 
 ## AASPortal
 AASPortal is an Angular based WEB application. The UI is implemented with the Bootstrap 5 frontend toolkit in conjunction with Bootstrap widgets (ng-bootstrap). For managing the global and local state of the application the NgRx framework is used.
