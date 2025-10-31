@@ -65,11 +65,11 @@ The technology stack for the entire project is: Typescript, ESM (ECMAScript modu
 
 | Workspace       | Description| Technology Stack |
 |-----------------|------------|------------------|
-| **aas-core**    | Provides platform neutral type definitions, AAS data models and utility functions. | AAS core 3.0 |
-| **aas-package** | Node.js library for handling an AASX package file. | Node.js, JSZip |
+| **aas-core**    | Provides platform neutral type definitions, AAS data models and utility functions. | TypeScript, AAS core 3.0 |
+| **aas-package** | Node.js library for reading and writing AASX package files (JSON/XML, V1/V2/V3 support). | TypeScript, JSZip, xpath |
 | **aas-node**    | The AASPortal backend server application. | Express.js, OpenAPI/Swagger (TSOA), WebDav-Client |
-| **aas-lib**     | Angular library | Angular 20.x, Bootstrap 5 |
-| **aas-portal**  | The AASPortal Web application | Angular 20.x, Bootstrap 5 |
+| **aas-lib**     | Reusable Angular UI components and services for AAS applications. | Angular 20.x, Bootstrap 5 |
+| **aas-portal**  | The AASPortal Web application for AAS visualization and management. | Angular 20.x, Bootstrap 5, NgRx |
 | **aas-server**  | An AAS server application with an API that is conform to the IDTA Part 2 specification. | Node.js, Express.js, OpenAPI/Swagger (TSOA) |
 | **aas-browser** | Front-end application for the AASServer for browsing its content. | Angular 20.x, Bootstrap 5 |
 
