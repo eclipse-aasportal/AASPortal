@@ -23,6 +23,51 @@ The following diagram shows the dependencies between workspaces:
 
 ---
 
+## aas-core
+
+**Location**: `projects/aas-core/`
+**Purpose**: Shared TypeScript definitions and utilities for Asset Administration Shell standards
+
+### Key Features
+- **AAS Data Models**: Complete TypeScript definitions for AAS elements (Properties, Files, Blobs, Operations)
+- **Type Guards**: Runtime type validation functions
+- **Reference Types**: Relationship and reference management utilities
+- **Environment Management**: Endpoint and environment configuration utilities
+
+### API Structure
+```
+src/lib/
+├── aas.ts                 # Core AAS interfaces and types
+├── types.ts               # Common utility types
+├── convert.ts             # Data conversion utilities
+├── document.ts            # Document handling and validation
+├── query-parser.ts        # AAS query parsing utilities
+├── authentication.ts      # Authentication types and utilities
+├── cache.ts               # Caching utilities
+└── index.ts               # Main exports
+```
+
+### Usage Example
+```typescript
+import { AAS, Submodel, Property } from 'aas-core';
+
+const myProperty: Property = {
+    category: 'PROPERTY',
+    idShort: 'temperature',
+    valueType: 'double',
+    value: '25.5'
+};
+```
+
+### Development Commands
+```bash
+npm run build -w aas-core         # Build TypeScript to ESM
+npm run test -w aas-core          # Run Jest tests
+npm run lint -w aas-core          # ESLint validation
+```
+
+---
+
 ## aas-package
 
 **Location**: `projects/aas-package/`
@@ -89,51 +134,6 @@ npm run watch -w aas-package         # Watch mode for tests
 - **xpath**: XML path expressions for XML parsing
 - **@xmldom/xmldom**: XML DOM implementation
 - **@aas-core-works/aas-core3.0-typescript**: AAS Core 3.0 types
-
----
-
-## aas-core
-
-**Location**: `projects/aas-core/`
-**Purpose**: Shared TypeScript definitions and utilities for Asset Administration Shell standards
-
-### Key Features
-- **AAS Data Models**: Complete TypeScript definitions for AAS elements (Properties, Files, Blobs, Operations)
-- **Type Guards**: Runtime type validation functions
-- **Reference Types**: Relationship and reference management utilities
-- **Environment Management**: Endpoint and environment configuration utilities
-
-### API Structure
-```
-src/lib/
-├── aas.ts                 # Core AAS interfaces and types
-├── types.ts               # Common utility types
-├── convert.ts             # Data conversion utilities
-├── document.ts            # Document handling and validation
-├── query-parser.ts        # AAS query parsing utilities
-├── authentication.ts      # Authentication types and utilities
-├── cache.ts               # Caching utilities
-└── index.ts               # Main exports
-```
-
-### Usage Example
-```typescript
-import { AAS, Submodel, Property } from 'aas-core';
-
-const myProperty: Property = {
-    category: 'PROPERTY',
-    idShort: 'temperature',
-    valueType: 'double',
-    value: '25.5'
-};
-```
-
-### Development Commands
-```bash
-npm run build -w aas-core         # Build TypeScript to ESM
-npm run test -w aas-core          # Run Jest tests
-npm run lint -w aas-core          # ESLint validation
-```
 
 ---
 
@@ -274,6 +274,72 @@ export class MyComponent {
 npm run build -w aas-lib           # Build Angular library
 npm run test -w aas-lib            # Karma + Jasmine tests
 ng build aas-lib --watch           # Watch mode development
+```
+
+---
+
+## aas-server
+
+**Location**: `projects/aas-server/`
+**Purpose**: Standalone AAS repository server with IDTA Part 2 compliant REST API
+
+### Key Features
+- **IDTA Specification Compliant**: Implements Asset Administration Shell Specification Part 2 (API)
+- **Asset Administration Shell Repository**: Store and manage AAS instances
+- **Submodel Repository**: Store and manage Submodels
+- **Concept Description Repository**: Manage concept descriptions
+- **OpenAPI/Swagger**: Auto-generated API documentation via TSOA
+- **AASX Support**: Handle AASX packages via aas-package library
+
+### API Structure
+```
+src/app/
+├── aas-server/           # Main server implementation
+├── configuration/        # Configuration management
+├── controller/          # API route controllers
+├── packages/            # AASX package handling
+├── project/             # Project management
+└── types/               # TypeScript definitions
+```
+
+### Development Commands
+```bash
+npm run build -w aas-server        # esbuild compilation
+npm run test -w aas-server         # Jest tests
+npm run lint -w aas-server         # ESLint validation
+npm run tsoa -w aas-server         # Generate OpenAPI specs
+```
+
+### API Documentation
+Access Swagger UI at: `http://localhost:<port>/api-docs`
+
+---
+
+## aas-browser
+
+**Location**: `projects/aas-browser/`
+**Purpose**: Angular-based frontend application for browsing AAS server content
+
+### Key Features
+- **Angular 20.x**: Modern Angular framework
+- **Bootstrap 5 UI**: Responsive design with ng-bootstrap
+- **AAS Browsing**: Navigate and view AAS structures
+- **Integration with aas-lib**: Reuses common UI components
+- **Connected to aas-server**: Designed to work with aas-server backend
+
+### Architecture
+```
+src/app/
+├── aas/                # AAS browsing components
+├── main/               # Main application layout
+└── types/              # TypeScript type definitions
+```
+
+### Development Commands
+```bash
+ng serve --project aas-browser    # Development server
+npm run build -w aas-browser      # Production build
+npm run test -w aas-browser       # Karma + Jasmine tests
 ```
 
 ---

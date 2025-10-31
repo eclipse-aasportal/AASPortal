@@ -5,11 +5,15 @@
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
-*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of five workspaces:
+*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of the following workspaces:
+
 - **aas-core**: Shared types, utilities, and AAS data models used across workspaces
+- **aas-package**: Node.js library for reading and writing AASX package files (JSON/XML, V1/V2/V3 support)
 - **aas-portal**: The browser app of *AASPortal*. It's an Angular-based frontend application using Bootstrap 5 and NgRx state management
 - **aas-node**: Node.js/Express.js backend with REST API, authentication (JWT), and OpenAPI/Swagger documentation
 - **aas-lib**: Angular library containing reusable UI components and services
+- **aas-server**: AAS server application with IDTA Part 2 compliant API
+- **aas-browser**: Frontend application for the AAS server
 - **aas-jest**: Custom Jest configuration utilities
 
 ```txt
@@ -17,13 +21,19 @@ aasportal
   ├── projects
   │     ├── aas-core
   │     │     └── package.json
+  │     ├── aas-package
+  │     │     └── package.json
   │     ├── aas-jest
   │     │     └── package.json
   │     ├── aas-lib
   │     │     └── package.json
   │     ├── aas-node
   │     │     └── package.json
-  │     └── aas-portal
+  │     ├── aas-portal
+  │     │     └── package.json
+  │     ├── aas-server
+  │     │     └── package.json
+  │     └── aas-browser
   │          └── package.json
   └── package.json
 
