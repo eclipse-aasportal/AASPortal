@@ -77,10 +77,13 @@ AASPortal uses different build tools optimized for each workspace:
 | Workspace | Build Tool | Output Format | Watch Mode |
 |-----------|------------|---------------|------------|
 | aas-core | TypeScript Compiler | ESM | `tsc --watch` |
+| aas-package | TypeScript Compiler + esbuild | ESM Bundle | `npm run watch` |
 | aas-portal | Angular CLI | Browser Bundle | `ng build --watch` |
 | aas-node | esbuild | ESM | `esbuild --watch` |
 | aas-lib | ng-packagr | Angular Package | `ng build --watch` |
-| aas-jest | TypeScript Compiler | CommonJS | `tsc --watch` |
+| aas-server | esbuild | ESM | `esbuild --watch` |
+| aas-browser | Angular CLI | Browser Bundle | `ng build --watch` |
+| aas-jest | TypeScript Compiler + esbuild | ESM Bundle | `npm run watch` |
 
 ### Development Build Commands
 
