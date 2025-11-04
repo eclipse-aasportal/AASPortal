@@ -18,6 +18,20 @@ This guide covers deploying AASPortal in Kubernetes environments, including supp
 - Container registry access (DockerHub or private registry)
 - Ingress controller (nginx-ingress recommended)
 
+## Docker Images
+
+AASPortal provides three Docker images on DockerHub:
+
+| Image | Description | Use Case | Port |
+|-------|-------------|----------|------|
+| `fraunhoferiosb/aasportal_aio` | All-in-one (frontend + backend) | Recommended for most deployments | 80 |
+| `fraunhoferiosb/aasportal_aasportal` | Frontend only (nginx + Angular) | Separate frontend/backend deployment | 80 |
+| `fraunhoferiosb/aasportal_aasnode` | Backend only (Node.js + Express) | Separate frontend/backend deployment | 1337 |
+
+**Available tags:** `latest` (main branch), `staging`, `unstable` (development branch)
+
+All images support the `BASE_HREF` environment variable for sub-path deployment.
+
 ## Basic Deployment
 
 ### Simple Root Path Deployment
@@ -44,7 +58,7 @@ spec:
     spec:
       containers:
       - name: aas-portal
-        image: fraunhoferiosb/aasportal:latest
+        image: fraunhoferiosb/aasportal_aio:latest
         ports:
         - containerPort: 80
           name: http
@@ -120,9 +134,13 @@ spec:
 
 ### Sub-Path Deployment with BASE_HREF
 
-**New in v2.0:** AASPortal supports deployment under any sub-path using the `BASE_HREF` environment variable.
+**New Feature:** AASPortal supports deployment under any sub-path using the `BASE_HREF` environment variable.
+
+You can use either the all-in-one image or separate frontend/backend images:
 
 #### Step 1: Configure Deployment with BASE_HREF
+
+**Option A: All-in-One Image (Recommended)**
 
 ```yaml
 apiVersion: apps/v1
@@ -135,12 +153,39 @@ spec:
     spec:
       containers:
       - name: aas-portal
-        image: fraunhoferiosb/aasportal:latest
+        image: fraunhoferiosb/aasportal_aio:latest
         env:
         - name: BASE_HREF
           value: "/aasportal/"  # Must end with /
         ports:
         - containerPort: 80
+```
+
+**Option B: Frontend Only Image**
+
+If you're deploying frontend and backend separately:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aas-portal
+  namespace: aasportal
+spec:
+  template:
+    spec:
+      containers:
+      - name: aas-portal-frontend
+        image: fraunhoferiosb/aasportal_aasportal:latest
+        env:
+        - name: BASE_HREF
+          value: "/aasportal/"  # Must end with /
+        ports:
+        - containerPort: 80
+      - name: aas-node-backend
+        image: fraunhoferiosb/aasportal_aasnode:latest
+        ports:
+        - containerPort: 1337
 ```
 
 #### Step 2: Configure Ingress with Path Rewriting

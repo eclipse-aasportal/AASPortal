@@ -54,4 +54,4 @@ jobs:
           file: ./Dockerfile.aas-node
           context: .
           push: true
-          tags: fraunhoferiosb/aasportal_aasserver:${{env.IMAGE_TAG}}
+          tags: fraunhoferiosb/aasportal_aasnode:${{env.IMAGE_TAG}}

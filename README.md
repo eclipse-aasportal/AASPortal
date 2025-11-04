@@ -131,7 +131,7 @@ metadata:
 spec:
   containers:
   - name: aas-portal
-    image: fraunhoferiosb/aasportal:latest
+    image: fraunhoferiosb/aasportal_aio:latest
     env:
     - name: BASE_HREF
       value: "/aasportal/"  # Deploy under sub-path
@@ -189,7 +189,7 @@ npm run lint -- --fix  # Auto-fix linting issues
 
 ## Changelog
 
-You can find the detailed changelog [here](docs/source/changelog/changelog.md).
+You can find the detailed changelog [here](./read-the-docs/source/changelog/changelog.md).
 
 ## Contributors
 
