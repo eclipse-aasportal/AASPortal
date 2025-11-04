@@ -51,6 +51,31 @@ podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio
 
 Then open http://localhost/ in your browser.
 
+### Using Kubernetes
+
+For production deployments in Kubernetes, AASPortal supports:
+- Standard root path deployment (`/`)
+- Sub-path deployment (e.g., `/aasportal/`) via `BASE_HREF` environment variable
+- Ingress configuration with path rewriting
+- High availability with horizontal pod autoscaling
+
+See the [Kubernetes Deployment Guide](kubernetes.md) for detailed instructions, including:
+- Complete deployment manifests
+- Ingress configuration examples
+- Environment variable reference
+- Troubleshooting common issues
+
+**Quick Start:**
+```bash
+# Deploy at root path
+kubectl apply -f https://raw.githubusercontent.com/eclipse-aasportal/AASPortal/main/kubernetes/deployment.yaml
+
+# Or deploy under sub-path (e.g., /aasportal/)
+# Set BASE_HREF=/aasportal/ in deployment manifest
+# Configure ingress with path rewriting
+# See Kubernetes guide for details
+```
+
 Or build a complete image from the Dockerfile, run the entire AASPortal application in a container, expose the application on port 80 (intended for production-like deployment) using
 
 ```bash
