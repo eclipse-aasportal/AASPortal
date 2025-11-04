@@ -93,7 +93,7 @@ npm run coverage              # Generate coverage reports
 
 ### Code Quality
 ```bash
-npm run lint                  # Lint all workspaces
+npm run lint                 # Lint all workspaces
 npm run format               # Format all workspaces
 npm run lint -w aas-portal   # Lint specific workspace
 ```
@@ -117,10 +117,10 @@ npm run compose:up:podman  # Full multi-service setup
 ### Kubernetes Deployment
 
 For production deployments in Kubernetes, AASPortal supports:
-- ✅ Standard root path deployment (`/`)
-- ✅ Sub-path deployment (e.g., `/aasportal/`) via `BASE_HREF` environment variable
-- ✅ Ingress configuration with path rewriting
-- ✅ High availability with horizontal pod autoscaling
+-  Standard root path deployment (`/`)
+-  Sub-path deployment (e.g., `/aasportal/`) via `BASE_HREF` environment variable
+-  Ingress configuration with path rewriting
+-  High availability with horizontal pod autoscaling
 
 **Quick example:**
 ```yaml
