@@ -45,6 +45,11 @@ spec:
       containers:
       - name: aas-portal
         image: fraunhoferiosb/aasportal:latest
+        env:
+        - name: JWT_SECRET
+          value: "change-this-secret-in-production"  # REQUIRED for authentication
+        - name: ENDPOINTS
+          value: '["file:///endpoints/samples?name=Samples"]'  # Optional: sample data
         ports:
         - containerPort: 80
           name: http
@@ -89,6 +94,11 @@ Apply the deployment:
 kubectl create namespace aasportal
 kubectl apply -f deployment.yaml
 ```
+
+**Important:** 
+- `JWT_SECRET` is **required** for user authentication (login/register) to work
+- Always use a strong, unique secret in production environments
+- Consider using Kubernetes Secrets instead of plain environment variables (see [Environment Variables](#environment-variables) section)
 
 ## Ingress Configuration
 
