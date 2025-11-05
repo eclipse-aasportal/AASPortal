@@ -1,7 +1,7 @@
 # Getting Started
 ## Prerequisites
 - Visual Studio Code
-- Node.js v22.12.0
+- Node.js v22.16.0
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
@@ -99,7 +99,7 @@ Open one of the supported web browsers and go to the Web site:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/FraunhoferIOSB/AASPortal.git
+   git clone https://github.com/eclipse-aasportal/AASPortal.git
    cd AASPortal
    ```
 
