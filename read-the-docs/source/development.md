@@ -542,13 +542,13 @@ npm run lint -ws
 **Multi-stage Dockerfile:**
 ```dockerfile
 # Build stage
-FROM node:22.12.0-alpine AS build
+FROM node:22.16.0-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
 # Production stage
-FROM node:22.12.0-alpine AS production
+FROM node:22.16.0-alpine AS production
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
 USER nodejs
