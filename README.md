@@ -9,7 +9,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 **AASPortal is under active development and we are looking forward to your active contributions!**
 
 ## Prerequisites
-- **Node.js v22.12.0** (required for development)
+- **Node.js v22.16.0** (required for development)
 - **Visual Studio Code** (recommended IDE)
 - **Docker Desktop 4.x OR Podman Desktop** (for containerized development)
 - **Git** (for version control)
@@ -34,7 +34,7 @@ Then open http://localhost/ in your browser.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/FraunhoferIOSB/AASPortal.git
+   git clone https://github.com/eclipse-aasportal/AASPortal.git
    cd AASPortal
    ```
 
@@ -171,9 +171,9 @@ http://127.0.0.1:5001                      # Container's loopback
 
 ### Common Development Issues
 
-**Build fails**: Ensure Node.js v22.12.0 is installed
+**Build fails**: Ensure Node.js v22.16.0 is installed
 ```bash
-node --version  # Should output v22.12.0
+node --version  # Should output v22.16.0
 ```
 
 **Tests fail**: Run tests individually to isolate issues
@@ -189,7 +189,7 @@ npm run lint -- --fix  # Auto-fix linting issues
 
 ## Changelog
 
-You can find the detailed changelog [here](docs/source/changelog/changelog.md).
+You can find the detailed changelog [here](read-the-docs/source/changelog/changelog.md).
 
 ## Contributors
 
