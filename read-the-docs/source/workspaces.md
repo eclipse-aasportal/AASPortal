@@ -14,7 +14,7 @@ The following diagram shows the dependencies between workspaces:
 |-----------|---------|------------|--------------|
 | [aas-core](#aas-core) | Shared types and utilities | TypeScript, ESM | `dist/` |
 | [aas-package](#aas-package) | AASX package file handling | TypeScript, JSZip | `dist/` |
-| [aas-portal](#aas-portal) | Frontend application | Angular 20.1.6, NgRx | `dist/browser/` |
+| [aas-portal](#aas-portal) | Frontend application | Angular 20.3.0, NgRx | `dist/browser/` |
 | [aas-node](#aas-node) | Backend API server | Express.js, esbuild | `dist/` |
 | [aas-lib](#aas-lib) | Reusable UI components | Angular Library | `dist/` |
 | [aas-server](#aas-server) | AAS server (IDTA Part 2) | Express.js, TSOA | `dist/` |
@@ -143,7 +143,7 @@ npm run watch -w aas-package         # Watch mode for tests
 **Purpose**: Angular-based frontend application for AAS visualization and management
 
 ### Key Features
-- **Angular 20.1.6**: Latest Angular framework with signals support
+- **Angular 20.3.0**: Latest Angular framework with signals support
 - **NgRx State Management**: Reactive state management pattern
 - **Bootstrap 5 UI**: Responsive design with ng-bootstrap components
 - **Multi-language Support**: i18n with ngx-translate
