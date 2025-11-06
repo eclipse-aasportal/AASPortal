@@ -82,6 +82,8 @@ export class ApiClientV3 extends ApiClient {
             this.endpoint.headers,
         );
 
+        this.logger.info(`getShells for endpoint "${this.endpoint.name}": returned ${result.result.length} AAS, cursor=${result.paging_metadata.cursor || 'none'}`);
+
         return {
             result: result.result.map(shell => shell.id),
             paging_metadata: { cursor: result.paging_metadata.cursor },

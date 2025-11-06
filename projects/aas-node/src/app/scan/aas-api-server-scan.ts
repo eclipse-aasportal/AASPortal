@@ -22,8 +22,19 @@ export class AASApiServerScan extends AASServerScan {
         return this.client.close();
     }
 
-    protected override createDocument(id: string): Promise<AASDocument> {
-        return this.client.createDocument(id);
+    protected override async createDocument(id: string): Promise<AASDocument> {
+        try {
+            this.client.logger.info(`Creating document for AAS "${id}" from endpoint "${this.client.endpoint.name}"`);
+            const document = await this.client.createDocument(id);
+            this.client.logger.info(`Successfully created document for AAS "${document.idShort}" [${id}]`);
+            return document;
+        } catch (error) {
+            // Log the error to help diagnose why some AAS fail to be indexed
+            this.client.logger.error(
+                `Failed to create document for AAS "${id}" from endpoint "${this.client.endpoint.name}": ${error?.message || error}`
+            );
+            throw error;
+        }
     }
 
     protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {
