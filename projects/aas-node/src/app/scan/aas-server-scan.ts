@@ -41,7 +41,8 @@ export abstract class AASServerScan extends EventEmitter {
                     }
 
                     indexCursor = result.paging_metadata.cursor;
-                    if (indexCursor === undefined) {
+                    // Treat empty results or undefined cursor as end of pagination
+                    if (indexCursor === undefined || result.result.length === 0) {
                         endOfIndex = true;
                     }
                 }
@@ -65,7 +66,8 @@ export abstract class AASServerScan extends EventEmitter {
                     }
 
                     endpointCursor = result.paging_metadata.cursor;
-                    if (endpointCursor === undefined) {
+                    // Treat empty results or undefined cursor as end of pagination
+                    if (endpointCursor === undefined || result.result.length === 0) {
                         endOfEndpoint = true;
                     }
                 }
