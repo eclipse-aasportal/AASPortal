@@ -241,14 +241,27 @@ export class ApiClientV3 extends ApiClient {
 
         for (const reference of submodelRefs) {
             try {
-                submodels.push(
-                    await this.http.get<aas.Submodel>(
-                        this.resolve(
-                            `shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(reference.keys[0].value)}`,
+                // Try nested path first (standard pattern)
+                try {
+                    submodels.push(
+                        await this.http.get<aas.Submodel>(
+                            this.resolve(
+                                `shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(reference.keys[0].value)}`,
+                            ),
+                            this.endpoint.headers,
                         ),
-                        this.endpoint.headers,
-                    ),
-                );
+                    );
+                } catch (nestedError) {
+                    // Fall back to repository pattern (BaSyx)
+                    submodels.push(
+                        await this.http.get<aas.Submodel>(
+                            this.resolve(
+                                `submodels/${encodeBase64Url(reference.keys[0].value)}`,
+                            ),
+                            this.endpoint.headers,
+                        ),
+                    );
+                }
             } catch (error) {
                 this.logger.error(`Unable to read Submodel "${reference.keys[0].value}": ${error?.message}`);
             }
@@ -312,6 +325,7 @@ export class ApiClientV3 extends ApiClient {
 
     private async hasSubmodel(aasId: string, submodel: aas.Submodel): Promise<boolean> {
         try {
+            // Try nested path first (standard pattern)
             return (
                 (await this.http.put(
                     this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(submodel.id)}`),
@@ -319,25 +333,56 @@ export class ApiClientV3 extends ApiClient {
                     this.endpoint.headers,
                 )) !== undefined
             );
-        } catch {
-            return false;
+        } catch (nestedError) {
+            // Fall back to repository pattern (BaSyx)
+            try {
+                return (
+                    (await this.http.put(
+                        this.resolve(`submodels/${encodeBase64Url(submodel.id)}`),
+                        new JsonWriterV3().convert(submodel),
+                        this.endpoint.headers,
+                    )) !== undefined
+                );
+            } catch {
+                return false;
+            }
         }
     }
 
     private async putSubmodel(aasId: string, submodel: aas.Submodel): Promise<void> {
-        await this.http.put(
-            this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(submodel.id)}`),
-            new JsonWriterV3().convert(submodel),
-            this.endpoint.headers,
-        );
+        try {
+            // Try nested path first (standard pattern)
+            await this.http.put(
+                this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(submodel.id)}`),
+                new JsonWriterV3().convert(submodel),
+                this.endpoint.headers,
+            );
+        } catch (nestedError) {
+            // Fall back to repository pattern (BaSyx)
+            await this.http.put(
+                this.resolve(`submodels/${encodeBase64Url(submodel.id)}`),
+                new JsonWriterV3().convert(submodel),
+                this.endpoint.headers,
+            );
+        }
     }
 
     private async postSubmodel(aasId: string, submodel: aas.Submodel): Promise<void> {
-        await this.http.post(
-            this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/`),
-            new JsonWriterV3().convert(submodel),
-            this.endpoint.headers,
-        );
+        try {
+            // Try nested path first (standard pattern)
+            await this.http.post(
+                this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/`),
+                new JsonWriterV3().convert(submodel),
+                this.endpoint.headers,
+            );
+        } catch (nestedError) {
+            // Fall back to repository pattern (BaSyx)
+            await this.http.post(
+                this.resolve(`submodels/`),
+                new JsonWriterV3().convert(submodel),
+                this.endpoint.headers,
+            );
+        }
     }
 
     private async hasConceptDescription(conceptDescription: aas.ConceptDescription): Promise<boolean> {
