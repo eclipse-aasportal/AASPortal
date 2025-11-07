@@ -216,6 +216,8 @@ export class ShellsComponent implements OnDestroy {
      */
     public setLimit(limit: number): void {
         this.state.update({ pageOptions: { limit, filterText: this.filterText() } });
+        this.state.getFirstPage();
+        this.state.save().subscribe();
     }
 
     /**

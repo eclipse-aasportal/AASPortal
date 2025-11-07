@@ -79,10 +79,6 @@ export class ShellsState implements OnDestroy {
             }
         });
 
-        effect(() => {
-            this.refreshPage(this.limit());
-        });
-
         this.subscription.add(this.indexChange.message.subscribe(this.updatePage));
     }
 
@@ -116,6 +112,7 @@ export class ShellsState implements OnDestroy {
     public update(newState: Partial<ShellsData>): void {
         if (newState.pageOptions !== undefined) {
             this.pageOptions$.set(newState.pageOptions);
+            this.data.update(current => ({ ...current, pageOptions: newState.pageOptions! }));
         }
 
         if (newState.documents) {
@@ -126,11 +123,11 @@ export class ShellsState implements OnDestroy {
             this.selected$.set(newState.selected);
         }
 
-        if (newState.next) {
+        if (newState.next !== undefined) {
             this.next$.set(newState.next);
         }
 
-        if (newState.previous) {
+        if (newState.previous !== undefined) {
             this.previous$.set(newState.previous);
         }
     }
@@ -272,13 +269,14 @@ export class ShellsState implements OnDestroy {
 
     private refreshPage(limit: number): void {
         if (untracked(this.documents).length === 0) {
+            this.getFirstPage();
             return;
         }
 
         this.api
             .getDocuments(
                 {
-                    next: this.getId(untracked(this.documents)[0]),
+                    previous: null,
                     limit,
                 },
                 untracked(this.filterText),
