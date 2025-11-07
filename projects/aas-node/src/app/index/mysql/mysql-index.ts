@@ -466,7 +466,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
