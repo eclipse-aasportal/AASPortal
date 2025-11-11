@@ -248,6 +248,7 @@ export class MySqlIndex extends AASIndex {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
+            
             const uuid = v4();
             await connection.query<ResultSetHeader>(
                 'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
@@ -260,7 +261,7 @@ export class MySqlIndex extends AASIndex {
                     document.idShort,
                     document.assetId || null,
                     document.thumbnail || null,
-                    BigInt(document.timestamp),
+                    BigInt(Math.floor(document.timestamp)),
                 ],
             );
 
@@ -271,6 +272,10 @@ export class MySqlIndex extends AASIndex {
             await connection.commit();
         } catch (error) {
             await connection.rollback();
+            // Ignore duplicate key errors (ER_DUP_ENTRY) from parallel workers
+            if ((error as any).code === 'ER_DUP_ENTRY' || (error as any).errno === 1062) {
+                return;
+            }
             throw error;
         }
     }

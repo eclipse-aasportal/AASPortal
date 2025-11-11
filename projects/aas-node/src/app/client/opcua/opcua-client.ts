@@ -127,7 +127,8 @@ export class OpcuaClient extends AASClient {
 
     public override getThumbnail(nodeId: string): Promise<NodeJS.ReadableStream | undefined> {
         noop(nodeId);
-        return Promise.reject(new Error('Not implemented.'));
+        // OPC UA does not support thumbnails, return undefined instead of rejecting
+        return Promise.resolve(undefined);
     }
 
     public override async getEnvironment(nodeId: string): Promise<aas.Environment> {

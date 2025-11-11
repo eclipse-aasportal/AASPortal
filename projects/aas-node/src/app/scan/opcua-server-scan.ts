@@ -56,15 +56,23 @@ export class OpcuaServerScan extends AASServerScan {
     private async browseAsync(
         nodeToBrowse: BrowseDescriptionLike,
         descriptions: ReferenceDescription[] = [],
+        visitedNodeIds: Set<string> = new Set(),
     ): Promise<ReferenceDescription[]> {
         const session = this.client.getSession();
         const result = await session.browse(nodeToBrowse);
         if (result.references) {
             for (const obj of result.references) {
+                const nodeIdStr = obj.nodeId.toString();
+                // Skip if we've already visited this node
+                if (visitedNodeIds.has(nodeIdStr)) {
+                    continue;
+                }
+                visitedNodeIds.add(nodeIdStr);
+                
                 if (await this.isAASTypeAsync(obj)) {
                     descriptions.push(obj);
                 } else if (await this.isFolderAsync(obj)) {
-                    await this.browseAsync(obj.nodeId.toString(), descriptions);
+                    await this.browseAsync(obj.nodeId.toString(), descriptions, visitedNodeIds);
                 }
             }
         }

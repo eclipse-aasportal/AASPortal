@@ -18,7 +18,8 @@ CREATE TABLE documents (
     idShort VARCHAR(100), 
     assetId VARCHAR(255),
     thumbnail VARCHAR(7167), 
-    timestamp LONG
+    timestamp LONG,
+    UNIQUE KEY unique_endpoint_id (endpoint, id)
 );
 
 CREATE TABLE elements (
