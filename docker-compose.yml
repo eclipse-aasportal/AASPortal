@@ -89,6 +89,7 @@ services:
       - aas-server:/data
     environment:
       - AAS_SERVER_PORT=${AAS_SERVER_PORT}
+      - ENABLE_STATIC_FILES=${ENABLE_STATIC_FILES}
     ports:
       - 50010:50010
 
