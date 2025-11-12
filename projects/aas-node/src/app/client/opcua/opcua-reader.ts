@@ -232,7 +232,7 @@ export class OpcuaReader extends AASReader {
         }
 
         if (!valueType) {
-            throw new Error('Property.valueType');
+            valueType = 'xs:string';
         }
 
         const property: aas.Property = {

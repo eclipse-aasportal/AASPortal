@@ -260,7 +260,7 @@ export class MySqlIndex extends AASIndex {
                     document.idShort,
                     document.assetId || null,
                     document.thumbnail || null,
-                    BigInt(document.timestamp),
+                    BigInt(Math.floor(document.timestamp)),
                 ],
             );
 

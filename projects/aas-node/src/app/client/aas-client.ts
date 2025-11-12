@@ -45,7 +45,7 @@ export abstract class AASClient {
             crc32: computeCrc32(environment),
         };
 
-        const thumbnail = await createThumbnail(await this.getThumbnail(address));
+        const thumbnail = await this.createThumbnail(address);
         if (thumbnail) {
             document.thumbnail = thumbnail;
         }
@@ -164,5 +164,13 @@ export abstract class AASClient {
         }
 
         return resolvedUrl;
+    }
+
+    private async createThumbnail(address: string): Promise<string | undefined> {
+        try {
+            return await createThumbnail(await this.getThumbnail(address));
+        } catch {
+            return undefined;
+        }
     }
 }
