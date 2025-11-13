@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked, ViewChild } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { Modal } from 'bootstrap';
@@ -27,7 +27,7 @@ import { DocumentPopupComponent } from "./document-popup/document-popup.componen
  */
 @Component({
     selector: 'fhg-handover-documentation',
-    imports: [TranslateDirective, NgbAccordionModule],
+    imports: [TranslateDirective, NgbAccordionModule, DocumentPopupComponent],
     templateUrl: './handover-documentation.html',
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
