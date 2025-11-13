@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { computed, Signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { first, from, mergeMap, of, toArray } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
+import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
 
 import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
@@ -76,31 +76,38 @@ export abstract class LeafView<TState extends LeafViewState<LeafViewData>> exten
 
     /** Initializes the current view. */
     protected onInit(): void {
-        this.route.params
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
             .pipe(
-                first(),
-                mergeMap(params => {
-                    if (params.id) {
-                        const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-                        return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
-                    }
-
-                    if (params.docs) {
-                        const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
-                        return from(docs).pipe(
-                            mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
-                            toArray(),
-                        );
-                    }
-
-                    return of(undefined);
+                map(([routeParams, queryParams]) => {
+                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
                 }),
+                mergeMap(params => this.documentsFromParams(params)),
+                first(),
             )
             .subscribe(documents => {
-                if (documents) {
-                    this.state.update({ tuples: [...this.filter(documents)] });
+                if (!documents) {
+                    return;
                 }
+
+                this.state.update({ tuples: [...this.filter(documents)] });
             });
+    }
+
+    private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
+        if (params?.id) {
+            const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+            return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+        }
+
+        if (params?.docs) {
+            const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+            return from(docs).pipe(
+                mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                toArray(),
+            );
+        }
+
+        return of(undefined);
     }
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
