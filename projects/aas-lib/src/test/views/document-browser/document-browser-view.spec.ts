@@ -63,7 +63,8 @@ describe('DocumentBrowserView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168') }) },
+            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168') }),
+              queryParams: of({}) },
         );
 
         document ={
