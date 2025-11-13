@@ -37,13 +37,29 @@
                 [pageSize]="1"
                 [directionLinks]="count() > 5"
             />
-            <div class="d-flex flex-column align-self-center">
+            <div class="d-flex flex-column align-self-start ms-4">
                 <label class="label">Life cycles</label>
-                <div class="p-2 border border-1 border-black rounded-1" style="width: fit-content;">
+                <div class="p-2 border border-1 border-black rounded-1 mb-3" style="width: fit-content;">
                     <div class="d-flex flex-column">
                         @for (value of getValueFromDataSheet("LifeCyclePhases"); track value) {
                         <div>{{value}}</div>
                         }
+                    </div>
+                </div>
+
+                <label class="label">Carbon Footprint</label>
+                <div class="d-flex flex-row align-items-center justify-content-between border border-3 border-primary rounded-3 bg-primary-subtle" style="width: fit-content;">
+                    <div class="text-primary mx-2" style="font-size: 1.5rem; transform: rotate(25deg);">
+                        <i class="bi bi-leaf-fill"></i> <!-- responsive to viewport width -->
+                    </div>
+                    <div class="d-flex flex-column text-center">
+                        <label>{{getTotalPCFValue()}}</label>
+                        <label style="font-size: 13px;">{{getTotalPCFUnit()}}</label>
+                    </div>
+                    <div class="text-primary mx-2" style="font-size: 1.5rem;">
+                        <i class="bi bi-leaf-fill"
+                        style="display:inline-block; transform: scaleX(-1) rotate(25deg); transform-origin:center;">
+                        </i>
                     </div>
                 </div>
 
@@ -62,6 +78,7 @@
                         <p>{{getValueFromDataSheet("QuantityOfMeasureForCalculation")}}</p>
                     </div>
                 </div>
+               @if (getFilenameExplanation()) {
                 <div class="d-flex flex-column mt-2">
                     <label class="label">Explanation</label>
                     <div class="d-flex flex-wrap align-items-center">
@@ -69,6 +86,8 @@
                         <button type="button" class="btn btn-primary" (click)="openFile()" style="width: fit-content">Download</button>
                     </div>
                 </div>
+               } 
+
             </div>
         </div>
     }

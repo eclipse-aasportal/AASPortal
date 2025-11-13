@@ -11,52 +11,52 @@
     <!-- Header of AAS View -->
     @if (document()) {
         <div class="fhg-aas-header">
-            <div class="d-flex flex-row flex-wrap align-items-center justify-content-center">
+            <div class="d-flex flex-row flex-wrap align-items-center justify-content-around">
                 <!-- Header of the header -->
-                <div class="container h-100 align-self-start">
+                <div class="container h-100 align-self-start text-white">
                     <div class="d-flex flex-column text-center">
                         <div class="bg-primary text-center py-2 my-2 fs-5">
                             <div class="d-flex flex-column data-entry">
-                                <label style="font-size: 15px;">{{address()}}</label>
+                                <label style="font-size: 15px;">AAS Overview</label>
                                 <label style="font-size: 20px;">{{idShort()}}</label>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="border border-secondary rounded p-1">
-                    <img
-                        class="img-fluid"
-                        [src]="thumbnail()"
-                        alt="thumbnail"
-                        (error)="thumbnail.set('/assets/resources/aas-idta.png')"
-                        style="max-height: 180px;"
-                    />
+                <div class="flex-fill d-flex flex-row flex-wrap align-items-center justify-content-center">
+                    <div class="border border-secondary rounded p-1">
+                        <img
+                            class="img-fluid"
+                            [src]="thumbnail()"
+                            alt="thumbnail"
+                            (error)="thumbnail.set('/assets/resources/aas-idta.png')"
+                            style="max-height: 180px;"
+                        />
+                    </div>
+                    <div class="d-flex flex-column ps-1">
+                        <div class="col-md-6 p-1 d-flex flex-column mt-0">
+                            <label class="label" translate>LABEL_VERSION</label>
+                            <label class="ms-2">{{version()}}</label>
+                        </div>
+                        <div class="col-md-6 p-1 d-flex flex-column mt-0">
+                            <label class="label" translate>LABEL_AAS_ID</label>
+                            <label class="ms-2">{{id()}}</label>
+                        </div>
+                        <div class="col-md-6 p-1 d-flex flex-column mt-0">
+                            <label class="label" translate>LABEL_ASSET_ID</label>
+                            <label class="ms-2">{{assetId()}}</label>
+                        </div>
+                    </div>
                 </div>
-                <div>
+
+                <div class="">
                     <div class="d-flex flex-column mt-1 mx-4">
-                        <label class="label">AAS View</label>
+                        <label class="label">AAS Content<br>View</label>
                         <button [routerLink]="openShellView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
                     </div>
                     <div class="d-flex flex-column mt-1 mx-4">
                         <label class="label">AAS Browser</label>
                         <button [routerLink]="openBrowserView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
-                    </div>
-                </div>
-
-
-                <div class="d-flex flex-column ps-1">
-                    <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                        <label class="label" translate>LABEL_VERSION</label>
-                        <label class="ms-2">{{version()}}</label>
-                    </div>
-                    <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                        <label class="label" translate>LABEL_AAS_ID</label>
-                        <label class="ms-2">{{id()}}</label>
-                    </div>
-                    <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                        <label class="label" translate>LABEL_ASSET_ID</label>
-                        <label class="ms-2">{{assetId()}}</label>
                     </div>
                 </div>
             </div>

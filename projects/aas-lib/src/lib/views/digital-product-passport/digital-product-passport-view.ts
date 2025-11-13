@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, getReferable, isFile } from 'aas-core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -62,6 +62,7 @@ const emptyMainData: MainData = {
         CarbonFootprint,
         Nameplate,
         HandoverDocumentation,
+        RouterModule
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -146,6 +147,17 @@ export class DigitalProductPassportView
             serialNumber: toString(nameplate, 'SerialNumber', currentLang),
         };
     });
+
+    public openAASOverview(){
+        const document = this.document();
+        if (document === undefined) {
+            return "";
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        return [`/aas/`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+    }
 
     public ngOnInit(): void {
         this.onInit();
