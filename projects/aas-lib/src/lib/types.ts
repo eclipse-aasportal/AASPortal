@@ -122,6 +122,7 @@ export type ViewRouteName =
     | 'HandoverDocumentation'
     | 'Nameplate'
     | 'OperationalData'
+    | 'Laser'
     | 'TechnicalData';
 
 export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;
