@@ -307,8 +307,14 @@
     },
     "CarbonFootprint": {
         "TITLE": "CO2-Fußabdruck",
-        "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
-        "TOTAL_PSFCO2EQ": "GWP100"
+        "CARBON_FOOTPRINT": "CO2-Fußabdruck",
+        "CARBON_FOOTPRINTS": "CO2-Fußabdrücke",
+        "LIFE_CYCLES": "Lebenszyklen",
+        "CALCULATION": "Berechnung",
+        "METHODS": "Methoden",
+        "UNIT": "Genutzte Einheit",
+        "QUANTITY": "Genutzte Menge",
+        "EXPLANATION": "Erklärung"
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
@@ -338,6 +344,12 @@
     "HandoverDocumentation": {
         "TITLE": "Übergabedocumentation",
         "EMPTY": "Keine Übergabedokumente verfügbar."
+    },
+    "HandoverDocumentationPopup": {
+        "LANGUAGE": "Sprache",
+        "SUMMARY": "Inhalt",
+        "KEYWORDS": "Stichwörter",
+        "ORGANIZATION": "Organisation"
     },
     "Browser": {
         "TITLE": "AAS-Browser",

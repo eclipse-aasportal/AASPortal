@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { DocumentationItem } from '../handover-documentation.state';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'fhg-document-popup',
-  imports: [],
+  imports: [TranslateDirective],
   templateUrl: './document-popup.component.html',
   styleUrl: './document-popup.component.scss'
 })
@@ -23,6 +24,8 @@ export class DocumentPopupComponent {
     files: []
   };
   @Input() modalId: string = 'customModal';
+
+  public constructor(translate: TranslateService){}
 
   public getTitle(){
 

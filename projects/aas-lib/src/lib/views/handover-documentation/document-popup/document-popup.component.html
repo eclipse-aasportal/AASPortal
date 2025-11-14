@@ -13,15 +13,15 @@
                     <div class="row">
                         <div class="col">
                             <div class="d-flex flex-column data-entry">
-                                <label class="label">Language</label>
+                                <label class="label" translate>HandoverDocumentationPopup.LANGUAGE</label>
                                 <p>{{body.language}}</p>
                             </div>
                             <div class="d-flex flex-column data-entry">
-                                <label class="label">Summary</label>
+                                <label class="label" translate>HandoverDocumentationPopup.SUMMARY</label>
                                 <p>{{body.summary}}</p>
                             </div>
                             <div class="d-flex flex-column data-entry">
-                                <label class="label">Keywords</label>
+                                <label class="label" translate>HandoverDocumentationPopup.KEYWORDS</label>
                                 <p>{{body.keywords}}</p>
                             </div>
                         </div>
@@ -35,7 +35,7 @@
                     
                     <hr/>
                     <div class="d-flex flex-column data-entry">
-                        <label class="label">Organization</label>
+                        <label class="label" translate>HandoverDocumentationPopup.ORGANIZATION</label>
                         <p>{{body.organization}}</p>
                     </div>
                     <div class="d-flex flex-column data-entry">
@@ -45,7 +45,7 @@
                 </ng-content>
             </div>
             <div class="modal-footer d-flex flex-row">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  translate>CMD_CLOSE</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="openFile()">Download</button>
             </div>
         </div>

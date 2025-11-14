@@ -8,7 +8,7 @@
 
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChangeDetectionStrategy, Component, computed, effect, Input, input, untracked } from '@angular/core';
-import { TranslateDirective } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
@@ -34,7 +34,7 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonF
 
     showDetails: boolean = this.isDigitalProductPassport;
 
-    public constructor() {
+    public constructor(translate: TranslateService) {
         super();
 
         effect(() => {

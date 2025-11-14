@@ -310,7 +310,13 @@
     "CarbonFootprint": {
         "TITLE": "Carbon Footprint",
         "CARBON_FOOTPRINT_DATA": "Carbon footprint",
-        "TOTAL_PSFCO2EQ": "GWP100"
+         "CARBON_FOOTPRINT": "Carbon footprints",
+        "LIFE_CYCLES": "Life cycles",
+        "CALCULATION": "Calculations",
+        "METHODS": "Methods",
+        "UNIT": "Unit for calculation",
+        "QUANTITY": "Quantity",
+        "EXPLANATION": "Explanation"
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
@@ -340,6 +346,12 @@
     "HandoverDocumentation": {
         "TITLE": "Handover Documentation",
         "EMPTY": "No handover documents available."
+    },
+    "HandoverDocumentationPopup": {
+        "LANGUAGE": "Language",
+        "SUMMARY": "Summary",
+        "KEYWORDS": "Keywords",
+        "ORGANIZATION": "Organization"
     },
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",
