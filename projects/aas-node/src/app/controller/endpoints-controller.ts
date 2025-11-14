@@ -20,13 +20,13 @@ import {
     Route,
     Security,
     Tags,
-    UploadedFiles,
+    UploadedFile,
 } from 'tsoa';
 
 import { aas, AASDocument, type AASEndpoint } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
-import { AASProvider } from '../aas-provider/aas-provider.js';
-import { decodeBase64Url } from '../convert.js';
+import { AASProvider } from '../provider/aas-provider.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -157,19 +157,19 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Uploads one or more AASX packages to the specified endpoint.
+     * @summary Inserts an AASX packages to the specified endpoint.
      * @param endpoint The name of the destination endpoint (Base64-URL encoded).
-     * @param files The AAS package file.
+     * @param file The AASX package file.
      */
     @Post('{endpoint}/packages')
     @Security('bearerAuth', ['editor', 'admin'])
     @OperationId('addPackages')
-    public async addPackages(@Path() endpoint: string, @UploadedFiles() files: Express.Multer.File[]): Promise<void> {
-        await this.aasProvider.addPackages(decodeBase64Url(endpoint), files);
+    public async addPackages(@Path() endpoint: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+        await this.aasProvider.insertPackages(decodeBase64Url(endpoint), file);
     }
 
     /**
-     * @summary Deletes an AAS document from the specified endpoint.
+     * @summary Deletes an AASX package from the specified endpoint.
      * @param endpoint The endpoint name (Base64-URL encoded).
      * @param id The AAS identifier (Base64-URL encoded).
      */

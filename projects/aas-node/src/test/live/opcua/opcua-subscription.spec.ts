@@ -11,7 +11,7 @@ import { OpcuaSubscription } from '../../../app/live/opcua/opcua-subscription.js
 import { createSpyObj } from 'aas-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { OpcuaClient } from '../../../app/package/opcua/opcua-client.js';
+import { OpcuaClient } from '../../../app/client/opcua/opcua-client.js';
 
 describe('OpcuaSubscription', function () {
     let subscription: OpcuaSubscription;

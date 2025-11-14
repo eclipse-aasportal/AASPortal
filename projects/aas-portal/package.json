@@ -9,7 +9,7 @@
     "private": true,
     "scripts": {
         "ng": "ng",
-        "serve": "ng serve --host=127.0.0.1",
+        "serve": "ng serve aas-portal --host=127.0.0.1",
         "build": "ng build",
         "build:debug": "ng build --configuration development",
         "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",

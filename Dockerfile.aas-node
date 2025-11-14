@@ -1,12 +1,14 @@
-# Dockerfile to build server app
-FROM node:22.16.0-alpine AS build
+# Dockerfile to build aas-node app
+ARG NODE_IMAGE=node:22.16.0-alpine
+
+FROM $NODE_IMAGE AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
 RUN node --no-warnings --loader ts-node/esm create-app-info.ts
-RUN npm run aas-node:build
+RUN npm run build -w=aas-core -w=aas-package -w=aas-node
 
-FROM node:22.16.0-alpine AS aas-node
+FROM $NODE_IMAGE AS aas-node
 RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/projects/aas-node/package.json package.json
@@ -15,10 +17,8 @@ COPY --from=build /usr/src/app/projects/aas-node/src/assets assets/
 COPY --from=build /usr/src/app/projects/aas-node/dist/ .
 COPY --from=build /usr/src/app/projects/aas-core/dist/ node_modules/aas-core/dist/
 COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-core/package.json
-ENV NODE_LOG=./log/debug.log
-ENV AAS_NODE_PORT=1337
-ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]
-ENV NODE_ENV=production
+COPY --from=build /usr/src/app/projects/aas-package/dist/ node_modules/aas-package/dist/
+COPY --from=build /usr/src/app/projects/aas-package/package.json node_modules/aas-package/package.json
 
 EXPOSE 1337
 CMD ["node", "aas-node.js" ]

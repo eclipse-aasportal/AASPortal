@@ -39,7 +39,7 @@ import {
     WebSocketData,
 } from 'aas-core';
 
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, Observable } from 'rxjs';
 import { getDisplayName, getUrl } from '../../utilities';
@@ -67,7 +67,7 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     selector: 'fhg-operational-data-view',
     templateUrl: './operational-data-view.html',
     styleUrl: './operational-data-view.scss',
-    imports: [NgbAccordionModule, ThumbnailQRCode],
+    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationalDataView extends LeafView<OperationalDataViewState> implements OnInit, OnDestroy {

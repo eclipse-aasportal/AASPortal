@@ -2,14 +2,23 @@
 
 AASPortal uses npm workspaces to organize code into distinct, reusable packages. This document provides detailed information about each workspace.
 
+## Workspace Architecture
+
+The following diagram shows the dependencies between workspaces:
+
+![AASPortal package diagram](./images/PackageDiagram.png "AASPortal package diagram")
+
 ## Overview
 
 | Workspace | Purpose | Technology | Build Output |
 |-----------|---------|------------|--------------|
 | [aas-core](#aas-core) | Shared types and utilities | TypeScript, ESM | `dist/` |
-| [aas-portal](#aas-portal) | Frontend application | Angular 20.1.6, NgRx | `dist/browser/` |
+| [aas-package](#aas-package) | AASX package file handling | TypeScript, JSZip | `dist/` |
+| [aas-portal](#aas-portal) | Frontend application | Angular 20.3.0, NgRx | `dist/browser/` |
 | [aas-node](#aas-node) | Backend API server | Express.js, esbuild | `dist/` |
 | [aas-lib](#aas-lib) | Reusable UI components | Angular Library | `dist/` |
+| [aas-server](#aas-server) | AAS server (IDTA Part 2) | Express.js, TSOA | `dist/` |
+| [aas-browser](#aas-browser) | AAS server frontend | Angular 20.x | `dist/browser/` |
 | [aas-jest](#aas-jest) | Test configuration | Jest utilities | `dist/` |
 
 ---
@@ -59,13 +68,82 @@ npm run lint -w aas-core          # ESLint validation
 
 ---
 
+## aas-package
+
+**Location**: `projects/aas-package/`
+**Purpose**: Node.js library for reading and writing AASX (Asset Administration Shell Exchange) package files
+
+### Key Features
+- **Multi-Version Support**: Read and write AAS packages in V1, V2, and V3 formats
+- **Multiple Formats**: Support for both JSON and XML serialization
+- **AASX File Handling**: Create and extract AASX package files (ZIP-based)
+- **Type-Safe**: Full TypeScript support with type definitions
+- **Standards Compliant**: Implements AAS Core 3.0 specification
+
+### API Structure
+```
+src/lib/
+├── aas-reader.ts           # High-level reader API
+├── aas-writer.ts           # High-level writer API
+├── aasx-file.ts            # AASX file operations
+├── aasx-file-builder.ts    # Build AASX packages programmatically
+├── aas-v2.ts               # AAS V2 type definitions
+├── types.ts                # Common type definitions
+├── utilities.ts            # Utility functions
+├── reader/                 # Format-specific readers
+│   ├── json-reader-v2.ts   # JSON V2 reader
+│   ├── json-reader-v3.ts   # JSON V3 reader
+│   ├── xml-reader-v1.ts    # XML V1 reader
+│   ├── xml-reader-v2.ts    # XML V2 reader
+│   └── xml-reader-v3.ts    # XML V3 reader
+└── writer/                 # Format-specific writers
+    ├── json-writer-v2.ts   # JSON V2 writer
+    ├── json-writer-v3.ts   # JSON V3 writer
+    └── xml-writer-v3.ts    # XML V3 writer
+```
+
+### Usage Example
+```typescript
+import { AASXFile, AASReader, AASWriter } from 'aas-package';
+
+// Reading an AASX package
+const aasxFile = new AASXFile('path/to/package.aasx');
+await aasxFile.open();
+const environment = await AASReader.readEnvironment(aasxFile);
+
+// Creating an AASX package
+const builder = new AASXFileBuilder();
+builder.addEnvironment(myEnvironment);
+builder.addThumbnail('/thumbnail.png', thumbnailBuffer);
+const packageBuffer = await builder.build();
+
+// Writing to file
+await AASWriter.writeFile('output.aasx', environment);
+```
+
+### Development Commands
+```bash
+npm run build -w aas-package         # Build TypeScript to ESM
+npm run test -w aas-package          # Run Jest tests
+npm run lint -w aas-package          # ESLint validation
+npm run watch -w aas-package         # Watch mode for tests
+```
+
+### Dependencies
+- **JSZip**: ZIP file creation and extraction
+- **xpath**: XML path expressions for XML parsing
+- **@xmldom/xmldom**: XML DOM implementation
+- **@aas-core-works/aas-core3.0-typescript**: AAS Core 3.0 types
+
+---
+
 ## aas-portal
 
 **Location**: `projects/aas-portal/`
 **Purpose**: Angular-based frontend application for AAS visualization and management
 
 ### Key Features
-- **Angular 20.1.6**: Latest Angular framework with signals support
+- **Angular 20.3.0**: Latest Angular framework with signals support
 - **NgRx State Management**: Reactive state management pattern
 - **Bootstrap 5 UI**: Responsive design with ng-bootstrap components
 - **Multi-language Support**: i18n with ngx-translate
@@ -200,6 +278,72 @@ ng build aas-lib --watch           # Watch mode development
 
 ---
 
+## aas-server
+
+**Location**: `projects/aas-server/`
+**Purpose**: Standalone AAS repository server with IDTA Part 2 compliant REST API
+
+### Key Features
+- **IDTA Specification Compliant**: Implements Asset Administration Shell Specification Part 2 (API)
+- **Asset Administration Shell Repository**: Store and manage AAS instances
+- **Submodel Repository**: Store and manage Submodels
+- **Concept Description Repository**: Manage concept descriptions
+- **OpenAPI/Swagger**: Auto-generated API documentation via TSOA
+- **AASX Support**: Handle AASX packages via aas-package library
+
+### API Structure
+```
+src/app/
+├── aas-server/           # Main server implementation
+├── configuration/        # Configuration management
+├── controller/          # API route controllers
+├── packages/            # AASX package handling
+├── project/             # Project management
+└── types/               # TypeScript definitions
+```
+
+### Development Commands
+```bash
+npm run build -w aas-server        # esbuild compilation
+npm run test -w aas-server         # Jest tests
+npm run lint -w aas-server         # ESLint validation
+npm run tsoa -w aas-server         # Generate OpenAPI specs
+```
+
+### API Documentation
+Access Swagger UI at: `http://localhost:<port>/api-docs`
+
+---
+
+## aas-browser
+
+**Location**: `projects/aas-browser/`
+**Purpose**: Angular-based frontend application for browsing AAS server content
+
+### Key Features
+- **Angular 20.x**: Modern Angular framework
+- **Bootstrap 5 UI**: Responsive design with ng-bootstrap
+- **AAS Browsing**: Navigate and view AAS structures
+- **Integration with aas-lib**: Reuses common UI components
+- **Connected to aas-server**: Designed to work with aas-server backend
+
+### Architecture
+```
+src/app/
+├── aas/                # AAS browsing components
+├── main/               # Main application layout
+└── types/              # TypeScript type definitions
+```
+
+### Development Commands
+```bash
+ng serve --project aas-browser    # Development server
+npm run build -w aas-browser      # Production build
+npm run test -w aas-browser       # Karma + Jasmine tests
+```
+
+---
+
 ## aas-jest
 
 **Location**: `projects/aas-jest/`
@@ -252,7 +396,10 @@ npm run format -w aas-jest         # Auto-fix linting issues
 ### Dependency Graph
 ```
 aas-portal → aas-lib → aas-core
-aas-node → aas-core
+aas-browser → aas-lib → aas-core
+aas-node → aas-package → aas-core
+aas-server → aas-package → aas-core
+aas-package → aas-core
 aas-jest → (used by all for testing)
 ```
 
@@ -268,9 +415,12 @@ aas-jest → (used by all for testing)
 Due to dependencies, build in this order:
 1. `aas-core` (no dependencies)
 2. `aas-jest` (no dependencies)
-3. `aas-lib` (depends on aas-core)
-4. `aas-portal` (depends on aas-lib, aas-core)
-5. `aas-node` (depends on aas-core)
+3. `aas-package` (depends on aas-core)
+4. `aas-lib` (depends on aas-core)
+5. `aas-portal` (depends on aas-lib, aas-core)
+6. `aas-browser` (depends on aas-lib, aas-core)
+7. `aas-node` (depends on aas-package, aas-core)
+8. `aas-server` (depends on aas-package, aas-core)
 
 ### Workspace-Specific Build Commands
 ```bash

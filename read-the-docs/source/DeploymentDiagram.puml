@@ -1,0 +1,28 @@
+@startuml AASPortal deployment diagram
+top to bottom direction
+
+artifact "nginx" <<image>> as NginxImage
+artifact "aas-portal" <<image>> as PortalImage
+NginxImage <|-- PortalImage
+node "aas-portal" <<service>> as PortalContainer
+PortalImage <.r. PortalContainer
+
+artifact "node" <<image>> as NodeImage
+artifact "aas-node" <<image>> as AASNodeImage
+NodeImage <|-- AASNodeImage
+node "aas-node" <<service>> as AASNodeContainer
+AASNodeImage <.r. AASNodeContainer
+
+PortalContainer "1" -d--> "1" AASNodeContainer
+
+artifact "mongo" <<image>> as MongoImage
+artifact "mariadb" <<image>> as MariadbImage
+artifact "nextcloud" <<image>> as NextcloudImage
+node "aas-users" <<service>> as UsersContainer
+node "aas-index" <<service>> as IndexContainer
+node "aas-cloud" <<service>> as CloudContainer
+AASNodeContainer -> UsersContainer
+AASNodeContainer -> IndexContainer
+AASNodeContainer -> CloudContainer
+
+@enduml

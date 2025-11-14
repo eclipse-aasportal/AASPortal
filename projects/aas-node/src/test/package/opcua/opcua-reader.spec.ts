@@ -8,22 +8,19 @@
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { createSpyObj } from 'aas-jest';
-import { Logger } from '../../../app/logging/logger.js';
-import { OpcuaReader } from '../../../app/package/opcua/opcua-reader.js';
-import { OPCUAComponent } from '../../../app/package/opcua/opcua.js';
-import { OpcuaDataTypeDictionary } from '../../../app/package/opcua/opcua-data-type-dictionary.js';
+import { OpcuaReader } from '../../../app/client/opcua/opcua-reader.js';
+import { OPCUAComponent } from '../../../app/client/opcua/opcua.js';
+import { OpcuaDataTypeDictionary } from '../../../app/client/opcua/opcua-data-type-dictionary.js';
 
 describe('OpcuaReader', () => {
     let reader: OpcuaReader;
-    let logger: jest.Mocked<Logger>;
     let origin: jest.Mocked<OPCUAComponent>;
     let dataTypes: jest.Mocked<OpcuaDataTypeDictionary>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         origin = createSpyObj<OPCUAComponent>({}, ['displayName', 'hasProperty', 'nodeClass']);
         dataTypes = createSpyObj<OpcuaDataTypeDictionary>(['get']);
-        reader = new OpcuaReader(logger, origin, dataTypes);
+        reader = new OpcuaReader(origin, dataTypes);
     });
 
     it('should be created', () => {

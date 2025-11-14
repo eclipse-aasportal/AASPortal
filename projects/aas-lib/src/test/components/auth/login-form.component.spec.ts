@@ -16,8 +16,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
-import { ERRORS } from '../../../lib/errors';
-import { INFO } from '../../../lib/info';
+import { ERRORS, INFO } from '../../../lib/messages';
 import { LoginFormComponent, LoginFormResult } from '../../../lib/components/auth/login-form/login-form.component';
 import { FakeLoader } from '../../mocks';
 

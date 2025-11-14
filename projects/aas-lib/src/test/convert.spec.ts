@@ -12,7 +12,6 @@ import {
     encodeBase64Url,
     basename,
     messageToString,
-    normalize,
     decodeBase64Url,
     isBase64,
     extension,
@@ -37,12 +36,6 @@ describe('convert', () => {
         });
     });
 
-    describe('normalize', () => {
-        it('replaces all "\\" with "/"', () => {
-            expect(normalize('A:\\hello/world\\john.doe')).toEqual('A:/hello/world/john.doe');
-        });
-    });
-
     describe('messageToString', () => {
         let translate: jest.Mocked<TranslateService>;
 
@@ -59,8 +52,8 @@ describe('convert', () => {
         });
 
         it('converts an ApplicationError', () => {
-            translate.instant.mockReturnValue('Hello {0}!');
-            const error = new ApplicationError('Hello World!', 'HELLO_WORLD', 'World');
+            translate.instant.mockReturnValue('Hello World!');
+            const error = new ApplicationError('HELLO_WORLD', { arg: 'World' });
             expect(messageToString(error, translate)).toEqual('Hello World!');
         });
     });

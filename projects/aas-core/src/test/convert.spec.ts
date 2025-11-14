@@ -24,6 +24,7 @@ import {
     mimeTypeToExtension,
     extensionToMimeType,
     isValidDate,
+    normalize,
 } from '../lib/convert.js';
 
 describe('Convert', () => {
@@ -458,6 +459,12 @@ describe('Convert', () => {
 
         it('return undefined for an unknown MIME type', () => {
             expect(extensionToMimeType('unknown')).toBeUndefined();
+        });
+    });
+
+    describe('normalize', () => {
+        it('replaces all "\\" with "/"', () => {
+            expect(normalize('A:\\hello/world\\john.doe')).toEqual('A:/hello/world/john.doe');
         });
     });
 });

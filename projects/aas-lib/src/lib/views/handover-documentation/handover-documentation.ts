@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
@@ -25,7 +25,7 @@ import {
  */
 @Component({
     selector: 'fhg-handover-documentation',
-    imports: [TranslateModule, NgbAccordionModule],
+    imports: [TranslateDirective, NgbAccordionModule],
     templateUrl: './handover-documentation.html',
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
