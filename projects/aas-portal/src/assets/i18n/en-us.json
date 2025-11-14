@@ -310,7 +310,13 @@
     "CarbonFootprint": {
         "TITLE": "Carbon Footprint",
         "CARBON_FOOTPRINT_DATA": "Carbon footprint",
-        "TOTAL_PSFCO2EQ": "GWP100"
+         "CARBON_FOOTPRINT": "Carbon footprints",
+        "LIFE_CYCLES": "Life cycles",
+        "CALCULATION": "Calculations",
+        "METHODS": "Methods",
+        "UNIT": "Unit for calculation",
+        "QUANTITY": "Quantity",
+        "EXPLANATION": "Explanation"
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
@@ -341,13 +347,26 @@
         "TITLE": "Handover Documentation",
         "EMPTY": "No handover documents available."
     },
+    "HandoverDocumentationPopup": {
+        "LANGUAGE": "Language",
+        "SUMMARY": "Summary",
+        "KEYWORDS": "Keywords",
+        "ORGANIZATION": "Organization"
+    },
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",
         "TITLE": "AAS browser"
     },
     "Nameplate": {
         "GENERAL": "General",
-        "TITLE": "Digital Namplate"
+        "TITLE": "Digital Namplate",
+        "SERIAL_NUMBER": "Serialnumber",
+        "YEAR_OF_CONSTRUCTION": "Year of Construction",
+        "DATE_OF_MANUFACTURE": "Date of Manufacture",
+        "PRODUCT_TYPE": "Product Type",
+        "PRODUCT_FAMILY": "Product Family",
+        "MANUFACTURER": "Manufacturer",
+        "MANUFACTURER_ADDRESS": "Manufacturer Address"
     },
     "TechnicalData": {
         "TITLE": "Technical Data"

@@ -1,3 +1,4 @@
+import { first } from 'rxjs';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -6,8 +7,9 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
+import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
@@ -21,17 +23,18 @@ import { ChildComponent } from '../../components/child-component';
  */
 @Component({
     selector: 'fhg-nameplate',
-    imports: [NgbAccordionModule, DataSheet],
+    imports: [NgbAccordionModule, DataSheet, TranslateDirective],
     templateUrl: './nameplate.html',
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Nameplate extends ChildComponent<NameplateData, NameplateState> {
-    public constructor() {
+export class Nameplate extends ChildComponent<NameplateData, NameplateState> implements AfterViewInit{
+    public constructor(translate: TranslateService) {
         super();
 
         effect(() => {
             const document = this.document();
+
             if (!document) {
                 return;
             }
@@ -43,6 +46,10 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> {
         });
     }
 
+    ngAfterViewInit(){
+        this.dataSheets();
+    }
+
     /** The state management service. */
     public override state = input.required<NameplateState>();
 
@@ -51,4 +58,52 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> {
 
     /** The presentation of the nameplate. */
     public readonly dataSheets = computed(() => this.state().dataSheets());
+
+    public getAssetId(){
+        if(!this.document()) return "";
+
+        return this.document()?.assetId;
+    }
+
+    public getAASIdShort(){
+        if(!this.document()) return "";
+
+        return this.document()?.idShort;
+    }
+
+    public checkNameplateValue(name: string | string[]){
+        if(!this.dataSheets()) return "";
+        if(!this.dataSheets()[0]) return "";
+        const value = this.getNameplateValue(name);
+        if(value == "-1") return false;
+        return true;
+    }
+
+    public getNameplateValue(name: string | string[]){
+        if(!this.dataSheets()) return "-1";
+        if(!this.dataSheets()[0]) return "-1";
+
+        if(Array.isArray(name)){
+
+            for(let i=0; i<name.length; i++){
+                var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == name[i].toLowerCase());
+                if(value) return value.value;
+            }
+
+        }else{
+            var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == name.toLowerCase());
+            if(value) return value.value;
+        }
+
+        return -1;
+    }
+
+    public getCompanyLogo(){
+        if(!this.dataSheets()) return "";
+        if(!this.dataSheets()[0]) return "";
+
+        var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == "companylogo");
+        if(value) return value.url;
+        return null;
+    }
 }

@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
-import { TranslateDirective } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, effect, Input, input, untracked } from '@angular/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
@@ -29,7 +29,12 @@ import { ChildComponent } from '../../components/child-component';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonFootprintState> {
-    public constructor() {
+    // Determines wether the view is used from inside the dpp view or standalone
+    @Input() isDigitalProductPassport: boolean = false;
+
+    showDetails: boolean = this.isDigitalProductPassport;
+
+    public constructor(translate: TranslateService) {
         super();
 
         effect(() => {
@@ -93,5 +98,46 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonF
      */
     public setIndex(index: number): void {
         this.state().update({ index });
+    }
+
+    public getTotalPCFValue(){
+        const result = this.totalPcfCO2eq();
+        const splitResult = result.split(" ");
+        if(!splitResult || splitResult.length <= 0) return "";
+        return splitResult[0];
+    }
+
+    public getTotalPCFUnit(){
+        const result = this.totalPcfCO2eq();
+        const splitResult = result.split(" ");
+        if(!splitResult || splitResult.length <= 1) return "";
+        return splitResult[1];
+    }
+
+    public getValueFromDataSheet(name: string){
+        const datasheet= this.item();
+        const result = datasheet.items.find(element => element.idShort === name);
+        if (!result) return "-1";
+        return result.value;
+
+    }
+
+    public getFilenameExplanation(){
+        const datasheet= this.item();
+        const result = datasheet.items.find(element => element.idShort === "ExplanatoryStatement");
+        if(!result || !result.value) return "";
+        return result.value;
+    }
+
+    public openFile(){
+        const datasheet= this.item();
+        const result = datasheet.items.find(element => element.idShort === "ExplanatoryStatement");
+        if(!result || !result.url) return;
+
+        window.open(result.url, '_blank');
+    }
+
+    public toggleDetailView(){
+        this.showDetails = !this.showDetails;
     }
 }

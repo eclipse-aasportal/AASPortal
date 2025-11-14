@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -7,7 +8,7 @@
  *****************************************************************************/
 
 import head from 'lodash-es/head';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first, combineLatest } from 'rxjs';
@@ -22,10 +23,11 @@ import {
     computed,
     effect,
     inject,
+    linkedSignal,
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, jsonization, toJsonValue, isSubmodel } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, jsonization, isSubmodel, toJsonValue } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
@@ -35,6 +37,8 @@ import {
     ToolbarService,
     encodeBase64Url,
     EndpointsApi,
+    findRouteForShell,
+    findRouteForSubmodel,
 } from 'aas-lib';
 
 import { CommandHandler } from '../aas/command-handler';
@@ -52,7 +56,7 @@ import { JsonValue } from 'projects/aas-core/dist/types/aas-core/jsonization';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateModule, FormsModule, AASTreeComponent],
+    imports: [TranslateModule, FormsModule, AASTreeComponent, CommonModule, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
@@ -146,6 +150,14 @@ export class AASComponent implements OnInit, OnDestroy {
         return document != null && !document.readonly && document.modified ? document.modified : false;
     });
 
+    public getSubmodels() {
+        if(!this.state.document()) return [];
+        if(!this.state.document()?.content) return [];
+        if(!this.state.document()?.content?.submodels) return [];
+
+        return this.state.document()?.content?.submodels;
+    }
+
     /**
      * Computed signal that determines if a new element can be created.
      * Returns true if exactly one element is selected, false otherwise.
@@ -235,6 +247,16 @@ export class AASComponent implements OnInit, OnDestroy {
 
         return '/assets/resources/aas-idta.png';
     }
+
+    /** The URL of the thumbnail. */
+    public readonly thumbnail = linkedSignal(() => {
+        const document = this.document();
+        if (!document) {
+            return '/assets/resources/aas-idta.png';
+        }
+
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
+    });
 
     /**
      * Clears the thumbnail of the current document by setting it to undefined.
@@ -501,5 +523,90 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         return version;
+    }
+
+    getSubmodelSemanticId(submodel: aas.Submodel){
+        if(!submodel) return "";
+        if(!submodel.semanticId) return "";
+        if(submodel.semanticId.keys.length <= 0) return "";
+        return submodel.semanticId.keys[0].value;
+    }
+
+    getSubmodelIcon(submodel: aas.Submodel){
+        //find out what type of submodel it is and 
+        //return a somewhat fitting thumbnail
+        // Document-related
+        // Nameplate-related
+        // Contact-related
+        // Carbon-related
+        // Data-related
+
+        const semId = this.getSubmodelSemanticId(submodel);
+        if(!semId) return "bi-question-circle"
+
+        if(semId.toLowerCase().includes("document") || submodel.idShort.toLowerCase().includes("document")) return "bi-file-earmark-richtext";
+        if(semId.toLowerCase().includes("contact") || submodel.idShort.toLowerCase().includes("contact")) return "bi-card-text";
+        if(semId.toLowerCase().includes("nameplate") || submodel.idShort.toLowerCase().includes("nameplate")) return "bi-file-text";
+        if(semId.toLowerCase().includes("carbon") || submodel.idShort.toLowerCase().includes("carbon")) return "bi-leaf";
+        if(semId.toLowerCase().includes("data") || submodel.idShort.toLowerCase().includes("data")) return "bi-graph-up";
+        if(semId.toLowerCase().includes("structure") || submodel.idShort.toLowerCase().includes("structure")) return "bi-diagram-3";
+
+        return "bi-question-circle";
+
+
+    }
+
+    openShellView(){
+        let route: Route | undefined;
+        const document = this.document();
+        if(document === undefined) return "";
+        const tuple = findRouteForShell(document!);
+        route = tuple.route;
+
+        if (route === undefined) return undefined;
+
+        const endpoint = this.document()?.endpoint;
+        if(endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if(id === undefined) return undefined;
+        
+        return [
+            `/views/${route.path}`,
+            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
+        ];
+
+    }
+
+    openBrowserView(){
+        const endpoint = this.document()?.endpoint;
+        if(endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if(id === undefined) return undefined;
+        
+        return [
+            `/views/Browser`,
+            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
+        ];
+
+    }
+
+    openSubmodelView(submodel: aas.Submodel){
+        let route: Route | undefined;
+        route = findRouteForSubmodel(submodel);
+
+        if (route === undefined) return undefined;
+
+        const endpoint = this.document()?.endpoint;
+        if(endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if(id === undefined) return undefined;
+        
+        return [
+            `/views/${route.path}`,
+            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
+        ];
     }
 }
