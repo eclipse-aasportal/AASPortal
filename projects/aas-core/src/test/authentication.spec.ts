@@ -30,39 +30,15 @@ describe('authentication', () => {
 
     describe('isUserAuthorized', () => {
         it('true for actual: guest, expected: guest', () => {
-            expect(isUserAuthorized('guest', 'guest')).toBeTruthy();
+            expect(isUserAuthorized('editor', ['reader', 'editor', 'admin'])).toBeTruthy();
         });
 
         it('false for actual: guest, expected: editor', () => {
-            expect(isUserAuthorized('guest', 'editor')).toBeFalsy();
+            expect(isUserAuthorized('editor', ['reader', 'admin'])).toBeFalsy();
         });
 
         it('false for actual: guest, expected: admin', () => {
-            expect(isUserAuthorized('guest', 'admin')).toBeFalsy();
-        });
-
-        it('true for actual: editor, expected: guest', () => {
-            expect(isUserAuthorized('editor', 'guest')).toBeTruthy();
-        });
-
-        it('true for actual: editor, expected: editor', () => {
-            expect(isUserAuthorized('editor', 'editor')).toBeTruthy();
-        });
-
-        it('false for actual: editor, expected: admin', () => {
-            expect(isUserAuthorized('editor', 'admin')).toBeFalsy();
-        });
-
-        it('true for actual: admin, expected: guest', () => {
-            expect(isUserAuthorized('admin', 'guest')).toBeTruthy();
-        });
-
-        it('true for actual: admin, expected: editor', () => {
-            expect(isUserAuthorized('admin', 'editor')).toBeTruthy();
-        });
-
-        it('true for actual: admin, expected: admin', () => {
-            expect(isUserAuthorized('admin', 'admin')).toBeTruthy();
+            expect(isUserAuthorized('reader', [])).toBeFalsy();
         });
     });
 });

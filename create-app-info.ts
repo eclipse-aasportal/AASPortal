@@ -60,7 +60,7 @@ const replacements = new Map<string, string>([
     ['@ngx-translate/http-loader', 'oss/@ngx-translate/http-loader/LICENSE.txt'],
 ]);
 
-const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'fhg-jest']);
+const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'aas-jest']);
 
 await main();
 

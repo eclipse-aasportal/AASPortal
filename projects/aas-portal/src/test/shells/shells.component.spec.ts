@@ -6,34 +6,42 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, model, signal } from '@angular/core';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { first, of } from 'rxjs';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    input,
+    model,
+    provideZonelessChangeDetection,
+    signal,
+} from '@angular/core';
+
 import { AASDocument, WebSocketData, aas } from 'aas-core';
 import {
-    WINDOW,
     ViewMode,
     AuthService,
     NotifyService,
-    DownloadService,
-    AASTableComponent,
+    AASTable,
     StartService,
     IndexChangeService,
+    EndpointsApi,
+    ToolbarService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
-import { ShellsApiService } from '../../app/shells/shells-api.service';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 @Component({
     selector: 'fhg-aas-table',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-class TestAASTableComponent {
+class TestAASTable {
     public readonly viewMode = input<ViewMode>(ViewMode.List);
     public readonly documents = input<AASDocument[]>([]);
     public readonly selected = model<AASDocument[]>([]);
@@ -41,34 +49,30 @@ class TestAASTableComponent {
 }
 
 describe('ShellsComponent', () => {
-    let window: jasmine.SpyObj<Window>;
-    let localStorage: jasmine.SpyObj<Storage>;
-    let api: jasmine.SpyObj<ShellsApiService>;
-    let component: ShellsComponent;
     let fixture: ComponentFixture<ShellsComponent>;
-    let favorites: jasmine.SpyObj<FavoritesService>;
-    let auth: jasmine.SpyObj<AuthService>;
-    let start: jasmine.SpyObj<StartService>;
-    let indexChange: jasmine.SpyObj<IndexChangeService>;
+    let component: ShellsComponent;
+    let localStorage: jest.Mocked<Storage>;
+    let api: jest.Mocked<EndpointsApi>;
+    let favorites: jest.Mocked<FavoritesService>;
+    let auth: jest.Mocked<AuthService>;
+    let start: jest.Mocked<StartService>;
+    let indexChange: jest.Mocked<IndexChangeService>;
 
-    beforeEach(() => {
-        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        localStorage = jasmine.createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
-
-        localStorage.getItem.and.returnValue(null);
-        window = jasmine.createSpyObj<Window>(['addEventListener', 'confirm'], { localStorage });
-
-        api = jasmine.createSpyObj<ShellsApiService>([
+    beforeEach(async () => {
+        start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
+        localStorage.getItem.mockReturnValue(null);
+        api = createSpyObj<EndpointsApi>([
             'addEndpoint',
-            'delete',
-            'getContent',
+            'deleteDocument',
             'getEndpoints',
-            'getHierarchy',
-            'getPage',
             'removeEndpoint',
+            'getContent',
+            'getHierarchy',
+            'getDocuments',
+            'downloadPackage',
         ]);
-
-        api.getPage.and.returnValue(
+        api.getDocuments.mockReturnValue(
             of({
                 previous: null,
                 next: null,
@@ -76,7 +80,7 @@ describe('ShellsComponent', () => {
             }),
         );
 
-        api.getContent.and.returnValue(
+        api.getContent.mockReturnValue(
             of({
                 assetAdministrationShells: [],
                 submodels: [],
@@ -84,19 +88,19 @@ describe('ShellsComponent', () => {
             } as aas.Environment),
         );
 
-        favorites = jasmine.createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+        favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
             active: signal(''),
             items: signal<FavoritesList[]>([]),
         });
 
-        auth = jasmine.createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
-            userId: of('guest'),
+        auth = createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
+            ready: of(true),
         });
 
-        auth.getCookie.and.returnValue(of(undefined));
-        auth.setCookie.and.returnValue(of(undefined));
+        auth.getCookie.mockReturnValue(of(undefined));
+        auth.setCookie.mockReturnValue(of(undefined));
 
-        indexChange = jasmine.createSpyObj<IndexChangeService>(
+        indexChange = createSpyObj<IndexChangeService>(
             {},
             {
                 message: of({
@@ -106,15 +110,11 @@ describe('ShellsComponent', () => {
             },
         );
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: ShellsApiService,
+                    provide: EndpointsApi,
                     useValue: api,
-                },
-                {
-                    provide: WINDOW,
-                    useValue: window,
                 },
                 {
                     provide: FavoritesService,
@@ -126,15 +126,11 @@ describe('ShellsComponent', () => {
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
-                },
-                {
-                    provide: DownloadService,
-                    useValue: jasmine.createSpyObj<DownloadService>(['downloadPackage']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set'], { toolbarTemplate: signal(null) }),
                 },
                 {
                     provide: StartService,
@@ -144,23 +140,23 @@ describe('ShellsComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
-        });
+            imports: [ShellsComponent],
+        }).compileComponents();
 
         TestBed.overrideComponent(ShellsComponent, {
             remove: {
-                imports: [AASTableComponent],
+                imports: [AASTable],
             },
             add: {
-                imports: [TestAASTableComponent],
+                imports: [TestAASTable],
             },
         });
 
@@ -171,17 +167,17 @@ describe('ShellsComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+        expect(component.files()).toBeUndefined();
+        expect(component.limit()).toBe(10);
+        expect(component.favoritesLists()).toEqual(['']);
+        expect(component.activeFavoritesList()).toBe('');
+        expect(component.selected()).toEqual([]);
+        expect(component.someSelected()).toBe(false);
+        expect(component.views().length).toBeGreaterThan(0);
+        expect(component.filter()).toBe('');
+        expect(component.filterText()).toBe('');
+        expect(component.documents()).toEqual([]);
+        expect(component.isFirstPage()).toBe(true);
+        expect(component.isLastPage()).toBe(true);
     });
-
-    // it('initial view mode is "list"', function (done: DoneFn) {
-    //     component.viewMode.pipe(first()).subscribe(value => {
-    //         expect(value).toEqual(ViewMode.List);
-    //         done();
-    //     });
-    // });
-
-    // it('sets "tree" view mode', function () {
-    //     component.setViewMode(ViewMode.Tree);
-    //     store.subscribe(state => expect(state.start.viewMode).toEqual(ViewMode.Tree));
-    // });
 });

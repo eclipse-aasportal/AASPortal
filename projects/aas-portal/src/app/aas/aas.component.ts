@@ -10,142 +10,181 @@ import head from 'lodash-es/head';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { Location } from '@angular/common';
-import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, from, of, catchError, first, combineLatest } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
+    DOCUMENT,
     OnDestroy,
     OnInit,
     TemplateRef,
     computed,
     effect,
-    signal,
-    untracked,
+    inject,
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, AASDocument, noop } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, jsonization, toJsonValue, isSubmodel } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
     decodeBase64Url,
-    DownloadService,
     NotifyService,
-    SecuredImageComponent,
     StartService,
     ToolbarService,
     encodeBase64Url,
+    EndpointsApi,
 } from 'aas-lib';
 
-import { CommandHandlerService } from '../aas/command-handler.service';
+import { CommandHandler } from '../aas/command-handler';
 import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
 import { UpdateElementCommand } from './commands/update-element-command';
 import { DeleteCommand } from './commands/delete-command';
 import { NewElementCommand } from './commands/new-element-command';
-import { AASApiService } from './aas-api.service';
 import { NewElementFormComponent } from './new-element-form/new-element-form.component';
 import { DashboardService } from '../dashboard/dashboard.service';
-import { AASStore } from './aas.store';
-import { DashboardChartType } from '../dashboard/dashboard.store';
+import { AASState } from './aas.state';
+import { DashboardChartType, DashboardPage } from '../dashboard/dashboard-types';
+import { JsonValue } from 'projects/aas-core/dist/types/aas-core/jsonization';
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [SecuredImageComponent, AASTreeComponent, TranslateModule, FormsModule],
+    imports: [TranslateModule, FormsModule, AASTreeComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/**
+ * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
+ * Handles document viewing, live mode operations, dashboard integration, and element manipulation.
+ *
+ * @remarks
+ * This component provides features including:
+ * - Document viewing and modification
+ * - Live mode controls (play/stop)
+ * - Dashboard integration
+ * - Element creation, editing, and deletion
+ * - Undo/Redo operations
+ * - Search functionality
+ * - Document synchronization
+ * - Download capabilities
+ */
 export class AASComponent implements OnInit, OnDestroy {
-    public constructor(
-        private readonly store: AASStore,
-        private readonly router: Router,
-        private readonly location: Location,
-        private readonly route: ActivatedRoute,
-        private readonly modal: NgbModal,
-        private readonly notify: NotifyService,
-        private readonly dashboard: DashboardService,
-        private readonly api: AASApiService,
-        private readonly download: DownloadService,
-        private readonly commandHandler: CommandHandlerService,
-        private readonly toolbar: ToolbarService,
-        private readonly start: StartService,
-        private readonly auth: AuthService,
-    ) {
+    private readonly state = inject(AASState);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly modal = inject(NgbModal);
+    private readonly notify = inject(NotifyService);
+    private readonly dashboard = inject(DashboardService);
+    private readonly api = inject(EndpointsApi);
+    private readonly commandHandler = inject(CommandHandler);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
+    private readonly auth = inject(AuthService);
+    private readonly dom = inject(DOCUMENT);
+
+    public constructor() {
         effect(() => {
-            const value = this.dashboardPage();
-            if (value !== untracked(this.dashboard.activePage)) {
-                this.dashboard.setActivePage(value);
-            }
-        });
-        effect(() => {
-            const aasToolbar = this.aasToolbar();
-            if (aasToolbar !== undefined) {
-                this.toolbar.set(aasToolbar);
+            const toolbarTemplate = this.toolbarTemplate();
+            if (toolbarTemplate !== undefined) {
+                this.toolbar.set(toolbarTemplate);
             }
         });
     }
 
-    public readonly aasToolbar = viewChild<TemplateRef<unknown>>('aasToolbar');
+    /**
+     * A template reference that defines the toolbar layout.
+     * Accessed via ViewChild decorator targeting an element with the 'toolbar' template reference variable.
+     */
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
-    public readonly address = computed(() => this.store.document$()?.address ?? '-');
+    public readonly treeState = this.state.treeState;
 
-    public readonly idShort = computed(() => this.store.document$()?.idShort ?? '-');
+    public readonly address = computed(() => this.state.document()?.address ?? '-');
 
-    public readonly id = computed(() => this.store.document$()?.id ?? '-');
+    public readonly idShort = computed(() => this.state.document()?.idShort ?? '-');
 
-    public readonly assetId = computed(() => this.store.document$()?.assetId ?? '-');
+    public readonly id = computed(() => this.state.document()?.id ?? '-');
 
-    public readonly thumbnail = computed(() => this.store.document$()?.thumbnail ?? '-');
+    public readonly assetId = computed(() => this.state.document()?.assetId ?? '-');
 
-    public readonly readOnly = computed(() => !!this.store.document$()?.readonly);
+    public readonly readOnly = computed(() => !!this.state.document()?.readonly);
 
     public readonly version = computed(() =>
-        this.versionToString(head(this.store.document$()?.content?.assetAdministrationShells)?.administration),
+        this.versionToString(head(this.state.document()?.content?.assetAdministrationShells)?.administration),
     );
 
-    public readonly document = this.store.document$;
+    public readonly document = this.state.document;
 
-    public readonly state = this.store.state$;
+    public readonly live = this.state.live;
 
-    public readonly searchExpression = this.store.searchExpression$;
+    public readonly searchExpression = this.state.searchExpression;
 
     public readonly dashboardPages = this.dashboard.pages;
 
-    public readonly dashboardPage = signal(this.dashboard.activePage());
+    public readonly dashboardPage = this.dashboard.activePage;
 
-    public readonly selectedElements = this.store.selectedElements$;
+    public readonly selectedElements = this.state.selectedElements;
 
     public readonly canUndo = this.commandHandler.canUndo;
 
     public readonly canRedo = this.commandHandler.canRedo;
 
     public readonly canPlay = computed(() => {
-        const state = this.store.state$();
-        return (this.store.document$()?.onlineReady ?? false) && state === 'offline';
+        const state = this.state.live();
+        return (this.state.document()?.onlineReady ?? false) && state === 'offline';
     });
 
     public readonly canStop = computed(() => {
-        const state = this.store.state$();
-        return (this.store.document$()?.onlineReady ?? false) && state === 'online';
+        const state = this.state.live();
+        return (this.state.document()?.onlineReady ?? false) && state === 'online';
     });
 
     public readonly canSynchronize = computed(() => {
-        const document = this.store.document$();
+        const document = this.state.document();
         return document != null && !document.readonly && document.modified ? document.modified : false;
     });
 
+    /**
+     * Computed signal that determines if a new element can be created.
+     * Returns true if exactly one element is selected, false otherwise.
+     * @readonly
+     * @returns {Signal<boolean>} A signal indicating whether a new element can be created
+     */
     public readonly canNewElement = computed(() => this.selectedElements().length === 1);
 
+    /**
+     * Computed signal that determines if editing is allowed for the selected elements.
+     * Returns true when exactly one element is selected, false otherwise.
+     *
+     * @returns {Signal<boolean>} A signal containing true if exactly one element is selected, false otherwise
+     */
     public readonly canEditElement = computed(() => this.selectedElements().length === 1);
 
-    public readonly canDeleteElement = computed(
-        () =>
-            this.selectedElements().length > 0 &&
-            this.selectedElements().every(item => item.modelType !== 'AssetAdministrationShell'),
-    );
+    /**
+     * Computed signal that determines if the selected elements can be deleted.
+     * Returns true if there are selected elements and none of them are Asset Administration Shells.
+     * @returns {boolean} True if elements can be deleted, false otherwise.
+     */
+    public readonly canDeleteElement = computed(() => {
+        const selectedElements = this.selectedElements();
+        return (
+            selectedElements.length > 0 && selectedElements.every(item => item.modelType !== 'AssetAdministrationShell')
+        );
+    });
 
+    /**
+     * Computed signal that determines if selected elements can be added to the dashboard.
+     *
+     * @returns {boolean} True if:
+     * - A dashboard page is selected
+     * - At least one element is selected
+     * - All selected elements are either number properties or time series
+     *
+     * @remarks
+     * This is used to enable/disable dashboard-related functionality based on the current selection state.
+     */
     public readonly canAddToDashboard = computed(() => {
         const selectedElements = this.selectedElements();
         return (
@@ -156,59 +195,107 @@ export class AASComponent implements OnInit, OnDestroy {
     });
 
     public ngOnInit(): void {
-        this.route.queryParams.pipe(first()).subscribe(params => {
-            if (params.search) {
-                this.store.searchExpression$.set(params.search);
-            }
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
+            .pipe(
+                map(([routeParams, queryParams]) => {
+                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
+                }),
+                first(),
+            )
+            .subscribe(params => {
+                if (params.search) {
+                    this.state.update({ searchExpression: params.search });
+                }
 
-            const state = this.location.getState() as Record<string, string>;
-            if (state.data) {
-                try {
-                    const document: AASDocument = JSON.parse(state.data);
-                    if (!document.content) {
-                        this.getDocumentContent(document);
+                if (params.id) {
+                    if (params.endpoint) {
+                        this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
+                    } else {
+                        this.getDocument(decodeBase64Url(params.id));
                     }
-                } catch {
-                    noop();
                 }
-            }
-
-            if (params.id) {
-                if (params.endpoint) {
-                    this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
-                } else {
-                    this.getDocument(decodeBase64Url(params.id));
-                }
-            }
-        });
+            });
     }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
     }
 
+    /**
+     * Retrieves the thumbnail image URL for the current document.
+     *
+     * @returns {string} The URL of the thumbnail image. If no thumbnail is set in the document,
+     * returns the default AAS thumbnail path '/assets/resources/aas-idta.png'
+     */
+    public getThumbnail(): string {
+        const thumbnail = this.document()?.thumbnail;
+        if (thumbnail) {
+            return thumbnail;
+        }
+
+        return '/assets/resources/aas-idta.png';
+    }
+
+    /**
+     * Clears the thumbnail of the current document by setting it to undefined.
+     * This method updates the document state while preserving other document properties.
+     */
+    public clearThumbnail(): void {
+        this.state.update({ document: { ...this.document()!, thumbnail: undefined } });
+    }
+
+    /**
+     * Initiates live mode by updating the state to 'online'.
+     * Changes the current state to indicate that the system is actively running.
+     * @public
+     */
     public play(): void {
-        this.store.state$.set('online');
+        this.state.update({ live: 'online' });
     }
 
     public stop(): void {
-        this.store.state$.set('offline');
+        this.state.update({ live: 'offline' });
     }
 
+    /**
+     * Adds a chart to the active dashboard page based on the selected elements and chart type.
+     * Navigates to the dashboard view after adding the chart.
+     *
+     * @param chartType - The type of chart to be added to the dashboard
+     * @returns void
+     * @throws No explicit throws, but will silently return if document or page is null
+     */
     public addToDashboard(chartType: string): void {
-        const document = this.store.document;
+        const document = this.state.document();
         const page = this.dashboard.activePage();
         if (!document || !page) {
             return;
         }
 
-        this.dashboard.add(page, document, this.store.selectedElements, chartType as DashboardChartType);
+        this.dashboard.addChart(page.name, document, this.state.selectedElements(), chartType as DashboardChartType);
         this.router.navigate(['/dashboard'], { queryParams: { page } });
+    }
+
+    /**
+     * Sets the active page in the dashboard.
+     * @param page - The dashboard page object to be set as active
+     * @throws {Error} When page object is invalid or undefined
+     */
+    public setDashboardPage(page: DashboardPage): void {
+        this.dashboard.setActivePage(page.name);
+    }
+
+    /**
+     * Updates the search expression.
+     * @param value - The new search expression string to be set
+     */
+    public setSearchExpression(value: string): void {
+        this.state.update({ searchExpression: value });
     }
 
     public synchronize(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.state.document()),
             mergeMap(document => {
                 if (!document) {
                     return EMPTY;
@@ -220,7 +307,7 @@ export class AASComponent implements OnInit, OnDestroy {
                             this.notify.info(messages.join('\r\n'));
                         }
 
-                        this.store.document$.set({ ...document, modified: false });
+                        this.state.update({ document: { ...document, modified: false } });
                     }),
                 );
             }),
@@ -228,31 +315,40 @@ export class AASComponent implements OnInit, OnDestroy {
         );
     }
 
+    /**
+     * Executes an undo operation using the command handler.
+     * Reverts the last executed command in the command history.
+     */
     public undo(): void {
         this.commandHandler.undo();
     }
 
+    /**
+     * Executes a redo operation on the command handler.
+     * This method restores the state that was undone by the last undo operation.
+     */
     public redo(): void {
         this.commandHandler.redo();
     }
 
     public newElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.state.document()),
             mergeMap(document => {
-                if (!document || this.store.selectedElements.length !== 1) {
+                const selectedElements = this.state.selectedElements();
+                if (!document || selectedElements.length !== 1) {
                     return EMPTY;
                 }
 
                 return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
                     mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(document.content, this.store.selectedElements[0]);
+                        modalRef.componentInstance.initialize(document.content, selectedElements[0]);
                         return from<Promise<aas.Referable | undefined>>(modalRef.result);
                     }),
                     map(result => {
                         if (result) {
                             this.commandHandler.execute(
-                                new NewElementCommand(this.store, document, this.store.selectedElements[0], result),
+                                new NewElementCommand(this.state, document, selectedElements[0], result),
                             );
                         }
                     }),
@@ -264,21 +360,22 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public editElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document$()),
+            map(() => this.state.document()),
             mergeMap(document => {
-                if (!document || this.store.selectedElements.length !== 1) {
+                const selectedElements = this.state.selectedElements();
+                if (!document || selectedElements.length !== 1) {
                     return EMPTY;
                 }
 
                 return of(this.modal.open(EditElementFormComponent, { backdrop: 'static' })).pipe(
                     mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(this.store.selectedElements[0]);
+                        modalRef.componentInstance.initialize(selectedElements[0]);
                         return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
                     }),
                     map(result => {
                         if (result) {
                             this.commandHandler.execute(
-                                new UpdateElementCommand(this.store, document, this.store.selectedElements[0], result),
+                                new UpdateElementCommand(this.state, document, selectedElements[0], result),
                             );
                         }
                     }),
@@ -290,27 +387,36 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public deleteElement(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.store.document),
+            map(() => this.state.document()),
             map(document => {
-                if (document && this.store.selectedElements.length > 0) {
-                    this.commandHandler.execute(new DeleteCommand(this.store, document, this.store.selectedElements));
+                const selectedElements = this.state.selectedElements();
+                if (document && selectedElements.length > 0) {
+                    this.commandHandler.execute(new DeleteCommand(this.state, document, selectedElements));
                 }
             }),
             catchError(error => this.notify.error(error)),
         );
     }
 
-    public downloadDocument(): Observable<void> {
-        return of(this.store.document).pipe(
-            mergeMap(document => {
-                if (!document) {
-                    return EMPTY;
-                }
+    /**
+     * Download the current state's document content or a single selected submodel as a JSON file.
+     */
+    public download(): void {
+        try {
+            const document = this.state.document();
+            if (!document || !document.content) {
+                return;
+            }
 
-                return this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx');
-            }),
-            catchError(error => this.notify.error(error)),
-        );
+            const selectedElements = this.selectedElements();
+            if (selectedElements.length === 1 && isSubmodel(selectedElements[0])) {
+                this.downloadSubmodel(selectedElements[0]);
+            } else {
+                this.downloadEnvironment(document.idShort, document.content);
+            }
+        } catch (error) {
+            this.notify.error(error);
+        }
     }
 
     public addToStart(): Observable<void> {
@@ -327,6 +433,31 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         return EMPTY;
+    }
+
+    public setSelectedElements(selectedElements: aas.Referable[]): void {
+        this.state.update({ selectedElements });
+    }
+
+    private downloadSubmodel(submodel: aas.Submodel) {
+        const sm = jsonization.submodelFromJsonable(toJsonValue(submodel)).mustValue();
+        this.downloadJson(submodel.idShort, jsonization.toJsonable(sm));
+    }
+
+    private downloadEnvironment(baseName: string, content: aas.Environment) {
+        const env = jsonization.environmentFromJsonable(toJsonValue(content)).mustValue();
+        this.downloadJson(baseName, jsonization.toJsonable(env));
+    }
+
+    private downloadJson(baseName: string, value: JsonValue): void {
+        const contentStr = JSON.stringify(value, null, 4);
+        const blob = new Blob([contentStr], { type: 'application/json' });
+        const filename = `${baseName}.json`;
+        const a = this.dom.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.setAttribute('download', filename);
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
     private isNumberProperty(element: aas.Referable): boolean {
@@ -347,16 +478,9 @@ export class AASComponent implements OnInit, OnDestroy {
         );
     }
 
-    private getDocumentContent(document: AASDocument): void {
-        this.api.getContent(document.id, document.endpoint).subscribe({
-            next: content => this.store.document$.set({ ...document, content }),
-            error: () => this.store.document$.set(document),
-        });
-    }
-
     private getDocument(id: string, endpoint?: string): void {
         this.api.getDocument(id, endpoint).subscribe({
-            next: document => this.store.document$.set(document),
+            next: document => this.state.update({ document }),
             error: error => console.debug(error),
         });
     }

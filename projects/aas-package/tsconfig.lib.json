@@ -1,0 +1,13 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist/lib",
+        "declaration": true,
+        "declarationMap": true,
+        "declarationDir": "./dist/types"
+    },
+    "include": [
+        "./src/lib/**/*.ts"
+    ]
+}

@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { AuthResult, Cookie, Credentials, UserProfile } from 'aas-core';
 import { Body, Controller, Delete, Get, Hidden, OperationId, Path, Post, Put, Route, Security, Tags } from 'tsoa';
+import type { AuthResult, Cookie, Credentials, UserProfile } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
 import { AuthService } from '../auth/auth-service.js';
-import { decodeBase64Url } from '../convert.js';
 
 @injectable()
 @Route('/api/v1')
@@ -19,16 +19,6 @@ import { decodeBase64Url } from '../convert.js';
 export class AuthController extends Controller {
     public constructor(@inject(AuthService) private readonly auth: AuthService) {
         super();
-    }
-
-    /**
-     * @summary Anonymous guest login.
-     * @returns A guest access token with read-only permission.
-     */
-    @Post('guest')
-    @OperationId('guest')
-    public guest(): Promise<AuthResult> {
-        return this.auth.login();
     }
 
     /**
@@ -59,7 +49,7 @@ export class AuthController extends Controller {
      * @returns The user profile.
      */
     @Get('users/{id}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getProfile')
     public getProfile(@Path() id: string): Promise<UserProfile> {
         return this.auth.getProfile(decodeBase64Url(id));
@@ -72,7 +62,7 @@ export class AuthController extends Controller {
      * @returns A new access token with read and write permissions.
      */
     @Put('users/{id}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('updateProfile')
     public updateProfile(@Path() id: string, @Body() profile: UserProfile): Promise<AuthResult> {
         return this.auth.updateProfile(decodeBase64Url(id), profile);
@@ -84,7 +74,6 @@ export class AuthController extends Controller {
      */
     @Hidden()
     @Delete('users/{id}/reset')
-    @Security('bearerAuth', ['guest'])
     @OperationId('resetPassword')
     public resetPassword(@Path() id: string): Promise<void> {
         return this.auth.resetPassword(decodeBase64Url(id));
@@ -95,7 +84,7 @@ export class AuthController extends Controller {
      * @param id The user ID.
      */
     @Delete('users/{id}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('deleteUser')
     public deleteUser(@Path() id: string): Promise<void> {
         return this.auth.deleteUserAsync(decodeBase64Url(id));
@@ -108,7 +97,7 @@ export class AuthController extends Controller {
      * @returns The cookie with the specified name or `undefined`.
      */
     @Get('users/{id}/cookies/{name}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getCookie')
     public getCookie(@Path() id: string, @Path() name: string): Promise<Cookie | undefined> {
         return this.auth.getCookie(decodeBase64Url(id), name);
@@ -120,7 +109,7 @@ export class AuthController extends Controller {
      * @returns All cookies.
      */
     @Get('users/{id}/cookies')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getCookies')
     public getCookies(@Path() id: string): Promise<Cookie[]> {
         return this.auth.getCookies(decodeBase64Url(id));
@@ -133,7 +122,7 @@ export class AuthController extends Controller {
      * @param cookie The current cookie.
      */
     @Post('users/{id}/cookies/{name}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('setCookie')
     public setCookie(@Path() id: string, @Path() name: string, @Body() cookie: Cookie): Promise<void> {
         return this.auth.setCookie(decodeBase64Url(id), name, cookie.data);
@@ -145,7 +134,7 @@ export class AuthController extends Controller {
      * @param name The cookie name.
      */
     @Delete('users/{id}/cookies/{name}')
-    @Security('bearerAuth', ['editor'])
+    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('deleteCookie')
     public deleteCookie(@Path() id: string, @Path() name: string): Promise<void> {
         return this.auth.deleteCookie(decodeBase64Url(id), name);

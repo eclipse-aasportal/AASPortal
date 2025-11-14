@@ -38,6 +38,9 @@ checkFilesAsync([
     './projects/aas-node/src',
     './projects/aas-lib/src',
     './projects/aas-core/src',
+    './projects/aas-package/src',
+    './projects/aas-server/src',
+    './projects/aas-browser/src',
 ]);
 
 async function checkFilesAsync(dirs: string[]): Promise<void> {

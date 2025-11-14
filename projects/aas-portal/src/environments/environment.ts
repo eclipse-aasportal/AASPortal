@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { Environment } from 'aas-lib';
+import data from '../../../../package.json';
 
 export const environment: Environment = {
     production: true,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    version: (require('../../../../package.json') as { version: string }).version,
+    version: data.version,
     homepage: 'https://www.iosb-ina.fraunhofer.de/',
     author: 'Fraunhofer IOSB-INA',
+    basePath: '/api/v1/',
 };

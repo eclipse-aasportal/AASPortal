@@ -4,6 +4,7 @@
         "AASPORTAL",
         "aasv",
         "aasv3",
+        "aasx",
         "angewandten",
         "autohide",
         "classname",
@@ -12,10 +13,16 @@
         "Einrichtung",
         "Foerderung",
         "Forschung",
+        "identifiables",
         "IDREF",
         "IDREFS",
+        "IDTA",
+        "Informations",
+        "inoutput",
         "IOSB",
         "irdi",
+        "Jsonable",
+        "jsonization",
         "jszip",
         "lcid",
         "Lemgo",
@@ -26,6 +33,8 @@
         "NMTOKEN",
         "NMTOKENS",
         "nodebuffer",
+        "opcua",
+        "openxml",
         "opnxml",
         "owncloud",
         "PCFCO2",
@@ -33,10 +42,12 @@
         "qrcode",
         "Qualifiable",
         "rechtlich",
+        "referables",
         "rels",
         "selbstaendige",
         "Sematics",
         "submodel",
+        "submodels",
         "tseslint",
         "tsoa",
         "tsyringe",
@@ -44,23 +55,71 @@
         "uuid",
         "webdav",
         "xmldoc",
-        "ZVEI",
-        "IDTA"
+        "ZVEI"
     ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.eol": "\n",
-    "jest.debugMode": true,
     "jest.virtualFolders": [
         {
             "name": "aas-core",
             "rootPath": "./projects/aas-core",
             "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals",
+        },
+        {
+            "name": "aas-package",
+            "rootPath": "./projects/aas-package",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
         },
         {
             "name": "aas-node",
             "rootPath": "./projects/aas-node",
             "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js"
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+        },
+        {
+            "name": "aas-lib",
+            "rootPath": "./projects/aas-lib",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+        },
+        {
+            "name": "aas-portal",
+            "rootPath": "./projects/aas-portal",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+        },
+        {
+            "name": "aas-server",
+            "rootPath": "./projects/aas-server",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
+        },
+        {
+            "name": "aas-browser",
+            "rootPath": "./projects/aas-browser",
+            "runMode": "on-demand",
+            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache"
         }
-    ]
+    ],
+    "[scss]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "plantuml.server": "http://localhost:8081",
+    "plantuml.render": "PlantUMLServer",
+    "[plantuml]": {
+        "editor.defaultFormatter": "jebbs.plantuml"
+    },
+    "plantuml.includepaths": [
+        "read-the-docs/source/"
+    ],
+    "plantuml.exportFormat": "png",
+    "plantuml.exportOutDir": "read-the-docs/source/images",
+    "plantuml.diagramsRoot": "read-the-docs/source",
+    "plantuml.exportIncludeFolderHeirarchy": false,
+    "plantuml.exportSubFolder": false,
 }

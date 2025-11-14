@@ -6,39 +6,38 @@
  *
  *****************************************************************************/
 
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import {
+    API_URL,
     AuthInterceptor,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
     START_TILE_TYPES,
     START_TILES,
-    StartTile,
     StartTileType,
+    VIEW_ROUTES,
+    viewRoutes,
+    WINDOW,
+    WindowService,
 } from 'aas-lib';
 
-import { HttpLoaderFactory } from './http-loader-factory';
 import { routes } from './app.routes';
-import { DashboardCardComponent } from './dashboard/dashboard-card.component';
+import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
+import { ApiUrlService } from './api-url.service';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideRouter(routes),
         provideHttpClient(withInterceptorsFromDi()),
-        importProvidersFrom(
-            TranslateModule.forRoot({
-                defaultLanguage: 'en-us',
-                loader: {
-                    provide: TranslateLoader,
-                    useFactory: HttpLoaderFactory,
-                    deps: [HttpClient],
-                },
-            }),
-        ),
+        provideTranslateService({
+            fallbackLang: 'en-us',
+            loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
+        }),
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         {
             provide: START_TILE_TYPES,
@@ -56,20 +55,24 @@ export const appConfig: ApplicationConfig = {
                     component: CustomerFeedbackCardComponent,
                 },
                 {
-                    name: 'Dashboard',
-                    component: DashboardCardComponent,
+                    name: 'Chart',
+                    component: ChartComponent,
                 },
             ] satisfies StartTileType[],
         },
         {
             provide: START_TILES,
-            useValue: [
-                {
-                    type: 'About',
-                    id: '395d511d-93ef-443a-b961-0ebdf7d2c55b',
-                    property: {},
-                } satisfies StartTile,
-            ],
+            useValue: [],
         },
+        {
+            provide: VIEW_ROUTES,
+            useValue: viewRoutes,
+        },
+        {
+            provide: API_URL,
+            useFactory: (window: WindowService) => new ApiUrlService(window),
+            deps: [WINDOW],
+        },
+        provideZonelessChangeDetection(),
     ],
 };

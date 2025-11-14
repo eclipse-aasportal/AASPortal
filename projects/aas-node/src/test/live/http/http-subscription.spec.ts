@@ -8,23 +8,23 @@
 
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { aas, DefaultType, LiveRequest } from 'aas-core';
-import { createSpyObj, DoneFn } from 'fhg-jest';
+import { createSpyObj, DoneFn } from 'aas-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
-import { AASApiClient } from '../../../app/package/aas-api/aas-api-client.js';
-import env from '../../assets/aas-environment.js';
+import { ApiClient } from '../../../app/client/api/api-client.js';
+import { aasEnvironment } from '../../assets/aas-environment.js';
 
 describe('HttpSubscription', function () {
-    let aasxServer: jest.Mocked<AASApiClient>;
+    let aasxServer: jest.Mocked<ApiClient>;
     let logger: jest.Mocked<Logger>;
     let client: jest.Mocked<SocketClient>;
     let subscription: HttpSubscription;
 
     beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
-        aasxServer = createSpyObj<AASApiClient>(['getShells', 'commit', 'openFile', 'readValue', 'resolveNodeId']);
+        aasxServer = createSpyObj<ApiClient>(['readValue', 'resolveNodeId']);
 
         const reference: aas.Reference = {
             type: 'ModelReference',
@@ -51,7 +51,7 @@ describe('HttpSubscription', function () {
             ],
         };
 
-        subscription = new HttpSubscription(logger, aasxServer, client, request, env);
+        subscription = new HttpSubscription(logger, aasxServer, client, request, aasEnvironment);
     });
 
     it('should be created', function () {

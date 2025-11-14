@@ -11,8 +11,8 @@ import { UserStorage } from './user-storage.js';
 import { LocalUserStorage } from './local-user-storage.js';
 import { Variable } from '../variable.js';
 import { MongoDBUserStorage } from './mongo-db-user-storage.js';
-import { Logger } from '../logging/logger.js';
-import { urlToString } from '../convert.js';
+import { LOGGER, Logger } from '../logging/logger.js';
+import { urlToString } from '../utilities.js';
 
 /* istanbul ignore next */
 export class UserStorageFactory {
@@ -20,7 +20,7 @@ export class UserStorageFactory {
 
     public create(): UserStorage {
         const url = this.container.resolve(Variable).USER_STORAGE;
-        const logger = this.container.resolve<Logger>('Logger');
+        const logger = this.container.resolve<Logger>(LOGGER);
         if (url) {
             try {
                 const protocol = new URL(url).protocol;

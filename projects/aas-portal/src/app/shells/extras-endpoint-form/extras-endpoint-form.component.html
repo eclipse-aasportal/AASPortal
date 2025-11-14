@@ -38,13 +38,13 @@
                     <td>
                         <div class="d-flex flex-column flex-grow-1">
                             <div>{{item.name}}</div>
-                            <div class="ts-small">{{item.url}}</div>
+                            <div class="fs-7">{{item.url}}</div>
                         </div>
                     </td>
                     <td>{{item.count}}</td>
                     @if (item.schedule === 'manual') {
-                    <td><a href="javascript:void(0);" (click)="scan(item.name)">{{'ExtrasEndpointForm.'+item.schedule |
-                            translate}}</a></td>
+                    <td><button class="btn btn-link p-0" type="button" (click)="scan(item.name)">{{'ExtrasEndpointForm.'+item.schedule |
+                            translate}}</button></td>
                     } @else {
                     <td>{{'ExtrasEndpointForm.' + item.schedule | translate}}</td>
                     }
@@ -52,7 +52,7 @@
                 }
             </tbody>
         </table>
-        <button type="button" class="btn btn-secondary" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed"
+        <button type="button" class="btn btn-secondary" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed()"
             aria-controls="collapseReset">
             <span translate>ExtrasEndpointForm.RESET</span><span>...</span>
         </button>

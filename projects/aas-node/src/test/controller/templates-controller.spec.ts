@@ -14,11 +14,11 @@ import morgan from 'morgan';
 import request from 'supertest';
 import { TemplateDescriptor, aas } from 'aas-core';
 
-import { Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
-import { getToken, guestPayload } from '../assets/json-web-token.js';
+import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
@@ -33,16 +33,16 @@ describe('TemplateController', () => {
     let authentication: jest.Mocked<Authentication>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info', 'debug', 'start', 'stop']);
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
 
         templateStorage = createSpyObj<TemplateStorage>(['getTemplatesAsync', 'readTemplateAsync']);
         authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(guestPayload);
+        authentication.check.mockResolvedValue(editorPayload);
 
         container.registerInstance(AuthService, auth);
-        container.registerInstance('Logger', logger);
+        container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(TemplateStorage, templateStorage);
         container.registerInstance(Authentication, authentication);

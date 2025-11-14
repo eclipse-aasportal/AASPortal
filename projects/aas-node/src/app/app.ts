@@ -14,11 +14,12 @@ import express, { Express, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
+import compression from 'compression';
+import multer from 'multer';
 
 import { RegisterRoutes } from './routes/routes.js';
 import { Variable } from './variable.js';
-import { Logger } from './logging/logger.js';
-import multer from 'multer';
+import { LOGGER, Logger } from './logging/logger.js';
 import { errorHandler } from './error-handler.js';
 
 @singleton()
@@ -36,7 +37,7 @@ export class App {
     }
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
     ) {
         this.app = express();
@@ -61,14 +62,33 @@ export class App {
             }),
         );
 
+        this.app.use(compression());
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
         this.app.use(morgan('dev'));
-        this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(this.swaggerDoc));
+        this.app.use(['/swagger', '/docs'], swaggerUi.serve, swaggerUi.setup(this.swaggerDoc));
 
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
-        this.app.get('/', this.getIndex);
+        this.app.get(
+            [
+                '/',
+                '/start',
+                '/shells',
+                '/aas',
+                '/views',
+                '/dashboard',
+                '/about',
+                '/views/CustomerFeedback',
+                '/views/Nameplate',
+                '/views/DigitalProductPassport',
+                '/views/HandoverDocumentation',
+                '/views/Browser',
+                '/views/Laser',
+            ],
+            this.getIndex,
+        );
+
         this.app.use(express.static(this.variable.WEB_ROOT));
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);

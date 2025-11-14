@@ -12,7 +12,7 @@ import { IncomingMessage } from 'http';
 import axios from 'axios';
 import { Socket } from 'net';
 import { HttpClient } from '../app/http-client.js';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
 
 describe('HttpClient', () => {
@@ -119,7 +119,7 @@ describe('HttpClient', () => {
             });
 
             jest.spyOn(net, 'createConnection').mockReturnValue(socket);
-            await expect(server.checkUrlExist('http://localhost:9876')).rejects.toThrowError();
+            await expect(server.checkUrlExist('http://localhost:9876')).rejects.toThrow();
         });
     });
 });

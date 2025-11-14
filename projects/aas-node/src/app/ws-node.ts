@@ -17,7 +17,7 @@ import fs from 'fs';
 import { App } from './app.js';
 import { Variable } from './variable.js';
 import { SocketClient } from './live/socket-client.js';
-import { Logger } from './logging/logger.js';
+import { LOGGER, Logger } from './logging/logger.js';
 
 /* istanbul ignore next */
 @singleton()
@@ -29,7 +29,7 @@ export class WSNode extends EventEmitter {
     public constructor(
         @inject(App) app: App,
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
     ) {
         super();
 
@@ -65,7 +65,7 @@ export class WSNode extends EventEmitter {
         });
 
         this.server.listen(this.variable.AAS_NODE_PORT, () => {
-            this.logger.info(`AAS-Server listening on ${this.variable.AAS_NODE_PORT}`);
+            this.logger.info(`AASNode listening on ${this.variable.AAS_NODE_PORT}`);
         });
     }
 

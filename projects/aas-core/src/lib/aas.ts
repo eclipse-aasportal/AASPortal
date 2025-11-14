@@ -351,8 +351,8 @@ export interface ReferenceElement extends DataElement {
 }
 
 export interface RelationshipElement extends SubmodelElement {
-    first: Reference;
-    second: Reference;
+    first?: Reference;
+    second?: Reference;
 }
 
 export interface Resource {

@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { KeywordDirectory } from '../../app/aas-index/keyword-directory.js';
+import { KeywordDirectory } from '../../app/index/keyword-directory.js';
 import { Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 

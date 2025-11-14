@@ -17,6 +17,7 @@ import {
     ChangeDetectionStrategy,
     viewChild,
     effect,
+    inject,
 } from '@angular/core';
 
 import { Library } from 'aas-core';
@@ -32,15 +33,14 @@ import { environment } from '../../environments/environment';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy {
+    private readonly api = inject(AboutApiService);
+    private readonly toolbar = inject(ToolbarService);
+    private readonly start = inject(StartService);
+    private readonly indexChange = inject(IndexChangeService);
     private readonly version$ = signal('');
     private readonly libraries$ = signal<Library[]>([]);
 
-    public constructor(
-        private api: AboutApiService,
-        private toolbar: ToolbarService,
-        private start: StartService,
-        private readonly indexChange: IndexChangeService,
-    ) {
+    public constructor() {
         effect(() => {
             const template = this.toolbarTemplate();
             if (template) {

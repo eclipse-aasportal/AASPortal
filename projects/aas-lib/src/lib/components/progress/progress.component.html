@@ -1,0 +1,15 @@
+
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+@if (visible()) {
+    <div class="progress form-group">
+        <div>{{label()}}</div>
+        <div class="progress-bar progress-bar-striped bg-success" role="progressbar" [style.width.%]="value()"></div>
+    </div>
+}
