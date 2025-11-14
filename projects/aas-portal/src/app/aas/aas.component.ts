@@ -250,7 +250,6 @@ export class AASComponent implements OnInit, OnDestroy {
 
     /** The URL of the thumbnail. */
     public readonly thumbnail = linkedSignal(() => {
-        console.log(this.document())
         const document = this.document();
         if (!document) {
             return '/assets/resources/aas-idta.png';

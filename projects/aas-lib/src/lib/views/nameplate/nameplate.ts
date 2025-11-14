@@ -43,7 +43,6 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
             if (value === null || document.endpoint !== value.endpoint || document.id !== value.id) {
                 this.state().update({ document });
             }
-            console.log(this.state().dataSheets())
         });
     }
 
@@ -104,7 +103,6 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
         if(!this.dataSheets()[0]) return "";
 
         var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == "companylogo");
-        console.log("Logo: ", value?.url);
         if(value) return value.url;
         return null;
     }
