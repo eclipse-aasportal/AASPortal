@@ -6,25 +6,8 @@
  *
  *****************************************************************************/
 
-<<<<<<<< HEAD:projects/aas-lib/src/lib/views/customer-feedback/customer-feedback.types.ts
-export interface GeneralItem {
-    name: string;
-    score: number;
-    sum: number;
-    count: number;
-    like: boolean;
-}
-
-export interface FeedbackItem {
-    stars: string[];
-    createdAt: string;
-    subject: string;
-    message: string;
-}
-========
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));
->>>>>>>> development:projects/aas-browser/src/main.ts

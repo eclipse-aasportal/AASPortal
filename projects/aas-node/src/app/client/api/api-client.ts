@@ -6,9 +6,6 @@
  *
  *****************************************************************************/
 
-<<<<<<<< HEAD:projects/aas-node/src/app/package/api/api-client.ts
-import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
-========
 import {
     aas,
     AASEndpoint,
@@ -19,17 +16,12 @@ import {
     PagedResult,
     traverse,
 } from 'aas-core';
->>>>>>>> development:projects/aas-node/src/app/client/api/api-client.ts
 
 import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
 import { AASClient } from '../aas-client.js';
-<<<<<<<< HEAD:projects/aas-node/src/app/package/api/api-client.ts
-import { ApiPackage } from './api-package.js';
-========
->>>>>>>> development:projects/aas-node/src/app/client/api/api-client.ts
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { AasxPackage } from '../fs/aasx-package.js';
 
@@ -66,30 +58,6 @@ export abstract class ApiClient extends AASClient {
         }
     }
 
-<<<<<<<< HEAD:projects/aas-node/src/app/package/api/api-client.ts
-    /**
-     * Reads the environment of the AAS with the specified identifier.
-     * @param id The unique identifier of the AAS.
-     * @param idShort The short identifier of the AAS.
-     * @returns The AAS environment.
-     */
-    public abstract readEnvironment(id: string, idShort: string): Promise<aas.Environment>;
-
-    /**
-     * Updates the elements contained in the specified AAS environment.
-     * @param id The unique identifier of the AAS to which the environment belongs.
-     * @param env The AAS environment.
-     */
-    public abstract writeEnvironment(id: string, env: aas.Environment): Promise<void>;
-
-    /**
-     * Gets the thumbnail of the AAS with the specified identifier.
-     * @param id The identifier of the current AAS.
-     */
-    public abstract getThumbnail(id: string): Promise<NodeJS.ReadableStream>;
-
-========
->>>>>>>> development:projects/aas-node/src/app/client/api/api-client.ts
     /** Opens a connection to the AAS endpoint. */
     public override open(): Promise<void> {
         ++this.reentry;
@@ -107,20 +75,10 @@ export abstract class ApiClient extends AASClient {
         });
     }
 
-<<<<<<<< HEAD:projects/aas-node/src/app/package/api/api-client.ts
-    /**
-     * Creates a package from the specified arguments.
-     * @param args The AAS identifier (args[0]) and the name (args[1]) of the AAS.
-     * @returns A new `AASServerPackage` instance.
-     **/
-    public override createPackage(...args: string[]): AASPackage {
-        return new ApiPackage(this.logger, this, args[0], args[1]);
-========
     public override async determineAddress(aasxFile: string): Promise<string | undefined> {
         const aasxPackage = await AasxPackage.createFromFile(aasxFile);
         const env = await aasxPackage.getEnvironment();
         return env.assetAdministrationShells.at(0)?.id;
->>>>>>>> development:projects/aas-node/src/app/client/api/api-client.ts
     }
 
     /**
@@ -142,19 +100,7 @@ export abstract class ApiClient extends AASClient {
      * Gets the names of the Asset Administration Shells contained in the current AASX server.
      * @returns The names of the AASs contained in the current AASX server.
      */
-<<<<<<<< HEAD:projects/aas-node/src/app/package/api/api-client.ts
-    public abstract getShells(cursor?: string): Promise<PagedResult<AASLabel>>;
-
-    /**
-     * Opens the specified file from the AASX server.
-     * @param shell The AAS that contains the file element.
-     * @param file The file.
-     * @returns A readable stream.
-     */
-    public abstract openFile(shell: aas.AssetAdministrationShell, file: aas.File): Promise<NodeJS.ReadableStream>;
-========
     public abstract getShells(cursor?: string): Promise<PagedResult<string>>;
->>>>>>>> development:projects/aas-node/src/app/client/api/api-client.ts
 
     /**
      * Reads the current value from a submodel element.
