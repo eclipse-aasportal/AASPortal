@@ -9,29 +9,32 @@
 import { Route, Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpEventType } from '@angular/common/http';
 import {
     ChangeDetectionStrategy,
     Component,
+    ElementRef,
     Inject,
     OnDestroy,
     TemplateRef,
     computed,
     effect,
     inject,
+    model,
     signal,
     viewChild,
 } from '@angular/core';
 
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { catchError, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
+import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
 import { AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
 import {
     AASTable,
     AuthService,
-    DownloadService,
-    EndpointsService,
+    EndpointsApi,
     NotifyService,
+    ProgressService,
     StartService,
     ToolbarService,
     WINDOW,
@@ -47,6 +50,7 @@ import { FavoritesFormComponent } from './favorites-form/favorites-form.componen
 import { ShellsState } from './shells.state';
 import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
 import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
+import { INFO } from '../messages';
 
 @Component({
     selector: 'fhg-shells',
@@ -55,19 +59,38 @@ import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpo
     imports: [AASTable, NgClass, TranslateModule, NgbModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/**
+ * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
+ * Provides functionality for:
+ * - Document management (upload, download, delete)
+ * - Endpoint management (add, update, remove)
+ * - Favorites management
+ * - Document filtering and pagination
+ * - View navigation
+ * - Toolbar integration
+ *
+ * Key features:
+ * - Document selection and bulk operations
+ * - Favorites list management
+ * - Pagination controls
+ * - Search filtering with query parsing
+ * - Authorization checks for privileged operations
+ * - Integration with start menu and toolbar
+ * - Modal dialogs for user interactions
+ */
 export class ShellsComponent implements OnDestroy {
     @Inject(WINDOW) private readonly window = inject(WINDOW);
     private readonly state = inject(ShellsState);
-    private readonly api = inject(EndpointsService);
     private readonly router = inject(Router);
     private readonly modal = inject(NgbModal);
     private readonly translate = inject(TranslateService);
     private readonly notify = inject(NotifyService);
     private readonly toolbar = inject(ToolbarService);
     private readonly auth = inject(AuthService);
-    private readonly download = inject(DownloadService);
+    private readonly api = inject(EndpointsApi);
     private readonly favorites = inject(FavoritesService);
     private readonly start = inject(StartService);
+    private readonly progress = inject(ProgressService);
 
     public constructor() {
         effect(() => {
@@ -76,33 +99,101 @@ export class ShellsComponent implements OnDestroy {
                 this.toolbar.set(template);
             }
         });
+
+        effect(() => {
+            const files = this.files();
+            const inputFiles = this.inputFiles();
+            if (!files || !inputFiles) {
+                return;
+            }
+
+            const fileList = inputFiles.nativeElement.files;
+            if (!fileList) {
+                return;
+            }
+
+            this.progress.begin();
+            this.uploadPackages(Array.from(fileList)).subscribe({
+                error: () => {
+                    this.progress.end();
+                    this.files.set(undefined);
+                },
+                complete: () => {
+                    this.progress.end();
+                    this.files.set(undefined);
+                },
+            });
+        });
     }
 
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('shellsToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
-    public readonly activeFavorites = this.favorites.active;
+    public readonly inputFiles = viewChild<ElementRef<HTMLInputElement>>('inputFiles');
 
+    /**
+     * The files selected for upload.
+     */
+    public readonly files = model<string[]>();
+
+    /**
+     * Name of the currently active favorites list. An empty string indicates that no favorites list is activated.
+     */
+    public readonly activeFavoritesList = this.favorites.active;
+
+    /**
+     * The maximum number of items used for paging or limiting result sets.
+     */
     public readonly limit = this.state.limit;
 
+    /**
+     * Array of favorite list names for use in the UI.
+     *
+     * The array always begins with an empty string (intended as a "no selection" or placeholder),
+     * followed by the name of each favorite list returned by this.favorites.items().
+     */
     public readonly favoritesLists = computed(() => ['', ...this.favorites.items().map(list => list.name)]);
 
+    /**
+     * The current active filter expression.
+     */
     public readonly filter = computed(() => {
         const filterText = this.filterText();
         return this.favorites.active() ? filterText : '';
     });
 
+    /**
+     * The filter expression.
+     */
     public readonly filterText = this.state.filterText;
 
+    /**
+     * Indicates whether the pagination is currently on the first page.
+     */
     public readonly isFirstPage = computed(() => this.state.previous() === null);
 
+    /**
+     * Indicates whether the pagination is currently on the last page.
+     */
     public readonly isLastPage = computed(() => this.state.next() === null);
 
+    /**
+     * The visible documents.
+     */
     public readonly documents = this.state.documents;
 
+    /**
+     * The selected documents.
+     */
     public readonly selected = this.state.selected;
 
+    /**
+     * Indicates that at least one document is selected.
+     */
     public readonly someSelected = computed(() => this.selected().length > 0);
 
+    /**
+     * Provides a list of available views.
+     */
     public readonly views = signal(viewRoutes).asReadonly();
 
     public ngOnDestroy(): void {
@@ -110,19 +201,39 @@ export class ShellsComponent implements OnDestroy {
         this.state.save().subscribe();
     }
 
-    public setActiveFavorites(name: string): void {
+    /**
+     * Sets the specified favorite list as active and persists the change.
+     * @param name - The name of the favorite list to set as active
+     */
+    public setActiveFavoriteList(name: string): void {
         this.favorites.setActive(name);
         this.favorites.save().subscribe();
     }
 
+    /**
+     * Updates the page options in the state with a new limit value.
+     * @param limit - The number of items to display per page
+     */
     public setLimit(limit: number): void {
         this.state.update({ pageOptions: { limit, filterText: this.filterText() } });
     }
 
+    /**
+     * Updates the state by setting the selected documents.
+     * @param documents - An array of AASDocument objects to be set as selected
+     */
     public setSelected(documents: AASDocument[]): void {
         this.state.update({ selected: documents });
     }
 
+    /**
+     * Adds a new AAS endpoint.
+     * This operation requires specific permissions.
+     *
+     * @returns An Observable that completes when the endpoint is successfully added,
+     *          or emits an error if the operation fails. Returns EMPTY if user cancels the operation.
+     * @throws Will be caught and handled by the notification service
+     */
     public addEndpoint(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => this.api.getEndpoints()),
@@ -143,6 +254,13 @@ export class ShellsComponent implements OnDestroy {
         );
     }
 
+    /**
+     * Updates the configuration of an AAS endpoint.
+     * This operation requires specific permissions.
+     *
+     * @returns An Observable that completes when the endpoint is updated, or emits an error if the operation fails
+     * @throws Error if unauthorized, endpoint retrieval fails, or update operation fails
+     */
     public updateEndpoint(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => this.api.getEndpoints()),
@@ -163,6 +281,13 @@ export class ShellsComponent implements OnDestroy {
         );
     }
 
+    /**
+     * Removes one or multiple endpoints from the AASNode configuration.
+     * This operation requires specific permissions.
+     *
+     * @returns An Observable that completes when the endpoint removal process is finished
+     * @throws Handled by the notification service if any error occurs during the process
+     */
     public removeEndpoint(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => this.api.getEndpoints()),
@@ -188,6 +313,12 @@ export class ShellsComponent implements OnDestroy {
         );
     }
 
+    /**
+     * Opens the extras dialog.
+     * This operation requires specific permissions.
+     *
+     * @returns An Observable that completes when the dialog has been closed.
+     */
     public extras(): Observable<void> {
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => {
@@ -197,34 +328,31 @@ export class ShellsComponent implements OnDestroy {
         );
     }
 
-    public uploadDocument(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            mergeMap(endpoints => {
-                const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints.set(endpoints.sort((a, b) => a.name.localeCompare(b.name)));
-                modalRef.componentInstance.endpoint.set(endpoints[0]);
-                return from<Promise<string | undefined>>(modalRef.result);
-            }),
-            map(result => {
-                if (result) {
-                    this.notify.info('INFO_UPLOAD_AASX_FILE_SUCCESS', result);
-                }
-            }),
-            catchError(error => this.notify.error(error)),
-        );
-    }
-
-    public downloadDocument(): Observable<void> {
+    /**
+     * Initiates download(s) of the AASX package files for the currently selected document(s).
+     *
+     * @returns An Observable that completes when the download request(s) complete.
+     */
+    public downloadPackages(): Observable<void> {
         return from(this.state.selected()).pipe(
-            mergeMap(document =>
-                this.download.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx'),
-            ),
+            mergeMap(document => this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx')),
             catchError(error => this.notify.error(error)),
         );
     }
 
-    public deleteDocument(): Observable<void> {
+    /**
+     * Deletes the currently selected documents.
+     * - If there is an active favorites collection:
+     *   - Removes the selected items from that favorites collection (calls `favorites.remove` and local `removeFavorites`).
+     *   - Persists the favorites change and returns the observable produced by `favorites.save()`.
+     * - Otherwise (no active favorites):
+     *   - Deletes the corresponding AASX packages from the endpoint.
+     *   - Ensures the user is authorized.
+     *   - Shows a confirmation dialog.
+     *
+     * @returns Observable that completes when the operation finishes (or EMPTY if there was nothing to delete).
+     */
+    public deletePackages(): Observable<void> {
         if (this.state.selected().length === 0) {
             return EMPTY;
         }
@@ -249,7 +377,7 @@ export class ShellsComponent implements OnDestroy {
                             ),
                         ),
                         mergeMap(result => from(result ? this.state.selected() : [])),
-                        mergeMap(document => this.api.delete(document.id, document.endpoint)),
+                        mergeMap(document => this.api.deleteDocument(document.id, document.endpoint)),
                         catchError(error => this.notify.error(error)),
                     );
                 }
@@ -279,7 +407,7 @@ export class ShellsComponent implements OnDestroy {
         ]);
     }
 
-    public setFilter(filterText: string): void {
+    public setFilterText(filterText: string): void {
         try {
             filterText = filterText.trim();
             if (filterText.length >= 3) {
@@ -297,19 +425,19 @@ export class ShellsComponent implements OnDestroy {
         }
     }
 
-    public firstPage(): void {
+    public getFirstPage(): void {
         this.state.getFirstPage();
     }
 
-    public previousPage(): void {
+    public getPreviousPage(): void {
         this.state.getPreviousPage();
     }
 
-    public nextPage(): void {
+    public getNextPage(): void {
         this.state.getNextPage();
     }
 
-    public lastPage(): void {
+    public getLastPage(): void {
         this.state.getLastPage();
     }
 
@@ -334,6 +462,50 @@ export class ShellsComponent implements OnDestroy {
         }
 
         return this.start.save();
+    }
+
+    private uploadPackages(files: File[]): Observable<void> {
+        return this.auth.ensureAuthorized('editor').pipe(
+            mergeMap(() => this.api.getEndpoints()),
+            mergeMap(endpoints => {
+                if (endpoints.length <= 1) {
+                    return of(endpoints.at(0));
+                }
+
+                const modalRef = this.modal.open(UploadFormComponent, { backdrop: 'static' });
+                modalRef.componentInstance.endpoints.set(endpoints.sort((a, b) => a.name.localeCompare(b.name)));
+                modalRef.componentInstance.endpoint.set(endpoints.at(0));
+                return from<Promise<AASEndpoint | undefined>>(modalRef.result);
+            }),
+            mergeMap(endpoint => {
+                if (!endpoint) {
+                    return EMPTY;
+                }
+
+                return of(...files).pipe(
+                    concatMap(file => {
+                        const inputFiles = this.inputFiles()?.nativeElement.files;
+                        if (!inputFiles) {
+                            return EMPTY;
+                        }
+
+                        return this.api.uploadPackage(endpoint.name, file).pipe(
+                            catchError(error => {
+                                this.notify.error(error);
+                                return of();
+                            }),
+                            map(event => {
+                                if (event.type === HttpEventType.UploadProgress) {
+                                    this.progress.set(Math.round((event.loaded / event.total!) * 100), file.name);
+                                } else if (event.type === HttpEventType.Response) {
+                                    this.notify.info(INFO.FILE_SUCCESSFULLY_UPLOADED, { file: file.name });
+                                }
+                            }),
+                        );
+                    }),
+                );
+            }),
+        );
     }
 
     private removeFavorites(favorites: AASDocument[]): void {

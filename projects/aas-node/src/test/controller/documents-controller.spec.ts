@@ -13,10 +13,11 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import { AASCursor, AASPagedResult } from 'aas-core';
+import { encodeBase64Url } from 'aas-package';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
-import { AASProvider } from '../../app/aas-provider/aas-provider.js';
+import { AASProvider } from '../../app/provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
 import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
@@ -24,7 +25,6 @@ import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
-import { encodeBase64Url } from '../../app/convert.js';
 
 describe('DocumentsController', () => {
     let app: Express;
@@ -45,7 +45,7 @@ describe('DocumentsController', () => {
             'getPackage',
             'getDocument',
             'getDocuments',
-            'addPackages',
+            'insertPackages',
             'deletePackage',
             'getDataElementValue',
             'invoke',

@@ -1,0 +1,88 @@
+@startuml AASPortal_Package_Diagram
+
+!theme plain
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam minClassWidth 140
+skinparam padding 15
+skinparam component {
+    FontSize 10
+    BackgroundColor #F5F5DC
+    BorderColor #000000
+}
+skinparam package {
+    BackgroundColor #FFD700
+    BorderColor #000000
+}
+
+package "aas-portal-project" <<package>> #C0C0C0 {
+    
+    ' Top tier - Foundation (centered)
+    package "aas-core" <<workspace>> as Core #FFD700 {
+        component "Common types and utilities\nPlatform neutral library" as CoreLib #F5F5DC
+    }
+    
+    ' Second tier - Shared libraries (widely spaced)
+    package "aas-lib" <<workspace>> as Lib #FFD700 {
+        component "Angular library" as AngLib #F5F5DC
+    }
+    
+    package "aas-jest" <<workspace>> as Jest #FFD700 {
+        component "Jest testing utilities" as JestLib #F5F5DC
+    }
+    
+    ' Third tier - Frontend Applications (widely spaced)
+    package "aas-portal" <<workspace>> as Portal #FFD700 {
+        component "Angular web application\nVisualization & Control" as PortalApp #F5F5DC
+    }
+    
+    package "aas-browser" <<workspace>> as Browser #FFD700 {
+        component "Angular browser application" as BrowserApp #F5F5DC
+    }
+    
+    ' Fourth tier - Backend Services (widely spaced)
+    package "aas-node" <<workspace>> as Node #FFD700 {
+        component "Node.js backend\n- Express Framework\n- Tsoa OpenAPI\n- WebSocket support" as NodeApp #F5F5DC
+    }
+    
+    package "aas-server" <<workspace>> as Server #FFD700 {
+        component "AAS v3 API server\n- Express Framework\n- Tsoa OpenAPI" as ServerApp #F5F5DC
+    }
+    
+    ' Layout positioning using hidden links
+    Core -[hidden]down-> Lib
+    Core -[hidden]down-> Jest
+    
+    Lib -[hidden]right-> Jest
+    
+    Lib -[hidden]down-> Portal
+    Jest -[hidden]down-> Browser
+    
+    Portal -[hidden]right-> Browser
+    
+    Portal -[hidden]down-> Node
+    Browser -[hidden]down-> Server
+    
+    Node -[hidden]right-> Server
+}
+
+' Dependencies - routed outside to avoid crossing
+Core .down.> Lib : depends on
+Core .down.> Jest : depends on
+Core .down.> Portal : depends on
+Core .down.> Browser : depends on
+Core .down.> Node : depends on
+Core .down.> Server : depends on
+
+Lib .down.> Portal : provides\ncomponents
+Lib .down.> Browser : provides\ncomponents
+
+Browser .right.> Server : static\ncontent
+
+legend bottom left
+npm: Node.js Package Manager
+<<package>>: npm Package
+<<workspace>>: npm Workspace
+end legend
+
+@enduml

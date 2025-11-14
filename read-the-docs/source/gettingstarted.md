@@ -1,15 +1,19 @@
 # Getting Started
 ## Prerequisites
 - Visual Studio Code
-- Node.js v22.12.0
+- Node.js v22.16.0
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
-*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of five workspaces:
+*AASPortal* is a mono-repository project. It is implemented using the *npm workspaces* concept. The project consists of the following workspaces:
+
 - **aas-core**: Shared types, utilities, and AAS data models used across workspaces
+- **aas-package**: Node.js library for reading and writing AASX package files (JSON/XML, V1/V2/V3 support)
 - **aas-portal**: The browser app of *AASPortal*. It's an Angular-based frontend application using Bootstrap 5 and NgRx state management
 - **aas-node**: Node.js/Express.js backend with REST API, authentication (JWT), and OpenAPI/Swagger documentation
 - **aas-lib**: Angular library containing reusable UI components and services
+- **aas-server**: AAS server application with IDTA Part 2 compliant API
+- **aas-browser**: Frontend application for the AAS server
 - **aas-jest**: Custom Jest configuration utilities
 
 ```txt
@@ -17,13 +21,19 @@ aasportal
   ├── projects
   │     ├── aas-core
   │     │     └── package.json
+  │     ├── aas-package
+  │     │     └── package.json
   │     ├── aas-jest
   │     │     └── package.json
   │     ├── aas-lib
   │     │     └── package.json
   │     ├── aas-node
   │     │     └── package.json
-  │     └── aas-portal
+  │     ├── aas-portal
+  │     │     └── package.json
+  │     ├── aas-server
+  │     │     └── package.json
+  │     └── aas-browser
   │          └── package.json
   └── package.json
 
@@ -40,6 +50,31 @@ podman run -p 80:80 docker.io/fraunhoferiosb/aasportal_aio
 ```
 
 Then open http://localhost/ in your browser.
+
+### Using Kubernetes
+
+For production deployments in Kubernetes, AASPortal supports:
+- Standard root path deployment (`/`)
+- Sub-path deployment (e.g., `/aasportal/`) via `BASE_HREF` environment variable
+- Ingress configuration with path rewriting
+- High availability with horizontal pod autoscaling
+
+See the [Kubernetes Deployment Guide](kubernetes.md) for detailed instructions, including:
+- Complete deployment manifests
+- Ingress configuration examples
+- Environment variable reference
+- Troubleshooting common issues
+
+**Quick Start:**
+```bash
+# Deploy at root path
+kubectl apply -f https://raw.githubusercontent.com/eclipse-aasportal/AASPortal/main/kubernetes/deployment.yaml
+
+# Or deploy under sub-path (e.g., /aasportal/)
+# Set BASE_HREF=/aasportal/ in deployment manifest
+# Configure ingress with path rewriting
+# See Kubernetes guide for details
+```
 
 Or build a complete image from the Dockerfile, run the entire AASPortal application in a container, expose the application on port 80 (intended for production-like deployment) using
 
@@ -64,7 +99,7 @@ Open one of the supported web browsers and go to the Web site:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/FraunhoferIOSB/AASPortal.git
+   git clone https://github.com/eclipse-aasportal/AASPortal.git
    cd AASPortal
    ```
 

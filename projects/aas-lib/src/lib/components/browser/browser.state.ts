@@ -42,6 +42,7 @@ export interface BrowserItem {
 
 export type BrowserData = {
     env: aas.Environment;
+    endpoint: string | null;
     current: BrowserElement | null;
     path: BrowserElement[];
 };
@@ -52,6 +53,7 @@ const initialState: BrowserData = {
         conceptDescriptions: [],
         submodels: [],
     },
+    endpoint: null,
     current: null,
     path: [],
 };
@@ -64,6 +66,7 @@ export class BrowserState extends ChildState<BrowserData> {
     private readonly path$ = signal(initialState.path);
     private readonly current$ = signal(initialState.current);
     private readonly env$ = signal(initialState.env);
+    private readonly endpoint$ = signal(initialState.endpoint);
 
     public constructor() {
         super(inject(TranslateService));
@@ -77,6 +80,8 @@ export class BrowserState extends ChildState<BrowserData> {
 
     /** The current Asset Administration Shell environment. */
     public readonly env = this.env$.asReadonly();
+
+    public readonly endpoint = this.endpoint$.asReadonly();
 
     /**
      * Updates the state with the provided new state.
@@ -93,6 +98,10 @@ export class BrowserState extends ChildState<BrowserData> {
 
         if (newState.env !== undefined) {
             this.env$.set(newState.env);
+        }
+
+        if (newState.endpoint !== undefined) {
+            this.endpoint$.set(newState.endpoint);
         }
     }
 }

@@ -15,9 +15,9 @@ import { Logger } from '../../app/logging/logger.js';
 import { FileStorage } from '../../app/file-storage/file-storage.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
 import { Variable } from '../../app/variable.js';
-import { TaskHandler } from '../../app/aas-provider/task-handler.js';
-import { Parallel } from '../../app/aas-provider/parallel.js';
-import { ScanResultKind, ScanTemplatesResult } from '../../app/types/scan-result.js';
+import { TaskHandler } from '../../app/provider/task-handler.js';
+import { Parallel } from '../../app/provider/parallel.js';
+import { ScanResultKind, ScanTemplatesResult } from '../../app/types.js';
 
 describe('TemplateStorage', () => {
     let templateStorage: TemplateStorage;

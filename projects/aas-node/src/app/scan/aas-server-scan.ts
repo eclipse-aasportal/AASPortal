@@ -7,10 +7,8 @@
  *****************************************************************************/
 
 import EventEmitter from 'events';
-import { AASDocument, AASEndpoint } from 'aas-core';
-import { AASIndex } from '../aas-index/aas-index.js';
-import { PagedResult } from '../types/paged-result.js';
-import { AASLabel } from '../package/api/api-client.js';
+import { AASDocument, AASEndpoint, PagedResult } from 'aas-core';
+import { AASIndex } from '../index/aas-index.js';
 
 type ScanTuple = { reference?: AASDocument; document?: AASDocument; error?: Error };
 
@@ -50,16 +48,16 @@ export abstract class AASServerScan extends EventEmitter {
 
                 if (!endOfEndpoint) {
                     const result = await this.nextEndpointPage(endpointCursor);
-                    for (const item of result.result) {
-                        let value = map.get(item.id);
+                    for (const address of result.result) {
+                        let value = map.get(address);
                         if (value === undefined) {
                             value = {};
-                            map.set(item.id, value);
+                            map.set(address, value);
                         }
 
                         if (value.document === undefined) {
                             try {
-                                value.document = await this.createDocument(item);
+                                value.document = await this.createDocument(address);
                             } catch (error) {
                                 value.error = error;
                             }
@@ -115,7 +113,7 @@ export abstract class AASServerScan extends EventEmitter {
 
     protected abstract close(): Promise<void>;
 
-    protected abstract createDocument(id: AASLabel): Promise<AASDocument>;
+    protected abstract createDocument(address: string): Promise<AASDocument>;
 
-    protected abstract nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>>;
+    protected abstract nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>>;
 }

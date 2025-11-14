@@ -34,7 +34,9 @@
                         </td>
                     }
                     @case ('link') {
-                        <a [routerLink]="property.url">{{ property.value }}</a>
+                        <td>
+                            <a [routerLink]="property.url">{{ property.value }}</a>
+                        </td>
                     }
                     @default {
                         <td>{{ property.value }}</td>

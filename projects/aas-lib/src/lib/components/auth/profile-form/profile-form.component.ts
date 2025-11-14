@@ -10,10 +10,10 @@ import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'aas-core';
 import { messageToString } from '../../../utilities';
-import { ERRORS } from '../../../errors';
+import { ERRORS } from '../../../messages';
 import { AuthApiService } from '../auth-api.service';
 
 export interface ProfileFormResult {
@@ -25,7 +25,7 @@ export interface ProfileFormResult {
     selector: 'fhg-profile',
     templateUrl: './profile-form.component.html',
     styleUrls: ['./profile-form.component.scss'],
-    imports: [NgbToast, FormsModule, NgbCollapse, TranslateModule],
+    imports: [NgbToast, FormsModule, NgbCollapse, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileFormComponent {

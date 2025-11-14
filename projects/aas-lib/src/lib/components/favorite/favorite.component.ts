@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getLocaleValue } from 'aas-core';
 import { SecuredImageComponent } from '../secured-image/secured-image.component';
 import { encodeBase64Url } from '../../utilities';
@@ -22,7 +22,7 @@ export type FavoriteDetail = {
     selector: 'fhg-favorite',
     templateUrl: './favorite.component.html',
     styleUrl: './favorite.component.scss',
-    imports: [TranslateModule, SecuredImageComponent],
+    imports: [TranslateDirective, TranslatePipe, SecuredImageComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoriteComponent {

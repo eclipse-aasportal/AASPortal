@@ -12,9 +12,23 @@
 <head>
     <meta charset="utf-8">
     <title>AASPortal</title>
-    <base href="/">
+    <script src="config.js"></script>
+    <script>
+        // Set base href dynamically from config
+        (function() {
+            const baseHref = (window.__env__ && window.__env__.BASE_HREF) || '/';
+            document.write('<base href="' + baseHref + '">');
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        // Apply theme immediately to prevent flash of unstyled content
+        (function() {
+            const theme = localStorage.getItem('aas-portal-theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        })();
+    </script>
 </head>
 
 <body>

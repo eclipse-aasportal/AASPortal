@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { createSpyObj } from 'aas-jest';
 import { aasEnvironment as env } from '../../assets/aas-environment.js';
-import { ApiClientV3, OperationResult } from '../../../app/package/api/api-client-v3.js';
+import { ApiClientV3, OperationResult } from '../../../app/client/api/api-client-v3.js';
 import { aas } from 'aas-core';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpClient } from '../../../app/http-client.js';
@@ -58,7 +58,7 @@ describe('ApiClientV3', () => {
             http.get.mockResolvedValue(aas);
             http.put.mockResolvedValue('OK');
 
-            await expect(client.writeEnvironment(aas.id, content)).resolves.toBe(void 0);
+            await expect(client.setEnvironment(aas.id, content)).resolves.toBe(void 0);
             expect(http.get).toHaveBeenCalled();
             expect(http.put).toHaveBeenCalled();
         });
@@ -74,7 +74,7 @@ describe('ApiClientV3', () => {
             http.get.mockRejectedValue(new Error());
             http.post.mockResolvedValue('OK');
 
-            await expect(client.writeEnvironment(aas.id, content)).resolves.toBe(void 0);
+            await expect(client.setEnvironment(aas.id, content)).resolves.toBe(void 0);
             expect(http.get).toHaveBeenCalled();
             expect(http.post).toHaveBeenCalled();
         });

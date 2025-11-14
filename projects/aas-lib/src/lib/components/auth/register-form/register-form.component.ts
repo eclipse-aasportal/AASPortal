@@ -10,11 +10,11 @@ import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { isValidEMail, isValidPassword, stringFormat, UserProfile, getUserNameFromEMail } from 'aas-core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { isValidEMail, isValidPassword, UserProfile, getUserNameFromEMail } from 'aas-core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AuthApiService } from '../auth-api.service';
-import { ERRORS } from '../../../errors';
+import { ERRORS } from '../../../messages';
 import { messageToString } from '../../../utilities';
 
 export interface RegisterFormResult {
@@ -26,7 +26,7 @@ export interface RegisterFormResult {
     selector: 'fhg-register',
     templateUrl: './register-form.component.html',
     styleUrls: ['./register-form.component.scss'],
-    imports: [NgbToast, FormsModule, TranslateModule],
+    imports: [NgbToast, FormsModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {
@@ -59,9 +59,9 @@ export class RegisterFormComponent {
     public submit(): void {
         this.clearMessages();
         if (isEmpty(this.userId())) {
-            this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
+            this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
         } else if (!isValidEMail(this.userId())) {
-            this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
+            this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL, { id: this.userId() }));
         } else if (!this.passwordAsEMail()) {
             if (isEmpty(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));

@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { ApplicationError } from './application-error.js';
 import { parseDate, parseNumber } from './convert.js';
+import { ApplicationError } from './types.js';
 
 export type AASQueryOperator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
@@ -80,18 +80,14 @@ export class QueryParser {
         }
 
         if (!this.expression || this.expression.length < QueryParser.minLength) {
-            throw new ApplicationError(
-                'QueryParser.MIN_LENGTH',
-                `A query expression must contain at least ${QueryParser.minLength} characters.`,
-                QueryParser.minLength,
-            );
+            throw new ApplicationError('QueryParser.MIN_LENGTH', { minLength: QueryParser.minLength });
         }
 
         this.currentPosition = 0;
         this.nextTerm();
 
         if (this.stack.length !== 1) {
-            throw new ApplicationError('QueryParser.INVALID_NESTED_EXPRESSION', `Invalid nested expression.`);
+            throw new ApplicationError('QueryParser.INVALID_NESTED_EXPRESSION');
         }
 
         const current = this.stack[this.stack.length - 1];
@@ -116,11 +112,7 @@ export class QueryParser {
 
     private beginTerm(): void {
         if (!this.skipBlanks()) {
-            throw new ApplicationError(
-                'QueryParser.TERM_EXPECTED',
-                `Term expected at position ${this.currentPosition}.`,
-                this.currentPosition,
-            );
+            throw new ApplicationError('QueryParser.TERM_EXPECTED', { currentPosition: this.currentPosition });
         }
 
         if (this.ifChar('(')) {
@@ -169,11 +161,9 @@ export class QueryParser {
         if (c === '"' || c === "'") {
             const i = this.expression.indexOf(c, this.currentPosition + 1);
             if (i < 0) {
-                throw new ApplicationError(
-                    'QueryParser.END_OF_TEXT_NOT_FOUND',
-                    `The end of the text, starting at position ${this.currentPosition}, was not found.`,
-                    this.currentPosition,
-                );
+                throw new ApplicationError('QueryParser.END_OF_TEXT_NOT_FOUND', {
+                    currentPosition: this.currentPosition,
+                });
             }
 
             const text = leaveQuotationMarks
@@ -213,21 +203,17 @@ export class QueryParser {
 
         if (this.ifChar(')')) {
             if (this.stack.length <= 1) {
-                throw new ApplicationError(
-                    'QueryParser.UNEXPECTED_CLOSING_BRACKET',
-                    `Unexpected closing bracket at position ${this.currentPosition}.`,
-                    this.currentPosition,
-                );
+                throw new ApplicationError('QueryParser.UNEXPECTED_CLOSING_BRACKET', {
+                    currentPosition: this.currentPosition,
+                });
             }
 
             return ')';
         }
 
-        throw new ApplicationError(
-            'QueryParser.LINK_EXPECTED',
-            `'||' or '&&' expected at position ${this.currentPosition}`,
-            this.currentPosition,
-        );
+        throw new ApplicationError('QueryParser.LINK_EXPECTED', {
+            currentPosition: this.currentPosition,
+        });
     }
 
     private skipBlanks(): boolean {
@@ -291,21 +277,17 @@ export class QueryParser {
         }
 
         if (i === this.currentPosition) {
-            throw new ApplicationError(
-                'QueryParser.MODEL_TYPE_EXPECTED',
-                `Model type abbreviation expected at position ${this.currentPosition}.`,
-                this.currentPosition,
-            );
+            throw new ApplicationError('QueryParser.MODEL_TYPE_EXPECTED', {
+                currentPosition: this.currentPosition,
+            });
         }
 
         const modelType = this.expression.substring(this.currentPosition, i);
         if (!QueryParser.abbreviations.has(modelType)) {
-            throw new ApplicationError(
-                'QueryParser.INVALID_ABBREVIATION',
-                `"${modelType}" is an invalid model type abbreviation at position ${this.currentPosition}.`,
+            throw new ApplicationError('QueryParser.INVALID_ABBREVIATION', {
                 modelType,
-                this.currentPosition,
-            );
+                currentPosition: this.currentPosition,
+            });
         }
 
         this.currentPosition = i;
@@ -328,11 +310,9 @@ export class QueryParser {
         }
 
         if (i === this.currentPosition) {
-            throw new ApplicationError(
-                'QueryParser.ELEMENT_NAME_EXPECTED',
-                `Submodel element name expected at position ${this.currentPosition}.`,
-                this.currentPosition,
-            );
+            throw new ApplicationError('QueryParser.ELEMENT_NAME_EXPECTED', {
+                currentPosition: this.currentPosition,
+            });
         }
 
         const name = this.expression.substring(this.currentPosition, i);
@@ -371,12 +351,10 @@ export class QueryParser {
 
         const c = this.expression[this.currentPosition];
         if (QueryParser.operatorChars.has(c)) {
-            throw new ApplicationError(
-                'QueryParser.INVALID_OPERATOR',
-                `'${c}' is an invalid operator at position ${this.currentPosition}.`,
-                c,
-                this.currentPosition,
-            );
+            throw new ApplicationError('QueryParser.INVALID_OPERATOR', {
+                operator: c,
+                currentPositin: this.currentPosition,
+            });
         }
 
         return undefined;
@@ -420,36 +398,30 @@ export class QueryParser {
 
             const date = parseDate(s, this.language);
             if (!date) {
-                throw new ApplicationError(
-                    'QueryParser.INVALID_DATE_EXPRESSION',
-                    `'${s}' is an invalid date expression at position ${this.currentPosition}.`,
-                    s,
-                    this.currentPosition,
-                );
+                throw new ApplicationError('QueryParser.INVALID_DATE_EXPRESSION', {
+                    expression: s,
+                    currentPosition: this.currentPosition,
+                });
             }
 
             return date;
         }
 
         if (minMax.length !== 2) {
-            throw new ApplicationError(
-                'QueryParser.INVALID_RANGE_EXPRESSION',
-                `'${s}' is an invalid range expression at position ${this.currentPosition}`,
-                s,
-                this.currentPosition,
-            );
+            throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+                expression: s,
+                currentPosition: this.currentPosition,
+            });
         }
 
         const min = parseNumber(minMax[0], this.language);
         const max = parseNumber(minMax[1], this.language);
         if (!Number.isNaN(min) || !Number.isNaN(max)) {
             if (Number.isNaN(min) || Number.isNaN(max)) {
-                throw new ApplicationError(
-                    'QueryParser.INVALID_RANGE_EXPRESSION',
-                    `'${s}' is an invalid range expression at position ${this.currentPosition}`,
-                    s,
-                    this.currentPosition,
-                );
+                throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+                    expression: s,
+                    currentPosition: this.currentPosition,
+                });
             }
 
             return [min, max];
@@ -459,12 +431,10 @@ export class QueryParser {
         const bigMax = this.parseBigint(minMax[1]);
         if (bigMin || bigMax) {
             if (!bigMin || !bigMax) {
-                throw new ApplicationError(
-                    'QueryParser.INVALID_RANGE_EXPRESSION',
-                    `'${s}' is an invalid range expression at position ${this.currentPosition}`,
-                    s,
-                    this.currentPosition,
-                );
+                throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+                    expression: s,
+                    currentPosition: this.currentPosition,
+                });
             }
 
             return [bigMin, bigMax];
@@ -473,12 +443,10 @@ export class QueryParser {
         const minDate = parseDate(minMax[0], this.language);
         const maxDate = parseDate(minMax[1], this.language);
         if (!minDate || !maxDate) {
-            throw new ApplicationError(
-                'QueryParser.INVALID_RANGE_EXPRESSION',
-                `'${s}' is an invalid range expression at position ${this.currentPosition}.`,
-                s,
-                this.currentPosition,
-            );
+            throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+                expression: s,
+                currentPosition: this.currentPosition,
+            });
         }
 
         return [minDate, maxDate];
