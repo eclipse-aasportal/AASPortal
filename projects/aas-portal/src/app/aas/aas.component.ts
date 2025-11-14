@@ -10,7 +10,7 @@ import head from 'lodash-es/head';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { EMPTY, map, mergeMap, Observable, from, of, catchError, first } from 'rxjs';
+import { EMPTY, map, mergeMap, Observable, from, of, catchError, first, combineLatest } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
@@ -195,19 +195,26 @@ export class AASComponent implements OnInit, OnDestroy {
     });
 
     public ngOnInit(): void {
-        this.route.params.pipe(first()).subscribe(params => {
-            if (params.search) {
-                this.state.update({ searchExpression: params.search });
-            }
-
-            if (params.id) {
-                if (params.endpoint) {
-                    this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
-                } else {
-                    this.getDocument(decodeBase64Url(params.id));
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
+            .pipe(
+                map(([routeParams, queryParams]) => {
+                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
+                }),
+                first(),
+            )
+            .subscribe(params => {
+                if (params.search) {
+                    this.state.update({ searchExpression: params.search });
                 }
-            }
-        });
+
+                if (params.id) {
+                    if (params.endpoint) {
+                        this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
+                    } else {
+                        this.getDocument(decodeBase64Url(params.id));
+                    }
+                }
+            });
     }
 
     public ngOnDestroy(): void {

@@ -44,7 +44,6 @@ const initialData: ShellsData = {
     providedIn: 'root',
 })
 export class ShellsState implements OnDestroy {
-    private readonly data = signal(initialData);
     private readonly subscription = new Subscription();
     private readonly pageOptions$ = signal(initialData.pageOptions);
     private readonly documents$ = signal<AASDocument[]>(initialData.documents);
@@ -88,9 +87,9 @@ export class ShellsState implements OnDestroy {
 
     public readonly active = this.favorites.active;
 
-    public readonly limit = computed(() => this.data().pageOptions.limit);
+    public readonly limit = computed(() => this.pageOptions$().limit);
 
-    public readonly filterText = computed(() => this.data().pageOptions.filterText);
+    public readonly filterText = computed(() => this.pageOptions$().filterText);
 
     public readonly documents = this.documents$.asReadonly();
 
@@ -141,7 +140,7 @@ export class ShellsState implements OnDestroy {
      * @returns An Observable that resolves to void when the cookie has been set successfully.
      */
     public save(): Observable<void> {
-        return this.auth.setCookie(cookieName, JSON.stringify(this.data().pageOptions));
+        return this.auth.setCookie(cookieName, JSON.stringify(this.pageOptions$()));
     }
 
     /**
