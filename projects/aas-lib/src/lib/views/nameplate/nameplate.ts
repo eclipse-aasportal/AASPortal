@@ -71,9 +71,17 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
         return this.document()?.idShort;
     }
 
-    public getNameplateValue(name: string | string[]){
+    public checkNameplateValue(name: string | string[]){
         if(!this.dataSheets()) return "";
         if(!this.dataSheets()[0]) return "";
+        const value = this.getNameplateValue(name);
+        if(value == "-1") return false;
+        return true;
+    }
+
+    public getNameplateValue(name: string | string[]){
+        if(!this.dataSheets()) return "-1";
+        if(!this.dataSheets()[0]) return "-1";
 
         if(Array.isArray(name)){
 

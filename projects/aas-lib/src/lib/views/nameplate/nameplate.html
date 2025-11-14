@@ -24,52 +24,72 @@
       <div class="col-md-6 bg-primary-subtle text-black p-3 bg-opacity-75">
         <div class="d-flex flex-row">
             <div>
+                @if (checkNameplateValue("ManufacturerProductDesignation")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">Name</label>
                     <label>{{getNameplateValue("ManufacturerProductDesignation")}}</label>
                 </div>
+                }
+                @if (checkNameplateValue("SerialNumber")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">Serialnumber</label>
                     <label>{{getNameplateValue("SerialNumber")}}</label>
                 </div>
+                }
+                @if (checkNameplateValue("URIOfTheProduct")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">URI</label>
                     <label>{{getNameplateValue("URIOfTheProduct")}}</label>
                 </div>
+                }
+                @if (checkNameplateValue("YearOfConstruction")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">Year of Construction</label>
                     <label>{{getNameplateValue("YearOfConstruction")}}</label>
                 </div>
+                }
+                @if (checkNameplateValue("DateOfManufacture")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">Date of Manufacture</label>
                     <label>{{getNameplateValue("DateOfManufacture")}}</label>
                 </div>
+                }
             </div>
             <div class="ms-5">
+                @if (checkNameplateValue("ManufacturerProductType")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">Product Type</label>
                     <label>{{getNameplateValue("ManufacturerProductType")}}</label>
                 </div>
+                }
+                @if (checkNameplateValue("ManufacturerProductFamily")) {
                 <div class="d-flex flex-column data-entry">
                     <label class="label">Product Family</label>
                     <label>{{getNameplateValue("ManufacturerProductFamily")}}</label>
                 </div>
+                }
             </div>
         </div>
       </div>
       
       <div class="col-md-6 bg-white bg-opacity-50 text-black p-3 ">
+        @if (getCompanyLogo()) {
         <div class="image-container border border-2 border-dark p-2 bg-white">
             <img src="{{getCompanyLogo()}}">
         </div>
+        }
+        @if (checkNameplateValue("ManufacturerName")) {
         <div class="d-flex flex-column data-entry">
             <label class="label">Manufacturer</label>
             <label>{{getNameplateValue("ManufacturerName")}}</label>
         </div>  
+        }
+        @if (checkNameplateValue(["AddressInformation", "PhysicalAddress"])) {
         <div class="d-flex flex-column data-entry">
             <label class="label">Manufacturer Address</label>
             <label>{{getNameplateValue(["AddressInformation", "PhysicalAddress"])}}</label>
         </div>  
+        }
       </div>
     </div>
   </div>
