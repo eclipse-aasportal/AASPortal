@@ -75,7 +75,7 @@
       <div class="col-md-6 bg-white bg-opacity-50 text-black p-3 ">
         @if (getCompanyLogo()) {
         <div class="image-container border border-2 border-dark p-2 bg-white">
-            <img src="{{getCompanyLogo()}}">
+            <img style="max-height: 100px;" src="{{getCompanyLogo()}}">
         </div>
         }
         @if (checkNameplateValue("ManufacturerName")) {
