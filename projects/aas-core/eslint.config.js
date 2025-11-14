@@ -1,10 +1,13 @@
 import globals from 'globals';
-import tsParser from '@typescript-eslint/parser'
+import tsParser from '@typescript-eslint/parser';
 import defaultConfig from '../../eslint.config.js';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
     ...defaultConfig,
+    {
+        ignores: ['src/test/assets/**', 'src/lib/aas-core/**'],
+    },
     {
         languageOptions: {
             globals: globals.es2022,
@@ -12,6 +15,5 @@ export default [
             ecmaVersion: 2022,
             sourceType: 'module',
         },
-        ignores: ['src/test/assets/**/*'],
     },
 ];

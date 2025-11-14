@@ -6,25 +6,32 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CustomerFeedbackCardComponent } from '../../../lib/views/customer-feedback/customer-feedback-card.component';
+import { FakeLoader } from '../../mocks';
 
 describe('CustomerFeedbackCardComponent', () => {
-    let component: CustomerFeedbackCardComponent;
-    let fixture: ComponentFixture<CustomerFeedbackCardComponent>;
-
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [],
+            providers: [provideZonelessChangeDetection()],
+            imports: [
+                CustomerFeedbackCardComponent,
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+            ],
         }).compileComponents();
-
-        fixture = TestBed.createComponent(CustomerFeedbackCardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(CustomerFeedbackCardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

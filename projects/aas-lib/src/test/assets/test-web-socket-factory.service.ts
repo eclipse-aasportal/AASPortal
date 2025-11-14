@@ -9,7 +9,7 @@
 import { WebSocketData } from 'aas-core';
 import { Subject } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { WebSocketFactoryService } from '../../lib/web-socket-factory.service';
+import { WebSocketFactoryService } from '../../lib/services/web-socket-factory.service';
 
 export class TestWebSocketFactoryService implements Partial<WebSocketFactoryService> {
     public constructor(private readonly subject: Subject<WebSocketData>) {}

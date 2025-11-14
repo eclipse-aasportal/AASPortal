@@ -52,17 +52,17 @@ export class MongoDBUserStorage extends UserStorage {
         this.connected = this.connect();
     }
 
-    public async existAsync(userId: string): Promise<boolean> {
+    public async exist(userId: string): Promise<boolean> {
         await this.connected;
         return (await this.userModel.findOne({ id: userId }).exec()) != null;
     }
 
-    public async readAsync(userId: string): Promise<UserData | undefined> {
+    public async read(userId: string): Promise<UserData | undefined> {
         await this.connected;
         return (await this.userModel.findOne({ id: userId }).exec()) ?? undefined;
     }
 
-    public async writeAsync(userId: string, data: UserData): Promise<void> {
+    public async write(userId: string, data: UserData): Promise<void> {
         await this.connected;
         let instance = await this.userModel.findOne({ id: userId }).exec();
         if (instance) {
@@ -76,12 +76,12 @@ export class MongoDBUserStorage extends UserStorage {
         await instance.save();
     }
 
-    public async deleteAsync(userId: string): Promise<boolean> {
+    public async delete(userId: string): Promise<boolean> {
         await this.connected;
         return (await this.userModel.findOneAndDelete({ id: userId }).exec()) != null;
     }
 
-    public async checkCookieAsync(userId: string, name: string): Promise<boolean> {
+    public async checkCookie(userId: string, name: string): Promise<boolean> {
         await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user != null) {
@@ -91,7 +91,7 @@ export class MongoDBUserStorage extends UserStorage {
         return false;
     }
 
-    public async getCookieAsync(userId: string, name: string): Promise<Cookie | undefined> {
+    public async getCookie(userId: string, name: string): Promise<Cookie | undefined> {
         await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user != null) {
@@ -101,7 +101,7 @@ export class MongoDBUserStorage extends UserStorage {
         return undefined;
     }
 
-    public async getCookiesAsync(userId: string): Promise<Cookie[]> {
+    public async getCookies(userId: string): Promise<Cookie[]> {
         await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user != null) {
@@ -111,7 +111,7 @@ export class MongoDBUserStorage extends UserStorage {
         return [];
     }
 
-    public async setCookieAsync(userId: string, name: string, data: string): Promise<void> {
+    public async setCookie(userId: string, name: string, data: string): Promise<void> {
         await this.connected;
         let user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user) {
@@ -128,7 +128,7 @@ export class MongoDBUserStorage extends UserStorage {
         await user.save();
     }
 
-    public async deleteCookieAsync(userId: string, name: string): Promise<void> {
+    public async deleteCookie(userId: string, name: string): Promise<void> {
         await this.connected;
         const user = await this.cookieModel.findOne({ id: userId }).exec();
         if (user) {

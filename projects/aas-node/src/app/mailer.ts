@@ -8,13 +8,13 @@
 
 import { inject, singleton } from 'tsyringe';
 import nodemailer from 'nodemailer';
-import { Logger } from './logging/logger.js';
+import { LOGGER, Logger } from './logging/logger.js';
 
 @singleton()
 export class Mailer {
     private transporter: unknown;
 
-    public constructor(@inject('Logger') private readonly logger: Logger) {
+    public constructor(@inject(LOGGER) private readonly logger: Logger) {
         this.transporter = nodemailer.createTransport({
             host: 'smtp.example.com',
             port: 587,

@@ -9,16 +9,16 @@
 import { describe, beforeEach, it, expect, beforeAll } from '@jest/globals';
 import path from 'path/posix';
 import fs from 'fs';
-import { LowDbQuery } from '../../../app/aas-index/lowdb/lowdb-query.js';
-import { LowDbData, LowDbDocument, LowDbElement } from '../../../app/aas-index/lowdb/lowdb-types.js';
+import { LowDbQuery } from '../../../app/index/lowdb/lowdb-query.js';
+import { LowDbData, LowDbDocument, LowDbElement } from '../../../app/index/lowdb/lowdb-types.js';
 
 describe('LowDbQuery', () => {
-    let query: LowDbQuery;
-    let document: LowDbDocument;
-    let elements: LowDbElement[];
-    let dbData: LowDbData;
-
     describe('text search', () => {
+        let query: LowDbQuery;
+        let document: LowDbDocument;
+        let elements: LowDbElement[];
+        let dbData: LowDbData;
+
         beforeAll(async () => {
             const file = path.resolve('./', 'src/test/assets/test-db.json');
             dbData = JSON.parse((await fs.promises.readFile(file)).toString());
@@ -61,6 +61,16 @@ describe('LowDbQuery', () => {
     });
 
     describe('AAS element search', () => {
+        let query: LowDbQuery;
+        let document: LowDbDocument;
+        let elements: LowDbElement[];
+        let dbData: LowDbData;
+
+        beforeAll(async () => {
+            const file = path.resolve('./', 'src/test/assets/test-db.json');
+            dbData = JSON.parse((await fs.promises.readFile(file)).toString());
+        });
+
         beforeEach(() => {
             document = dbData.documents[0];
             elements = dbData.elements;

@@ -6,22 +6,13 @@
  *
  *****************************************************************************/
 
-import { AASDocument } from 'aas-core';
-import { Logger } from '../logging/logger.js';
-import { AASApiClient, AASLabel } from '../package/aas-api/aas-api-client.js';
-import { AASApiPackage } from '../package/aas-api/aas-api-package.js';
+import { AASDocument, PagedResult } from 'aas-core';
+import { ApiClient } from '../client/api/api-client.js';
 import { AASServerScan } from './aas-server-scan.js';
-import { PagedResult } from '../types/paged-result.js';
 
 export class AASApiServerScan extends AASServerScan {
-    private readonly logger: Logger;
-    private readonly client: AASApiClient;
-
-    public constructor(logger: Logger, server: AASApiClient) {
+    public constructor(private readonly client: ApiClient) {
         super();
-
-        this.logger = logger;
-        this.client = server;
     }
 
     protected override open(): Promise<void> {
@@ -31,12 +22,11 @@ export class AASApiServerScan extends AASServerScan {
         return this.client.close();
     }
 
-    protected override createDocument(id: AASLabel): Promise<AASDocument> {
-        const aasPackage = new AASApiPackage(this.logger, this.client, id.id, id.idShort);
-        return aasPackage.createDocumentAsync();
+    protected override createDocument(id: string): Promise<AASDocument> {
+        return this.client.createDocument(id);
     }
 
-    protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<AASLabel>> {
+    protected override nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {
         return this.client.getShells(cursor);
     }
 }

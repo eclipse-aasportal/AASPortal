@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
 import { AuthService } from '../auth/auth-service.js';
-import { Logger } from '../logging/logger.js';
+import { LOGGER, Logger } from '../logging/logger.js';
 import { ERRORS } from '../errors.js';
 import { Variable } from '../variable.js';
 
@@ -23,7 +23,7 @@ export class Authentication {
     private readonly publicKey: string;
 
     public constructor(
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
         @inject(AuthService) private readonly auth: AuthService,
         @inject(Variable) private readonly variable: Variable,
     ) {
@@ -34,51 +34,50 @@ export class Authentication {
         }
     }
 
-    public static authentication(token: string, role: UserRole): Promise<JWTPayload> {
+    public static async authentication(token: string | undefined, scopes: UserRole[] | undefined): Promise<JWTPayload> {
         if (!Authentication.instance) {
             Authentication.instance = container.resolve(Authentication);
         }
 
-        return Authentication.instance.check(token, role);
+        return await Authentication.instance.check(token, scopes);
     }
 
-    public async check(token: string, role: UserRole): Promise<JWTPayload> {
+    public async check(token: string | undefined, scopes: UserRole[] | undefined): Promise<JWTPayload> {
+        if (!token || !scopes) {
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
+        }
+
         const payload = jwt.verify(token, this.publicKey) as JWTPayload;
-        if (!payload.role) {
-            throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
+        if (!payload.role || !payload.sub) {
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
         }
 
-        if (payload.role === 'admin' || payload.role === 'editor') {
-            if (!payload.sub || !(await this.auth.hasUser(payload.sub))) {
-                throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
-            }
-        } else if (payload.role !== 'guest') {
-            throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
+        if (!(await this.auth.hasUser(payload.sub))) {
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
         }
 
-        if (!isUserAuthorized(payload.role, role)) {
-            throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
+        if (!isUserAuthorized(payload.role, scopes)) {
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
         }
 
         return payload;
     }
 }
 
-export async function expressAuthentication(req: Request, name: string, scopes?: string[]): Promise<JWTPayload> {
+export async function expressAuthentication(req: Request, name: string, scopes: UserRole[]): Promise<JWTPayload> {
+    let token: string | undefined;
     if (name === 'bearerAuth') {
-        if (scopes && scopes.length === 1) {
-            if (req.headers.authorization) {
-                const items = req.headers.authorization.split(' ');
-                if (items.length === 2) {
-                    return Authentication.authentication(items[1], scopes[0] as UserRole);
-                }
+        if (req.headers.authorization) {
+            const items = req.headers.authorization.split(' ');
+            if (items.length === 2) {
+                token = items[1];
             }
         }
     } else if (name === 'api_key') {
-        if (req.query && req.query.access_token) {
-            return Authentication.authentication(req.query.access_token as string, 'guest');
+        if (typeof req.query?.access_token === 'string') {
+            token = req.query.access_token;
         }
     }
 
-    throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
+    return await Authentication.authentication(token, scopes);
 }

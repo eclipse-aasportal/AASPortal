@@ -6,275 +6,240 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { jest } from '@jest/globals';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, Subject } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { EMPTY, Subject } from 'rxjs';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
-import { AuthService, NotifyService, StartService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
-import { pages } from './test-pages';
-import { SelectionMode } from '../../app/types/selection-mode';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
-import { DashboardChart } from '../../app/dashboard/dashboard.store';
+import { DashboardService } from '../../app/dashboard/dashboard.service';
+import { DashboardChartItem, DashboardState } from '../../app/dashboard/dashboard-types';
+import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
+
+import data from '../assets/test-pages.json';
+import { createSpyObj, FakeLoader } from '../mocks';
+
+@Component({
+    selector: 'fhg-chart-edit',
+    imports: [],
+    template: '<div></div>',
+    styles: [],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TestChartEditComponent {
+    public readonly item = input.required<DashboardChartItem>();
+}
 
 describe('DashboardComponent', () => {
-    let component: DashboardComponent;
-    let fixture: ComponentFixture<DashboardComponent>;
     let webSocketSubject: WebSocketSubject<WebSocketData>;
-    let webSocketFactory: jasmine.SpyObj<WebSocketFactoryService>;
-    let auth: jasmine.SpyObj<AuthService>;
-    let start: jasmine.SpyObj<StartService>;
-    const chart1 = '42';
-    const chart2 = '4711';
-    // const chart3 = '0815';
+    let webSocketFactory: jest.Mocked<WebSocketFactoryService>;
+    let start: jest.Mocked<StartService>;
+    let service: jest.Mocked<DashboardService>;
+    let window: jest.Mocked<WindowService>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
-        webSocketFactory = jasmine.createSpyObj<WebSocketFactoryService>(['create']);
-        webSocketFactory.create.and.returnValue(webSocketSubject);
-        start = jasmine.createSpyObj<StartService>(['add', 'save']);
+        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
+        webSocketFactory.create.mockReturnValue(webSocketSubject);
+        start = createSpyObj<StartService>(['add', 'save']);
 
-        auth = jasmine.createSpyObj<AuthService>(['checkCookie', 'getCookie', 'setCookie'], { userId: of('guest') });
-        auth.checkCookie.and.returnValue(of(true));
-        auth.setCookie.and.returnValue(of(void 0));
-        auth.getCookie.and.callFake(name => {
-            if (name === '.DashboardPage') {
-                return of('Test');
-            }
+        const pages: DashboardState = DashboardService.fromString(JSON.stringify(data));
 
-            return of(JSON.stringify(pages));
+        service = createSpyObj<DashboardService>(['getMemento', 'setMemento', 'save', 'updatePage', 'deletePage'], {
+            editMode: signal(false),
+            pages: signal(pages).asReadonly(),
+            activePage: signal(pages[1]).asReadonly(),
         });
 
-        TestBed.configureTestingModule({
+        service.save.mockReturnValue(EMPTY);
+
+        window = createSpyObj<WindowService>(['prompt', 'addEventListener', 'removeEventListener'], {
+            innerWidth: 700,
+        });
+
+        await TestBed.configureTestingModule({
             providers: [
-                {
-                    provide: AuthService,
-                    useValue: auth,
-                },
                 {
                     provide: WebSocketFactoryService,
                     useValue: webSocketFactory,
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: DashboardApiService,
-                    useValue: jasmine.createSpyObj<DashboardApiService>(['getBlobValue']),
+                    useValue: createSpyObj<DashboardApiService>(['getBlobValue']),
                 },
                 {
                     provide: WINDOW,
-                    useValue: jasmine.createSpyObj<Window>(['prompt']),
+                    useValue: window,
                 },
                 {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set']),
                 },
                 {
                     provide: StartService,
                     useValue: start,
                 },
+                {
+                    provide: DashboardService,
+                    useValue: service,
+                },
                 provideRouter([]),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideZonelessChangeDetection(),
+                provideTranslateService({
+                    fallbackLang: 'en-us',
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
-        });
+            imports: [],
+        }).compileComponents();
 
-        fixture = TestBed.createComponent(DashboardComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        TestBed.overrideComponent(DashboardComponent, {
+            add: {
+                imports: [TestChartEditComponent],
+            },
+            remove: {
+                imports: [ChartEditComponent],
+            },
+        });
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('shows the Test page', () => {
-        expect(component.activePage()).toEqual('Test');
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.activePage()?.name).toEqual('Test');
     });
 
-    it('displays two rows', () => {
-        expect(component.rows().length).toEqual(2);
+    it('starts with 1 chart in first row', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.firstItems().length).toBe(1);
+    });
+
+    it('displays 2 charts per row', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+        expect(component.items().length).toBe(2);
     });
 
     describe('single selection', () => {
-        it('supports single mode selection', () => {
-            expect(component.selectionMode()).toEqual(SelectionMode.Single);
-        });
-
         it('indicates no item selected', () => {
-            expect(component.selectedItem).toBeNull();
-            expect(component.selectedItems.length).toEqual(0);
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            expect(component.selectedItem()).toBeUndefined();
+            expect(component.selectedItems().length).toEqual(0);
         });
 
         it('allows to toggle the selection of a chart', () => {
-            const rows = component.rows();
-            component.toggleSelection(rows[0].columns[0]);
-            expect(component.selectedItem).toEqual(rows[0].columns[0].item);
-            expect(component.selectedItems.length).toEqual(1);
-            component.toggleSelection(rows[0].columns[0]);
-            expect(component.selectedItem).toBeNull();
-            expect(component.selectedItems.length).toEqual(0);
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[0]);
+            expect(component.selectedItem()).toEqual(items[0]);
+            expect(component.selectedItems().length).toEqual(1);
+            component.toggleSelection(undefined, items[0]);
+            expect(component.selectedItem()).toBeUndefined();
+            expect(component.selectedItems().length).toEqual(0);
         });
 
         it('ensures that only one item is selected', () => {
-            const rows = component.rows();
-            component.toggleSelection(rows[0].columns[0]);
-            expect(component.selectedItem).toEqual(rows[0].columns[0].item);
-            expect(component.selectedItems.length).toEqual(1);
-            component.toggleSelection(rows[0].columns[1]);
-            expect(component.selectedItem).toEqual(rows[0].columns[1].item);
-            expect(component.selectedItems.length).toEqual(1);
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[0]);
+            expect(component.selectedItem()).toEqual(items[0]);
+            expect(component.selectedItems().length).toEqual(1);
+            component.toggleSelection(undefined, items[1]);
+            expect(component.selectedItem()).toEqual(items[1]);
+            expect(component.selectedItems().length).toEqual(1);
         });
     });
 
     describe('view mode', () => {
         it('has a view mode (initial)', () => {
-            expect(component.editMode()).toBeFalse();
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            expect(component.editMode()).toBe(false);
         });
     });
 
     describe('edit mode', () => {
         beforeEach(() => {
-            component.editMode.set(true);
+            service.editMode.set(true);
         });
 
         it('has an edit mode', () => {
-            expect(component.editMode()).toBeTrue();
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            expect(component.editMode()).toBe(true);
         });
 
-        it('can move item[0, 1] to the left', () => {
-            component.toggleSelection(component.rows()[0].columns[1]);
-            expect(component.canMoveLeft()).toBeTrue();
-            component.moveLeft();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart2);
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect(component.rows()[0].columns[1].id).toEqual(chart2);
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart2);
+        it('can move item[1] to the left', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[1]);
+            expect(component.canMovePrevious()).toBe(true);
+            component.movePrevious();
+            expect(service.updatePage).toHaveBeenCalled();
         });
 
-        it('can move item[0, 0] to the right including undo/redo', () => {
-            component.toggleSelection(component.rows()[0].columns[0]);
-            expect(component.canMoveRight()).toBeTrue();
-            component.moveRight();
-
-            expect(component.rows()[0].columns[1].id).toEqual(chart1);
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart1);
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect(component.rows()[0].columns[1].id).toEqual(chart1);
+        it('can move item[1] to the right', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[1]);
+            expect(component.canMoveNext()).toBe(true);
+            component.moveNext();
+            expect(service.updatePage).toHaveBeenCalled();
         });
 
-        it('can move item[0, 0] up creating a new row including undo/redo', () => {
-            component.toggleSelection(component.rows()[0].columns[0]);
-            expect(component.canMoveUp()).toBeTrue();
-            component.moveUp();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart1);
-            expect(component.rows().length).toEqual(3);
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart1);
-            expect(component.rows().length).toEqual(2);
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart1);
-            expect(component.rows().length).toEqual(3);
-        });
-
-        it('can move item[0, 0] down to [1, 1] including undo/redo', () => {
-            component.toggleSelection(component.rows()[0].columns[0]);
-            expect(component.canMoveDown()).toBeTrue();
-            component.moveDown();
-
-            expect(component.rows()[1].columns[1].id).toEqual(chart1);
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect(component.rows()[0].columns[0].id).toEqual(chart1);
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect(component.rows()[1].columns[1].id).toEqual(chart1);
-        });
-
-        it('gets the color of a chart', () => {
-            expect(component.getColor(component.rows()[0].columns[0])).toEqual('#123456');
-        });
-
-        it('sets the color of a chart including undo/redo', () => {
-            component.changeColor(component.rows()[0].columns[0], '#AA55AA');
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#123456');
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).sources[0].color).toEqual('#AA55AA');
-        });
-
-        it('gets the source labels of a chart', () => {
-            expect(component.getSources(component.rows()[0].columns[0])).toEqual(['RotationSpeed']);
-        });
-
-        it('can delete the Test page', () => {
-            const name = component.activePage();
+        it('deletes the Test page', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
             component.delete();
-            expect(component.pages().find(item => item === name)).toBeUndefined();
+            expect(service.deletePage).toHaveBeenCalled();
         });
 
-        it('can change the min value', () => {
-            component.changeMin(component.rows()[0].columns[0], '0');
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).min).toEqual(0);
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).min).toBeUndefined();
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).min).toEqual(0);
-        });
-
-        it('can change the max value', () => {
-            component.changeMax(component.rows()[0].columns[0], '5500');
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).max).toEqual(5500);
-            expect(component.canUndo()).toBeTrue();
-            component.undo();
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).max).toBeUndefined();
-            expect(component.canRedo()).toBeTrue();
-            component.redo();
-
-            expect((component.rows()[0].columns[0].item as DashboardChart).max).toEqual(5500);
+        it('deletes a chart', () => {
+            const fixture = TestBed.createComponent(DashboardComponent);
+            const component = fixture.componentInstance;
+            fixture.detectChanges();
+            const items = component.activePage().items;
+            component.toggleSelection(undefined, items[1]);
+            component.delete();
+            expect(service.updatePage).toHaveBeenCalled();
         });
     });
 });

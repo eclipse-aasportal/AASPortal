@@ -7,39 +7,37 @@
  *****************************************************************************/
 
 import { ApplicationError } from 'aas-core';
-import { DashboardPage, DashboardStore } from '../dashboard.store';
 import { DashboardCommand } from './dashboard-command';
 import { ERRORS } from '../../types/errors';
+import { DashboardService } from '../dashboard.service';
+import { DashboardPage } from '../dashboard-types';
 
 export class AddNewPageCommand extends DashboardCommand {
     public constructor(
-        store: DashboardStore,
+        service: DashboardService,
         private pageName?: string,
     ) {
-        super('Add new page', store);
+        super('Add new page', service);
     }
 
     protected executing(): void {
         const name = this.pageName?.trim();
-        if (!name && this.store.pages.some(item => item.name === name)) {
-            throw new ApplicationError(
-                `A page withe name "${name}" already exists.`,
-                ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
-                name,
-            );
+        if (!name && this.service.pages().some(page => page.name === name)) {
+            throw new ApplicationError(ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS, { name }, 409);
         }
 
         this.addNewPage(name);
     }
 
     private addNewPage(name?: string): void {
-        name = name?.trim() ?? this.store.createPageName();
+        name = name?.trim() ?? this.service.createPageName();
         const page: DashboardPage = {
             name: name,
+            active: false,
             items: [],
             requests: [],
         };
 
-        this.store.updateState(state => ({ ...state, pages: [...state.pages, page] }));
+        this.service.addPage(page);
     }
 }

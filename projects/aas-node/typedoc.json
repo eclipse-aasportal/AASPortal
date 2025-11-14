@@ -1,0 +1,9 @@
+{
+    "extends": [
+        "../../typedoc.base.jsonc"
+    ],
+    "entryPoints": [
+        "src/app/**/*.ts"
+    ],
+    "tsconfig": "tsconfig.app.json"
+}

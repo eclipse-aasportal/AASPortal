@@ -6,40 +6,59 @@
  *
  *****************************************************************************/
 
+import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Router, provideRouter } from '@angular/router';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { of } from 'rxjs';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    DOCUMENT,
+    input,
+    output,
+    provideZonelessChangeDetection,
+    signal,
+} from '@angular/core';
+
+import { AASDocument, aas, noop } from 'aas-core';
 import {
     AASTreeComponent,
     AuthService,
-    DownloadService,
+    EndpointsApi,
     NotifyService,
-    OnlineState,
-    SecuredImageComponent,
+    LiveState,
     StartService,
+    ToolbarService,
 } from 'aas-lib';
 
-import { AASDocument, aas, noop } from 'aas-core';
 import { AASComponent } from '../../app/aas/aas.component';
-import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router, provideRouter } from '@angular/router';
-import { Component, input, output, signal } from '@angular/core';
-import { AASApiService } from '../../app/aas/aas-api.service';
-import { ToolbarService } from '../../../../aas-lib/src/lib/toolbar.service';
-import { AASStore } from '../../app/aas/aas.store';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
-import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard.store';
-import { of } from 'rxjs';
+import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
+import { createSpyObj, FakeLoader } from '../mocks';
+import { AASState } from '../../app/aas/aas.state';
+
+import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
+
+class MockURL implements Partial<URL> {
+    public static createObjectURL(): string {
+        return '';
+    };
+
+    public static revokeObjectURL(): void {
+    }
+}
 
 @Component({
     selector: 'fhg-aas-tree',
     template: '<div></div>',
     styleUrls: [],
-    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTreeComponent {
     public document = input<AASDocument | null>(null);
-    public state = input<OnlineState | null>('offline');
+    public state = input<LiveState | null>('offline');
     public searchExpression = input('');
     public selected = input<aas.Referable[]>([torque, rotationSpeed]);
     public selectedChange = output<aas.Referable[]>();
@@ -53,102 +72,87 @@ class TestAASTreeComponent {
     }
 }
 
-@Component({
-    selector: 'fhg-img',
-    template: '<div></div>',
-    styleUrls: [],
-    standalone: true,
-})
-class TestSecureImageComponent {
-    public readonly src = input.required<string>();
-    public readonly alt = input<string | undefined>();
-    public readonly classname = input<string | undefined>();
-    public readonly width = input<number | undefined>();
-    public readonly height = input<number | undefined>();
-}
-
 describe('AASComponent', () => {
-    let component: AASComponent;
     let fixture: ComponentFixture<AASComponent>;
-    let dashboard: jasmine.SpyObj<DashboardService>;
+    let component: AASComponent;
+    let dashboard: jest.Mocked<DashboardService>;
     let router: Router;
-    let store: AASStore;
-    let api: jasmine.SpyObj<AASApiService>;
-    let download: jasmine.SpyObj<DownloadService>;
-    let start: jasmine.SpyObj<StartService>;
+    let api: jest.Mocked<EndpointsApi>;
+    let start: jest.Mocked<StartService>;
     let pages: DashboardPage[];
 
-    beforeEach(() => {
-        pages = [{ name: 'Dashboard 1', items: [], requests: [] }];
+    beforeEach(async () => {
+        pages = [{ name: 'Dashboard 1', items: [], requests: [], active: true }];
 
-        api = jasmine.createSpyObj<AASApiService>(['getDocument', 'putDocument']);
-        download = jasmine.createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
-        dashboard = jasmine.createSpyObj<DashboardService>(['add'], {
-            activePage: signal(pages[0].name),
-            pages: signal(pages.map(page => page.name)),
+        api = createSpyObj<EndpointsApi>([
+            'getDocument',
+            'putDocument',
+            'downloadPackage',
+            'download',
+            'uploadPackage',
+        ]);
+        dashboard = createSpyObj<DashboardService>(['addChart'], {
+            activePage: signal(pages[0]).asReadonly(),
+            pages: signal(pages).asReadonly(),
         });
 
-        start = jasmine.createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
-        start.save.and.returnValue(of(void 0))
+        start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
+        start.save.mockReturnValue(of(void 0));
 
-        TestBed.configureTestingModule({
+        await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: AASApiService,
+                    provide: EndpointsApi,
                     useValue: api,
                 },
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
                     provide: DashboardService,
                     useValue: dashboard,
                 },
                 {
-                    provide: DownloadService,
-                    useValue: download,
-                },
-                {
                     provide: ToolbarService,
-                    useValue: jasmine.createSpyObj<ToolbarService>(['clear', 'set']),
+                    useValue: createSpyObj<ToolbarService>(['clear', 'set']),
                 },
                 {
                     provide: AuthService,
-                    useValue: jasmine.createSpyObj<AuthService>(['ensureAuthorized']),
+                    useValue: createSpyObj<AuthService>(['ensureAuthorized']),
                 },
                 {
                     provide: StartService,
                     useValue: start,
                 },
-                 provideHttpClientTesting(),
+                provideHttpClientTesting(),
                 provideRouter([]),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideZonelessChangeDetection(),
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
-        });
+            imports: [AASComponent],
+        }).compileComponents();
 
         TestBed.overrideComponent(AASComponent, {
             remove: {
-                imports: [AASTreeComponent, SecuredImageComponent],
+                imports: [AASTreeComponent],
             },
             add: {
-                imports: [TestAASTreeComponent, TestSecureImageComponent],
+                imports: [TestAASTreeComponent],
             },
         });
 
+        router = TestBed.inject(Router);
+        const state = TestBed.inject(AASState);
+        state.update({ document: sampleDocument });
+
         fixture = TestBed.createComponent(AASComponent);
         component = fixture.componentInstance;
-        store = TestBed.inject(AASStore);
-        router = TestBed.inject(Router);
-        store.document$.set(sampleDocument);
-        fixture.detectChanges();
     });
 
     it('should create', () => {
@@ -172,28 +176,118 @@ describe('AASComponent', () => {
     });
 
     it('indicates that "play" is disabled while sample AAS is not online ready', () => {
-        expect(component.canPlay()).toBeFalse();
+        expect(component.canPlay()).toBe(false);
     });
 
     it('indicates that "stop" is disabled while sample AAS is not online ready', () => {
-        expect(component.canStop()).toBeFalse();
+        expect(component.canStop()).toBe(false);
     });
 
     it('indicates that the sample AAS is editable', () => {
-        expect(component.readOnly()).toBeFalse();
+        expect(component.readOnly()).toBe(false);
     });
 
     describe('canAddToDashboard', () => {
+        it('can add the selected properties to the dashboard', () => {
+            component.setSelectedElements([torque, rotationSpeed]);
+            jest.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+            expect(component.canAddToDashboard()).toBe(true);
+            component.addToDashboard(DashboardChartType.BarVertical);
+            expect(dashboard.addChart).toHaveBeenCalled();
+            expect(router.navigateByUrl).toHaveBeenCalled();
+        });
+    });
+
+    describe('download', () => {
         beforeEach(() => {
-            component.selectedElements.set([torque, rotationSpeed]);
+            Object.defineProperty(globalThis as any, 'URL', {
+                configurable: true,
+                writable: true,
+                value: MockURL,
+            });
         });
 
-        it('can add the selected properties to the dashboard', () => {
-            spyOn(router, 'navigateByUrl').and.resolveTo(true);
-            expect(component.canAddToDashboard()).toBeTrue();
-            component.addToDashboard(DashboardChartType.BarVertical);
-            expect(dashboard.add).toHaveBeenCalled();
-            expect(router.navigateByUrl).toHaveBeenCalled();
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('does nothing when there is no document content', () => {
+            const dom = TestBed.inject(DOCUMENT) as Document;
+            const createElSpy = jest.spyOn(dom, 'createElement');
+            const state = TestBed.inject(AASState);
+            state.update({ document: { ...sampleDocument, content: undefined } });
+            component.download();
+            expect(createElSpy).not.toHaveBeenCalled();
+            createElSpy.mockRestore();
+        });
+
+        it('creates a blob, starts download and revokes the object URL after timeout', () => {
+            const dom = TestBed.inject(DOCUMENT) as Document;
+            const fakeAnchor = { setAttribute: jest.fn(), click: jest.fn(), href: '' };
+            const createElSpy = jest.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
+            const createObjectSpy = jest.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = jest.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const state = TestBed.inject(AASState);
+            state.update({ document: sampleDocument });
+
+            jest.useFakeTimers();
+            component.download();
+
+            expect(createObjectSpy).toHaveBeenCalled();
+            expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${sampleDocument.idShort}.json`);
+            expect(fakeAnchor.click).toHaveBeenCalled();
+
+            jest.advanceTimersByTime(1000);
+            expect(revokeSpy).toHaveBeenCalledWith('blob://1');
+
+            createElSpy.mockRestore();
+            createObjectSpy.mockRestore();
+            revokeSpy.mockRestore();
+            jest.useRealTimers();
+        });
+
+        it('notifies on error when preparing the download fails', () => {
+            const state = TestBed.inject(AASState);
+            const badDoc = Object.create(sampleDocument);
+            Object.defineProperty(badDoc, 'content', {
+                get: () => {
+                    throw new Error('boom');
+                },
+                configurable: true,
+            });
+
+            state.update({ document: badDoc as any });
+            const notify = TestBed.inject(NotifyService) as jest.Mocked<NotifyService>;
+            component.download();
+            expect(notify.error).toHaveBeenCalled();
+        });
+
+        it('downloads a submodel', () => {
+            const dom = TestBed.inject(DOCUMENT) as Document;
+            const fakeAnchor = { setAttribute: jest.fn(), click: jest.fn(), href: '' };
+            const createElSpy = jest.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
+            const createObjectSpy = jest.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = jest.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const state = TestBed.inject(AASState);
+            state.update({ document: sampleDocument });
+
+            jest.useFakeTimers();
+            const submodel = sampleDocument.content!.submodels[0];
+            component.setSelectedElements([submodel]);
+            component.download();
+
+            expect(createObjectSpy).toHaveBeenCalled();
+            expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${submodel.idShort}.json`);
+            expect(fakeAnchor.click).toHaveBeenCalled();
+
+            jest.advanceTimersByTime(1000);
+            expect(revokeSpy).toHaveBeenCalledWith('blob://1');
+
+            createElSpy.mockRestore();
+            createObjectSpy.mockRestore();
+            revokeSpy.mockRestore();
+            jest.useRealTimers();
+
         });
     });
 });

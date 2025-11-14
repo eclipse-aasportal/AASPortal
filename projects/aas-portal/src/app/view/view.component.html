@@ -7,5 +7,5 @@
  !---------------------------------------------------------------------------->
 
 <div class="overflow-auto h-100 px-2">
-    <router-outlet></router-outlet>
+    <router-outlet (activate)="setViewComponent($event)"></router-outlet>
 </div>

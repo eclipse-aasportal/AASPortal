@@ -21,7 +21,7 @@ import {
     noop,
 } from 'aas-core';
 
-import { AASStore } from '../aas.store';
+import { AASState } from '../aas.state';
 
 export class NewElementCommand extends Command {
     private readonly memento: AASDocument;
@@ -29,7 +29,7 @@ export class NewElementCommand extends Command {
     private content: aas.Environment;
 
     public constructor(
-        private readonly store: AASStore,
+        private readonly store: AASState,
         document: AASDocument,
         private readonly parent: aas.Referable,
         private readonly element: aas.Referable | aas.Environment,
@@ -73,15 +73,15 @@ export class NewElementCommand extends Command {
             throw new Error('Invalid operation.');
         }
 
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     protected onUndo(): void {
-        this.store.document$.set({ ...this.memento, modified: true });
+        this.store.update({ document: { ...this.memento, modified: true } });
     }
 
     protected onRedo(): void {
-        this.store.document$.set({ ...this.document, modified: true });
+        this.store.update({ document: { ...this.document, modified: true } });
     }
 
     protected onAbort(): void {

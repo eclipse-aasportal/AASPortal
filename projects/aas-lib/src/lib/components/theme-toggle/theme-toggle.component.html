@@ -1,0 +1,20 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !----------------------------------------------------------------------------->
+
+<button
+    type="button"
+    class="btn btn-link text-decoration-none p-0"
+    (click)="toggleTheme()"
+    [attr.aria-label]="theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
+>
+    @if (theme() === 'light') {
+        <i class="bi bi-moon-stars-fill"></i>
+    } @else {
+        <i class="bi bi-sun-fill"></i>
+    }
+</button>

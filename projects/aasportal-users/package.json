@@ -4,8 +4,9 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "docker-compose -f docker-compose.yml up"
-    },
+        "build": "docker-compose -f docker-compose.yml up",
+        "compose": "podman compose -f docker-compose.yml up --detach"
+     },
     "author": "Fraunhofer IOSB-INA",
     "license": "ISC"
 }

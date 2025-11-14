@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { IndexChangeService } from 'aas-lib';
 import { environment } from '../../environments/environment';
@@ -20,7 +20,7 @@ import { environment } from '../../environments/environment';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutCardComponent {
-    public constructor(private readonly indexChange: IndexChangeService) {}
+    private readonly indexChange = inject(IndexChangeService);
 
     public readonly version = signal(environment.version).asReadonly();
 

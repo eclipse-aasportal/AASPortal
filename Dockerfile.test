@@ -1,0 +1,7 @@
+# Creates an all-in-one Docker image
+FROM node:22.16.0-alpine AS build
+WORKDIR /usr/src/app
+COPY . .
+RUN npm ci --unsafe-perm=true --allow-root
+RUN npm run build
+RUN npm run test

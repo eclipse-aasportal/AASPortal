@@ -1,9 +1,12 @@
 import globals from 'globals';
-import tsParser from '@typescript-eslint/parser'
+import tsParser from '@typescript-eslint/parser';
 import defaultConfig from '../../eslint.config.js';
 
 export default [
     ...defaultConfig,
+    {
+        ignores: ['src/test/assets/**'],
+    },
     {
         languageOptions: {
             globals: globals.browser,
@@ -11,7 +14,6 @@ export default [
             ecmaVersion: 2022,
             sourceType: 'module',
         },
-        ignores: ['src/test/assets/**/*'],
         rules: {
             '@angular-eslint/directive-selector': [
                 'error',
@@ -31,5 +33,5 @@ export default [
                 },
             ],
         },
-    }
+    },
 ];

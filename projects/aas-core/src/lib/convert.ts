@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { DataTypeDefXsd, LangString } from './aas.js';
+import {
+    AssetAdministrationShell,
+    ConceptDescription,
+    DataTypeDefXsd,
+    Environment,
+    LangString,
+    Submodel,
+    SubmodelElement,
+} from './aas.js';
+import * as jsonization from './aas-core/jsonization.js';
+import * as types from './aas-core/types.js';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -20,82 +30,82 @@ const dateTimeFormat: Intl.DateTimeFormatOptions = {
 const invariantDecimalSeparator = '.';
 const invariantGroupSeparator = ',';
 
-const mimeTypes = new Map<string, string>([
-    ['audio/aac', '.aac'],
-    ['application/x-abiword', '.abw'],
-    ['application/x-freearc', '.arc'],
-    ['image/avif', '.avif'],
-    ['video/x-msvideo', '.avi'],
-    ['application/vnd.amazon.ebook', '.azw'],
+const mimeTypes = new Map<string, string | string[]>([
+    ['application/epub+zip', '.epub'],
+    ['application/gzip', '.gz'],
+    ['application/java-archive', '.jar'],
+    ['application/json', '.json'],
+    ['application/ld+json', '.jsonld'],
+    ['application/msword', '.doc'],
     ['application/octet-stream', '.bin'],
-    ['.bmp', 'image/bmp'],
+    ['application/ogg', '.ogx'],
+    ['application/pdf', '.pdf'],
+    ['application/rtf', '.rtf'],
+    ['application/vnd.amazon.ebook', '.azw'],
+    ['application/vnd.apple.installer+xml', '.mpkg'],
+    ['application/vnd.mozilla.xul+xml', '.xul'],
+    ['application/vnd.ms-excel', '.xls'],
+    ['application/vnd.ms-fontobject', '.eot'],
+    ['application/vnd.ms-powerpoint', '.ppt'],
+    ['application/vnd.oasis.opendocument.presentation', '.odp'],
+    ['application/vnd.oasis.opendocument.spreadsheet', '.ods'],
+    ['application/vnd.oasis.opendocument.text', '.odt'],
+    ['application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx'],
+    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
+    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
+    ['application/vnd.rar', '.rar'],
+    ['application/vnd.visio', '.vsd'],
+    ['application/x-7z-compressed', '.7z'],
+    ['application/x-abiword', '.abw'],
     ['application/x-bzip', '.bz'],
     ['application/x-bzip2', '.bz2'],
     ['application/x-cdf', '.cda'],
     ['application/x-csh', '.csh'],
-    ['text/css', '.css'],
-    ['text/csv', '.csv'],
-    ['application/msword', '.doc'],
-    ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
-    ['application/vnd.ms-fontobject', '.eot'],
-    ['application/epub+zip', '.epub'],
-    ['application/gzip', '.gz'],
-    ['image/gif', '.gif'],
-    ['text/html', '.html'],
-    ['image/vnd.microsoft.icon', '.ico'],
-    ['text/calendar', '.ics'],
-    ['application/java-archive', '.jar'],
-    ['image/jpeg', '.jpg'],
-    ['text/javascript', '.js'],
-    ['application/json', '.json'],
-    ['application/ld+json', '.jsonld'],
-    ['audio/midi', '.midi'],
-    ['audio/x-midi', '.midi'],
-    ['audio/mpeg', '.mp3'],
-    ['video/mp4', '.mp4'],
-    ['video/mpeg', '.mpeg'],
-    ['application/vnd.apple.installer+xml', '.mpkg'],
-    ['application/vnd.oasis.opendocument.presentation', '.odp'],
-    ['application/vnd.oasis.opendocument.spreadsheet', '.ods'],
-    ['application/vnd.oasis.opendocument.text', '.odt'],
-    ['audio/ogg', '.oga'],
-    ['video/ogg', '.ogv'],
-    ['application/ogg', '.ogx'],
-    ['audio/opus', '.opus'],
-    ['font/otf', '.otf'],
-    ['image/png', '.png'],
-    ['application/pdf', '.pdf'],
+    ['application/x-freearc', '.arc'],
     ['application/x-httpd-php', '.php'],
-    ['application/vnd.ms-powerpoint', '.ppt'],
-    ['application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx'],
-    ['application/vnd.rar', '.rar'],
-    ['application/rtf', '.rtf'],
+    ['application/x-pem-file', '.pem'],
     ['application/x-sh', '.sh'],
-    ['image/svg+xml', '.svg'],
     ['application/x-tar', '.tar'],
-    ['image/tiff', '.tiff'],
-    ['video/mp2t', '.ts'],
-    ['font/ttf', '.ttf'],
-    ['text/plain', '.txt'],
-    ['application/vnd.visio', '.vsd'],
+    ['application/xhtml+xml', '.xhtml'],
+    ['application/xml', '.xml'],
+    ['application/zip', '.zip'],
+    ['audio/3gpp', '.3gp'],
+    ['audio/3gpp2', '.3g2'],
+    ['audio/aac', '.aac'],
+    ['audio/midi', '.midi'],
+    ['audio/mpeg', '.mp3'],
+    ['audio/ogg', '.oga'],
+    ['audio/opus', '.opus'],
     ['audio/wav', '.wav'],
     ['audio/webm', '.weba'],
-    ['video/webm', '.webp'],
+    ['audio/x-midi', '.midi'],
+    ['font/otf', '.otf'],
+    ['font/ttf', '.ttf'],
     ['font/woff', '.woff'],
     ['font/woff2', '.woff2'],
-    ['application/xhtml+xml', '.xhtml'],
-    ['application/vnd.ms-excel', '.xls'],
-    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
-    ['application/xml', '.xml'],
+    ['image/avif', '.avif'],
+    ['image/bmp', '.bmp'],
+    ['image/gif', '.gif'],
+    ['image/jpeg', ['.jpg', '.jpeg']],
+    ['image/png', '.png'],
+    ['image/svg+xml', '.svg'],
+    ['image/tiff', '.tiff'],
+    ['image/vnd.microsoft.icon', '.ico'],
+    ['text/calendar', '.ics'],
+    ['text/css', '.css'],
+    ['text/csv', '.csv'],
+    ['text/html', '.html'],
+    ['text/javascript', '.js'],
+    ['text/plain', '.txt'],
     ['text/xml', '.xml'],
-    ['application/vnd.mozilla.xul+xml', '.xul'],
-    ['application/x-pem-file', '.pem'],
-    ['application/zip', '.zip'],
     ['video/3gpp', '.3gp'],
-    ['audio/3gpp', '.3gp'],
     ['video/3gpp2', '.3g2'],
-    ['audio/3gpp2', '.3g2'],
-    ['application/x-7z-compressed', '.7z'],
+    ['video/mp2t', '.ts'],
+    ['video/mp4', '.mp4'],
+    ['video/mpeg', '.mpeg'],
+    ['video/ogg', '.ogv'],
+    ['video/webm', '.webp'],
+    ['video/x-msvideo', '.avi'],
 ]);
 
 export type DefaultType = string | number | boolean | bigint;
@@ -222,26 +232,39 @@ export function changeType(value: unknown, type: DataTypeDefXsd, localId?: strin
  * @returns A string expression that represents the specified value.
  */
 export function convertToString(value: unknown, localeId?: string): string {
-    let s = '';
-    if (value != null) {
-        if (typeof value === 'string') {
-            s = value;
-        } else if (typeof value === 'boolean') {
-            s = value ? 'true' : 'false';
-        } else if (typeof value === 'number') {
-            s = localeId ? value.toLocaleString(localeId) : value.toString();
-        } else if (value instanceof Date) {
-            s = localeId ? value.toLocaleString(localeId, dateTimeFormat) : value.toString();
-        } else if (typeof value === 'bigint') {
-            s = localeId ? value.toLocaleString(localeId) : value.toString();
-        } else if (Array.isArray(value)) {
-            s = `[${getItems(value).join(', ')}]`;
-        } else if (typeof value === 'object') {
-            s = JSON.stringify(value, undefined, 2);
-        }
+    if (value === undefined || value === null) {
+        return '';
     }
 
-    return s;
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    if (typeof value === 'boolean') {
+        return value ? 'true' : 'false';
+    }
+
+    if (typeof value === 'number') {
+        return localeId ? value.toLocaleString(localeId) : value.toString();
+    }
+
+    if (value instanceof Date) {
+        return localeId ? value.toLocaleString(localeId, dateTimeFormat) : value.toString();
+    }
+
+    if (typeof value === 'bigint') {
+        return localeId ? value.toLocaleString(localeId) : value.toString();
+    }
+
+    if (Array.isArray(value)) {
+        return `[${getItems(value).join(', ')}]`;
+    }
+
+    if (typeof value === 'object') {
+        return JSON.stringify(value, undefined, 2);
+    }
+
+    return '';
 
     function getItems(array: unknown[]): string[] {
         return array.map(item => convertToString(item, localeId));
@@ -303,7 +326,11 @@ export function convertFromString(
  * @param localeId The locale identifier.
  * @returns A number.
  */
-export function parseNumber(s: string, localeId?: string): number {
+export function parseNumber(s: string | undefined, localeId?: string): number {
+    if (!s) {
+        return NaN;
+    }
+
     let decimalSeparator: string;
     let groupSeparator: string;
     if (localeId) {
@@ -341,56 +368,58 @@ export function parseNumber(s: string, localeId?: string): number {
  * @param s The string expression that represents a date and time.
  * @param localeId The locale identifier.
  */
-export function parseDate(s: string, localeId?: string): Date | undefined {
+export function parseDate(s: string | undefined, localeId?: string): Date | undefined {
     const format = new Intl.DateTimeFormat(localeId, dateTimeFormat);
     const now = new Date();
     const parts = format.formatToParts(now);
     const tuple = getFormatInfo(parts);
 
+    s = s?.trim();
+    if (!s) {
+        return undefined;
+    }
+
     let date: Date | undefined;
-    if (s) {
-        s = s.trim();
-        if (localeId) {
-            let dateItems: string[] | undefined;
-            let timeTuple: { items: string[]; timePeriod?: string } | undefined;
-            const dateTime = splitDateTime(s);
-            if (dateTime.length === 1) {
-                if (s.indexOf(tuple.dateDelimiter) >= 0) {
-                    dateItems = s.split(tuple.dateDelimiter);
-                    const day = getDay(dateItems);
-                    date = day
-                        ? new Date(getYear(dateItems), getMonth(dateItems), getDay(dateItems))
-                        : new Date(getYear(dateItems), getMonth(dateItems));
-                } else {
-                    timeTuple = splitTime(s);
-                    date = new Date(
-                        now.getFullYear(),
-                        now.getMonth(),
-                        now.getDate(),
-                        getHours(timeTuple?.items, timeTuple?.timePeriod),
-                        getMinutes(timeTuple?.items),
-                        getSeconds(timeTuple?.items),
-                    );
-                }
-            } else if (dateTime.length === 2) {
-                dateItems = dateTime[0].split(tuple.dateDelimiter);
-                timeTuple = splitTime(dateTime[1]);
+    if (localeId) {
+        let dateItems: string[] | undefined;
+        let timeTuple: { items: string[]; timePeriod?: string } | undefined;
+        const dateTime = splitDateTime(s);
+        if (dateTime.length === 1) {
+            if (s.indexOf(tuple.dateDelimiter) >= 0) {
+                dateItems = s.split(tuple.dateDelimiter);
+                const day = getDay(dateItems);
+                date = day
+                    ? new Date(getYear(dateItems), getMonth(dateItems), getDay(dateItems))
+                    : new Date(getYear(dateItems), getMonth(dateItems));
+            } else {
+                timeTuple = splitTime(s);
                 date = new Date(
-                    getYear(dateItems),
-                    getMonth(dateItems),
-                    getDay(dateItems),
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
                     getHours(timeTuple?.items, timeTuple?.timePeriod),
                     getMinutes(timeTuple?.items),
                     getSeconds(timeTuple?.items),
                 );
-            } else {
-                date = new Date(0);
             }
+        } else if (dateTime.length === 2) {
+            dateItems = dateTime[0].split(tuple.dateDelimiter);
+            timeTuple = splitTime(dateTime[1]);
+            date = new Date(
+                getYear(dateItems),
+                getMonth(dateItems),
+                getDay(dateItems),
+                getHours(timeTuple?.items, timeTuple?.timePeriod),
+                getMinutes(timeTuple?.items),
+                getSeconds(timeTuple?.items),
+            );
         } else {
-            date = new Date(s);
-            if (date.toString() === 'Invalid Date') {
-                date = parseDate(s, 'en');
-            }
+            date = new Date(0);
+        }
+    } else {
+        date = new Date(s);
+        if (date.toString() === 'Invalid Date') {
+            date = parseDate(s, 'en');
         }
     }
 
@@ -660,42 +689,69 @@ export function isBooleanType(type: DataTypeDefXsd): boolean {
 }
 
 /**
- * Converts a locale invariant string representation of the current value into a localized.
- * @param value The locale invariant string representation of a value.
+ * Converts a culture invariant value expression to a locale string.
+ * @param value The value expression.
  * @param valueType The value type.
  * @param localeId The target language.
+ * @param unit The physical unit.
+ * @returns The locale string or `undefined`.
  */
-export function toLocale(value: string | undefined, valueType: DataTypeDefXsd, localeId: string): string | undefined {
+export function toDisplayValue(
+    value: string | undefined,
+    valueType: DataTypeDefXsd,
+    localeId?: string,
+    unit?: string,
+): string | undefined {
     if (!value) {
         return value;
     }
 
-    switch (valueType) {
-        case 'xs:float':
-        case 'xs:double': {
-            const d = parseNumber(value);
-            return Number.isNaN(d) ? undefined : d.toLocaleString(localeId);
+    let s: string | undefined = value;
+    if (localeId) {
+        switch (valueType) {
+            case 'xs:float':
+            case 'xs:double':
+            case 'xs:decimal':
+            case 'xs:integer':
+            case 'xs:int':
+            case 'xs:unsignedInt':
+            case 'xs:unsignedShort': {
+                const d = parseNumber(value);
+                if (isNaN(d)) {
+                    return undefined;
+                }
+
+                s = d.toLocaleString(localeId);
+                break;
+            }
+            case 'xs:date':
+                s = parseDate(value)?.toLocaleDateString(localeId);
+                break;
+            case 'xs:dateTime':
+                s = parseDate(value)?.toLocaleString(localeId, dateTimeFormat);
+                break;
+            case 'xs:time':
+                s = parseDate(value)?.toLocaleTimeString(localeId);
+                break;
+            case 'xs:long':
+            case 'xs:unsignedLong':
+                s = BigInt(value).toLocaleString(localeId);
+                break;
         }
-        case 'xs:integer':
-        case 'xs:int':
-        case 'xs:unsignedInt':
-        case 'xs:unsignedShort': {
-            const i = parseNumber(value);
-            return Number.isNaN(i) ? undefined : i.toLocaleString(localeId);
-        }
-        case 'xs:date':
-        case 'xs:dateTime':
-            return parseDate(value)?.toLocaleString(localeId, dateTimeFormat);
-        case 'xs:unsignedLong':
-        case 'xs:long':
-        default:
-            return value;
+    } else {
+        s = value;
     }
+
+    if (s && unit) {
+        s += ' ' + unit;
+    }
+
+    return s;
 }
 
 /**
- * Converts a localized string representation of the current value into a locale invariant.
- * @param value The localized string representation of a value.
+ * Converts a localized value into its invariant equivalent.
+ * @param value The localized value.
  * @param valueType The value type.
  * @param localeId The source language.
  */
@@ -710,12 +766,14 @@ export function toInvariant(
 
     switch (valueType) {
         case 'xs:float':
-        case 'xs:double': {
+        case 'xs:double':
+        case 'xs:decimal': {
             const d = parseNumber(value, localeId);
             return Number.isNaN(d) ? undefined : d.toString();
         }
         case 'xs:integer':
         case 'xs:int':
+        case 'xs:short':
         case 'xs:unsignedInt':
         case 'xs:unsignedShort': {
             const i = parseNumber(value, localeId);
@@ -737,10 +795,11 @@ export function toInvariant(
  */
 export function isNumberType(valueType: DataTypeDefXsd): boolean {
     switch (valueType) {
-        case 'xs:float':
         case 'xs:double':
-        case 'xs:integer':
+        case 'xs:float':
         case 'xs:int':
+        case 'xs:integer':
+        case 'xs:short':
         case 'xs:unsignedInt':
         case 'xs:unsignedShort':
             return true;
@@ -785,21 +844,100 @@ export function toBoolean(value: unknown): boolean {
 
 /** Returns the file extension that corresponds to the specified MIME type. */
 export function mimeTypeToExtension(mimeType: string): string | undefined {
-    return mimeTypes.get(mimeType);
+    const value = mimeTypes.get(mimeType);
+    if (!value) {
+        return undefined;
+    }
+
+    return Array.isArray(value) ? value[0] : value;
 }
 
 /** Returns the MIME type that corresponds ti the specified file extension */
-export function extensionToMimeType(extension: string): string | undefined {
-    extension = extension?.toLowerCase();
-    for (const tuple of mimeTypes) {
-        if (tuple[1] === extension) {
-            return tuple[0];
+export function extensionToMimeType(filename: string): string | undefined {
+    const index = filename.lastIndexOf('.');
+    if (index < 0) {
+        return undefined;
+    }
+
+    const extension = filename.substring(index).toLowerCase();
+    for (const [mimeType, ext] of mimeTypes) {
+        if (Array.isArray(ext)) {
+            if (ext.some(item => item === extension)) {
+                return mimeType;
+            }
+        } else if (ext === extension) {
+            return mimeType;
         }
     }
 
     return undefined;
 }
 
+/** Converts the specified value. */
+export function toJsonValue(value: unknown): jsonization.JsonValue {
+    return value as jsonization.JsonValue;
+}
+export function toEnvironment(value: types.Environment): Environment {
+    return jsonization.toJsonable(value) as Environment;
+}
+
+export function toAssetAdministrationShell(value: types.AssetAdministrationShell): AssetAdministrationShell {
+    return jsonization.toJsonable(value) as unknown as AssetAdministrationShell;
+}
+
+export function toSubmodel(value: types.Submodel): Submodel {
+    return jsonization.toJsonable(value) as unknown as Submodel;
+}
+
+export function toConceptDescription(value: types.ConceptDescription): ConceptDescription {
+    return jsonization.toJsonable(value) as unknown as ConceptDescription;
+}
+
+export function toSubmodelElement(value: types.ISubmodelElement): SubmodelElement {
+    return jsonization.toJsonable(value) as unknown as SubmodelElement;
+}
+
+/**
+ * Checks wether the Submodel with the specified identifier is referenced by the current Asset Administration Shell.
+ * @param aas The current Asset Administration Shell.
+ * @param smId The identifier of the Submodel.
+ */
+export function isSubmodelReferenced(aas: AssetAdministrationShell, smId: string): boolean {
+    if (!aas.submodels) {
+        return false;
+    }
+
+    return aas.submodels
+        .flatMap(reference => reference.keys)
+        .some(key => key.type === 'Submodel' && key.value === smId);
+}
+
+/**
+ * Normalizes a file path by replacing backslashes with forward slashes.
+ * It removes any leading directory indicators (like '/') and './' at the start of the path.
+ * This ensures that the returned path is consistent and suitable for further processing.
+ *
+ * @param path The input file path to normalize.
+ * @returns The normalized file path as a string.
+ */
+export function normalize(path: string): string {
+    path = path.replace(/\\/g, '/');
+    if (path.charAt(0) === '/') {
+        path = path.slice(1);
+    } else if (path.startsWith('./')) {
+        path = path.slice(2);
+    }
+
+    return path;
+}
+
+/**
+ * Converts a string representation of a boolean value into a boolean.
+ * This function checks if the input string, when converted to lower case,
+ * is equal to 'true'. If it is, the function returns `true`; otherwise, it returns `false`.
+ * @param value The string representation of a boolean.
+ * @returns The boolean value corresponding to the string.
+ */
 function stringToBoolean(value: string): boolean {
     return value?.toLocaleLowerCase() === 'true';
 }

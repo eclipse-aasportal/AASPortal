@@ -6,22 +6,24 @@
  *
  *****************************************************************************/
 
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { aas, AASDocument, selectElement } from 'aas-core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import cloneDeep from 'lodash-es/cloneDeep';
-import { NotifyService } from 'aas-lib';
+import { EndpointsApi, NotifyService } from 'aas-lib';
 import { aasNoTechnicalData, submodelTechnicalData } from '../../test/assets/sample-document';
 import { NewElementCommand } from '../../app/aas/commands/new-element-command';
-import { AASStore } from '../../app/aas/aas.store';
-import { AASApiService } from '../../app/aas/aas-api.service';
+import { AASState } from '../../app/aas/aas.state';
+import { createSpyObj, FakeLoader } from '../mocks';
 
-describe('NewElementCommand', function () {
+describe('NewElementCommand', () => {
     let command: NewElementCommand;
     let document: AASDocument;
     let submodel: aas.Submodel;
-    let store: AASStore;
+    let state: AASState;
 
-    beforeEach(function () {
+    beforeEach(() => {
         document = cloneDeep(aasNoTechnicalData);
         submodel = cloneDeep(submodelTechnicalData);
 
@@ -29,26 +31,33 @@ describe('NewElementCommand', function () {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: jasmine.createSpyObj<NotifyService>(['error']),
+                    useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: AASApiService,
-                    useValue: jasmine.createSpyObj<AASApiService>(['getContent', 'getDocument', 'putDocument']),
+                    provide: EndpointsApi,
+                    useValue: createSpyObj<EndpointsApi>(['getContent', 'getDocument', 'putDocument']),
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+                provideZonelessChangeDetection(),
             ],
         });
 
-        store = TestBed.inject(AASStore);
-        store.document$.set(document);
+        state = TestBed.inject(AASState);
+        state.update({ document });
     });
 
-    beforeEach(function () {
-        command = new NewElementCommand(store, document, document.content!.assetAdministrationShells[0], submodel);
+    beforeEach(() => {
+        command = new NewElementCommand(state, document, document.content!.assetAdministrationShells[0], submodel);
         command.execute();
     });
 
     it('can be executed', () => {
-        const document = store.document$();
+        const document = state.document();
         const element = selectElement(document!.content!, 'TechnicalData');
         expect(element).toBeDefined();
     });
@@ -56,14 +65,14 @@ describe('NewElementCommand', function () {
     it('can be undone/redone', () => {
         {
             command.undo();
-            const document = store.document$();
+            const document = state.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeUndefined();
         }
 
         {
             command.redo();
-            const document = store.document$();
+            const document = state.document();
             const element = selectElement(document!.content!, 'TechnicalData');
             expect(element).toBeDefined();
         }

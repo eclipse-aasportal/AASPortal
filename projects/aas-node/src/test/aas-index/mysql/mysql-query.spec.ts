@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { describe, it, expect } from '@jest/globals';
-import { MySqlQuery } from '../../../app/aas-index/mysql/mysql-query.js';
+import { MySqlQuery } from '../../../app/index/mysql/mysql-query.js';
 
 describe('MySqlQuery', () => {
     describe('createSql', () => {

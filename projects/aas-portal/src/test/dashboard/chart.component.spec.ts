@@ -1,0 +1,54 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { jest } from '@jest/globals';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { WebSocketFactoryService } from 'aas-lib';
+import { ChartComponent } from '../../app/dashboard/chart/chart.component';
+import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
+import { createSpyObj, FakeLoader } from '../mocks';
+
+describe('ChartComponent', () => {
+    let webSocketFactory: jest.Mocked<WebSocketFactoryService>;
+    let api: jest.Mocked<DashboardApiService>;
+
+    beforeEach(async () => {
+        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
+        api = createSpyObj<DashboardApiService>(['getBlobValue']);
+
+        await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: WebSocketFactoryService,
+                    useValue: webSocketFactory,
+                },
+                {
+                    provide: DashboardApiService,
+                    useValue: api,
+                },
+                provideZonelessChangeDetection(),
+            ],
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+            ],
+        }).compileComponents();
+    });
+
+    it('should create', () => {
+        const fixture = TestBed.createComponent(ChartComponent);
+        const component = fixture.componentInstance;
+        expect(component).toBeTruthy();
+    });
+});

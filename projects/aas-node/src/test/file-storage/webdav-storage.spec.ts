@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, afterEach, jest } from '@jest/globals';
 import { WebDAVStorage } from '../../app/file-storage/webdav-storage.js';
 import { FileStat, WebDAVClient } from 'webdav';
-import { createSpyObj } from 'fhg-jest';
+import { createSpyObj } from 'aas-jest';
 
 describe('WebDAVStorage', () => {
     let storage: WebDAVStorage;

@@ -6,39 +6,40 @@
  *
  *****************************************************************************/
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { jest } from '@jest/globals';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ExtrasEndpointFormComponent } from '../../app/shells/extras-endpoint-form/extras-endpoint-form.component';
 import { ExtrasEndpointService } from '../../app/shells/extras-endpoint-form/extras-endpoint.service';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ExtrasEndpointFormComponent', () => {
-    let component: ExtrasEndpointFormComponent;
-    let fixture: ComponentFixture<ExtrasEndpointFormComponent>;
-    let service: jasmine.SpyObj<ExtrasEndpointService>;
+    let service: jest.Mocked<ExtrasEndpointService>;
 
     beforeEach(async () => {
-        service = jasmine.createSpyObj<ExtrasEndpointService>(['getDocumentCount', 'getEndpoints', 'reset', 'scan']);
-        service.getEndpoints.and.returnValue(
+        service = createSpyObj<ExtrasEndpointService>(['getDocumentCount', 'getEndpoints', 'reset', 'scan']);
+        service.getEndpoints.mockReturnValue(
             of([
                 { name: 'Endpoint 1', url: 'http://endpoint/1', type: 'AAS_API', schedule: { type: 'manual' } },
                 { name: 'Endpoint 2', url: 'http://endpoint/2', type: 'AAS_API' },
             ]),
         );
 
-        service.getDocumentCount.and.returnValue(of(42));
-        service.reset.and.returnValue(of(void 0));
-        service.scan.and.returnValue(of(void 0));
+        service.getDocumentCount.mockReturnValue(of(42));
+        service.reset.mockReturnValue(of(void 0));
+        service.scan.mockReturnValue(of(void 0));
 
         await TestBed.configureTestingModule({
-            providers: [NgbActiveModal],
+            providers: [NgbActiveModal, provideZonelessChangeDetection()],
             imports: [
                 TranslateModule.forRoot({
                     loader: {
                         provide: TranslateLoader,
-                        useClass: TranslateFakeLoader,
+                        useClass: FakeLoader,
                     },
                 }),
             ],
@@ -52,17 +53,19 @@ describe('ExtrasEndpointFormComponent', () => {
                 providers: [{ provide: ExtrasEndpointService, useValue: service }],
             },
         });
-
-        fixture = TestBed.createComponent(ExtrasEndpointFormComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
+        const fixture = TestBed.createComponent(ExtrasEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 
     it('shows 2 endpoints', () => {
+        const fixture = TestBed.createComponent(ExtrasEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         expect(component.endpoints()).toEqual([
             { name: 'Endpoint 1', url: 'http://endpoint/1', count: 42, schedule: 'manual' },
             { name: 'Endpoint 2', url: 'http://endpoint/2', count: 42, schedule: 'every' },
@@ -70,11 +73,17 @@ describe('ExtrasEndpointFormComponent', () => {
     });
 
     it('provides a reset', () => {
+        const fixture = TestBed.createComponent(ExtrasEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         component.reset();
         expect(service.reset).toHaveBeenCalled();
     });
 
     it('manually starts an endpoint scan', () => {
+        const fixture = TestBed.createComponent(ExtrasEndpointFormComponent);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
         component.scan('Endpoint 1');
         expect(service.scan).toHaveBeenCalledWith('Endpoint 1');
     });

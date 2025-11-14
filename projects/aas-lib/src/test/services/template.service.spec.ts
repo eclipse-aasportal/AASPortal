@@ -1,0 +1,82 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { jest } from '@jest/globals';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { of } from 'rxjs';
+import { TemplateDescriptor, aas } from 'aas-core';
+
+import { NotifyService } from '../../lib/components/notify/notify.service';
+import { TemplateService } from '../../lib/services/template.service';
+import { createSpyObj, DoneFn } from '../mocks';
+
+describe('TemplateService', () => {
+    let service: TemplateService;
+    let httpTestingController: HttpTestingController;
+    let http: HttpClient;
+    let template: TemplateDescriptor;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: NotifyService,
+                    useValue: createSpyObj<NotifyService>(['error']),
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+                provideZonelessChangeDetection(),
+            ],
+        });
+
+        http = TestBed.inject(HttpClient);
+        service = TestBed.inject(TemplateService);
+        httpTestingController = TestBed.inject(HttpTestingController);
+
+        template = {
+            idShort: '',
+            modelType: 'Property',
+            endpoint: { type: 'file', address: 'property.json' },
+        };
+
+        const url = `/api/v1/templates`;
+        const req = httpTestingController.expectOne(url);
+        req.flush([template] as TemplateDescriptor[]);
+    });
+
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
+
+    describe('templates', () => {
+        it('returns the available templates', () => {
+            expect(service.templates()).toEqual([template]);
+        });
+    });
+
+    describe('getTemplate', () => {
+        it('returns the template with the specified endpoint', (done: DoneFn) => {
+            const property: aas.Property = {
+                valueType: 'xs:string',
+                idShort: 'aProperty',
+                modelType: 'Property',
+            };
+
+            jest.spyOn(http, 'get').mockReturnValue(of(property));
+
+            service.getTemplate({ type: 'file', address: 'submodel-element/property.json' }).subscribe(value => {
+                expect(value).toEqual(property);
+                expect(http.get).toHaveBeenCalledWith(`/api/v1/templates/c3VibW9kZWwtZWxlbWVudC9wcm9wZXJ0eS5qc29u`);
+                done();
+            });
+        });
+    });
+});

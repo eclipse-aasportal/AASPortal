@@ -12,8 +12,8 @@ import { FileStorage } from './file-storage.js';
 import { LocalFileStorage } from './local-file-storage.js';
 import { Variable } from '../variable.js';
 import { WebDAVStorage } from './webdav-storage.js';
-import { Logger } from '../logging/logger.js';
-import { urlToString } from '../convert.js';
+import { LOGGER, Logger } from '../logging/logger.js';
+import { urlToString } from '../utilities.js';
 
 @singleton()
 export class FileStorageProvider {
@@ -21,7 +21,7 @@ export class FileStorageProvider {
 
     public constructor(
         @inject(Variable) private readonly variable: Variable,
-        @inject('Logger') private readonly logger: Logger,
+        @inject(LOGGER) private readonly logger: Logger,
     ) {}
 
     /**

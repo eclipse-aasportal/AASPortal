@@ -7,187 +7,20 @@
  *****************************************************************************/
 
 import { describe, it, expect } from '@jest/globals';
-import { createSpyObj } from 'fhg-jest';
+
+import { Reference } from '../lib/aas.js';
 import {
-    aas,
     equalUrls,
     getEndpointName,
     getEndpointType,
-    isAssetAdministrationShell,
-    isBlob,
-    isHasSemantics,
-    isMultiLanguageProperty,
-    isProperty,
     isReference,
-    isReferenceElement,
-    isSubmodel,
-    isSubmodelElement,
-    isSubmodelElementCollection,
-    isSubmodelElementList,
     isUrlSafeBase64,
     isValidEMail,
     isValidPassword,
     stringFormat,
 } from '../lib/index.js';
-import { HasSemantics, Reference } from '../lib/aas.js';
 
 describe('index', () => {
-    describe('isSubmodelElement', () => {
-        it('indicates that "Submodel" is not a SubmodelElement', () => {
-            const submodel = createSpyObj<aas.Submodel>({}, { modelType: 'Submodel' });
-            expect(isSubmodelElement(submodel)).toBeFalsy();
-        });
-
-        it('indicates that "Property" is a SubmodelElement', () => {
-            const property = createSpyObj<aas.Submodel>({}, { modelType: 'Property' });
-            expect(isSubmodelElement(property)).toBeTruthy();
-        });
-
-        it('indicates that "ReferenceElement" is a SubmodelElement', () => {
-            const referenceElement = createSpyObj<aas.Submodel>({}, { modelType: 'ReferenceElement' });
-            expect(isSubmodelElement(referenceElement)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a SubmodelElement', () => {
-            expect(isSubmodelElement(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a SubmodelElement', () => {
-            expect(isSubmodelElement(undefined)).toBeFalsy();
-        });
-
-        it('indicates that "{}" is not a SubmodelElement', () => {
-            expect(isSubmodelElement({})).toBeFalsy();
-        });
-    });
-
-    describe('isAssetAdministrationShell', () => {
-        it('identifies an AssetAdministrationShell', () => {
-            const shell = createSpyObj<aas.AssetAdministrationShell>({}, { modelType: 'AssetAdministrationShell' });
-            expect(isAssetAdministrationShell(shell)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a AssetAdministrationShell', () => {
-            expect(isAssetAdministrationShell(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a AssetAdministrationShell', () => {
-            expect(isAssetAdministrationShell(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isProperty', () => {
-        it('identifies a Property', () => {
-            const property = createSpyObj<aas.Property>({}, { modelType: 'Property' });
-            expect(isProperty(property)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a Property', () => {
-            expect(isProperty(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a Property', () => {
-            expect(isProperty(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isBlob', () => {
-        it('identifies a Blob', () => {
-            const property = createSpyObj<aas.Blob>({}, { modelType: 'Blob' });
-            expect(isBlob(property)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a Blob', () => {
-            expect(isBlob(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a Blob', () => {
-            expect(isBlob(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isReferenceElement', () => {
-        it('identifies a ReferenceElement', () => {
-            const referenceElement = createSpyObj<aas.ReferenceElement>({}, { modelType: 'ReferenceElement' });
-            expect(isReferenceElement(referenceElement)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a ReferenceElement', () => {
-            expect(isReferenceElement(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a ReferenceElement', () => {
-            expect(isReferenceElement(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isSubmodelElementCollection', () => {
-        it('identifies a SubmodelElementCollection', () => {
-            const collection = createSpyObj<aas.SubmodelElementCollection>(
-                {},
-                { modelType: 'SubmodelElementCollection' },
-            );
-
-            expect(isSubmodelElementCollection(collection)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a SubmodelElementCollection', () => {
-            expect(isSubmodelElementCollection(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a SubmodelElementCollection', () => {
-            expect(isSubmodelElementCollection(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isSubmodelElementList', () => {
-        it('identifies a SubmodelElementList', () => {
-            const list = createSpyObj<aas.SubmodelElementList>({}, { modelType: 'SubmodelElementList' });
-            expect(isSubmodelElementList(list)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a SubmodelElementList', () => {
-            expect(isSubmodelElementList(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a SubmodelElementList', () => {
-            expect(isSubmodelElementList(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isSubmodel', () => {
-        it('identifies a Submodel', () => {
-            const submodel = createSpyObj<aas.ReferenceElement>({}, { modelType: 'Submodel' });
-            expect(isSubmodel(submodel)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a Submodel', () => {
-            expect(isSubmodel(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a Submodel', () => {
-            expect(isSubmodel(undefined)).toBeFalsy();
-        });
-    });
-
-    describe('isMultiLanguageProperty', () => {
-        it('identifies a MultiLanguageProperty', () => {
-            const multiLanguageProperty = createSpyObj<aas.ReferenceElement>(
-                {},
-                { modelType: 'MultiLanguageProperty' },
-            );
-            expect(isMultiLanguageProperty(multiLanguageProperty)).toBeTruthy();
-        });
-
-        it('indicates that "null" is not a MultiLanguageProperty', () => {
-            expect(isMultiLanguageProperty(null)).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not a MultiLanguageProperty', () => {
-            expect(isMultiLanguageProperty(undefined)).toBeFalsy();
-        });
-    });
-
     describe('equalUrls', () => {
         it('returns true for same URLs', () => {
             expect(equalUrls('https://www.fraunhofer.de/', 'https://www.fraunhofer.de/')).toBeTruthy();
@@ -379,31 +212,6 @@ describe('index', () => {
 
         it('indicates that "null" is not of type Reference', () => {
             expect(isReference(null)).toBeFalsy();
-        });
-    });
-
-    describe('isHasSemantics', () => {
-        it('indicates that value is of type HasSemantics', () => {
-            const value: HasSemantics = {
-                semanticId: {
-                    keys: [],
-                    type: 'ExternalReference',
-                },
-            };
-
-            expect(isHasSemantics(value)).toBeTruthy();
-        });
-
-        it('indicates that "{}" is not of type HasSemantics', () => {
-            expect(isHasSemantics({})).toBeFalsy();
-        });
-
-        it('indicates that "undefined" is not of type HasSemantics', () => {
-            expect(isHasSemantics(undefined)).toBeFalsy();
-        });
-
-        it('indicates that "null" is not of type HasSemantics', () => {
-            expect(isHasSemantics(null)).toBeFalsy();
         });
     });
 });
