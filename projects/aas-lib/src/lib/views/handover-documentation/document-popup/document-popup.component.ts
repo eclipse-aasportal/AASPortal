@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { DocumentationItem } from '../handover-documentation.state';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'fhg-document-popup',
@@ -25,7 +26,11 @@ export class DocumentPopupComponent {
   };
   @Input() modalId: string = 'customModal';
 
-  public constructor(translate: TranslateService){}
+  public constructor(translate: TranslateService, public activeModal: NgbActiveModal){}
+
+  closeModal() {
+    this.activeModal.dismiss();
+  }
 
   public getTitle(){
 

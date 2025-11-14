@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DocumentPopupComponent } from './document-popup.component';
+import { TranslateService } from '@ngx-translate/core';
 
 describe('DocumentPopupComponent', () => {
   let component: DocumentPopupComponent;
@@ -8,7 +9,8 @@ describe('DocumentPopupComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DocumentPopupComponent]
+      imports: [DocumentPopupComponent],
+      declarations: [TranslateService]
     })
     .compileComponents();
 

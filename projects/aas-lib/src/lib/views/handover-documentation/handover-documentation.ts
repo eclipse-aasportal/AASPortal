@@ -1,3 +1,4 @@
+import { NgbModal, NgbSlide } from '@ng-bootstrap/ng-bootstrap';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -9,7 +10,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked, ViewChild } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { Modal } from 'bootstrap';
 
 import { AASDocument } from 'aas-core';
 
@@ -27,15 +27,13 @@ import { DocumentPopupComponent } from "./document-popup/document-popup.componen
  */
 @Component({
     selector: 'fhg-handover-documentation',
-    imports: [TranslateDirective, NgbAccordionModule, DocumentPopupComponent],
+    imports: [NgbAccordionModule],
     templateUrl: './handover-documentation.html',
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> implements AfterViewInit{
+export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState>{
 
-    @ViewChild('modal') modalComponent!: DocumentPopupComponent;
-    bootstrapModal!: Modal;
 
     clickedItem: DocumentationItem =  {
         preview: '',
@@ -51,7 +49,7 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
         files: []
     };
 
-    public constructor() {
+    public constructor(private modalService: NgbModal) {
         super();
 
         effect(() => {
@@ -67,15 +65,10 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
         });
     }
 
-    ngAfterViewInit() {
-        this.bootstrapModal = new Modal(
-            document.getElementById(this.modalComponent.modalId)!
-        );
-    }
-
     openModal(item: DocumentationItem) {
-        this.clickedItem = item;
-        this.bootstrapModal.show();
+        const modalRef = this.modalService.open(DocumentPopupComponent, { size: 'md' });
+        modalRef.componentInstance.body = item;
+        modalRef.componentInstance.title = 'Document'; // optional
     }
 
     /**
