@@ -9,6 +9,7 @@ import { first } from 'rxjs';
 
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
+import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
@@ -22,13 +23,13 @@ import { ChildComponent } from '../../components/child-component';
  */
 @Component({
     selector: 'fhg-nameplate',
-    imports: [NgbAccordionModule, DataSheet],
+    imports: [NgbAccordionModule, DataSheet, TranslateDirective],
     templateUrl: './nameplate.html',
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Nameplate extends ChildComponent<NameplateData, NameplateState> implements AfterViewInit{
-    public constructor() {
+    public constructor(translate: TranslateService) {
         super();
 
         effect(() => {

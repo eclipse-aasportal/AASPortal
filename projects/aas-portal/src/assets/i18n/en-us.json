@@ -347,7 +347,14 @@
     },
     "Nameplate": {
         "GENERAL": "General",
-        "TITLE": "Digital Namplate"
+        "TITLE": "Digital Namplate",
+        "SERIAL_NUMBER": "Serialnumber",
+        "YEAR_OF_CONSTRUCTION": "Year of Construction",
+        "DATE_OF_MANUFACTURE": "Date of Manufacture",
+        "PRODUCT_TYPE": "Product Type",
+        "PRODUCT_FAMILY": "Product Family",
+        "MANUFACTURER": "Manufacturer",
+        "MANUFACTURER_ADDRESS": "Manufacturer Address"
     },
     "TechnicalData": {
         "TITLE": "Technical Data"

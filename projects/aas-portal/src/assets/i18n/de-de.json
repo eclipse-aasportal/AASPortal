@@ -345,7 +345,14 @@
     },
     "Nameplate": {
         "GENERAL": "Allgemein",
-        "TITLE": "Digitales Typenschild"
+        "TITLE": "Digitales Typenschild",
+        "SERIAL_NUMBER": "Seriennummer",
+        "YEAR_OF_CONSTRUCTION": "Baujahr",
+        "DATE_OF_MANUFACTURE": "Herstellungsdatum",
+        "PRODUCT_TYPE": "Produkttyp",
+        "PRODUCT_FAMILY": "Produktgruppe",
+        "MANUFACTURER": "Hersteller",
+        "MANUFACTURER_ADDRESS": "Herstelleradresse"
     },
     "TechnicalData": {
         "TITLE": "Technische Daten"
