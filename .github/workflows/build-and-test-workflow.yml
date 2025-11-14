@@ -36,8 +36,4 @@ jobs:
             reports/aas-core.xml
             reports/aas-node.xml
             reports/aas-lib.xml
-<<<<<<< HEAD
             reports/aas-portal.xml
-=======
-            reports/aas-portal.xml
->>>>>>> development
