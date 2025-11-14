@@ -8,7 +8,11 @@
 
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
+<<<<<<< HEAD
 import { TranslateModule } from '@ngx-translate/core';
+=======
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+>>>>>>> development
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
@@ -35,7 +39,11 @@ import { CompositeView } from '../composite-view';
     selector: 'fhg-doc-browser',
     templateUrl: './document-browser-view.html',
     styleUrl: './document-browser-view.scss',
+<<<<<<< HEAD
     imports: [TranslateModule, NgbPaginationModule, BrowserComponent, ThumbnailQRCode],
+=======
+    imports: [TranslateDirective, TranslatePipe, NgbPaginationModule, BrowserComponent, ThumbnailQRCode],
+>>>>>>> development
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**

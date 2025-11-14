@@ -93,9 +93,13 @@ describe('AuthController', () => {
         });
 
         it.skip('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+<<<<<<< HEAD
             authentication.check.mockRejectedValueOnce(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
+=======
+            authentication.check.mockRejectedValueOnce(new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401));
+>>>>>>> development
 
             const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1');
             expect(response.statusCode).toBe(401);
@@ -123,9 +127,13 @@ describe('AuthController', () => {
         });
 
         it.skip('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies', async () => {
+<<<<<<< HEAD
             authentication.check.mockRejectedValueOnce(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
+=======
+            authentication.check.mockRejectedValueOnce(new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401));
+>>>>>>> development
 
             const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies');
             expect(response.statusCode).toBe(401);
@@ -147,9 +155,13 @@ describe('AuthController', () => {
         });
 
         it.skip('Unauthenticated user: POST /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+<<<<<<< HEAD
             authentication.check.mockRejectedValueOnce(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
+=======
+            authentication.check.mockRejectedValueOnce(new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401));
+>>>>>>> development
 
             const response = await request(app)
                 .post('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1')
@@ -173,9 +185,13 @@ describe('AuthController', () => {
         });
 
         it.skip('Unauthenticated user: DELETE /api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1', async () => {
+<<<<<<< HEAD
             authentication.check.mockRejectedValueOnce(
                 new ApplicationError(ERRORS.UnauthorizedAccess, ERRORS.UnauthorizedAccess),
             );
+=======
+            authentication.check.mockRejectedValueOnce(new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401));
+>>>>>>> development
 
             const response = await request(app).delete('/api/v1/users/am9obi5kb2VAZW1haWwuY29t/cookies/Cookie1');
             expect(response.statusCode).toBe(401);
@@ -195,9 +211,13 @@ describe('AuthController', () => {
         });
 
         it.skip('Unauthenticated user: GET /api/v1/users/am9obi5kb2VAZW1haWwuY29t', async () => {
+<<<<<<< HEAD
             authentication.check.mockRejectedValueOnce(
                 new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess),
             );
+=======
+            authentication.check.mockRejectedValueOnce(new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401));
+>>>>>>> development
 
             const response = await request(app).get('/api/v1/users/am9obi5kb2VAZW1haWwuY29t');
             expect(response.statusCode).toBe(401);

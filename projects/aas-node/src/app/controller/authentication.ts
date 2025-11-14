@@ -44,11 +44,16 @@ export class Authentication {
 
     public async check(token: string | undefined, scopes: UserRole[] | undefined): Promise<JWTPayload> {
         if (!token || !scopes) {
+<<<<<<< HEAD
             throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
+=======
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
+>>>>>>> development
         }
 
         const payload = jwt.verify(token, this.publicKey) as JWTPayload;
         if (!payload.role || !payload.sub) {
+<<<<<<< HEAD
             throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
         }
 
@@ -58,6 +63,17 @@ export class Authentication {
 
         if (!isUserAuthorized(payload.role, scopes)) {
             throw new ApplicationError('Unauthorized access.', ERRORS.UnauthorizedAccess);
+=======
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
+        }
+
+        if (!(await this.auth.hasUser(payload.sub))) {
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
+        }
+
+        if (!isUserAuthorized(payload.role, scopes)) {
+            throw new ApplicationError(ERRORS.UnauthorizedAccess, undefined, 401);
+>>>>>>> development
         }
 
         return payload;

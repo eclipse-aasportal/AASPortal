@@ -3,7 +3,12 @@
         "../../typedoc.base.jsonc"
     ],
     "entryPoints": [
+<<<<<<< HEAD
         "src/public-api.ts"
+=======
+        "src/public-api.ts",
+        "src/lib/**/*.ts"
+>>>>>>> development
     ],
     "tsconfig": "tsconfig.lib.json"
 }

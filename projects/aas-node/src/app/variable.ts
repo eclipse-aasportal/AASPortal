@@ -40,8 +40,13 @@ export class Variable {
         this.HTTPS_PFX_FILE = process.env.HTTPS_PFX_FILE;
         this.AAS_EXPIRES_IN = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
         this.AAS_INDEX = process.env.AAS_INDEX;
+<<<<<<< HEAD
         this.AAS_NODE_USERNAME = process.env.AAS_NODE_USERNAME ?? 'aas-server';
         this.AAS_NODE_PASSWORD = process.env.AAS_NODE_PASSWORD ?? 'aas-server';
+=======
+        this.AAS_NODE_USERNAME = process.env.AAS_NODE_USERNAME ?? 'aas-node';
+        this.AAS_NODE_PASSWORD = process.env.AAS_NODE_PASSWORD ?? 'aas-node';
+>>>>>>> development
         this.LOG_LEVEL = (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Info';
     }
 
@@ -105,7 +110,7 @@ export class Variable {
     /** The AASIndex realization. */
     public readonly AAS_INDEX?: string;
 
-    /** The user name of AASNode (default: aas-server) */
+    /** The user name of AASNode (default: aas-node) */
     public readonly AAS_NODE_USERNAME: string;
 
     /** The root password. */

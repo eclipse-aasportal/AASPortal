@@ -1,0 +1,188 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { aas, AASDocument, AASEndpoint, LiveRequest } from 'aas-core';
+import { computeCrc32 } from 'aas-package';
+import { Logger } from '../logging/logger.js';
+import { SocketClient } from '../live/socket-client.js';
+import { SocketSubscription } from '../live/socket-subscription.js';
+import { createThumbnail } from '../utilities.js';
+
+/** Represents a client of a server that provides Asset Administration Shells. */
+export abstract class AASClient {
+    protected constructor(
+        protected readonly logger: Logger,
+        public readonly endpoint: AASEndpoint,
+    ) {}
+
+    /** Indicates whether an active connection is established. */
+    public abstract readonly isOpen: boolean;
+
+    /** Indicates whether the AAS source is read-only. */
+    public abstract readonly readOnly: boolean;
+
+    /** Indicates whether the AAS source provides live data. */
+    public abstract readonly onlineReady: boolean;
+
+    public async createDocument(address: string): Promise<AASDocument> {
+        const environment = await this.getEnvironment(address);
+        const aas = environment.assetAdministrationShells[0];
+        const document: AASDocument = {
+            id: aas.id,
+            endpoint: this.endpoint.name,
+            address: address,
+            idShort: aas.idShort,
+            assetId: aas.assetInformation.globalAssetId,
+            readonly: this.readOnly,
+            onlineReady: true,
+            content: environment,
+            timestamp: Date.now(),
+            crc32: computeCrc32(environment),
+        };
+
+        const thumbnail = await this.createThumbnail(address);
+        if (thumbnail) {
+            document.thumbnail = thumbnail;
+        }
+
+        return document;
+    }
+
+    /**
+     * Tests the connection to the AAS endpoint.
+     */
+    public abstract test(): Promise<void>;
+
+    /**
+     * Opens a connection to the AAS endpoint.
+     */
+    public abstract open(): Promise<void>;
+
+    /**
+     * Closes the connection to the AAS endpoint.
+     */
+    public abstract close(): Promise<void>;
+
+    /**
+     * Gets the thumbnail of the AAS package with the specified address.
+     * @param address The address of the package in the AAS endpoint.
+     */
+    public abstract getThumbnail(address: string): Promise<NodeJS.ReadableStream | undefined>;
+
+    /**
+     * Gets the AAS environment contained in the package with the specified address.
+     * @param address The address of the package in the AAS endpoint.
+     */
+    public abstract getEnvironment(address: string): Promise<aas.Environment>;
+
+    /**
+     * Sets a new AAS environment in the package with the specified address.
+     * @param address The address of the package in the AAS endpoint.
+     * @param env The AAS environment.
+     */
+    public abstract setEnvironment(address: string, env: aas.Environment): Promise<void>;
+
+    /**
+     * Opens a readable stream.
+     * @param address The address of the package in the AAS endpoint.
+     * @param file The File element to read the content.
+     */
+    public abstract openRead(address: string, file: aas.File): Promise<NodeJS.ReadableStream>;
+
+    public abstract determineAddress(aasxFile: string): Promise<string | undefined>;
+
+    /**
+     * Creates a WebSocket subscription.
+     * @param client The client.
+     * @param request The request.
+     * @param env The AAS environment.
+     */
+    public abstract createSubscription(
+        client: SocketClient,
+        request: LiveRequest,
+        env: aas.Environment,
+    ): SocketSubscription;
+
+    /**
+     * Downloads an aasx package form the current source.
+     * @param endpoint The endpoint name.
+     * @param id The AAS identifier.
+     * @returns A readable stream.
+     */
+<<<<<<< HEAD:projects/aas-node/src/app/package/aas-client.ts
+    public abstract getPackage(aasIdentifier: string, name: string): Promise<NodeJS.ReadableStream>;
+=======
+    public abstract getPackage(endpoint: string, id: string): Promise<NodeJS.ReadableStream>;
+>>>>>>> development:projects/aas-node/src/app/client/aas-client.ts
+
+    /**
+     * Uploads an AASX package.
+     * @param file The AASX package file.
+     */
+<<<<<<< HEAD:projects/aas-node/src/app/package/aas-client.ts
+    public abstract postPackage(file: Express.Multer.File): Promise<string>;
+=======
+    public abstract insertPackage(file: string): Promise<void>;
+>>>>>>> development:projects/aas-node/src/app/client/aas-client.ts
+
+    /**
+     * Delete an aasx package from the current source.
+     * @param id The AAS identifier.
+     * @param name The name of the package in the source.
+     */
+<<<<<<< HEAD:projects/aas-node/src/app/package/aas-client.ts
+    public abstract deletePackage(aasId: string, name: string): Promise<string>;
+=======
+    public abstract deletePackage(id: string, name: string): Promise<void>;
+>>>>>>> development:projects/aas-node/src/app/client/aas-client.ts
+
+    /**
+     * Invokes the specified operation synchronously.
+     * @param env The current AAS environment.
+     * @param operation The operation to invoke.
+     * @returns The invoked operation.
+     */
+    public abstract invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation>;
+
+    /**
+     * Reads the value of the current Blob element.
+     * @param env The AAS environment.
+     * @param submodelId The Submodel to which the Blob belongs.
+     * @param idShortPath The path from the Submodel to the Blob element.
+     * @returns The Blob value.
+     */
+    public abstract getBlobValue(
+        env: aas.Environment,
+        submodelId: string,
+        idShortPath: string,
+    ): Promise<string | undefined>;
+
+    /**
+     * Resolves a new URL from the base URL and the specified URL.
+     * @param url The URL.
+     * @returns A new URL.
+     */
+    protected resolve(url: string, searchParams?: Record<string, string | number>): URL {
+        const resolvedUrl = new URL(url, this.endpoint.url);
+        if (searchParams) {
+            for (const name in searchParams) {
+                resolvedUrl.searchParams.set(name, String(searchParams[name]));
+            }
+        }
+
+        return resolvedUrl;
+    }
+
+    private async createThumbnail(address: string): Promise<string | undefined> {
+        try {
+            return await createThumbnail(await this.getThumbnail(address));
+        } catch {
+            return undefined;
+        }
+    }
+}

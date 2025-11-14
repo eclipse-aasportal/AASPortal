@@ -98,6 +98,17 @@ export const viewRoutes: ViewRoute[] = [
         },
     },
     {
+<<<<<<< HEAD
+=======
+        path: 'Laser',
+        component: OperationalDataView,
+        data: {
+            type: 'Leaf',
+            idShorts: ['OperationalData'],
+        },
+    },
+    {
+>>>>>>> development
         path: 'TechnicalData',
         component: TechnicalDataView,
         data: {

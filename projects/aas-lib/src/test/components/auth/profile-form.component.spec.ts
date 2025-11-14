@@ -17,7 +17,11 @@ import { AuthResult } from 'aas-core';
 import { of } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
+<<<<<<< HEAD
 import { ERRORS } from '../../../lib/errors';
+=======
+import { ERRORS } from '../../../lib/messages';
+>>>>>>> development
 import { ProfileFormComponent } from '../../../lib/components/auth/profile-form/profile-form.component';
 import { DoneFn, FakeLoader } from '../../mocks';
 

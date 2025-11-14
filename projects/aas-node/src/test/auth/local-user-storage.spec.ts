@@ -17,7 +17,7 @@ import { LocalUserStorage } from '../../app/auth/local-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
 import { createSpyObj } from 'aas-jest';
 import { Logger } from '../../app/logging/logger.js';
-import { slash } from '../../app/convert.js';
+import { slash } from '../../app/utilities.js';
 
 describe('LocaleUserStorage', function () {
     let userStorage: UserStorage;

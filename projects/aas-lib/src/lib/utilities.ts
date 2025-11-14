@@ -11,10 +11,14 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     aas,
     ApplicationError,
+<<<<<<< HEAD
     ErrorData,
     convertToString,
     stringFormat,
     noop,
+=======
+    convertToString,
+>>>>>>> development
     getLocaleValue,
     getPreferredName,
     AASDocument,
@@ -30,6 +34,10 @@ import {
     toDisplayValue,
     getChildren,
     getSemanticId,
+<<<<<<< HEAD
+=======
+    isErrorData,
+>>>>>>> development
 } from 'aas-core';
 
 import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } from './types';
@@ -43,79 +51,24 @@ import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } 
 export function messageToString(message: unknown, translate: TranslateService): string {
     let text: string;
     if (message instanceof ApplicationError) {
-        text = format(message.message, message.name, message.args);
+        text = translate.instant(message.message, message.args);
     } else if (message instanceof Error) {
         text = message.message;
     } else if (typeof message === 'string') {
         text = message;
     } else if (message instanceof HttpErrorResponse) {
         if (isErrorData(message.error)) {
-            text = format(message.error.message, message.error.name, message.error.args);
+            text = translate.instant(message.error.message, message.error.args);
         } else {
             text = message.message ?? `${message.status} ${message.statusText}`;
         }
     } else if (isErrorData(message)) {
-        text = format(message.message, message.name, message.args);
+        text = translate.instant(message.message, message.args);
     } else {
         text = convertToString(message);
     }
 
     return text;
-
-    function isErrorData(value: unknown): value is ErrorData {
-        const errorData = value as ErrorData;
-        return errorData.message !== undefined && errorData.name !== undefined && errorData.type !== undefined;
-    }
-
-    function format(message: string, name: string, args: unknown[]): string {
-        if (name) {
-            return stringFormat(translate.instant(name), args);
-        }
-
-        return message;
-    }
-}
-
-/**
- * Resolves the specified error to an displayable object.
- * @param error The error.
- * @param translate The translation service.
- * @returns
- */
-export async function resolveError(error: unknown, translate: TranslateService): Promise<string> {
-    let message = error;
-    if (error instanceof HttpErrorResponse) {
-        if (error.error instanceof Blob) {
-            if (error.error.type === 'application/json') {
-                try {
-                    const buffer = await error.error.arrayBuffer();
-                    message = JSON.parse(new TextDecoder().decode(buffer));
-                } catch {
-                    noop();
-                }
-            }
-        } else {
-            message = `${error.message}: ${convertToString(error.error)}`;
-        }
-    }
-
-    return messageToString(message, translate);
-}
-
-/**
- * Replaces all `\` in the specified path with `/`.
- * @param path The path.
- * @returns The normalized file path.
- */
-export function normalize(path: string): string {
-    path = path.replace(/\\/g, '/');
-    if (path.charAt(0) === '/') {
-        path = path.slice(1);
-    } else if (path.startsWith('./')) {
-        path = path.slice(2);
-    }
-
-    return path;
 }
 
 /**

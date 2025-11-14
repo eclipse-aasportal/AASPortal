@@ -9,17 +9,20 @@
 import { parentPort } from 'worker_threads';
 import { extname, join } from 'path/posix';
 import { AASEndpoint, TemplateDescriptor, isSubmodel } from 'aas-core';
+<<<<<<< HEAD
+=======
+import { createJsonReader, createXmlReader } from 'aas-package';
+
+>>>>>>> development
 import { LOGGER, Logger } from '../logging/logger.js';
 import { FileStorage } from '../file-storage/file-storage.js';
 import { inject, singleton } from 'tsyringe';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { Variable } from '../variable.js';
-import { createJsonReader } from '../package/create-json-reader.js';
-import { createXmlReader } from '../package/create-xml-reader.js';
-import { AasxDirectory } from '../package/file-system/aasx-directory.js';
-import { ScanResultKind, ScanTemplatesResult } from '../types/scan-result.js';
-import { toUint8Array } from '../convert.js';
-import { WorkerData } from '../types/worker-data.js';
+import { AasxDirectory } from '../client/fs/aasx-directory.js';
+import { ScanResultKind, ScanTemplatesResult, WorkerData } from '../types.js';
+import { toUint8Array } from '../utilities.js';
+import { AasxPackage } from '../client/fs/aasx-package.js';
 
 @singleton()
 export class TemplateScan {
@@ -130,13 +133,11 @@ export class TemplateScan {
     }
 
     private async fromAasxFile(file: string): Promise<TemplateDescriptor | undefined> {
-        let source: AasxDirectory | undefined;
+        let client: AasxDirectory | undefined;
         try {
-            source = new AasxDirectory(this.logger, this.fileStorage, this.endpoint);
-            await source.open();
-            const pkg = source.createPackage(file);
-            const env = await pkg.getEnvironment();
-            if (env.submodels.length === 0) {
+            const aasxPackage = await AasxPackage.createFromFile(file);
+            const env = await aasxPackage.getEnvironment();
+            if (env.submodels.length > 0) {
                 return undefined;
             }
 
@@ -151,7 +152,7 @@ export class TemplateScan {
         } catch {
             return undefined;
         } finally {
-            await source?.close();
+            await client?.close();
         }
     }
 }

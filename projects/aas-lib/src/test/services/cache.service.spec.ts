@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { jest } from '@jest/globals';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -32,6 +33,19 @@ describe('CacheService', () => {
                 },
                 provideZonelessChangeDetection(),
             ],
+=======
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+
+import { CacheService } from '../../lib/services/cache.service';
+
+describe('CacheService', () => {
+    let service: CacheService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [provideZonelessChangeDetection()],
+>>>>>>> development
         });
 
         service = TestBed.inject(CacheService);
@@ -75,6 +89,7 @@ describe('CacheService', () => {
             service.set('http://the/answer/to/all/questions', 42);
         });
 
+<<<<<<< HEAD
         it('clears the cache if the IndexChangeService receives a message', (done: DoneFn) => {
             message.subscribe(() => {
                 expect(service.get('http://the/answer/to/all/questions')).toBeUndefined();
@@ -82,6 +97,11 @@ describe('CacheService', () => {
             });
 
             message.next({ type: 'AnyMessage', data: 42 } satisfies WebSocketData);
+=======
+        it('clears the cache', () => {
+            service.clear();
+            expect(service.get('http://the/answer/to/all/questions')).toBeUndefined();
+>>>>>>> development
         });
     });
 });

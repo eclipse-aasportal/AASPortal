@@ -12,57 +12,75 @@ main();
 
 function main() {
     const aasCoreSummary = read('./reports/aas-core/coverage-summary.json');
-    const aasServerSummary = read('./reports/aas-node/coverage-summary.json');
+    const aasNodeSummary = read('./reports/aas-node/coverage-summary.json');
     const aasLibSummary = read('./reports/aas-lib/coverage-summary.json');
     const aasPortalSummary = read('./reports/aas-portal/coverage-summary.json');
+    const aasServerSummary = read('./reports/aas-server/coverage-summary.json');
+    const aasBrowserSummary = read('./reports/aas-browser/coverage-summary.json');
 
     const statementsTotal =
         aasCoreSummary.total.statements.total +
-        aasServerSummary.total.statements.total +
+        aasNodeSummary.total.statements.total +
         aasLibSummary.total.statements.total +
-        aasPortalSummary.total.statements.total;
+        aasPortalSummary.total.statements.total +
+        aasServerSummary.total.statements.total +
+        aasBrowserSummary.total.statements.total;
 
     const statementsCovered =
         aasCoreSummary.total.statements.covered +
-        aasServerSummary.total.statements.covered +
+        aasNodeSummary.total.statements.covered +
         aasLibSummary.total.statements.covered +
-        aasPortalSummary.total.statements.covered;
+        aasPortalSummary.total.statements.covered +
+        aasServerSummary.total.statements.covered +
+        aasBrowserSummary.total.statements.covered;
 
     const branchesTotal =
         aasCoreSummary.total.branches.total +
-        aasServerSummary.total.branches.total +
+        aasNodeSummary.total.branches.total +
         aasLibSummary.total.branches.total +
-        aasPortalSummary.total.branches.total;
+        aasPortalSummary.total.branches.total +
+        aasServerSummary.total.branches.total +
+        aasBrowserSummary.total.branches.total;
 
     const branchesCovered =
         aasCoreSummary.total.branches.covered +
-        aasServerSummary.total.branches.covered +
+        aasNodeSummary.total.branches.covered +
         aasLibSummary.total.branches.covered +
-        aasPortalSummary.total.branches.covered;
+        aasPortalSummary.total.branches.covered +
+        aasServerSummary.total.branches.covered +
+        aasBrowserSummary.total.branches.covered;
 
     const functionsTotal =
         aasCoreSummary.total.functions.total +
-        aasServerSummary.total.functions.total +
+        aasNodeSummary.total.functions.total +
         aasLibSummary.total.functions.total +
-        aasPortalSummary.total.functions.total;
+        aasPortalSummary.total.functions.total +
+        aasServerSummary.total.functions.total +
+        aasBrowserSummary.total.functions.total;
 
     const functionsCovered =
         aasCoreSummary.total.functions.covered +
-        aasServerSummary.total.functions.covered +
+        aasNodeSummary.total.functions.covered +
         aasLibSummary.total.functions.covered +
-        aasPortalSummary.total.functions.covered;
+        aasPortalSummary.total.functions.covered +
+        aasServerSummary.total.functions.covered +
+        aasBrowserSummary.total.functions.covered;
 
     const total =
         aasCoreSummary.total.lines.total +
-        aasServerSummary.total.lines.total +
+        aasNodeSummary.total.lines.total +
         aasLibSummary.total.lines.total +
-        aasPortalSummary.total.lines.total;
+        aasPortalSummary.total.lines.total +
+        aasServerSummary.total.lines.total +
+        aasBrowserSummary.total.lines.total;
 
     const covered =
         aasCoreSummary.total.lines.covered +
-        aasServerSummary.total.lines.covered +
+        aasNodeSummary.total.lines.covered +
         aasLibSummary.total.lines.covered +
-        aasPortalSummary.total.lines.covered;
+        aasPortalSummary.total.lines.covered +
+        aasServerSummary.total.lines.covered +
+        aasBrowserSummary.total.lines.covered;
 
     console.info('=============================== Coverage summary ===============================');
     console.info(

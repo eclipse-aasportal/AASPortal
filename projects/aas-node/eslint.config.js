@@ -6,12 +6,14 @@ import defaultConfig from '../../eslint.config.js';
 export default [
     ...defaultConfig,
     {
+        ignores: ['src/test/assets/**'],
+    },
+    {
         languageOptions: {
             globals: globals.node,
             parser: tsParser,
             ecmaVersion: 2022,
             sourceType: 'module',
         },
-        ignores: ['src/test/assets/**/*'],
     },
 ];

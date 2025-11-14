@@ -6,27 +6,42 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
+=======
+import { jest } from '@jest/globals';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+>>>>>>> development
 import { BrowserComponent } from '../../../lib/components/browser/browser.component';
 import { BrowserState } from '../../../lib/components/browser/browser.state';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 
 import sampleDocument from '../../assets/sample-document.json';
+<<<<<<< HEAD
+=======
+import { API_URL } from '../../../lib/types';
+>>>>>>> development
 
 describe('BrowserComponent', () => {
     let fixture: ComponentFixture<BrowserComponent>;
     let component: BrowserComponent;
     let api: jest.Mocked<EndpointsApi>;
+<<<<<<< HEAD
     let document: AASDocument;
+=======
+>>>>>>> development
     let browserState: BrowserState;
 
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
 
+<<<<<<< HEAD
         document = {
             address: '',
             crc32: 0,
@@ -38,6 +53,8 @@ describe('BrowserComponent', () => {
             content: sampleDocument as aas.Environment,
         };
 
+=======
+>>>>>>> development
         await TestBed.configureTestingModule({
             imports: [BrowserComponent],
             providers: [
@@ -46,6 +63,16 @@ describe('BrowserComponent', () => {
                     provide: EndpointsApi,
                     useValue: api,
                 },
+<<<<<<< HEAD
+=======
+                {
+                    provide: API_URL,
+                    useValue: {
+                        join: jest.fn(),
+                        getFileUrl: jest.fn(),
+                    }
+                },
+>>>>>>> development
                 provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
@@ -59,7 +86,12 @@ describe('BrowserComponent', () => {
         fixture = TestBed.createComponent(BrowserComponent);
         browserState = TestBed.inject(BrowserState);
         fixture.componentRef.setInput('state', browserState);
+<<<<<<< HEAD
         fixture.componentRef.setInput('document', document);
+=======
+        fixture.componentRef.setInput('env', sampleDocument);
+        fixture.componentRef.setInput('endpoint', 'test');
+>>>>>>> development
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
@@ -69,7 +101,12 @@ describe('BrowserComponent', () => {
     });
 
     it('should initialize the state with the AAS document', () => {
+<<<<<<< HEAD
         expect(component.document()).toEqual(document);
+=======
+        expect(component.env()).toEqual(sampleDocument);
+        expect(component.endpoint()).toEqual('test');
+>>>>>>> development
         expect(component.state()).toBe(browserState);
         expect(component.path()).toEqual([]);
         expect(component.current()).toBeDefined();
@@ -77,7 +114,11 @@ describe('BrowserComponent', () => {
         expect(component.children()?.length).toBeGreaterThan(0);
     });
 
+<<<<<<< HEAD
     describe('goDown/gouUp', () => {
+=======
+    describe('goDown/goUp', () => {
+>>>>>>> development
         it('should navigate down and up in the hierarchy', () => {
             const child = component.children()[0];
             component.goDown(child);

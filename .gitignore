@@ -41,12 +41,20 @@ typings
 reports
 .nyc_output
 temp
+tmp
 *-audit.json
 swagger.json
 swagger.yaml
 /projects/aas-node/src/app/routes
 /projects/ass-node/src/assets/app-info.json
 /projects/aas-portal/src/start
+<<<<<<< HEAD
+=======
+/projects/aas-server/data
+/projects/aas-server/src/app/routes
+/projects/aas-server/src/assets/swagger.json
+/data
+>>>>>>> development
 
 # System files
 .DS_Store

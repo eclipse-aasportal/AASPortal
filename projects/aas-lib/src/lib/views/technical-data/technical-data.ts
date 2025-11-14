@@ -7,7 +7,10 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+<<<<<<< HEAD
 import { TranslateModule } from '@ngx-translate/core';
+=======
+>>>>>>> development
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
@@ -27,7 +30,11 @@ import { TechnicalDataData, TechnicalDataState } from './technical-data.state';
  */
 @Component({
     selector: 'fhg-technical-data',
+<<<<<<< HEAD
     imports: [TranslateModule, NgbAccordionModule, DataSheet],
+=======
+    imports: [NgbAccordionModule, DataSheet],
+>>>>>>> development
     templateUrl: './technical-data.html',
     styleUrl: './technical-data.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,7 +6,11 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { TranslateModule } from '@ngx-translate/core';
+=======
+import { TranslateDirective } from '@ngx-translate/core';
+>>>>>>> development
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -38,7 +42,11 @@ import { encodeBase64Url } from '../../utilities';
     selector: 'fhg-contact-information-view',
     templateUrl: './contact-information-view.html',
     styleUrls: ['./contact-information-view.scss'],
+<<<<<<< HEAD
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformation],
+=======
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformation],
+>>>>>>> development
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContactInformationView extends LeafView<ContactInformationViewState> implements OnInit, OnDestroy {

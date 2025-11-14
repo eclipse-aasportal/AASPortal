@@ -1,0 +1,28 @@
+{
+    "extends": "../../tsconfig.json",
+    "compileOnSave": false,
+    "compilerOptions": {
+        "outDir": "./build",
+        "lib": [
+            "ES2022",
+            "dom"
+        ],
+        "types": [
+            "@angular/localize",
+            "jest"
+        ],
+        "paths": {
+            "aas-lib": [
+                "projects/aas-lib/src/public-api"
+            ],
+            "@app/*": ["src/app/*"]
+        }
+    },
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true,
+        "typeCheckHostBindings": true,
+        "strictTemplates": true
+    }
+}

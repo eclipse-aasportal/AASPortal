@@ -51,7 +51,11 @@ export class AuthService {
     public async login(credentials: Credentials): Promise<AuthResult> {
         const data = await this.userStorage.read(credentials.id);
         if (!data) {
+<<<<<<< HEAD
             throw new ApplicationError(`Unknown user ${credentials.id}.`, ERRORS.UnknownUser, credentials.id);
+=======
+            throw new ApplicationError(ERRORS.UnknownUser, { id: credentials.id }, 400);
+>>>>>>> development
         }
 
         await this.checkPassword(credentials.password, data.password);
@@ -64,7 +68,7 @@ export class AuthService {
     public async getProfile(id: string): Promise<UserProfile> {
         const data = await this.userStorage.read(id);
         if (data == null) {
-            throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
+            throw new ApplicationError(ERRORS.UnknownUser, { id }, 400);
         }
 
         return { id: data.id, name: data.name } as UserProfile;
@@ -73,12 +77,12 @@ export class AuthService {
     public async updateProfile(id: string, profile: UserProfile): Promise<AuthResult> {
         const data = await this.userStorage.read(id);
         if (data == null) {
-            throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
+            throw new ApplicationError(ERRORS.UnknownUser, { id }, 400);
         }
 
         if (profile.password) {
             if (!isValidPassword(profile.password)) {
-                throw new ApplicationError('Invalid password.', ERRORS.InvalidPassword);
+                throw new ApplicationError(ERRORS.InvalidPassword, undefined, 400);
             }
 
             data.password = await bcrypt.hash(profile.password, 10);
@@ -90,11 +94,15 @@ export class AuthService {
             await this.userStorage.write(id, data);
         } else {
             if (await this.userStorage.exist(profile.id)) {
+<<<<<<< HEAD
                 throw new ApplicationError(
                     `An account already exists for this e-mail '${profile.id}'.`,
                     ERRORS.UserAlreadyExists,
                     profile.id,
                 );
+=======
+                throw new ApplicationError(ERRORS.UserAlreadyExists, { id: profile.id }, 409);
+>>>>>>> development
             }
 
             await this.userStorage.write(profile.id, data);
@@ -108,19 +116,23 @@ export class AuthService {
 
     public async registerUser(profile: UserProfile): Promise<AuthResult> {
         if (!isValidEMail(profile.id)) {
-            throw new ApplicationError(`'${profile.id}' is not a valid e-mail.`, ERRORS.InvalidEMail);
+            throw new ApplicationError(ERRORS.InvalidEMail, { id: profile.id }, 400);
         }
 
         if (await this.userStorage.exist(profile.id)) {
+<<<<<<< HEAD
             throw new ApplicationError(
                 `An account already exists for this e-mail '${profile.id}'.`,
                 ERRORS.UserAlreadyExists,
                 profile.id,
             );
+=======
+            throw new ApplicationError(ERRORS.UserAlreadyExists, { id: profile.id }, 409);
+>>>>>>> development
         }
 
         if (!profile.password || !isValidPassword(profile.password)) {
-            throw new ApplicationError('Invalid password.', ERRORS.InvalidPassword);
+            throw new ApplicationError(ERRORS.InvalidPassword, undefined, 400);
         }
 
         let name = profile.name;
@@ -145,7 +157,7 @@ export class AuthService {
     public async resetPassword(id: string): Promise<void> {
         const data = await this.userStorage.read(id);
         if (data == null) {
-            throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
+            throw new ApplicationError(ERRORS.UnknownUser, { id }, 400);
         }
 
         const password = this.createPassword();
@@ -156,7 +168,11 @@ export class AuthService {
 
     public async deleteUserAsync(id: string): Promise<void> {
         if (!(await this.userStorage.delete(id))) {
+<<<<<<< HEAD
             throw new ApplicationError(`Unknown user ${id}.`, ERRORS.UnknownUser, id);
+=======
+            throw new ApplicationError(ERRORS.UnknownUser, { id }, 400);
+>>>>>>> development
         }
     }
 
@@ -191,7 +207,7 @@ export class AuthService {
 
     private async checkPassword(password: string, hash: string) {
         if (!(await bcrypt.compare(password, hash))) {
-            throw new ApplicationError('Invalid password.', ERRORS.InvalidPassword);
+            throw new ApplicationError(ERRORS.InvalidPassword, undefined, 401);
         }
     }
 

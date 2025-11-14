@@ -10,7 +10,12 @@ import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
+<<<<<<< HEAD
+=======
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+>>>>>>> development
 import {
+    API_URL,
     AuthInterceptor,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
@@ -19,12 +24,21 @@ import {
     StartTileType,
     VIEW_ROUTES,
     viewRoutes,
+<<<<<<< HEAD
+=======
+    WINDOW,
+    WindowService,
+>>>>>>> development
 } from 'aas-lib';
 
 import { routes } from './app.routes';
 import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
+<<<<<<< HEAD
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+=======
+import { ApiUrlService } from './api-url.service';
+>>>>>>> development
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -64,6 +78,14 @@ export const appConfig: ApplicationConfig = {
             provide: VIEW_ROUTES,
             useValue: viewRoutes,
         },
+<<<<<<< HEAD
+=======
+        {
+            provide: API_URL,
+            useFactory: (window: WindowService) => new ApiUrlService(window),
+            deps: [WINDOW],
+        },
+>>>>>>> development
         provideZonelessChangeDetection(),
     ],
 };

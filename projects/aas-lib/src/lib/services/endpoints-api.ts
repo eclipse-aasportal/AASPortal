@@ -6,10 +6,17 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AASCursor, AASDocument, AASPagedResult, aas } from 'aas-core';
 import { first, mergeMap, Observable, of, tap } from 'rxjs';
+=======
+import { DOCUMENT, inject, Injectable } from '@angular/core';
+import { HttpClient, HttpEvent } from '@angular/common/http';
+import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
+import { first, map, mergeMap, Observable, of, tap } from 'rxjs';
+>>>>>>> development
 import { encodeBase64Url } from '../utilities';
 import { AuthService } from '../components/auth/auth.service';
 import { CacheService } from './cache.service';
@@ -17,11 +24,50 @@ import { CacheService } from './cache.service';
 /** The API of the digital nameplate. */
 @Injectable({ providedIn: 'root' })
 export class EndpointsApi {
+<<<<<<< HEAD
     public constructor(
         private readonly http: HttpClient,
         private readonly auth: AuthService,
         private readonly cache: CacheService,
     ) {}
+=======
+    private readonly document = inject(DOCUMENT);
+    private readonly http = inject(HttpClient);
+    private readonly auth = inject(AuthService);
+    private readonly cache = inject(CacheService);
+
+    /**
+     * Returns all configured AAS endpoints.
+     * @returns An array of `AASEndpoint`.
+     */
+    public getEndpoints(): Observable<AASEndpoint[]> {
+        return this.http.get<AASEndpoint[]>('/api/v1/endpoints');
+    }
+
+    /**
+     * Adds a new endpoint.
+     * @param endpoint The AAS endpoint.
+     */
+    public addEndpoint(endpoint: AASEndpoint): Observable<void> {
+        return this.http.post<void>('/api/v1/endpoints', endpoint);
+    }
+
+    /**
+     * Updates an existing endpoint.
+     * @param endpoint The AAS endpoint.
+     */
+    public updateEndpoint(endpoint: AASEndpoint): Observable<void> {
+        return this.http.put<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint.name)}`, endpoint);
+    }
+
+    /**
+     * Removes the specified endpoint.
+     * @param name The name of the endpoint.
+     */
+    public removeEndpoint(name: string): Observable<void> {
+        return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(name)}`);
+    }
+>>>>>>> development
 
     /**
      * Gets the AAS document with the specified identifier.
@@ -101,6 +147,19 @@ export class EndpointsApi {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Delete the specified AAS document from the corresponding AAS container.
+     * @param id The identification of the AAS document to delete.
+     * @param url The URL of the AAS container.
+     * @returns An observable.
+     */
+    public deleteDocument(id: string, url: string): Observable<void> {
+        return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
+    }
+
+    /**
+>>>>>>> development
      * Returns a AAS document hierarchy.
      * @param id The identification of the root AAS document.
      * @param endpoint The endpoint name of the root AAS document.
@@ -115,4 +174,71 @@ export class EndpointsApi {
 
         return of(documents);
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Downloads a file from the specified URL.
+     * @param url The URL to the file resource.
+     * @param filename The file name.
+     */
+    public download(url: string, filename: string): Observable<void> {
+        return this.http
+            .get(url, {
+                responseType: 'blob',
+            })
+            .pipe(
+                map(blob => {
+                    const a = this.document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.setAttribute('download', filename);
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                }),
+            );
+    }
+
+    /**
+     * Downloads an AASX package file from the specified endpoint for the given AAS identifier.
+     *
+     * @param endpoint The endpoint name used to form the request URL.
+     * @param id The identifier for the AAS whose package will be downloaded.
+     * @param filename The name used for the downloaded file in the browser.
+     * @returns An Observable that completes after the download is triggered.
+     */
+    public downloadPackage(endpoint: string, id: string, filename: string): Observable<void> {
+        return this.http
+            .get(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`, {
+                responseType: 'blob',
+            })
+            .pipe(
+                map(blob => {
+                    const a = this.document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.setAttribute('download', filename);
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }),
+            );
+    }
+
+    /**
+     * Uploads an AASX package file to the specified endpoint.
+     * This method sends a multipart/form-data POST request containing the provided
+     * file to the server. The request reports progress and emits events describing
+     * the upload process. The file is appended to the form data under the key 'file'.
+     *
+     * @param endpoint The endpoint name used to construct the upload URL.
+     * @param file The File object to be uploaded.
+     * @returns An Observable emitting HttpEvent<object> for upload progress and completion.
+     */
+    public uploadPackage(endpoint: string, file: File): Observable<HttpEvent<object>> {
+        const data = new FormData();
+        data.append('file', file);
+        return this.http.post(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages`, data, {
+            reportProgress: true,
+            observe: 'events',
+        });
+    }
+>>>>>>> development
 }

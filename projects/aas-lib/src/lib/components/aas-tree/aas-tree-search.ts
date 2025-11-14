@@ -15,11 +15,15 @@ import {
     convertFromString,
     convertToString,
     getModelTypeFromAbbreviation,
+    normalize,
     parseDate,
     parseNumber,
 } from 'aas-core';
 
+<<<<<<< HEAD
 import { normalize } from '../../utilities';
+=======
+>>>>>>> development
 import { AASTreeNode } from './aas-tree-node';
 
 type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';

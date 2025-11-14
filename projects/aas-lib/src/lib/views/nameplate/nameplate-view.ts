@@ -6,7 +6,11 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { LangChangeEvent, TranslateModule, TranslateService } from '@ngx-translate/core';
+=======
+import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
+>>>>>>> development
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
@@ -43,7 +47,11 @@ import { NameplateViewState } from './nameplate-view.state';
     selector: 'fhg-nameplate-view',
     templateUrl: './nameplate-view.html',
     styleUrls: ['./nameplate-view.scss'],
+<<<<<<< HEAD
     imports: [TranslateModule, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate],
+=======
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate],
+>>>>>>> development
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NameplateView extends LeafView<NameplateViewState> implements OnInit, OnDestroy {

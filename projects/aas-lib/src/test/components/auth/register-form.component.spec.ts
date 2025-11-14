@@ -16,7 +16,11 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
+<<<<<<< HEAD
 import { ERRORS } from '../../../lib/errors';
+=======
+import { ERRORS } from '../../../lib/messages';
+>>>>>>> development
 import { getToken } from '../../assets/json-web-token';
 import { FakeLoader } from '../../mocks';
 import {

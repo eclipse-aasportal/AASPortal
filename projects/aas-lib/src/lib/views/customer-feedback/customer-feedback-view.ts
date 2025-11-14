@@ -6,7 +6,11 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+=======
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+>>>>>>> development
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -41,7 +45,11 @@ const maxStars = 5;
     selector: 'fhg-customer-feedback',
     templateUrl: './customer-feedback-view.html',
     styleUrls: ['./customer-feedback-view.scss'],
+<<<<<<< HEAD
     imports: [ScoreComponent, DecimalPipe, TranslateModule],
+=======
+    imports: [ScoreComponent, DecimalPipe, TranslateDirective],
+>>>>>>> development
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerFeedbackView extends LeafView<CustomerFeedbackViewState> implements OnInit, OnDestroy {

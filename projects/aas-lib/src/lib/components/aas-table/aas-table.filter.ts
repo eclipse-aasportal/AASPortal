@@ -6,7 +6,10 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { normalize } from '../../utilities';
+=======
+>>>>>>> development
 import {
     AASDocument,
     aas,
@@ -24,6 +27,7 @@ import {
     flat,
     getModelTypeFromAbbreviation,
     AASAbbreviation,
+    normalize,
 } from 'aas-core';
 
 export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';

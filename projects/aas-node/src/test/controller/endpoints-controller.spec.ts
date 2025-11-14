@@ -21,7 +21,7 @@ import { createSpyObj } from 'aas-jest';
 import { sampleDocument } from '../assets/sample-document.js';
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
-import { AASProvider } from '../../app/aas-provider/aas-provider.js';
+import { AASProvider } from '../../app/provider/aas-provider.js';
 import { Variable } from '../../app/variable.js';
 import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
@@ -55,7 +55,11 @@ describe('EndpointsController', () => {
             'getContent',
             'getPackage',
             'getDocument',
+<<<<<<< HEAD
             'addPackages',
+=======
+            'insertPackages',
+>>>>>>> development
             'deletePackage',
             'getDataElementValue',
             'invoke',
@@ -202,10 +206,14 @@ describe('EndpointsController', () => {
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxl/packages')
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .attach('files', resolve('./src/test/assets/samples/example-motor.aasx'));
+            .attach('file', resolve('./src/test/assets/samples/example-motor.aasx'));
 
         expect(response.statusCode).toBe(204);
+<<<<<<< HEAD
         expect(aasProvider.addPackages).toHaveBeenCalled();
+=======
+        expect(aasProvider.insertPackages).toHaveBeenCalled();
+>>>>>>> development
     });
 
     it('DELETE: /api/v1/endpoints/{name}/packages/{id}', async () => {

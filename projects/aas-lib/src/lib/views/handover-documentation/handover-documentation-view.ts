@@ -6,7 +6,11 @@
  *
  *****************************************************************************/
 
+<<<<<<< HEAD
 import { TranslateModule } from '@ngx-translate/core';
+=======
+import { TranslateDirective } from '@ngx-translate/core';
+>>>>>>> development
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -38,7 +42,11 @@ import { encodeBase64Url } from '../../utilities';
     selector: 'fhg-handover-documentation-view',
     templateUrl: './handover-documentation-view.html',
     styleUrls: ['./handover-documentation-view.scss'],
+<<<<<<< HEAD
     imports: [TranslateModule, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation],
+=======
+    imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation],
+>>>>>>> development
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HandoverDocumentationView extends LeafView<HandoverDocumentationViewState> implements OnInit, OnDestroy {

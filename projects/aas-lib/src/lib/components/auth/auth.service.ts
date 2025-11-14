@@ -13,7 +13,11 @@ import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throw
 import { jwtDecode } from 'jwt-decode';
 import { ApplicationError, Credentials, stringFormat, UserProfile, UserRole, JWTPayload, toBoolean } from 'aas-core';
 
+<<<<<<< HEAD
 import { ERRORS } from '../../errors';
+=======
+import { ERRORS } from '../../messages';
+>>>>>>> development
 import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-form.component';
 import { ProfileFormComponent, ProfileFormResult } from '../auth/profile-form/profile-form.component';
 import { RegisterFormComponent, RegisterFormResult } from '../auth/register-form/register-form.component';
@@ -122,7 +126,11 @@ export class AuthService {
         return this.login().pipe(
             map(() => {
                 if (!this.isAuthorized(roles)) {
+<<<<<<< HEAD
                     throw new ApplicationError('Unauthorized access.', ERRORS.UNAUTHORIZED_ACCESS);
+=======
+                    throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, undefined, 401);
+>>>>>>> development
                 }
             }),
         );

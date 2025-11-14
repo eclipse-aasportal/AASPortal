@@ -28,11 +28,15 @@ export class RenamePageCommand extends DashboardCommand {
         }
 
         if (this.service.pages().some(item => item.name === name)) {
+<<<<<<< HEAD
             throw new ApplicationError(
                 `A page withe name "${name}" already exists.`,
                 ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS,
                 name,
             );
+=======
+            throw new ApplicationError(ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS, { name }, 409);
+>>>>>>> development
         }
 
         this.renamePage(name);
