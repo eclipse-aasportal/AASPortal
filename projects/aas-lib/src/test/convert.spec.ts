@@ -12,7 +12,6 @@ import {
     encodeBase64Url,
     basename,
     messageToString,
-    normalize,
     decodeBase64Url,
     isBase64,
     extension,
@@ -37,6 +36,7 @@ describe('convert', () => {
         });
     });
 
+<<<<<<< HEAD
     describe('normalize', () => {
         it('replaces all "\\" with "/"', () => {
             expect(normalize('A:\\hello/world\\john.doe')).toEqual('A:/hello/world/john.doe');
@@ -46,6 +46,11 @@ describe('convert', () => {
     describe('messageToString', () => {
         let translate: jest.Mocked<TranslateService>;
 
+=======
+    describe('messageToString', () => {
+        let translate: jest.Mocked<TranslateService>;
+
+>>>>>>> development
         beforeEach(() => {
             translate = createSpyObj<TranslateService>(['instant', 'getCurrentLang'], {
                 currentLang: 'en-us',
@@ -59,8 +64,13 @@ describe('convert', () => {
         });
 
         it('converts an ApplicationError', () => {
+<<<<<<< HEAD
             translate.instant.mockReturnValue('Hello {0}!');
             const error = new ApplicationError('Hello World!', 'HELLO_WORLD', 'World');
+=======
+            translate.instant.mockReturnValue('Hello World!');
+            const error = new ApplicationError('HELLO_WORLD', { arg: 'World' });
+>>>>>>> development
             expect(messageToString(error, translate)).toEqual('Hello World!');
         });
     });

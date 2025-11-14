@@ -31,6 +31,16 @@ Development Guide <development.md>
 
 ```{toctree} 
 :hidden:
+<<<<<<< HEAD
+=======
+:caption: Deployment
+:maxdepth: 3
+Kubernetes <kubernetes.md>
+```
+
+```{toctree} 
+:hidden:
+>>>>>>> development
 :caption: Usage
 :maxdepth: 3
 usage.md

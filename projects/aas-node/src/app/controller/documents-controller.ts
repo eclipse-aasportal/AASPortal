@@ -9,8 +9,8 @@
 import { inject, injectable } from 'tsyringe';
 import { Controller, Get, OperationId, Path, Query, Route, Tags } from 'tsoa';
 import { AASDocument, AASPagedResult } from 'aas-core';
-import { AASProvider } from '../aas-provider/aas-provider.js';
-import { decodeBase64Url } from '../convert.js';
+import { decodeBase64Url } from 'aas-package';
+import { AASProvider } from '../provider/aas-provider.js';
 
 @injectable()
 @Route('/api/v1/documents')

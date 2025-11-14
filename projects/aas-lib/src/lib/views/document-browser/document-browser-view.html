@@ -12,10 +12,14 @@
             <div class="bg-primary text-center py-2 my-2 fs-5">{{ 'Browser.TITLE' | translate }}</div>
             <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
         </div>
+<<<<<<< HEAD
         <fhg-browser
             [document]="document()"
             [state]="browserState"
         ></fhg-browser>
+=======
+        <fhg-browser [env]="content()" [endpoint]="document()?.endpoint" [state]="browserState"></fhg-browser>
+>>>>>>> development
     </div>
 } @else {
     <div class="alert alert-info text-center mt-2" role="alert" translate>Browser.EMPTY</div>

@@ -14,4 +14,5 @@ export const environment: Environment = {
     version: data.version,
     homepage: 'https://www.iosb-ina.fraunhofer.de/',
     author: 'Fraunhofer IOSB-INA',
+    basePath: '/api/v1/',
 };

@@ -2,7 +2,7 @@
     "name": "aas-core",
     "version": "3.0.0",
     "description": "Common types and utilities for the Web-AAS project",
-    "module": "./dist/lib/index.js",
+    "module": "./dist/aas-core.js",
     "main": "./dist/aas-core.js",
     "types": "./dist/types/index.d.ts",
     "author": "Fraunhofer IOSB-INA",
@@ -17,6 +17,11 @@
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/lib/**/*.ts",
         "format": "eslint src/lib/**/*.ts --fix",
+<<<<<<< HEAD
             "docs": "typedoc --out docs"
 }
+=======
+        "docs": "typedoc --out docs"
+    }
+>>>>>>> development
 }

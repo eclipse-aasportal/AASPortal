@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { DataTypeDefXsd, LangString } from './aas.js';
+import {
+    AssetAdministrationShell,
+    ConceptDescription,
+    DataTypeDefXsd,
+    Environment,
+    LangString,
+    Submodel,
+    SubmodelElement,
+} from './aas.js';
+import * as jsonization from './aas-core/jsonization.js';
+import * as types from './aas-core/types.js';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -20,7 +30,11 @@ const dateTimeFormat: Intl.DateTimeFormatOptions = {
 const invariantDecimalSeparator = '.';
 const invariantGroupSeparator = ',';
 
+<<<<<<< HEAD
 const mimeTypes = new Map<string, string>([
+=======
+const mimeTypes = new Map<string, string | string[]>([
+>>>>>>> development
     ['application/epub+zip', '.epub'],
     ['application/gzip', '.gz'],
     ['application/java-archive', '.jar'],
@@ -76,7 +90,11 @@ const mimeTypes = new Map<string, string>([
     ['image/avif', '.avif'],
     ['image/bmp', '.bmp'],
     ['image/gif', '.gif'],
+<<<<<<< HEAD
     ['image/jpeg', '.jpg'],
+=======
+    ['image/jpeg', ['.jpg', '.jpeg']],
+>>>>>>> development
     ['image/png', '.png'],
     ['image/svg+xml', '.svg'],
     ['image/tiff', '.tiff'],
@@ -834,21 +852,100 @@ export function toBoolean(value: unknown): boolean {
 
 /** Returns the file extension that corresponds to the specified MIME type. */
 export function mimeTypeToExtension(mimeType: string): string | undefined {
-    return mimeTypes.get(mimeType);
+    const value = mimeTypes.get(mimeType);
+    if (!value) {
+        return undefined;
+    }
+
+    return Array.isArray(value) ? value[0] : value;
 }
 
 /** Returns the MIME type that corresponds ti the specified file extension */
-export function extensionToMimeType(extension: string): string | undefined {
-    extension = extension?.toLowerCase();
-    for (const tuple of mimeTypes) {
-        if (tuple[1] === extension) {
-            return tuple[0];
+export function extensionToMimeType(filename: string): string | undefined {
+    const index = filename.lastIndexOf('.');
+    if (index < 0) {
+        return undefined;
+    }
+
+    const extension = filename.substring(index).toLowerCase();
+    for (const [mimeType, ext] of mimeTypes) {
+        if (Array.isArray(ext)) {
+            if (ext.some(item => item === extension)) {
+                return mimeType;
+            }
+        } else if (ext === extension) {
+            return mimeType;
         }
     }
 
     return undefined;
 }
 
+/** Converts the specified value. */
+export function toJsonValue(value: unknown): jsonization.JsonValue {
+    return value as jsonization.JsonValue;
+}
+export function toEnvironment(value: types.Environment): Environment {
+    return jsonization.toJsonable(value) as Environment;
+}
+
+export function toAssetAdministrationShell(value: types.AssetAdministrationShell): AssetAdministrationShell {
+    return jsonization.toJsonable(value) as unknown as AssetAdministrationShell;
+}
+
+export function toSubmodel(value: types.Submodel): Submodel {
+    return jsonization.toJsonable(value) as unknown as Submodel;
+}
+
+export function toConceptDescription(value: types.ConceptDescription): ConceptDescription {
+    return jsonization.toJsonable(value) as unknown as ConceptDescription;
+}
+
+export function toSubmodelElement(value: types.ISubmodelElement): SubmodelElement {
+    return jsonization.toJsonable(value) as unknown as SubmodelElement;
+}
+
+/**
+ * Checks wether the Submodel with the specified identifier is referenced by the current Asset Administration Shell.
+ * @param aas The current Asset Administration Shell.
+ * @param smId The identifier of the Submodel.
+ */
+export function isSubmodelReferenced(aas: AssetAdministrationShell, smId: string): boolean {
+    if (!aas.submodels) {
+        return false;
+    }
+
+    return aas.submodels
+        .flatMap(reference => reference.keys)
+        .some(key => key.type === 'Submodel' && key.value === smId);
+}
+
+/**
+ * Normalizes a file path by replacing backslashes with forward slashes.
+ * It removes any leading directory indicators (like '/') and './' at the start of the path.
+ * This ensures that the returned path is consistent and suitable for further processing.
+ *
+ * @param path The input file path to normalize.
+ * @returns The normalized file path as a string.
+ */
+export function normalize(path: string): string {
+    path = path.replace(/\\/g, '/');
+    if (path.charAt(0) === '/') {
+        path = path.slice(1);
+    } else if (path.startsWith('./')) {
+        path = path.slice(2);
+    }
+
+    return path;
+}
+
+/**
+ * Converts a string representation of a boolean value into a boolean.
+ * This function checks if the input string, when converted to lower case,
+ * is equal to 'true'. If it is, the function returns `true`; otherwise, it returns `false`.
+ * @param value The string representation of a boolean.
+ * @returns The boolean value corresponding to the string.
+ */
 function stringToBoolean(value: string): boolean {
     return value?.toLocaleLowerCase() === 'true';
 }

@@ -13,12 +13,21 @@ import { LOGGER, Logger } from '../logging/logger.js';
 import { DirectoryScan } from './directory-scan.js';
 import { AASApiServerScan } from './aas-api-server-scan.js';
 import { OpcuaServerScan } from './opcua-server-scan.js';
+<<<<<<< HEAD
 import { OpcuaClient } from '../package/opcua/opcua-client.js';
 import { AasxDirectory } from '../package/file-system/aasx-directory.js';
 import { ApiClient } from '../package/api/api-client.js';
 import { ApiClientV3 } from '../package/api/api-client-v3.js';
 import { ApiClientV1 } from '../package/api/api-client-v1.js';
 import { ApiClientV0 } from '../package/api/api-client-v0.js';
+=======
+import { OpcuaClient } from '../client/opcua/opcua-client.js';
+import { AasxDirectory } from '../client/fs/aasx-directory.js';
+import { ApiClient } from '../client/api/api-client.js';
+import { ApiClientV3 } from '../client/api/api-client-v3.js';
+import { ApiClientV1 } from '../client/api/api-client-v1.js';
+import { ApiClientV0 } from '../client/api/api-client-v0.js';
+>>>>>>> development
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
 
@@ -48,14 +57,13 @@ export class AASServerScanFactory {
                         throw new Error('Not implemented.');
                 }
 
-                return new AASApiServerScan(this.logger, source);
+                return new AASApiServerScan(source);
             }
             case 'OPC_UA':
-                return new OpcuaServerScan(this.logger, new OpcuaClient(this.logger, endpoint));
+                return new OpcuaServerScan(new OpcuaClient(this.logger, endpoint));
             case 'WebDAV':
             case 'FileSystem':
                 return new DirectoryScan(
-                    this.logger,
                     new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint),
                 );
             default:

@@ -10,13 +10,17 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { UserStorageFactory } from './auth/user-storage-factory.js';
 import { WSNode } from './ws-node.js';
-import { AASProvider } from './aas-provider/aas-provider.js';
-import { AASIndexFactory } from './aas-index/aas-index-factory.js';
+import { AASProvider } from './provider/aas-provider.js';
+import { AASIndexFactory } from './index/aas-index-factory.js';
 import { TemplateStorage } from './template/template-storage.js';
 import { LOGGER } from './logging/logger.js';
 import { ConsoleLogger } from './logging/console-logger.js';
 import { Variable } from './variable.js';
+<<<<<<< HEAD
 import { AAS_INDEX } from './aas-index/aas-index.js';
+=======
+import { AAS_INDEX } from './index/aas-index.js';
+>>>>>>> development
 import { USER_STORAGE } from './auth/user-storage.js';
 
 container.registerInstance('USERS_DIR', './users');

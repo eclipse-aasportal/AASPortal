@@ -10,14 +10,22 @@ import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { aas, selectElement } from 'aas-core';
+<<<<<<< HEAD
 import { ApiClient } from '../../../app/package/api/api-client.js';
+=======
+import { ApiClient } from '../../../app/client/api/api-client.js';
+>>>>>>> development
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';
 import submodels from '../../assets/test-aas/submodels.js';
 import nameplate from '../../assets/test-aas/nameplate-becher1.js';
 import digitalProductPassport from '../../assets/test-aas/digital-product-passport-becher1.js';
 import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js';
+<<<<<<< HEAD
 import { ApiClientV0 } from '../../../app/package/api/api-client-v0.js';
+=======
+import { ApiClientV0 } from '../../../app/client/api/api-client-v0.js';
+>>>>>>> development
 import { Logger } from '../../../app/logging/logger.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
 import { createSpyObj } from 'aas-jest';
@@ -42,23 +50,20 @@ describe('ApiClientV0', function () {
         jest.restoreAllMocks();
     });
 
-    describe('getShellsAsync', () => {
+    describe('getShells', () => {
         it('returns the AAS list', async () => {
             http.get.mockResolvedValue(listaas);
             const result = await client.getShells();
             expect(result.result).toEqual([
-                {
-                    id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:AssistanceSystem:Dte',
-                    idShort: 'AssistanceSystem_Dte',
-                },
-                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:CunaCup:Becher1', idShort: 'CunaCup_Becher1' },
-                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:CunaCup:Becher2', idShort: 'CunaCup_Becher2' },
-                { id: 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:Id:AAS:DTOrchestrator', idShort: 'DTOrchestrator' },
+                'AssistanceSystem_Dte',
+                'CunaCup_Becher1',
+                'CunaCup_Becher2',
+                'DTOrchestrator',
             ]);
         });
     });
 
-    describe('readEnvironmentAsync', () => {
+    describe('getEnvironment', () => {
         it('gets the AAS with the specified idShort', async () => {
             http.get.mockImplementation(url => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,11 +89,15 @@ describe('ApiClientV0', function () {
                 return new Promise(resolve => resolve(value));
             });
 
+<<<<<<< HEAD
             await expect(client.readEnvironment('http://aas/CunaCup_Becher1', 'CunaCup_Becher1')).resolves.toBeTruthy();
+=======
+            await expect(client.getEnvironment('CunaCup_Becher1')).resolves.toBeTruthy();
+>>>>>>> development
         });
     });
 
-    describe('openFileAsync', () => {
+    describe('openRead', () => {
         it('can open a file', async () => {
             const stream = new IncomingMessage(new Socket());
             stream.push(
@@ -107,15 +116,20 @@ describe('ApiClientV0', function () {
 
             http.getResponse.mockResolvedValue(stream);
             await expect(
+<<<<<<< HEAD
                 client.openFile(
                     aasEnvironment.assetAdministrationShells[0],
+=======
+                client.openRead(
+                    aasEnvironment.assetAdministrationShells[0].idShort,
+>>>>>>> development
                     selectElement(aasEnvironment, 'Documentation', 'OperatingManual.DigitalFile_PDF')!,
                 ),
             ).resolves.toBeTruthy();
         });
     });
 
-    describe('readValueAsync', () => {
+    describe('readValue', () => {
         it('reads the current value of a data element', async () => {
             http.get.mockResolvedValue({ value: '42' });
             await expect(client.readValue('http://localhost:1234', 'xs:int')).resolves.toBe(42);

@@ -7,7 +7,11 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
+<<<<<<< HEAD
 import { TestBed } from '@angular/core/testing';
+=======
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+>>>>>>> development
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -15,6 +19,10 @@ import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
+<<<<<<< HEAD
+=======
+    DOCUMENT,
+>>>>>>> development
     input,
     output,
     provideZonelessChangeDetection,
@@ -26,20 +34,42 @@ import {
     AASTreeComponent,
     AuthService,
     EndpointsApi,
+<<<<<<< HEAD
     DownloadService,
     NotifyService,
     LiveState,
     SecuredImageComponent,
+=======
+    NotifyService,
+    LiveState,
+>>>>>>> development
     StartService,
     ToolbarService,
 } from 'aas-lib';
 
 import { AASComponent } from '../../app/aas/aas.component';
+<<<<<<< HEAD
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
+=======
+>>>>>>> development
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 import { DashboardChartType, DashboardPage } from '../../app/dashboard/dashboard-types';
 import { createSpyObj, FakeLoader } from '../mocks';
 import { AASState } from '../../app/aas/aas.state';
+<<<<<<< HEAD
+=======
+
+import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
+
+class MockURL implements Partial<URL> {
+    public static createObjectURL(): string {
+        return '';
+    };
+
+    public static revokeObjectURL(): void {
+    }
+}
+>>>>>>> development
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -63,6 +93,7 @@ class TestAASTreeComponent {
     }
 }
 
+<<<<<<< HEAD
 @Component({
     selector: 'fhg-img',
     template: '<div></div>',
@@ -82,14 +113,32 @@ describe('AASComponent', () => {
     let router: Router;
     let api: jest.Mocked<EndpointsApi>;
     let download: jest.Mocked<DownloadService>;
+=======
+describe('AASComponent', () => {
+    let fixture: ComponentFixture<AASComponent>;
+    let component: AASComponent;
+    let dashboard: jest.Mocked<DashboardService>;
+    let router: Router;
+    let api: jest.Mocked<EndpointsApi>;
+>>>>>>> development
     let start: jest.Mocked<StartService>;
     let pages: DashboardPage[];
 
     beforeEach(async () => {
         pages = [{ name: 'Dashboard 1', items: [], requests: [], active: true }];
 
+<<<<<<< HEAD
         api = createSpyObj<EndpointsApi>(['getDocument', 'putDocument']);
         download = createSpyObj<DownloadService>(['downloadPackage', 'download', 'uploadPackages']);
+=======
+        api = createSpyObj<EndpointsApi>([
+            'getDocument',
+            'putDocument',
+            'downloadPackage',
+            'download',
+            'uploadPackage',
+        ]);
+>>>>>>> development
         dashboard = createSpyObj<DashboardService>(['addChart'], {
             activePage: signal(pages[0]).asReadonly(),
             pages: signal(pages).asReadonly(),
@@ -111,10 +160,6 @@ describe('AASComponent', () => {
                 {
                     provide: DashboardService,
                     useValue: dashboard,
-                },
-                {
-                    provide: DownloadService,
-                    useValue: download,
                 },
                 {
                     provide: ToolbarService,
@@ -143,16 +188,22 @@ describe('AASComponent', () => {
 
         TestBed.overrideComponent(AASComponent, {
             remove: {
-                imports: [AASTreeComponent, SecuredImageComponent],
+                imports: [AASTreeComponent],
             },
             add: {
-                imports: [TestAASTreeComponent, TestSecureImageComponent],
+                imports: [TestAASTreeComponent],
             },
         });
 
         router = TestBed.inject(Router);
         const state = TestBed.inject(AASState);
         state.update({ document: sampleDocument });
+<<<<<<< HEAD
+=======
+
+        fixture = TestBed.createComponent(AASComponent);
+        component = fixture.componentInstance;
+>>>>>>> development
     });
 
     it('should create', () => {
@@ -186,27 +237,39 @@ describe('AASComponent', () => {
     });
 
     it('indicates that "play" is disabled while sample AAS is not online ready', () => {
+<<<<<<< HEAD
         const fixture = TestBed.createComponent(AASComponent);
         const component = fixture.componentInstance;
+=======
+>>>>>>> development
         expect(component.canPlay()).toBe(false);
     });
 
     it('indicates that "stop" is disabled while sample AAS is not online ready', () => {
+<<<<<<< HEAD
         const fixture = TestBed.createComponent(AASComponent);
         const component = fixture.componentInstance;
+=======
+>>>>>>> development
         expect(component.canStop()).toBe(false);
     });
 
     it('indicates that the sample AAS is editable', () => {
+<<<<<<< HEAD
         const fixture = TestBed.createComponent(AASComponent);
         const component = fixture.componentInstance;
+=======
+>>>>>>> development
         expect(component.readOnly()).toBe(false);
     });
 
     describe('canAddToDashboard', () => {
         it('can add the selected properties to the dashboard', () => {
+<<<<<<< HEAD
             const fixture = TestBed.createComponent(AASComponent);
             const component = fixture.componentInstance;
+=======
+>>>>>>> development
             component.setSelectedElements([torque, rotationSpeed]);
             jest.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
             expect(component.canAddToDashboard()).toBe(true);
@@ -215,4 +278,100 @@ describe('AASComponent', () => {
             expect(router.navigateByUrl).toHaveBeenCalled();
         });
     });
+<<<<<<< HEAD
+=======
+
+    describe('download', () => {
+        beforeEach(() => {
+            Object.defineProperty(globalThis as any, 'URL', {
+                configurable: true,
+                writable: true,
+                value: MockURL,
+            });
+        });
+
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('does nothing when there is no document content', () => {
+            const dom = TestBed.inject(DOCUMENT) as Document;
+            const createElSpy = jest.spyOn(dom, 'createElement');
+            const state = TestBed.inject(AASState);
+            state.update({ document: { ...sampleDocument, content: undefined } });
+            component.download();
+            expect(createElSpy).not.toHaveBeenCalled();
+            createElSpy.mockRestore();
+        });
+
+        it('creates a blob, starts download and revokes the object URL after timeout', () => {
+            const dom = TestBed.inject(DOCUMENT) as Document;
+            const fakeAnchor = { setAttribute: jest.fn(), click: jest.fn(), href: '' };
+            const createElSpy = jest.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
+            const createObjectSpy = jest.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = jest.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const state = TestBed.inject(AASState);
+            state.update({ document: sampleDocument });
+
+            jest.useFakeTimers();
+            component.download();
+
+            expect(createObjectSpy).toHaveBeenCalled();
+            expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${sampleDocument.idShort}.json`);
+            expect(fakeAnchor.click).toHaveBeenCalled();
+
+            jest.advanceTimersByTime(1000);
+            expect(revokeSpy).toHaveBeenCalledWith('blob://1');
+
+            createElSpy.mockRestore();
+            createObjectSpy.mockRestore();
+            revokeSpy.mockRestore();
+            jest.useRealTimers();
+        });
+
+        it('notifies on error when preparing the download fails', () => {
+            const state = TestBed.inject(AASState);
+            const badDoc = Object.create(sampleDocument);
+            Object.defineProperty(badDoc, 'content', {
+                get: () => {
+                    throw new Error('boom');
+                },
+                configurable: true,
+            });
+
+            state.update({ document: badDoc as any });
+            const notify = TestBed.inject(NotifyService) as jest.Mocked<NotifyService>;
+            component.download();
+            expect(notify.error).toHaveBeenCalled();
+        });
+
+        it('downloads a submodel', () => {
+            const dom = TestBed.inject(DOCUMENT) as Document;
+            const fakeAnchor = { setAttribute: jest.fn(), click: jest.fn(), href: '' };
+            const createElSpy = jest.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
+            const createObjectSpy = jest.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = jest.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const state = TestBed.inject(AASState);
+            state.update({ document: sampleDocument });
+
+            jest.useFakeTimers();
+            const submodel = sampleDocument.content!.submodels[0];
+            component.setSelectedElements([submodel]);
+            component.download();
+
+            expect(createObjectSpy).toHaveBeenCalled();
+            expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${submodel.idShort}.json`);
+            expect(fakeAnchor.click).toHaveBeenCalled();
+
+            jest.advanceTimersByTime(1000);
+            expect(revokeSpy).toHaveBeenCalledWith('blob://1');
+
+            createElSpy.mockRestore();
+            createObjectSpy.mockRestore();
+            revokeSpy.mockRestore();
+            jest.useRealTimers();
+
+        });
+    });
+>>>>>>> development
 });

@@ -10,16 +10,22 @@ import upperFirst from 'lodash-es/upperFirst';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
+<<<<<<< HEAD
 
 import {
     aas,
     AASDocument,
+=======
+import {
+    aas,
+>>>>>>> development
     getAbbreviation,
     getChildren,
     getConceptDescription,
     getSemanticId,
     isFile,
     isReference,
+<<<<<<< HEAD
 } from 'aas-core';
 
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
@@ -27,6 +33,16 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { getUrl, isLangString, referenceToString } from '../../utilities';
 import { BrowserData, BrowserElement, BrowserElementRef, BrowserProperty, BrowserState } from './browser.state';
 import { ChildComponent } from '../child-component';
+=======
+    isSubmodel,
+} from 'aas-core';
+
+import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
+import { isLangString, referenceToString } from '../../utilities';
+import { BrowserData, BrowserElement, BrowserElementRef, BrowserProperty, BrowserState } from './browser.state';
+import { ChildComponent } from '../child-component';
+import { API_URL } from '../../types';
+>>>>>>> development
 
 const collectionNames: Record<string, string> = {
     SubmodelElementCollection: 'value',
@@ -54,13 +70,21 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
  * and explore related concept descriptions and child elements.
  */
 export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> {
+<<<<<<< HEAD
     private readonly api = inject(EndpointsApi);
+=======
+    private readonly apiUrl = inject(API_URL);
+>>>>>>> development
 
     public constructor() {
         super();
 
         effect(() => {
+<<<<<<< HEAD
             const env = this.document()?.content;
+=======
+            const env = this.env();
+>>>>>>> development
             if (env) {
                 const aas = env.assetAdministrationShells.at(0);
                 const current = aas ? this.createElement(aas, env) : null;
@@ -77,6 +101,7 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
                 });
             }
         });
+<<<<<<< HEAD
     }
 
     /**
@@ -85,6 +110,26 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
      * to reflect the content of the document.
      */
     public readonly document = input<AASDocument | null | undefined>(undefined);
+=======
+
+        effect(() => {
+            const endpoint = this.endpoint();
+            this.state().update({ endpoint });
+        });
+    }
+
+    /**
+     * Input property that accepts an `Environment` to be displayed in the browser.
+     * It can be null or undefined. When a new environment is provided, the component updates its state
+     * to reflect the content of the document.
+     */
+    public readonly env = input<aas.Environment | undefined>(undefined);
+
+    /**
+     * The name of the AAS endpoint. A value is required in a multi endpoint application.
+     */
+    public readonly endpoint = input<string | undefined>(undefined);
+>>>>>>> development
 
     /**
      * Input signal that holds the `BrowserState` for the component. This state manages the
@@ -188,7 +233,21 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
         name = upperFirst(name);
         if (typeof value === 'string') {
             if (isFile(referable) && name === 'Value') {
+<<<<<<< HEAD
                 return [{ name, value, kind: 'url', url: getUrl(this.document()!, referable) }];
+=======
+                const aas = this.env()!.assetAdministrationShells[0];
+                const submodel = isSubmodel(referable) ? referable : (this.state().path()[1].referable as aas.Submodel);
+                const idShortPath = this.getIdShortPath(referable);
+                return [
+                    {
+                        name,
+                        value,
+                        kind: 'url',
+                        url: this.apiUrl.getFileUrl(aas.id, submodel.id, idShortPath, this.endpoint()),
+                    },
+                ];
+>>>>>>> development
             }
 
             return [{ name, value, kind: 'text' }];
@@ -228,4 +287,23 @@ export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> 
 
         return [];
     }
+<<<<<<< HEAD
+=======
+
+    private getIdShortPath(referable: aas.Referable): string {
+        const current = this.current()?.referable;
+        if (current === undefined) {
+            return '';
+        }
+
+        const path = this.state().path();
+        const idShortPath: string[] = [current.idShort];
+        for (let i = 2, n = path.length; i < n; i++) {
+            idShortPath.push(path[i].referable.idShort);
+        }
+
+        idShortPath.push(referable.idShort);
+        return idShortPath.join('.');
+    }
+>>>>>>> development
 }

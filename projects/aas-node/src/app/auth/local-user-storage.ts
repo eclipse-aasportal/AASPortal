@@ -14,7 +14,11 @@ import { Cookie } from 'aas-core';
 import { UserStorage } from './user-storage.js';
 import { UserData } from './user-data.js';
 import { LOGGER, Logger } from '../logging/logger.js';
+<<<<<<< HEAD
 import { slash } from '../convert.js';
+=======
+import { slash } from '../utilities.js';
+>>>>>>> development
 
 @injectable()
 export class LocalUserStorage extends UserStorage {

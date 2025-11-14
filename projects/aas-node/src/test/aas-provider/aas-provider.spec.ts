@@ -11,15 +11,19 @@ import { describe, beforeEach, it, expect, jest } from '@jest/globals';
 import { AASEndpoint } from 'aas-core';
 
 import { Logger } from '../../app/logging/logger.js';
-import { AASProvider } from '../../app/aas-provider/aas-provider.js';
-import { Parallel } from '../../app/aas-provider/parallel.js';
+import { AASProvider } from '../../app/provider/aas-provider.js';
+import { Parallel } from '../../app/provider/parallel.js';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
+<<<<<<< HEAD
 import { AASClientFactory } from '../../app/package/aas-client-factory.js';
+=======
+import { AASClientFactory } from '../../app/client/aas-client-factory.js';
+>>>>>>> development
 import { createSpyObj } from 'aas-jest';
 import { Variable } from '../../app/variable.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
-import { AASIndex } from '../../app/aas-index/aas-index.js';
-import { TaskHandler } from '../../app/aas-provider/task-handler.js';
+import { AASIndex } from '../../app/index/aas-index.js';
+import { TaskHandler } from '../../app/provider/task-handler.js';
 
 describe('AASProvider', function () {
     let aasProvider: AASProvider;

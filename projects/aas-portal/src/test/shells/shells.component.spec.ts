@@ -7,9 +7,15 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
+<<<<<<< HEAD
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
+=======
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { first, of } from 'rxjs';
+>>>>>>> development
 import {
     ChangeDetectionStrategy,
     Component,
@@ -24,13 +30,19 @@ import {
     ViewMode,
     AuthService,
     NotifyService,
+<<<<<<< HEAD
     DownloadService,
+=======
+>>>>>>> development
     AASTable,
     StartService,
     IndexChangeService,
     EndpointsApi,
     ToolbarService,
+<<<<<<< HEAD
     EndpointsService,
+=======
+>>>>>>> development
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
@@ -51,9 +63,16 @@ class TestAASTable {
 }
 
 describe('ShellsComponent', () => {
+<<<<<<< HEAD
     let localStorage: jest.Mocked<Storage>;
     let endpoints: jest.Mocked<EndpointsService>;
     let documents: jest.Mocked<EndpointsApi>;
+=======
+    let fixture: ComponentFixture<ShellsComponent>;
+    let component: ShellsComponent;
+    let localStorage: jest.Mocked<Storage>;
+    let api: jest.Mocked<EndpointsApi>;
+>>>>>>> development
     let favorites: jest.Mocked<FavoritesService>;
     let auth: jest.Mocked<AuthService>;
     let start: jest.Mocked<StartService>;
@@ -63,9 +82,23 @@ describe('ShellsComponent', () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
         localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
         localStorage.getItem.mockReturnValue(null);
+<<<<<<< HEAD
         endpoints = createSpyObj<EndpointsService>(['addEndpoint', 'delete', 'getEndpoints', 'removeEndpoint']);
         documents = createSpyObj<EndpointsApi>(['getContent', 'getHierarchy', 'getDocuments']);
         documents.getDocuments.mockReturnValue(
+=======
+        api = createSpyObj<EndpointsApi>([
+            'addEndpoint',
+            'deleteDocument',
+            'getEndpoints',
+            'removeEndpoint',
+            'getContent',
+            'getHierarchy',
+            'getDocuments',
+            'downloadPackage',
+        ]);
+        api.getDocuments.mockReturnValue(
+>>>>>>> development
             of({
                 previous: null,
                 next: null,
@@ -73,7 +106,11 @@ describe('ShellsComponent', () => {
             }),
         );
 
+<<<<<<< HEAD
         documents.getContent.mockReturnValue(
+=======
+        api.getContent.mockReturnValue(
+>>>>>>> development
             of({
                 assetAdministrationShells: [],
                 submodels: [],
@@ -106,6 +143,7 @@ describe('ShellsComponent', () => {
         await TestBed.configureTestingModule({
             providers: [
                 {
+<<<<<<< HEAD
                     provide: EndpointsService,
                     useValue: endpoints,
                 },
@@ -114,6 +152,12 @@ describe('ShellsComponent', () => {
                     useValue: documents,
                 },
                 {
+=======
+                    provide: EndpointsApi,
+                    useValue: api,
+                },
+                {
+>>>>>>> development
                     provide: FavoritesService,
                     useValue: favorites,
                 },
@@ -124,10 +168,13 @@ describe('ShellsComponent', () => {
                 {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
+<<<<<<< HEAD
                 },
                 {
                     provide: DownloadService,
                     useValue: createSpyObj<DownloadService>(['downloadPackage']),
+=======
+>>>>>>> development
                 },
                 {
                     provide: ToolbarService,
@@ -141,17 +188,26 @@ describe('ShellsComponent', () => {
                     provide: IndexChangeService,
                     useValue: indexChange,
                 },
+<<<<<<< HEAD
                 provideZonelessChangeDetection(),
             ],
             imports: [
                 ShellsComponent,
                 TranslateModule.forRoot({
+=======
+                provideTranslateService({
+>>>>>>> development
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+<<<<<<< HEAD
+=======
+            imports: [ShellsComponent],
+>>>>>>> development
         }).compileComponents();
 
         TestBed.overrideComponent(ShellsComponent, {
@@ -169,5 +225,17 @@ describe('ShellsComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
+        expect(component.files()).toBeUndefined();
+        expect(component.limit()).toBe(10);
+        expect(component.favoritesLists()).toEqual(['']);
+        expect(component.activeFavoritesList()).toBe('');
+        expect(component.selected()).toEqual([]);
+        expect(component.someSelected()).toBe(false);
+        expect(component.views().length).toBeGreaterThan(0);
+        expect(component.filter()).toBe('');
+        expect(component.filterText()).toBe('');
+        expect(component.documents()).toEqual([]);
+        expect(component.isFirstPage()).toBe(true);
+        expect(component.isLastPage()).toBe(true);
     });
 });

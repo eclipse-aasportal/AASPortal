@@ -77,10 +77,20 @@ AASPortal uses different build tools optimized for each workspace:
 | Workspace | Build Tool | Output Format | Watch Mode |
 |-----------|------------|---------------|------------|
 | aas-core | TypeScript Compiler | ESM | `tsc --watch` |
+<<<<<<< HEAD
 | aas-portal | Angular CLI | Browser Bundle | `ng build --watch` |
 | aas-node | esbuild | ESM | `esbuild --watch` |
 | aas-lib | ng-packagr | Angular Package | `ng build --watch` |
 | aas-jest | TypeScript Compiler | CommonJS | `tsc --watch` |
+=======
+| aas-package | TypeScript Compiler + esbuild | ESM Bundle | `npm run watch` |
+| aas-portal | Angular CLI | Browser Bundle | `ng build --watch` |
+| aas-node | esbuild | ESM | `esbuild --watch` |
+| aas-lib | ng-packagr | Angular Package | `ng build --watch` |
+| aas-server | esbuild | ESM | `esbuild --watch` |
+| aas-browser | Angular CLI | Browser Bundle | `ng build --watch` |
+| aas-jest | TypeScript Compiler + esbuild | ESM Bundle | `npm run watch` |
+>>>>>>> development
 
 ### Development Build Commands
 
@@ -539,13 +549,21 @@ npm run lint -ws
 **Multi-stage Dockerfile:**
 ```dockerfile
 # Build stage
+<<<<<<< HEAD
 FROM node:22.12.0-alpine AS build
+=======
+FROM node:22.16.0-alpine AS build
+>>>>>>> development
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
 # Production stage
+<<<<<<< HEAD
 FROM node:22.12.0-alpine AS production
+=======
+FROM node:22.16.0-alpine AS production
+>>>>>>> development
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
 USER nodejs

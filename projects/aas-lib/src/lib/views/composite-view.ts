@@ -7,8 +7,13 @@
  *****************************************************************************/
 
 import { computed, Signal } from '@angular/core';
+<<<<<<< HEAD
 import { ActivatedRoute } from '@angular/router';
 import { first, from, mergeMap, of, toArray } from 'rxjs';
+=======
+import { ActivatedRoute, Params } from '@angular/router';
+import { combineLatest, first, from, mergeMap, of, toArray, map, Observable } from 'rxjs';
+>>>>>>> development
 
 import { aas, AASDocument, getReferable, getSemanticId } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
@@ -36,8 +41,22 @@ export abstract class CompositeView<TState extends CompositeViewState<CompositeV
     protected readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
     public override readonly document = computed(() => {
+<<<<<<< HEAD
         const item = this.tuple();
         return item ? item[0] : undefined;
+=======
+        const tuple = this.tuple();
+        return tuple ? tuple[0] : undefined;
+    });
+
+    public readonly content = computed(() => {
+        const content = this.document()?.content;
+        if (!content) {
+            return undefined;
+        }
+
+        return content;
+>>>>>>> development
     });
 
     /** Returns the version of the current AAS. */
@@ -64,6 +83,7 @@ export abstract class CompositeView<TState extends CompositeViewState<CompositeV
     public override readonly count = computed(() => this.tuples().length);
 
     protected onInit(): void {
+<<<<<<< HEAD
         this.route.params
             .pipe(
                 first(),
@@ -92,6 +112,43 @@ export abstract class CompositeView<TState extends CompositeViewState<CompositeV
             });
     }
 
+=======
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
+            .pipe(
+                map(([routeParams, queryParams]) => {
+                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
+                }),
+                mergeMap(params => this.documentsFromParams(params)),
+                first(),
+            )
+            .subscribe(documents => {
+                if (!documents) {
+                    return;
+                }
+
+                const tuples: [AASDocument, ViewRouteMap][] = [...this.filter(documents)];
+                this.state.update({ tuples });
+            });
+    }
+
+    private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
+        if (params?.id) {
+            const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+            return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+        }
+
+        if (params?.docs) {
+            const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+            return from(docs).pipe(
+                mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                toArray(),
+            );
+        }
+
+        return of(undefined);
+    }
+
+>>>>>>> development
     private *filter(documents: AASDocument[]): Generator<[AASDocument, ViewRouteMap]> {
         for (const document of documents) {
             if (!document.content) {

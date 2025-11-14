@@ -7,15 +7,25 @@
  *****************************************************************************/
 
 import { FormsModule } from '@angular/forms';
+<<<<<<< HEAD
 import { Router } from '@angular/router';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+=======
+import { RouterLink } from '@angular/router';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+>>>>>>> development
 import {
     ChangeDetectionStrategy,
     Component,
     WritableSignal,
     computed,
     effect,
+<<<<<<< HEAD
+=======
+    inject,
+>>>>>>> development
     input,
     model,
     signal,
@@ -77,6 +87,7 @@ export class AASTableRow {
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.html',
     styleUrls: ['./aas-table.scss'],
+<<<<<<< HEAD
     imports: [FormsModule, NgbTooltip, MaxLengthPipe, TranslateModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -93,16 +104,36 @@ export class AASTable {
         private readonly router: Router,
         private readonly translate: TranslateService,
     ) {
+=======
+    imports: [FormsModule, NgbTooltip, MaxLengthPipe, TranslateDirective, TranslatePipe, RouterLink],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AASTable {
+    private readonly translate = inject(TranslateService);
+    private readonly _rows = computed(() => {
+        const selected = new Set(untracked(this.selected));
+        return this.documents().map(document => new AASTableRow(document, selected.has(document)));
+    });
+
+    public constructor() {
+>>>>>>> development
         effect(() => {
             const selected = new Set(this.selected());
             untracked(this._rows).forEach(row => row.selected.set(selected.has(row.document)));
         });
     }
 
+<<<<<<< HEAD
     public readonly documents = input<AASDocument[]>([]);
 
     public readonly selected = model<AASDocument[]>([]);
 
+=======
+    public readonly selected = model<AASDocument[]>([]);
+
+    public readonly documents = input<AASDocument[]>([]);
+
+>>>>>>> development
     public readonly filter = input('');
 
     public readonly rows = computed(() => {
@@ -134,6 +165,7 @@ export class AASTable {
         return '/assets/resources/aas-idta.png';
     }
 
+<<<<<<< HEAD
     public open(row: AASTableRow): void {
         this.router.navigate(['/aas'], {
             queryParams: {
@@ -141,6 +173,10 @@ export class AASTable {
                 id: encodeBase64Url(row.id),
             },
         });
+=======
+    public getRouterLink(row: AASTableRow): unknown[] | undefined {
+        return ['/aas', { endpoint: encodeBase64Url(row.endpoint), id: encodeBase64Url(row.id) }];
+>>>>>>> development
     }
 
     public getToolTip(row: AASTableRow): string {

@@ -11,7 +11,7 @@ import net from 'net';
 import FormData from 'form-data';
 import axios, { AxiosResponse } from 'axios';
 import { singleton } from 'tsyringe';
-import { parseUrl } from './convert.js';
+import { parseUrl } from './utilities.js';
 
 @singleton()
 export class HttpClient {

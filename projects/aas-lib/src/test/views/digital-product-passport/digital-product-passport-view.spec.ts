@@ -87,7 +87,12 @@ describe('DigitalProductPassportView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         route = createSpyObj<ActivatedRoute>(
             {},
+<<<<<<< HEAD
             { params: of({ endpoint: encodeBase64Url(sample.endpoint), id: encodeBase64Url(sample.id) }) },
+=======
+            { params: of({ endpoint: encodeBase64Url(sample.endpoint), id: encodeBase64Url(sample.id) }),
+              queryParams: of({}) },
+>>>>>>> development
         );
 
         api.getDocument.mockReturnValue(of(sample as AASDocument));

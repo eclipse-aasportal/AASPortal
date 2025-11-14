@@ -8,9 +8,10 @@
 
 <div class="fhg-main-page bg-body-secondary">
     <div class="fhg-main-navbar">
-        <nav class="navbar navbar-expand-sm bg-white">
+        <nav class="navbar navbar-expand-sm bg-body">
             <div class="container-fluid">
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
+<<<<<<< HEAD
                     <img src="/assets/fhg-logo.svg" style="width: 40px;" alt="Fraunhofer">
                 </a>
                 <button class="navbar-toggler" type="button"
@@ -30,6 +31,39 @@
                         <fhg-auth class="text-primary m-1"></fhg-auth>
                         <img class="m-1 d-none d-md-block object-fit-contain" src="/assets/aas-portal.svg" width="67"
                             height="40" alt="AASPortal">
+=======
+                    <img src="/assets/fhg-logo.svg" style="width: 40px" alt="Fraunhofer" />
+                </a>
+                <button class="navbar-toggler" type="button" (click)="isMenuCollapsed.set(!isMenuCollapsed())">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div [ngbCollapse]="isMenuCollapsed()" class="collapse navbar-collapse">
+                    <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
+                        @for (link of links(); track link) {
+                            <li [ngbNavItem]="link.id" class="nav-item">
+                                <a
+                                    ngbNavLink
+                                    class="nav-item"
+                                    routerLink="{{ link.url }}"
+                                    routerLinkActive="active"
+                                    (click)="isMenuCollapsed.set(true)"
+                                    >{{ link.name | translate }}</a
+                                >
+                            </li>
+                        }
+                    </ul>
+                    <div class="d-flex align-items-center me-1">
+                        <fhg-theme-toggle class="text-primary m-1"></fhg-theme-toggle>
+                        <fhg-localize class="text-primary m-1" [languages]="languages()"></fhg-localize>
+                        <fhg-auth class="text-primary m-1"></fhg-auth>
+                        <img
+                            class="m-1 d-none d-md-block object-fit-contain"
+                            src="/assets/aas-portal.svg"
+                            width="67"
+                            height="40"
+                            alt="AASPortal"
+                        />
+>>>>>>> development
                     </div>
                 </div>
             </div>
@@ -39,11 +73,12 @@
         <div class="btn-toolbar mx-2" role="toolbar">
             <ng-container *ngTemplateOutlet="toolbarTemplate()"></ng-container>
         </div>
-        <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200;"></fhg-notify>
+        <fhg-notify class="toast-container position-fixed end-0 p-1" style="z-index: 1200"></fhg-notify>
     </div>
     <div class="fhg-main-content">
         <router-outlet></router-outlet>
     </div>
+<<<<<<< HEAD
     <div class="fhg-main-statusbar">
         <div class="fs-9 text-nowrap text-truncate">© {{year()}} Fraunhofer IOSB-INA - AASPortal (v{{version()}})</div>
         <div class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
@@ -55,5 +90,24 @@
             <span>&nbsp;/&nbsp;{{endpointCount()}}&nbsp;</span>
             <span translate>Main.ENDPOINTS</span>
         </div>
+=======
+    <div class="fhg-main-statusbar fs-8">
+        <div class="text-nowrap text-truncate">© {{ year() }} Fraunhofer IOSB-INA - AASPortal (v{{ version() }})</div>
+        <div class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
+            <span>{{ documentCount() }}&nbsp;</span>
+            <span translate>Main.SHELLS</span>
+            @if (changedDocuments() > 0) {
+                <span>&nbsp;{{ changedDocuments() }}</span>
+            }
+            <span>&nbsp;/&nbsp;{{ endpointCount() }}&nbsp;</span>
+            <span translate>Main.ENDPOINTS</span>
+        </div>
+        <fhg-progress></fhg-progress>
+        <div class="me-auto">
+            <a class="ms-3" href="{{ 'Main.GTC_URL' | translate }}" target="_blank" translate>Main.GTC</a>
+            <a class="ms-3" href="{{ 'Main.PUBLISHING_NOTES_URL' | translate }}" target="_blank" translate>Main.PUBLISHING_NOTES</a>
+            <a class="ms-3" href="{{ 'Main.DATA_PROTECTION_POLICY_URL' | translate }}" target="_blank" translate>Main.DATA_PROTECTION_POLICY</a>
+        </div>
+>>>>>>> development
     </div>
 </div>

@@ -31,7 +31,10 @@ import {
     convertToString,
     selectSubmodel,
     getIdShortPath,
+<<<<<<< HEAD
     stringFormat,
+=======
+>>>>>>> development
     isFile,
     isBlob,
     isReferenceElement,
@@ -190,6 +193,7 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
                 return '';
             }
 
+<<<<<<< HEAD
             return stringFormat(
                 this.translate.instant('INFO_AAS_OFFLINE'),
                 new Date(document.timestamp).toLocaleString(untracked(this.currentLang)),
@@ -197,6 +201,14 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
         }
 
         return this.translate.instant('INFO_NO_SHELL_AVAILABLE');
+=======
+            return this.translate.instant('Info.AAS_OFFLINE', {
+                timestamp: new Date(document.timestamp).toLocaleString(untracked(this.currentLang)),
+            });
+        }
+
+        return this.translate.instant('Info.NO_SHELL_AVAILABLE');
+>>>>>>> development
     });
 
     public ngOnDestroy(): void {

@@ -74,7 +74,12 @@ describe('HandoverDocumentationView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
+<<<<<<< HEAD
             { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+=======
+            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+              queryParams: of({}) },
+>>>>>>> development
         );
 
         api.getDocument.mockReturnValue(of(document));
