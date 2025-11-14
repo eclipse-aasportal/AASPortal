@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 @if (rows().length > 0) {
-    <div class="table-responsive d-none d-lg-block">
+    <div class="table-responsive">
         <table class="table table-sm table-hover table-striped">
             <thead>
                 <tr>
@@ -107,7 +107,7 @@
         </table>
     </div>
 
-    <div class="container d-block d-lg-none">
+    <!-- <div class="container d-block d-lg-none">
         @for (row of rows(); track row) {
             <div class="d-flex flex-row justify-content-evenly border border-1 border-primary rounded-1 py-2 px-3 align-items-center mb-2">
                 <input
@@ -172,7 +172,7 @@
             </div>
             
         }
-    </div>
+    </div> -->
 
 
 } @else {
