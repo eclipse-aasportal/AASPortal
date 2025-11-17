@@ -116,17 +116,17 @@ services:
     ports:
       - 1337:1337
   
-  # aas-portal:
-  #   container_name: aas-portal
-  #   build:
-  #     context: .
-  #     dockerfile: ./Dockerfile.aas-portal
-  #     args:
-  #       - NODE_IMAGE=${NODE_IMAGE}
-  #       - NGINX_IMAGE=${NGINX_IMAGE}
-  #   restart: always
-  #   ports:
-  #     - 80:80
+  aas-portal:
+    container_name: aas-portal
+    build:
+      context: .
+      dockerfile: ./Dockerfile.aas-portal
+      args:
+        - NODE_IMAGE=${NODE_IMAGE}
+        - NGINX_IMAGE=${NGINX_IMAGE}
+    restart: always
+    ports:
+      - 80:80
 
 volumes:
   aasportal-users:
