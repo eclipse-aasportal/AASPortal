@@ -13,6 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first, combineLatest } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -56,7 +57,7 @@ import { JsonValue } from 'projects/aas-core/dist/types/aas-core/jsonization';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateModule, FormsModule, AASTreeComponent, CommonModule, RouterModule],
+    imports: [TranslateModule, FormsModule, AASTreeComponent, CommonModule, RouterModule, NgbNavModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**

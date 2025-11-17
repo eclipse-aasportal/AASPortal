@@ -66,55 +66,45 @@
 
     <!-- Body of AAS View -->
     <div class="fhg-aas-document">
-          <!-- Tab headers -->
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="submodels-tab" data-bs-toggle="tab" data-bs-target="#submodels"
-                    type="button" role="tab" aria-controls="submodels" aria-selected="true">
-                Submodels
-            </button>
+        <ul ngbNav #nav="ngbNav" class="nav-tabs">
+            <li [ngbNavItem]="1">
+                <button ngbNavLink>Submodels</button>
+                <ng-template ngbNavContent>
+                    <div class="d-flex flex-row flex-wrap">
+                        @for (submodel of getSubmodels(); track submodel) {
+                            <div class="d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black rounded-3 align-items-center bg-primary-subtle w-md-40">
+                                <div class="me-4 text-secondary" style="font-size: 3.5rem;">
+                                    <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
+                                </div>
+                                <div class="me-4">
+                                    <label  style="font-size:14px; overflow-wrap: anywhere; word-break: break-word;">{{getSubmodelSemanticId(submodel)}}</label>
+                                    <h4 style="overflow-wrap: anywhere; word-break: break-word;">{{submodel.idShort}}</h4>
+                                </div>
+                                <div>
+                                    <button [routerLink]="openSubmodelView(submodel)" type="button" class="btn btn-primary" style="font-size: 1.5rem;"><i class="bi bi-box-arrow-up-right"></i></button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </ng-template>
             </li>
-            <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tree-tab" data-bs-toggle="tab" data-bs-target="#tree"
-                    type="button" role="tab" aria-controls="tree" aria-selected="false">
-                AAS Tree
-            </button>
+            <li [ngbNavItem]="2">
+                <button ngbNavLink>AAS Tree</button>
+                <ng-template ngbNavContent>
+                    <fhg-aas-tree
+                        #aasTree
+                        [live]="live()"
+                        [searchExpression]="searchExpression()"
+                        [document]="document()"
+                        (selected)="setSelectedElements($event)"
+                        [state]="treeState"
+                    >
+                    </fhg-aas-tree>
+                </ng-template>
             </li>
         </ul>
 
-          <!-- Tab content -->
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="submodels" role="tabpanel" aria-labelledby="submodels-tab">
-                <div class="d-flex flex-row flex-wrap">
-                    @for (submodel of getSubmodels(); track submodel) {
-                        <div class="d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black rounded-3 align-items-center bg-primary-subtle w-md-40">
-                            <div class="me-4 text-secondary" style="font-size: 3.5rem;">
-                                <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
-                            </div>
-                            <div class="me-4">
-                                <label  style="font-size:14px; overflow-wrap: anywhere; word-break: break-word;">{{getSubmodelSemanticId(submodel)}}</label>
-                                <h4 style="overflow-wrap: anywhere; word-break: break-word;">{{submodel.idShort}}</h4>
-                            </div>
-                            <div>
-                                <button [routerLink]="openSubmodelView(submodel)" type="button" class="btn btn-primary" style="font-size: 1.5rem;"><i class="bi bi-box-arrow-up-right"></i></button>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <div class="tab-pane fade" id="tree" role="tabpanel" aria-labelledby="tree-tab">
-               <fhg-aas-tree
-                    #aasTree
-                    [live]="live()"
-                    [searchExpression]="searchExpression()"
-                    [document]="document()"
-                    (selected)="setSelectedElements($event)"
-                    [state]="treeState"
-                >
-                </fhg-aas-tree>
-            </div>
-        </div>
+        <div [ngbNavOutlet]="nav" class="mt-2"></div>
     </div>
 
 
