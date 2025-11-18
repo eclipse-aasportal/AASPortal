@@ -166,7 +166,7 @@ describe('MySqlIndex', () => {
                 type: 'AAS_API',
             };
 
-            await expect(index.addEndpoint(endpoint)).resolves.toEqual(void 0);
+            await expect(index.insertEndpoint(endpoint)).resolves.toEqual(void 0);
             expect(connection.query).toHaveBeenCalledWith(
                 'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
                 [endpoint.name, endpoint.url, endpoint.type, undefined, undefined, undefined],
@@ -247,7 +247,7 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockImplementation(impl);
-            await expect(index.removeEndpoint('Endpoint 1')).resolves.toEqual(true);
+            await expect(index.deleteEndpoint('Endpoint 1')).resolves.toEqual(true);
             expect(connection.query).toHaveBeenCalledTimes(4);
         });
     });
@@ -260,7 +260,7 @@ describe('MySqlIndex', () => {
         it('selects the first page', async () => {
             const results: MySqlDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
-            await expect(index.nextPage('Endpoint 1', undefined, 10)).resolves.toEqual({
+            await expect(index.getPage('Endpoint 1', undefined, 10)).resolves.toEqual({
                 paging_metadata: { cursor: undefined },
                 result: [],
             });
@@ -331,7 +331,7 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockImplementation(impl);
-            await expect(index.remove('Endpoint 1', 'http://document/aas')).resolves.toEqual(true);
+            await expect(index.delete('Endpoint 1', 'http://document/aas')).resolves.toEqual(true);
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.commit).toHaveBeenCalled();
         });

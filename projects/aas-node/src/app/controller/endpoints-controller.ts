@@ -90,7 +90,7 @@ export class EndpointsController extends Controller {
     @OperationId('updateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
-            throw new Error('Invalid URL.');
+            throw new Error('Endpoint name cannot be changed.');
         }
 
         await this.aasProvider.updateEndpoint(endpoint);
@@ -163,8 +163,8 @@ export class EndpointsController extends Controller {
      */
     @Post('{endpoint}/packages')
     @Security('bearerAuth', ['editor', 'admin'])
-    @OperationId('addPackages')
-    public async addPackages(@Path() endpoint: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+    @OperationId('insertPackages')
+    public async insertPackages(@Path() endpoint: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
         await this.aasProvider.insertPackages(decodeBase64Url(endpoint), file);
     }
 
@@ -181,7 +181,7 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Downloads an AAS document from the specified endpoint.
+     * @summary Gets an AAS document that provides an AAS with the specified identifier from the given endpoint.
      * @param endpoint The endpoint name (Base64-URL encoded).
      * @param id The AAS identifier (Base64-URL encoded).
      * @returns The AAS document.
@@ -189,7 +189,23 @@ export class EndpointsController extends Controller {
     @Get('{endpoint}/documents/{id}')
     @OperationId('getDocument')
     public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
-        return await this.aasProvider.getDocument(decodeBase64Url(id), decodeBase64Url(endpoint));
+        return await this.aasProvider.getDocument(
+            decodeBase64Url(endpoint),
+            'AssetAdministrationShell',
+            decodeBase64Url(id),
+        );
+    }
+
+    /**
+     * @summary Gets the AAS document that provides an Asset with the specified identifier from the specified endpoint.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The Asset identifier (Base64-URL encoded).
+     * @returns The AAS document
+     */
+    @Get('{endpoint}/documents/asset/{id}')
+    @OperationId('getDocumentByAsset')
+    public async getDocumentByAsset(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
+        return await this.aasProvider.getDocument(decodeBase64Url(endpoint), 'Asset', decodeBase64Url(id));
     }
 
     /**

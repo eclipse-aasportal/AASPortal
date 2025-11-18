@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ActivatedRoute, provideRouter } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { first, of } from 'rxjs';
@@ -18,13 +18,13 @@ import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 import carbon_footprint_0_9 from '../../assets/carbon-footprint-0-9.json';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint-view';
 import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
+import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../../../lib/views/views-constants';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -72,8 +72,10 @@ describe('CarbonFootprintView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
-              queryParams: of({}) },
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
         );
 
         api.getDocument.mockReturnValue(of(document));
@@ -98,7 +100,16 @@ describe('CarbonFootprintView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                        {
+                            path: 'CarbonFootprint',
+                            component: CarbonFootprintView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [CARBON_FOOTPRINT_1_0, CARBON_FOOTPRINT_0_9],
+                            },
+                        },
+                    ],
                 },
                 provideTranslateService({
                     loader: {

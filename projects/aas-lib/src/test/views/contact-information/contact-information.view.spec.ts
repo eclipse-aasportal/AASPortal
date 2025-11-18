@@ -19,13 +19,13 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { ContactInformationView } from '../../../lib/views/contact-information/contact-information-view';
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
 import { ContactInformationState } from '../../../lib/views/contact-information/contact-information.state';
 import { createSpyObj, FakeLoader } from '../../mocks';
+import { CONTACT_INFORMATION_1_0 } from '../../../lib/views/views-constants';
 
 import contactInformation from '../../assets/contact-information-1-0.json';
 
@@ -98,7 +98,17 @@ describe.skip('ContactInformationsView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                            {
+                                path: 'ContactInformation',
+                                component: ContactInformationView,
+                                data: {
+                                    type: 'Leaf',
+                                    semanticIds: [CONTACT_INFORMATION_1_0],
+                                },
+                            },
+                        
+                    ],
                 },
                 provideTranslateService({
                     loader: {

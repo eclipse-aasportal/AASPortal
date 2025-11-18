@@ -41,8 +41,8 @@ import {
 } from 'aas-core';
 
 import { Tree, TreeNode } from '../tree';
-import { basename } from '../../utilities';
-import { hasSpecificView } from '../../views/views-routes';
+import { basename, hasSpecificView } from '../../utilities';
+import { ViewRoute } from '../../types';
 
 /**
  * Represents a node in the tree structure of Asset Administration Shell.
@@ -89,12 +89,12 @@ export class AASTree extends Tree<aas.Referable, AASTreeNode> {
         return this._contents;
     }
 
-    public static from(document: AASDocument | null, language: string): AASTree {
+    public static from(viewRoutes: ViewRoute[], document: AASDocument | null, language: string): AASTree {
         if (!document || !document.content) {
             return new AASTree([]);
         }
 
-        return new AASTree(new TreeInitialize(document.content, language).get());
+        return new AASTree(new TreeInitialize(viewRoutes, document.content, language).get());
     }
 
     public update(referable: aas.Referable): void {
@@ -184,6 +184,7 @@ class TreeInitialize {
     private readonly nodes: AASTreeNode[] = [];
 
     public constructor(
+        private readonly viewRoutes: ViewRoute[],
         private readonly env: aas.Environment,
         private readonly language: string,
     ) {}
@@ -225,7 +226,7 @@ class TreeInitialize {
         let canOpen = false;
         switch (element.modelType) {
             case 'AssetAdministrationShell':
-                canOpen = hasSpecificView(this.env);
+                canOpen = hasSpecificView(this.viewRoutes, this.env);
                 break;
             case 'Blob':
                 canOpen = true;

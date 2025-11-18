@@ -18,13 +18,13 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { TechnicalDataView } from '../../../lib/views/technical-data/technical-data-view';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { TechnicalData } from '../../../lib/views/technical-data/technical-data';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { TechnicalDataState } from '../../../lib/views/technical-data/technical-data.state';
+import { TECHNICAL_DATA_1_2 } from '../../../lib/views/views-constants';
 
 import technicalData from '../../assets/technical-data-1-2.json';
 
@@ -99,7 +99,15 @@ describe('TechnicalDataView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [    {
+                            path: 'TechnicalData',
+                            component: TechnicalDataView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [TECHNICAL_DATA_1_2],
+                            },
+                        },
+                    ],
                 },
                 provideZonelessChangeDetection(),
             ],

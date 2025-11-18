@@ -163,22 +163,23 @@
         "EMPTY": "Die START-Seite ist leer."
     },
     "Shells": {
-        "FAVORITES": "Alle Verwaltungsschalen",
-        "ENDPOINT": "Endpunkt",
         "ADD_ENDPOINT": "Hinzufügen...",
-        "UPDATE_ENDPOINT": "Bearbeiten...",
-        "REMOVE_ENDPOINT": "Entfernen...",
-        "EXTRAS": "Extras...",
-        "PLACEHOLDER_FILTER": "Filter",
-        "DigitalProductPassport": "Produktpass",
-        "CustomerFeedback": "Nutzer-Feedback",
-        "Nameplate": "Typenschild",
-        "HandoverDocumentation": "Übergabedokumentation",
-        "OperationalData": "Operative Daten",
         "Browser": "Browser",
-        "ContactInformations": "Kontaktinformationen",
         "CarbonFootprint": "CO2-Fußabdruck",
-        "TechnicalData": "Technische Daten"
+        "ContactInformation": "Kontaktinformationen",
+        "CustomerFeedback": "Nutzer-Feedback",
+        "DigitalProductPassport": "Produktpass",
+        "ENDPOINT": "Endpunkt",
+        "EXTRAS": "Extras...",
+        "FAVORITES": "Alle Verwaltungsschalen",
+        "HandoverDocumentation": "Übergabedokumentation",
+        "HierarchicalStructure": "Hierarchische Strukturen",
+        "Nameplate": "Typenschild",
+        "OperationalData": "Operative Daten",
+        "PLACEHOLDER_FILTER": "Filter",
+        "REMOVE_ENDPOINT": "Entfernen...",
+        "TechnicalData": "Technische Daten",
+        "UPDATE_ENDPOINT": "Bearbeiten..."
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -374,5 +375,8 @@
     },
     "OperationalData": {
         "TITLE": "Betriebsdaten"
+    },
+    "HierarchicalStructure": {
+        "TITLE": "Hierarchische Strukturen"
     }
 }

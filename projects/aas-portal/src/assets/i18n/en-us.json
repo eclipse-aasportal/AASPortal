@@ -152,7 +152,7 @@
         "DASHBOARD": "Dashboard",
         "DATA_PROTECTION_POLICY": "Data protection policy",
         "DATA_PROTECTION_POLICY_URL": "https://www.fraunhofer.de/en/data-protection-policy.html",
-         "ENDPOINTS": "Endpoints",
+        "ENDPOINTS": "Endpoints",
         "GTC": "GTC",
         "GTC_URL": "https://www.fraunhofer.de/en/gtc.html",
         "PUBLISHING_NOTES": "Publishing notes",
@@ -165,22 +165,23 @@
         "EMPTY": "The START page is empty."
     },
     "Shells": {
-        "FAVORITES": "All shells",
-        "ENDPOINT": "Endpoint",
         "ADD_ENDPOINT": "Add...",
-        "UPDATE_ENDPOINT": "Edit...",
-        "REMOVE_ENDPOINT": "Remove...",
-        "EXTRAS": "Extras...",
-        "PLACEHOLDER_FILTER": "Filter",
-        "DigitalProductPassport": "Product passport",
-        "CustomerFeedback": "User feedback",
-        "Nameplate": "Nameplate",
-        "HandoverDocumentation": "Handover documentation",
-        "OperationalData": "Operational data",
         "Browser": "Browser",
-        "ContactInformations": "Contact information",
         "CarbonFootprint": "Carbon footprint",
-        "TechnicalData": "Technical data"
+        "ContactInformation": "Contact information",
+        "CustomerFeedback": "User feedback",
+        "DigitalProductPassport": "Product passport",
+        "ENDPOINT": "Endpoint",
+        "EXTRAS": "Extras...",
+        "FAVORITES": "All shells",
+        "HandoverDocumentation": "Handover documentation",
+        "HierarchicalStructure": "Hierarchical Structures",
+        "Nameplate": "Nameplate",
+        "OperationalData": "Operational data",
+        "PLACEHOLDER_FILTER": "Filter",
+        "REMOVE_ENDPOINT": "Remove...",
+        "TechnicalData": "Technical data",
+        "UPDATE_ENDPOINT": "Edit..."
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Search"
@@ -371,10 +372,13 @@
     "TechnicalData": {
         "TITLE": "Technical Data"
     },
-    "ContactInformations": {
+    "ContactInformation": {
         "TITLE": "Contact Information"
     },
     "OperationalData": {
         "TITLE": "Operational Data"
+    },
+    "HierarchicalStructure": {
+        "TITLE": "Hierarchical Structures"
     }
 }

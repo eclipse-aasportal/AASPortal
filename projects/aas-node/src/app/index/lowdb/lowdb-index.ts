@@ -96,7 +96,7 @@ export class LowDbIndex extends AASIndex {
         });
     }
 
-    public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
+    public override async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
         if (this.db.data.endpoints.some(item => item.name === endpoint.name)) {
             throw new ApplicationError(ERRORS.RegistryAlreadyExists, { endpoint: endpoint.name }, 409);
         }
@@ -117,7 +117,7 @@ export class LowDbIndex extends AASIndex {
         return old;
     }
 
-    public override async removeEndpoint(endpointName: string): Promise<boolean> {
+    public override async deleteEndpoint(endpointName: string): Promise<boolean> {
         const index = this.db.data.endpoints.findIndex(endpoint => endpoint.name === endpointName);
         if (index < 0) {
             return false;
@@ -129,7 +129,7 @@ export class LowDbIndex extends AASIndex {
         return true;
     }
 
-    public override nextPage(
+    public override getPage(
         endpointName: string,
         cursor: string | undefined,
         limit: number = 100,
@@ -215,23 +215,30 @@ export class LowDbIndex extends AASIndex {
         }
     }
 
-    public override find(endpointName: string | undefined, id: string): Promise<AASDocument | undefined> {
-        return new Promise<AASDocument | undefined>(resolve => {
-            const document = endpointName
-                ? this.db.data.documents.find(
-                      item => item.endpoint === endpointName && (item.id === id || item.assetId === id),
-                  )
-                : this.db.data.documents.find(item => item.id === id || item.assetId === id);
+    public override async find(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument | undefined> {
+        return await new Promise<AASDocument | undefined>(resolve => {
+            const document = endpoint
+                ? modelType === 'AssetAdministrationShell'
+                    ? this.db.data.documents.find(item => item.endpoint === endpoint && item.id === id)
+                    : this.db.data.documents.find(item => item.endpoint === endpoint && item.assetId === id)
+                : modelType === 'AssetAdministrationShell'
+                  ? this.db.data.documents.find(item => item.id === id)
+                  : this.db.data.documents.find(item => item.assetId === id);
 
             if (document === undefined) {
                 resolve(undefined);
                 return;
             }
+
             resolve(this.toDocument(document));
         });
     }
 
-    public override async add(document: AASDocument): Promise<void> {
+    public override async insert(document: AASDocument): Promise<void> {
         const endpoint = document.endpoint;
         const id = document.id;
         const documents = this.db.data.documents;
@@ -250,7 +257,7 @@ export class LowDbIndex extends AASIndex {
         await this.db.write();
     }
 
-    public override async remove(endpointName: string, id: string): Promise<boolean> {
+    public override async delete(endpointName: string, id: string): Promise<boolean> {
         const documents = this.db.data.documents;
         const index = documents.findIndex(item => item.endpoint === endpointName && item.id === id);
         if (index < 0) {

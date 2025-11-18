@@ -45,13 +45,14 @@ import { AASTreeSearch } from './aas-tree-search';
 import { encodeBase64Url } from '../../utilities';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { LogType, NotifyService } from '../notify/notify.service';
-import { findRouteForShell, findRouteForSubmodel } from '../../views/views-routes';
+import { findRouteForShell, findRouteForSubmodel } from '../../utilities';
 
 import { AASTreeApi } from './aas-tree-api';
 import { WINDOW } from '../../services/window.service';
 import { FormsModule } from '@angular/forms';
 import { AASTreeData, AASTreeState } from './aas-tree.state';
 import { ChildComponent } from '../child-component';
+import { VIEW_ROUTES } from '../../views/views-routes';
 
 /**
  * Presents the contents of an Asset Administration Shell as a tree.
@@ -71,6 +72,7 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
     private readonly window = inject(WINDOW);
     private readonly dom = inject(DOCUMENT);
     private readonly notify = inject(NotifyService);
+    private readonly viewRoutes = inject(VIEW_ROUTES);
     private readonly webSocketFactory = inject(WebSocketFactoryService);
     private shiftKey = false;
     private altKey = false;
@@ -305,9 +307,9 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
 
         let route: Route | undefined;
         if (isSubmodel(identifiable)) {
-            route = findRouteForSubmodel(identifiable);
+            route = findRouteForSubmodel(this.viewRoutes, identifiable);
         } else if (isAssetAdministrationShell(identifiable)) {
-            const tuple = findRouteForShell(document);
+            const tuple = findRouteForShell(this.viewRoutes, document);
             route = tuple.route;
         }
 
@@ -328,14 +330,6 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
     public findPrevious(): void {
         this.search.findPrevious();
     }
-
-    // public toString(value: aas.Reference | undefined): string {
-    //     if (!value) {
-    //         return '-';
-    //     }
-
-    //     return value.keys.map(key => key.value).join('.');
-    // }
 
     private expandNode(node: AASTreeNode): void {
         const tree = new AASTree(untracked(this.state().contents));
@@ -389,7 +383,7 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
 
     private update(document: AASDocument | null): void {
         if (document) {
-            const tree = AASTree.from(document, untracked(this.currentLang));
+            const tree = AASTree.from(this.viewRoutes, document, untracked(this.currentLang));
             this.state().update({
                 document,
                 matchIndex: -1,

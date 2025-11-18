@@ -1,7 +1,6 @@
 {
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "Launch aas-portal",
             "type": "chrome",
@@ -76,7 +75,7 @@
                 "test",
                 "-w",
                 "aas-node",
-                "--testPathPattern",
+                "--testPathPatterns",
                 "${fileBasename}",
                 "--coverage=false"
             ],
@@ -92,81 +91,89 @@
                 "test",
                 "-w",
                 "aas-core",
-                "--testPathPattern",
-                "${fileBasename}",
-                "--coverage=false"
-            ]
-        },
-        {
-            "name": "Debug current aas-package test",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "test",
-                "-w",
-                "aas-package",
-                "--testPathPattern",
-                "${fileBasename}",
-                "--coverage=false"
-            ]
-        },
-        {
-            "name": "Debug current aas-lib test",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "test",
-                "-w",
-                "aas-lib",
-                "--testPathPattern",
-                "${fileBasename}",
-                "--coverage=false"
-            ]
-        },
-        {
-            "name": "Debug current aas-portal test",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "test",
-                "-w",
-                "aas-portal",
-                "--testPathPattern",
-                "${fileBasename}",
-                "--coverage=false"
-            ]
-        },
-        {
-            "name": "Debug current aas-browser test",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "test",
-                "-w",
-                "aas-browser",
                 "--testPathPatterns",
                 "${fileBasename}",
-                "--coverage=false",
+                "--coverage=false"
             ]
+        },
+        {
+            "name": "Debug single aas-package test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/projects/aas-package",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": [
+                "--config",
+                "jest.config.ts",
+                "--runInBand",
+                "--testPathPatterns",
+                "${fileBasename}"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--experimental-vm-modules"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug single aas-lib test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/projects/aas-lib",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": [
+                "--config",
+                "jest.config.ts",
+                "--runInBand",
+                "--testPathPatterns",
+                "${fileBasename}"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--experimental-vm-modules"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug single aas-portal test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/projects/aas-portal",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": [
+                "--config",
+                "jest.config.ts",
+                "--runInBand",
+                "--testPathPatterns",
+                "${fileBasename}"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--experimental-vm-modules"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug single aas-browser test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/projects/aas-browser",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": [
+                "--config",
+                "jest.config.ts",
+                "--runInBand",
+                "--testPathPatterns",
+                "${fileBasename}"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--experimental-vm-modules"
+            },
+            "console": "integratedTerminal"
         },
         {
             "name": "Debug current aas-server test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
+            "runtimeExecutable": "node",
             "runtimeArgs": [
                 "run-script",
                 "test",

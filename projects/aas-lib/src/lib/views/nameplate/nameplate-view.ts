@@ -33,7 +33,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { Nameplate } from './nameplate';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { LeafView } from '../leaf-view';
 import { NameplateViewState } from './nameplate-view.state';
 

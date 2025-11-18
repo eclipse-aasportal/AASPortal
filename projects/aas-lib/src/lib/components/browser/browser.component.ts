@@ -25,7 +25,7 @@ import { ConceptDescriptionComponent } from '../concept-description/concept-desc
 import { isLangString, referenceToString } from '../../utilities';
 import { BrowserData, BrowserElement, BrowserElementRef, BrowserProperty, BrowserState } from './browser.state';
 import { ChildComponent } from '../child-component';
-import { API_URL } from '../../types';
+import { API_URL } from '../../api-url';
 
 const collectionNames: Record<string, string> = {
     SubmodelElementCollection: 'value',
