@@ -8,9 +8,10 @@
 
 import { aas } from 'aas-core';
 import { NAMEPLATE_3_0, CARBON_FOOTPRINT_1_0, HANDOVER_DOCUMENTATION_2_0 } from '../../lib/views/views-constants';
-import { findRouteForShell, findRouteForSubmodel, hasSpecificView } from '../../lib/views/views-routes';
+import { findRouteForShell, findRouteForSubmodel, hasSpecificView } from '../../lib/utilities';
+import { viewRoutes } from '../../lib/views/view-route-config'
 
-describe('views-roots', () => {
+describe('utilities', () => {
     describe('findRouteForSubmodel', () => {
         it('should has a Nameplate route', () => {
             const submodel: aas.Submodel = {
@@ -28,7 +29,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(findRouteForSubmodel(submodel)?.path).toEqual('Nameplate');
+            expect(findRouteForSubmodel(viewRoutes, submodel)?.path).toEqual('Nameplate');
         });
 
         it('has no specific route for "Unknown"', () => {
@@ -47,7 +48,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(findRouteForSubmodel(submodel, false)?.data.type).toBeUndefined();
+            expect(findRouteForSubmodel(viewRoutes, submodel, false)?.data.type).toBeUndefined();
         });
 
         it('returns the default route for "Unknown"', () => {
@@ -66,7 +67,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(findRouteForSubmodel(submodel)?.data.type).toEqual('Default');
+            expect(findRouteForSubmodel(viewRoutes, submodel)?.data.type).toEqual('Default');
         });
 
         it('should has a OperationData route', () => {
@@ -85,7 +86,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(findRouteForSubmodel(submodel)?.path).toEqual('OperationalData');
+            expect(findRouteForSubmodel(viewRoutes, submodel)?.path).toEqual('OperationalData');
         });
     });
 
@@ -140,7 +141,7 @@ describe('views-roots', () => {
                 ],
             };
 
-            const result = findRouteForShell(env);
+            const result = findRouteForShell(viewRoutes, env);
             expect(result.route?.path).toEqual('DigitalProductPassport');
             expect(result.map?.Nameplate).toBeDefined();
             expect(result.map?.CarbonFootprint).toBeDefined();
@@ -197,7 +198,7 @@ describe('views-roots', () => {
                 ],
             };
 
-            const result = findRouteForShell(env, false);
+            const result = findRouteForShell(viewRoutes, env, false);
             expect(result).toEqual({});
         });
     });
@@ -219,7 +220,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(hasSpecificView(submodel)).toBe(true);
+            expect(hasSpecificView(viewRoutes, submodel)).toBe(true);
         });
 
         it('has no specific view for "Unknown"', () => {
@@ -238,7 +239,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(hasSpecificView(submodel)).toBe(false);
+            expect(hasSpecificView(viewRoutes, submodel)).toBe(false);
         });
 
         it('should has a specific OperationData view', () => {
@@ -257,7 +258,7 @@ describe('views-roots', () => {
                 },
             };
 
-            expect(hasSpecificView(submodel)).toBe(true);
+            expect(hasSpecificView(viewRoutes, submodel)).toBe(true);
         });
     });
 });

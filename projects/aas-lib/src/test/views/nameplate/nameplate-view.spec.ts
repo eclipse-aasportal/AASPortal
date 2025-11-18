@@ -18,13 +18,13 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { NameplateView } from '../../../lib/views/nameplate/nameplate-view';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { Nameplate } from '../../../lib/views/nameplate/nameplate';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { NameplateState } from '../../../lib/views/nameplate/nameplate.state';
+import { NAMEPLATE_2_0, NAMEPLATE_3_0, NAMEPLATE_FHG, NAMEPLATE_HSU } from '../../../lib/views/views-constants';
 
 import nameplate_3_0 from '../../assets/nameplate-3-0.json';
 
@@ -99,7 +99,15 @@ describe('NameplateView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [    {
+                            path: 'Nameplate',
+                            component: NameplateView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [NAMEPLATE_2_0, NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0],
+                            },
+                        },
+                    ],
                 },
                 provideTranslateService({
                     loader: {

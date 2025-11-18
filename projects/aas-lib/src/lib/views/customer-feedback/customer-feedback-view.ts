@@ -32,7 +32,7 @@ import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';
 import { LeafView } from '../leaf-view';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { CustomerFeedbackViewState } from './customer-feedback-view.state';
 
 const maxStars = 5;

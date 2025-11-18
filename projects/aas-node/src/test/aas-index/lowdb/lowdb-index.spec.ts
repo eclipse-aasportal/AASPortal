@@ -50,7 +50,7 @@ describe('LowDbIndex', () => {
 
     describe('nextPage', () => {
         it('returns all documents that belongs to a container', async () => {
-            const result = await index.nextPage('Samples', undefined);
+            const result = await index.getPage('Samples', undefined);
             expect(result.result).toEqual(db.data.documents.filter(document => document.endpoint === 'Samples'));
         });
     });

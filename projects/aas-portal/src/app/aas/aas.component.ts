@@ -502,7 +502,7 @@ export class AASComponent implements OnInit, OnDestroy {
     }
 
     private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument(id, endpoint).subscribe({
+        this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
             next: document => this.state.update({ document }),
             error: error => console.debug(error),
         });

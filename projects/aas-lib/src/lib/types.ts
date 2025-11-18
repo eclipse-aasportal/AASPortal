@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { InjectionToken } from '@angular/core';
 import { Data, Route } from '@angular/router';
 import { aas } from 'aas-core';
 
@@ -120,6 +119,7 @@ export type ViewRouteName =
     | 'CustomerFeedback'
     | 'DigitalProductPassport'
     | 'HandoverDocumentation'
+    | 'HierarchicalStructure'
     | 'Nameplate'
     | 'OperationalData'
     | 'Laser'
@@ -128,8 +128,6 @@ export type ViewRouteName =
 export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;
 
 export type ViewRouteResult = { route?: ViewRoute; map?: ViewRouteMap };
-
-export const VIEW_ROUTES = new InjectionToken<ViewRoute[]>('ViewRoutes');
 
 /**
  * URL resolver.
@@ -146,5 +144,3 @@ export interface ApiUrl {
      */
     getFileUrl(id: string, submodelId: string, idShortPath: string, endpoint?: string): string;
 }
-
-export const API_URL = new InjectionToken<ApiUrl>('API URL');

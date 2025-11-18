@@ -71,10 +71,21 @@ describe('DocumentsController', () => {
         app.use(errorHandler);
     });
 
-    it('getDocument: /api/v1/documents/:id', async () => {
+    it('getDocument: /api/v1/documents/{id}', async () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(sampleDocument);
+        expect(aasProvider.getDocument).toHaveBeenCalled();
+    });
+
+    it('getDocument: /api/v1/documents/asset/{id}', async () => {
+        aasProvider.getDocument.mockResolvedValue(sampleDocument);
+        const response = await request(app)
+            .get('/api/v1/documents/asset/aHR0cDovL2N1c3RvbWVyLmNvbS9hc3NldHMvS0hCVlpKU1FLSVk')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);

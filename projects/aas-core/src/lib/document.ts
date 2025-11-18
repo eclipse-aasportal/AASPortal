@@ -472,7 +472,7 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
  * @param reference The reference.
  * @returns The referenced referable or `undefined`.
  */
-export function selectReferable<T extends aas.Referable>(
+export function selectReferable<T extends aas.Referable = aas.Referable>(
     env: aas.Environment,
     reference: aas.Reference,
 ): T | undefined {
