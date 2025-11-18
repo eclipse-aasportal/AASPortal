@@ -29,7 +29,7 @@ export abstract class AASServerScan extends EventEmitter {
             let endOfEndpoint = false;
             do {
                 if (!endOfIndex) {
-                    const result = await index.nextPage(endpoint.name, indexCursor);
+                    const result = await index.getPage(endpoint.name, indexCursor);
                     for (const reference of result.result) {
                         let value = map.get(reference.id);
                         if (value === undefined) {

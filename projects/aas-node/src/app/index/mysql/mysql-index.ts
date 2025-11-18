@@ -96,7 +96,7 @@ export class MySqlIndex extends AASIndex {
         return this.toEndpoint(results[0]);
     }
 
-    public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
+    public override async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
         const connection = await this.getConnection();
         await connection.query<ResultSetHeader>(
             'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
@@ -144,7 +144,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async removeEndpoint(endpointName: string): Promise<boolean> {
+    public override async deleteEndpoint(endpointName: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -187,7 +187,7 @@ export class MySqlIndex extends AASIndex {
         return this.getLastPage(connection, cursor.limit, query);
     }
 
-    public override async nextPage(
+    public override async getPage(
         endpointName: string,
         cursor: string | undefined,
         limit: number = 100,
@@ -244,7 +244,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async add(document: AASDocument): Promise<void> {
+    public override async insert(document: AASDocument): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -275,11 +275,16 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async find(endpoint: string | undefined, id: string): Promise<AASDocument | undefined> {
+    public override async find(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument | undefined> {
         const connection = await this.getConnection();
         const document = endpoint
-            ? await this.selectEndpointDocument(connection, endpoint, id)
-            : await this.selectDocument(connection, id);
+            ? await this.selectEndpointDocument(connection, endpoint, modelType, id)
+            : await this.selectDocument(connection, modelType, id);
+
         if (!document) {
             return undefined;
         }
@@ -287,7 +292,7 @@ export class MySqlIndex extends AASIndex {
         return this.toDocument(document);
     }
 
-    public override async remove(endpointName: string, id: string): Promise<boolean> {
+    public override async delete(endpointName: string, id: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -505,11 +510,14 @@ export class MySqlIndex extends AASIndex {
     private async selectEndpointDocument(
         connection: Connection,
         endpoint: string,
+        modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
     ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
-            'SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)',
-            [endpoint, id, id],
+            modelType === 'AssetAdministrationShell'
+                ? 'SELECT * FROM `documents` WHERE endpoint = ? AND id = ?'
+                : 'SELECT * FROM `documents` WHERE endpoint = ? AND assetId = ?',
+            [endpoint, id],
         );
 
         if (results.length === 0) {
@@ -519,10 +527,16 @@ export class MySqlIndex extends AASIndex {
         return results[0];
     }
 
-    private async selectDocument(connection: Connection, id: string): Promise<MySqlDocument | undefined> {
+    private async selectDocument(
+        connection: Connection,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
-            'SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)',
-            [id, id],
+            modelType === 'AssetAdministrationShell'
+                ? 'SELECT * FROM `documents` WHERE id = ?'
+                : 'SELECT * FROM `documents` WHERE assetId = ?',
+            [id],
         );
 
         if (results.length === 0) {

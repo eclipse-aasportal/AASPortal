@@ -63,7 +63,7 @@ describe('EndpointsApi', () => {
 
     describe('getDocument', () => {
         it('/api/v1/endpoints/:name/documents/:id}', (done: DoneFn) => {
-            service.getDocument('document1', 'Samples').subscribe(value => {
+            service.getDocument('AssetAdministrationShell', 'document1', 'Samples').subscribe(value => {
                 expect(value).toEqual(sample as AASDocument);
                 done();
             });

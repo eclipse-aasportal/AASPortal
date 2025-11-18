@@ -56,17 +56,26 @@ export class EndpointsApi {
 
     /**
      * Gets the AAS document with the specified identifier.
-     * @param id The AAS identifier.
+     * @param modelType The model type to which the identifier belongs.
+     * @param id Depending of the model type the AAS or Asset identifier.
      * @param endpoint The endpoint name.
      * @returns The requested AAS document.
      */
-    public getDocument(id: string, endpoint?: string): Observable<AASDocument> {
+    public getDocument(
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+        endpoint?: string,
+    ): Observable<AASDocument> {
         return this.auth.ready.pipe(
             first(ready => ready === true),
             mergeMap(() => {
                 const url = endpoint
-                    ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`
-                    : `/api/v1/documents/${encodeBase64Url(id)}`;
+                    ? modelType === 'AssetAdministrationShell'
+                        ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`
+                        : `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/asset/${encodeBase64Url(id)}`
+                    : modelType === 'AssetAdministrationShell'
+                      ? `/api/v1/documents/${encodeBase64Url(id)}`
+                      : `/api/v1/documents/asset/${encodeBase64Url(id)}`;
 
                 const document: AASDocument | undefined = this.cache.get(url);
                 if (document === undefined) {

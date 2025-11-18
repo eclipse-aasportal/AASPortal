@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+export * from './lib/api-url';
 export * from './lib/components/aas-table/aas-table';
 export * from './lib/components/aas-tree/aas-tree-node';
 export * from './lib/components/aas-tree/aas-tree-search';
@@ -63,6 +64,8 @@ export * from './lib/views/handover-documentation/handover-documentation-view';
 export * from './lib/views/handover-documentation/handover-documentation-view';
 export * from './lib/views/handover-documentation/handover-documentation';
 export * from './lib/views/handover-documentation/handover-documentation';
+export * from './lib/views/hierarchical-structure/hierarchical-structure-view';
+export * from './lib/views/hierarchical-structure/hierarchical-structure';
 export * from './lib/views/leaf-view';
 export * from './lib/views/nameplate/nameplate-view';
 export * from './lib/views/nameplate/nameplate';
@@ -70,6 +73,7 @@ export * from './lib/views/operational-data/operational-data-view';
 export * from './lib/views/technical-data/technical-data-view';
 export * from './lib/views/technical-data/technical-data';
 export * from './lib/views/thumbnail-qrcode/thumbnail-qrcode';
+export * from './lib/views/view-route-config';
 export * from './lib/views/view';
 export * from './lib/views/views-constants';
 export * from './lib/views/views-routes';

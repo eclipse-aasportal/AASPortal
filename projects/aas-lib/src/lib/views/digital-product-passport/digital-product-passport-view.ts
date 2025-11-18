@@ -34,7 +34,7 @@ import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { Nameplate } from '../nameplate/nameplate';
 import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
 import { CompositeView } from '../composite-view';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { DigitalProductPassportViewState } from './digital-product-passport-view.state';
 
 export type MainData = {

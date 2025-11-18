@@ -26,7 +26,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from './carbon-footprint';
 import { LeafView } from '../leaf-view';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { CarbonFootprintViewState } from './carbon-footprint-view.state';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';

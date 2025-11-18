@@ -14,9 +14,9 @@ import { BrowserComponent } from '../../../lib/components/browser/browser.compon
 import { BrowserState } from '../../../lib/components/browser/browser.state';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
+import { API_URL } from '../../../lib/api-url';
 
 import sampleDocument from '../../assets/sample-document.json';
-import { API_URL } from '../../../lib/types';
 
 describe('BrowserComponent', () => {
     let fixture: ComponentFixture<BrowserComponent>;

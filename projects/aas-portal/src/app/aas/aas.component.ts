@@ -40,6 +40,7 @@ import {
     EndpointsApi,
     findRouteForShell,
     findRouteForSubmodel,
+    VIEW_ROUTES,
 } from 'aas-lib';
 
 import { CommandHandler } from '../aas/command-handler';
@@ -88,6 +89,7 @@ export class AASComponent implements OnInit, OnDestroy {
     private readonly start = inject(StartService);
     private readonly auth = inject(AuthService);
     private readonly dom = inject(DOCUMENT);
+    private readonly viewRoutes = inject(VIEW_ROUTES);
 
     public constructor() {
         effect(() => {
@@ -152,9 +154,9 @@ export class AASComponent implements OnInit, OnDestroy {
     });
 
     public getSubmodels() {
-        if(!this.state.document()) return [];
-        if(!this.state.document()?.content) return [];
-        if(!this.state.document()?.content?.submodels) return [];
+        if (!this.state.document()) return [];
+        if (!this.state.document()?.content) return [];
+        if (!this.state.document()?.content?.submodels) return [];
 
         return this.state.document()?.content?.submodels;
     }
@@ -502,7 +504,7 @@ export class AASComponent implements OnInit, OnDestroy {
     }
 
     private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument(id, endpoint).subscribe({
+        this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
             next: document => this.state.update({ document }),
             error: error => console.debug(error),
         });
@@ -526,15 +528,15 @@ export class AASComponent implements OnInit, OnDestroy {
         return version;
     }
 
-    getSubmodelSemanticId(submodel: aas.Submodel){
-        if(!submodel) return "";
-        if(!submodel.semanticId) return "";
-        if(submodel.semanticId.keys.length <= 0) return "";
+    getSubmodelSemanticId(submodel: aas.Submodel) {
+        if (!submodel) return '';
+        if (!submodel.semanticId) return '';
+        if (submodel.semanticId.keys.length <= 0) return '';
         return submodel.semanticId.keys[0].value;
     }
 
-    getSubmodelIcon(submodel: aas.Submodel){
-        //find out what type of submodel it is and 
+    getSubmodelIcon(submodel: aas.Submodel) {
+        //find out what type of submodel it is and
         //return a somewhat fitting thumbnail
         // Document-related
         // Nameplate-related
@@ -543,71 +545,64 @@ export class AASComponent implements OnInit, OnDestroy {
         // Data-related
 
         const semId = this.getSubmodelSemanticId(submodel);
-        if(!semId) return "bi-question-circle"
+        if (!semId) return 'bi-question-circle';
 
-        if(semId.toLowerCase().includes("document") || submodel.idShort.toLowerCase().includes("document")) return "bi-file-earmark-richtext";
-        if(semId.toLowerCase().includes("contact") || submodel.idShort.toLowerCase().includes("contact")) return "bi-card-text";
-        if(semId.toLowerCase().includes("nameplate") || submodel.idShort.toLowerCase().includes("nameplate")) return "bi-file-text";
-        if(semId.toLowerCase().includes("carbon") || submodel.idShort.toLowerCase().includes("carbon")) return "bi-leaf";
-        if(semId.toLowerCase().includes("data") || submodel.idShort.toLowerCase().includes("data")) return "bi-graph-up";
-        if(semId.toLowerCase().includes("structure") || submodel.idShort.toLowerCase().includes("structure")) return "bi-diagram-3";
+        if (semId.toLowerCase().includes('document') || submodel.idShort.toLowerCase().includes('document'))
+            return 'bi-file-earmark-richtext';
+        if (semId.toLowerCase().includes('contact') || submodel.idShort.toLowerCase().includes('contact'))
+            return 'bi-card-text';
+        if (semId.toLowerCase().includes('nameplate') || submodel.idShort.toLowerCase().includes('nameplate'))
+            return 'bi-file-text';
+        if (semId.toLowerCase().includes('carbon') || submodel.idShort.toLowerCase().includes('carbon'))
+            return 'bi-leaf';
+        if (semId.toLowerCase().includes('data') || submodel.idShort.toLowerCase().includes('data'))
+            return 'bi-graph-up';
+        if (semId.toLowerCase().includes('structure') || submodel.idShort.toLowerCase().includes('structure'))
+            return 'bi-diagram-3';
 
-        return "bi-question-circle";
-
-
+        return 'bi-question-circle';
     }
 
-    openShellView(){
+    openShellView() {
         let route: Route | undefined;
         const document = this.document();
-        if(document === undefined) return "";
-        const tuple = findRouteForShell(document!);
+        if (document === undefined) return '';
+        const tuple = findRouteForShell(this.viewRoutes, document!);
         route = tuple.route;
 
         if (route === undefined) return undefined;
 
         const endpoint = this.document()?.endpoint;
-        if(endpoint === undefined) return undefined;
+        if (endpoint === undefined) return undefined;
 
         const id = this.document()?.id;
-        if(id === undefined) return undefined;
-        
-        return [
-            `/views/${route.path}`,
-            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
-        ];
+        if (id === undefined) return undefined;
 
+        return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    openBrowserView(){
+    openBrowserView() {
         const endpoint = this.document()?.endpoint;
-        if(endpoint === undefined) return undefined;
+        if (endpoint === undefined) return undefined;
 
         const id = this.document()?.id;
-        if(id === undefined) return undefined;
-        
-        return [
-            `/views/Browser`,
-            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
-        ];
+        if (id === undefined) return undefined;
 
+        return [`/views/Browser`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    openSubmodelView(submodel: aas.Submodel){
+    openSubmodelView(submodel: aas.Submodel) {
         let route: Route | undefined;
-        route = findRouteForSubmodel(submodel);
+        route = findRouteForSubmodel(this.viewRoutes, submodel);
 
         if (route === undefined) return undefined;
 
         const endpoint = this.document()?.endpoint;
-        if(endpoint === undefined) return undefined;
+        if (endpoint === undefined) return undefined;
 
         const id = this.document()?.id;
-        if(id === undefined) return undefined;
-        
-        return [
-            `/views/${route.path}`,
-            { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) },
-        ];
+        if (id === undefined) return undefined;
+
+        return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 }

@@ -133,15 +133,18 @@
                             "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
                             "projects/aas-browser/src/styles.scss"
                         ],
-                        "scripts": []
+                        "scripts": [],
+                        "allowedCommonJsDependencies": [
+                            "qrcode"
+                        ]
                     },
                     "configurations": {
                         "production": {
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "1MB",
-                                    "maximumError": "2MB"
+                                    "maximumWarning": "2MB",
+                                    "maximumError": "3MB"
                                 },
                                 {
                                     "type": "anyComponentStyle",

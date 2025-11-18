@@ -26,7 +26,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { HandoverDocumentation } from './handover-documentation';
 import { LeafView } from '../leaf-view';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { HandoverDocumentationViewState } from './handover-documentation-view.state';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';
