@@ -25,7 +25,7 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { TechnicalData } from './technical-data';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { TechnicalDataViewState } from './technical-data-view.state';
 import { LeafView } from '../leaf-view';
 import { StartService } from '../../services/start.service';

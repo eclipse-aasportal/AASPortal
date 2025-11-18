@@ -23,6 +23,7 @@ import { WINDOW } from '../../../lib/services/window.service';
 import { AASTreeApi } from '../../../lib/components/aas-tree/aas-tree-api';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { AASTreeState } from '../../../lib/components/aas-tree/aas-tree.state';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 
 describe('AASTreeComponent', () => {
     let fixture: ComponentFixture<AASTreeComponent>;
@@ -59,6 +60,10 @@ describe('AASTreeComponent', () => {
                 {
                     provide: ActivatedRoute,
                     useValue: {} as Partial<ActivatedRoute>,
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: [],
                 },
                 provideTranslateService({
                     loader: {

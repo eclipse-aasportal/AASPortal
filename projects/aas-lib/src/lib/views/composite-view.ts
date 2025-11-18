@@ -94,13 +94,15 @@ export abstract class CompositeView<TState extends CompositeViewState<CompositeV
     private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
         if (params?.id) {
             const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-            return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+            return this.api
+                .getDocument('AssetAdministrationShell', decodeBase64Url(params.id), endpoint)
+                .pipe(toArray());
         }
 
         if (params?.docs) {
             const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
             return from(docs).pipe(
-                mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                mergeMap(([endpoint, id]) => this.api.getDocument('AssetAdministrationShell', id, endpoint)),
                 toArray(),
             );
         }

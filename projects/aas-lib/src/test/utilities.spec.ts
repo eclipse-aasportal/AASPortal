@@ -19,7 +19,7 @@ import {
 } from '../lib/utilities';
 import { createSpyObj } from './mocks';
 
-describe('convert', () => {
+describe('utilities', () => {
     describe('basename', () => {
         it('gets the file name of a file path', () => {
             expect(basename('A:/hello/world/john.doe')).toEqual('john.doe');
@@ -63,6 +63,11 @@ describe('convert', () => {
             const b64url = encodeBase64Url('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
             expect(b64url).toEqual('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw');
         });
+
+        it('converts ÄÖÜäöüß to Base64Url string', () => {
+            const b64url = encodeBase64Url('ÄÖÜäöüß');
+            expect(b64url).toEqual('w4TDlsOcw6TDtsO8w58');
+        });
     });
 
     describe('decodeBase64Url', () => {
@@ -71,6 +76,11 @@ describe('convert', () => {
                 'aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw',
             );
             expect(url).toEqual('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
+        });
+
+        it('converts Base64Url string of ÄÖÜäöüß to normal string', () => {
+            const str = decodeBase64Url('w4TDlsOcw6TDtsO8w58');
+            expect(str).toEqual('ÄÖÜäöüß');
         });
     });
 

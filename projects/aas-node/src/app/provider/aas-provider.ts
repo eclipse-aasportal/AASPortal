@@ -118,24 +118,30 @@ export class AASProvider {
 
     /**
      * Gets the AAS document with the specified identifier.
-     * @param id The AAS identifier.
-     * @param endpointName The endpoint name.
+     *
+     * @param endpoint The AAS endpoint name (optional).
+     * @param modelType The model type to which `id` belongs.
+     * @param id Depending on the model type the AAS or Asset identifier.
      * @returns The AAS document with the specified identifier.
      */
-    public async getDocument(id: string, endpointName?: string): Promise<AASDocument> {
-        const document = await this.index.get(endpointName, id);
+    public async getDocument(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument> {
+        const document = await this.index.get(endpoint, modelType, id);
         document.content = await this.getDocumentContent(document);
         return document;
     }
 
     /**
      * Gets the AAS environment for the specified AAS document.
-     * @param endpointName The endpoint name.
+     * @param endpoint The endpoint name.
      * @param id The AAS identifier.
      * @returns The AAS environment.
      */
-    public async getContent(endpointName: string, id: string): Promise<aas.Environment> {
-        const document = await this.index.get(endpointName, id);
+    public async getContent(endpoint: string, id: string): Promise<aas.Environment> {
+        const document = await this.index.get(endpoint, 'AssetAdministrationShell', id);
         return await this.getDocumentContent(document);
     }
 
@@ -147,7 +153,7 @@ export class AASProvider {
      */
     public async getThumbnail(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
@@ -174,7 +180,7 @@ export class AASProvider {
         options?: object,
     ): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         let stream: NodeJS.ReadableStream;
         const client = this.clientFactory.create(endpoint);
         try {
@@ -231,7 +237,7 @@ export class AASProvider {
      */
     public async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.clientFactory.testAsync(endpoint);
-        await this.index.addEndpoint(endpoint);
+        await this.index.insertEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
             type: 'AASNodeMessage',
             data: {
@@ -286,7 +292,7 @@ export class AASProvider {
     public async removeEndpoint(endpointName: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
-            await this.index.removeEndpoint(endpoint.name);
+            await this.index.deleteEndpoint(endpoint.name);
             const task = this.taskHandler.find(endpointName, 'ScanEndpoint');
             if (task) {
                 this.taskHandler.delete(task.id);
@@ -336,7 +342,7 @@ export class AASProvider {
      */
     public async updateDocument(endpointName: string, id: string, content: aas.Environment): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         if (!document) {
             throw new Error(`The destination document ${id} is not available.`);
         }
@@ -358,7 +364,7 @@ export class AASProvider {
      */
     public async getPackage(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
@@ -405,7 +411,7 @@ export class AASProvider {
             const address = await client.determineAddress(aasxFile);
             if (address) {
                 const document = await client.createDocument(address);
-                await this.index.add(document);
+                await this.index.insert(document);
                 this.notify({ type: 'Added', document });
             }
         } finally {
@@ -420,12 +426,12 @@ export class AASProvider {
      */
     public async deletePackage(endpointName: string, id: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         if (document) {
             const client = this.clientFactory.create(endpoint);
             try {
                 await client.deletePackage(document.id, document.address);
-                await this.index.remove(endpointName, id);
+                await this.index.delete(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
                 await client.close();
@@ -442,7 +448,7 @@ export class AASProvider {
      */
     public async invoke(endpointName: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
@@ -465,7 +471,7 @@ export class AASProvider {
      * @returns All AAS documents of a hierarchy.
      */
     public async getHierarchy(endpoint: string, id: string): Promise<AASDocument[]> {
-        const document = await this.index.get(endpoint, id);
+        const document = await this.index.get(endpoint, 'AssetAdministrationShell', id);
         const root: AASDocument = { ...document, parentId: null, content: null };
         const nodes: AASDocument[] = [root];
         await this.collectDescendants(root, nodes);
@@ -515,7 +521,7 @@ export class AASProvider {
 
         for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
             try {
-                await this.index.addEndpoint(endpoint);
+                await this.index.insertEndpoint(endpoint);
                 this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) added.`);
                 this.wsServer.notify('IndexChange', {
                     type: 'AASNodeMessage',
@@ -551,7 +557,7 @@ export class AASProvider {
 
     private async createSubscription(message: LiveRequest, socket: SocketClient): Promise<SocketSubscription> {
         const endpoint = await this.index.getEndpoint(message.endpoint);
-        const document = await this.index.get(message.endpoint, message.id);
+        const document = await this.index.get(message.endpoint, 'AssetAdministrationShell', message.id);
         const client = this.clientFactory.create(endpoint);
         await client.open();
         let env = this.cache.get(document.endpoint, document.id);
@@ -690,7 +696,7 @@ export class AASProvider {
             return;
         }
 
-        await this.index.add(document);
+        await this.index.insert(document);
         this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
         this.sendMessage({ type: 'Added', document });
     }
@@ -702,7 +708,7 @@ export class AASProvider {
         }
 
         const document = result.document;
-        await this.index.remove(result.endpoint.name, document.id);
+        await this.index.delete(result.endpoint.name, document.id);
         this.cache.remove(document.endpoint, document.id);
         this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
         this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
@@ -720,7 +726,7 @@ export class AASProvider {
         for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
             const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
             for (const assetId of assetIds) {
-                const child = await this.index.find(undefined, assetId);
+                const child = await this.index.find(undefined, 'Asset', assetId);
                 if (child) {
                     const node: AASDocument = { ...child, parentId: parent.id, content: null };
                     nodes.push(node);
@@ -732,7 +738,8 @@ export class AASProvider {
         for (const reference of this.whereAASReference(content.submodels)) {
             const childId = reference.keys[0].value;
             const child =
-                (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
+                (await this.index.find(parent.endpoint, 'AssetAdministrationShell', childId)) ??
+                (await this.index.find(undefined, 'AssetAdministrationShell', childId));
 
             if (child) {
                 const node: AASDocument = { ...child, parentId: parent.id, content: null };

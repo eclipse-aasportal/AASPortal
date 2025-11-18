@@ -15,6 +15,7 @@ import morgan from 'morgan';
 import { Readable } from 'stream';
 import { resolve } from 'path/posix';
 import request from 'supertest';
+import multer from 'multer';
 import { aas, AASEndpoint } from 'aas-core';
 import { createSpyObj } from 'aas-jest';
 
@@ -27,7 +28,6 @@ import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
-import multer from 'multer';
 
 describe('EndpointsController', () => {
     let app: Express;
@@ -222,6 +222,17 @@ describe('EndpointsController', () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/endpoints/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(sampleDocument);
+        expect(aasProvider.getDocument).toHaveBeenCalled();
+    });
+
+    it('GET: /api/v1/endpoints/{name}/documents/asset/{id}', async () => {
+        aasProvider.getDocument.mockResolvedValue(sampleDocument);
+        const response = await request(app)
+            .get('/api/v1/endpoints/U2FtcGxl/documents/asset/aHR0cDovL2N1c3RvbWVyLmNvbS9hc3NldHMvS0hCVlpKU1FLSVk')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);

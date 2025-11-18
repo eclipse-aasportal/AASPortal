@@ -31,6 +31,7 @@ import {
     LiveState,
     StartService,
     ToolbarService,
+    VIEW_ROUTES,
 } from 'aas-lib';
 
 import { AASComponent } from '../../app/aas/aas.component';
@@ -124,6 +125,10 @@ describe('AASComponent', () => {
                 {
                     provide: StartService,
                     useValue: start,
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: [],
                 },
                 provideHttpClientTesting(),
                 provideRouter([]),

@@ -47,7 +47,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { LeafView } from '../leaf-view';
 import { OperationalDataViewState } from './operational-data-view.state';
 

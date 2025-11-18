@@ -20,10 +20,10 @@
         "start": "docker build -f Dockerfile -t aasserver . && docker run -d --name AASServer -p 50010:50010 --restart=always aasserver"
     },
     "dependencies": {
-        "@aas-core-works/aas-core3.0-typescript": "^1.0.3",
+        "@aas-core-works/aas-core3.0-typescript": "^1.0.4",
         "@xmldom/xmldom": "^0.8.10",
-        "axios": "^1.12.2",
-        "bcryptjs": "^3.0.2",
+        "axios": "^1.13.2",
+        "bcryptjs": "^3.0.3",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
         "express": "^5.1.0",

@@ -27,7 +27,7 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { BrowserComponent } from '../../components/browser/browser.component';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { VIEW_ROUTES } from '../../types';
+import { VIEW_ROUTES } from '../../views/views-routes';
 import { DocumentBrowserViewState } from './document-browser-view.state';
 import { CompositeView } from '../composite-view';
 
