@@ -32,12 +32,13 @@ import {
     NAMEPLATE_HSU,
     TECHNICAL_DATA_1_2,
 } from './views-constants';
+import { GenericSubmodelComponent } from './generic-submodel/generic-submodel.component';
 
 /** The routes to the specific views. */
 export const viewRoutes: ViewRoute[] = [
     {
-        path: 'Browser',
-        component: DocumentBrowserView,
+        path: 'GenericSubmodel',
+        component: GenericSubmodelComponent,
         data: {
             type: 'Default',
         },
