@@ -14,6 +14,7 @@ import { EndpointsApi } from '../services/endpoints-api';
 import { ViewRoute, ViewRouteName } from '../types';
 import { VIEW_ROUTE_NAME } from './view-route-name';
 import { VIEW_ROUTES } from './views-routes';
+import { encodeBase64Url } from '../utilities';
 
 /** Provides a specific view. */
 export abstract class View {
@@ -44,6 +45,17 @@ export abstract class View {
 
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
+
+        public openAASOverview(){
+        const document = this.document();
+        if (document === undefined) {
+            return "";
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        return [`/aas/`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+    }
 }
 
 /** Provides a specific view. */
@@ -71,4 +83,15 @@ export abstract class View2 {
 
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
+
+        public openAASOverview(){
+        const document = this.document();
+        if (document === undefined) {
+            return "";
+        }
+
+        const endpoint = document.endpoint;
+        const id = document.id;
+        return [`/aas/`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+    }
 }

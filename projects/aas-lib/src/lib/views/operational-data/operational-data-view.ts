@@ -20,7 +20,7 @@ import {
     viewChild,
     WritableSignal,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import {
@@ -67,7 +67,7 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     selector: 'fhg-operational-data-view',
     templateUrl: './operational-data-view.html',
     styleUrl: './operational-data-view.scss',
-    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective],
+    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationalDataView extends LeafView<OperationalDataViewState> implements OnInit, OnDestroy {
