@@ -75,18 +75,17 @@
                                 <div [ngStyle]="{ width: node.level * 16 + 'px' }"></div>
                                 @if (node.expanded) {
                                     <button class="btn p-0" type="button" (click)="collapse(node)">
-                                        <div>
+                                        <div class="text-body-secondary">
                                             <i class="bi bi-dash-square"></i>
                                         </div>
                                     </button>
                                 } @else {
                                     @if (node.hasChildren) {
                                         <button class="btn p-0" type="button" (click)="expand(node)">
-                                            <div>
+                                            <div class="text-body-secondary">
                                                 <i class="bi bi-plus-square"></i>
                                             </div>
                                         </button>
-                                    } @else {
                                         <div class="text-muted">
                                             <i class="bi bi-square"></i>
                                         </div>
