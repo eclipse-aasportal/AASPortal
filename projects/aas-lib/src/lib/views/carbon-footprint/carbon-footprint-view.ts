@@ -8,7 +8,7 @@
 
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { of, Observable } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -36,7 +36,7 @@ import { encodeBase64Url } from '../../utilities';
  */
 @Component({
     selector: 'fhg-carbon-footprint-view',
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, CarbonFootprint],
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, CarbonFootprint, RouterModule],
     templateUrl: './carbon-footprint-view.html',
     styleUrl: './carbon-footprint-view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

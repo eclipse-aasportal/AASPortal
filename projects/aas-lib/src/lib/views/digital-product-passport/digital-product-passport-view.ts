@@ -148,17 +148,6 @@ export class DigitalProductPassportView
         };
     });
 
-    public openAASOverview(){
-        const document = this.document();
-        if (document === undefined) {
-            return "";
-        }
-
-        const endpoint = document.endpoint;
-        const id = document.id;
-        return [`/aas/`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
-    }
-
     public ngOnInit(): void {
         this.onInit();
     }
