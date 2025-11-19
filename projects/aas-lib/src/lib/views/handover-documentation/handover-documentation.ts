@@ -1,4 +1,3 @@
-import { NgbModal, NgbSlide } from '@ng-bootstrap/ng-bootstrap';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -7,10 +6,9 @@ import { NgbModal, NgbSlide } from '@ng-bootstrap/ng-bootstrap';
  *
  *****************************************************************************/
 
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked, ViewChild } from '@angular/core';
-import { TranslateDirective } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument } from 'aas-core';
 
 import { ChildComponent } from '../../components/child-component';
@@ -19,7 +17,7 @@ import {
     HandoverDocumentationData,
     HandoverDocumentationState,
 } from './handover-documentation.state';
-import { DocumentPopupComponent } from "./document-popup/document-popup.component";
+import { DocumentPopupComponent } from './document-popup/document-popup.component';
 
 /**
  * Provides a component for submodels that belong to the IDTA specification "Handover Documentation".
@@ -32,21 +30,19 @@ import { DocumentPopupComponent } from "./document-popup/document-popup.componen
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState>{
-
-
-    clickedItem: DocumentationItem =  {
+export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> {
+    public clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
-        subtitle: "",
-        summary: "",
-        organization: "",
-        language: "",
-        keywords: "",
+        subtitle: '',
+        summary: '',
+        organization: '',
+        language: '',
+        keywords: '',
         version: '',
         status: '',
-        statusDate: '',        
-        files: []
+        statusDate: '',
+        files: [],
     };
 
     public constructor(private modalService: NgbModal) {
@@ -65,7 +61,7 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
         });
     }
 
-    openModal(item: DocumentationItem) {
+    public openModal(item: DocumentationItem) {
         const modalRef = this.modalService.open(DocumentPopupComponent, { size: 'md' });
         modalRef.componentInstance.body = item;
         modalRef.componentInstance.title = 'Document'; // optional
@@ -116,17 +112,16 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
     }
 
     public getDocumentTitle(item: DocumentationItem): string {
+        if (item.title) return item.title;
 
-        if(item.title) return item.title;
-
-        if(!item.files || item.files.length <= 0) return "N/A";
+        if (!item.files || item.files.length <= 0) return 'N/A';
 
         return item.files[0].name;
     }
 
-    public openFile(item: DocumentationItem){
-        if(!item) return;
-        if(!item.files || item.files.length <= 0) return;
+    public openFile(item: DocumentationItem) {
+        if (!item) return;
+        if (!item.files || item.files.length <= 0) return;
 
         window.open(item.files[0].url, '_blank');
     }

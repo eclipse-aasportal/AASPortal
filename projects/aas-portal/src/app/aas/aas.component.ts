@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
  *****************************************************************************/
 
 import head from 'lodash-es/head';
-import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, map, mergeMap, Observable, from, of, catchError, first, combineLatest } from 'rxjs';
@@ -528,14 +528,14 @@ export class AASComponent implements OnInit, OnDestroy {
         return version;
     }
 
-    getSubmodelSemanticId(submodel: aas.Submodel) {
+    public getSubmodelSemanticId(submodel: aas.Submodel) {
         if (!submodel) return '';
         if (!submodel.semanticId) return '';
         if (submodel.semanticId.keys.length <= 0) return '';
         return submodel.semanticId.keys[0].value;
     }
 
-    getSubmodelIcon(submodel: aas.Submodel) {
+    public getSubmodelIcon(submodel: aas.Submodel) {
         //find out what type of submodel it is and
         //return a somewhat fitting thumbnail
         // Document-related
@@ -563,12 +563,11 @@ export class AASComponent implements OnInit, OnDestroy {
         return 'bi-question-circle';
     }
 
-    openShellView() {
-        let route: Route | undefined;
+    public openShellView() {
         const document = this.document();
         if (document === undefined) return '';
         const tuple = findRouteForShell(this.viewRoutes, document!);
-        route = tuple.route;
+        const route = tuple.route;
 
         if (route === undefined) return undefined;
 
@@ -581,7 +580,7 @@ export class AASComponent implements OnInit, OnDestroy {
         return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    openBrowserView() {
+    public openBrowserView() {
         const endpoint = this.document()?.endpoint;
         if (endpoint === undefined) return undefined;
 
@@ -591,9 +590,8 @@ export class AASComponent implements OnInit, OnDestroy {
         return [`/views/Browser`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    openSubmodelView(submodel: aas.Submodel) {
-        let route: Route | undefined;
-        route = findRouteForSubmodel(this.viewRoutes, submodel);
+    public openSubmodelView(submodel: aas.Submodel) {
+        const route = findRouteForSubmodel(this.viewRoutes, submodel);
 
         if (route === undefined) return undefined;
 

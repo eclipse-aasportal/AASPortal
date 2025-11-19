@@ -46,10 +46,10 @@ export abstract class View {
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
 
-        public openAASOverview(){
+    public openAASOverview() {
         const document = this.document();
         if (document === undefined) {
-            return "";
+            return '';
         }
 
         const endpoint = document.endpoint;
@@ -84,10 +84,10 @@ export abstract class View2 {
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
 
-        public openAASOverview(){
+    public openAASOverview() {
         const document = this.document();
         if (document === undefined) {
-            return "";
+            return '';
         }
 
         const endpoint = document.endpoint;

@@ -33,7 +33,14 @@ import { encodeBase64Url } from '../../utilities';
 
 @Component({
     selector: 'fhg-technical-data-view',
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, TechnicalData, RouterModule],
+    imports: [
+        TranslateDirective,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        ThumbnailQRCode,
+        TechnicalData,
+        RouterModule,
+    ],
     templateUrl: './technical-data-view.html',
     styleUrl: './technical-data-view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

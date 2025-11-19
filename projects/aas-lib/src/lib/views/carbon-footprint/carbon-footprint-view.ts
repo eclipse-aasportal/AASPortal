@@ -36,7 +36,14 @@ import { encodeBase64Url } from '../../utilities';
  */
 @Component({
     selector: 'fhg-carbon-footprint-view',
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, CarbonFootprint, RouterModule],
+    imports: [
+        TranslateDirective,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        ThumbnailQRCode,
+        CarbonFootprint,
+        RouterModule,
+    ],
     templateUrl: './carbon-footprint-view.html',
     styleUrl: './carbon-footprint-view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
