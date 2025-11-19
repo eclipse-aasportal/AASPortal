@@ -603,6 +603,10 @@ export class AASComponent implements OnInit, OnDestroy {
         const id = this.document()?.id;
         if (id === undefined) return undefined;
 
+        if(route.path === "GenericSubmodel") {
+            return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id), sm_id: encodeBase64Url(submodel.id) }];
+        }
+
         return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 }

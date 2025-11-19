@@ -317,6 +317,10 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
             return undefined;
         }
 
+        if(isSubmodel(identifiable) && route.path === "GenericSubmodel") {
+            return [`/views/${route.path}`, { endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id), sm_id: encodeBase64Url(identifiable.id) }];
+        }
+
         return [
             `/views/${route.path}`,
             { endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) },

@@ -9,8 +9,7 @@ import { GroupItem, Group } from '../operational-data/operational-data-view';
 import { VIEW_ROUTES } from '../views-routes';
 import { GenericSubmodelViewState } from './generic-submodel.state';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { OperationalDataViewState } from '../operational-data/operational-data-view.state';
-import { LeafView } from '../leaf-view';
+import { LeafViewGeneral } from '../leaf-view';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
@@ -22,7 +21,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
   templateUrl: './generic-submodel.component.html',
   styleUrl: './generic-submodel.component.scss',
 })
-export class GenericSubmodelComponent extends LeafView<GenericSubmodelViewState> implements OnInit, OnDestroy {
+export class GenericSubmodelComponent extends LeafViewGeneral<GenericSubmodelViewState> implements OnInit, OnDestroy {
 private readonly map = new Map<string, GroupItem>();
     private readonly toolbar = inject(ToolbarService);
     private readonly currentLang: Signal<string>;

@@ -289,3 +289,131 @@ export abstract class LeafView2 extends View2 {
         return undefined;
     }
 }
+
+export abstract class LeafViewGeneral<TState extends LeafViewState<LeafViewData>> extends View {
+    private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
+
+    protected constructor(
+        route: ActivatedRoute,
+        api: EndpointsApi,
+        viewRoutes: ViewRoute[],
+        viewRouteName: ViewRouteName,
+        protected readonly state: TState,
+    ) {
+        super(route, api, viewRoutes, viewRouteName);
+
+        this.tuples = this.state.tuples;
+    }
+
+    private submodel_id = '';
+
+    /** The current active AAS document. */
+    public override readonly document = computed(() => {
+        const item = this.tuple();
+        return item ? item[0] : undefined;
+    });
+
+    /** The number of available AAS documents. */
+    public override readonly count = computed(() => this.tuples().length);
+
+    /** The version of the current active submodel. */
+    public override readonly version = computed(() => {
+        const item = this.tuple();
+        if (!item) {
+            return undefined;
+        }
+
+        const administration = item[1].administration;
+        if (!administration) {
+            return undefined;
+        }
+
+        const version = administration?.version;
+        const revision = administration?.revision;
+        if (version) {
+            return revision ? `${version}.${revision}` : `${version}`;
+        }
+
+        return undefined;
+    });
+
+    /** The current active submodel. */
+    public readonly submodel = computed(() => {
+        const item = this.tuple();
+        return item ? item[1] : undefined;
+    });
+
+    /** The submodels and the corresponding AAS documents. */
+    protected readonly tuples: Signal<[AASDocument, aas.Submodel][]>;
+
+    /** Initializes the current view. */
+    protected onInit(): void {
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
+            .pipe(
+                map(([routeParams, queryParams]) => {
+                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
+                }),
+                mergeMap((params) => {
+                    if(params.sm_id) this.submodel_id = params.sm_id;
+                    return this.documentsFromParams(params);
+                }),
+                first(),
+            )
+            .subscribe(documents => {
+                if (!documents) {
+                    return;
+                }
+
+                this.state.update({ tuples: [...this.filter(documents)] });
+            });
+    }
+
+    private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
+        if (params?.id) {
+            const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
+            return this.api
+                .getDocument('AssetAdministrationShell', decodeBase64Url(params.id), endpoint)
+                .pipe(toArray());
+        }
+
+        if (params?.docs) {
+            const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
+            return from(docs).pipe(
+                mergeMap(([endpoint, id]) => this.api.getDocument('AssetAdministrationShell', id, endpoint)),
+                toArray(),
+            );
+        }
+
+        return of(undefined);
+    }
+
+    private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
+        for (const document of documents) {
+            if (!document.content) {
+                continue;
+            }
+
+            const submodel = this.findSubmodel(document);
+            if (submodel) {
+                yield [document, submodel];
+            }
+        }
+    }
+
+    private findSubmodel(document: AASDocument): aas.Submodel | undefined {
+        const env = isEnvironment(document) ? document : document.content;
+        if (!env) {
+            return undefined;
+        }
+        if(!this.submodel_id) {
+            return undefined;
+        }
+        for (const submodel of env.submodels) {
+            if(submodel.id === decodeBase64Url(this.submodel_id)) {
+                return submodel
+            }
+        }
+
+        return undefined;
+    }
+}
