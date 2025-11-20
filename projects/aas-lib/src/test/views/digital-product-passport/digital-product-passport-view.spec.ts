@@ -75,6 +75,7 @@ export class TestNameplate {
 export class TestCarbonFootprint {
     public readonly document = input<AASDocument>();
     public readonly state = input<CarbonFootprintState>();
+    public readonly isDigitalProductPassport = input<boolean>();
 }
 
 @Component({

@@ -88,7 +88,7 @@ export class DeleteCommand extends Command {
         this.store.update({ document: { ...this.document, modified: true } });
     }
 
-    private deleteFromShells(element: aas.Submodel) {
+    private deleteFromShells(element: aas.Submodel): void {
         const env = this.document.content!;
         env.assetAdministrationShells.forEach((shell, i) => {
             if (shell.submodels) {

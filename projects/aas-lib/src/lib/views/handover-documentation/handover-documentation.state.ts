@@ -43,7 +43,7 @@ export type DocumentationItem = {
     keywords: string;
     version: string;
     status: string;
-    statusDate: string,
+    statusDate: string;
     files: FileItem[];
 };
 
@@ -145,7 +145,10 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
                             title: this.toExpression(getReferable(documentVersion, 'Title'), ''),
                             subtitle: this.toExpression(getReferable(documentVersion, 'SubTitle'), ''),
                             summary: this.toExpression(getReferable(documentVersion, 'Summary'), ''),
-                            organization: this.toExpression(getReferable(documentVersion, 'OrganizationOfficialName'), ''),
+                            organization: this.toExpression(
+                                getReferable(documentVersion, 'OrganizationOfficialName'),
+                                '',
+                            ),
                             language: this.toExpression(getReferable(documentVersion, 'Language'), ''),
                             keywords: this.toExpression(getReferable(documentVersion, 'KeyWords'), ''),
                             version: this.toExpression(getReferable(documentVersion, 'DocumentVersionId')),
@@ -185,21 +188,30 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
             return items;
         }
         for (const documents of submodel.submodelElements) {
-            if (isSubmodelElementList(documents) && (getSemanticId(documents) === documentId || getSemanticId(documents) === altDocumentId) && documents.value) {
-                for(const document of documents.value){
-                    if(isSubmodelElementCollection(document) && document.value){
+            if (
+                isSubmodelElementList(documents) &&
+                (getSemanticId(documents) === documentId || getSemanticId(documents) === altDocumentId) &&
+                documents.value
+            ) {
+                for (const document of documents.value) {
+                    if (isSubmodelElementCollection(document) && document.value) {
                         for (const documentVersions of document.value.filter(
-                            element => getSemanticId(element) === documentVersionId || getSemanticId(element) === altDocumentVersionId
+                            element =>
+                                getSemanticId(element) === documentVersionId ||
+                                getSemanticId(element) === altDocumentVersionId,
                         )) {
                             if (isSubmodelElementList(documentVersions) && documentVersions.value) {
                                 //Version 2.0 supports multiple Versions for a single Document
                                 //Add every Version seperately
-                                for(const documentVersion of documentVersions.value){
+                                for (const documentVersion of documentVersions.value) {
                                     const item: DocumentationItem = {
                                         preview: this.getPreview(getReferable(documentVersion, 'PreviewFile')),
                                         title: this.toExpression(getReferable(documentVersion, 'Title'), ''),
                                         subtitle: this.toExpression(getReferable(documentVersion, 'SubTitle'), ''),
-                                        organization: this.toExpression(getReferable(documentVersion, 'OrganizationOfficialName'), ''),
+                                        organization: this.toExpression(
+                                            getReferable(documentVersion, 'OrganizationOfficialName'),
+                                            '',
+                                        ),
                                         language: this.toExpression(getReferable(documentVersion, 'Language'), ''),
                                         summary: this.toExpression(getReferable(documentVersion, 'Description'), ''),
                                         keywords: this.toExpression(getReferable(documentVersion, 'KeyWords'), ''),
@@ -222,11 +234,9 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
                                         items.push(item);
                                     }
                                 }
-
                             }
                         }
                     }
-                    
                 }
             }
         }

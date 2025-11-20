@@ -78,7 +78,7 @@ export class NotifyService {
      * Removes the specified message.
      * @param message The message to remove.
      */
-    public remove(message: MessageEntry) {
+    public remove(message: MessageEntry): void {
         this._messages.update(values => values.filter(value => value !== message));
     }
 

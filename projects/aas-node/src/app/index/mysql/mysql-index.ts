@@ -383,15 +383,15 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY endpoint ASC, id ASC LIMIT ?;';
+                    ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY endpoint ASC, id ASC LIMIT ?;';
+                    ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -419,15 +419,16 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY documents.endpoint ASC, documents.id ASC LIMIT ?;';
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY endpoint ASC, id ASC LIMIT ?;';
+                    ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            sql =
+                'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -455,15 +456,16 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY documents.endpoint DESC, documents.id DESC LIMIT ?;';
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY endpoint DESC, id DESC LIMIT ?;';
+                    ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? ORDER BY endpoint DESC, id DESC LIMIT ?;';
+            sql =
+                'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -471,7 +473,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
@@ -485,15 +487,15 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY documents.endpoint DESC, documents.id DESC LIMIT ?;';
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY endpoint DESC, id DESC LIMIT ?;';
+                    ' ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` ORDER BY endpoint DESC, id DESC LIMIT ?;';
+            sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -501,7 +503,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };

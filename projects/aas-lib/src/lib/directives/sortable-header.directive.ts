@@ -36,7 +36,7 @@ export class SortableHeaderDirective {
     @Output()
     public sort = new EventEmitter<SortEvent>();
 
-    public rotate() {
+    public rotate(): void {
         this.direction = rotate[this.direction];
         this.sort.emit({ column: this.sortable, direction: this.direction });
     }

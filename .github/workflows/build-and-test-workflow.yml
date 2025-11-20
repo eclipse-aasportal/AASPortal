@@ -26,6 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci --unsafe-perm=true --allow-root
       - run: npm run build
+      # - run: npm run lint
       - run: npm run test
       - run: npm run coverage
       - name: Archive code coverage results
@@ -34,6 +35,9 @@ jobs:
           name: code-coverage-report
           path: |
             reports/aas-core.xml
+            reports/aas-package.xml
             reports/aas-node.xml
+            reports/aas-server.xml
             reports/aas-lib.xml
             reports/aas-portal.xml
+            reports/aas-browser.xml

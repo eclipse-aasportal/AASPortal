@@ -34,7 +34,7 @@ export class RemoveEndpointFormComponent {
 
     public readonly messages = signal<string[]>([]);
 
-    public inputChange() {
+    public inputChange(): void {
         this.clearMessages();
     }
 

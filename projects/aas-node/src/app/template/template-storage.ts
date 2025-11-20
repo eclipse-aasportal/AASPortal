@@ -69,11 +69,11 @@ export class TemplateStorage {
         }
     }
 
-    private startScan = () => {
+    private startScan = (): void => {
         this.scanTemplates(this.taskHandler.createTask('TemplateStorage', this, 'ScanTemplates'));
     };
 
-    private scanTemplates = async (task: Task) => {
+    private scanTemplates = async (task: Task): Promise<void> => {
         const data: ScanTemplatesData = {
             type: 'ScanTemplatesData',
             taskId: task.id,
@@ -98,7 +98,7 @@ export class TemplateStorage {
         return createJsonReader(referable).read(referable);
     }
 
-    private parallelOnMessage = (result: ScanResult) => {
+    private parallelOnMessage = (result: ScanResult): void => {
         try {
             if (this.isScanTemplatesResult(result)) {
                 this.templates = result.templates;
@@ -108,7 +108,7 @@ export class TemplateStorage {
         }
     };
 
-    private parallelOnEnd = (result: ScanResult) => {
+    private parallelOnEnd = (result: ScanResult): void => {
         const task = this.taskHandler.get(result.taskId);
         if (task === undefined || task.owner !== this) {
             return;

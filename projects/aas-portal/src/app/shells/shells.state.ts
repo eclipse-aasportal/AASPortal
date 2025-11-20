@@ -125,11 +125,11 @@ export class ShellsState implements OnDestroy {
             this.selected$.set(newState.selected);
         }
 
-        if (newState.next) {
+        if (newState.next !== undefined) {
             this.next$.set(newState.next);
         }
 
-        if (newState.previous) {
+        if (newState.previous !== undefined) {
             this.previous$.set(newState.previous);
         }
     }
@@ -287,7 +287,7 @@ export class ShellsState implements OnDestroy {
             .subscribe();
     }
 
-    private readonly updatePage = () => {
+    private readonly updatePage = (): void => {
         const documents = untracked(this.documents);
         if (documents.length === 0) {
             return;

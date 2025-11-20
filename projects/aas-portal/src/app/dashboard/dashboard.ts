@@ -60,7 +60,7 @@ export abstract class Dashboard {
         };
     }
 
-    private updateLineChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
+    private updateLineChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode): void {
         if (tuple) {
             const data = dataset.data as number[];
             const labels = tuple.configuration.data.labels!;
@@ -88,7 +88,7 @@ export abstract class Dashboard {
         }
     }
 
-    private updateBarChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode) {
+    private updateBarChart(tuple: ChartConfigurationTuple, dataset: ChartDataset, node: LiveNode): void {
         if (tuple) {
             const data = dataset.data as number[];
             let y = 0;

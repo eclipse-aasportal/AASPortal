@@ -7,7 +7,16 @@ import { NgbModal, NgbSlide } from '@ng-bootstrap/ng-bootstrap';
  *
  *****************************************************************************/
 
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    input,
+    untracked,
+    ViewChild,
+} from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -19,7 +28,7 @@ import {
     HandoverDocumentationData,
     HandoverDocumentationState,
 } from './handover-documentation.state';
-import { DocumentPopupComponent } from "./document-popup/document-popup.component";
+import { DocumentPopupComponent } from './document-popup/document-popup.component';
 
 /**
  * Provides a component for submodels that belong to the IDTA specification "Handover Documentation".
@@ -32,21 +41,19 @@ import { DocumentPopupComponent } from "./document-popup/document-popup.componen
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState>{
-
-
-    clickedItem: DocumentationItem =  {
+export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> {
+    clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
-        subtitle: "",
-        summary: "",
-        organization: "",
-        language: "",
-        keywords: "",
+        subtitle: '',
+        summary: '',
+        organization: '',
+        language: '',
+        keywords: '',
         version: '',
         status: '',
-        statusDate: '',        
-        files: []
+        statusDate: '',
+        files: [],
     };
 
     public constructor(private modalService: NgbModal) {
@@ -116,17 +123,16 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationD
     }
 
     public getDocumentTitle(item: DocumentationItem): string {
+        if (item.title) return item.title;
 
-        if(item.title) return item.title;
-
-        if(!item.files || item.files.length <= 0) return "N/A";
+        if (!item.files || item.files.length <= 0) return 'N/A';
 
         return item.files[0].name;
     }
 
-    public openFile(item: DocumentationItem){
-        if(!item) return;
-        if(!item.files || item.files.length <= 0) return;
+    public openFile(item: DocumentationItem) {
+        if (!item) return;
+        if (!item.files || item.files.length <= 0) return;
 
         window.open(item.files[0].url, '_blank');
     }
