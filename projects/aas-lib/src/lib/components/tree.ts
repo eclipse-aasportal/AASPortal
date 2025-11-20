@@ -263,7 +263,7 @@ export abstract class Tree<TElement, TNode extends TreeNode<TElement>> {
 
     protected abstract cloneNode(node: TNode): TNode;
 
-    private expandNode(node: TNode, nodes: TNode[]) {
+    private expandNode(node: TNode, nodes: TNode[]): void {
         const index = nodes.indexOf(node);
         const clone = this.cloneNode(node);
         clone.expanded = true;

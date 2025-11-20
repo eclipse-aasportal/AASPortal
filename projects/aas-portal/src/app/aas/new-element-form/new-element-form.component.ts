@@ -51,7 +51,7 @@ export class NewElementFormComponent {
 
     public readonly messages = this._messages.asReadonly();
 
-    public cancel() {
+    public cancel(): void {
         this.modal.close();
     }
 

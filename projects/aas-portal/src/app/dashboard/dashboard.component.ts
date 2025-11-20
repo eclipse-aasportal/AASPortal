@@ -432,7 +432,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         return ViewPortSize.lg;
     }
 
-    private readonly updateViewPortSize = () => {
+    private readonly updateViewPortSize = (): void => {
         this.viewPortSize.set(this.getViewPortSize());
     };
 }

@@ -92,7 +92,7 @@ export class EditElementFormComponent {
 
     public readonly messages = signal<string[]>([]);
 
-    public initialize(element: aas.SubmodelElement) {
+    public initialize(element: aas.SubmodelElement): void {
         this.element = { ...element };
         this.modelType.set(element.modelType);
         this.semanticId.set(this.referenceToString(element.semanticId));
@@ -115,13 +115,13 @@ export class EditElementFormComponent {
         }
     }
 
-    public submit() {
+    public submit(): void {
         if (this.element && this.submitElement()) {
             this.modal.close(this.element);
         }
     }
 
-    public cancel() {
+    public cancel(): void {
         this.modal.close();
     }
 
@@ -148,7 +148,7 @@ export class EditElementFormComponent {
         });
     }
 
-    public removeLangString(item: LangStringRow) {
+    public removeLangString(item: LangStringRow): void {
         this.clearMessages();
         if (item.index >= 0) {
             this.langStrings.update(values => {
@@ -319,7 +319,7 @@ export class EditElementFormComponent {
         this.messages.set([message]);
     }
 
-    private clearMessages() {
+    private clearMessages(): void {
         this.messages.set([]);
     }
 }

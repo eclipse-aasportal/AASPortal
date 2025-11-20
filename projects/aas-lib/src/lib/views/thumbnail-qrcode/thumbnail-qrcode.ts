@@ -22,7 +22,7 @@ import { AASDocument } from 'aas-core';
 import { WINDOW } from '../../services/window.service';
 import { encodeBase64Url } from '../../utilities';
 
-export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { factory: () => QRCode });
+export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { factory: (): typeof QRCode => QRCode });
 
 /**
  * Displays a thumbnail of the current Asset Administration Shell

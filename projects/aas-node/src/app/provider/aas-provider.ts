@@ -609,7 +609,7 @@ export class AASProvider {
         return this.variable.SCAN_ENDPOINT_TIMEOUT;
     }
 
-    private scanEndpoint = (task: Task, endpoint: AASEndpoint) => {
+    private scanEndpoint = (task: Task, endpoint: AASEndpoint): void => {
         const data: ScanEndpointData = {
             type: 'ScanEndpointData',
             taskId: task.id,
@@ -621,7 +621,7 @@ export class AASProvider {
         this.parallel.execute(data);
     };
 
-    private parallelOnMessage = async (result: ScanResult) => {
+    private parallelOnMessage = async (result: ScanResult): Promise<void> => {
         try {
             if (this.isScanEndpointResult(result)) {
                 switch (result.kind) {
@@ -645,7 +645,7 @@ export class AASProvider {
         return result.type === 'ScanEndpointResult';
     }
 
-    private parallelOnEnd = async (result: ScanResult) => {
+    private parallelOnEnd = async (result: ScanResult): Promise<void> => {
         const task = this.taskHandler.get(result.taskId);
         if (task === undefined || task.owner !== this) {
             return;
@@ -714,7 +714,7 @@ export class AASProvider {
         this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
     }
 
-    private sendMessage(data: AASNodeMessage) {
+    private sendMessage(data: AASNodeMessage): void {
         this.wsServer.notify('IndexChange', {
             type: 'AASNodeMessage',
             data: data,

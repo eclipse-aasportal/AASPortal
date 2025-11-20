@@ -48,7 +48,7 @@ export abstract class Command {
         this.onRedo();
     }
 
-    public abort() {
+    public abort(): void {
         if (this.state !== CommandState.Idle) {
             throw new Error('Invalid command state.');
         }

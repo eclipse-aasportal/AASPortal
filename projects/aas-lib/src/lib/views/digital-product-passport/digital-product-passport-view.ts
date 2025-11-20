@@ -62,7 +62,7 @@ const emptyMainData: MainData = {
         CarbonFootprint,
         Nameplate,
         HandoverDocumentation,
-        RouterModule
+        RouterModule,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

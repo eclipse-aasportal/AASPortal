@@ -517,12 +517,12 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
         this.notify.log(LogType.Error, error);
     };
 
-    private keyup = () => {
+    private keyup = (): void => {
         this.shiftKey = false;
         this.altKey = false;
     };
 
-    private keydown = (event: KeyboardEvent) => {
+    private keydown = (event: KeyboardEvent): void => {
         this.shiftKey = event.shiftKey;
         this.altKey = event.altKey;
     };

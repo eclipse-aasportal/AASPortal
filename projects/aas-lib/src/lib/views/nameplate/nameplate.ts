@@ -28,7 +28,7 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Nameplate extends ChildComponent<NameplateData, NameplateState> implements AfterViewInit{
+export class Nameplate extends ChildComponent<NameplateData, NameplateState> implements AfterViewInit {
     public constructor(translate: TranslateService) {
         super();
 
@@ -46,7 +46,7 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
         });
     }
 
-    ngAfterViewInit(){
+    ngAfterViewInit() {
         this.dataSheets();
     }
 
@@ -59,51 +59,51 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
     /** The presentation of the nameplate. */
     public readonly dataSheets = computed(() => this.state().dataSheets());
 
-    public getAssetId(){
-        if(!this.document()) return "";
+    public getAssetId() {
+        if (!this.document()) return '';
 
         return this.document()?.assetId;
     }
 
-    public getAASIdShort(){
-        if(!this.document()) return "";
+    public getAASIdShort() {
+        if (!this.document()) return '';
 
         return this.document()?.idShort;
     }
 
-    public checkNameplateValue(name: string | string[]){
-        if(!this.dataSheets()) return "";
-        if(!this.dataSheets()[0]) return "";
+    public checkNameplateValue(name: string | string[]) {
+        if (!this.dataSheets()) return '';
+        if (!this.dataSheets()[0]) return '';
         const value = this.getNameplateValue(name);
-        if(value == "-1") return false;
+        if (value == '-1') return false;
         return true;
     }
 
-    public getNameplateValue(name: string | string[]){
-        if(!this.dataSheets()) return "-1";
-        if(!this.dataSheets()[0]) return "-1";
+    public getNameplateValue(name: string | string[]) {
+        if (!this.dataSheets()) return '-1';
+        if (!this.dataSheets()[0]) return '-1';
 
-        if(Array.isArray(name)){
-
-            for(let i=0; i<name.length; i++){
-                var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == name[i].toLowerCase());
-                if(value) return value.value;
+        if (Array.isArray(name)) {
+            for (let i = 0; i < name.length; i++) {
+                var value = this.dataSheets()[0].items.find(
+                    element => element.idShort.toLowerCase() == name[i].toLowerCase(),
+                );
+                if (value) return value.value;
             }
-
-        }else{
-            var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == name.toLowerCase());
-            if(value) return value.value;
+        } else {
+            var value = this.dataSheets()[0].items.find(element => element.idShort.toLowerCase() == name.toLowerCase());
+            if (value) return value.value;
         }
 
         return -1;
     }
 
-    public getCompanyLogo(){
-        if(!this.dataSheets()) return "";
-        if(!this.dataSheets()[0]) return "";
+    public getCompanyLogo() {
+        if (!this.dataSheets()) return '';
+        if (!this.dataSheets()[0]) return '';
 
-        var value = this.dataSheets()[0].items.find((element) => element.idShort.toLowerCase() == "companylogo");
-        if(value) return value.url;
+        const value = this.dataSheets()[0].items.find(element => element.idShort.toLowerCase() == 'companylogo');
+        if (value) return value.url;
         return null;
     }
 }

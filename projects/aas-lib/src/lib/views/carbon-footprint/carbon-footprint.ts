@@ -100,44 +100,43 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonF
         this.state().update({ index });
     }
 
-    public getTotalPCFValue(){
+    public getTotalPCFValue() {
         const result = this.totalPcfCO2eq();
-        const splitResult = result.split(" ");
-        if(!splitResult || splitResult.length <= 0) return "";
+        const splitResult = result.split(' ');
+        if (!splitResult || splitResult.length <= 0) return '';
         return splitResult[0];
     }
 
-    public getTotalPCFUnit(){
+    public getTotalPCFUnit() {
         const result = this.totalPcfCO2eq();
-        const splitResult = result.split(" ");
-        if(!splitResult || splitResult.length <= 1) return "";
+        const splitResult = result.split(' ');
+        if (!splitResult || splitResult.length <= 1) return '';
         return splitResult[1];
     }
 
-    public getValueFromDataSheet(name: string){
-        const datasheet= this.item();
+    public getValueFromDataSheet(name: string) {
+        const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === name);
-        if (!result) return "-1";
-        return result.value;
-
-    }
-
-    public getFilenameExplanation(){
-        const datasheet= this.item();
-        const result = datasheet.items.find(element => element.idShort === "ExplanatoryStatement");
-        if(!result || !result.value) return "";
+        if (!result) return '-1';
         return result.value;
     }
 
-    public openFile(){
-        const datasheet= this.item();
-        const result = datasheet.items.find(element => element.idShort === "ExplanatoryStatement");
-        if(!result || !result.url) return;
+    public getFilenameExplanation() {
+        const datasheet = this.item();
+        const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
+        if (!result || !result.value) return '';
+        return result.value;
+    }
+
+    public openFile() {
+        const datasheet = this.item();
+        const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
+        if (!result || !result.url) return;
 
         window.open(result.url, '_blank');
     }
 
-    public toggleDetailView(){
+    public toggleDetailView() {
         this.showDetails = !this.showDetails;
     }
 }

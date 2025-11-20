@@ -113,7 +113,7 @@ export class NewElementCommand extends Command {
         this.content.assetAdministrationShells[0] = { ...shell, submodels };
     }
 
-    private insertSubmodelElement(element: aas.SubmodelElement) {
+    private insertSubmodelElement(element: aas.SubmodelElement): void {
         const sourceSubmodel = this.getSubmodel(this.parent);
         const index = this.content.submodels.indexOf(sourceSubmodel);
         const targetSubmodel = cloneDeep(sourceSubmodel);

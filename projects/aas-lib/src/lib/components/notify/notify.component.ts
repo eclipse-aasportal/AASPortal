@@ -27,7 +27,7 @@ export class NotifyComponent implements OnInit {
         this.notify.remove(message);
     }
 
-    public close(message: MessageEntry) {
+    public close(message: MessageEntry): void {
         this.notify.remove(message);
     }
 
