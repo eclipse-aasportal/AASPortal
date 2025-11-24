@@ -65,7 +65,7 @@ import { VIEW_ROUTES } from '../../views/views-routes';
     providers: [AASTreeSearch, AASTreeApi, AASTreeState],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> implements OnDestroy {
+export class AASTreeComponent extends ChildComponent<AASTreeState> implements OnDestroy {
     private readonly liveNodes: LiveNode[] = [];
     private readonly map = new Map<string, AASTreeNode>();
     private readonly search = inject(AASTreeSearch);

@@ -46,7 +46,6 @@ NODE_ENV=development
 
 # Database URLs
 USER_STORAGE=mongodb://localhost:27017/aasportal-users
-TEMPLATE_STORAGE=./templates
 
 # Authentication
 JWT_SECRET=dev-secret-change-in-production

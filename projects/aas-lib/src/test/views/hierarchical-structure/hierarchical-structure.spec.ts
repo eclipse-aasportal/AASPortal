@@ -70,6 +70,6 @@ describe('HierarchicalStructure', () => {
     });
 
     it('should have 3 nodes', () => {
-        expect(component.nodes()).toBeDefined();
+        expect(component.tree()).toEqual([]);
     });
 });

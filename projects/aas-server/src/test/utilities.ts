@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { v4 as uuid } from 'uuid';
+import { nanoid } from 'nanoid';
 import { resolve } from 'path';
 import fs from 'fs';
 import { Database } from '../app/db/database.js';
@@ -15,7 +15,7 @@ import { createSpyObj } from './create-spy-obj.js';
 import { Variable } from '../app/variable.js';
 
 export async function createDatabase(): Promise<Database> {
-    const tmpDir = resolve(`./src/test/assets/tmp/${uuid()}`);
+    const tmpDir = resolve(`./src/test/assets/tmp/${nanoid()}`);
     if (fs.existsSync(tmpDir)) {
         await fs.promises.rm(tmpDir, { recursive: true });
     }

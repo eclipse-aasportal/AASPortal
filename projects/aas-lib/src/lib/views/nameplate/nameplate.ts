@@ -28,7 +28,7 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Nameplate extends ChildComponent<NameplateData, NameplateState> implements AfterViewInit {
+export class Nameplate extends ChildComponent<NameplateState> implements AfterViewInit {
     public constructor(translate: TranslateService) {
         super();
 

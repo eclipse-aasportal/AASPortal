@@ -148,48 +148,9 @@
             <i class="bi bi-bar-chart-line-fill"></i>
         </button>
     </div>
-    <div class="btn-group me-2 my-1" [hidden]="readOnly()">
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="synchronize().subscribe()"
-            [disabled]="canSynchronize() === false"
-        >
-            <i class="bi bi-arrow-repeat"></i>
-        </button>
-    </div>
     <div class="btn-group me-2 my-1">
         <button type="button" class="btn btn-primary" (click)="download()">
             <i class="bi bi-download"></i>
-        </button>
-    </div>
-    <div class="btn-group me-2 my-1" [hidden]="readOnly()">
-        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="canUndo() === false">
-            <i class="bi bi-arrow-counterclockwise"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="canRedo() === false">
-            <i class="bi bi-arrow-clockwise"></i>
-        </button>
-    </div>
-    <div class="btn-group me-2 my-1" [hidden]="readOnly()">
-        <button type="button" class="btn btn-primary" (click)="newElement().subscribe()" [disabled]="!canNewElement()">
-            <i class="bi bi-plus-lg"></i>
-        </button>
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="editElement().subscribe()"
-            [disabled]="!canEditElement()"
-        >
-            <i class="bi bi-pencil"></i>
-        </button>
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="deleteElement().subscribe()"
-            [disabled]="!canDeleteElement()"
-        >
-            <i class="bi bi-trash"></i>
         </button>
     </div>
     <div class="input-group flex-grow-1 me-2 my-1">
@@ -201,11 +162,11 @@
             (ngModelChange)="setSearchExpression($event)"
             [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate"
         />
-        <!-- <button type="button" class="btn btn-primary" (click)="aasTree.findNext()">
+        <button type="button" class="btn btn-primary" (click)="findNext()">
             <i class="bi bi-chevron-down"></i>
         </button>
-        <button type="button" class="btn btn-primary" (click)="aasTree.findPrevious()">
+        <button type="button" class="btn btn-primary" (click)="findPrevious()">
             <i class="bi bi-chevron-up"></i>
-        </button> -->
+        </button>
     </div>
 </ng-template>

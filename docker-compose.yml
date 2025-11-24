@@ -40,19 +40,6 @@ services:
     ports:
       - 3306:3306
 
-  aasportal-cloud-db:
-    image: mariadb
-    container_name: aasportal-cloud-db
-    restart: always
-    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
-    volumes:
-      - nextcloud_db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${NEXTCLOUD_PASSWORD}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-
   aasportal-cloud:
     image: nextcloud
     container_name: aasportal-cloud
@@ -111,7 +98,6 @@ services:
       - AAS_NODE_PORT=${AAS_NODE_PORT}
       - USER_STORAGE=${USER_STORAGE}
       - AAS_INDEX=${AAS_INDEX}
-      - TEMPLATE_STORAGE=${TEMPLATE_STORAGE}
       - ENDPOINTS=${ENDPOINTS}
     ports:
       - 1337:1337
@@ -131,6 +117,4 @@ services:
 volumes:
   aasportal-users:
   aasportal-index:
-  nextcloud_db:
-  aasportal-cloud:
   aas-server:

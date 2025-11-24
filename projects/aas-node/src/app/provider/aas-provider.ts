@@ -681,12 +681,16 @@ export class AASProvider {
             return;
         }
 
-        await this.index.update(document);
-        if (document.content && this.cache.has(document.endpoint, document.id)) {
-            this.cache.set(document.endpoint, document.id, document.content);
-        }
+        try {
+            await this.index.update(document);
+            if (document.content && this.cache.has(document.endpoint, document.id)) {
+                this.cache.set(document.endpoint, document.id, document.content);
+            }
 
-        this.sendMessage({ type: 'Update', document: { ...document, content: null } });
+            this.sendMessage({ type: 'Update', document: { ...document, content: null } });
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     private async onAdded(result: ScanEndpointResult): Promise<void> {
@@ -696,9 +700,13 @@ export class AASProvider {
             return;
         }
 
-        await this.index.insert(document);
-        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
-        this.sendMessage({ type: 'Added', document });
+        try {
+            await this.index.insert(document);
+            this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
+            this.sendMessage({ type: 'Added', document });
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     private async onRemoved(result: ScanEndpointResult): Promise<void> {
@@ -708,10 +716,14 @@ export class AASProvider {
         }
 
         const document = result.document;
-        await this.index.delete(result.endpoint.name, document.id);
-        this.cache.remove(document.endpoint, document.id);
-        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
-        this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
+        try {
+            await this.index.delete(result.endpoint.name, document.id);
+            this.cache.remove(document.endpoint, document.id);
+            this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
+            this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     private sendMessage(data: AASNodeMessage): void {

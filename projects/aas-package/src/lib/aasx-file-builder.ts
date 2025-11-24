@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { v4 as uuid } from 'uuid';
+import { nanoid } from 'nanoid';
 import { toEnvironment, types } from 'aas-core';
 
 import { XmlWriterV3 } from './writer/xml-writer-v3.js';
@@ -43,14 +43,14 @@ export abstract class AasxFileBuilder<T extends AasxFile> {
     private get rels(): string {
         return `<?xml version="1.0" encoding="utf-8"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-    <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail" Target="/thumbnail.png" Id="${uuid}" />
-    <Relationship Type="http://admin-shell.io/aasx/relationships/aasx-origin" Target="/aasx/aasx-origin" Id="${uuid()}" />
+    <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail" Target="/thumbnail.png" Id="${nanoid()}" />
+    <Relationship Type="http://admin-shell.io/aasx/relationships/aasx-origin" Target="/aasx/aasx-origin" Id="${nanoid()}" />
 </Relationships>`;
     }
 
     private get aasxRels(): string {
         return `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-    <Relationship Type="http://admin-shell.io/aasx/relationships/aas-spec" Target="/aasx/data.xml" Id="${uuid()}"/>
+    <Relationship Type="http://admin-shell.io/aasx/relationships/aas-spec" Target="/aasx/data.xml" Id="${nanoid()}"/>
 </Relationships>`;
     }
 

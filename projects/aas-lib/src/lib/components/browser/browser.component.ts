@@ -52,7 +52,7 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
  * It allows users to navigate through the AAS environment, view properties of elements,
  * and explore related concept descriptions and child elements.
  */
-export class BrowserComponent extends ChildComponent<BrowserData, BrowserState> {
+export class BrowserComponent extends ChildComponent<BrowserState> {
     private readonly apiUrl = inject(API_URL);
 
     public constructor() {

@@ -60,3 +60,38 @@ export function createSpyObj<T extends object>(
 }
 
 export type DoneFn = (...args: any[]) => void;
+
+export function mockFetchJson(
+    data: unknown,
+    options?: { ok?: boolean; status?: number; headers?: Record<string, string> },
+) {
+    const { ok = true, status = 200, headers } = options || {};
+    const mock = jest.fn().mockImplementation(() =>
+        Promise.resolve({
+            ok,
+            status,
+            headers,
+            json: () => Promise.resolve(data),
+            text: () => Promise.resolve(typeof data === 'string' ? data : JSON.stringify(data)),
+        }),
+    );
+    (global as any).fetch = mock;
+    return mock;
+}
+
+export function mockFetchReject(error: unknown) {
+    const mock = jest.fn().mockImplementation(() => Promise.reject(error));
+    (global as any).fetch = mock;
+    return mock;
+}
+
+export function restoreFetch() {
+    try {
+        // Remove global fetch so tests can restore environment
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete (global as any).fetch;
+    } catch {
+        (global as any).fetch = undefined;
+    }
+}

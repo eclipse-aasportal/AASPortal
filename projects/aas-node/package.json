@@ -1,6 +1,6 @@
 {
     "name": "aas-node",
-    "version": "3.0.0",
+    "version": "3.2.0",
     "author": "Fraunhofer IOSB-INA",
     "license": "Apache 2.0",
     "description": "Web-based visualization and control of asset administration shells.",
@@ -10,8 +10,8 @@
     "scripts": {
         "tsoa": "tsoa spec-and-routes -c tsoa.config.json",
         "serve": "rimraf build && npm run tsoa && tsc -p tsconfig.app.json",
-        "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts",
-        "test:watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch --coverage=false",
+        "test": "node --experimental-vm-modules --experimental-sqlite  --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts",
+        "test:watch": "node --experimental-vm-modules --experimental-sqlite --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch --coverage=false",
         "build": "rimraf dist && npm run tsoa && node esbuild.prod.js",
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",

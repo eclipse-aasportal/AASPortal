@@ -41,7 +41,7 @@ import { DocumentPopupComponent } from './document-popup/document-popup.componen
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> {
+export class HandoverDocumentation extends ChildComponent<HandoverDocumentationState> {
     clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
