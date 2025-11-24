@@ -101,7 +101,7 @@ export class ApiClientV3 extends ApiClient {
             this.endpoint.headers,
         );
 
-        const submodels = await this.readSubmodels(id, shell.submodels);
+        const submodels = await this.readSubmodels(shell.submodels);
         const conceptDescriptions = await this.readConceptDescriptions(submodels);
         const env: aas.Environment = {
             assetAdministrationShells: [shell],
@@ -122,10 +122,10 @@ export class ApiClientV3 extends ApiClient {
         }
 
         for (const submodel of env.submodels) {
-            if (await this.hasSubmodel(id, submodel)) {
-                await this.putSubmodel(id, submodel);
+            if (await this.hasSubmodel(submodel)) {
+                await this.putSubmodel(submodel);
             } else {
-                await this.postSubmodel(id, submodel);
+                await this.postSubmodel(submodel);
             }
         }
 
@@ -233,7 +233,7 @@ export class ApiClientV3 extends ApiClient {
         return blob.value;
     }
 
-    private async readSubmodels(aasId: string, submodelRefs: aas.Reference[] | undefined): Promise<aas.Submodel[]> {
+    private async readSubmodels(submodelRefs: aas.Reference[] | undefined): Promise<aas.Submodel[]> {
         const submodels: aas.Submodel[] = [];
         if (submodelRefs === undefined) {
             return submodels;
@@ -243,9 +243,7 @@ export class ApiClientV3 extends ApiClient {
             try {
                 submodels.push(
                     await this.http.get<aas.Submodel>(
-                        this.resolve(
-                            `shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(reference.keys[0].value)}`,
-                        ),
+                        this.resolve(`submodels/${encodeBase64Url(reference.keys[0].value)}`),
                         this.endpoint.headers,
                     ),
                 );
@@ -310,11 +308,11 @@ export class ApiClientV3 extends ApiClient {
         return await this.http.post(this.resolve(`shells`), new JsonWriterV3().convert(shell), this.endpoint.headers);
     }
 
-    private async hasSubmodel(aasId: string, submodel: aas.Submodel): Promise<boolean> {
+    private async hasSubmodel(submodel: aas.Submodel): Promise<boolean> {
         try {
             return (
                 (await this.http.put(
-                    this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(submodel.id)}`),
+                    this.resolve(`submodels/${encodeBase64Url(submodel.id)}`),
                     new JsonWriterV3().convert(submodel),
                     this.endpoint.headers,
                 )) !== undefined
@@ -324,20 +322,16 @@ export class ApiClientV3 extends ApiClient {
         }
     }
 
-    private async putSubmodel(aasId: string, submodel: aas.Submodel): Promise<void> {
+    private async putSubmodel(submodel: aas.Submodel): Promise<void> {
         await this.http.put(
-            this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/${encodeBase64Url(submodel.id)}`),
+            this.resolve(`submodels/${encodeBase64Url(submodel.id)}`),
             new JsonWriterV3().convert(submodel),
             this.endpoint.headers,
         );
     }
 
-    private async postSubmodel(aasId: string, submodel: aas.Submodel): Promise<void> {
-        await this.http.post(
-            this.resolve(`shells/${encodeBase64Url(aasId)}/submodels/`),
-            new JsonWriterV3().convert(submodel),
-            this.endpoint.headers,
-        );
+    private async postSubmodel(submodel: aas.Submodel): Promise<void> {
+        await this.http.post(this.resolve(`submodels/`), new JsonWriterV3().convert(submodel), this.endpoint.headers);
     }
 
     private async hasConceptDescription(conceptDescription: aas.ConceptDescription): Promise<boolean> {

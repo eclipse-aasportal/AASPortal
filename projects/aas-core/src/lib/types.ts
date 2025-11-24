@@ -117,11 +117,8 @@ export interface AASCursor {
 
 /** Describes a template. */
 export interface TemplateDescriptor {
-    idShort: string;
-    id?: string;
-    endpoint?: Endpoint;
-    format?: '.json' | '.xml' | '.aasx';
-    modelType: aas.ModelType | '';
+    name: string;
+    url: string;
 }
 
 export interface LiveValue {

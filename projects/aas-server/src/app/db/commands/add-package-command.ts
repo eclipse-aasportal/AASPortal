@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { v4 as uuid } from 'uuid';
+import { nanoid } from 'nanoid';
 import { aas, ApplicationError, types } from 'aas-core';
 
 import { DatabaseEnvironment, DatabaseKey, PackageItem, IdentifiableItem } from '../database-types.js';
@@ -65,7 +65,7 @@ export class AddPackageCommand extends DatabaseCommand<string> {
             );
         }
 
-        const packageId = uuid();
+        const packageId = nanoid();
         await this.add({ key: key, id: packageId, filename: this.filename, environment }, this.sourceFile);
         return packageId;
     }

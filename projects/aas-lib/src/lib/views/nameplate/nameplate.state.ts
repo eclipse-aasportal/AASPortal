@@ -30,7 +30,7 @@ const initialState: NameplateData = {
  * Manages the state of the Nameplate component.
  */
 @Injectable()
-export class NameplateState extends ChildState<NameplateData> {
+export class NameplateState extends ChildState {
     private readonly document$ = signal(initialState.document);
     private readonly submodel$ = signal(initialState.submodel);
     private readonly dataSheets$ = signal(initialState.dataSheets);
@@ -73,7 +73,7 @@ export class NameplateState extends ChildState<NameplateData> {
      * Updates the state.
      * @param newState The new state.
      */
-    public override update(newState: Partial<NameplateData>): void {
+    public update(newState: Partial<NameplateData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }

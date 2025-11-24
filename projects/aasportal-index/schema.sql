@@ -10,7 +10,7 @@ CREATE TABLE endpoints (
 );
 
 CREATE TABLE documents (
-    uuid CHAR(36) PRIMARY KEY,
+    uuid CHAR(21) PRIMARY KEY,
     address VARCHAR(255), 
     crc32 INT UNSIGNED, 
     endpoint VARCHAR(100), 
@@ -18,11 +18,12 @@ CREATE TABLE documents (
     idShort VARCHAR(100), 
     assetId VARCHAR(255),
     thumbnail VARCHAR(7167), 
-    timestamp LONG
+    timestamp LONG,
+    UNIQUE (id, endpoint)
 );
 
 CREATE TABLE elements (
-    uuid CHAR(36) NOT NULL,
+    uuid CHAR(21) NOT NULL,
     modelType VARCHAR(5) NOT NULL,
     id VARCHAR(255),
     idShort VARCHAR(100) NOT NULL,

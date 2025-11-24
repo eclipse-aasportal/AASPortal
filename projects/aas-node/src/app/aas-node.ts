@@ -12,7 +12,6 @@ import { UserStorageFactory } from './auth/user-storage-factory.js';
 import { WSNode } from './ws-node.js';
 import { AASProvider } from './provider/aas-provider.js';
 import { AASIndexFactory } from './index/aas-index-factory.js';
-import { TemplateStorage } from './template/template-storage.js';
 import { LOGGER } from './logging/logger.js';
 import { ConsoleLogger } from './logging/console-logger.js';
 import { Variable } from './variable.js';
@@ -34,4 +33,3 @@ container.afterResolution(
 
 container.resolve(WSNode).run();
 container.resolve(AASProvider);
-container.resolve(TemplateStorage).start();

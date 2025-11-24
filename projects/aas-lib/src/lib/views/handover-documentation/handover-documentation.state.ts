@@ -63,7 +63,7 @@ const initialState: HandoverDocumentationData = {
  * Manages the state of the HandoverDocumentation component.
  */
 @Injectable()
-export class HandoverDocumentationState extends ChildState<HandoverDocumentationData> {
+export class HandoverDocumentationState extends ChildState {
     private readonly document$ = signal(initialState.document);
     private readonly submodel$ = signal(initialState.submodel);
     private readonly items$ = signal(initialState.items);
@@ -105,7 +105,7 @@ export class HandoverDocumentationState extends ChildState<HandoverDocumentation
     /** The handover document items. */
     public readonly items = this.items$.asReadonly();
 
-    public override update(newState: Partial<HandoverDocumentationData>): void {
+    public update(newState: Partial<HandoverDocumentationData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }

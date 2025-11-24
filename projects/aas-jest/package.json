@@ -1,6 +1,6 @@
 {
     "name": "aas-jest",
-    "version": "1.0.0",
+    "version": "3.2.0",
     "description": "Extensions for jest test framework",
     "module": "./dist/lib/index.js",
     "main": "./dist/aas-jest.js",

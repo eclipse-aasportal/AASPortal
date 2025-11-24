@@ -16,7 +16,10 @@ import { VIEW_ROUTE_NAME } from './view-route-name';
 import { VIEW_ROUTES } from './views-routes';
 import { encodeBase64Url } from '../utilities';
 
-/** Provides a specific view. */
+/** 
+ * Provides a specific view.
+ * @deprecated Use View2 class.
+ */
 export abstract class View {
     /**
      * Creates a new instance of a derived `View` class.
@@ -46,10 +49,10 @@ export abstract class View {
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
 
-        public openAASOverview(){
+    public openAASOverview() {
         const document = this.document();
         if (document === undefined) {
-            return "";
+            return '';
         }
 
         const endpoint = document.endpoint;
@@ -58,7 +61,9 @@ export abstract class View {
     }
 }
 
-/** Provides a specific view. */
+/** 
+ * Provides a specific view component.
+ */
 @Component({ selector: 'awp-view', template: '' })
 export abstract class View2 {
     protected readonly route = inject(ActivatedRoute);
@@ -83,15 +88,4 @@ export abstract class View2 {
 
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
-
-        public openAASOverview(){
-        const document = this.document();
-        if (document === undefined) {
-            return "";
-        }
-
-        const endpoint = document.endpoint;
-        const id = document.id;
-        return [`/aas/`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
-    }
 }

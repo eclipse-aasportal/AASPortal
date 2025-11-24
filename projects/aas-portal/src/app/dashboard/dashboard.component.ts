@@ -29,9 +29,8 @@ import {
 } from '@angular/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
-import { NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { CommandHandler, NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
-import { CommandHandler } from '../aas/command-handler';
 import { MovePreviousCommand } from './commands/move-previous-command';
 import { MoveNextCommand } from './commands/move-next-command';
 import { DeletePageCommand } from './commands/delete-page-command';

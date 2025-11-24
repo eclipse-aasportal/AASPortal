@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable, WritableSignal, computed, signal, untracked } from '@angular/core';
-import { v4 as uuid } from 'uuid';
+import { nanoid } from 'nanoid';
 import { EMPTY, map, mergeMap, Observable, skipWhile, tap } from 'rxjs';
 import { aas, AASDocument, getIdShortPath, getUnit, LiveNode } from 'aas-core';
 import { AuthService, encodeBase64Url } from 'aas-lib';
@@ -243,7 +243,7 @@ export class DashboardService {
 
             const item: DashboardChartItem = {
                 label: label,
-                id: uuid(),
+                id: nanoid(),
                 chartType: signal(DashboardChartType.Line),
                 sources: [source],
                 selected: signal(false),
@@ -257,7 +257,7 @@ export class DashboardService {
     private addBarChart(page: DashboardPage, properties: aas.Property[], nodes: LiveNode[] | null): void {
         const item: DashboardChartItem = {
             label: '',
-            id: uuid(),
+            id: nanoid(),
             chartType: signal(DashboardChartType.BarVertical),
             sources: [],
             selected: signal(false),
@@ -305,7 +305,7 @@ export class DashboardService {
 
                 const item: DashboardChartItem = {
                     label: label,
-                    id: uuid(),
+                    id: nanoid(),
                     chartType: signal(DashboardChartType.TimeSeries),
                     sources: [source],
                     selected: signal(false),
