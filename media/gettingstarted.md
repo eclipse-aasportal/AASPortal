@@ -156,7 +156,6 @@ AASNode provides a user management. Authentication of a user is based on Json We
 | MAX_WORKERS      | Number of background worker that scan AAS containers.                 | 8                                              |
 | AAS_NODE_PORT | The port number where AASNode is listening.                         | 80                                             |
 | USER_STORAGE     | URL of the user database.                                             | './users'                                      |
-| TEMPLATE_STORAGE | URL of the template storage                                           |                                                |
 | TIMEOUT          | Timeout until a new scan starts (ms).                                 | 5000                                           |
 | WEB_ROOT         | The root directory for static file resources.                         | './wwwroot'                                    |
 
