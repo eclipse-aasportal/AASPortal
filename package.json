@@ -1,6 +1,6 @@
 {
     "name": "aas-portal-project",
-    "version": "3.5-development.0",
+    "version": "3.5-development.1",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
@@ -81,12 +81,12 @@
         "jwt-decode": "^4.0.0",
         "lodash-es": "^4.17.21",
         "marked": "^16.3.0",
-        "mongoose": "^8.18.1",
+        "mongoose": "^8.19.3",
         "morgan": "^1.10.1",
         "multer": "^2.0.2",
-        "mysql2": "^3.14.5",
+        "mysql2": "^3.15.3",
         "nanoid": "^5.1.6",
-        "node-opcua": "^2.156.0",
+        "node-opcua": "^2.157.0",
         "node-opcua-client-crawler": "^2.127.1",
         "nodemailer": "^7.0.10",
         "qrcode": "^1.5.4",
