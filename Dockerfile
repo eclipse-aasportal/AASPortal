@@ -21,8 +21,13 @@ COPY --from=build /usr/src/app/projects/aas-package/dist/ node_modules/aas-packa
 COPY --from=build /usr/src/app/projects/aas-package/package.json node_modules/aas-package/package.json
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ wwwroot/
 COPY --from=build /usr/src/app/welcome/ wwwroot/assets/welcome/
+COPY --from=build /usr/src/app/projects/aas-portal/src/config.js wwwroot/config.js.template
+COPY docker-entrypoint-aas-portal.sh /usr/src/app/docker-entrypoint-aas-portal.sh
+RUN chmod +x /usr/src/app/docker-entrypoint-aas-portal.sh
+
 ENV AAS_NODE_PORT=80
 ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]
 
 EXPOSE 80
+ENTRYPOINT ["/usr/src/app/docker-entrypoint-aas-portal.sh"]
 CMD ["node", "aas-node.js" ]
