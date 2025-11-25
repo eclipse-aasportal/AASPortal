@@ -28,11 +28,11 @@ export class DocumentPopupComponent {
 
     public constructor(public activeModal: NgbActiveModal) {}
 
-    public closeModal() {
+    public closeModal(): void {
         this.activeModal.dismiss();
     }
 
-    public getTitle() {
+    public getTitle(): string {
         if (this.body.title) return this.body.title;
 
         if (!this.body.files || this.body.files.length <= 0) return 'N/A';
@@ -64,7 +64,7 @@ export class DocumentPopupComponent {
         }
     }
 
-    public openFile() {
+    public openFile(): void {
         if (!this.body) return;
         if (!this.body.files || this.body.files.length <= 0) return;
 

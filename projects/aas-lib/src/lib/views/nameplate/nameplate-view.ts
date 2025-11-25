@@ -90,7 +90,7 @@ export class NameplateView extends LeafView<NameplateViewState> implements OnIni
         this.toolbar.clear();
     }
 
-    public getSemanticId() {
+    public getSemanticId(): string | undefined {
         if (!this.submodel()) return '';
         return this.submodel()?.semanticId?.keys[0].value;
     }

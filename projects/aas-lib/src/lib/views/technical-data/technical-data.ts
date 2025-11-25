@@ -13,7 +13,7 @@ import { AASDocument } from 'aas-core';
 
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 import { ChildComponent } from '../../components/child-component';
-import { TechnicalDataData, TechnicalDataState } from './technical-data.state';
+import { TechnicalDataState } from './technical-data.state';
 
 /**
  * TechnicalData component for displaying technical data sheets based on the

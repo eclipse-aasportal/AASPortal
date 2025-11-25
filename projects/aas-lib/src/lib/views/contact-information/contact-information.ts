@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, untracked 
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
-import { ContactInformationData, ContactInformationState } from './contact-information.state';
+import { ContactInformationState } from './contact-information.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**

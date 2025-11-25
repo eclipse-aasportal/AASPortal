@@ -13,7 +13,7 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { CarbonFootprintData, CarbonFootprintState } from './carbon-footprint.state';
+import { CarbonFootprintState } from './carbon-footprint.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**
@@ -100,42 +100,42 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintState> {
         this.state().update({ index });
     }
 
-    public getTotalPCFValue() {
+    public getTotalPCFValue(): string {
         const result = this.totalPcfCO2eq();
         const splitResult = result.split(' ');
         if (!splitResult || splitResult.length <= 0) return '';
         return splitResult[0];
     }
 
-    public getTotalPCFUnit() {
+    public getTotalPCFUnit(): string {
         const result = this.totalPcfCO2eq();
         const splitResult = result.split(' ');
         if (!splitResult || splitResult.length <= 1) return '';
         return splitResult[1];
     }
 
-    public getValueFromDataSheet(name: string) {
+    public getValueFromDataSheet(name: string): string | string[] | undefined {
         const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === name);
         if (!result) return '-1';
         return result.value;
     }
 
-    public getFilenameExplanation() {
+    public getFilenameExplanation(): string | string[] | undefined {
         const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
         if (!result || !result.value) return '';
         return result.value;
     }
 
-    public openFile() {
+    public openFile(): void {
         const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
         if (!result || !result.url) return;
         window.open(result.url, '_blank');
     }
 
-    public toggleDetailView() {
+    public toggleDetailView(): void {
         this.showDetails = !this.showDetails;
     }
 }

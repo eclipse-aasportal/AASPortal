@@ -6,27 +6,13 @@
  *
  *****************************************************************************/
 
-import {
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    input,
-    untracked,
-    ViewChild,
-} from '@angular/core';
-import { TranslateDirective } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument } from 'aas-core';
 
 import { ChildComponent } from '../../components/child-component';
-import {
-    DocumentationItem,
-    HandoverDocumentationData,
-    HandoverDocumentationState,
-} from './handover-documentation.state';
+import { DocumentationItem, HandoverDocumentationState } from './handover-documentation.state';
 import { DocumentPopupComponent } from './document-popup/document-popup.component';
 
 /**
@@ -41,7 +27,7 @@ import { DocumentPopupComponent } from './document-popup/document-popup.componen
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HandoverDocumentation extends ChildComponent<HandoverDocumentationState> {
-    clickedItem: DocumentationItem = {
+    public clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
         subtitle: '',
@@ -71,7 +57,7 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationS
         });
     }
 
-    public openModal(item: DocumentationItem) {
+    public openModal(item: DocumentationItem): void {
         const modalRef = this.modalService.open(DocumentPopupComponent, { size: 'md' });
         modalRef.componentInstance.body = item;
         modalRef.componentInstance.title = 'Document'; // optional
@@ -129,7 +115,7 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationS
         return item.files[0].name;
     }
 
-    public openFile(item: DocumentationItem) {
+    public openFile(item: DocumentationItem): void {
         if (!item) return;
         if (!item.files || item.files.length <= 0) return;
 

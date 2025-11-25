@@ -16,7 +16,7 @@ import { VIEW_ROUTE_NAME } from './view-route-name';
 import { VIEW_ROUTES } from './views-routes';
 import { encodeBase64Url } from '../utilities';
 
-/** 
+/**
  * Provides a specific view.
  * @deprecated Use View2 class.
  */
@@ -49,7 +49,7 @@ export abstract class View {
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
 
-    public openAASOverview() {
+    public openAASOverview(): string | (string | { endpoint: string; id: string; })[]{
         const document = this.document();
         if (document === undefined) {
             return '';
@@ -61,7 +61,7 @@ export abstract class View {
     }
 }
 
-/** 
+/**
  * Provides a specific view component.
  */
 @Component({ selector: 'awp-view', template: '' })
@@ -89,7 +89,7 @@ export abstract class View2 {
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
 
-    public openAASOverview() {
+    public openAASOverview(): string | (string | { endpoint: string; id: string; })[] {
         const document = this.document();
         if (document === undefined) {
             return '';
