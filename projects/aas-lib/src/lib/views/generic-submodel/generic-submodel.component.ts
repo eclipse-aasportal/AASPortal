@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, Signal, signal, TemplateRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, Signal, signal, TemplateRef, viewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { aas, getChildren, isSubmodelElementCollection, isSubmodelElementList, isProperty, isMultiLanguageProperty, getLocaleValue, isFile, AASDocument, WebSocketData, LiveRequest, LiveNode, convertToString } from 'projects/aas-core';
 import { Observable, EMPTY } from 'rxjs';
 import { getDisplayName, getUrl } from '../../utilities';
-import { GroupItem, Group } from '../operational-data/operational-data-view';
 import { VIEW_ROUTES } from '../views-routes';
 import { GenericSubmodelViewState } from './generic-submodel.state';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
@@ -14,6 +13,18 @@ import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { ToolbarService } from '../../services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
 
+
+export type GroupItem = {
+    idShort: string;
+    name: string;
+    value: WritableSignal<string | undefined>;
+    type: 'text' | 'link';
+    element: aas.SubmodelElement;
+    url?: string;
+    isOnline?: boolean;
+};
+
+export type Group = { idShort: string; name: string; parentName?: string; items: GroupItem[] };
 @Component({
   selector: 'fhg-generic-submodel',
   imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterModule],
@@ -73,7 +84,7 @@ private readonly map = new Map<string, GroupItem>();
                 }
             }
         }
-
+        console.log(groups)
         return groups;
     });
 

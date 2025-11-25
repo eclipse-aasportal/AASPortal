@@ -19,37 +19,36 @@
     </div>
     <div ngbAccordion>
         @for (group of groups(); track group.idShort; let i = $index) {
-        <div ngbAccordionItem [collapsed]="false">
-            <h2 ngbAccordionHeader>
-                <button class="fw-semibold" ngbAccordionButton>{{group.name}}</button>
-            </h2>
-            <div ngbAccordionCollapse>
-                <div ngbAccordionBody>
-                    <ng-template>
-                        <table class="table table-sm table-striped table-borderless">
-                            <tbody>
-                                @for (item of group.items; track item.idShort) {
-                                <tr>
-                                    <td class="align-middle">{{item.name}}</td>
-                                    <td>
-                                        @if (item.type === 'link') {
-                                        <a [href]="item.url" target="_blank">{{item.value()}}</a>
-                                        } @else {
-                                        <div class="text-end">{{item.value()}}</div>
-                                        }
-                                    </td>
-                                    <td class="fhg-w-4">@if (item.isOnline) {
-                                        <i class="bi bi-broadcast text-success"></i>
-                                        }
-                                    </td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </ng-template>
+            @if (group.items.length > 0) {
+            <div ngbAccordionItem [collapsed]="false">
+                <h2 ngbAccordionHeader>
+                    <button class="fw-semibold" ngbAccordionButton>{{group.name}}</button>
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            <table class="table table-sm table-striped table-borderless">
+                                <tbody>
+                                    @for (item of group.items; track item.idShort) {
+                                    <tr>
+                                        <td class="align-middle">{{item.name}}</td>
+                                        <td>
+                                            @if (item.type === 'link') {
+                                            <a [href]="item.url" target="_blank">{{item.value()}}</a>
+                                            } @else {
+                                            <div class="text-end">{{item.value()}}</div>
+                                            }
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </ng-template>
+                    </div>
                 </div>
             </div>
-        </div>
+            }
+            
         }
     </div>
 </div>
