@@ -32,7 +32,7 @@ const initialState: AASTreeData = {
  * Represents the state handler of the AASTree component.
  */
 @Injectable()
-export class AASTreeState extends ChildState<AASTreeData> {
+export class AASTreeState extends ChildState {
     private readonly document$ = signal(initialState.document);
     private readonly expanded$ = signal(initialState.expanded);
     private readonly matchIndex$ = signal(initialState.matchIndex);

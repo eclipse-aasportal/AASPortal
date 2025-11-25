@@ -7,29 +7,9 @@
  *****************************************************************************/
 
 import { Injectable, signal } from '@angular/core';
-import { aas, AASDocument } from 'aas-core';
+import { Tree } from '../../components/tree/tree.component';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
-
-export type TreeNode = {
-    archeType: ArcheType;
-    id: string;
-    level: number;
-    name: string;
-    abbreviation: string;
-    node: aas.Entity;
-    expanded: boolean;
-    highlighted: boolean;
-    loaded: boolean;
-    isLeaf: boolean;
-    hasChildren: boolean;
-    document?: AASDocument | null;
-    thumbnail?: string;
-};
-
-export type TreeItem = [aas.Entity | null, TreeNode];
-
-export type Tree = TreeItem[];
 
 export type HierarchicalStructureData = {
     tree: Tree;
@@ -50,7 +30,25 @@ const initialState: HierarchicalStructureData = {
  */
 @Injectable()
 export class HierarchicalStructureState {
-    private readonly tree$ = signal(initialState.tree);
+    private readonly tree$ = signal(initialState.tree, {
+        equal: (a, b) => {
+            if (a === b) {
+                return true;
+            }
+
+            if (a.length !== b.length) {
+                return false;
+            }
+
+            for (let i = 0, n = a.length; i < n; i++) {
+                if (a[i] !== b[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+    });
 
     /**
      * An observable that provides a read-only view of the hierarchical structure tree.

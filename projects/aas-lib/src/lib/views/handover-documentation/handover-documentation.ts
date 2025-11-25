@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    input,
+    untracked,
+    ViewChild,
+} from '@angular/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument } from 'aas-core';
@@ -30,8 +40,8 @@ import { DocumentPopupComponent } from './document-popup/document-popup.componen
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationData, HandoverDocumentationState> {
-    public clickedItem: DocumentationItem = {
+export class HandoverDocumentation extends ChildComponent<HandoverDocumentationState> {
+    clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
         subtitle: '',

@@ -35,7 +35,6 @@ export class EndpointScan {
             scan.on('remove', this.postRemove);
             scan.on('add', this.postAdd);
             scan.on('error', this.onError);
-            await this.index.hack();
             await scan.scanAsync(this.index, data.endpoint);
         } finally {
             scan.off('compare', this.compare);

@@ -24,7 +24,7 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './contact-information.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContactInformation extends ChildComponent<ContactInformationData, ContactInformationState> {
+export class ContactInformation extends ChildComponent<ContactInformationState> {
     /**
      * Creates a new instance of the ContactInformation component.
      */

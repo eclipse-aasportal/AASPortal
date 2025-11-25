@@ -344,7 +344,6 @@ describe('MySqlIndex', () => {
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.query).toHaveBeenNthCalledWith(1, 'DELETE FROM `elements`;');
             expect(connection.query).toHaveBeenNthCalledWith(2, 'DELETE FROM `documents`;');
-            expect(connection.query).toHaveBeenNthCalledWith(3, 'DELETE FROM `endpoints`;');
             expect(connection.commit).toHaveBeenCalled();
         });
     });

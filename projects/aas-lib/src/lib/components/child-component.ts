@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({ selector: 'awp-child-deprecated', template: '' })
-export abstract class ChildComponent<TData, TState extends ChildState<TData>> {
+export abstract class ChildComponent<TState extends ChildState> {
     protected constructor() {
         const langChange = toSignal(this.translate.onLangChange);
         this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());

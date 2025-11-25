@@ -26,8 +26,8 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Nameplate extends ChildComponent<NameplateData, NameplateState> implements AfterViewInit {
-    public constructor() {
+export class Nameplate extends ChildComponent<NameplateState> implements AfterViewInit {
+    public constructor(translate: TranslateService) {
         super();
 
         effect(() => {
@@ -44,7 +44,7 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
         });
     }
 
-    public ngAfterViewInit() {
+    ngAfterViewInit() {
         this.dataSheets();
     }
 
@@ -77,14 +77,14 @@ export class Nameplate extends ChildComponent<NameplateData, NameplateState> imp
         return true;
     }
 
-    public getNameplateValue(names: string | string[]) {
+    public getNameplateValue(name: string | string[]) {
         if (!this.dataSheets()) return '-1';
         if (!this.dataSheets()[0]) return '-1';
 
-        if (Array.isArray(names)) {
-            for (const name of names) {
-                const value = this.dataSheets()[0].items.find(
-                    element => element.idShort.toLowerCase() == name.toLowerCase(),
+        if (Array.isArray(name)) {
+            for (let i = 0; i < name.length; i++) {
+                var value = this.dataSheets()[0].items.find(
+                    element => element.idShort.toLowerCase() == name[i].toLowerCase(),
                 );
                 if (value) return value.value;
             }

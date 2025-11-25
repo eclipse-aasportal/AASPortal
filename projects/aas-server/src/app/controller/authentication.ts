@@ -149,7 +149,10 @@ export class Authentication {
         });
     }
 
-    private async handleErrorAndRefresh(verifyResult: VerifyResolve, request: express.Request) {
+    private async handleErrorAndRefresh(
+        verifyResult: VerifyResolve,
+        request: express.Request,
+    ): Promise<string | jwt.JwtPayload> {
         if (verifyResult.type === 'success') {
             return verifyResult.result;
         }
@@ -177,7 +180,10 @@ export class Authentication {
         return refreshVerify.result;
     }
 
-    private async checkScopes(token: string | jwt.JwtPayload | undefined, requiredScopes: string[] | undefined) {
+    private async checkScopes(
+        token: string | jwt.JwtPayload | undefined,
+        requiredScopes: string[] | undefined,
+    ): Promise<void> {
         if (!requiredScopes || requiredScopes.length === 0) {
             return;
         }

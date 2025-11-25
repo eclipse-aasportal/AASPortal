@@ -181,7 +181,7 @@ export class AuthService {
         });
     }
 
-    private async checkPassword(password: string, hash: string) {
+    private async checkPassword(password: string, hash: string): Promise<void> {
         if (!(await bcrypt.compare(password, hash))) {
             throw new ApplicationError(ERRORS.InvalidPassword, undefined, 401);
         }

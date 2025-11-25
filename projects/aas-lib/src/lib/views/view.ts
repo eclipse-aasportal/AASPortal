@@ -16,7 +16,10 @@ import { VIEW_ROUTE_NAME } from './view-route-name';
 import { VIEW_ROUTES } from './views-routes';
 import { encodeBase64Url } from '../utilities';
 
-/** Provides a specific view. */
+/** 
+ * Provides a specific view.
+ * @deprecated Use View2 class.
+ */
 export abstract class View {
     /**
      * Creates a new instance of a derived `View` class.
@@ -58,7 +61,9 @@ export abstract class View {
     }
 }
 
-/** Provides a specific view. */
+/** 
+ * Provides a specific view component.
+ */
 @Component({ selector: 'awp-view', template: '' })
 export abstract class View2 {
     protected readonly route = inject(ActivatedRoute);

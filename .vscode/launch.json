@@ -12,7 +12,7 @@
         {
             "name": "Launch aas-node",
             "type": "node",
-            "args": [],
+            "args": ["--experimental-sqlite"],
             "request": "launch",
             "preLaunchTask": "build-aas-node",
             "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
@@ -31,8 +31,6 @@
                 "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "USER_STORAGE": "mongodb://aas-node:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users",
-                "TEMPLATE_STORAGE": "http://aas-node:5w0vmrkzrwDIDyZs@localhost:8080/templates",
-                "AAS_INDEX": "mysql://aas-node:60PYRe6Vd8C99u4n@localhost:3306",
             }
         },
         {

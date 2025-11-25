@@ -10,16 +10,14 @@ import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { LOGGER, Logger } from './logging/logger.js';
 import { ScanResult, ScanResultKind, WorkerData } from './types.js';
-import { isScanEndpointData, isScanTemplatesData, toUint8Array } from './utilities.js';
+import { isScanEndpointData, toUint8Array } from './utilities.js';
 import { EndpointScan } from './endpoint-scan.js';
-import { TemplateScan } from './template/template-scan.js';
 
 @singleton()
 export class WorkerApp {
     public constructor(
         @inject(LOGGER) private readonly logger: Logger,
         @inject(EndpointScan) private readonly endpointScan: EndpointScan,
-        @inject(TemplateScan) private readonly templateScan: TemplateScan,
     ) {}
 
     public run(): void {
@@ -34,8 +32,6 @@ export class WorkerApp {
         try {
             if (isScanEndpointData(data)) {
                 await this.endpointScan.scanAsync(data);
-            } else if (isScanTemplatesData(data)) {
-                await this.templateScan.scanAsync(data);
             }
         } catch (error) {
             this.logger.error(error);

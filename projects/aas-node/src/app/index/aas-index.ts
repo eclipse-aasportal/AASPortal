@@ -15,13 +15,7 @@ import {
     ApplicationError,
     PagedResult,
     aas,
-    baseType,
     getAbbreviation,
-    isProperty,
-    isValidDate,
-    parseDate,
-    parseNumber,
-    toBoolean,
 } from 'aas-core';
 
 import { KeywordDirectory } from './keyword-directory.js';
@@ -102,10 +96,10 @@ export abstract class AASIndex {
      * Gets a page of AAS documents.
      *
      * @param cursor The cursor that specifies the page to get.
-     * @param expression An optional query expression.
+     * @param query An optional query expression.
      * @param language Optional the
      */
-    public abstract getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult>;
+    public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult>;
 
     /**
      * Gets a page of AAS documents.
@@ -191,80 +185,15 @@ export abstract class AASIndex {
      */
     public abstract destroy(): Promise<void>;
 
-    public hack(): Promise<void> {
-        return Promise.resolve();
-    }
-
     protected toAbbreviation(referable: aas.Referable): string {
         return getAbbreviation(referable.modelType)!.toLowerCase();
-    }
-
-    protected toStringValue(referable: aas.Referable, max: number = 512): string | undefined {
-        switch (referable.modelType) {
-            case 'Property': {
-                const property = referable as aas.Property;
-                if (baseType(property.valueType) === 'string') {
-                    return this.preprocessString(property.value, max);
-                }
-
-                return undefined;
-            }
-            case 'MultiLanguageProperty':
-                return this.preprocessString((referable as aas.MultiLanguageProperty).value);
-            case 'File':
-                return (referable as aas.File).value;
-            case 'Blob':
-                return (referable as aas.Blob).contentType;
-            case 'Range':
-            case 'ReferenceElement':
-            default:
-                return undefined;
-        }
-    }
-
-    protected toNumberValue(referable: aas.Referable): number | undefined {
-        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'number') {
-            return undefined;
-        }
-
-        const value = parseNumber(referable.value);
-        if (Number.isNaN(value)) {
-            return undefined;
-        }
-
-        return value;
-    }
-
-    protected toDateValue(referable: aas.Referable): Date | undefined {
-        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'Date') {
-            return undefined;
-        }
-
-        const value = parseDate(referable.value);
-        return isValidDate(value) ? value : undefined;
-    }
-
-    protected toBooleanValue(referable: aas.Referable): boolean | undefined {
-        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'boolean') {
-            return undefined;
-        }
-
-        return toBoolean(referable.value);
-    }
-
-    protected toBigintValue(referable: aas.Referable): bigint | undefined {
-        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'bigint') {
-            return undefined;
-        }
-
-        return BigInt(referable.value);
     }
 
     protected toDocumentId(document: AASDocument): AASDocumentId {
         return { endpoint: document.endpoint, id: document.id };
     }
 
-    private preprocessString(value: string | aasV2.LangString[] | undefined, max: number = 512): string | undefined {
+    protected preprocessString(value: string | aasV2.LangString[] | undefined, max: number = 512): string | undefined {
         if (value === undefined) {
             return undefined;
         }

@@ -34,7 +34,7 @@ const initialState: TechnicalDataData = {
  * @extends ChildState<TechnicalDataData>
  */
 @Injectable()
-export class TechnicalDataState extends ChildState<TechnicalDataData> {
+export class TechnicalDataState extends ChildState {
     private readonly document$ = signal(initialState.document);
     private readonly submodel$ = signal(initialState.submodel);
     private readonly dataSheets$ = signal(initialState.dataSheets);
@@ -84,7 +84,7 @@ export class TechnicalDataState extends ChildState<TechnicalDataData> {
      *
      * @param newState Partial state to update.
      */
-    public override update(newState: Partial<TechnicalDataData>): void {
+    public update(newState: Partial<TechnicalDataData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }

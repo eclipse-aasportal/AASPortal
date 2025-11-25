@@ -11,5 +11,5 @@ import { InjectionToken } from '@angular/core';
 export type WindowService = Window & typeof globalThis;
 
 export const WINDOW = new InjectionToken<WindowService>('Global window object', {
-    factory: () => window,
+    factory: (): WindowService => window,
 });

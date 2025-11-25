@@ -3,9 +3,6 @@ import { createDefaultEsmPreset } from 'ts-jest';
 
 const presetConfig = createDefaultEsmPreset({
     tsconfig: './tsconfig.spec.json',
-    babelConfig: {
-        plugins: ['@babel/plugin-syntax-import-attributes'],
-    },
 });
 
 const config: Config = {

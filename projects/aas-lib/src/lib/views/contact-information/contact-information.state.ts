@@ -27,7 +27,7 @@ const initialState: ContactInformationData = {
  * Manages the state for the Contact Information component.
  */
 @Injectable()
-export class ContactInformationState extends ChildState<ContactInformationData> {
+export class ContactInformationState extends ChildState {
     private readonly document$ = signal(initialState.document);
 
     public constructor() {
@@ -107,7 +107,7 @@ export class ContactInformationState extends ChildState<ContactInformationData> 
         return contacts;
     });
 
-    public override update(newState: Partial<ContactInformationData>): void {
+    public update(newState: Partial<ContactInformationData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }

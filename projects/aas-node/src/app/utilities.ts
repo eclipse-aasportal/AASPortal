@@ -10,7 +10,7 @@ import { ApplicationError } from 'aas-core';
 import { streamToObjectUrl } from 'aas-package';
 import { ERRORS } from './errors.js';
 import { ImageProcessing } from './image-processing.js';
-import { ScanEndpointData, ScanTemplatesData, WorkerData } from './types.js';
+import { ScanEndpointData, WorkerData } from './types.js';
 
 export function parseUrl(url: string): URL {
     try {
@@ -79,8 +79,4 @@ export async function createThumbnail(readable: NodeJS.ReadableStream | undefine
 
 export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
     return data.type === 'ScanEndpointData';
-}
-
-export function isScanTemplatesData(data: WorkerData): data is ScanTemplatesData {
-    return data.type === 'ScanTemplatesData';
 }

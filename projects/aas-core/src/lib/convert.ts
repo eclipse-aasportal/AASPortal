@@ -530,7 +530,7 @@ export function parseDate(s: string | undefined, localeId?: string): Date | unde
  * @param value The date value.
  * @returns `true` if the date value is valid; otherwise, `false`.
  */
-export function isValidDate(value: Date | undefined): boolean {
+export function isValidDate(value: Date | undefined): value is Date {
     if (value === undefined) {
         return false;
     }

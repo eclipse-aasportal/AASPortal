@@ -77,7 +77,7 @@
             "name": "aas-node",
             "rootPath": "./projects/aas-node",
             "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
+            "jestCommandLine": "node --experimental-vm-modules --experimental-sqlite --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
         },
         {
             "name": "aas-lib",

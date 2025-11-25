@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { FormsModule } from '@angular/forms';
-import { RouterLinkWithHref } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { catchError, concatMap, map, of, Subject } from 'rxjs';
 
 import {
@@ -21,15 +20,17 @@ import {
     isEntity,
     isProperty,
     isRelationshipElement,
+    noop,
     selectReferable,
 } from 'aas-core';
 
-import { ArcheType, HierarchicalStructureState, Tree, TreeItem, TreeNode } from './hierarchical-structure.state';
+import { ArcheType, HierarchicalStructureState } from './hierarchical-structure.state';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { encodeBase64Url, findRouteForShell, getDisplayName } from '../../utilities';
 import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../views-constants';
 import { ChildComponent2 } from '../../components/child-component';
 import { VIEW_ROUTES } from '../views-routes';
+import { Tree, TreeComponent, TreeNode, TreeService } from '../../components/tree/tree.component';
 
 const ARCHE_TYPE = 'https://admin-shell.io/idta/HierarchicalStructures/ArcheType/1/0';
 const ENTRY_NODE = 'https://admin-shell.io/idta/HierarchicalStructures/EntryNode/1/0';
@@ -46,10 +47,10 @@ const HAS_PART = 'https://admin-shell.io/idta/HierarchicalStructures/HasPart/1/0
     templateUrl: './hierarchical-structure.html',
     styleUrl: './hierarchical-structure.scss',
     providers: [HierarchicalStructureState],
-    imports: [FormsModule, RouterLinkWithHref],
+    imports: [FormsModule, TreeComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HierarchicalStructure extends ChildComponent2 {
+export class HierarchicalStructure extends ChildComponent2 implements TreeService {
     private readonly state = inject(HierarchicalStructureState);
     private readonly api = inject(EndpointsApi);
     private readonly viewRoutes = inject(VIEW_ROUTES);
@@ -73,6 +74,7 @@ export class HierarchicalStructure extends ChildComponent2 {
             }
 
             const tree: Tree = [];
+            this.visited.clear();
             this.createTree(archeType, null, entryNode, 0, tree, entryNode.idShort);
             this.state.update({ tree });
         });
@@ -81,8 +83,8 @@ export class HierarchicalStructure extends ChildComponent2 {
             .pipe(
                 takeUntilDestroyed(),
                 concatMap(node => {
-                    const globalAssetId = node.node.globalAssetId;
-                    if (!globalAssetId || node.document) {
+                    const globalAssetId = (node.id as aas.Entity).globalAssetId;
+                    if (!globalAssetId || node.options.document) {
                         return of();
                     }
 
@@ -91,15 +93,17 @@ export class HierarchicalStructure extends ChildComponent2 {
                         map(document => {
                             const shell = document?.content?.assetAdministrationShells.at(0);
                             if (!shell) {
-                                return { ...node, document };
+                                return { ...node, options: { ...node.options, document } } satisfies TreeNode;
                             }
 
                             return {
                                 ...node,
-                                abbreviation: getAbbreviation(shell.modelType)!,
+                                symbolType: 'image',
+                                symbol: document!.thumbnail,
+                                type: 'routerLink',
                                 name: getDisplayName(shell, document?.content, this.currentLang()),
-                                document,
-                                thumbnail: document!.thumbnail,
+                                suffix: document?.id,
+                                options: { ...node.options, document },
                             } satisfies TreeNode;
                         }),
                     );
@@ -107,13 +111,16 @@ export class HierarchicalStructure extends ChildComponent2 {
             )
             .subscribe(node => {
                 const tree: Tree = this.state.tree().map(item => {
-                    return item[1].id === node.id ? [item[0], node] : item;
+                    return item.path === node.path ? node : item;
                 });
 
                 this.state.update({ tree });
             });
     }
 
+    /**
+     * The current AAS environment.
+     */
     private readonly env = computed(
         () =>
             this.document()?.content ??
@@ -134,37 +141,9 @@ export class HierarchicalStructure extends ChildComponent2 {
      */
     public readonly submodel = input<aas.Submodel>();
 
-    /**
-     * The visible nodes in the hierarchical structure tree.
-     */
-    public readonly nodes = computed(() => {
-        const tree = this.state.tree();
-        const nodes: TreeNode[] = [];
-        const root = tree.find(item => item[0] === null);
-        if (!root) {
-            return nodes;
-        }
+    public readonly service = signal<TreeService>(this).asReadonly();
 
-        this.buildTree(tree, null, nodes);
-        return nodes;
-    });
-
-    /**
-     * A computed property that determines whether all non-leaf nodes with children in the tree are expanded.
-     */
-    public readonly expanded = computed(() => {
-        for (const [, node] of this.state.tree()) {
-            if (node.isLeaf || !node.hasChildren) {
-                continue;
-            }
-
-            if (!node.expanded) {
-                return false;
-            }
-        }
-
-        return true;
-    });
+    public readonly tree = this.state.tree;
 
     /**
      * Returns the thumbnail URL for a given tree node.
@@ -175,37 +154,17 @@ export class HierarchicalStructure extends ChildComponent2 {
      * @returns The URL of the thumbnail image.
      */
     public getThumbnail(node: TreeNode): string {
-        if (node.thumbnail) {
-            return node.thumbnail;
+        if (node.symbol) {
+            return node.symbol;
         }
 
         return '/assets/resources/aas-idta.png';
     }
 
-    /**
-     * Expands a specific tree node if provided, or expands all nodes if no node is specified.
-     *
-     * @param node - The tree node to expand. If omitted, all nodes will be expanded.
-     */
-    public expand(node?: TreeNode): void {
-        if (node) {
-            this.expandNode(node);
-        } else {
-            this.expandAll();
-        }
-    }
-
-    /**
-     * Collapses a specific tree node or all nodes in the hierarchical structure.
-     *
-     * @param node - The tree node to collapse. If omitted, all nodes will be collapsed.
-     */
-    public collapse(node?: TreeNode): void {
-        if (node) {
-            this.collapseNode(node);
-        } else {
-            this.collapseAll();
-        }
+    /** Not relevant. */
+    public getUrl(node: TreeNode): string {
+        noop(node);
+        return '';
     }
 
     /**
@@ -216,7 +175,7 @@ export class HierarchicalStructure extends ChildComponent2 {
      *          or `undefined` if no valid document or route is found.
      */
     public getRouterLink(node: TreeNode): unknown[] | undefined {
-        const document = node.document;
+        const document = node.options.document as AASDocument;
         if (!document) {
             return undefined;
         }
@@ -233,58 +192,36 @@ export class HierarchicalStructure extends ChildComponent2 {
         ];
     }
 
-    private expandNode(node: TreeNode): void {
-        const loadedItems: TreeItem[] = [];
-        const tree = this.state.tree().map<TreeItem>(item => {
-            if (item[1] !== node) {
-                return item;
+    public loadChildren(node: TreeNode): TreeNode[] {
+        const items: TreeNode[] = [];
+        const archeType = node.options.archeType as ArcheType;
+        const entity = node.id as aas.Entity;
+        if (archeType === 'Full') {
+            this.createChildren(archeType, entity, node.level, node.path, items);
+        } else if (archeType === 'OneDown') {
+            const content = (node.options.document as AASDocument)?.content;
+            if (content) {
+                const submodel = this.findHierarchicalStructure(content);
+                if (!submodel) {
+                    return items;
+                }
+
+                const archeType = this.getArcheType(submodel);
+                const entryNode = this.getEntryNode(submodel);
+                if (!entryNode) {
+                    return items;
+                }
+
+                if (archeType === 'Full' || archeType === 'OneDown') {
+                    this.createChildren(archeType, entryNode, node.level, node.path, items);
+                }
             }
+        }
 
-            if (!node.loaded) {
-                this.loadChildren(node, loadedItems);
-            }
-
-            return [item[0], { ...item[1], expanded: true, loaded: true }];
-        });
-
-        tree.push(...loadedItems);
-        this.state.update({ tree });
+        return items;
     }
 
-    private expandAll(): void {
-        const loadedItems: TreeItem[] = [];
-        const tree = this.state.tree().map(item => {
-            const treeNode = item[1];
-            if (treeNode.isLeaf || treeNode.expanded) {
-                return item;
-            }
-
-            if (!treeNode.loaded) {
-                this.loadChildren(treeNode, loadedItems);
-            }
-
-            return [item[0], { ...treeNode, expanded: true, loaded: true }] as TreeItem;
-        });
-
-        tree.push(...loadedItems);
-        this.state.update({ tree });
-    }
-
-    private collapseNode(node: TreeNode): void {
-        const tree: Tree = this.state.tree().map(item => {
-            const itemNode = item[1];
-            return itemNode === node ? [item[0], { ...itemNode, expanded: false }] : item;
-        });
-
-        this.state.update({ tree });
-    }
-
-    private collapseAll(): void {
-        const tree: Tree = this.state.tree().map(item => {
-            const itemNode = item[1];
-            return !itemNode.isLeaf && itemNode.expanded ? [item[0], { ...itemNode, expanded: false }] : item;
-        });
-
+    public setTree(tree: Tree): void {
         this.state.update({ tree });
     }
 
@@ -294,41 +231,54 @@ export class HierarchicalStructure extends ChildComponent2 {
         node: aas.Entity,
         level: number,
         data: Tree,
-        id: string,
+        path: string,
     ): void {
         if (!node.globalAssetId || this.visited.has(node.globalAssetId)) {
             return;
         }
 
-        const treeNode: TreeNode = {
-            archeType,
-            id,
+        const item: TreeNode = {
+            parent,
+            id: node,
+            path,
             level,
-            abbreviation: getAbbreviation(node.modelType)!,
-            node,
+            symbolType: 'text',
+            symbol: getAbbreviation(node.modelType)!,
             expanded: level === 0,
+            selected: false,
             highlighted: false,
             loaded: false,
-            name: getDisplayName(node, untracked(this.document)?.content, this.currentLang()),
+            type: 'text',
+            name: getDisplayName(node, untracked(this.document)?.content, untracked(this.currentLang)),
+            suffix: node.globalAssetId,
             isLeaf: true,
             hasChildren: false,
+            options: { archeType },
         };
 
-        this.subject.next(treeNode);
+        this.subject.next(item);
         if (node.globalAssetId) {
             this.visited.add(node.globalAssetId);
         }
 
         if (archeType === 'Full' || archeType === 'OneDown') {
-            data.push([this.determineParent(parent, node), treeNode]);
+            item.parent = this.determineParent(parent, node);
+            data.push(item);
             if (node.statements) {
                 for (const statement of node.statements) {
                     if (this.isNode(statement)) {
-                        treeNode.isLeaf = false;
-                        treeNode.hasChildren = true;
-                        if (treeNode.expanded) {
-                            this.createTree(archeType, node, statement, level + 1, data, `${id}.${statement.idShort}`);
-                            treeNode.loaded = true;
+                        item.isLeaf = false;
+                        item.hasChildren = true;
+                        if (item.expanded) {
+                            this.createTree(
+                                archeType,
+                                node,
+                                statement,
+                                level + 1,
+                                data,
+                                `${path}.${statement.idShort}`,
+                            );
+                            item.loaded = true;
                         } else {
                             break;
                         }
@@ -339,9 +289,10 @@ export class HierarchicalStructure extends ChildComponent2 {
             const statement = node.statements?.find(statement => isEntity(statement));
             if (statement) {
                 const parentNode = this.createParent(statement, level);
+                item.parent = statement;
                 this.subject.next(parentNode);
-                data.push([null, parentNode]);
-                data.push([parent, treeNode]);
+                data.push(parentNode);
+                data.push(item);
                 this.oneLevelDown(parentNode, data);
             }
         }
@@ -372,32 +323,36 @@ export class HierarchicalStructure extends ChildComponent2 {
 
     private createParent(node: aas.Entity, level: number): TreeNode {
         return {
-            archeType: 'OneUp',
-            id: node.idShort,
+            parent: null,
+            id: node,
+            path: node.idShort,
             level,
+            type: 'text',
             name: getDisplayName(node, untracked(this.document)?.content, this.currentLang()),
-            abbreviation: getAbbreviation(node.modelType)!,
-            node: node,
+            suffix: node.globalAssetId,
+            symbolType: 'text',
+            symbol: getAbbreviation(node.modelType)!,
             expanded: false,
+            selected: false,
             highlighted: false,
             loaded: false,
             isLeaf: false,
             hasChildren: true,
+            options: { archeType: 'OneUp' },
         };
     }
 
     private oneLevelDown(parentNode: TreeNode, data: Tree): void {
-        const parent = parentNode.node;
+        const parent = parentNode.id as aas.Entity;
         for (let i = 0, n = data.length; i < n; i++) {
             const item = data[i];
-            if (item[0] !== parent) {
+            if (item.parent !== parent) {
                 continue;
             }
 
-            const child = item[1];
-            child.id = parent.idShort + '.' + child.id;
-            child.level = parentNode.level + 1;
-            this.oneLevelDown(child, data);
+            item.path = parent.idShort + '.' + item.path;
+            item.level = parentNode.level + 1;
+            this.oneLevelDown(item, data);
         }
     }
 
@@ -405,36 +360,12 @@ export class HierarchicalStructure extends ChildComponent2 {
         return isEntity(statement) && getSemanticId(statement) === NODE;
     }
 
-    private loadChildren(node: TreeNode, items: TreeItem[]): void {
-        if (node.archeType === 'Full') {
-            this.createChildren(node.archeType, node.node, node.level, node.id, items);
-        } else if (node.archeType === 'OneDown') {
-            const content = node.document?.content;
-            if (content) {
-                const submodel = this.findHierarchicalStructure(content);
-                if (!submodel) {
-                    return;
-                }
-
-                const archeType = this.getArcheType(submodel);
-                const entryNode = this.getEntryNode(submodel);
-                if (!entryNode) {
-                    return;
-                }
-
-                if (archeType === 'Full' || archeType === 'OneDown') {
-                    this.createChildren(archeType, entryNode, node.level, node.id, items);
-                }
-            }
-        }
-    }
-
     private createChildren(
         archeType: ArcheType,
         parent: aas.Entity,
         level: number,
         parentId: string,
-        items: TreeItem[],
+        items: TreeNode[],
     ): void {
         for (const statement of parent.statements!) {
             if (isEntity(statement)) {
@@ -458,16 +389,6 @@ export class HierarchicalStructure extends ChildComponent2 {
     private getEntryNode(submodel: aas.Submodel): aas.Entity | undefined {
         const referable = submodel.submodelElements?.find(element => getSemanticId(element) === ENTRY_NODE);
         return isEntity(referable) ? referable : undefined;
-    }
-
-    private buildTree(data: Tree, parent: aas.Entity | null, nodes: TreeNode[]): void {
-        const children = data.filter(item => item[0] === parent);
-        for (const child of children) {
-            nodes.push(child[1]);
-            if (child[1].expanded) {
-                this.buildTree(data, child[1].node, nodes);
-            }
-        }
     }
 
     private getLogicalConnection(relation: aas.RelationshipElement): 'SameAs' | 'IsPartOf' | 'HasPart' | undefined {

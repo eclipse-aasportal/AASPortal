@@ -28,7 +28,7 @@ import { ChildComponent } from '../../components/child-component';
     imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective, DataSheet],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonFootprintState> {
+export class CarbonFootprint extends ChildComponent<CarbonFootprintState> {
     // Determines wether the view is used from inside the dpp view or standalone
     @Input() public isDigitalProductPassport: boolean = false;
 

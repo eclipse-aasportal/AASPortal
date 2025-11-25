@@ -63,8 +63,6 @@
                         <td class="text-end">
                             @if (node.canOpen) {
                                 <a [href]="getUrl(node)" target="_blank">{{ node.value() }}</a>
-                            } @else if (node.element.modelType === 'RelationshipElement') {
-                                <div class="d-flex flex-column fs-9 me-2">ToDo...</div>
                             } @else {
                                 <div class="text-nowrap me-2">{{ node.value() }}</div>
                             }
@@ -75,21 +73,16 @@
                                 <div [ngStyle]="{ width: node.level * 16 + 'px' }"></div>
                                 @if (node.expanded) {
                                     <button class="btn p-0" type="button" (click)="collapse(node)">
-                                        <div class="text-body-secondary">
+                                        <div>
                                             <i class="bi bi-dash-square"></i>
                                         </div>
                                     </button>
-                                } @else {
-                                    @if (node.hasChildren) {
-                                        <button class="btn p-0" type="button" (click)="expand(node)">
-                                            <div class="text-body-secondary">
-                                                <i class="bi bi-plus-square"></i>
-                                            </div>
-                                        </button>
-                                        <div class="text-muted">
-                                            <i class="bi bi-square"></i>
+                                } @else if (node.hasChildren) {
+                                    <button class="btn p-0" type="button" (click)="expand(node)">
+                                        <div>
+                                            <i class="bi bi-plus-square"></i>
                                         </div>
-                                    }
+                                    </button>
                                 }
                                 <div class="ms-1 w-9 text-info fw-bold text-center">
                                     {{ node.abbreviation }}

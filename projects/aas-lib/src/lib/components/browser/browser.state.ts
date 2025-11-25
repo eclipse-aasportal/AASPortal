@@ -62,7 +62,7 @@ const initialState: BrowserData = {
  * State management service for the browser component.
  */
 @Injectable()
-export class BrowserState extends ChildState<BrowserData> {
+export class BrowserState extends ChildState {
     private readonly path$ = signal(initialState.path);
     private readonly current$ = signal(initialState.current);
     private readonly env$ = signal(initialState.env);
@@ -87,7 +87,7 @@ export class BrowserState extends ChildState<BrowserData> {
      * Updates the state with the provided new state.
      * @param newState The new state to set.
      */
-    public override update(newState: Partial<BrowserData>): void {
+    public update(newState: Partial<BrowserData>): void {
         if (newState.current !== undefined) {
             this.current$.set(newState.current);
         }

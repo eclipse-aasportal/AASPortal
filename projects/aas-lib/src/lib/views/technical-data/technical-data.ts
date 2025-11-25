@@ -31,7 +31,7 @@ import { TechnicalDataData, TechnicalDataState } from './technical-data.state';
     styleUrl: './technical-data.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TechnicalData extends ChildComponent<TechnicalDataData, TechnicalDataState> {
+export class TechnicalData extends ChildComponent<TechnicalDataState> {
     public constructor() {
         super();
 
