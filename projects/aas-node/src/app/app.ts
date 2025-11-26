@@ -104,7 +104,7 @@ export class App {
                 return this.getIndex(req, res);
             }
 
-            if (spaRoutes.some((route) => req.path.startsWith(route))) {
+            if (spaRoutes.some(route => req.path.startsWith(route))) {
                 return this.getIndex(req, res);
             }
 
@@ -125,9 +125,7 @@ export class App {
     };
 
     private getIndex = (req: Request, res: Response) => {
-        this.logger.info(
-            `[SPA] Serving index.html for ${req.method} ${req.originalUrl} (path: ${req.path})`,
-        );
+        this.logger.info(`[SPA] Serving index.html for ${req.method} ${req.originalUrl} (path: ${req.path})`);
         res.sendFile(this.variable.WEB_ROOT + '/index.html');
     };
 }
