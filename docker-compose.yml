@@ -91,7 +91,12 @@ services:
       args:
         - NODE_IMAGE=${NODE_IMAGE}
         - NGINX_IMAGE=${NGINX_IMAGE}
+    depends_on:
+      aas-node:
+        condition: service_started
     restart: always
+    environment:
+      - BASE_HREF=${BASE_HREF:-/}
     ports:
       - 80:80
 
