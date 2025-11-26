@@ -97,8 +97,6 @@ services:
     restart: always
     environment:
       - BASE_HREF=${BASE_HREF:-/}
-      - AAS_NODE_HOST=aas-node
-      - AAS_NODE_PORT=1337
     ports:
       - 80:80
 
