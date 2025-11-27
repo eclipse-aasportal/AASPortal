@@ -50,7 +50,7 @@ import { findRouteForShell, findRouteForSubmodel } from '../../utilities';
 import { AASTreeApi } from './aas-tree-api';
 import { WINDOW } from '../../services/window.service';
 import { FormsModule } from '@angular/forms';
-import { AASTreeData, AASTreeState } from './aas-tree.state';
+import { AASTreeState } from './aas-tree.state';
 import { ChildComponent } from '../child-component';
 import { VIEW_ROUTES } from '../../views/views-routes';
 

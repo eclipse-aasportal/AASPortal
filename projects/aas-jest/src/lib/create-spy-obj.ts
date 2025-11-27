@@ -43,6 +43,6 @@ export function createSpyObj<T extends object>(
 
 export type DoneFn = () => void;
 
-export function fail() {
+export function fail(): void {
     expect(false).toBe(true);
 }
