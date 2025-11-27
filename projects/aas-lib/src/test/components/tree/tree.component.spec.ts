@@ -64,31 +64,36 @@ describe('TreeComponent', () => {
                 return node.symbol ?? '';
             },
 
-            loadChildren: function (node: TreeNode): TreeNode[] {
-                switch (node.path) {
+            loadChildren: function (parent: TreeNode): { parent: TreeNode; children: TreeNode[] } {
+                switch (parent.path) {
                     case 'A':
-                        return [createLeaf('A.1', 'A'), createComposite('A.2', 'A')];
+                        return { parent, children: [createLeaf('A.1', 'A'), createComposite('A.2', 'A')] };
 
                     case 'B':
-                        return [createLeaf('B.1', 'B'), createLeaf('B.2', 'B')];
+                        return { parent, children: [createLeaf('B.1', 'B'), createLeaf('B.2', 'B')] };
 
                     case 'A.2':
-                        return [
-                            createLeaf('A.2.1', 'A.2'),
-                            createComposite('A.2.2', 'A.2'),
-                            createComposite('A.2.3', 'A.2'),
-                        ];
+                        return {
+                            parent,
+                            children: [
+                                createLeaf('A.2.1', 'A.2'),
+                                createComposite('A.2.2', 'A.2'),
+                                createComposite('A.2.3', 'A.2'),
+                            ],
+                        };
 
                     case 'A.2.2':
-                        return [createLeaf('A.2.2.1', 'A.2.2')];
+                        return { parent, children: [createLeaf('A.2.2.1', 'A.2.2')] };
 
                     case 'A.2.3':
-                        return [createLeaf('A.2.3.1', 'A.2.3')];
+                        return { parent, children: [createLeaf('A.2.3.1', 'A.2.3')] };
 
                     default:
-                        throw new Error(`Unknown parent ${node.path}`);
+                        throw new Error(`Unknown parent ${parent.path}`);
                 }
             },
+
+            loaded: (node: TreeNode): void  => {},
 
             getRouterLink: function (node: TreeNode): unknown[] | undefined {
                 return [node.name];

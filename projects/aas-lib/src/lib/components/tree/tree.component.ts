@@ -33,14 +33,17 @@ export type TreeNode = {
 
 export type Tree = TreeNode[];
 
+export type TreeResult = { parent: TreeNode; children: TreeNode[] };
+
 /**
- *
+ * Defines an interface for services that adapt the tree to the specific structure to be displayed.
  */
 export interface TreeService {
     /**
+     * Gets a thumbnail for the specified node.
      *
      * @param node The current node.
-     * @returns
+     * @returns An URL to a thumbnail.
      */
     getThumbnail(node: TreeNode): string;
 
@@ -49,17 +52,28 @@ export interface TreeService {
      * @param node The parent node.
      * @return The loaded children.
      */
-    loadChildren(node: TreeNode): TreeNode[];
+    loadChildren(node: TreeNode): TreeResult | undefined;
 
     /**
+     * Called after loading a node for further operations.
+     *
+     * @param node The loaded tree node.
+     */
+    loaded(node: TreeNode): void;
+
+    /**
+     * Gets a link to a route that belongs to the specified node.
      *
      * @param node The current node.
+     * @returns A link to a route.
      */
     getRouterLink(node: TreeNode): unknown[] | undefined;
 
     /**
+     * Returns an URL to a resource that belongs to the specified node.
      *
-     * @param node The node
+     * @param node The current node.
+     * @returns An URL to a resource that belongs to the current node.
      */
     getUrl(node: TreeNode): string;
 }
@@ -175,9 +189,10 @@ export class TreeComponent {
     }
 
     /**
+     * Gets a link to a route that belongs to the specified node.
      *
      * @param node The current node.
-     * @returns
+     * @returns A link to a route.
      */
     public getRouterLink(node: TreeNode): unknown[] | undefined {
         return this.service().getRouterLink(node);
@@ -185,6 +200,7 @@ export class TreeComponent {
 
     /**
      * Returns an URL to a resource that belongs to the specified node.
+     *
      * @param node The current node.
      * @returns An URL to a resource that belongs to the current node.
      */
@@ -207,35 +223,7 @@ export class TreeComponent {
      * @param node - Optional tree node to toggle. When omitted, toggles selection state for the whole tree.
      */
     public toggleSelection(node?: TreeNode): void {
-        let tree: Tree;
-        if (node) {
-            tree = this.tree().map(item => {
-                if (node === item) {
-                    return { ...item, selected: !item.selected };
-                }
-
-                if (this.selectionMode() === 'single' && item.selected) {
-                    return { ...item, selected: false };
-                }
-
-                return item;
-            });
-        } else {
-            if (this.everySelected()) {
-                tree = this.tree().map(item => ({ ...item, selected: false }));
-            } else {
-                this.loadTree();
-                tree = this.tree().map(item => {
-                    if (item.selected) {
-                        return item;
-                    }
-
-                    return { ...item, selected: true };
-                });
-            }
-        }
-
-        this.update({ tree });
+        node ? this.toggleNode(node) : this.everySelected() ? this.deselectAll() : this.selectAll();
     }
 
     /**
@@ -264,7 +252,7 @@ export class TreeComponent {
      * - There are no thrown errors documented by this method; invalid indices simply resolve to `undefined`.
      */
     public highlight(arg?: TreeNode | number): void {
-        const tree = this.loadTree();
+        const { tree, loaded } = this.loadTree();
         let node = typeof arg === 'number' ? this.at(tree, arg) : arg;
         for (let i = 0, n = tree.length; i < n; i++) {
             const item = tree[i];
@@ -282,6 +270,41 @@ export class TreeComponent {
         }
 
         this.update({ tree });
+        loaded.forEach(node => this.service().loaded(node));
+    }
+
+    private toggleNode(node: TreeNode): void {
+        const tree = this.tree().map(item => {
+            if (node === item) {
+                return { ...item, selected: !item.selected };
+            }
+
+            if (this.selectionMode() === 'single' && item.selected) {
+                return { ...item, selected: false };
+            }
+
+            return item;
+        });
+
+        this.update({ tree });
+    }
+
+    private deselectAll(): void {
+        const tree = this.tree().map(item => ({ ...item, selected: false }));
+        this.update({ tree });
+    }
+
+    private selectAll(): void {
+        const { tree, loaded } = this.loadTree();
+        for (let i = 0, n = tree.length; i < n; i++) {
+            const node = tree[i];
+            if (!node.selected) {
+                tree[i] = { ...node, selected: true };
+            }
+        }
+
+        this.update({ tree });
+        loaded.forEach(node => this.service().loaded(node));
     }
 
     private ensureExpanded(tree: Tree, node: TreeNode): void {
@@ -337,22 +360,32 @@ export class TreeComponent {
             }
 
             if (!node.loaded) {
-                children.push(...this.service().loadChildren(node));
-            }
+                const result = this.service().loadChildren(node);
+                if (!result) {
+                    return { ...node, hasChildren: false, expanded: true, loaded: true };
+                }
 
-            return { ...item, expanded: true, loaded: true };
+                children.push(...result.children);
+                return { ...result.parent, expanded: true, loaded: true, hasChildren: result.children.length > 0 };
+            } else {
+                return { ...node, expanded: true, loaded: true };
+            }
         });
 
         tree.push(...children);
         this.update({ tree });
+        children.forEach(node => this.service().loaded(node));
     }
 
     private expandAll(): void {
-        this.update({ tree: this.loadTree(true) });
+        const { tree, loaded } = this.loadTree(true);
+        this.update({ tree });
+        loaded.forEach(item => this.service().loaded(item));
     }
 
-    private loadTree(expand: boolean = false): Tree {
+    private loadTree(expand: boolean = false): { tree: Tree; loaded: TreeNode[] } {
         const tree = [...this.tree()];
+        const loaded: TreeNode[] = [];
         for (let i = 0; i < tree.length; i++) {
             const node = tree[i];
             if (node.isLeaf || !node.hasChildren) {
@@ -360,14 +393,20 @@ export class TreeComponent {
             }
 
             if (!node.loaded) {
-                tree.push(...this.service().loadChildren(node));
-                tree[i] = { ...node, loaded: true, expanded: expand };
+                const result = this.service().loadChildren(node);
+                if (!result) {
+                    tree[i] = { ...node, loaded: true, expanded: expand, hasChildren: false };
+                } else {
+                    tree.push(...result.children);
+                    loaded.push(...result.children);
+                    tree[i] = { ...node, loaded: true, expanded: expand, hasChildren: result.children.length > 0 };
+                }
             } else if (expand && !node.expanded) {
                 tree[i] = { ...node, expanded: expand };
             }
         }
 
-        return tree;
+        return { tree, loaded };
     }
 
     private collapseNode(node: TreeNode): void {

@@ -20,6 +20,7 @@ COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-c
 COPY --from=build /usr/src/app/projects/aas-package/dist/ node_modules/aas-package/dist/
 COPY --from=build /usr/src/app/projects/aas-package/package.json node_modules/aas-package/package.json
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ wwwroot/
+COPY --from=build /usr/src/app/projects/aas-portal/src/config.js wwwroot/config.js
 COPY --from=build /usr/src/app/welcome/ wwwroot/assets/welcome/
 ENV AAS_NODE_PORT=80
 ENV ENDPOINTS=["\"file:///endpoints/samples?name=Samples\""]
