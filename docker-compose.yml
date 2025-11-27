@@ -40,25 +40,6 @@ services:
     ports:
       - 3306:3306
 
-  aasportal-cloud:
-    image: nextcloud
-    container_name: aasportal-cloud
-    restart: always
-    depends_on:
-      - aasportal-cloud-db
-    volumes:
-      - aasportal-cloud:/var/www/html
-    environment:
-      - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_HOST=aasportal-cloud-db
-      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
-      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
-      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
-    ports:
-      - 8080:80
-
   aas-server:
     container_name: aas-server
     build:
@@ -110,7 +91,12 @@ services:
       args:
         - NODE_IMAGE=${NODE_IMAGE}
         - NGINX_IMAGE=${NGINX_IMAGE}
+    depends_on:
+      aas-node:
+        condition: service_started
     restart: always
+    environment:
+      - BASE_HREF=${BASE_HREF:-/}
     ports:
       - 80:80
 
