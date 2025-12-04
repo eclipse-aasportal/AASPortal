@@ -26,9 +26,9 @@
         "bcryptjs": "^3.0.3",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
-        "express": "^5.1.0",
-        "form-data": "^4.0.4",
-        "jsonwebtoken": "^9.0.2",
+        "express": "^5.2.1",
+        "form-data": "^4.0.5",
+        "jsonwebtoken": "^9.0.3",
         "jszip": "^3.10.1",
         "jwks-rsa": "^3.2.0",
         "lodash-es": "^4.17.21",
@@ -40,7 +40,6 @@
         "tslib": "^2.8.1",
         "tsoa": "^6.6.0",
         "tsyringe": "^4.10.0",
-        "uuid": "^13.0.0",
         "ws": "^8.18.3",
         "xpath": "^0.0.34"
     }

@@ -17,16 +17,5 @@
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/lib/**/*.ts",
         "format": "eslint src/lib/**/*.ts --fix"
-    },
-    "dependencies": {
-        "@aas-core-works/aas-core3.0-typescript": "^1.0.3",
-        "@xmldom/xmldom": "^0.8.10",
-        "jszip": "^3.10.1",
-        "lodash-es": "^4.17.21",
-        "reflect-metadata": "^0.2.2",
-        "tslib": "^2.8.1",
-        "tsyringe": "^4.10.0",
-        "uuid": "^13.0.0",
-        "xpath": "^0.0.34"
     }
 }
