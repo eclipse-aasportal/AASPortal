@@ -13,7 +13,7 @@ import { AASDocument } from 'aas-core';
 
 import { DataSheet } from '../../components/data-sheet/data-sheet';
 import { ChildComponent } from '../../components/child-component';
-import { TechnicalDataData, TechnicalDataState } from './technical-data.state';
+import { TechnicalDataState } from './technical-data.state';
 
 /**
  * TechnicalData component for displaying technical data sheets based on the
@@ -31,7 +31,7 @@ import { TechnicalDataData, TechnicalDataState } from './technical-data.state';
     styleUrl: './technical-data.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TechnicalData extends ChildComponent<TechnicalDataState> {
+export class TechnicalData extends ChildComponent {
     public constructor() {
         super();
 
@@ -51,7 +51,7 @@ export class TechnicalData extends ChildComponent<TechnicalDataState> {
     /**
      * State manager for technical data, required input.
      */
-    public override state = input.required<TechnicalDataState>();
+    public state = input.required<TechnicalDataState>();
 
     /**
      * Input for the current AASDocument.

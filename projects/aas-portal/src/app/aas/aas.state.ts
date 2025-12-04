@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable, signal } from '@angular/core';
-import { AASTreeState, LiveState } from 'aas-lib';
+import { LiveState } from 'aas-lib';
 import { aas, AASDocument, equalArray } from 'aas-core';
 
 export type AASData = {
@@ -45,9 +45,6 @@ export class AASState {
 
     /** The selected elements. */
     public readonly selectedElements = this.selectedElements$.asReadonly();
-
-    /** The state handler of the AASTree child component. */
-    public readonly treeState = new AASTreeState();
 
     public update(newState: Partial<AASData>): void {
         if (newState.document !== undefined) {

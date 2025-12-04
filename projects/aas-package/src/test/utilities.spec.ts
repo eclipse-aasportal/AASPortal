@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { describe, expect, beforeEach, it } from 'vitest';
 import { decodeBase64Url, encodeBase64Url } from '../lib/utilities.js';
 
 describe('utilities', () => {

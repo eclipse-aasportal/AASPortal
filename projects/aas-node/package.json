@@ -10,8 +10,8 @@
     "scripts": {
         "tsoa": "tsoa spec-and-routes -c tsoa.config.json",
         "serve": "rimraf build && npm run tsoa && tsc -p tsconfig.app.json",
-        "test": "node --experimental-vm-modules --experimental-sqlite  --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts",
-        "test:watch": "node --experimental-vm-modules --experimental-sqlite --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch --coverage=false",
+        "test": "vitest --run",
+        "watch": "vitest --watch --coverage=false",
         "build": "rimraf dist && npm run tsoa && node esbuild.prod.js",
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",
@@ -48,5 +48,8 @@
         "webdav": "^5.8.0",
         "ws": "^8.18.3",
         "xpath": "^0.0.34"
+    },
+    "devDependencies": {
+        "@vitest/coverage-v8": "^3.2.4"
     }
 }

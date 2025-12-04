@@ -22,7 +22,6 @@ import { TestWebSocketFactoryService } from '../../assets/test-web-socket-factor
 import { WINDOW } from '../../../lib/services/window.service';
 import { AASTreeApi } from '../../../lib/components/aas-tree/aas-tree-api';
 import { createSpyObj, FakeLoader } from '../../mocks';
-import { AASTreeState } from '../../../lib/components/aas-tree/aas-tree.state';
 import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 
 describe('AASTreeComponent', () => {
@@ -40,7 +39,6 @@ describe('AASTreeComponent', () => {
         await TestBed.configureTestingModule({
             imports: [AASTreeComponent],
             providers: [
-                AASTreeState,
                 {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error', 'info', 'log']),
@@ -78,7 +76,6 @@ describe('AASTreeComponent', () => {
         fixture = TestBed.createComponent(AASTreeComponent);
         component = fixture.componentInstance;
         fixture.componentRef.setInput('document', document);
-        fixture.componentRef.setInput('state', TestBed.inject(AASTreeState));
         fixture.detectChanges();
     });
 
@@ -94,18 +91,6 @@ describe('AASTreeComponent', () => {
         expect(component.document()).toEqual(document);
     });
 
-    it('indicates if document is online-ready', () => {
-        expect(component.onlineReady()).toEqual(document.onlineReady ? document.onlineReady : false);
-    });
-
-    it('indicates if document is read-only', () => {
-        expect(component.readonly()).toEqual(document.readonly);
-    });
-
-    it('indicates if the document is modified', () => {
-        expect(component.modified()).toEqual(document.modified ? document.modified : false);
-    });
-
     it('shows the current live state', () => {
         expect(component.live()).toEqual('offline');
     });
@@ -118,17 +103,17 @@ describe('AASTreeComponent', () => {
         const nodes = component.nodes();
         expect(nodes).toBeTruthy();
         expect(nodes.length).toEqual(5);
-        expect(nodes[0].element.idShort).toEqual('ExampleMotor');
-        expect(nodes[0].expanded).toBe(true);
-        expect(nodes[1].element.idShort).toEqual('Identification');
-        expect(nodes[2].element.idShort).toEqual('TechnicalData');
-        expect(nodes[3].element.idShort).toEqual('OperationalData');
-        expect(nodes[4].element.idShort).toEqual('Documentation');
+        expect(nodes[0].name).toEqual('ExampleMotor');
+        expect(component.isExpanded(nodes[0])).toBe(true);
+        expect(nodes[1].name).toEqual('Identification');
+        expect(nodes[2].name).toEqual('TechnicalData');
+        expect(nodes[3].name).toEqual('Documentation');
+        expect(nodes[4].name).toEqual('OperationalData');
     });
 
     describe('toggleSelection', () => {
         it('toggle selection of all rows', () => {
-            component.toggleSelections();
+            component.toggleSelection();
             expect(component.nodes().every(value => value.selected)).toBe(true);
         });
     });
@@ -137,19 +122,15 @@ describe('AASTreeComponent', () => {
         it('collapse root element', () => {
             component.collapse(component.nodes()[0]);
             expect(component.nodes().length).toEqual(1);
-            expect(component.nodes()[0].element.idShort).toEqual('ExampleMotor');
-            expect(component.nodes()[0].expanded).toBe(false);
+            expect(component.nodes()[0].id.idShort).toEqual('ExampleMotor');
+            expect(component.isExpanded(component.nodes()[0])).toBe(false);
         });
 
         it('collapse to initial view', () => {
             component.collapse();
-            expect(component.nodes().length).toEqual(5);
-            expect(component.nodes()[0].element.idShort).toEqual('ExampleMotor');
-            expect(component.nodes()[0].expanded).toBe(true);
-            expect(component.nodes()[1].element.idShort).toEqual('Identification');
-            expect(component.nodes()[2].element.idShort).toEqual('TechnicalData');
-            expect(component.nodes()[3].element.idShort).toEqual('OperationalData');
-            expect(component.nodes()[4].element.idShort).toEqual('Documentation');
+            expect(component.nodes().length).toEqual(1);
+            expect(component.nodes()[0].id.idShort).toEqual('ExampleMotor');
+            expect(component.isExpanded(component.nodes()[0])).toBe(false);
         });
     });
 
@@ -157,8 +138,8 @@ describe('AASTreeComponent', () => {
         it('expand submodel "Identification"', () => {
             component.expand(component.nodes()[1]);
             expect(component.nodes().length).toEqual(9);
-            expect(component.nodes()[1].element.idShort).toEqual('Identification');
-            expect(component.nodes()[0].expanded).toBe(true);
+            expect(component.nodes()[1].id.idShort).toEqual('Identification');
+            expect(component.isExpanded(component.nodes()[0])).toBe(true);
         });
 
         it('expands all', () => {
@@ -171,53 +152,58 @@ describe('AASTreeComponent', () => {
 
     describe('search text "max"', () => {
         it('the search text must be at least three characters long', () => {
-            fixture.componentRef.setInput('searchExpression', 'z');
+            fixture.componentRef.setInput('searchExpression', 'm');
             fixture.detectChanges();
-            fixture.componentRef.setInput('searchExpression', 'zy');
+            fixture.componentRef.setInput('searchExpression', 'ma');
             fixture.detectChanges();
             fixture.componentRef.setInput('searchExpression', 'max');
             fixture.detectChanges();
-            expect(component.matchNode()?.name).toEqual('MaxRotationSpeed');
+            expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
         });
 
-        it('finds the first occurrence of "max" at row 7', () => {
+        it('finds the next occurrences of "max"', () => {
             fixture.componentRef.setInput('searchExpression', 'max');
             fixture.detectChanges();
-            expect(component.matchIndex()).toEqual(7);
-        });
-
-        it('finds the next occurrence of "max" at row 8', () => {
-            fixture.componentRef.setInput('searchExpression', 'max');
-            fixture.detectChanges();
+            expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
             component.findNext();
-            expect(component.matchIndex()).toEqual(8);
+            fixture.detectChanges();
+            expect(component.highlighted()?.name).toEqual('MaxTorque');
+            component.findNext();
+            fixture.detectChanges();
+            expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
         });
 
-        it('finds the previous occurrence of "max" at row 8', () => {
+        it('finds the previous occurrences of "max"', () => {
             fixture.componentRef.setInput('searchExpression', 'max');
             fixture.detectChanges();
+            expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
             component.findPrevious();
-            expect(component.matchIndex()).toEqual(8);
+            fixture.detectChanges();
+            expect(component.highlighted()?.name).toEqual('MaxTorque');
+            component.findPrevious();
+            fixture.detectChanges();
+            expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
         });
+
     });
 
     describe('search pattern', () => {
         it('finds the first occurrence of "#prop:max" at row 7', () => {
             fixture.componentRef.setInput('searchExpression', '#prop:max');
             fixture.detectChanges();
-            expect(component.matchIndex()).toEqual(7);
+            expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
         });
 
         it('finds the first occurrence of "#prop:MaxTorque" at row 8', () => {
             fixture.componentRef.setInput('searchExpression', '#prop:MaxTorque');
             fixture.detectChanges();
-            expect(component.matchIndex()).toEqual(8);
+            expect(component.highlighted()?.name).toEqual('MaxTorque');
         });
 
         it('finds the first occurrence of "#prop:serialnumber=P12345678I40" at row 5', () => {
             fixture.componentRef.setInput('searchExpression', '#prop:serialnumber=P12345678I40');
             fixture.detectChanges();
-            expect(component.matchIndex()).toEqual(5);
+            expect(component.highlighted()?.name).toEqual('SerialNumber');
         });
     });
 });

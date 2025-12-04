@@ -10,6 +10,8 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import jszip from 'jszip';
+import { describe, expect, beforeEach, it } from 'vitest';
+import { fileURLToPath } from 'url';
 import { AasxFileBuilder } from '../lib/aasx-file-builder.js';
 import { AasxFile } from '../lib/aasx-file.js';
 
@@ -49,7 +51,7 @@ describe('AasxFileBuilder', () => {
             await fs.promises.unlink(zipFile);
         }
 
-        builder = new AasxPackageBuilder('src/test/assets/');
+        builder = new AasxPackageBuilder(fileURLToPath(new URL('./assets/', import.meta.url)));
     });
 
     describe('build', () => {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import { getUserNameFromEMail, isUserAuthorized } from '../lib/authentication.js';
 
 describe('authentication', () => {

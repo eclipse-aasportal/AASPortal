@@ -7,14 +7,14 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { resolve } from 'path';
 
-import { createSpyObj } from './create-spy-obj.js';
 import { Variable } from '../app/variable.js';
 import { createDatabase } from './utilities.js';
 import { SubmodelRepository } from '../app/submodel-repository.js';
 import { HttpCache } from '../app/http-cache.js';
+import { createSpyObj } from './mocks.js';
 
 describe('SubmodelRepository', () => {
     let variable: Variable;

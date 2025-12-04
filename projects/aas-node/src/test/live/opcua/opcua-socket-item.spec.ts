@@ -6,17 +6,17 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ClientMonitoredItem } from 'node-opcua';
 import { OpcuaSocketItem } from '../../../app/live/opcua/opcua-socket-item.js';
 import { Logger } from '../../../app/logging/logger.js';
-import { createSpyObj } from 'aas-jest';
 import { SocketClient } from '../../../app/live/socket-client.js';
+import { createSpyObj } from '../../mocks.js';
 
 describe('OpcuaSocketItem', () => {
     let item: OpcuaSocketItem;
-    let logger: jest.Mocked<Logger>;
-    let client: jest.Mocked<SocketClient>;
+    let logger: Mocked<Logger>;
+    let client: Mocked<SocketClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);

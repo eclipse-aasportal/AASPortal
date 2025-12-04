@@ -334,11 +334,9 @@ export class EditComponent implements OnInit, OnDestroy {
     }
 
     public findNext(): void {
-        this.aasTree()?.findNext();
     }
 
     public findPrevious(): void {
-        this.aasTree()?.findPrevious();
     }
 
     private downloadSubmodel(submodel: aas.Submodel) {

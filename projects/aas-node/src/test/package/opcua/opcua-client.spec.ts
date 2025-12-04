@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { CallMethodRequestLike, CallMethodResult, ClientSession, OPCUAClient, StatusCodes, Variant } from 'node-opcua';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../../mocks.js';
 import { LiveRequest, aas } from 'aas-core';
 import { OpcuaClient } from '../../../app/client/opcua/opcua-client.js';
 import { Logger } from '../../../app/logging/logger.js';
@@ -24,7 +24,7 @@ type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodRes
 
 describe('OpcuaClient', () => {
     let server: OpcuaClient;
-    let logger: jest.Mocked<Logger>;
+    let logger: Mocked<Logger>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -36,7 +36,7 @@ describe('OpcuaClient', () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     it('should be created', () => {
@@ -44,8 +44,8 @@ describe('OpcuaClient', () => {
     });
 
     describe('testAsync', () => {
-        let client: jest.Mocked<OPCUAClient>;
-        let session: jest.Mocked<ClientSession>;
+        let client: Mocked<OPCUAClient>;
+        let session: Mocked<ClientSession>;
 
         beforeEach(() => {
             client = createSpyObj<OPCUAClient>(['connect', 'createSession', 'closeSession', 'disconnect']);
@@ -55,7 +55,7 @@ describe('OpcuaClient', () => {
         it('returns for a valid URL to an OPC-UA server', async () => {
             client.connect.mockImplementation(() => new Promise<void>(resolve => resolve()));
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
-            jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
+            vitest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
             await expect(server.test()).resolves.toBeUndefined();
         });
 
@@ -65,14 +65,14 @@ describe('OpcuaClient', () => {
             );
 
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
-            jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
+            vitest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
             await expect(server.test()).rejects.toThrow();
         });
     });
 
     describe('openAsync/closeAsync', () => {
-        let client: jest.Mocked<OPCUAClient>;
-        let session: jest.Mocked<ClientSession>;
+        let client: Mocked<OPCUAClient>;
+        let session: Mocked<ClientSession>;
 
         beforeEach(() => {
             client = createSpyObj<OPCUAClient>(['connect', 'createSession', 'closeSession', 'disconnect']);
@@ -82,7 +82,7 @@ describe('OpcuaClient', () => {
         it('can open/close a connection to an OPC-UA server', async () => {
             client.connect.mockImplementation(() => new Promise<void>(resolve => resolve()));
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
-            jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
+            vitest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
             await expect(server.open()).resolves.toBeUndefined();
             expect(server.isOpen).toBeTruthy();
             await expect(server.close()).resolves.toBeUndefined();
@@ -91,15 +91,15 @@ describe('OpcuaClient', () => {
     });
 
     describe('getSession', () => {
-        let client: jest.Mocked<OPCUAClient>;
-        let session: jest.Mocked<ClientSession>;
+        let client: Mocked<OPCUAClient>;
+        let session: Mocked<ClientSession>;
 
         beforeEach(() => {
             client = createSpyObj<OPCUAClient>(['connect', 'createSession', 'closeSession', 'disconnect']);
             session = createSpyObj<ClientSession>([]);
             client.connect.mockImplementation(() => new Promise<void>(resolve => resolve()));
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
-            jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
+            vitest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
         });
 
         it('returns the current session', async () => {
@@ -149,15 +149,15 @@ describe('OpcuaClient', () => {
     });
 
     describe('invoke', () => {
-        let client: jest.Mocked<OPCUAClient>;
-        let session: jest.Mocked<ClientSession>;
+        let client: Mocked<OPCUAClient>;
+        let session: Mocked<ClientSession>;
 
         beforeEach(() => {
             client = createSpyObj<OPCUAClient>(['connect', 'createSession', 'closeSession', 'disconnect']);
             session = createSpyObj<ClientSession>(['call']);
             client.connect.mockImplementation(() => new Promise<void>(resolve => resolve()));
             client.createSession.mockImplementation(() => new Promise<ClientSession>(resolve => resolve(session)));
-            jest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
+            vitest.spyOn(OPCUAClient, 'create').mockReturnValue(client);
         });
 
         it('invokes an operation', async () => {

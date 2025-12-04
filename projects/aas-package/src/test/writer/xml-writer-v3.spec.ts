@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect } from '@jest/globals';
+import { describe, beforeEach, it, expect } from 'vitest';
 import { aasEnvironment } from '../assets/aas-environment.js';
 import { XmlWriterV3 } from '../../lib/writer/xml-writer-v3.js';
 

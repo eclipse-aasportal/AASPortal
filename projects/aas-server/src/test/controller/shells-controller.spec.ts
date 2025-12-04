@@ -7,32 +7,32 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import os from 'os';
 import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import multer from 'multer';
-import { resolve } from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { aas, jsonization, toJsonValue } from 'aas-core';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
-import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { ShellRepository } from '../../app/shell-repository.js';
+import { createSpyObj } from '../mocks.js';
 
 describe('ShellsController', () => {
     let app: Express;
     let logger: Logger;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
-    let repository: jest.Mocked<ShellRepository>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
+    let repository: Mocked<ShellRepository>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -107,7 +107,7 @@ describe('ShellsController', () => {
     });
 
     it('GET: /shells/{id}/asset-information/thumbnail', async () => {
-        const file = resolve('./src/test/assets/MotorI40.JPG');
+        const file = fileURLToPath(new URL('../assets/MotorI40.JPG', import.meta.url));
         repository.getThumbnail.mockResolvedValue({
             filename: 'MotorI40.JPG',
             value: 'MotorI40.JPG',
@@ -125,7 +125,7 @@ describe('ShellsController', () => {
     });
 
     it('PUT: /shells/{id}/asset-information/thumbnail', async () => {
-        const file = resolve('./src/test/assets/thumbnail.png');
+        const file = fileURLToPath(new URL('../assets/thumbnail.png', import.meta.url));
         repository.updateThumbnail.mockResolvedValue();
         const response = await request(app)
             .put('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw/asset-information/thumbnail')

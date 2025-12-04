@@ -23,7 +23,7 @@ import {
 
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
 import { isLangString, referenceToString } from '../../utilities';
-import { BrowserData, BrowserElement, BrowserElementRef, BrowserProperty, BrowserState } from './browser.state';
+import { BrowserElement, BrowserElementRef, BrowserProperty, BrowserState } from './browser.state';
 import { ChildComponent } from '../child-component';
 import { API_URL } from '../../api-url';
 
@@ -52,7 +52,7 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
  * It allows users to navigate through the AAS environment, view properties of elements,
  * and explore related concept descriptions and child elements.
  */
-export class BrowserComponent extends ChildComponent<BrowserState> {
+export class BrowserComponent extends ChildComponent {
     private readonly apiUrl = inject(API_URL);
 
     public constructor() {
@@ -100,7 +100,7 @@ export class BrowserComponent extends ChildComponent<BrowserState> {
      * current element being displayed, the navigation path, and the overall AAS environment.
      * This input is required for the component to function correctly.
      */
-    public override readonly state = input.required<BrowserState>();
+    public readonly state = input.required<BrowserState>();
 
     /**
      * Returns the current navigation path as an array of `BrowserElement` objects.

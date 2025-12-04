@@ -28,8 +28,8 @@ export class AuthController extends Controller {
      */
     @Post('login')
     @OperationId('login')
-    public login(@Body() credentials: Credentials): Promise<AuthResult> {
-        return this.auth.login(credentials);
+    public async login(@Body() credentials: Credentials): Promise<AuthResult> {
+        return await this.auth.login(credentials);
     }
 
     /**
@@ -39,8 +39,8 @@ export class AuthController extends Controller {
      */
     @Post('register')
     @OperationId('register')
-    public register(@Body() profile: UserProfile): Promise<AuthResult> {
-        return this.auth.registerUser(profile);
+    public async register(@Body() profile: UserProfile): Promise<AuthResult> {
+        return await this.auth.registerUser(profile);
     }
 
     /**
@@ -51,8 +51,8 @@ export class AuthController extends Controller {
     @Get('users/{id}')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getProfile')
-    public getProfile(@Path() id: string): Promise<UserProfile> {
-        return this.auth.getProfile(decodeBase64Url(id));
+    public async getProfile(@Path() id: string): Promise<UserProfile> {
+        return await this.auth.getProfile(decodeBase64Url(id));
     }
 
     /**
@@ -64,8 +64,8 @@ export class AuthController extends Controller {
     @Put('users/{id}')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('updateProfile')
-    public updateProfile(@Path() id: string, @Body() profile: UserProfile): Promise<AuthResult> {
-        return this.auth.updateProfile(decodeBase64Url(id), profile);
+    public async updateProfile(@Path() id: string, @Body() profile: UserProfile): Promise<AuthResult> {
+        return await this.auth.updateProfile(decodeBase64Url(id), profile);
     }
 
     /**
@@ -75,8 +75,8 @@ export class AuthController extends Controller {
     @Hidden()
     @Delete('users/{id}/reset')
     @OperationId('resetPassword')
-    public resetPassword(@Path() id: string): Promise<void> {
-        return this.auth.resetPassword(decodeBase64Url(id));
+    public async resetPassword(@Path() id: string): Promise<void> {
+        await this.auth.resetPassword(decodeBase64Url(id));
     }
 
     /**
@@ -86,8 +86,8 @@ export class AuthController extends Controller {
     @Delete('users/{id}')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('deleteUser')
-    public deleteUser(@Path() id: string): Promise<void> {
-        return this.auth.deleteUserAsync(decodeBase64Url(id));
+    public async deleteUser(@Path() id: string): Promise<void> {
+        await this.auth.deleteUserAsync(decodeBase64Url(id));
     }
 
     /**
@@ -99,8 +99,8 @@ export class AuthController extends Controller {
     @Get('users/{id}/cookies/{name}')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getCookie')
-    public getCookie(@Path() id: string, @Path() name: string): Promise<Cookie | undefined> {
-        return this.auth.getCookie(decodeBase64Url(id), name);
+    public async getCookie(@Path() id: string, @Path() name: string): Promise<Cookie | undefined> {
+        return await this.auth.getCookie(decodeBase64Url(id), name);
     }
 
     /**
@@ -111,8 +111,8 @@ export class AuthController extends Controller {
     @Get('users/{id}/cookies')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getCookies')
-    public getCookies(@Path() id: string): Promise<Cookie[]> {
-        return this.auth.getCookies(decodeBase64Url(id));
+    public async getCookies(@Path() id: string): Promise<Cookie[]> {
+        return await this.auth.getCookies(decodeBase64Url(id));
     }
 
     /**
@@ -124,8 +124,8 @@ export class AuthController extends Controller {
     @Post('users/{id}/cookies/{name}')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('setCookie')
-    public setCookie(@Path() id: string, @Path() name: string, @Body() cookie: Cookie): Promise<void> {
-        return this.auth.setCookie(decodeBase64Url(id), name, cookie.data);
+    public async setCookie(@Path() id: string, @Path() name: string, @Body() cookie: Cookie): Promise<void> {
+        await this.auth.setCookie(decodeBase64Url(id), name, cookie.data);
     }
 
     /**
@@ -136,7 +136,7 @@ export class AuthController extends Controller {
     @Delete('users/{id}/cookies/{name}')
     @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('deleteCookie')
-    public deleteCookie(@Path() id: string, @Path() name: string): Promise<void> {
-        return this.auth.deleteCookie(decodeBase64Url(id), name);
+    public async deleteCookie(@Path() id: string, @Path() name: string): Promise<void> {
+        await this.auth.deleteCookie(decodeBase64Url(id), name);
     }
 }

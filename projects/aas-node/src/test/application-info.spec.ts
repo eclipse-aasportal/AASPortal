@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { AppInfo } from 'aas-core';
-import { createSpyObj } from 'aas-jest';
 import { ApplicationInfo } from '../app/application-info.js';
 import { Logger } from '../app/logging/logger.js';
 import { Variable } from '../app/variable.js';
+import { createSpyObj } from './mocks.js';
 
 const appInfo = {
     name: 'aas-portal-project',
@@ -34,8 +34,8 @@ const appInfo = {
 };
 
 describe('Application Info service', () => {
-    let logger: jest.Mocked<Logger>;
-    let variable: jest.Mocked<Variable>;
+    let logger: Mocked<Logger>;
+    let variable: Mocked<Variable>;
     let applicationInfo: ApplicationInfo;
 
     beforeEach(() => {

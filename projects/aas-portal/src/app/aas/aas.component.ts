@@ -93,8 +93,6 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public readonly aasTree = viewChild<AASTreeComponent>('aasTree');
 
-    public readonly treeState = this.state.treeState;
-
     public readonly address = computed(() => this.state.document()?.address ?? '-');
 
     public readonly idShort = computed(() => this.state.document()?.idShort ?? '-');

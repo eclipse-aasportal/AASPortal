@@ -6,22 +6,22 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { Connection } from 'mysql2/promise';
-import { createSpyObj } from 'aas-jest';
 import { AASEndpoint } from 'aas-core';
 import { MySqlIndex } from '../../../app/index/mysql/mysql-index.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { Variable } from '../../../app/variable.js';
 import { KeywordDirectory } from '../../../app/index/keyword-directory.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from '../../../app/index/mysql/mysql-types.js';
+import { createSpyObj } from '../../mocks.js';
 
 describe('MySqlIndex', () => {
     let index: MySqlIndex;
-    let logger: jest.Mocked<Logger>;
-    let variable: jest.Mocked<Variable>;
-    let connection: jest.Mocked<Connection>;
-    let keywords: jest.Mocked<KeywordDirectory>;
+    let logger: Mocked<Logger>;
+    let variable: Mocked<Variable>;
+    let connection: Mocked<Connection>;
+    let keywords: Mocked<KeywordDirectory>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'info']);

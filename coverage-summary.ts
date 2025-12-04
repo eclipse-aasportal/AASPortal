@@ -10,7 +10,7 @@ import { readFileSync } from 'fs';
 
 main();
 
-function main() {
+function main(): void {
     const aasCoreSummary = read('./reports/aas-core/coverage-summary.json');
     const aasNodeSummary = read('./reports/aas-node/coverage-summary.json');
     const aasLibSummary = read('./reports/aas-lib/coverage-summary.json');

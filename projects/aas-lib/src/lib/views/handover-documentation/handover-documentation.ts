@@ -1,4 +1,4 @@
-import { NgbModal, NgbSlide } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -7,27 +7,13 @@ import { NgbModal, NgbSlide } from '@ng-bootstrap/ng-bootstrap';
  *
  *****************************************************************************/
 
-import {
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    input,
-    untracked,
-    ViewChild,
-} from '@angular/core';
-import { TranslateDirective } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 
 import { ChildComponent } from '../../components/child-component';
-import {
-    DocumentationItem,
-    HandoverDocumentationData,
-    HandoverDocumentationState,
-} from './handover-documentation.state';
+import { DocumentationItem, HandoverDocumentationState } from './handover-documentation.state';
 import { DocumentPopupComponent } from './document-popup/document-popup.component';
 
 /**
@@ -41,7 +27,7 @@ import { DocumentPopupComponent } from './document-popup/document-popup.componen
     styleUrl: './handover-documentation.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentation extends ChildComponent<HandoverDocumentationState> {
+export class HandoverDocumentation extends ChildComponent {
     clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
@@ -81,7 +67,7 @@ export class HandoverDocumentation extends ChildComponent<HandoverDocumentationS
     /**
      * The state of the handover documentation component.
      */
-    public override state = input.required<HandoverDocumentationState>();
+    public state = input.required<HandoverDocumentationState>();
 
     /**
      * The current active AAS document.

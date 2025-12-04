@@ -9,7 +9,7 @@
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { LeafView2 } from '../leaf-view';
+import { LeafView } from '../leaf-view';
 import { encodeBase64Url } from '../../utilities';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
@@ -26,7 +26,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './hierarchical-structure-view.html',
     styleUrl: './hierarchical-structure-view.scss',
 })
-export class HierarchicalStructureView extends LeafView2 implements OnDestroy {
+export class HierarchicalStructureView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
 

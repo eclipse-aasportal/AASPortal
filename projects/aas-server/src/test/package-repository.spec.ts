@@ -8,17 +8,18 @@
 
 import 'reflect-metadata';
 import { resolve } from 'path';
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { fileURLToPath } from 'url';
 
 import { PackageRepository } from '../app/package-repository.js';
-import { createSpyObj } from './create-spy-obj.js';
 import { Variable } from '../app/variable.js';
 import { Logger } from '../app/logging/logger.js';
 import { createDatabase } from './utilities.js';
 import { HttpCache } from '../app/http-cache.js';
+import { createSpyObj } from './mocks.js';
 
 describe('PackageRepository', () => {
-    let logger: jest.Mocked<Logger>;
+    let logger: Mocked<Logger>;
     let variable: Variable;
     let cache: HttpCache;
 
@@ -36,7 +37,7 @@ describe('PackageRepository', () => {
         it('adds an aasx file', async () => {
             const db = await createDatabase();
             const repository = new PackageRepository(logger, variable, db, cache);
-            const path = resolve('./src/test/assets/mvp-dpp-1.0.0.aasx');
+            const path = fileURLToPath(new URL('./assets/mvp-dpp-1.0.0.aasx', import.meta.url));
             const packageId = await repository.add(path, 'mvp-dpp-1.0.0.aasx');
             expect(packageId).toBeTruthy();
         });
@@ -54,7 +55,7 @@ describe('PackageRepository', () => {
         it('updates an aasx file', async () => {
             const db = await createDatabase();
             const repository = new PackageRepository(logger, variable, db, cache);
-            const path = resolve('./src/test/assets/example-motor.aasx');
+            const path = fileURLToPath(new URL('./assets/example-motor.aasx', import.meta.url));
             await expect(
                 repository.update('fcc2b977-fb48-463e-b45f-071114cea173', path, 'example-motor.aasx'),
             ).resolves.toBe(void 0);

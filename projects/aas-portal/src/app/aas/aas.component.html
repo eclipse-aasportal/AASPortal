@@ -96,8 +96,8 @@
                         [live]="live()"
                         [searchExpression]="searchExpression()"
                         [document]="document()"
-                        (selected)="setSelectedElements($event)"
-                        [state]="treeState"
+                        [allowSelection]="true"
+                        [enableValue]="true"
                     >
                     </fhg-aas-tree>
                 </ng-template>
@@ -156,7 +156,7 @@
     <div class="input-group flex-grow-1 me-2 my-1">
         <div class="input-group-text"><i class="bi bi-search"></i></div>
         <input
-            type="text"
+            type="search"
             class="form-control"
             [ngModel]="searchExpression()"
             (ngModelChange)="setSearchExpression($event)"

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked, vitest } from 'vitest';
 import { ApplicationError, UserProfile } from 'aas-core';
 
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -15,14 +15,14 @@ import { ERRORS } from '../../app/errors.js';
 import { Mailer } from '../../app/mailer.js';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
 
 describe('AuthService', function () {
     let mailer: Mailer;
     let auth: AuthService;
-    let userStorage: jest.Mocked<UserStorage>;
-    let variable: jest.Mocked<Variable>;
+    let userStorage: Mocked<UserStorage>;
+    let variable: Mocked<Variable>;
     let johnDoeData: UserData;
 
     beforeEach(function () {
@@ -175,7 +175,7 @@ describe('AuthService', function () {
     describe('resetPasswordAsync', function () {
         it('sends a new password via e-mail', async function () {
             userStorage.read.mockReturnValue(new Promise<UserData>(result => result(johnDoeData)));
-            mailer.sendNewPassword = jest.fn();
+            mailer.sendNewPassword = vitest.fn();
             await expect(auth.resetPassword('john.doe@email.com')).resolves.toBeUndefined();
             expect(mailer.sendNewPassword).toHaveBeenCalled();
         });

@@ -6,16 +6,18 @@
  *
  *****************************************************************************/
 
+import { describe, beforeEach, it, expect } from 'vitest';
+import { fileURLToPath } from 'node:url';
 import { readFile } from 'fs/promises';
 import { JsonReaderV2 } from '../../lib/reader/json-reader-v2.js';
-import { describe, beforeEach, it, expect } from '@jest/globals';
 
 describe('JsonReaderV2', function () {
     let reader: JsonReaderV2;
     let json: string;
 
     beforeEach(async function () {
-        json = (await readFile('./src/test/assets/aas-example-v2.json')).toString();
+        const file = fileURLToPath(new URL('../assets/aas-example-v2.json', import.meta.url));
+        json = (await readFile(file)).toString();
         reader = new JsonReaderV2(json);
     });
 

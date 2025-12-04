@@ -1,6 +1,6 @@
 {
     "name": "aas-portal-project",
-    "version": "3.5-development.2",
+    "version": "3.5-development.5",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
@@ -146,6 +146,7 @@
         "ts-node": "^10.9.2",
         "typedoc": "^0.28.14",
         "typescript": "^5.8.3",
-        "typescript-eslint": "8.46.3"
+        "typescript-eslint": "8.46.3",
+        "vitest": "^3.2.4"
     }
 }

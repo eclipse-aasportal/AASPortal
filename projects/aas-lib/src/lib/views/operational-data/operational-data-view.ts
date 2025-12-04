@@ -6,6 +6,12 @@
  *
  *****************************************************************************/
 
+import { RouterModule } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
+import { EMPTY, Observable } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -13,16 +19,13 @@ import {
     effect,
     inject,
     OnDestroy,
-    OnInit,
     Signal,
     signal,
     TemplateRef,
     viewChild,
     WritableSignal,
 } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { WebSocketSubject } from 'rxjs/webSocket';
+
 import {
     aas,
     AASDocument,
@@ -39,17 +42,13 @@ import {
     WebSocketData,
 } from 'aas-core';
 
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
-import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { EMPTY, Observable } from 'rxjs';
 import { getDisplayName, getUrl } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { VIEW_ROUTES } from '../../views/views-routes';
 import { LeafView } from '../leaf-view';
 import { OperationalDataViewState } from './operational-data-view.state';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 export type GroupItem = {
     idShort: string;
@@ -67,25 +66,21 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     selector: 'fhg-operational-data-view',
     templateUrl: './operational-data-view.html',
     styleUrl: './operational-data-view.scss',
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'OperationalData' }],
     imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OperationalDataView extends LeafView<OperationalDataViewState> implements OnInit, OnDestroy {
+export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GroupItem>();
     private readonly toolbar = inject(ToolbarService);
     private readonly webSocketFactory = inject(WebSocketFactoryService);
+    private readonly state = inject(OperationalDataViewState);
     private readonly currentLang: Signal<string>;
     private liveNodes: LiveNode[] = [];
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor() {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'OperationalData',
-            inject(OperationalDataViewState),
-        );
+        super();
 
         const translate = inject(TranslateService);
         const langChange = toSignal(translate.onLangChange);
@@ -133,10 +128,6 @@ export class OperationalDataView extends LeafView<OperationalDataViewState> impl
 
         return groups;
     });
-
-    public ngOnInit(): void {
-        this.onInit();
-    }
 
     public ngOnDestroy(): void {
         this.webSocketSubject?.unsubscribe();

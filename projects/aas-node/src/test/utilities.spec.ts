@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { decodeBase64Url, encodeBase64Url } from 'aas-package';
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 
 describe('utilities', () => {
     describe('encodeBase64Url', () => {

@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
@@ -19,7 +19,7 @@ import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
 import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
@@ -29,10 +29,10 @@ import { errorHandler } from '../assets/error-handler.js';
 describe('DocumentsController', () => {
     let app: Express;
     let logger: Logger;
-    let auth: jest.Mocked<AuthService>;
-    let aasProvider: jest.Mocked<AASProvider>;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
+    let auth: Mocked<AuthService>;
+    let aasProvider: Mocked<AASProvider>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);

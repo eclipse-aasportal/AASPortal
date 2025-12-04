@@ -8,10 +8,8 @@
 
 export * from './lib/api-url';
 export * from './lib/components/aas-table/aas-table';
-export * from './lib/components/aas-tree/aas-tree-node';
 export * from './lib/components/aas-tree/aas-tree-search';
 export * from './lib/components/aas-tree/aas-tree.component';
-export * from './lib/components/aas-tree/aas-tree.state';
 export * from './lib/components/auth/auth-api.service';
 export * from './lib/components/auth/auth.component';
 export * from './lib/components/auth/auth.interceptor';
@@ -34,7 +32,6 @@ export * from './lib/components/notify/notify.service';
 export * from './lib/components/progress/progress.component';
 export * from './lib/components/progress/progress.service';
 export * from './lib/components/score/score.component';
-export * from './lib/components/secured-image/secured-image.component';
 export * from './lib/components/theme-toggle/theme-toggle.component';
 export * from './lib/directives/sortable-header.directive';
 export * from './lib/pipes/max-length.pipe';

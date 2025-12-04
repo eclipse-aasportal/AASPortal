@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { createSpyObj } from 'aas-jest';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
+import { createSpyObj } from '../../mocks.js';
 import { aasEnvironment as env } from '../../assets/aas-environment.js';
 import { ApiClientV3, OperationResult } from '../../../app/client/api/api-client-v3.js';
 import { aas } from 'aas-core';
@@ -17,7 +17,7 @@ import { HttpClient } from '../../../app/http-client.js';
 describe('ApiClientV3', () => {
     let logger: Logger;
     let client: ApiClientV3;
-    let http: jest.Mocked<HttpClient>;
+    let http: Mocked<HttpClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -30,7 +30,7 @@ describe('ApiClientV3', () => {
     });
 
     describe('resolveNodeId', () => {
-        let shell: jest.Mocked<aas.AssetAdministrationShell>;
+        let shell: Mocked<aas.AssetAdministrationShell>;
 
         beforeEach(() => {
             shell = createSpyObj<aas.AssetAdministrationShell>({}, { id: 'http://localhost/test/aas' });

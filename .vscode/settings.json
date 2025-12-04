@@ -62,24 +62,6 @@
     "files.eol": "\n",
     "jest.virtualFolders": [
         {
-            "name": "aas-core",
-            "rootPath": "./projects/aas-core",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals",
-        },
-        {
-            "name": "aas-package",
-            "rootPath": "./projects/aas-package",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
-        },
-        {
-            "name": "aas-node",
-            "rootPath": "./projects/aas-node",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --experimental-sqlite --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
-        },
-        {
             "name": "aas-lib",
             "rootPath": "./projects/aas-lib",
             "runMode": "on-demand",
@@ -90,12 +72,6 @@
             "rootPath": "./projects/aas-portal",
             "runMode": "on-demand",
             "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
-        },
-        {
-            "name": "aas-server",
-            "rootPath": "./projects/aas-server",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
         },
         {
             "name": "aas-browser",

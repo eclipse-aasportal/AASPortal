@@ -6,19 +6,19 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked, vitest } from 'vitest';
 import { aas, DefaultType, LiveRequest } from 'aas-core';
-import { createSpyObj, DoneFn } from 'aas-jest';
 import { Logger } from '../../../app/logging/logger.js';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { ApiClient } from '../../../app/client/api/api-client.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
+import { createSpyObj, DoneFn } from '../../mocks.js';
 
 describe('HttpSubscription', function () {
-    let aasxServer: jest.Mocked<ApiClient>;
-    let logger: jest.Mocked<Logger>;
-    let client: jest.Mocked<SocketClient>;
+    let aasxServer: Mocked<ApiClient>;
+    let logger: Mocked<Logger>;
+    let client: Mocked<SocketClient>;
     let subscription: HttpSubscription;
 
     beforeEach(function () {
@@ -59,7 +59,7 @@ describe('HttpSubscription', function () {
     });
 
     it('open/close subscription', (done: DoneFn) => {
-        jest.useFakeTimers();
+        vitest.useFakeTimers();
         aasxServer.readValue.mockReturnValue(
             new Promise<DefaultType>(result => {
                 expect(true).toBeTruthy();
