@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
+import { describe, beforeEach, it, expect, afterEach, Mocked, vitest } from 'vitest';
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
 import { aas, selectElement } from 'aas-core';
@@ -20,13 +20,13 @@ import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js
 import { ApiClientV0 } from '../../../app/client/api/api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../../mocks.js';
 import { HttpClient } from '../../../app/http-client.js';
 
 describe('ApiClientV0', function () {
-    let logger: jest.Mocked<Logger>;
+    let logger: Mocked<Logger>;
     let client: ApiClient;
-    let http: jest.Mocked<HttpClient>;
+    let http: Mocked<HttpClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -39,7 +39,7 @@ describe('ApiClientV0', function () {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     describe('getShells', () => {
@@ -120,7 +120,7 @@ describe('ApiClientV0', function () {
     });
 
     describe('resolveNodeId', function () {
-        let shell: jest.Mocked<aas.AssetAdministrationShell>;
+        let shell: Mocked<aas.AssetAdministrationShell>;
 
         beforeEach(function () {
             shell = createSpyObj<aas.AssetAdministrationShell>({}, { idShort: 'aas1' });

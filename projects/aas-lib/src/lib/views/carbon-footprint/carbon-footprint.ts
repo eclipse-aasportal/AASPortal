@@ -13,7 +13,7 @@ import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { CarbonFootprintData, CarbonFootprintState } from './carbon-footprint.state';
+import { CarbonFootprintState } from './carbon-footprint.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**
@@ -28,7 +28,7 @@ import { ChildComponent } from '../../components/child-component';
     imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective, DataSheet],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarbonFootprint extends ChildComponent<CarbonFootprintState> {
+export class CarbonFootprint extends ChildComponent {
     // Determines wether the view is used from inside the dpp view or standalone
     @Input() isDigitalProductPassport: boolean = false;
 
@@ -63,7 +63,7 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintState> {
     /**
      * The state of the carbon footprint component.
      */
-    public override readonly state = input.required<CarbonFootprintState>();
+    public readonly state = input.required<CarbonFootprintState>();
 
     /**
      * The total product carbon footprint.

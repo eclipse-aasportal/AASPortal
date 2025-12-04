@@ -8,27 +8,12 @@
 
 import { jest } from '@jest/globals';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { QR_CODE, ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { WINDOW, WindowService } from '../../../lib/services/window.service';
-import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 
 import sample from '../../assets/dpp-sample.json';
 import { createSpyObj } from '../../mocks';
-
-@Component({
-    selector: 'fhg-img',
-    template: '<div></div>',
-    styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class TestSecuredImageComponent {
-    public readonly src = input<string>('');
-    public readonly alt = input<string | undefined>();
-    public readonly class = input<string | undefined>();
-    public readonly width = input<number | undefined>();
-    public readonly height = input<number | undefined>();
-}
 
 describe('ThumbnailQRCode', () => {
     let component: ThumbnailQRCode;
@@ -54,11 +39,6 @@ describe('ThumbnailQRCode', () => {
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();
-
-        TestBed.overrideComponent(ThumbnailQRCode, {
-            remove: { imports: [SecuredImageComponent] },
-            add: { imports: [TestSecuredImageComponent] },
-        });
 
         fixture = TestBed.createComponent(ThumbnailQRCode);
         component = fixture.componentInstance;

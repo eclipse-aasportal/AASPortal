@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals';
+import { beforeEach, describe, it, expect } from 'vitest';
 import { LangString } from '../lib/aas.js';
 import {
     changeType,

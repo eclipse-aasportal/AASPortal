@@ -11,8 +11,7 @@
     "type": "module",
     "scripts": {
         "test": "",
-        "test:debug": "",
-        "test:watch": "",
+        "watch": "",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
         "build:debug": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",

@@ -6,80 +6,74 @@
  *
  *****************************************************************************/
 
-import { Component, computed, DOCUMENT, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLinkWithHref } from '@angular/router';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    DOCUMENT,
+    effect,
+    inject,
+    input,
+    OnDestroy,
+    signal,
+    untracked,
+    WritableSignal,
+} from '@angular/core';
+
+import { noop } from 'aas-core';
+import { WINDOW } from '../../services/window.service';
+import { ChildComponent } from '../child-component';
 
 export type TreeId = string | number | object;
 
-export type TreeNode = {
-    parent: TreeId | null;
-    id: TreeId;
+export type TreeSymbolType = 'image' | 'text';
+
+export type TreeType = 'text' | 'routerLink' | 'url';
+
+export type TreeValueType = 'text' | 'url' | 'signal';
+
+export type TreeNode<TId = TreeId, TOptions = Record<string, unknown>> = {
+    parentId: TId | null;
+    id: TId;
     path: string;
     level: number;
     name: string;
     suffix?: string;
-    expanded: boolean;
     selected: boolean;
     highlighted: boolean;
-    loaded: boolean;
     isLeaf: boolean;
-    hasChildren: boolean;
-    symbolType: 'image' | 'text';
+    symbolType: TreeSymbolType;
     symbol?: string;
-    type: 'text' | 'routerLink' | 'url';
-    options: Record<string, unknown>;
+    type: TreeType;
+    valueType?: TreeValueType;
+    value?: string | WritableSignal<string | undefined>;
+    options: TOptions;
+} & (
+    | {
+          isLeaf: true;
+      }
+    | {
+          isLeaf: false;
+          loaded: boolean;
+          expanded: boolean;
+          hasChildren: boolean;
+      }
+);
+
+export type Tree<TId = TreeId, TOptions = Record<string, unknown>> = TreeNode<TId, TOptions>[];
+
+export type TreeResult<TId = TreeId, TOptions = Record<string, unknown>> = {
+    parent: TreeNode<TId, TOptions>;
+    children: TreeNode<TId, TOptions>[];
 };
 
-export type Tree = TreeNode[];
-
-export type TreeResult = { parent: TreeNode; children: TreeNode[] };
-
-/**
- * Defines an interface for services that adapt the tree to the specific structure to be displayed.
- */
-export interface TreeService {
-    /**
-     * Gets a thumbnail for the specified node.
-     *
-     * @param node The current node.
-     * @returns An URL to a thumbnail.
-     */
-    getThumbnail(node: TreeNode): string;
-
-    /**
-     * Loads the children of the specified parent node.
-     * @param node The parent node.
-     * @return The loaded children.
-     */
-    loadChildren(node: TreeNode): TreeResult | undefined;
-
-    /**
-     * Called after loading a node for further operations.
-     *
-     * @param node The loaded tree node.
-     */
-    loaded(node: TreeNode): void;
-
-    /**
-     * Gets a link to a route that belongs to the specified node.
-     *
-     * @param node The current node.
-     * @returns A link to a route.
-     */
-    getRouterLink(node: TreeNode): unknown[] | undefined;
-
-    /**
-     * Returns an URL to a resource that belongs to the specified node.
-     *
-     * @param node The current node.
-     * @returns An URL to a resource that belongs to the current node.
-     */
-    getUrl(node: TreeNode): string;
-}
-
-type TreeData = {
-    tree: Tree;
+export type TreeData<TId = TreeId, TOptions = Record<string, unknown>> = {
+    tree: Tree<TId, TOptions>;
+    matchIndex: number;
+    selectionDisabled: boolean;
 };
 
 @Component({
@@ -87,37 +81,111 @@ type TreeData = {
     imports: [FormsModule, RouterLinkWithHref],
     templateUrl: './tree.component.html',
     styleUrl: './tree.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TreeComponent {
-    private readonly document = inject(DOCUMENT);
+export abstract class TreeComponent<TId = TreeId, TOptions = Record<string, unknown>>
+    extends ChildComponent
+    implements OnDestroy, AfterViewInit
+{
+    private readonly dom = inject(DOCUMENT);
+    private readonly window = inject(WINDOW);
+    private readonly tree$ = signal<Tree<TId, TOptions>>([]);
+    private readonly matchIndex$ = signal(-1);
+    private readonly selectionDisabled$ = signal(false);
+    private shiftKey = false;
+    private altKey = false;
+
+    protected constructor() {
+        super();
+
+        effect(() => {
+            const matchIndex = this.matchIndex();
+            if (!matchIndex || matchIndex < 0) {
+                const tree = untracked(this.tree).map(item =>
+                    item.highlighted ? { ...item, highlight: false } : item,
+                );
+
+                this.update({ tree });
+                return;
+            }
+
+            const { tree, loaded } = this.loadTree();
+            let node = tree[matchIndex];
+            for (let i = 0, n = tree.length; i < n; i++) {
+                const item = tree[i];
+                if (node === item) {
+                    node = { ...item, highlighted: true };
+                    tree[i] = node;
+                } else if (item.highlighted) {
+                    tree[i] = { ...item, highlighted: false };
+                }
+            }
+
+            if (node && node.highlighted) {
+                this.ensureExpanded(tree, node);
+                this.scrollIntoView(node.path);
+            }
+
+            this.update({ tree });
+            loaded.forEach(node => this.loaded(node));
+        });
+
+        effect(() => {
+            this.start(this.loadAll(), this.searchExpression());
+        });
+
+        this.window.addEventListener('keyup', this.keyup);
+        this.window.addEventListener('keydown', this.keydown);
+    }
+
+    /**
+     * The current search expression.
+     */
+    public readonly searchExpression = input<string | undefined>(undefined);
+
+    /**
+     * Determines whether tree nodes can be selected.
+     * @default false
+     */
+    public readonly allowSelection = input(false);
+
+    /**
+     * Enables or disables the value display in the tree component.
+     * @default false
+     */
+    public readonly enableValue = input(false);
 
     /**
      * The nodes of the hierarchical structure.
      */
-    public readonly tree = model<Tree>([]);
+    public readonly tree = this.tree$.asReadonly();
 
     /**
-     * Service used by the tree component to manage tree data and operations.
+     * The index of the current match in a search operation.
      */
-    public readonly service = input.required<TreeService>();
+    public readonly matchIndex = this.matchIndex$.asReadonly();
 
     /**
-     * Determines the selection mode for the tree component.
-     *
-     * - `'no'`: Selection is disabled.
-     * - `'single'`: Only one item can be selected at a time.
-     * - `'multi'`: Multiple items can be selected simultaneously.
-     *
-     * This property is read-only and is set via an input binding.
+     * The selected tree nodes.
      */
-    public readonly selectionMode = input<'no' | 'single' | 'multi'>('no');
+    public readonly selectedNodes = computed(() => this.tree().filter(node => node.selected));
+
+    /**
+     * The currently highlighted tree node.
+     */
+    public readonly highlighted = computed(() => this.tree().find(node => node.highlighted));
+
+    /**
+     * Enables or disables selection in the tree component.
+     */
+    public readonly selectionDisabled = this.selectionDisabled$.asReadonly();
 
     /**
      * The visible nodes in the hierarchical structure tree.
      */
     public readonly nodes = computed(() => {
         const tree = this.tree();
-        const nodes: TreeNode[] = [];
+        const nodes: TreeNode<TId, TOptions>[] = [];
         this.buildTree(tree, null, nodes);
         return nodes;
     });
@@ -140,11 +208,11 @@ export class TreeComponent {
      */
     public readonly expanded = computed(() => {
         for (const node of this.tree()) {
-            if (node.isLeaf || !node.hasChildren) {
+            if (!this.hasChildren(node)) {
                 continue;
             }
 
-            if (!node.expanded) {
+            if (!this.isExpanded(node)) {
                 return false;
             }
         }
@@ -152,12 +220,24 @@ export class TreeComponent {
         return true;
     });
 
+    public ngOnDestroy(): void {
+        this.window.removeEventListener('keyup', this.keyup);
+        this.window.removeEventListener('keydown', this.keydown);
+    }
+
+    public ngAfterViewInit(): void {
+        const root = untracked(this.tree).find(node => node.parentId === null);
+        if (root) {
+            this.expandNode(root);
+        }
+    }
+
     /**
      * Expands a specific tree node if provided, or expands all nodes if no node is specified.
      *
      * @param node - The tree node to expand. If omitted, all nodes will be expanded.
      */
-    public expand(node?: TreeNode): void {
+    public expand(node?: TreeNode<TId, TOptions>): void {
         if (node) {
             this.expandNode(node);
         } else {
@@ -170,7 +250,7 @@ export class TreeComponent {
      *
      * @param node - The tree node to collapse. If omitted, all nodes will be collapsed.
      */
-    public collapse(node?: TreeNode): void {
+    public collapse(node?: TreeNode<TId, TOptions>): void {
         if (node) {
             this.collapseNode(node);
         } else {
@@ -179,23 +259,14 @@ export class TreeComponent {
     }
 
     /**
-     * Gets a thumbnail for the specified node.
-     *
-     * @param node The current node.
-     * @returns An URL to a thumbnail.
-     */
-    public getThumbnail(node: TreeNode): string {
-        return this.service().getThumbnail(node);
-    }
-
-    /**
      * Gets a link to a route that belongs to the specified node.
      *
      * @param node The current node.
      * @returns A link to a route.
      */
-    public getRouterLink(node: TreeNode): unknown[] | undefined {
-        return this.service().getRouterLink(node);
+    public getRouterLink(node: TreeNode<TId, TOptions>): unknown[] | undefined {
+        noop(node);
+        return undefined;
     }
 
     /**
@@ -204,8 +275,9 @@ export class TreeComponent {
      * @param node The current node.
      * @returns An URL to a resource that belongs to the current node.
      */
-    public getUrl(node: TreeNode): string {
-        return this.service().getUrl(node);
+    public getUrl(node: TreeNode<TId, TOptions>): string | undefined {
+        noop(node);
+        return undefined;
     }
 
     /**
@@ -222,69 +294,136 @@ export class TreeComponent {
      *
      * @param node - Optional tree node to toggle. When omitted, toggles selection state for the whole tree.
      */
-    public toggleSelection(node?: TreeNode): void {
+    public toggleSelection(node?: TreeNode<TId, TOptions>): void {
         node ? this.toggleNode(node) : this.everySelected() ? this.deselectAll() : this.selectAll();
     }
 
     /**
-     * Highlight a node in the component's flattened tree representation.
-     *
-     * If `arg` is a number it will be resolved to a node using `this.at(this.tree(), arg)`.
-     * The method produces a new `tree` array by mapping the current flattened tree:
-     * - If an entry's node is strictly equal (`===`) to the resolved node, that node object
-     *   is shallow-cloned with `highlighted: true`.
-     * - If an entry's node is currently `selected`, that node object is shallow-cloned with
-     *   `highlighted: false` (selected nodes are explicitly un-highlighted).
-     * - All other entries are left unchanged.
-     *
-     * The component state is then updated by calling `this.update({ tree })`.
-     *
-     * @param arg - Optional. A TreeNode instance to highlight or an index (number) that will
-     *              be resolved to a TreeNode via `this.at(this.tree(), arg)`. If omitted or
-     *              if the index is out of range, no node will be marked `highlighted: true`.
-     *
-     * @returns void
-     *
-     * @remarks
-     * - This method does not mutate the original node objects except for creating shallow
-     *   clones for nodes whose `highlighted` value changes; the `tree` array reference is replaced.
-     * - Comparison to find the node uses reference equality (`===`).
-     * - There are no thrown errors documented by this method; invalid indices simply resolve to `undefined`.
+     * Determines whether a tree node is expanded.
+     * @param node - The tree node to check.
+     * @returns `true` if the node is not a leaf and is expanded; otherwise `false`.
      */
-    public highlight(arg?: TreeNode | number): void {
-        const { tree, loaded } = this.loadTree();
-        let node = typeof arg === 'number' ? this.at(tree, arg) : arg;
-        for (let i = 0, n = tree.length; i < n; i++) {
-            const item = tree[i];
-            if (node === item) {
-                node = { ...item, highlighted: true };
-                tree[i] = node;
-            } else if (item.highlighted) {
-                tree[i] = { ...item, highlighted: false };
-            }
-        }
-
-        if (node && node.highlighted) {
-            this.ensureExpanded(tree, node);
-            this.scrollIntoView(node.path);
-        }
-
-        this.update({ tree });
-        loaded.forEach(node => this.service().loaded(node));
+    public isExpanded(node: TreeNode<TId, TOptions>): boolean {
+        return !node.isLeaf && node.expanded;
     }
 
-    private toggleNode(node: TreeNode): void {
-        const tree = this.tree().map(item => {
-            if (node === item) {
-                return { ...item, selected: !item.selected };
+    /**
+     * Determines whether a composite tree node has been loaded.
+     * @param node - The tree node to check.
+     * @returns `true` if the node is a leaf or has been loaded; otherwise `false`.
+     */
+    public isLoaded(node: TreeNode<TId, TOptions>): boolean {
+        return node.isLeaf || node.loaded;
+    }
+
+    /**
+     * Determines whether a composite tree node has children.
+     * @param node - The tree node to check.
+     * @returns `true` if the node is not a leaf and has children; otherwise `false`.
+     */
+    public hasChildren(node: TreeNode<TId, TOptions>): boolean {
+        return !node.isLeaf && node.hasChildren;
+    }
+
+    /**
+     * Reads and unwraps a value that can be either a string, a WritableSignal, or undefined.
+     * If the value is a function (WritableSignal), it invokes it to get the current value.
+     * Otherwise, it returns the value as-is.
+     *
+     * @param value - The value to read, which can be a string, WritableSignal<string | undefined>, or undefined
+     * @returns The unwrapped string value, or undefined if the input is undefined or the signal resolves to undefined
+     */
+    public readValue(value: string | WritableSignal<string | undefined> | undefined): string | undefined {
+        return typeof value === 'function' ? value() : value;
+    }
+
+    /**
+     * Loads the children of the specified parent node.
+     *
+     * @param node The parent node.
+     * @return The loaded children.
+     */
+    protected abstract loadChildren(node: TreeNode<TId, TOptions>): TreeResult<TId, TOptions> | undefined;
+
+    /**
+     * Called after loading a node for further operations.
+     *
+     * @param node The loaded tree node.
+     */
+    protected abstract loaded(node: TreeNode<TId, TOptions>): void;
+
+    /**
+     * Starts a search operation.
+     *
+     * @param nodes The nodes to include in the search.
+     * @param searchExpression The search expression.
+     */
+    protected abstract start(nodes: TreeNode<TId, TOptions>[], searchExpression: string | undefined): void;
+
+    /**
+     * Updates the tree component state with the provided partial data.
+     *
+     * @param newState - Partial tree data containing updates to apply
+     * @param newState.tree - The new tree structure to set, if provided
+     */
+    protected update(newState: Partial<TreeData<TId, TOptions>>): void {
+        if (newState.tree !== undefined) {
+            this.tree$.set(newState.tree);
+        }
+
+        if (newState.matchIndex !== undefined) {
+            this.matchIndex$.set(newState.matchIndex);
+        }
+
+        if (newState.selectionDisabled !== undefined) {
+            this.selectionDisabled$.set(newState.selectionDisabled);
+        }
+    }
+
+    private toggleNode(node: TreeNode<TId, TOptions>): void {
+        let tree: Tree<TId, TOptions>;
+        if (this.altKey) {
+            tree = this.tree().map(item => {
+                if (node === item) {
+                    return { ...item, selected: !item.selected };
+                }
+
+                if (item.selected) {
+                    return { ...item, selected: false };
+                }
+
+                return item;
+            });
+        } else if (this.shiftKey) {
+            const nodes = this.nodes();
+            const index = nodes.indexOf(node);
+            let begin = index;
+            let end = index;
+            const selection = nodes.map(item => item.selected);
+            const last = selection.lastIndexOf(true);
+            if (last >= 0) {
+                if (last > index) {
+                    begin = index;
+                    end = selection.indexOf(true);
+                } else if (last < index) {
+                    begin = last;
+                    end = index;
+                }
             }
 
-            if (this.selectionMode() === 'single' && item.selected) {
-                return { ...item, selected: false };
-            }
+            const set = new Set(nodes.slice(begin, end + 1));
+            tree = this.tree().map(item => {
+                if (set.has(item)) {
+                    return item.selected ? item : { ...item, selected: true };
+                }
 
-            return item;
-        });
+                return item.selected ? { ...item, selected: false } : item;
+            });
+        } else {
+            tree = this.tree().map(item => {
+                return node === item ? { ...item, selected: !item.selected } : item;
+            });
+        }
 
         this.update({ tree });
     }
@@ -304,13 +443,13 @@ export class TreeComponent {
         }
 
         this.update({ tree });
-        loaded.forEach(node => this.service().loaded(node));
+        loaded.forEach(node => this.loaded(node));
     }
 
-    private ensureExpanded(tree: Tree, node: TreeNode): void {
+    private ensureExpanded(tree: Tree<TId, TOptions>, node: TreeNode<TId, TOptions>): void {
         while (node) {
-            const index = tree.findIndex(item => item.id === node.parent);
-            if (index < 0 || tree[index].expanded) {
+            const index = tree.findIndex(item => item.id === node.parentId);
+            if (index < 0 || this.isExpanded(tree[index])) {
                 break;
             }
 
@@ -322,45 +461,29 @@ export class TreeComponent {
 
     private scrollIntoView(id: string): void {
         setTimeout(() => {
-            const element = this.document.getElementById(id);
+            const element = this.dom.getElementById(id);
             element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
         });
     }
 
-    private buildTree(tree: Tree, parent: TreeId | null, nodes: TreeNode[]): void {
-        for (const child of tree.filter(item => item.parent === parent)) {
+    private buildTree(tree: Tree<TId, TOptions>, parent: TId | null, nodes: TreeNode<TId, TOptions>[]): void {
+        for (const child of tree.filter(item => item.parentId === parent)) {
             nodes.push(child);
-            if (child.expanded) {
+            if (this.isExpanded(child)) {
                 this.buildTree(tree, child.id, nodes);
             }
         }
     }
 
-    private at(tree: Tree, index: number, parent: TreeId | null = null, i = { index: 0 }): TreeNode | undefined {
-        for (const child of tree.filter(item => item.parent === parent)) {
-            if (index === i.index) {
-                return child;
-            }
-
-            ++i.index;
-            const node = this.at(tree, index, child.id, i);
-            if (node) {
-                return node;
-            }
-        }
-
-        return undefined;
-    }
-
-    private expandNode(node: TreeNode): void {
-        const children: TreeNode[] = [];
+    private expandNode(node: TreeNode<TId, TOptions>): void {
+        const children: TreeNode<TId, TOptions>[] = [];
         const tree = this.tree().map(item => {
             if (item !== node) {
                 return item;
             }
 
-            if (!node.loaded) {
-                const result = this.service().loadChildren(node);
+            if (!this.isLoaded(node)) {
+                const result = this.loadChildren(node);
                 if (!result) {
                     return { ...node, hasChildren: false, expanded: true, loaded: true };
                 }
@@ -374,18 +497,25 @@ export class TreeComponent {
 
         tree.push(...children);
         this.update({ tree });
-        children.forEach(node => this.service().loaded(node));
+        children.forEach(node => this.loaded(node));
     }
 
     private expandAll(): void {
         const { tree, loaded } = this.loadTree(true);
         this.update({ tree });
-        loaded.forEach(item => this.service().loaded(item));
+        loaded.forEach(item => this.loaded(item));
     }
 
-    private loadTree(expand: boolean = false): { tree: Tree; loaded: TreeNode[] } {
-        const tree = [...this.tree()];
-        const loaded: TreeNode[] = [];
+    private loadAll(): TreeNode<TId, TOptions>[] {
+        const { tree, loaded } = this.loadTree();
+        this.update({ tree });
+        loaded.forEach(item => this.loaded(item));
+        return untracked(this.tree);
+    }
+
+    private loadTree(expand: boolean = false): { tree: Tree<TId, TOptions>; loaded: TreeNode<TId, TOptions>[] } {
+        const tree = [...untracked(this.tree)];
+        const loaded: TreeNode<TId, TOptions>[] = [];
         for (let i = 0; i < tree.length; i++) {
             const node = tree[i];
             if (node.isLeaf || !node.hasChildren) {
@@ -393,7 +523,7 @@ export class TreeComponent {
             }
 
             if (!node.loaded) {
-                const result = this.service().loadChildren(node);
+                const result = this.loadChildren(node);
                 if (!result) {
                     tree[i] = { ...node, loaded: true, expanded: expand, hasChildren: false };
                 } else {
@@ -409,8 +539,8 @@ export class TreeComponent {
         return { tree, loaded };
     }
 
-    private collapseNode(node: TreeNode): void {
-        const tree: Tree = this.tree().map(item => {
+    private collapseNode(node: TreeNode<TId, TOptions>): void {
+        const tree = this.tree().map(item => {
             return item === node ? { ...item, expanded: false } : item;
         });
 
@@ -418,16 +548,20 @@ export class TreeComponent {
     }
 
     private collapseAll(): void {
-        const tree: Tree = this.tree().map(item => {
+        const tree = this.tree().map(item => {
             return !item.isLeaf && item.expanded ? { ...item, expanded: false } : item;
         });
 
         this.update({ tree });
     }
 
-    private update(newState: Partial<TreeData>): void {
-        if (newState.tree !== undefined) {
-            this.tree.set(newState.tree);
-        }
-    }
+    private keyup = (): void => {
+        this.shiftKey = false;
+        this.altKey = false;
+    };
+
+    private keydown = (event: KeyboardEvent): void => {
+        this.shiftKey = event.shiftKey;
+        this.altKey = event.altKey;
+    };
 }

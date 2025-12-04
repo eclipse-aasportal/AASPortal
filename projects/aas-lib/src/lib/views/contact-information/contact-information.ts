@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, untracked 
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
-import { ContactInformationData, ContactInformationState } from './contact-information.state';
+import { ContactInformationState } from './contact-information.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**
@@ -24,7 +24,7 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './contact-information.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContactInformation extends ChildComponent<ContactInformationState> {
+export class ContactInformation extends ChildComponent {
     /**
      * Creates a new instance of the ContactInformation component.
      */
@@ -47,7 +47,7 @@ export class ContactInformation extends ChildComponent<ContactInformationState> 
     /**
      * The state of the contact information component.
      */
-    public override readonly state = input.required<ContactInformationState>();
+    public readonly state = input.required<ContactInformationState>();
 
     /**
      * The current active AAS document.

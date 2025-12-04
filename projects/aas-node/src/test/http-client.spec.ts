@@ -12,8 +12,8 @@ import { IncomingMessage } from 'http';
 import axios from 'axios';
 import { Socket } from 'net';
 import { HttpClient } from '../app/http-client.js';
-import { createSpyObj } from 'aas-jest';
-import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
+import { createSpyObj } from './mocks.js';
+import { describe, beforeEach, it, expect, afterEach, vitest, Mocked } from 'vitest';
 
 describe('HttpClient', () => {
     let server: HttpClient;
@@ -23,7 +23,7 @@ describe('HttpClient', () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     it('should created', () => {
@@ -32,7 +32,7 @@ describe('HttpClient', () => {
 
     describe('get', () => {
         beforeEach(() => {
-            jest.spyOn(axios, 'get').mockResolvedValue({ data: { text: 'Hello World!' } });
+            vitest.spyOn(axios, 'get').mockResolvedValue({ data: { text: 'Hello World!' } });
         });
 
         it('gets an object from a server', async () => {
@@ -47,7 +47,7 @@ describe('HttpClient', () => {
             const stream = new IncomingMessage(new Socket());
             stream.push(JSON.stringify({ text: 'Hello World!' }));
             stream.push(null);
-            jest.spyOn(axios, 'get').mockResolvedValue({ data: stream });
+            vitest.spyOn(axios, 'get').mockResolvedValue({ data: stream });
         });
 
         it('gets the message response', async () => {
@@ -57,7 +57,7 @@ describe('HttpClient', () => {
 
     describe('put', () => {
         beforeEach(() => {
-            jest.spyOn(axios, 'put').mockResolvedValue({ data: 42, statusText: 'OK' });
+            vitest.spyOn(axios, 'put').mockResolvedValue({ data: 42, statusText: 'OK' });
         });
 
         it('updates an object on a server', async () => {
@@ -69,7 +69,7 @@ describe('HttpClient', () => {
 
     describe('post', () => {
         beforeEach(() => {
-            jest.spyOn(axios, 'post').mockResolvedValue({ data: 4711, statusText: 'Created' });
+            vitest.spyOn(axios, 'post').mockResolvedValue({ data: 4711, statusText: 'Created' });
         });
 
         it('updates an object on a server', async () => {
@@ -81,7 +81,7 @@ describe('HttpClient', () => {
 
     describe('delete', () => {
         beforeEach(() => {
-            jest.spyOn(axios, 'delete').mockResolvedValue({ data: {}, statusText: 'Deleted' });
+            vitest.spyOn(axios, 'delete').mockResolvedValue({ data: {}, statusText: 'Deleted' });
         });
 
         it('updates an object on a server', async () => {
@@ -90,22 +90,22 @@ describe('HttpClient', () => {
     });
 
     describe('checkUrlExist', () => {
-        let socket: jest.Mocked<net.Socket>;
+        let socket: Mocked<net.Socket>;
 
         beforeEach(() => {
-            socket = createSpyObj<net.Socket>(['setTimeout', 'on', 'end', 'destroy']);
+            socket = createSpyObj<net.Socket>(['setTimeout', 'on', 'end', 'destroy', 'timeout']);
         });
 
         it('validates a connection', async () => {
             socket.on.mockImplementation((event, listener) => {
-                if (event === 'end') {
+                if ((event as string) === 'end') {
                     setTimeout(() => (listener as () => void)());
                 }
 
                 return socket;
             });
 
-            jest.spyOn(net, 'createConnection').mockReturnValue(socket);
+            vitest.spyOn(net, 'createConnection').mockReturnValue(socket);
             await expect(server.checkUrlExist('http://localhost:1234')).resolves.toBeUndefined();
         });
 
@@ -118,7 +118,7 @@ describe('HttpClient', () => {
                 return socket;
             });
 
-            jest.spyOn(net, 'createConnection').mockReturnValue(socket);
+            vitest.spyOn(net, 'createConnection').mockReturnValue(socket);
             await expect(server.checkUrlExist('http://localhost:9876')).rejects.toThrow();
         });
     });

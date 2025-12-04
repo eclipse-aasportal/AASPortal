@@ -1,4 +1,3 @@
-import { first } from 'rxjs';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -9,12 +8,12 @@ import { first } from 'rxjs';
 
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
 import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { NameplateData, NameplateState } from './nameplate.state';
+import { NameplateState } from './nameplate.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**
@@ -28,7 +27,7 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Nameplate extends ChildComponent<NameplateState> implements AfterViewInit {
+export class Nameplate extends ChildComponent implements AfterViewInit {
     public constructor(translate: TranslateService) {
         super();
 
@@ -51,7 +50,7 @@ export class Nameplate extends ChildComponent<NameplateState> implements AfterVi
     }
 
     /** The state management service. */
-    public override state = input.required<NameplateState>();
+    public state = input.required<NameplateState>();
 
     /** The active AAS document. */
     public readonly document = input<AASDocument>();

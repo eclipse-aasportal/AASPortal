@@ -8,7 +8,7 @@
 
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
 import { catchError, concatMap, map, of, Subject } from 'rxjs';
 
 import {
@@ -24,13 +24,24 @@ import {
     selectReferable,
 } from 'aas-core';
 
-import { ArcheType, HierarchicalStructureState } from './hierarchical-structure.state';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { encodeBase64Url, findRouteForShell, findSubmodel, getDisplayName } from '../../utilities';
 import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../views-constants';
-import { ChildComponent2 } from '../../components/child-component';
 import { VIEW_ROUTES } from '../views-routes';
-import { Tree, TreeComponent, TreeNode, TreeResult, TreeService } from '../../components/tree/tree.component';
+import { Tree, TreeComponent, TreeNode, TreeResult } from '../../components/tree/tree.component';
+import { RouterLinkWithHref } from '@angular/router';
+
+export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
+
+export type NodeOptions = {
+    archeType: ArcheType;
+    document?: AASDocument | null;
+    node?: aas.Entity;
+};
+
+export type HierarchicalTreeResult = TreeResult<aas.Entity, NodeOptions>;
+
+export type HierarchicalNode = TreeNode<aas.Entity, NodeOptions>;
 
 const ARCHE_TYPE = 'https://admin-shell.io/idta/HierarchicalStructures/ArcheType/1/0';
 const ENTRY_NODE = 'https://admin-shell.io/idta/HierarchicalStructures/EntryNode/1/0';
@@ -44,17 +55,15 @@ const HAS_PART = 'https://admin-shell.io/idta/HierarchicalStructures/HasPart/1/0
  */
 @Component({
     selector: 'fhg-hierarchical-structure',
-    templateUrl: './hierarchical-structure.html',
-    styleUrl: './hierarchical-structure.scss',
-    providers: [HierarchicalStructureState],
-    imports: [FormsModule, TreeComponent],
+    templateUrl: '../../components/tree/tree.component.html',
+    styleUrl: '../../components/tree/tree.component.scss',
+    imports: [FormsModule, RouterLinkWithHref],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HierarchicalStructure extends ChildComponent2 implements TreeService {
-    private readonly state = inject(HierarchicalStructureState);
+export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions> {
     private readonly api = inject(EndpointsApi);
     private readonly viewRoutes = inject(VIEW_ROUTES);
-    private readonly subject = new Subject<TreeNode>();
+    private readonly subject = new Subject<HierarchicalNode>();
     private readonly visited = new Set<string>();
 
     public constructor() {
@@ -73,10 +82,10 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
                 return;
             }
 
-            const tree: Tree = [];
+            const tree: Tree<aas.Entity, NodeOptions> = [];
             this.visited.clear();
             this.createTree(archeType, entryNode, tree);
-            this.state.update({ tree });
+            this.update({ tree });
             tree.forEach(item => this.loaded(item));
         });
 
@@ -84,7 +93,7 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
             .pipe(
                 takeUntilDestroyed(),
                 concatMap(item => {
-                    const globalAssetId = (item.id as aas.Entity).globalAssetId;
+                    const globalAssetId = item.id.globalAssetId;
                     if (!globalAssetId || item.options.document) {
                         return of();
                     }
@@ -96,7 +105,7 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
                 }),
             )
             .subscribe(({ document, item }) => {
-                const tree: Tree = this.state.tree().map(obj => {
+                const tree = this.tree().map(obj => {
                     if (!document || obj !== item) {
                         return obj;
                     }
@@ -104,7 +113,7 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
                     return this.updateNode(item, document);
                 });
 
-                this.state.update({ tree });
+                this.update({ tree });
             });
     }
 
@@ -132,46 +141,14 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
     public readonly submodel = input<aas.Submodel>();
 
     /**
-     * Read-only signal exposing the TreeService instance associated with this view.
-     */
-    public readonly service = signal<TreeService>(this).asReadonly();
-
-    /**
-     * Read-only reference to the hierarchical tree model used by this view.
-     */
-    public readonly tree = this.state.tree;
-
-    /**
-     * Returns the thumbnail URL for a given tree node.
-     * If the node has a thumbnail property, it returns that value.
-     * Otherwise, it returns the default thumbnail path.
-     *
-     * @param node - The tree node for which to retrieve the thumbnail.
-     * @returns The URL of the thumbnail image.
-     */
-    public getThumbnail(node: TreeNode): string {
-        if (node.symbol) {
-            return node.symbol;
-        }
-
-        return '/assets/resources/aas-idta.png';
-    }
-
-    /** Not relevant. */
-    public getUrl(node: TreeNode): string {
-        noop(node);
-        return '';
-    }
-
-    /**
      * Generates a route link to a specific view for the specified node.
      *
      * @param node - The tree node containing a document for which to generate the route link.
      * @returns An array representing the route link, including the route path and encoded document properties,
      *          or `undefined` if no valid document or route is found.
      */
-    public getRouterLink(node: TreeNode): unknown[] | undefined {
-        const document = node.options.document as AASDocument;
+    public override getRouterLink(node: HierarchicalNode): unknown[] | undefined {
+        const document = node.options.document;
         if (!document) {
             return undefined;
         }
@@ -193,13 +170,13 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
      *
      * @param parent The parent element for which the child elements are to be loaded.
      */
-    public loadChildren(parent: TreeNode): TreeResult | undefined {
-        const children: TreeNode[] = [];
-        const parentArcheType = parent.options.archeType as ArcheType;
+    protected override loadChildren(parent: HierarchicalNode): HierarchicalTreeResult | undefined {
+        const children: HierarchicalNode[] = [];
+        const parentArcheType = parent.options.archeType;
         if (parentArcheType === 'Full') {
             this.createChildren(parent, children);
         } else if (parentArcheType === 'OneDown') {
-            const env = (parent.options.document as AASDocument)?.content;
+            const env = parent.options.document?.content;
             if (env) {
                 const submodel = this.findHierarchicalStructure(env);
                 if (!submodel) {
@@ -216,7 +193,7 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
                     ...parent,
                     id: entryNode,
                     name: entryNode.idShort,
-                    options: { ...parent.options, node: parent },
+                    options: { ...parent.options, node: parent.id },
                 };
 
                 if (archeType === 'Full' || archeType === 'OneDown') {
@@ -229,30 +206,28 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
     }
 
     /**
-     * Loads the Asset Administration Shell that corresponds the globalAssetId of the specified node.
+     * Loads the Asset Administration Shell that corresponds to the globalAssetId of the specified node.
      *
      * @param item The loaded node.
      */
-    public loaded(item: TreeNode): void {
+    protected loaded(item: HierarchicalNode): void {
         this.subject.next(item);
     }
 
     /**
-     * Set the current hierarchical tree in the component's state.
-     *
-     * @param tree - The Tree instance or data object to store as the current tree.
+     * Not relevant.
      */
-    public setTree(tree: Tree): void {
-        this.state.update({ tree });
+    protected override start(nodes: HierarchicalNode[], searchExpression: string | undefined): void {
+        noop(nodes, searchExpression);
     }
 
-    private updateNode(item: TreeNode, document: AASDocument | null): TreeNode {
+    private updateNode(item: HierarchicalNode, document: AASDocument | null): HierarchicalNode {
         const shell = document?.content?.assetAdministrationShells.at(0);
         if (!shell) {
-            return { ...item, options: { ...item.options, document } } satisfies TreeNode;
+            return { ...item, options: { ...item.options, document } } satisfies HierarchicalNode;
         }
 
-        const update: TreeNode = {
+        const update: HierarchicalNode = {
             ...item,
             symbolType: 'image',
             symbol: document!.thumbnail,
@@ -262,8 +237,8 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
             options: { ...item.options, document },
         };
 
-        const node = item.id as aas.Entity;
-        const archeType = item.options.archeType as ArcheType;
+        const node = item.id;
+        const archeType = item.options.archeType;
         if (archeType === 'OneDown') {
             if (!this.isNode(node)) {
                 return update;
@@ -282,9 +257,11 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
             const archeType = this.getArcheType(submodel);
             if (archeType === 'Full' || archeType === 'OneDown') {
                 update.isLeaf = false;
-                update.hasChildren =
-                    entryNode.statements !== undefined &&
-                    entryNode.statements.some(statement => isEntity(statement) && this.isNode(statement));
+                if (!update.isLeaf) {
+                    update.hasChildren =
+                        entryNode.statements !== undefined &&
+                        entryNode.statements.some(statement => isEntity(statement) && this.isNode(statement));
+                }
             }
         }
 
@@ -297,7 +274,7 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
         node: aas.Entity,
         level: number,
         path: string,
-    ): TreeNode {
+    ): HierarchicalNode {
         let isLeaf = true;
         let hasChildren = false;
         if (archeType === 'Full' || (archeType === 'OneDown' && this.isEntryNode(node))) {
@@ -307,8 +284,8 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
             }
         }
 
-        const item: TreeNode = {
-            parent: this.determineParent(parent, node),
+        const item: HierarchicalNode = {
+            parentId: this.determineParent(parent, node),
             id: node,
             path,
             level,
@@ -329,13 +306,16 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
         return item;
     }
 
-    private createTree(archeType: ArcheType, entryNode: aas.Entity, tree: Tree): void {
+    private createTree(archeType: ArcheType, entryNode: aas.Entity, tree: Tree<aas.Entity, NodeOptions>): void {
         if (!entryNode.globalAssetId || this.visited.has(entryNode.globalAssetId)) {
             return;
         }
 
         const rootItem = this.createNode(archeType, null, entryNode, 0, entryNode.idShort);
-        rootItem.loaded = true;
+        if (!rootItem.isLeaf) {
+            rootItem.loaded = true;
+        }
+
         if (archeType === 'Full' || archeType === 'OneDown') {
             tree.push(rootItem);
             if (entryNode.statements) {
@@ -369,9 +349,9 @@ export class HierarchicalStructure extends ChildComponent2 implements TreeServic
         return parent;
     }
 
-    private createChildren(parentItem: TreeNode, items: TreeNode[]): void {
-        const parent = parentItem.id as aas.Entity;
-        const archeType = parentItem.options.archeType as ArcheType;
+    private createChildren(parentItem: HierarchicalNode, items: HierarchicalNode[]): void {
+        const parent = parentItem.id;
+        const archeType = parentItem.options.archeType;
         if (!parent.statements) {
             return;
         }

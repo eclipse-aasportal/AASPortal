@@ -7,21 +7,22 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { fileURLToPath } from 'url';
 import { resolve } from 'path';
 
-import { createSpyObj } from './create-spy-obj.js';
 import { Variable } from '../app/variable.js';
 import { createDatabase } from './utilities.js';
 import { ShellRepository } from '../app/shell-repository.js';
 import { SubmodelRepository } from '../app/submodel-repository.js';
 import { HttpCache } from '../app/http-cache.js';
 import { AasxPackageBuilder } from '../app/aasx-package-builder.js';
+import { createSpyObj } from './mocks.js';
 
 describe('ShellRepository', () => {
     let variable: Variable;
     let cache: HttpCache;
-    let packageBuilder: jest.Mocked<AasxPackageBuilder>;
+    let packageBuilder: Mocked<AasxPackageBuilder>;
 
     beforeEach(() => {
         variable = createSpyObj<Variable>(
@@ -103,7 +104,7 @@ describe('ShellRepository', () => {
             await expect(
                 repository.updateThumbnail(
                     'http://customer.com/aas/9175_7013_7091_9168',
-                    resolve('./src/test/assets/thumbnail.png'),
+                    fileURLToPath(new URL('./assets/thumbnail.png', import.meta.url)),
                     'thumbnail.png',
                 ),
             ).resolves.toBe(void 0);
@@ -113,7 +114,11 @@ describe('ShellRepository', () => {
             const db = await createDatabase();
             const repository = new ShellRepository(db, new SubmodelRepository(db, cache), cache, packageBuilder);
             await expect(
-                repository.updateThumbnail('unknown', resolve('./src/test/assets/thumbnail.png'), 'thumbnail.png'),
+                repository.updateThumbnail(
+                    'unknown',
+                    fileURLToPath(new URL('./assets/thumbnail.png', import.meta.url)),
+                    'thumbnail.png',
+                ),
             ).rejects.toThrow();
         });
     });

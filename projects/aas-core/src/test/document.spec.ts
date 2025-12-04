@@ -7,8 +7,7 @@
  *****************************************************************************/
 
 import { cloneDeep } from 'lodash-es';
-import { describe, it, expect } from '@jest/globals';
-import { createSpyObj } from 'aas-jest';
+import { beforeEach, describe, it, expect } from 'vitest';
 import { AASDocument } from '../lib/types.js';
 import * as aas from '../lib/aas.js';
 import { testProperty, testSubmodel, testSubmodelElementCollection } from './assets/samples.js';
@@ -34,6 +33,7 @@ import {
     selectReferable,
     selectSubmodel,
 } from '../lib/document.js';
+import { createSpyObj } from './mocks.js';
 
 describe('Document', () => {
     describe('equalDocument', () => {

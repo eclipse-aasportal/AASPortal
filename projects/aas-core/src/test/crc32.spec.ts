@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, beforeEach, it, expect } from 'vitest';
 import { Crc32 } from '../lib/crc32.js';
 
 describe('Crc32', () => {

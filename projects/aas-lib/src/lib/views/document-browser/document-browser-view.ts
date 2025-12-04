@@ -30,11 +30,13 @@ import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { VIEW_ROUTES } from '../../views/views-routes';
 import { DocumentBrowserViewState } from './document-browser-view.state';
 import { CompositeView } from '../composite-view';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 @Component({
     selector: 'fhg-doc-browser',
     templateUrl: './document-browser-view.html',
     styleUrl: './document-browser-view.scss',
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Browser' }],
     imports: [TranslateDirective, TranslatePipe, NgbPaginationModule, BrowserComponent, ThumbnailQRCode],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -43,18 +45,13 @@ import { CompositeView } from '../composite-view';
  * It allows users to navigate through the AAS environment, view element properties, and explore related concept descriptions.
  * This view extends the `CompositeView` and integrates with the `ToolbarService` to provide a customizable toolbar.
  */
-export class DocumentBrowserView extends CompositeView<DocumentBrowserViewState> implements OnInit, OnDestroy {
+export class DocumentBrowserView extends CompositeView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly state = inject(DocumentBrowserViewState);
 
     public constructor() {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'Browser',
-            inject(DocumentBrowserViewState),
-        );
+        super();
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -73,10 +70,6 @@ export class DocumentBrowserView extends CompositeView<DocumentBrowserViewState>
      * The `BrowserState` instance used by the `BrowserComponent` to manage the browsing state.
      */
     public readonly browserState = this.state.browserState;
-
-    public ngOnInit(): void {
-        this.onInit();
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

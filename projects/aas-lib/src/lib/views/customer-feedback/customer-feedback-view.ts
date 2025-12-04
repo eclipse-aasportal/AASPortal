@@ -9,13 +9,11 @@
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
     ChangeDetectionStrategy,
     Component,
     OnDestroy,
-    OnInit,
     Signal,
     TemplateRef,
     computed,
@@ -29,11 +27,10 @@ import { ScoreComponent } from '../../components/score/score.component';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';
 import { LeafView } from '../leaf-view';
-import { VIEW_ROUTES } from '../../views/views-routes';
 import { CustomerFeedbackViewState } from './customer-feedback-view.state';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 const maxStars = 5;
 
@@ -41,25 +38,21 @@ const maxStars = 5;
     selector: 'fhg-customer-feedback',
     templateUrl: './customer-feedback-view.html',
     styleUrls: ['./customer-feedback-view.scss'],
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'CustomerFeedback' }],
     imports: [ScoreComponent, DecimalPipe, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerFeedbackView extends LeafView<CustomerFeedbackViewState> implements OnInit, OnDestroy {
+export class CustomerFeedbackView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
     private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly translate = inject(TranslateService);
+    private readonly state = inject(CustomerFeedbackViewState);
 
     public constructor() {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'CustomerFeedback',
-            inject(CustomerFeedbackViewState),
-        );
+        super();
 
         const langChange = toSignal(this.translate.onLangChange);
         this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
@@ -104,10 +97,6 @@ export class CustomerFeedbackView extends LeafView<CustomerFeedbackViewState> im
     public readonly feedbacks = this.state.feedbacks;
 
     public readonly starClassNames = this.state.starClassNames;
-
-    public ngOnInit(): void {
-        this.onInit();
-    }
 
     public ngOnDestroy(): void {
         this.subscription.unsubscribe();

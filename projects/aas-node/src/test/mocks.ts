@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect, jest } from '@jest/globals';
+import { expect, Mocked, vitest } from 'vitest';
 
-type Func = (...args: any[]) => any;
+type Func = () => any;
 
 export type SpyObjMethodNames<T = undefined> = T extends undefined
     ? ReadonlyArray<string> | { [methodName: string]: any }
@@ -22,15 +22,15 @@ export type SpyObjPropertyNames<T = undefined> = T extends undefined
 export function createSpyObj<T extends object>(
     methodNames: SpyObjMethodNames<T>,
     propertyNames?: SpyObjPropertyNames<T>,
-): jest.Mocked<T> {
+): Mocked<T> {
     const obj: { [key: string]: unknown } = {};
     if (Array.isArray(methodNames)) {
         for (const methodName of methodNames) {
-            obj[methodName as string] = jest.fn();
+            obj[methodName as string] = vitest.fn();
         }
     } else {
         for (const methodName in methodNames) {
-            obj[methodName] = jest.fn();
+            obj[methodName] = vitest.fn();
         }
     }
 
@@ -46,11 +46,11 @@ export function createSpyObj<T extends object>(
         }
     }
 
-    return obj as jest.Mocked<T>;
+    return obj as Mocked<T>;
 }
 
-export type DoneFn = (...args: any[]) => void;
+export type DoneFn = () => void;
 
-export function fail() {
+export function fail(): void {
     expect(false).toBe(true);
 }

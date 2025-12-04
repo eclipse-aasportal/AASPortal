@@ -8,28 +8,18 @@
 
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    inject,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { HandoverDocumentation } from './handover-documentation';
 import { LeafView } from '../leaf-view';
-import { VIEW_ROUTES } from '../../views/views-routes';
 import { HandoverDocumentationViewState } from './handover-documentation-view.state';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 /**
  * Provides a view for submodels that correspond to the IDTA specification "Handover documentation".
@@ -38,21 +28,17 @@ import { encodeBase64Url } from '../../utilities';
     selector: 'fhg-handover-documentation-view',
     templateUrl: './handover-documentation-view.html',
     styleUrls: ['./handover-documentation-view.scss'],
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HandoverDocumentation' }],
     imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HandoverDocumentationView extends LeafView<HandoverDocumentationViewState> implements OnInit, OnDestroy {
+export class HandoverDocumentationView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly state = inject(HandoverDocumentationViewState);
 
     public constructor() {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'HandoverDocumentation',
-            inject(HandoverDocumentationViewState),
-        );
+        super();
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -71,10 +57,6 @@ export class HandoverDocumentationView extends LeafView<HandoverDocumentationVie
      * The state of the handover documentation.
      */
     public readonly handoverDocumentationState = this.state.handoverDocumentationState;
-
-    public ngOnInit(): void {
-        this.onInit();
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

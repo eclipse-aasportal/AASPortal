@@ -9,28 +9,13 @@
 import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { FavoriteComponent } from '../../../lib/components/favorite/favorite.component';
 import { AuthService } from '../../../lib/components/auth/auth.service';
-import { SecuredImageComponent } from '../../../lib/components/secured-image/secured-image.component';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { createSpyObj, FakeLoader } from '../../mocks';
-
-@Component({
-    selector: 'fhg-img',
-    template: '<div></div>',
-    styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class TestSecuredImageComponent {
-    public readonly src = input<string>('');
-    public readonly alt = input<string | undefined>();
-    public readonly class = input<string | undefined>();
-    public readonly width = input<number | undefined>();
-    public readonly height = input<number | undefined>();
-}
 
 describe('FavoriteComponent', () => {
     let api: jest.Mocked<EndpointsApi>;
@@ -64,11 +49,6 @@ describe('FavoriteComponent', () => {
                 }),
             ],
         }).compileComponents();
-
-        TestBed.overrideComponent(FavoriteComponent, {
-            remove: { imports: [SecuredImageComponent] },
-            add: { imports: [TestSecuredImageComponent] },
-        });
     });
 
     it('should create', () => {

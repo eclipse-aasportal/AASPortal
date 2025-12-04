@@ -8,9 +8,9 @@
 
 import 'reflect-metadata';
 import fs from 'fs';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import os from 'os';
-import { resolve } from 'path';
+import { fileURLToPath } from 'url';
 import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
@@ -21,18 +21,18 @@ import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
-import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { PackageRepository } from '../../app/package-repository.js';
 import { encodeBase64Url } from '../../app/utilities.js';
+import { createSpyObj } from '../mocks.js';
 
 describe('PackagesController', () => {
     let app: Express;
     let logger: Logger;
-    let authentication: jest.Mocked<Authentication>;
-    let variable: jest.Mocked<Variable>;
-    let repository: jest.Mocked<PackageRepository>;
+    let authentication: Mocked<Authentication>;
+    let variable: Mocked<Variable>;
+    let repository: Mocked<PackageRepository>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -59,7 +59,7 @@ describe('PackagesController', () => {
 
     it('POST: /packages', async () => {
         repository.add.mockResolvedValue('1');
-        const src = resolve('./src/test/assets/example-motor.aasx');
+        const src = fileURLToPath(new URL('../assets/example-motor.aasx', import.meta.url));
         const response = await request(app)
             .post('/api/v3/packages')
             .set('Authorization', `Bearer ${getToken()}`)
@@ -81,7 +81,7 @@ describe('PackagesController', () => {
     });
 
     it('GET: /packages/{packageId}', async () => {
-        const file = resolve('./src/test/assets/example-motor.aasx');
+        const file = fileURLToPath(new URL('../assets/example-motor.aasx', import.meta.url));
         repository.getPackage.mockResolvedValue({
             filename: 'example-motor.aasx',
             value: 'example-motor.aasx',
@@ -99,7 +99,7 @@ describe('PackagesController', () => {
 
     it('PUT: /packages/{packageId}', async () => {
         repository.update.mockResolvedValue(void 0);
-        const src = resolve('./src/test/assets/example-motor.aasx');
+        const src = fileURLToPath(new URL('../assets/example-motor.aasx', import.meta.url));
         const response = await request(app)
             .put('/api/v3/packages/MA')
             .set('Authorization', `Bearer ${getToken()}`)

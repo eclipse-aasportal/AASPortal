@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { resolve } from 'path';
 import fs from 'fs';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import os from 'os';
 import { container } from 'tsyringe';
+import { fileURLToPath } from 'url';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
@@ -23,18 +23,18 @@ import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
-import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { SubmodelRepository } from '../../app/submodel-repository.js';
 import { encodeBase64Url } from '../../app/utilities.js';
+import { createSpyObj } from '../mocks.js';
 
 describe('SubmodelsController', () => {
     let app: Express;
     let logger: Logger;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
-    let repository: jest.Mocked<SubmodelRepository>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
+    let repository: Mocked<SubmodelRepository>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -126,7 +126,7 @@ describe('SubmodelsController', () => {
     });
 
     it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        const file = resolve('./src/test/assets/Test.pdf');
+        const file = fileURLToPath(new URL('../assets/Test.pdf', import.meta.url));
         const fileResult: FileResult = {
             filename: 'Test.pdf',
             value: 'Test.pdf',
@@ -154,7 +154,7 @@ describe('SubmodelsController', () => {
         const response = await request(app)
             .put(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/attachment`)
             .set('Authorization', `Bearer ${getToken()}`)
-            .attach('file', resolve('./src/test/assets/Test.pdf'));
+            .attach('file', fileURLToPath(new URL('../assets/Test.pdf', import.meta.url)));
 
         expect(response.statusCode).toBe(204);
         expect(repository.updateSubmodelElementAttachment).toHaveBeenCalled();

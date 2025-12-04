@@ -13,7 +13,6 @@
         ],
         "types": [
             "node",
-            "jest"
         ]
     }
 }

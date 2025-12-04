@@ -7,122 +7,157 @@
  *****************************************************************************/
 
 import { jest } from '@jest/globals';
-import { DOCUMENT, provideZonelessChangeDetection } from '@angular/core';
+import { Component, DOCUMENT, effect, inject, Injectable, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
-import { Tree, TreeComponent, TreeNode, TreeService } from '../../../lib/components/tree/tree.component';
+import { noop } from 'aas-core';
+import { FakeLoader } from '../../mocks';
+import { TreeComponent, TreeId, TreeNode, TreeResult } from '../../../lib/components/tree/tree.component';
+
+function createComposite(id: string, parent: string | null): TreeNode {
+    return {
+        parentId: parent,
+        id,
+        path: id,
+        level: id.split('.').length - 1,
+        name: id,
+        expanded: false,
+        selected: false,
+        highlighted: false,
+        loaded: false,
+        isLeaf: false,
+        hasChildren: true,
+        symbolType: 'text',
+        symbol: id,
+        type: 'text',
+        options: {},
+    };
+}
+
+function createLeaf(id: string, parent: string | null): TreeNode {
+    return {
+        parentId: parent,
+        id,
+        path: id,
+        level: id.split('.').length - 1,
+        name: id,
+        selected: false,
+        highlighted: false,
+        isLeaf: true,
+        symbolType: 'text',
+        symbol: id,
+        type: 'text',
+        options: {},
+    };
+}
+
+@Injectable()
+export class TreeSearch {
+    public readonly matchIndex = signal(-1);
+}
+
+@Component({})
+class TestTreeComponent extends TreeComponent {
+    private readonly treeSearch = inject(TreeSearch);
+
+    public constructor() {
+        super();
+
+        const tree = [createComposite('A', null), createComposite('B', null)];
+        this.update({ tree });
+
+        effect(() => {
+            this.update({ matchIndex: this.treeSearch.matchIndex() });
+        });
+    }
+
+    public override getRouterLink(node: TreeNode): unknown[] | undefined {
+        return [node.name];
+    }
+
+    public override getUrl(node: TreeNode): string | undefined {
+        return node.name;
+    }
+
+    public override ngAfterViewInit(): void {
+    }
+
+    protected override loadChildren(parent: TreeNode): TreeResult | undefined {
+        switch (parent.path) {
+            case 'A':
+                return { parent, children: [createLeaf('A.1', 'A'), createComposite('A.2', 'A')] };
+
+            case 'B':
+                return { parent, children: [createLeaf('B.1', 'B'), createLeaf('B.2', 'B')] };
+
+            case 'A.2':
+                return {
+                    parent,
+                    children: [
+                        createLeaf('A.2.1', 'A.2'),
+                        createComposite('A.2.2', 'A.2'),
+                        createComposite('A.2.3', 'A.2'),
+                    ],
+                };
+
+            case 'A.2.2':
+                return { parent, children: [createLeaf('A.2.2.1', 'A.2.2')] };
+
+            case 'A.2.3':
+                return { parent, children: [createLeaf('A.2.3.1', 'A.2.3')] };
+
+            default:
+                throw new Error(`Unknown parent ${parent.path}`);
+        }
+    }
+
+    protected override loaded(node: TreeNode): void {
+        noop(node);
+    }
+
+    protected override start(
+        nodes: TreeNode<TreeId, Record<string, unknown>>[],
+        searchExpression: string | undefined,
+    ): void {
+        noop(nodes, searchExpression);
+    }
+}
 
 describe('TreeComponent', () => {
     let component: TreeComponent;
     let fixture: ComponentFixture<TreeComponent>;
-    let service: TreeService;
-    let tree: Tree;
-
-    function createComposite(id: string, parent: string | null): TreeNode {
-        return {
-            parent,
-            id,
-            path: id,
-            level: id.split('.').length - 1,
-            name: id,
-            expanded: false,
-            selected: false,
-            highlighted: false,
-            loaded: false,
-            isLeaf: false,
-            hasChildren: true,
-            symbolType: 'text',
-            symbol: id,
-            type: 'text',
-            options: {},
-        };
-    }
-
-    function createLeaf(id: string, parent: string | null): TreeNode {
-        return {
-            parent,
-            id,
-            path: id,
-            level: id.split('.').length - 1,
-            name: id,
-            expanded: false,
-            selected: false,
-            highlighted: false,
-            loaded: false,
-            isLeaf: true,
-            hasChildren: false,
-            symbolType: 'text',
-            symbol: id,
-            type: 'text',
-            options: {},
-        };
-    }
+    let treeSearch: TreeSearch;
 
     beforeEach(async () => {
-        service = {
-            getThumbnail: function (node: TreeNode): string {
-                return node.symbol ?? '';
-            },
-
-            loadChildren: function (parent: TreeNode): { parent: TreeNode; children: TreeNode[] } {
-                switch (parent.path) {
-                    case 'A':
-                        return { parent, children: [createLeaf('A.1', 'A'), createComposite('A.2', 'A')] };
-
-                    case 'B':
-                        return { parent, children: [createLeaf('B.1', 'B'), createLeaf('B.2', 'B')] };
-
-                    case 'A.2':
-                        return {
-                            parent,
-                            children: [
-                                createLeaf('A.2.1', 'A.2'),
-                                createComposite('A.2.2', 'A.2'),
-                                createComposite('A.2.3', 'A.2'),
-                            ],
-                        };
-
-                    case 'A.2.2':
-                        return { parent, children: [createLeaf('A.2.2.1', 'A.2.2')] };
-
-                    case 'A.2.3':
-                        return { parent, children: [createLeaf('A.2.3.1', 'A.2.3')] };
-
-                    default:
-                        throw new Error(`Unknown parent ${parent.path}`);
-                }
-            },
-
-            loaded: (node: TreeNode): void  => {},
-
-            getRouterLink: function (node: TreeNode): unknown[] | undefined {
-                return [node.name];
-            },
-
-            getUrl: function (node: TreeNode): string {
-                return node.name;
-            },
-        };
-
-        tree = [createComposite('A', null), createComposite('B', null)];
-
         await TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-            imports: [TreeComponent],
+            providers: [
+                {
+                    provide: TreeSearch,
+                    useClass: TreeSearch
+                },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
+                provideZonelessChangeDetection(),
+            ],
+            imports: [TestTreeComponent],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TreeComponent);
-        fixture.componentRef.setInput('service', service);
-        fixture.componentRef.setInput('tree', tree);
-        fixture.componentRef.setInput('selectionMode', 'single');
+        fixture = TestBed.createComponent(TestTreeComponent);
+        fixture.componentRef.setInput('allowSelection', true);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        treeSearch = TestBed.inject(TreeSearch);
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
         expect(component.expanded()).toBe(false);
-        expect(component.selectionMode()).toBe('single');
+        expect(component.allowSelection()).toBe(true);
         expect(component.nodes().map(item => item.path)).toEqual(['A', 'B']);
     });
 
@@ -151,11 +186,11 @@ describe('TreeComponent', () => {
 
     it('should expand/collapse "A"', () => {
         component.expand(component.nodes()[0]);
-        expect(component.nodes()[0].expanded).toBe(true);
+        expect(component.isExpanded(component.nodes()[0])).toBe(true);
         expect(component.nodes().map(item => item.name)).toEqual(['A', 'A.1', 'A.2', 'B']);
 
         component.collapse(component.nodes()[0]);
-        expect(component.nodes()[0].expanded).toBe(false);
+        expect(component.isExpanded(component.nodes()[0])).toBe(false);
         expect(component.nodes().map(item => item.name)).toEqual(['A', 'B']);
     });
 
@@ -164,11 +199,33 @@ describe('TreeComponent', () => {
         const A_2_3_1 = 7;
         const document = TestBed.inject(DOCUMENT);
         jest.spyOn(document, 'getElementById');
-        component.highlight(7);
+        treeSearch.matchIndex.set(10);
+        fixture.detectChanges();
         jest.runAllTimers();
         expect(component.nodes()[6].name).toBe('A.2.3.1');
         expect(component.nodes()[6].highlighted).toBe(true);
+        expect(component.highlighted()?.name).toBe('A.2.3.1');
         expect(document.getElementById).toHaveBeenCalledWith('A.2.3.1');
         jest.useRealTimers();
+    });
+
+    it('should select/deselect all node', () => {
+        component.expand();
+        component.toggleSelection();
+        expect(component.nodes().every(node => node.selected)).toBe(true);
+        expect(component.selectedNodes().length).toBe(component.nodes().length);
+        component.toggleSelection();
+        expect(component.nodes().every(node => !node.selected));
+        expect(component.selectedNodes().length).toBe(0);
+    });
+
+    it('should select/deselect a tree node', () => {
+        component.expand();
+        component.toggleSelection(component.nodes()[4]);
+        expect(component.nodes()[4].selected).toBe(true);
+        expect(component.selectedNodes()).toContain(component.nodes()[4]);
+        component.toggleSelection(component.nodes()[4]);
+        expect(component.nodes()[4].selected).toBe(false);
+        expect(component.selectedNodes()).not.toContain(component.nodes()[4]);
     });
 });
