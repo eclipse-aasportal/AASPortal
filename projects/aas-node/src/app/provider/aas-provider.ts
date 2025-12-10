@@ -16,7 +16,6 @@ import {
     WebSocketData,
     AASNodeMessage,
     aas,
-    selectElement,
     AASCursor,
     AASPagedResult,
     AASEndpoint,
@@ -27,6 +26,7 @@ import {
     isFile,
     isBlob,
     convertToString,
+    selectReferable,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -193,7 +193,7 @@ export class AASProvider {
                 }
             }
 
-            const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, idShortPath);
+            const dataElement: aas.DataElement | undefined = selectReferable(document.content, smId, idShortPath);
             if (!dataElement) {
                 throw new Error('DataElement not found.');
             }
@@ -320,7 +320,13 @@ export class AASProvider {
         this.resetRequested = true;
         await this.index.clear();
         this.cache.clear();
-        for (const task of [...this.taskHandler.tasks]) {
+        const tasks = [...this.taskHandler.tasks];
+        if (tasks.length === 0) {
+            await this.restart();
+            return;
+        }
+
+        for (const task of tasks) {
             if (task.state === 'idle' && task.owner === this) {
                 this.taskHandler.delete(task.id);
             }
@@ -509,7 +515,6 @@ export class AASProvider {
     private async restart(): Promise<void> {
         this.resetRequested = false;
         await this.initializeIndex();
-        this.cache.clear();
         await this.startScan();
         this.logger.info('AASNode configuration restored.');
     }

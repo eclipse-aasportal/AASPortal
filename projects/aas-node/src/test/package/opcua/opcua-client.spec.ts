@@ -191,9 +191,9 @@ describe('OpcuaClient', () => {
                         } as aas.Property,
                     },
                 ],
-                parent: {
-                    type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                path: {
+                    id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                    idShortPath: 'sum',
                 },
             };
 
@@ -233,9 +233,9 @@ describe('OpcuaClient', () => {
                         } as aas.Property,
                     },
                 ],
-                parent: {
-                    type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                path: {
+                    id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                    idShortPath: 'sum',
                 },
             };
 

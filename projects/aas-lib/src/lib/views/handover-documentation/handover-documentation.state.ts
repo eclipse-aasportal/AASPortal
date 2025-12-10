@@ -202,7 +202,7 @@ export class HandoverDocumentationState extends ChildState {
                         )) {
                             if (isSubmodelElementList(documentVersions) && documentVersions.value) {
                                 //Version 2.0 supports multiple Versions for a single Document
-                                //Add every Version seperately
+                                //Add every Version separately
                                 for (const documentVersion of documentVersions.value) {
                                     const item: DocumentationItem = {
                                         preview: this.getPreview(getReferable(documentVersion, 'PreviewFile')),

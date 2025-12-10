@@ -14,8 +14,6 @@ import {
     aas,
     AASEndpoint,
     ApplicationError,
-    getIdShortPath,
-    selectSubmodel,
     noop,
     isConceptDescription,
     traverse,
@@ -139,10 +137,14 @@ export class ApiClientV3 extends ApiClient {
     }
 
     public override async openRead(id: string, file: aas.File): Promise<NodeJS.ReadableStream> {
+        if (!file.path) {
+            throw new Error('Invalid argument "file".');
+        }
+
         const aasId = encodeBase64Url(id);
-        const smId = encodeBase64Url(file.parent!.keys[0].value);
-        const path = getIdShortPath(file);
-        const url = this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${path}/attachment`);
+        const smId = encodeBase64Url(file.path.id);
+        const idShortPath = file.path.idShortPath;
+        const url = this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}/attachment`);
         return await this.http.getResponse(url, this.endpoint.headers);
     }
 
@@ -181,13 +183,13 @@ export class ApiClientV3 extends ApiClient {
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
-        if (!operation.parent) {
-            throw new Error('Invalid operation.');
+        if (!operation.path) {
+            throw new Error('Invalid argument ""operation.');
         }
 
         const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
-        const smId = encodeBase64Url(selectSubmodel(env, operation)!.id);
-        const path = getIdShortPath(operation);
+        const smId = encodeBase64Url(operation.path.id);
+        const idShortPath = operation.path.idShortPath;
         const request: OperationRequest = {};
 
         if (operation.inputVariables) {
@@ -200,7 +202,7 @@ export class ApiClientV3 extends ApiClient {
 
         const result: OperationResult = JSON.parse(
             await this.http.post(
-                this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${path}/invoke`),
+                this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}/invoke`),
                 request,
                 this.endpoint.headers,
             ),

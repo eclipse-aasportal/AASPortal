@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, afterEach, Mocked, vitest } from 'vitest';
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
-import { aas, selectElement } from 'aas-core';
+import { aas, selectReferable } from 'aas-core';
 import { ApiClient } from '../../../app/client/api/api-client.js';
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';
@@ -106,7 +106,7 @@ describe('ApiClientV0', function () {
             await expect(
                 client.openRead(
                     aasEnvironment.assetAdministrationShells[0].idShort,
-                    selectElement(aasEnvironment, 'Documentation', 'OperatingManual.DigitalFile_PDF')!,
+                    selectReferable(aasEnvironment, 'Documentation', 'OperatingManual.DigitalFile_PDF')!,
                 ),
             ).resolves.toBeTruthy();
         });

@@ -44,7 +44,7 @@ export abstract class View {
     /** The version of the current active submodel. */
     public abstract readonly version: Signal<string | undefined>;
 
-    public openAASOverview() {
+    public openAASOverview(): string | unknown[] {
         const document = this.document();
         if (document === undefined) {
             return '';

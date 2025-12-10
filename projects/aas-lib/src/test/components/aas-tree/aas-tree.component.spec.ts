@@ -107,8 +107,8 @@ describe('AASTreeComponent', () => {
         expect(component.isExpanded(nodes[0])).toBe(true);
         expect(nodes[1].name).toEqual('Identification');
         expect(nodes[2].name).toEqual('TechnicalData');
-        expect(nodes[3].name).toEqual('Documentation');
-        expect(nodes[4].name).toEqual('OperationalData');
+        expect(nodes[3].name).toEqual('OperationalData');
+        expect(nodes[4].name).toEqual('Documentation');
     });
 
     describe('toggleSelection', () => {

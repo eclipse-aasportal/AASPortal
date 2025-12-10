@@ -9,7 +9,7 @@
 import { Injectable, WritableSignal, computed, signal, untracked } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { EMPTY, map, mergeMap, Observable, skipWhile, tap } from 'rxjs';
-import { aas, AASDocument, getIdShortPath, getUnit, LiveNode } from 'aas-core';
+import { aas, AASDocument, getUnit, LiveNode } from 'aas-core';
 import { AuthService, encodeBase64Url } from 'aas-lib';
 
 import {
@@ -289,18 +289,18 @@ export class DashboardService {
 
     private addScatterChart(document: AASDocument, page: DashboardPage, blobs: aas.Blob[]): void {
         for (const blob of blobs) {
-            if (blob.parent) {
+            if (blob.path) {
                 const label = blob.idShort;
                 const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
-                const smId = encodeBase64Url(blob.parent.keys[0].value);
-                const path = getIdShortPath(blob);
+                const smId = encodeBase64Url(blob.path.id);
+                const idShortPath = blob.path.idShortPath;
                 const source: DashboardSource = {
                     label: blob.idShort,
                     color: this.createRandomColor(),
                     element: blob,
                     node: null,
-                    url: `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`,
+                    url: `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/blobs/${idShortPath}/value`,
                 };
 
                 const item: DashboardChartItem = {

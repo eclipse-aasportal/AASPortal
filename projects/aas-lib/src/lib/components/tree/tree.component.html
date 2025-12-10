@@ -92,22 +92,16 @@
                                 </div>
                             }
 
-                            @if (node.type === 'text') {
-                                <div class="ms-2 flex-grow-1 text-nowrap">
+                            <div class="ms-2 flex-grow-1 text-nowrap">
+                                @if (node.type === 'text') {
                                     <b>{{ node.name }}</b>
-                                    <span class="text-secondary d-none d-lg-inline">&nbsp;[{{ node.suffix }}]</span>
-                                </div>
-                            } @else if (node.type === 'routerLink') {
-                                <div class="ms-2 flex-grow-1 text-nowrap">
+                                } @else if (node.type === 'routerLink') {
                                     <a [routerLink]="getRouterLink(node)">{{ node.name }}</a>
-                                    <span class="text-secondary d-none d-lg-inline">&nbsp;[{{ node.suffix }}]</span>
-                                </div>
-                            } @else {
-                                <div class="ms-2 flex-grow-1 text-nowrap">
+                                } @else {
                                     <a [href]="getUrl(node)">{{ node.name }}</a>
-                                    <span class="text-secondary d-none d-lg-inline">&nbsp;[{{ node.suffix }}]</span>
-                                </div>
-                            }
+                                }
+                                <span class="text-secondary d-none d-xl-inline mx-2">{{ node.suffix | max: 60 }}</span>
+                            </div>
                         </div>
                     </td>
                     @if (enableValue()) {

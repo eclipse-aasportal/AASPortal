@@ -6,8 +6,6 @@
  *
  *****************************************************************************/
 
-import { aas, isIdentifiable } from 'aas-core';
-
 enum CommandState {
     Idle,
     Executed,
@@ -63,36 +61,4 @@ export abstract class Command {
     protected abstract onRedo(): void;
 
     protected abstract onAbort(): void;
-
-    protected createReference(referable: aas.Referable): aas.Reference {
-        let reference: aas.Reference | undefined;
-        if (isIdentifiable(referable)) {
-            reference = {
-                type: 'ModelReference',
-                keys: [
-                    {
-                        value: referable.id,
-                        type: referable.modelType as aas.KeyTypes,
-                    },
-                ],
-            };
-        } else if (referable.parent) {
-            reference = {
-                type: 'ModelReference',
-                keys: [
-                    ...referable.parent.keys.map(key => ({ ...key })),
-                    {
-                        type: referable.modelType as aas.KeyTypes,
-                        value: referable.idShort,
-                    },
-                ],
-            };
-        }
-
-        if (!reference) {
-            throw new Error(`${referable.idShort} is not referable.`);
-        }
-
-        return reference;
-    }
 }

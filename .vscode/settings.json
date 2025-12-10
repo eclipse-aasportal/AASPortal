@@ -86,7 +86,7 @@
     "[html]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "plantuml.server": "http://localhost:8081",
+    "plantuml.server": "http://localhost:8080",
     "plantuml.render": "PlantUMLServer",
     "[plantuml]": {
         "editor.defaultFormatter": "jebbs.plantuml"

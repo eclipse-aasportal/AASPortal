@@ -12,16 +12,13 @@ import { AASDocument } from '../lib/types.js';
 import * as aas from '../lib/aas.js';
 import { testProperty, testSubmodel, testSubmodelElementCollection } from './assets/samples.js';
 import { aasEnvironment } from './assets/aas-environment.js';
+import { createSpyObj } from './mocks.js';
 import {
     equalDocument,
-    getAbsolutePath,
     getChildren,
-    getIdShortPath,
     getIEC61360Content,
-    getParent,
     isAssetAdministrationShell,
     isBlob,
-    isDescendant,
     isMultiLanguageProperty,
     isProperty,
     isReferenceElement,
@@ -29,11 +26,10 @@ import {
     isSubmodelElement,
     isSubmodelElementCollection,
     isSubmodelElementList,
-    selectElement,
     selectReferable,
     selectSubmodel,
+    splitIdShortPath,
 } from '../lib/document.js';
-import { createSpyObj } from './mocks.js';
 
 describe('Document', () => {
     describe('equalDocument', () => {
@@ -262,7 +258,7 @@ describe('Document', () => {
 
         beforeEach(async () => {
             env = aasEnvironment;
-            property = selectElement(env, 'Documentation', 'OperatingManual.DocumentClassificationSystem')!;
+            property = selectReferable(env, 'Documentation', 'OperatingManual.DocumentClassificationSystem')!;
         });
 
         it('', () => {
@@ -270,7 +266,7 @@ describe('Document', () => {
         });
     });
 
-    describe('selectElement', () => {
+    describe('selectReferable', () => {
         let env: aas.Environment;
 
         beforeEach(async () => {
@@ -278,146 +274,23 @@ describe('Document', () => {
         });
 
         it('selects a Submodel', () => {
-            expect(selectElement(env, 'TechnicalData')).toBeDefined();
+            expect(selectReferable(env, 'TechnicalData')).toBeDefined();
         });
 
         it('selects a Property in a Submodel', () => {
-            expect(selectElement(env, 'TechnicalData', 'MaxTorque')).toBeDefined();
+            expect(selectReferable(env, 'TechnicalData', 'MaxTorque')).toBeDefined();
         });
 
         it('return undefined for an invalid path.', () => {
-            expect(selectElement(env, 'TechnicalData', 'Unknown')).toBeUndefined();
+            expect(selectReferable(env, 'TechnicalData', 'Unknown')).toBeUndefined();
         });
 
         it('selects "Documentation/OperatingManual/DocumentId"', () => {
-            expect(selectElement(env, 'Documentation', 'OperatingManual.DocumentId')).toBeDefined();
+            expect(selectReferable(env, 'Documentation', 'OperatingManual.DocumentId')).toBeDefined();
         });
     });
 
-    describe('getParent', () => {
-        let child: aas.Referable;
-        let parent: aas.Referable;
-
-        beforeEach(() => {
-            parent = selectElement(aasEnvironment, 'TechnicalData')!;
-            child = selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
-        });
-
-        it('gets the parent of a child', () => {
-            expect(getParent(aasEnvironment, child)).toEqual(parent);
-        });
-
-        it('returns "undefined" for an identifiable', () => {
-            expect(getParent(aasEnvironment, parent)).toBeUndefined();
-        });
-    });
-
-    describe('selectReferable', () => {
-        let env: aas.Environment;
-
-        beforeEach(() => {
-            env = aasEnvironment;
-        });
-
-        it('selects an AAS', () => {
-            const reference: aas.Reference = {
-                type: 'ModelReference',
-                keys: [
-                    {
-                        type: 'AssetAdministrationShell',
-                        value: 'http://customer.com/aas/9175_7013_7091_9168',
-                    },
-                ],
-            };
-
-            expect(selectReferable(env, reference)).toEqual(env.assetAdministrationShells[0]);
-        });
-
-        it('selects the "Documentation" submodel', () => {
-            const reference: aas.Reference = {
-                type: 'ModelReference',
-                keys: [
-                    {
-                        type: 'Submodel',
-                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                    },
-                ],
-            };
-
-            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
-            expect(selectReferable(env, reference)).toEqual(submodel);
-        });
-
-        it('selects the "DocumentId" property', () => {
-            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            const reference: aas.Reference = {
-                type: 'ModelReference',
-                keys: [
-                    {
-                        type: 'Submodel',
-                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                    },
-                    {
-                        type: 'SubmodelElementCollection',
-                        value: 'OperatingManual',
-                    },
-                    {
-                        type: 'Property',
-                        value: 'DocumentId',
-                    },
-                ],
-            };
-
-            expect(selectReferable(env, reference)).toEqual(property);
-        });
-    });
-
-    describe('getParent', () => {
-        let env: aas.Environment;
-
-        beforeEach(() => {
-            env = aasEnvironment;
-        });
-
-        it('returns "OperatingManual" as parent of "DocumentId"', () => {
-            const collection: aas.SubmodelElementCollection = selectElement(env, 'Documentation', 'OperatingManual')!;
-            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(getParent(env, property)).toEqual(collection);
-        });
-
-        it('returns "undefined" while "Documentation" has no parent', () => {
-            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
-            expect(getParent(env, submodel)).toBeUndefined();
-        });
-    });
-
-    describe('isDescendent', () => {
-        let env: aas.Environment;
-
-        beforeEach(() => {
-            env = aasEnvironment;
-        });
-
-        it('indicates that "DocumentId" is a descendant of "OperatingManual"', () => {
-            const collection: aas.SubmodelElementCollection = selectElement(env, 'Documentation', 'OperatingManual')!;
-            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(isDescendant(env, collection, property)).toBeTruthy();
-        });
-
-        it('indicates that "DocumentId" is a descendant of "Documentation"', () => {
-            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
-            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            expect(isDescendant(env, submodel, property)).toBeTruthy();
-        });
-
-        it('indicates that "MaxTorque" is not a descendant of "Documentation"', () => {
-            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
-            const property: aas.Property = selectElement(env, 'TechnicalData', 'MaxTorque')!;
-            expect(isDescendant(env, submodel, property)).toBeFalsy();
-        });
-    });
-
-    describe('selectElement', () => {
+    describe('selectSubmodel', () => {
         let env: aas.Environment;
 
         beforeEach(() => {
@@ -425,31 +298,27 @@ describe('Document', () => {
         });
 
         it('return the submodel to which "DocumentId" belongs.', () => {
-            const property: aas.Property = selectElement(env, 'Documentation', 'OperatingManual.DocumentId')!;
-            const submodel: aas.Submodel = selectElement(env, 'Documentation')!;
+            const property: aas.Property = selectReferable(env, 'Documentation', 'OperatingManual.DocumentId')!;
+            const submodel: aas.Submodel = selectReferable(env, 'Documentation')!;
             expect(selectSubmodel(env, property)).toEqual(submodel);
         });
     });
 
-    describe('getAbsolutePath', () => {
-        it('gets the absolute path of "MaxTorque"', () => {
-            const property: aas.Property = selectElement(aasEnvironment, 'TechnicalData', 'MaxTorque')!;
-            expect(getAbsolutePath(property)).toEqual([
-                'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
-                'MaxTorque',
-            ]);
+    describe('splitIdShortPath', () => {
+        it('should split ""', () => {
+            expect(splitIdShortPath('')).toEqual([]);
         });
-    });
 
-    describe('getIdShortPath', () => {
-        it('gets the idShort path of "DocumentId"', () => {
-            const property: aas.Property = selectElement(
-                aasEnvironment,
-                'Documentation',
-                'OperatingManual.DocumentId',
-            )!;
+        it('should split "a"', () => {
+            expect(splitIdShortPath('a')).toEqual(['a']);
+        });
 
-            expect(getIdShortPath(property)).toEqual('OperatingManual.DocumentId');
+        it('should split "a[0]"', () => {
+            expect(splitIdShortPath('a[0]')).toEqual(['a', '0']);
+        });
+
+        it('should split "a.b.c[1][3].d[0].e"', () => {
+            expect(splitIdShortPath('a.b.c[1][3].d[0].e')).toEqual(['a', 'b', 'c', '1', '3', 'd', '0', 'e']);
         });
     });
 });

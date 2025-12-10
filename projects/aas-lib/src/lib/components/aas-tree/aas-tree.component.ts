@@ -28,7 +28,6 @@ import {
     extensionToMimeType,
     getAbbreviation,
     getChildren,
-    getIdShortPath,
     getLocaleValue,
     getSemanticId,
     isAnnotatedRelationshipElement,
@@ -48,7 +47,6 @@ import {
     LiveRequest,
     noop,
     normalize,
-    selectSubmodel,
     toDisplayValue,
     WebSocketData,
 } from 'aas-core';
@@ -60,6 +58,7 @@ import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } fr
 import { VIEW_ROUTES } from '../../views/views-routes';
 import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
 import { NotifyService } from '../notify/notify.service';
+import { MaxLengthPipe } from '../../pipes/max-length.pipe';
 import {
     Tree,
     TreeComponent,
@@ -97,7 +96,7 @@ const initialState: AASTreeData = {
  */
 @Component({
     selector: 'fhg-aas-tree',
-    imports: [FormsModule, RouterLinkWithHref],
+    imports: [FormsModule, RouterLinkWithHref, MaxLengthPipe],
     templateUrl: '../tree/tree.component.html',
     styleUrl: '../tree/tree.component.scss',
     providers: [AASTreeSearch, AASTreeApi],
@@ -233,12 +232,12 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
 
             let index = 0;
             for (const child of getChildren(parent, env)) {
-                children.push(this.createNode(child, parent, level, index++, parent.idShort));
+                children.push(this.createNode(child, parent, level, index++, node.path));
             }
         } else {
             let index = 0;
             for (const child of getChildren(parent)) {
-                children.push(this.createNode(child, parent, level, index++, parent.idShort));
+                children.push(this.createNode(child, parent, level, index++, node.path));
             }
         }
 
@@ -258,7 +257,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     }
 
     private createTree(env: aas.Environment, shell: aas.AssetAdministrationShell): AASTree {
-        return [this.createNode(shell, null, 0, 0, shell.idShort)];
+        return [this.createNode(shell, null, 0, 0, '')];
     }
 
     private createNode(
@@ -283,12 +282,13 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         path: string,
     ): AASNode {
         const { value, valueType } = this.getValue(referable);
+        const idShort = referable.idShort ?? index.toString();
         return {
             id: referable,
             parentId: parent,
-            name: referable.idShort,
+            name: this.createName(parent, referable, index),
             suffix: this.getSuffix(referable),
-            path: `${path}.${referable.idShort}`,
+            path: path ? `${path}.${idShort}` : idShort,
             symbolType: 'text',
             symbol: getAbbreviation(referable.modelType),
             type: 'text',
@@ -312,6 +312,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         let hasChildren: boolean;
         let symbolType: TreeSymbolType;
         let symbol: string | undefined;
+        const idShort = referable.idShort ?? index.toString();
         if (isAssetAdministrationShell(referable)) {
             hasChildren = referable.submodels !== undefined && referable.submodels.length > 0;
             symbolType = 'image';
@@ -325,9 +326,9 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         return {
             id: referable,
             parentId: parent,
-            name: referable.idShort,
+            name: this.createName(parent, referable, index),
             suffix: this.getSuffix(referable),
-            path: `${path}.${referable.idShort}`,
+            path: path ? `${path}.${idShort}` : idShort,
             symbolType,
             symbol,
             type: this.determineType(referable),
@@ -342,6 +343,14 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         };
     }
 
+    private createName(parent: aas.Referable | null, referable: aas.Referable, index: number): string {
+        if (parent?.modelType === 'SubmodelElementList') {
+            return referable.idShort ? `[${index} : ${referable.idShort}]` : `[${index}]`;
+        }
+
+        return referable.idShort;
+    }
+
     private determineType(referable: aas.Referable): TreeType {
         if (isSubmodel(referable)) {
             if (findRouteForSubmodel(this.viewRoutes, referable, false)) {
@@ -352,7 +361,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         if (isAssetAdministrationShell(referable)) {
             const document = untracked(this.document);
             if (document) {
-                if ((findRouteForShell(this.viewRoutes, document).route, false)) {
+                if (findRouteForShell(this.viewRoutes, document, false)) {
                     return 'routerLink';
                 }
             }
@@ -377,79 +386,53 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     }
 
     private getSuffix(referable: aas.Referable | null): string {
+        let suffix: string | undefined;
         if (!referable) {
-            return '-';
-        }
-
-        if (isAssetAdministrationShell(referable)) {
-            return referable.id;
-        }
-
-        if (isMultiLanguageProperty(referable)) {
-            let value = '';
+            suffix = '';
+        } else if (isAssetAdministrationShell(referable)) {
+            suffix = referable.id;
+        } else if (isMultiLanguageProperty(referable)) {
             if (referable && Array.isArray(referable.value)) {
-                value += `${referable.value.map(item => item.language).join(', ')}`;
+                suffix = `${referable.value.map(item => item.language).join(', ')}`;
             }
-
-            return value;
-        }
-
-        if (isSubmodel(referable)) {
+        } else if (isSubmodel(referable)) {
             const sid = getSemanticId(referable);
-            return sid ? `sematicId: ${sid}` : `id: ${referable.id}`;
-        }
-
-        if (isProperty(referable)) {
+            suffix = sid ? `sematicId: ${sid}` : `id: ${referable.id}`;
+        } else if (isProperty(referable)) {
             const valueType = (referable as aas.Property).valueType;
-            return valueType ? (valueType.startsWith('xs:') ? valueType.substring(3) : valueType) : '-';
-        }
-
-        if (isBlob(referable)) {
-            return referable.contentType || '-';
-        }
-
-        if (isFile(referable)) {
+            if (valueType) {
+                suffix = valueType.startsWith('xs:') ? valueType.substring(3) : valueType;
+            }
+        } else if (isBlob(referable)) {
+            suffix = referable.contentType;
+        } else if (isFile(referable)) {
             if (referable.contentType) {
-                return referable.contentType;
+                suffix = referable.contentType;
+            } else if (referable.value) {
+                suffix = extensionToMimeType(referable.value);
             }
-
-            if (referable.value) {
-                return extensionToMimeType(referable.value) ?? '-';
-            }
-
-            return '-';
-        }
-
-        if (isRange(referable)) {
+        } else if (isRange(referable)) {
             const valueType = (referable as aas.Property).valueType;
-            return valueType ? (valueType.startsWith('xs:') ? valueType.substring(3) : valueType) : '-';
-        }
-
-        if (isSubmodelElementCollection(referable)) {
-            return referable.value ? `${referable.value.length}` : '0';
-        }
-
-        if (isSubmodelElementList(referable)) {
-            return referable.value ? `${referable.value.length}` : '0';
-        }
-
-        if (isAnnotatedRelationshipElement(referable)) {
-            return referable.annotations ? `${referable.annotations.length}` : '0';
-        }
-
-        if (isEntity(referable)) {
-            return referable.statements ? `${referable.statements.length}` : '0';
-        }
-
-        if (isOperation(referable)) {
-            return (
+            if (valueType) {
+                suffix = valueType.startsWith('xs:') ? valueType.substring(3) : valueType;
+            }
+        } else if (isSubmodelElementCollection(referable)) {
+            suffix = referable.value ? `${referable.value.length}` : '0';
+        } else if (isSubmodelElementList(referable)) {
+            suffix = referable.value ? `${referable.value.length}` : '0';
+        } else if (isAnnotatedRelationshipElement(referable)) {
+            suffix = referable.annotations ? `${referable.annotations.length}` : '0';
+        } else if (isEntity(referable)) {
+            suffix = referable.statements ? `${referable.statements.length}` : '0';
+        } else if (isOperation(referable)) {
+            suffix = (
                 (referable.inputVariables?.length ?? 0) +
                 (referable.inoutputVariables?.length ?? 0) +
                 (referable.outputVariables?.length ?? 0)
             ).toString();
         }
 
-        return '-';
+        return suffix ? '[' + suffix + ']' : '';
     }
 
     private getFileURL(file: aas.File): string | undefined {
@@ -458,17 +441,12 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         }
 
         const document = this.document();
-        if (!document?.content || !file.value) {
+        if (!document?.content || !file.value || !file.path) {
             return undefined;
         }
 
-        const submodel = selectSubmodel(document.content, file);
-        if (!submodel) {
-            return undefined;
-        }
-
-        const smId = encodeBase64Url(submodel.id);
-        const path = getIdShortPath(file);
+        const smId = encodeBase64Url(file.path.id);
+        const path = file.path.idShortPath;
         const name = encodeBase64Url(document.endpoint);
         const id = encodeBase64Url(document.id);
         return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
@@ -476,13 +454,13 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
 
     private getBlobUrl(blob: aas.Blob): string | undefined {
         const document = this.document();
-        if (!document || !blob.parent || this.live() === 'online') {
+        if (!document || !blob.path || this.live() === 'online') {
             return undefined;
         }
 
-        const smId = blob.parent.keys[0].value;
-        const idShortPath = getIdShortPath(blob);
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${idShortPath}/value`;
+        const smId = encodeBase64Url(blob.path.id);
+        const idShortPath = blob.path.idShortPath;
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/submodels/${smId}/submodel-elements/${idShortPath}/value`;
     }
 
     private getReferenceUrl(reference: aas.Reference | undefined): string | undefined {
@@ -588,7 +566,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         }
     }
 
-    private prepareOffline() {
+    private prepareOffline(): void {
         const nodes = new Set(this.map.values());
         const tree = untracked(this.tree).map(node => {
             if (nodes.has(node)) {

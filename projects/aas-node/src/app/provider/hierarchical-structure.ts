@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, aas, getSemanticId, isEntity, isRelationshipElement, selectReferable } from 'aas-core';
+import { AASDocument, aas, getReferenced, getSemanticId, isEntity, isRelationshipElement } from 'aas-core';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 
@@ -84,8 +84,8 @@ export class HierarchicalStructure extends HierarchicalStructureElement {
             return undefined;
         }
 
-        const first = selectReferable(this.env, hasPart.first);
-        const second = selectReferable(this.env, hasPart.second);
+        const first = getReferenced(this.env, hasPart.first);
+        const second = getReferenced(this.env, hasPart.second);
         if (isEntity(first) && isEntity(second)) {
             if (this.isNode(first)) {
                 return first;

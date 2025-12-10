@@ -9,7 +9,7 @@
 import FormData from 'form-data';
 import { createReadStream } from 'fs';
 import { basename } from 'path';
-import { aas, AASEndpoint, ApplicationError, getIdShortPath, noop, PagedResult, selectSubmodel } from 'aas-core';
+import { aas, AASEndpoint, ApplicationError, noop, PagedResult } from 'aas-core';
 
 import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2 } from 'aas-package';
 import { ApiClient } from './api-client.js';
@@ -109,8 +109,12 @@ export class ApiClientV1 extends ApiClient {
     }
 
     public async openRead(_: string, file: aas.File): Promise<NodeJS.ReadableStream> {
-        const smId = encodeBase64Url(file.parent!.keys[0].value);
-        const path = getIdShortPath(file);
+        if (!file.path) {
+            throw new Error('Invalid argument "file".');
+        }
+
+        const smId = encodeBase64Url(file.path.id);
+        const path = file.path.idShortPath;
         const url = this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}/attachment`);
         return await this.http.getResponse(url, this.endpoint.headers);
     }
@@ -153,13 +157,13 @@ export class ApiClientV1 extends ApiClient {
     }
 
     public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
-        if (!operation.parent) {
-            throw new Error('Invalid operation.');
+        if (!operation.path) {
+            throw new Error('Invalid argument ""operation.');
         }
 
         const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
-        const smId = encodeBase64Url(selectSubmodel(env, operation)!.id);
-        const path = getIdShortPath(operation);
+        const smId = encodeBase64Url(operation.path.id);
+        const idShortPath = operation.path.idShortPath;
         const writer = new JsonWriterV2();
         const opr: aasV2.Operation = writer.convert(operation);
         const request: OperationRequest = {
@@ -171,7 +175,7 @@ export class ApiClientV1 extends ApiClient {
 
         const result: OperationResult = JSON.parse(
             await this.http.post(
-                this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${path}/invoke`),
+                this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${idShortPath}/invoke`),
                 request,
                 this.endpoint.headers,
             ),

@@ -15,6 +15,7 @@ import {
     isSubmodel,
     isSubmodelElementCollection,
     isSubmodelElementList,
+    splitIdShortPath,
     types,
 } from 'aas-core';
 
@@ -196,7 +197,7 @@ export function processSerializationModifier(
  */
 export function selectSubmodelElement(submodel: aas.Submodel, idShortPath: string): aas.SubmodelElement | undefined {
     let current: aas.SubmodelElement | undefined = submodel;
-    const items = idShortPath.split('.').reverse();
+    const items = splitIdShortPath(idShortPath).reverse();
     while (items.length > 0) {
         const idShort = items.pop()!;
         switch (current.modelType) {
@@ -208,13 +209,26 @@ export function selectSubmodelElement(submodel: aas.Submodel, idShortPath: strin
                     element => element.idShort === idShort,
                 );
                 break;
-            case 'SubmodelElementList':
+            case 'SubmodelElementList': {
+                const value = (current as aas.SubmodelElementList).value ?? [];
+                const index = parseInt(idShort, 10);
+                if (index >= 0) {
+                    current = value[index];
+                    if (current) {
+                        break;
+                    }
+                }
+
                 current = (current as aas.SubmodelElementList).value?.find(element => element.idShort === idShort);
                 break;
+            }
             case 'AnnotatedRelationshipElement':
                 current = (current as aas.AnnotatedRelationshipElement).annotations?.find(
                     element => element.idShort === idShort,
                 );
+                break;
+            case 'Entity':
+                current = (current as aas.Entity).statements?.find(element => element.idShort === idShort);
                 break;
         }
 
