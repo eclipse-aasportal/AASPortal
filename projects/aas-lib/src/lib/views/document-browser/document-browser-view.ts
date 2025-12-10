@@ -6,28 +6,16 @@
  *
  *****************************************************************************/
 
-import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    inject,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { encodeBase64Url } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { BrowserComponent } from '../../components/browser/browser.component';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { VIEW_ROUTES } from '../../views/views-routes';
 import { DocumentBrowserViewState } from './document-browser-view.state';
 import { CompositeView } from '../composite-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';

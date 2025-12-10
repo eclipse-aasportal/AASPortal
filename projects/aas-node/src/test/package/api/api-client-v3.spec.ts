@@ -92,9 +92,9 @@ describe('ApiClientV3', () => {
             const operation: aas.Operation = {
                 idShort: 'noop',
                 modelType: 'Operation',
-                parent: {
-                    type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                path: {
+                    id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                    idShortPath: 'noop',
                 },
             };
 
@@ -112,9 +112,9 @@ describe('ApiClientV3', () => {
             const operation: aas.Operation = {
                 idShort: 'noop',
                 modelType: 'Operation',
-                parent: {
-                    type: 'ModelReference',
-                    keys: [{ type: 'Submodel', value: 'http://i40.customer.com/type/1/1/F13E8576F6488342' }],
+                path: {
+                    id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                    idShortPath: 'noop',
                 },
             };
 

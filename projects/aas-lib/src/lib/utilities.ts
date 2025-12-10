@@ -15,7 +15,6 @@ import {
     getLocaleValue,
     getPreferredName,
     AASDocument,
-    getIdShortPath,
     isSubmodelElementCollection,
     getReferable,
     isProperty,
@@ -141,7 +140,7 @@ export function isBase64(s: string): boolean {
 export function convertBlobToBase64Async(blob: Blob): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = (): void => {
             const base64WithDataUrlPrefix = reader.result as string;
             const index = base64WithDataUrlPrefix.indexOf(';base64,');
             const base64 = base64WithDataUrlPrefix.substring(index + 8);
@@ -237,17 +236,12 @@ export function isLangString(value: unknown): value is aas.LangString[] {
  * @returns The URL to the content of the specified file.
  */
 export function getUrl(document: AASDocument, file: aas.File | undefined): string | undefined {
-    if (file === undefined || file.value === undefined) {
+    if (file === undefined || file.value === undefined || !file.path) {
         return undefined;
     }
 
-    let smId = file.parent?.keys.at(0)?.value;
-    if (!smId) {
-        return undefined;
-    }
-
-    smId = encodeBase64Url(smId);
-    const path = getIdShortPath(file);
+    const smId = encodeBase64Url(file.path.id);
+    const path = file.path.idShortPath;
     const name = encodeBase64Url(document.endpoint);
     const id = encodeBase64Url(document.id);
     return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;

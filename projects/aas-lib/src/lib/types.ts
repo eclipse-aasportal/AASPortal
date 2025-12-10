@@ -137,10 +137,11 @@ export interface ApiUrl {
 
     /**
      * Gets the URL of a File resource.
-     * @param id - The AAS identifier.
-     * @param submodelId - The submodel identifier.
-     * @param idShortPath - The idShort path of the File element.
-     * @param endpoint - Optional the name of the AAS endpoint.
+     * @param endpoint In a multi endpoint environment the name of the endpoint.
+     * @param id The Asset Administration Shell identifier.
+     * @param submodelId The submodel identifier.
+     * @param idShortPath The idShort path of the File element.
+     * @param options Additional request options.
      */
-    getFileUrl(id: string, submodelId: string, idShortPath: string, endpoint?: string): string;
+    getFileUrl(endpoint: string | undefined, id: string, submodelId: string, idShortPath: string): string;
 }

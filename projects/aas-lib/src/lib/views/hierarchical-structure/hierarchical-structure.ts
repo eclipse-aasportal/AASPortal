@@ -16,12 +16,12 @@ import {
     AASDocument,
     getAbbreviation,
     getChildren,
+    getReferenced,
     getSemanticId,
     isEntity,
     isProperty,
     isRelationshipElement,
     noop,
-    selectReferable,
 } from 'aas-core';
 
 import { EndpointsApi } from '../../services/endpoints-api';
@@ -30,6 +30,7 @@ import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../vie
 import { VIEW_ROUTES } from '../views-routes';
 import { Tree, TreeComponent, TreeNode, TreeResult } from '../../components/tree/tree.component';
 import { RouterLinkWithHref } from '@angular/router';
+import { MaxLengthPipe } from '../../pipes/max-length.pipe';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 
@@ -57,7 +58,7 @@ const HAS_PART = 'https://admin-shell.io/idta/HierarchicalStructures/HasPart/1/0
     selector: 'fhg-hierarchical-structure',
     templateUrl: '../../components/tree/tree.component.html',
     styleUrl: '../../components/tree/tree.component.scss',
-    imports: [FormsModule, RouterLinkWithHref],
+    imports: [FormsModule, RouterLinkWithHref, MaxLengthPipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions> {
@@ -233,7 +234,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
             symbol: document!.thumbnail,
             type: 'routerLink',
             name: getDisplayName(shell, document?.content, this.currentLang()),
-            suffix: document?.id,
+            suffix: `[${document?.id}]`,
             options: { ...item.options, document },
         };
 
@@ -419,7 +420,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
                 children = getChildren(referable);
             }
         } else {
-            referable = selectReferable(untracked(this.env), reference);
+            referable = getReferenced(untracked(this.env), reference);
         }
 
         return isEntity(referable) ? referable : undefined;

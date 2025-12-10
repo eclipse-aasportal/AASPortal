@@ -73,7 +73,7 @@ export class OperationCallFormComponent {
     public initialize(document: AASDocument, operation: aas.Operation): void {
         this.document = document;
         this.operation = cloneDeep(operation);
-        delete this.operation.parent;
+        delete this.operation.path;
 
         try {
             this.name.set(this.operation.idShort);
@@ -143,7 +143,7 @@ export class OperationCallFormComponent {
 
         for (const sourceVariable of sources) {
             const source = sourceVariable.value;
-            delete source.parent;
+            delete source.path;
             if (isProperty(source)) {
                 delete source.nodeId;
                 const inputType = isBooleanType(source.valueType) ? 'checkbox' : 'text';

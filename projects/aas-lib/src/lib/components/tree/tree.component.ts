@@ -26,6 +26,7 @@ import {
 import { noop } from 'aas-core';
 import { WINDOW } from '../../services/window.service';
 import { ChildComponent } from '../child-component';
+import { MaxLengthPipe } from '../../pipes/max-length.pipe';
 
 export type TreeId = string | number | object;
 
@@ -78,7 +79,7 @@ export type TreeData<TId = TreeId, TOptions = Record<string, unknown>> = {
 
 @Component({
     selector: 'fhg-tree',
-    imports: [FormsModule, RouterLinkWithHref],
+    imports: [FormsModule, RouterLinkWithHref, MaxLengthPipe],
     templateUrl: './tree.component.html',
     styleUrl: './tree.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

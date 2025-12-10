@@ -34,7 +34,7 @@ export class CarbonFootprint extends ChildComponent {
 
     showDetails: boolean = this.isDigitalProductPassport;
 
-    public constructor(translate: TranslateService) {
+    public constructor() {
         super();
 
         effect(() => {

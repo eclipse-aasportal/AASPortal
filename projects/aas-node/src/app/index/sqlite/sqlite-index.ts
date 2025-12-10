@@ -479,6 +479,7 @@ export class SqliteIndex extends AASIndex {
                     }
                 }
                 this.db.exec('COMMIT');
+                resolve();
             } catch (error) {
                 this.db.exec('ROLLBACK');
                 reject(error);

@@ -81,6 +81,7 @@ export class BrowserState extends ChildState {
     /** The current Asset Administration Shell environment. */
     public readonly env = this.env$.asReadonly();
 
+    /** The current endpoint name. */
     public readonly endpoint = this.endpoint$.asReadonly();
 
     /**

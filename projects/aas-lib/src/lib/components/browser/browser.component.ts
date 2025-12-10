@@ -19,6 +19,7 @@ import {
     isFile,
     isReference,
     isSubmodel,
+    isSubmodelElementList,
 } from 'aas-core';
 
 import { ConceptDescriptionComponent } from '../concept-description/concept-description.component';
@@ -62,7 +63,7 @@ export class BrowserComponent extends ChildComponent {
             const env = this.env();
             if (env) {
                 const aas = env.assetAdministrationShells.at(0);
-                const current = aas ? this.createElement(aas, env) : null;
+                const current = aas ? this.createElement(aas, aas.idShort, env) : null;
                 this.state().update({ env, current, path: [] });
             } else {
                 this.state().update({
@@ -160,23 +161,36 @@ export class BrowserComponent extends ChildComponent {
 
         this.state().update({
             path: [...this.path(), current],
-            current: this.createElement(element.referable, untracked(this.state().env)),
+            current: this.createElement(element.referable, element.name, untracked(this.state().env)),
         });
     }
 
-    private createElement(referable: aas.Referable, env: aas.Environment): BrowserElement {
+    private createElement(referable: aas.Referable, name: string, env: aas.Environment): BrowserElement {
         const semanticId = getSemanticId(referable);
+        const modelType = referable.modelType;
         return {
-            name: referable.idShort,
+            name,
             referable,
             conceptDescription: semanticId ? getConceptDescription(env, semanticId) : undefined,
             properties: this.createProperties(referable),
             collectionName: upperFirst(collectionNames[referable.modelType]),
-            children: getChildren(referable, env).map(child => ({
-                name: child.idShort,
-                abbreviation: getAbbreviation(child.modelType) ?? '',
-                referable: child,
-            })),
+            children: getChildren(referable, env).map((child, index) => {
+                let name: string;
+                if (modelType === 'SubmodelElementList') {
+                    name = '[' + index + ']';
+                    if (child.idShort) {
+                        name += ' : ' + child.idShort;
+                    }
+                } else {
+                    name = child.idShort;
+                }
+
+                return {
+                    name,
+                    abbreviation: getAbbreviation(child.modelType) ?? '',
+                    referable: child,
+                };
+            }),
         };
     }
 
@@ -205,7 +219,7 @@ export class BrowserComponent extends ChildComponent {
                         name,
                         value,
                         kind: 'url',
-                        url: this.apiUrl.getFileUrl(aas.id, submodel.id, idShortPath, this.endpoint()),
+                        url: this.apiUrl.getFileUrl(this.endpoint(), aas.id, submodel.id, idShortPath),
                     },
                 ];
             }
@@ -254,13 +268,33 @@ export class BrowserComponent extends ChildComponent {
             return '';
         }
 
-        const path = this.state().path();
-        const idShortPath: string[] = [current.idShort];
-        for (let i = 2, n = path.length; i < n; i++) {
-            idShortPath.push(path[i].referable.idShort);
+        const path = [
+            ...this.state()
+                .path()
+                .map(item => item.referable),
+            current,
+            referable,
+        ];
+
+        if (path.length < 2) {
+            return '';
         }
 
-        idShortPath.push(referable.idShort);
-        return idShortPath.join('.');
+        let parent = path[1];
+        let idShortPath = '';
+        for (let i = 2, n = path.length; i < n; i++) {
+            const item = path[i];
+            if (!idShortPath) {
+                idShortPath = item.idShort;
+            } else if (isSubmodelElementList(parent)) {
+                idShortPath += '[' + parent.value!.indexOf(item) + ']';
+            } else {
+                idShortPath += '.' + item.idShort;
+            }
+
+            parent = item;
+        }
+
+        return idShortPath;
     }
 }
