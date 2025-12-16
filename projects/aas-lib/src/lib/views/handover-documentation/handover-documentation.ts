@@ -28,7 +28,7 @@ import { DocumentPopupComponent } from './document-popup/document-popup.componen
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HandoverDocumentation extends ChildComponent {
-    clickedItem: DocumentationItem = {
+    public clickedItem: DocumentationItem = {
         preview: '',
         title: 'test',
         subtitle: '',
@@ -58,7 +58,7 @@ export class HandoverDocumentation extends ChildComponent {
         });
     }
 
-    openModal(item: DocumentationItem) {
+    public openModal(item: DocumentationItem): void {
         const modalRef = this.modalService.open(DocumentPopupComponent, { size: 'md' });
         modalRef.componentInstance.body = item;
         modalRef.componentInstance.title = 'Document'; // optional
@@ -116,7 +116,7 @@ export class HandoverDocumentation extends ChildComponent {
         return item.files[0].name;
     }
 
-    public openFile(item: DocumentationItem) {
+    public openFile(item: DocumentationItem): void {
         if (!item) return;
         if (!item.files || item.files.length <= 0) return;
 

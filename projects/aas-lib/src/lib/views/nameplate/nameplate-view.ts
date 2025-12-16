@@ -80,7 +80,7 @@ export class NameplateView extends LeafView implements OnDestroy {
         this.toolbar.clear();
     }
 
-    public getSemanticId() {
+    public getSemanticId(): string | undefined {
         if (!this.submodel()) return '';
         return this.submodel()?.semanticId?.keys[0].value;
     }

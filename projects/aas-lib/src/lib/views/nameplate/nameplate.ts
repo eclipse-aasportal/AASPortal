@@ -8,11 +8,10 @@
 
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
-import { DataSheet } from '../../components/data-sheet/data-sheet';
 import { NameplateState } from './nameplate.state';
 import { ChildComponent } from '../../components/child-component';
 
@@ -22,13 +21,13 @@ import { ChildComponent } from '../../components/child-component';
  */
 @Component({
     selector: 'fhg-nameplate',
-    imports: [NgbAccordionModule, DataSheet, TranslateDirective],
+    imports: [NgbAccordionModule, TranslateDirective],
     templateUrl: './nameplate.html',
     styleUrl: './nameplate.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Nameplate extends ChildComponent implements AfterViewInit {
-    public constructor(translate: TranslateService) {
+    public constructor() {
         super();
 
         effect(() => {
@@ -45,7 +44,7 @@ export class Nameplate extends ChildComponent implements AfterViewInit {
         });
     }
 
-    ngAfterViewInit() {
+    public ngAfterViewInit(): void {
         this.dataSheets();
     }
 
@@ -58,51 +57,53 @@ export class Nameplate extends ChildComponent implements AfterViewInit {
     /** The presentation of the nameplate. */
     public readonly dataSheets = computed(() => this.state().dataSheets());
 
-    public getAssetId() {
+    public getAssetId(): string | undefined {
         if (!this.document()) return '';
 
         return this.document()?.assetId;
     }
 
-    public getAASIdShort() {
+    public getAASIdShort(): string | undefined {
         if (!this.document()) return '';
 
         return this.document()?.idShort;
     }
 
-    public checkNameplateValue(name: string | string[]) {
-        if (!this.dataSheets()) return '';
-        if (!this.dataSheets()[0]) return '';
+    public checkNameplateValue(name: string | string[]): boolean | string {
+        if (!this.dataSheets()) return false;
+        if (!this.dataSheets()[0]) return false;
         const value = this.getNameplateValue(name);
         if (value == '-1') return false;
         return true;
     }
 
-    public getNameplateValue(name: string | string[]) {
+    public getNameplateValue(names: string | string[]): string | string[] | undefined {
         if (!this.dataSheets()) return '-1';
         if (!this.dataSheets()[0]) return '-1';
 
-        if (Array.isArray(name)) {
-            for (let i = 0; i < name.length; i++) {
-                var value = this.dataSheets()[0].items.find(
-                    element => element.idShort.toLowerCase() == name[i].toLowerCase(),
+        if (Array.isArray(names)) {
+            for (const name of names) {
+                const value = this.dataSheets()[0].items.find(
+                    element => element.idShort.toLowerCase() == name.toLowerCase(),
                 );
                 if (value) return value.value;
             }
         } else {
-            var value = this.dataSheets()[0].items.find(element => element.idShort.toLowerCase() == name.toLowerCase());
+            const value = this.dataSheets()[0].items.find(
+                element => element.idShort.toLowerCase() == names.toLowerCase(),
+            );
             if (value) return value.value;
         }
 
-        return -1;
+        return '-1';
     }
 
-    public getCompanyLogo() {
+    public getCompanyLogo(): string | undefined {
         if (!this.dataSheets()) return '';
         if (!this.dataSheets()[0]) return '';
 
         const value = this.dataSheets()[0].items.find(element => element.idShort.toLowerCase() == 'companylogo');
         if (value) return value.url;
-        return null;
+        return undefined;
     }
 }

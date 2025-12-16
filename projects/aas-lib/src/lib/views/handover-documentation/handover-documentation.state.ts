@@ -25,7 +25,6 @@ import {
 import { ChildState } from '../../components/child-state';
 import { basename, extension, findSubmodel, getUrl } from '../../utilities';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
-import { reference } from '@popperjs/core';
 
 export type FileItem = {
     name: string;
