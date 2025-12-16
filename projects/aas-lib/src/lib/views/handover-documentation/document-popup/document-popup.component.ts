@@ -10,8 +10,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     styleUrl: './document-popup.component.scss',
 })
 export class DocumentPopupComponent {
-    @Input() title: string = '';
-    @Input() body: DocumentationItem = {
+    @Input() public title: string = '';
+    @Input() public body: DocumentationItem = {
         preview: '',
         title: 'test',
         subtitle: '',
@@ -24,18 +24,18 @@ export class DocumentPopupComponent {
         statusDate: '',
         files: [],
     };
-    @Input() modalId: string = 'customModal';
+    @Input() public modalId: string = 'customModal';
 
     public constructor(
         translate: TranslateService,
         public activeModal: NgbActiveModal,
     ) {}
 
-    closeModal() {
+    public closeModal(): void {
         this.activeModal.dismiss();
     }
 
-    public getTitle() {
+    public getTitle(): string {
         if (this.body.title) return this.body.title;
 
         if (!this.body.files || this.body.files.length <= 0) return 'N/A';
@@ -67,7 +67,7 @@ export class DocumentPopupComponent {
         }
     }
 
-    public openFile() {
+    public openFile(): void {
         if (!this.body) return;
         if (!this.body.files || this.body.files.length <= 0) return;
 

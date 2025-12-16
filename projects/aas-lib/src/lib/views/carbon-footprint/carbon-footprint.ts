@@ -8,11 +8,10 @@
 
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChangeDetectionStrategy, Component, computed, effect, Input, input, untracked } from '@angular/core';
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
-import { DataSheet } from '../../components/data-sheet/data-sheet';
 import { CarbonFootprintState } from './carbon-footprint.state';
 import { ChildComponent } from '../../components/child-component';
 
@@ -25,14 +24,14 @@ import { ChildComponent } from '../../components/child-component';
     templateUrl: './carbon-footprint.html',
     styleUrl: './carbon-footprint.scss',
     providers: [CarbonFootprintState],
-    imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective, DataSheet],
+    imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprint extends ChildComponent {
     // Determines wether the view is used from inside the dpp view or standalone
-    @Input() isDigitalProductPassport: boolean = false;
+    @Input() public isDigitalProductPassport: boolean = false;
 
-    showDetails: boolean = this.isDigitalProductPassport;
+    public showDetails: boolean = this.isDigitalProductPassport;
 
     public constructor() {
         super();
@@ -100,35 +99,35 @@ export class CarbonFootprint extends ChildComponent {
         this.state().update({ index });
     }
 
-    public getTotalPCFValue() {
+    public getTotalPCFValue(): string | string[] {
         const result = this.totalPcfCO2eq();
         const splitResult = result.split(' ');
         if (!splitResult || splitResult.length <= 0) return '';
         return splitResult[0];
     }
 
-    public getTotalPCFUnit() {
+    public getTotalPCFUnit(): string | string[] {
         const result = this.totalPcfCO2eq();
         const splitResult = result.split(' ');
         if (!splitResult || splitResult.length <= 1) return '';
         return splitResult[1];
     }
 
-    public getValueFromDataSheet(name: string) {
+    public getValueFromDataSheet(name: string): string | string[] | undefined {
         const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === name);
         if (!result) return '-1';
         return result.value;
     }
 
-    public getFilenameExplanation() {
+    public getFilenameExplanation(): string | string[] | undefined {
         const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
         if (!result || !result.value) return '';
         return result.value;
     }
 
-    public openFile() {
+    public openFile(): void {
         const datasheet = this.item();
         const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
         if (!result || !result.url) return;
@@ -136,7 +135,7 @@ export class CarbonFootprint extends ChildComponent {
         window.open(result.url, '_blank');
     }
 
-    public toggleDetailView() {
+    public toggleDetailView(): void {
         this.showDetails = !this.showDetails;
     }
 }

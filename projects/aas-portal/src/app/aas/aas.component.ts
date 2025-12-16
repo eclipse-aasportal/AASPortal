@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
  *****************************************************************************/
 
 import head from 'lodash-es/head';
-import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
@@ -129,7 +129,7 @@ export class AASComponent implements OnInit, OnDestroy {
         return (this.state.document()?.onlineReady ?? false) && state === 'online';
     });
 
-    public getSubmodels() {
+    public getSubmodels(): aas.Submodel[] | undefined {
         if (!this.state.document()) return [];
         if (!this.state.document()?.content) return [];
         if (!this.state.document()?.content?.submodels) return [];
@@ -346,12 +346,12 @@ export class AASComponent implements OnInit, OnDestroy {
         this.aasTree()?.findPrevious();
     }
 
-    private downloadSubmodel(submodel: aas.Submodel) {
+    private downloadSubmodel(submodel: aas.Submodel): void {
         const sm = jsonization.submodelFromJsonable(toJsonValue(submodel)).mustValue();
         this.downloadJson(submodel.idShort, jsonization.toJsonable(sm));
     }
 
-    private downloadEnvironment(baseName: string, content: aas.Environment) {
+    private downloadEnvironment(baseName: string, content: aas.Environment): void {
         const env = jsonization.environmentFromJsonable(toJsonValue(content)).mustValue();
         this.downloadJson(baseName, jsonization.toJsonable(env));
     }
@@ -410,14 +410,13 @@ export class AASComponent implements OnInit, OnDestroy {
         return version;
     }
 
-    getSubmodelSemanticId(submodel: aas.Submodel) {
-        if (!submodel) return '';
-        if (!submodel.semanticId) return '';
-        if (submodel.semanticId.keys.length <= 0) return '';
+    public getSubmodelSemanticId(submodel: aas.Submodel): string {
+        if (!submodel?.semanticId) return '';
+        if (submodel?.semanticId?.keys?.length <= 0) return '';
         return submodel.semanticId.keys[0].value;
     }
 
-    getSubmodelIcon(submodel: aas.Submodel) {
+    public getSubmodelIcon(submodel: aas.Submodel): string {
         //find out what type of submodel it is and
         //return a somewhat fitting thumbnail
         // Document-related
@@ -445,12 +444,11 @@ export class AASComponent implements OnInit, OnDestroy {
         return 'bi-question-circle';
     }
 
-    openShellView() {
-        let route: Route | undefined;
+    public openShellView(): (string | { endpoint: string; id: string })[] | undefined {
         const document = this.document();
-        if (document === undefined) return '';
+        if (document === undefined) return undefined;
         const tuple = findRouteForShell(this.viewRoutes, document!);
-        route = tuple.route;
+        const route = tuple.route;
 
         if (route === undefined) return undefined;
 
@@ -463,7 +461,7 @@ export class AASComponent implements OnInit, OnDestroy {
         return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    openBrowserView() {
+    public openBrowserView(): (string | { endpoint: string; id: string })[] | undefined {
         const endpoint = this.document()?.endpoint;
         if (endpoint === undefined) return undefined;
 
@@ -473,9 +471,8 @@ export class AASComponent implements OnInit, OnDestroy {
         return [`/views/Browser`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    openSubmodelView(submodel: aas.Submodel) {
-        let route: Route | undefined;
-        route = findRouteForSubmodel(this.viewRoutes, submodel);
+    public openSubmodelView(submodel: aas.Submodel): (string | { endpoint: string; id: string })[] | undefined {
+        const route = findRouteForSubmodel(this.viewRoutes, submodel);
 
         if (route === undefined) return undefined;
 
