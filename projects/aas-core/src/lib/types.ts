@@ -279,3 +279,11 @@ export class ApplicationError extends Error {
         this.name = name;
     }
 }
+
+/** A package descriptor. */
+export type PackageDescription = {
+    /** The AAS Ids contained in the package. */
+    aasIds?: string[];
+    /** The unique package identifier. */
+    packageId: string;
+};

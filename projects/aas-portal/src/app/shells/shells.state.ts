@@ -281,7 +281,7 @@ export class ShellsState implements OnDestroy {
                     limit,
                 },
                 untracked(this.filterText),
-                this.translate.currentLang,
+                this.translate.getCurrentLang(),
             )
             .pipe(mergeMap(result => this.setPageAndLoadContents(result)))
             .subscribe();

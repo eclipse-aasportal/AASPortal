@@ -9,12 +9,11 @@
 import path from 'path';
 import fs from 'fs';
 import { inject, singleton } from 'tsyringe';
-import { PagedResult, types } from 'aas-core';
+import { PackageDescription, PagedResult, types } from 'aas-core';
 import { FileResult } from 'aas-package';
 
 import { Database } from './db/database.js';
 import { Variable } from './variable.js';
-import { PackageDescription } from './types.js';
 import { LOGGER, Logger } from './logging/logger.js';
 import { DatabaseEnvironment } from './db/database-types.js';
 import { AddPackageCommand } from './db/commands/add-package-command.js';
@@ -75,7 +74,7 @@ export class PackageRepository {
     public async add(sourceFile: string, filename: string): Promise<string> {
         const command = new AddPackageCommand(this.db, sourceFile, filename);
         const result = await this.db.execute(command);
-        this.cache.remove('/packages');
+        this.cache.clear();
         return result;
     }
 
@@ -84,13 +83,13 @@ export class PackageRepository {
         const env = await aasx.getEnvironment();
         const command = new UpdatePackageCommand(this.db, packageId, path, filename, env);
         await this.db.execute(command);
-        this.cache.remove('/packages');
+        this.cache.clear();
     }
 
     public async delete(packageId: string): Promise<void> {
         const command = new DeletePackageCommand(this.db, packageId);
         await this.db.execute(command);
-        this.cache.remove('/packages');
+        this.cache.clear();
     }
 
     private async import(): Promise<void> {

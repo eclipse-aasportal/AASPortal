@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (rows().length > 0) {
+@if (items().length > 0) {
     <div class="table-responsive">
         <table class="table table-sm table-hover table-striped">
             <thead>
@@ -17,8 +17,8 @@
                             type="checkbox"
                             class="form-check-input"
                             [indeterminate]="someSelected()"
-                            [checked]="everySelected()"
-                            (change)="toggleSelections()"
+                            [ngModel]="everySelected()"
+                            (ngModelChange)="toggleSelected($event)"
                         />
                     </th>
                     <th scope="col" class="th-w-icon">
@@ -36,26 +36,28 @@
                 </tr>
             </thead>
             <tbody>
-                @for (row of rows(); track row.trackId) {
+                @for (item of items(); track item) {
                     <tr class="align-middle">
                         <td>
                             <input
                                 type="checkbox"
                                 class="form-check-input"
-                                [ngModel]="row.selected()"
-                                (ngModelChange)="toggleSelected(row, $event)"
-                                [name]="row.name"
+                                [ngModel]="item.selected()"
+                                (ngModelChange)="toggleSelected($event, item)"
+                                [name]="item.name"
                             />
                         </td>
                         <td>
-                            @switch (row.state) {
+                            @switch (item.state) {
                                 @case ('unloaded') {
                                     <div class="position-relative">
                                         <img
-                                            class="img-fluid opacity-50"
-                                            [src]="getThumbnail(row)"
-                                            [alt]="row.name"
-                                            (error)="row.thumbnail = undefined"
+                                            class="object-fit-contain opacity-50"
+                                            width="40"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = undefined"
                                         />
                                         <div
                                             class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
@@ -67,9 +69,12 @@
                                 @case ('unavailable') {
                                     <div class="position-relative">
                                         <img
-                                            class="img-fluid opacity-50"
-                                            [src]="row.thumbnail"
-                                            [alt]="row.name"
+                                            class="object-fit-contain opacity-50"
+                                            width="40"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = undefined"
                                         />
                                         <div
                                             class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
@@ -81,24 +86,26 @@
                                 @default {
                                     <div>
                                         <img
-                                            class="img-fluid"
-                                            [src]="getThumbnail(row)"
-                                            [alt]="row.name"
-                                            (error)="row.thumbnail = undefined"
+                                            class="object-fit-contain"
+                                            width="40"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = undefined"
                                         />
                                     </div>
                                 }
                             }
                         </td>
                         <td>
-                            <a [routerLink]="getRouterLink(row)">{{ row.name | max: 60 }}</a>
+                            <a [routerLink]="getRouterLink(item)">{{ item.name | max: 60 }}</a>
                         </td>
                         <td>
-                            <div>{{ row.endpoint }}</div>
+                            <div class="text-nowrap">{{ item.endpoint }}</div>
                         </td>
                         <td>
-                            <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">
-                                {{ row.id | max: 80 }}
+                            <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(item)">
+                                {{ item.id | max: 80 }}
                             </div>
                         </td>
                     </tr>
@@ -106,77 +113,6 @@
             </tbody>
         </table>
     </div>
-
-    <!-- <div class="container d-block d-lg-none">
-        @for (row of rows(); track row) {
-            <div class="d-flex flex-row justify-content-evenly border border-1 border-primary rounded-1 py-2 px-3 align-items-center mb-2">
-                <input
-                    type="checkbox"
-                    class="form-check-input me-3"
-                    style="transform: scale(1.5);
-                        transform-origin: center;"
-                    [ngModel]="row.selected()"
-                    (ngModelChange)="toggleSelected(row, $event)"
-                    [name]="row.name"
-                />
-                @switch (row.state) {
-                    @case ('unloaded') {
-                        <div class="position-relative">
-                            <img
-                                class="img-fluid opacity-50"
-                                [src]="getThumbnail(row)"
-                                [alt]="row.name"
-                                (error)="row.thumbnail = undefined"
-                            />
-                            <div
-                                class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
-                            >
-                                <i class="bi bi-cloud-arrow-down"></i>
-                            </div>
-                        </div>
-                    }
-                    @case ('unavailable') {
-                        <div class="position-relative">
-                            <img
-                                class="img-fluid opacity-50"
-                                [src]="row.thumbnail"
-                                [alt]="row.name"
-                            />
-                            <div
-                                class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
-                            >
-                                <i class="bi bi-cone-striped"></i>
-                            </div>
-                        </div>
-                    }
-                    @default {
-                        <div>
-                            <img
-                                class="img-fluid"
-                                [src]="getThumbnail(row)"
-                                [alt]="row.name"
-                                (error)="row.thumbnail = undefined"
-                            />
-                        </div>
-                    }
-                }
-                <div class="d-flex flex-column">
-                    <label style="overflow-wrap: anywhere; word-break: break-word;" >{{ row.name | max: 40 }}</label>  
-                    <label>{{ row.endpoint | max: 40 }}</label>  
-                </div>
-                <div>
-                    <button [routerLink]="getRouterLink(row)" type="button" class="btn btn-primary" style="font-size: 1rem;"><i class="bi bi-box-arrow-up-right"></i></button>
-                </div>
-
-            
-            </div>
-            
-        }
-    </div> -->
-
-
 } @else {
-    <div class="alert alert-info text-center mt-2" role="alert">
-        {{ 'AASTable.INFO_NO_SHELLS_AVAILABLE' | translate }}
-    </div>
+    <div class="alert alert-info text-center mt-2" role="alert" translate>AASTable.INFO_NO_SHELLS_AVAILABLE</div>
 }

@@ -8,21 +8,26 @@
 
 <div class="overflow-auto h-100 px-2">
     <ul class="list-group">
-        @for (item of items().items; track item.id) {
+        @for (item of items(); track item.id) {
             <li class="list-group-item list-group-item-action">
                 <div class="d-flex flex-row align-items-center">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [ngModel]="item.selected"
+                        (ngModelChange)="setSelected(item, $event) "
+                    />
                     <img
-                        class="img-fluid ms-2"
+                        class="object-fit-contain ms-2"
                         width="40"
                         height="40"
-                        [src]="getThumbnailSource(item)"
+                        [src]="item.thumbnail"
                         [alt]="item.idShort"
                         (error)="item.thumbnail = undefined"
                     />
                     <a class="text-nowrap ms-2" [routerLink]="getLink(item)">{{ item.idShort }}</a>
                     <div class="text-nowrap text-body-tertiary d-none d-lg-block ms-2">
-                        <span>[</span><span>{{ item.id | max: 80 }}</span
-                        ><span>]</span>
+                        [{{ item.id | max: 80 }}]
                     </div>
                 </div>
             </li>
@@ -69,7 +74,7 @@
         <button
             type="button"
             class="btn btn-primary"
-            (click)="downloadPackages()"
+            (click)="downloadPackages().subscribe()"
             [disabled]="someSelected() === false"
         >
             <i class="bi bi-download"></i>
@@ -77,7 +82,7 @@
         <button
             type="button"
             class="btn btn-primary"
-            (click)="deletePackages()"
+            (click)="deletePackages().subscribe()"
             [disabled]="someSelected() === false"
         >
             <i class="bi bi-trash"></i>

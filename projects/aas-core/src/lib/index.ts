@@ -27,7 +27,7 @@ export * as types from './aas-core/types.js';
 export * as verification from './aas-core/verification.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function noop(...args: unknown[]) {}
+export function noop(...args: unknown[]): void {}
 
 /**
  * Determines whether the specified value represents a valid e-mail.

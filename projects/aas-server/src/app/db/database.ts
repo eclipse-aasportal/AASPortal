@@ -10,8 +10,8 @@ import { inject, singleton } from 'tsyringe';
 import path, { join } from 'path';
 import fs from 'fs';
 
-import { aas, PagedResult, noop, ApplicationError } from 'aas-core';
-import { PackageDescription, Stats, WebSocketData } from '../types.js';
+import { aas, PagedResult, noop, ApplicationError, PackageDescription } from 'aas-core';
+import { Stats, WebSocketData } from '../types.js';
 import { Variable } from '../variable.js';
 import { ERROR } from '../error.js';
 import { DatabaseData, DatabaseKey, PackageItem } from './database-types.js';

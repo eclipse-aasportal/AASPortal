@@ -62,6 +62,6 @@ describe('AASTable', () => {
         const component = fixture.componentInstance;
         fixture.componentRef.setInput('documents', [document1, document2, document3]);
         fixture.detectChanges();
-        expect(component.rows()).toBeTruthy();
+        expect(component.items()).toBeTruthy();
     });
 });

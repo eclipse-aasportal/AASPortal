@@ -11,9 +11,6 @@
     "CAPTION_REMOVE_WORKSPACE": "Remove Group",
     "CAPTION_NEW_ELEMENT": "Insert New",
     "CAPTION_EDIT_ELEMENT": "Edit",
-    "CAPTION_ERROR": "Error",
-    "CAPTION_INFO": "Info",
-    "CAPTION_WARNING": "Warning",
     "CAPTION_UPLOAD_FILE": "Upload AASX File",
     "CMD_OK": "OK",
     "CMD_OPEN_AAS": "Open AAS",
@@ -112,6 +109,11 @@
     "ALERT_FAILED": "Failed!",
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
+    "Notify": {
+        "CAPTION_ERROR": "Error",
+        "CAPTION_INFO": "Info",
+        "CAPTION_WARNING": "Warning"
+    },
     "Error": {
         "AAS_ALREADY_EXISTS": "An AAS with the identifier '{{id}}' already exists.",
         "AAS_DOES_NOT_EXIST": "An asset administration shell with the identification '{{id}}' does not exist.",
@@ -311,7 +313,7 @@
     "CarbonFootprint": {
         "TITLE": "Carbon Footprint",
         "CARBON_FOOTPRINT_DATA": "Carbon footprint",
-         "CARBON_FOOTPRINT": "Carbon footprints",
+        "CARBON_FOOTPRINT": "Carbon footprints",
         "LIFE_CYCLES": "Life cycles",
         "CALCULATION": "Calculations",
         "METHODS": "Methods",
