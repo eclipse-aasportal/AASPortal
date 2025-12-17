@@ -6,21 +6,24 @@
  *
  *****************************************************************************/
 
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { API_URL, ToolbarService } from 'aas-lib';
 
 import { ShellsComponent } from '../app/shells/shells.component';
 import { createSpyObj, FakeLoader } from './mocks';
-import { ShellsService } from '../app/shells.service';
 import { Cursor } from '../app/types';
 import { ApiUrlService } from '../app/api-url.service';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { ShellsService } from '../app/shells/shells.service';
 
 describe('ShellsComponent', () => {
+    let fixture: ComponentFixture<ShellsComponent>;
+    let component: ShellsComponent;
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             providers: [
@@ -33,6 +36,7 @@ describe('ShellsComponent', () => {
                     useValue: createSpyObj<ShellsService>([], {
                         limit: signal(30),
                         cursor: signal<Cursor | undefined>(undefined),
+                        items: signal([]),
                     }),
                 },
                 {
@@ -52,12 +56,13 @@ describe('ShellsComponent', () => {
             ],
             imports: [ShellsComponent],
         }).compileComponents();
+
+        fixture = TestBed.createComponent(ShellsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(ShellsComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
         expect(component).toBeTruthy();
     });
 });

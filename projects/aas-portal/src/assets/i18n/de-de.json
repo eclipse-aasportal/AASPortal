@@ -11,9 +11,6 @@
     "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",
     "CAPTION_NEW_ELEMENT": "Neu hinzufügen",
     "CAPTION_EDIT_ELEMENT": "Bearbeiten",
-    "CAPTION_ERROR": "Fehler",
-    "CAPTION_INFO": "Info",
-    "CAPTION_WARNING": "Warnung",
     "CAPTION_UPLOAD_FILE": "AASX-Datei hochladen",
     "CMD_OK": "OK",
     "CMD_OPEN_AAS": "VWS öffnen",
@@ -110,6 +107,11 @@
     "ALERT_FAILED": "Fehlgeschlagen!",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
+    "Notify": {
+        "CAPTION_ERROR": "Fehler",
+        "CAPTION_INFO": "Info",
+        "CAPTION_WARNING": "Warnung"
+    },
     "Error": {
         "AAS_ALREADY_EXISTS": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert bereits.",
         "AAS_DOES_NOT_EXIST": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert nicht.",

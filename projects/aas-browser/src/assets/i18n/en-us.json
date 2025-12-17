@@ -9,5 +9,15 @@
     "Info": {
         "FILE_SUCCESSFULLY_DOWNLOADED": "{{file}} was successfully downloaded.",
         "FILE_SUCCESSFULLY_UPLOADED": "{{file}} was successfully uploaded."
+    },
+    "Notify": {
+        "CAPTION_INFO": "Info",
+        "CAPTION_WARNING": "Warning",
+        "CAPTION_ERROR": "Error"
+    },
+    "Shells": {
+        "AAS_NOT_CONTAINED": "The AAS '{{id}}' is not contained in a package.",
+        "SUCCESSFULLY_DOWNLOADED": "The package containing AAS '{{id}}' has been successfully downloaded.",
+        "SUCCESSFULLY_DELETED": "The package containing  AAS '{{id}}' has been successfully deleted."
     }
 }

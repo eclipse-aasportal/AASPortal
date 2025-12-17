@@ -49,7 +49,6 @@ export class DeletePackageCommand extends DatabaseCommand<void> {
         page.items[index] = null;
         await this.table.deleteFile(key);
         await this.table.deleteKey(this.packageId);
-        return void 0;
     }
 
     private async removePackageId(

@@ -23,9 +23,8 @@ import {
     UploadedFile,
 } from 'tsoa';
 
-import { noop, PagedResult } from 'aas-core';
+import { noop, PackageDescription, PagedResult } from 'aas-core';
 
-import { PackageDescription } from '../types.js';
 import { decodeBase64Url } from '../utilities.js';
 import { PackageRepository } from '../package-repository.js';
 

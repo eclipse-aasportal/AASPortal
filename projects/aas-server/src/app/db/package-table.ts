@@ -8,11 +8,10 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ApplicationError } from 'aas-core';
+import { ApplicationError, PackageDescription } from 'aas-core';
 import { DatabaseKey, DatabaseTableData, PackageItem } from './database-types.js';
 import { Database } from './database.js';
 import { DatabaseTable } from './database-table.js';
-import { PackageDescription } from '../types.js';
 import { ERROR } from '../error.js';
 
 export class PackageTable extends DatabaseTable<PackageItem, PackageDescription> {
