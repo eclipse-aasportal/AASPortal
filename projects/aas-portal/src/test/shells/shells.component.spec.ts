@@ -68,7 +68,6 @@ describe('ShellsComponent', () => {
             'getEndpoints',
             'removeEndpoint',
             'getContent',
-            'getHierarchy',
             'getDocuments',
             'downloadPackage',
         ]);
