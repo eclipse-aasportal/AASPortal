@@ -6,19 +6,19 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { AuthService } from 'aas-lib';
 import { AASDocument } from 'aas-core';
 import { FavoritesList, FavoritesService, FavoritesState } from '../../app/shells/favorites.service';
-import { createSpyObj, DoneFn, FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;
-    let auth: jest.Mocked<AuthService>;
+    let auth: Mocked<AuthService>;
     const favorite: AASDocument = {
         address: 'http://localhost/aas',
         crc32: 0,
@@ -132,11 +132,9 @@ describe('FavoritesService', () => {
     });
 
     describe('save', () => {
-        it('saves the current favorites lists', (done: DoneFn) => {
-            service.save().subscribe(() => {
-                expect(auth.setCookie).toHaveBeenCalledWith('v2.Favorites', JSON.stringify(state));
-                done();
-            });
+        it('saves the current favorites lists', async () => {
+            await lastValueFrom(service.save());
+            expect(auth.setCookie).toHaveBeenCalledWith('v2.Favorites', JSON.stringify(state));
         });
     });
 });

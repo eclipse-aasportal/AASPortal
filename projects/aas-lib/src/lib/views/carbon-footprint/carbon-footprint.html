@@ -7,27 +7,43 @@
  !---------------------------------------------------------------------------->
 <div class="container d-flex flex-column">
     <!-- Total PCF -->
-    <div class="align-self-center d-flex flex-row align-items-center justify-content-between border border-3 border-primary rounded-3 m-5 mb-1 bg-primary-subtle" style="width: fit-content;">
-        <div class="text-primary mx-2" style="font-size: 3rem; transform: rotate(25deg);">
-            <i class="bi bi-leaf-fill"></i> <!-- responsive to viewport width -->
+    <div
+        class="align-self-center d-flex flex-row align-items-center justify-content-between border border-3 border-primary rounded-3 m-5 mb-1 bg-primary-subtle"
+        style="width: fit-content"
+    >
+        <div class="text-primary mx-2" style="font-size: 3rem; transform: rotate(25deg)">
+            <i class="bi bi-leaf-fill"></i>
+            <!-- responsive to viewport width -->
         </div>
         <div class="d-flex flex-column text-center">
-            <label class="pcf-value">{{getTotalPCFValue()}}</label>
-            <label class="pcf-unit">{{getTotalPCFUnit()}}</label>
+            <label class="pcf-value">{{ getTotalPCFValue() }}</label>
+            <label class="pcf-unit">{{ getTotalPCFUnit() }}</label>
         </div>
-        <div class="text-primary mx-2" style="font-size: 3rem;">
-            <i class="bi bi-leaf-fill"
-            style="display:inline-block; transform: scaleX(-1) rotate(25deg); transform-origin:center;">
+        <div class="text-primary mx-2" style="font-size: 3rem">
+            <i
+                class="bi bi-leaf-fill"
+                style="display: inline-block; transform: scaleX(-1) rotate(25deg); transform-origin: center"
+            >
             </i>
         </div>
     </div>
     @if (isDigitalProductPassport) {
-        <button type="button" class="btn btn-secondary align-self-center my-2" style="width: fit-content;" (click)="toggleDetailView()">Details</button>
+        <button
+            type="button"
+            class="btn btn-secondary align-self-center my-2"
+            style="width: fit-content"
+            (click)="toggleDetailView()"
+        >
+            Details
+        </button>
     }
 
     <!-- Specific PCF Values -->
     @if (!isDigitalProductPassport || showDetails) {
-        <div class="d-flex flex-column border border-primary border-2 rounded-2 align-self-center p-2 bg-primary-subtle" style="width: clamp(400px, 50vw, 700px);">
+        <div
+            class="d-flex flex-column border border-primary border-2 rounded-2 align-self-center p-2 bg-primary-subtle"
+            style="width: clamp(400px, 50vw, 700px)"
+        >
             <!-- Pagination to switch die PCFs -->
             <label translate>CarbonFootprint.CARBON_FOOTPRINTS</label>
             <ngb-pagination
@@ -39,66 +55,71 @@
             />
             <div class="d-flex flex-column align-self-start ms-4">
                 <label class="label" translate>CarbonFootprint.LIFE_CYCLES</label>
-                <div class="p-2 border border-1 border-black rounded-1 mb-3" style="width: fit-content;">
+                <div class="p-2 border border-1 border-black rounded-1 mb-3" style="width: fit-content">
                     <div class="d-flex flex-column">
-                        @for (value of getValueFromDataSheet("LifeCyclePhases"); track value) {
-                        <div>{{value}}</div>
+                        @for (value of getValueFromDataSheet('LifeCyclePhases'); track value) {
+                            <div>{{ value }}</div>
                         }
                     </div>
                 </div>
 
                 <label class="label" translate>CarbonFootprint.CARBON_FOOTPRINT</label>
-                <div class="d-flex flex-row align-items-center justify-content-between border border-3 border-primary rounded-3 bg-primary-subtle" style="width: fit-content;">
-                    <div class="text-primary mx-2" style="font-size: 1.5rem; transform: rotate(25deg);">
-                        <i class="bi bi-leaf-fill"></i> <!-- responsive to viewport width -->
+                <div
+                    class="d-flex flex-row align-items-center justify-content-between border border-3 border-primary rounded-3 bg-primary-subtle"
+                    style="width: fit-content"
+                >
+                    <div class="text-primary mx-2" style="font-size: 1.5rem; transform: rotate(25deg)">
+                        <i class="bi bi-leaf-fill"></i>
+                        <!-- responsive to viewport width -->
                     </div>
                     <div class="d-flex flex-column text-center">
-                        <label>{{getTotalPCFValue()}}</label>
-                        <label style="font-size: 13px;">{{getTotalPCFUnit()}}</label>
+                        <label>{{ getTotalPCFValue() }}</label>
+                        <label style="font-size: 13px">{{ getTotalPCFUnit() }}</label>
                     </div>
-                    <div class="text-primary mx-2" style="font-size: 1.5rem;">
-                        <i class="bi bi-leaf-fill"
-                        style="display:inline-block; transform: scaleX(-1) rotate(25deg); transform-origin:center;">
+                    <div class="text-primary mx-2" style="font-size: 1.5rem">
+                        <i
+                            class="bi bi-leaf-fill"
+                            style="display: inline-block; transform: scaleX(-1) rotate(25deg); transform-origin: center"
+                        >
                         </i>
                     </div>
                 </div>
 
                 <label class="label mt-3" translate>CarbonFootprint.CALCULATION</label>
-                <div class="p-2 border border-1 border-black rounded-1" style="width: fit-content;">
+                <div class="p-2 border border-1 border-black rounded-1" style="width: fit-content">
                     <div class="d-flex flex-column data-entry">
                         <label class="label" translate>CarbonFootprint.METHODS</label>
-                        <p>{{getValueFromDataSheet("PcfCalculationMethods")}}</p>
+                        <p>{{ getValueFromDataSheet('PcfCalculationMethods') }}</p>
                     </div>
                     <div class="d-flex flex-column data-entry">
                         <label class="label" translate>CarbonFootprint.UNIT</label>
-                        <p>{{getValueFromDataSheet("ReferenceImpactUnitForCalculation")}}</p>
+                        <p>{{ getValueFromDataSheet('ReferenceImpactUnitForCalculation') }}</p>
                     </div>
                     <div class="d-flex flex-column data-entry">
                         <label class="label" translate>CarbonFootprint.QUANTITY</label>
-                        <p>{{getValueFromDataSheet("QuantityOfMeasureForCalculation")}}</p>
+                        <p>{{ getValueFromDataSheet('QuantityOfMeasureForCalculation') }}</p>
                     </div>
                 </div>
-               @if (getFilenameExplanation()) {
-                <div class="d-flex flex-column mt-2">
-                    <label class="label" translate>CarbonFootprint.EXPLANATION</label>
-                    <div class="d-flex flex-wrap align-items-center">
-                        <label class="me-3">{{getFilenameExplanation()}}</label>
-                        <button type="button" class="btn btn-primary" (click)="openFile()" style="width: fit-content">Download</button>
+                @if (getFilenameExplanation()) {
+                    <div class="d-flex flex-column mt-2">
+                        <label class="label" translate>CarbonFootprint.EXPLANATION</label>
+                        <div class="d-flex flex-wrap align-items-center">
+                            <label class="me-3">{{ getFilenameExplanation() }}</label>
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                (click)="openFile()"
+                                style="width: fit-content"
+                            >
+                                Download
+                            </button>
+                        </div>
                     </div>
-                </div>
-               } 
-
+                }
             </div>
         </div>
     }
-    
-
 </div>
-
-
-
-
-
 
 <!-- <div ngbAccordion>
     <div ngbAccordionItem [collapsed]="collapsed()">

@@ -284,16 +284,4 @@ export class EndpointsController extends Controller {
     ): Promise<aas.Operation> {
         return await this.aasProvider.invoke(decodeBase64Url(endpoint), decodeBase64Url(id), operation);
     }
-
-    /**
-     * @summary Gets the content of the specified AAS document.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     * @returns The AAS environment or `undefined`.
-     */
-    @Get('{endpoint}/documents/{id}/hierarchy')
-    @OperationId('getHierarchy')
-    public async getHierarchy(@Path() endpoint: string, @Path() id: string): Promise<AASDocument[]> {
-        return await this.aasProvider.getHierarchy(decodeBase64Url(endpoint), decodeBase64Url(id));
-    }
 }

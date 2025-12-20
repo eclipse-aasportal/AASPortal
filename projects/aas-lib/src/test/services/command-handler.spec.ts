@@ -6,20 +6,20 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mock, Mocked, vitest } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { noop } from 'aas-core';
 import { Command } from '../../lib/services/command';
 import { CommandHandler } from '../../lib/services/command-handler';
-import { createSpyObj } from '../../../../aas-portal/src/test/mocks';
+import { createSpyObj } from '../mocks';
 import { NotifyService } from '../../lib/components/notify/notify.service';
 
 class TestCommand extends Command {
     public constructor(
-        private spy?: jest.Mock,
-        private undoSpy?: jest.Mock,
-        private redoSpy?: jest.Mock,
+        private spy?: Mock,
+        private undoSpy?: Mock,
+        private redoSpy?: Mock,
     ) {
         super('TestCommand');
     }
@@ -48,7 +48,7 @@ class TestCommand extends Command {
 }
 
 class FailCommand extends Command {
-    public constructor(private abortSpy: jest.Mock) {
+    public constructor(private abortSpy: Mock) {
         super('TestCommand');
     }
 
@@ -100,14 +100,14 @@ describe('CommandHandler', () => {
     });
 
     it('can execute a command', () => {
-        const spy = jest.fn();
+        const spy = vitest.fn();
         service.execute(new TestCommand(spy));
         expect(spy).toHaveBeenCalled();
     });
 
     it('can undo/redo a command', () => {
-        const undoSpy = jest.fn();
-        const redoSpy = jest.fn();
+        const undoSpy = vitest.fn();
+        const redoSpy = vitest.fn();
         service.execute(new TestCommand(undefined, undoSpy, redoSpy));
         expect(service.canUndo()).toBe(true);
         service.undo();
@@ -126,7 +126,7 @@ describe('CommandHandler', () => {
     });
 
     it('aborts a failed command', () => {
-        const abortSpy = jest.fn();
+        const abortSpy = vitest.fn();
         expect(() => service.execute(new FailCommand(abortSpy))).toThrow();
         expect(abortSpy).toHaveBeenCalled();
     });

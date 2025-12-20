@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { first, of } from 'rxjs';
+import { first, lastValueFrom, of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
@@ -52,9 +52,9 @@ export class TestNameplate {
 describe('NameplateView', () => {
     let fixture: ComponentFixture<NameplateView>;
     let component: NameplateView;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -73,8 +73,10 @@ describe('NameplateView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
-              queryParams: of({}) },
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
         );
 
         api.getDocument.mockReturnValue(of(document));
@@ -99,7 +101,8 @@ describe('NameplateView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: [    {
+                    useValue: [
+                        {
                             path: 'Nameplate',
                             component: NameplateView,
                             data: {
@@ -151,12 +154,10 @@ describe('NameplateView', () => {
         expect(component.index()).toBe(1);
     });
 
-    it('adds a favorite to the start page', (done) => {
+    it('adds a favorite to the start page', async () => {
         start.add.mockReturnValue(true);
         start.save.mockReturnValue(of(void 0));
-        component.addToStart().pipe(first()).subscribe(() => {
-            expect(start.add).toHaveBeenCalled();
-            done();
-        })
+        await lastValueFrom(component.addToStart().pipe(first()));
+        expect(start.add).toHaveBeenCalled();
     });
 });

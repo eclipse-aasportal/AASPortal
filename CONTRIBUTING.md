@@ -62,7 +62,6 @@ AASPortal uses npm workspaces with the following structure:
 - **aas-portal**: Angular frontend application
 - **aas-node**: Node.js/Express.js backend API
 - **aas-lib**: Reusable Angular UI components
-- **aas-jest**: Custom Jest configuration
 
 ### Working with Workspaces
 Use workspace-specific commands:
@@ -89,9 +88,8 @@ npm run test -ws              # All workspaces
 
 ## Testing
 
-- **Backend**: Jest for Node.js testing (aas-core, aas-node)
 - **Frontend**: Karma + Jasmine for Angular testing (aas-portal, aas-lib)
-- Coverage reports are generated in `reports/` directory
+- Coverage reports are generated in `coverage/` directory
 
 ## Container Development
 

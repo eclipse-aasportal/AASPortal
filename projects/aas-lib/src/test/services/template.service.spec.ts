@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -42,7 +42,7 @@ describe('TemplateService', () => {
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
+        vitest.clearAllMocks();
     });
 
     it('should be created', () => {

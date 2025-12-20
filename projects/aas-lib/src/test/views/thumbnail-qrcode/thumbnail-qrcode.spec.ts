@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { QR_CODE, ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
@@ -18,7 +18,7 @@ import { createSpyObj } from '../../mocks';
 describe('ThumbnailQRCode', () => {
     let component: ThumbnailQRCode;
     let fixture: ComponentFixture<ThumbnailQRCode>;
-    let window: jest.Mocked<WindowService>;
+    let window: Mocked<WindowService>;
 
     beforeEach(async () => {
         window = createSpyObj<WindowService>(['open'], {
@@ -34,7 +34,7 @@ describe('ThumbnailQRCode', () => {
                 },
                 {
                     provide: QR_CODE,
-                    useValue: { toCanvas: jest.fn() },
+                    useValue: { toCanvas: vitest.fn() },
                 },
                 provideZonelessChangeDetection(),
             ],

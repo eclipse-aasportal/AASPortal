@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -58,7 +58,7 @@ describe('RemoveEndpointFormComponent', () => {
 
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        jest.spyOn(modal, 'close').mockImplementation(result => {
+        vi.spyOn(modal, 'close').mockImplementation(result => {
             expect(result).toEqual(['Samples']);
         });
 
@@ -83,7 +83,7 @@ describe('RemoveEndpointFormComponent', () => {
 
         fixture.detectChanges();
         const form = fixture.debugElement.nativeElement.querySelector('form');
-        jest.spyOn(modal, 'close');
+        vi.spyOn(modal, 'close');
         form.dispatchEvent(new Event('submit'));
         expect(modal.close).toHaveBeenCalledTimes(0);
         expect(component.messages().length > 0).toBe(true);

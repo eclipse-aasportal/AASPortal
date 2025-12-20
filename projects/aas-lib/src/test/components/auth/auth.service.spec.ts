@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { EMPTY, first, map, of } from 'rxjs';
+import { EMPTY, first, lastValueFrom, map, of } from 'rxjs';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
@@ -23,12 +23,12 @@ import { getToken } from '../../assets/json-web-token';
 import { LoginFormResult } from '../../../lib/components/auth/login-form/login-form.component';
 import { RegisterFormResult } from '../../../lib/components/auth/register-form/register-form.component';
 import { ProfileFormResult } from '../../../lib/components/auth/profile-form/profile-form.component';
-import { createSpyObj, DoneFn, FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AuthService', () => {
     let service: AuthService;
-    let window: jest.Mocked<Window>;
-    let api: jest.Mocked<AuthApiService>;
+    let window: Mocked<Window>;
+    let api: Mocked<AuthApiService>;
     let modal: NgbModal;
 
     describe('anonym', () => {
@@ -112,25 +112,25 @@ describe('AuthService', () => {
                 newToken = getToken('John');
             });
 
-            it('can login as arguments', function (done: DoneFn) {
+            it('can login as arguments', async () => {
                 api.login.mockReturnValue(of({ token: newToken }));
-                service
-                    .login({ id: 'john.doe@email.com', password: 'password' })
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeTruthy();
-                        expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBe(true);
-                        expect(service.name()).toEqual('John');
-                        expect(service.role()).toEqual('editor');
-                        done();
-                    });
+                const value = await lastValueFrom(
+                    service
+                        .login({ id: 'john.doe@email.com', password: 'password' })
+                        .pipe(map(() => service.payload())),
+                );
+
+                expect(value).toBeTruthy();
+                expect(service.email()).toEqual('john.doe@email.com');
+                expect(service.authenticated()).toBe(true);
+                expect(service.name()).toEqual('John');
+                expect(service.role()).toEqual('editor');
             });
 
-            it('can login via form', function (done: DoneFn) {
+            it('can login via form', async () => {
                 api.login.mockReturnValue(of({ token: newToken }));
 
-                jest.spyOn(modal, 'open').mockReturnValue(
+                vi.spyOn(modal, 'open').mockReturnValue(
                     createSpyObj<NgbModalRef>(
                         {},
                         {
@@ -141,17 +141,12 @@ describe('AuthService', () => {
                     ),
                 );
 
-                service
-                    .login()
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeTruthy();
-                        expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBe(true);
-                        expect(service.name()).toEqual('John');
-                        expect(service.role()).toEqual('editor');
-                        done();
-                    });
+                const value = await lastValueFrom(service.login().pipe(map(() => service.payload())));
+                expect(value).toBeTruthy();
+                expect(service.email()).toEqual('john.doe@email.com');
+                expect(service.authenticated()).toBe(true);
+                expect(service.name()).toEqual('John');
+                expect(service.role()).toEqual('editor');
             });
         });
 
@@ -162,30 +157,29 @@ describe('AuthService', () => {
                 newToken = getToken('John');
             });
 
-            it('allows registering a new user via arguments', function (done: DoneFn) {
+            it('allows registering a new user via arguments', async () => {
                 api.register.mockReturnValue(of({ token: newToken }));
 
-                service
-                    .register({
-                        id: 'john.doe@email.com',
-                        name: 'John',
-                        password: '1234.xyz',
-                    })
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeTruthy();
-                        expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBe(true);
-                        expect(service.name()).toEqual('John');
-                        expect(service.role()).toEqual('editor');
-                        done();
-                    });
+                const value = await lastValueFrom(
+                    service
+                        .register({
+                            id: 'john.doe@email.com',
+                            name: 'John',
+                            password: '1234.xyz',
+                        })
+                        .pipe(map(() => service.payload())),
+                );
+
+                expect(value).toBeTruthy();
+                expect(service.email()).toEqual('john.doe@email.com');
+                expect(service.authenticated()).toBe(true);
+                expect(service.name()).toEqual('John');
+                expect(service.role()).toEqual('editor');
             });
 
-            it('allows registering a new user via form', function (done: DoneFn) {
+            it('allows registering a new user via form', async () => {
                 api.register.mockReturnValue(of({ token: newToken }));
-
-                jest.spyOn(modal, 'open').mockReturnValue(
+                vi.spyOn(modal, 'open').mockReturnValue(
                     createSpyObj<NgbModalRef>(
                         {},
                         {
@@ -196,33 +190,23 @@ describe('AuthService', () => {
                     ),
                 );
 
-                service
-                    .register()
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeTruthy();
-                        expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBe(true);
-                        expect(service.name()).toEqual('John');
-                        expect(service.role()).toEqual('editor');
-                        done();
-                    });
+                const value = await lastValueFrom(service.register().pipe(map(() => service.payload())));
+                expect(value).toBeTruthy();
+                expect(service.email()).toEqual('john.doe@email.com');
+                expect(service.authenticated()).toBe(true);
+                expect(service.name()).toEqual('John');
+                expect(service.role()).toEqual('editor');
             });
 
             describe('logout', () => {
-                it('throws an error when try to logout', (done: DoneFn) => {
-                    service.logout().subscribe({
-                        error: error => {
-                            expect(error).toBeTruthy();
-                            done();
-                        },
-                    });
+                it('throws an error when try to logout', async () => {
+                    await expect(lastValueFrom(service.logout())).rejects.toThrowError();
                 });
             });
 
             describe('updateProfile', () => {
-                it('throw an error for a guest login', async () => {
-                    service.updateUserProfile().subscribe({ error: error => expect(error).toBeTruthy() });
+                it('throws an error for a guest login', async () => {
+                    await expect(lastValueFrom(service.updateUserProfile())).rejects.toThrowError();
                 });
             });
         });
@@ -318,15 +302,13 @@ describe('AuthService', () => {
         describe('logout', () => {
             beforeEach(() => {});
 
-            it('logs out the current user', function (done: DoneFn) {
-                service.logout().subscribe(value => {
-                    expect(value).toBeUndefined();
-                    expect(service.email()).toBeUndefined();
-                    expect(service.authenticated()).toBe(false);
-                    expect(service.name()).toBeUndefined();
-                    expect(service.role()).toBeUndefined();
-                    done();
-                });
+            it('logs out the current user', async () => {
+                const value = await lastValueFrom(service.logout());
+                expect(value).toBeUndefined();
+                expect(service.email()).toBeUndefined();
+                expect(service.authenticated()).toBe(false);
+                expect(service.name()).toBeUndefined();
+                expect(service.role()).toBeUndefined();
             });
         });
 
@@ -338,118 +320,97 @@ describe('AuthService', () => {
                 newToken = getToken('John Doe');
             });
 
-            it('updates the user profile via argument', (done: DoneFn) => {
+            it('updates the user profile via argument', async () => {
                 api.updateProfile.mockReturnValue(of({ token: newToken }));
 
-                service
-                    .updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' })
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeTruthy();
-                        expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBe(true);
-                        expect(service.name()).toEqual('John Doe');
-                        expect(service.role()).toEqual('editor');
-                        done();
-                    });
+                const value = await lastValueFrom(
+                    service
+                        .updateUserProfile({ id: 'john.doe@email.com', name: 'John Doe' })
+                        .pipe(map(() => service.payload())),
+                );
+
+                expect(value).toBeTruthy();
+                expect(service.email()).toEqual('john.doe@email.com');
+                expect(service.authenticated()).toBe(true);
+                expect(service.name()).toEqual('John Doe');
+                expect(service.role()).toEqual('editor');
             });
 
-            it('updates the user profile via form', (done: DoneFn) => {
+            it('updates the user profile via form', async () => {
                 api.updateProfile.mockReturnValue(of({ token: newToken }));
-                jest.spyOn(modal, 'open').mockReturnValue(
+                vi.spyOn(modal, 'open').mockReturnValue(
                     createSpyObj<NgbModalRef>(
                         {},
                         {
                             result: new Promise<ProfileFormResult>(resolve => resolve({ token: newToken })),
-                            componentInstance: { initialize: jest.fn() },
+                            componentInstance: { initialize: vi.fn() },
                         },
                     ),
                 );
 
-                service
-                    .updateUserProfile()
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeTruthy();
-                        expect(service.email()).toEqual('john.doe@email.com');
-                        expect(service.authenticated()).toBe(true);
-                        expect(service.name()).toEqual('John Doe');
-                        expect(service.role()).toEqual('editor');
-                        done();
-                    });
+                const value = await lastValueFrom(service.updateUserProfile().pipe(map(() => service.payload())));
+                expect(value).toBeTruthy();
+                expect(service.email()).toEqual('john.doe@email.com');
+                expect(service.authenticated()).toBe(true);
+                expect(service.name()).toEqual('John Doe');
+                expect(service.role()).toEqual('editor');
             });
 
-            it('deletes a user via form', (done: DoneFn) => {
+            it('deletes a user via form', async () => {
                 api.delete.mockReturnValue(of(void 0));
                 window.confirm.mockReturnValue(true);
-                jest.spyOn(modal, 'open').mockReturnValue(
+                vi.spyOn(modal, 'open').mockReturnValue(
                     createSpyObj<NgbModalRef>(
                         {},
                         {
                             result: new Promise<ProfileFormResult>(resolve => resolve({ action: 'deleteUser' })),
-                            componentInstance: { initialize: jest.fn() },
+                            componentInstance: { initialize: vi.fn() },
                         },
                     ),
                 );
 
-                service
-                    .updateUserProfile()
-                    .pipe(map(() => service.payload()))
-                    .subscribe(value => {
-                        expect(value).toBeUndefined();
-                        expect(service.email()).toBeUndefined();
-                        expect(service.authenticated()).toBe(false);
-                        expect(service.name()).toBeUndefined();
-                        expect(service.role()).toBeUndefined();
-                        done();
-                    });
+                const value = await lastValueFrom(service.updateUserProfile().pipe(map(() => service.payload())));
+                expect(value).toBeUndefined();
+                expect(service.email()).toBeUndefined();
+                expect(service.authenticated()).toBe(false);
+                expect(service.name()).toBeUndefined();
+                expect(service.role()).toBeUndefined();
             });
         });
 
         describe('getCookie', () => {
-            it('returns the value of "Cookie1"', (done: DoneFn) => {
+            it('returns the value of "Cookie1"', async () => {
                 api.getCookie.mockReturnValue(
                     of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
                 );
 
-                service
-                    .getCookie('Cookie1')
-                    .pipe(first())
-                    .subscribe(value => {
-                        expect(value).toEqual('The quick brown fox jumps over the lazy dog.');
-                        done();
-                    });
+                const value = await lastValueFrom(service.getCookie('Cookie1').pipe(first()));
+                expect(value).toEqual('The quick brown fox jumps over the lazy dog.');
             });
         });
 
         describe('checkCookie', () => {
-            it('indicates that "Cookie1" exist', (done: DoneFn) => {
+            it('indicates that "Cookie1" exist', async () => {
                 api.getCookie.mockReturnValue(
                     of({ name: 'Cookie', data: 'The quick brown fox jumps over the lazy dog.' }),
                 );
 
-                service.checkCookie('Cookie1').subscribe(value => {
-                    expect(value).toBe(true);
-                    done();
-                });
+                const value = await lastValueFrom(service.checkCookie('Cookie1'));
+                expect(value).toBe(true);
             });
 
-            it('indicates that "Unknown" not exist', (done: DoneFn) => {
+            it('indicates that "Unknown" not exist', async () => {
                 api.getCookie.mockReturnValue(of(undefined));
-                service.checkCookie('Unknown').subscribe(value => {
-                    expect(value).toBe(false);
-                    done();
-                });
+                const value = await lastValueFrom(service.checkCookie('Unknown'));
+                expect(value).toBe(false);
             });
         });
 
         describe('deleteCookie', () => {
-            it('deletes a cookie', (done: DoneFn) => {
+            it('deletes a cookie', async () => {
                 api.deleteCookie.mockReturnValue(of(void 0));
-                service.deleteCookie('Cookie1').subscribe(() => {
-                    expect(api.deleteCookie).toHaveBeenCalledWith('john.doe@email.com', 'Cookie1');
-                    done();
-                });
+                await lastValueFrom(service.deleteCookie('Cookie1'));
+                expect(api.deleteCookie).toHaveBeenCalledWith('john.doe@email.com', 'Cookie1');
             });
         });
     });

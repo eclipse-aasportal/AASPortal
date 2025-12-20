@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
-import { first, of } from 'rxjs';
+import { first, lastValueFrom, of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
@@ -52,9 +52,9 @@ export class TestBrowserComponent {
 describe('DocumentBrowserView', () => {
     let fixture: ComponentFixture<DocumentBrowserView>;
     let component: DocumentBrowserView;
-    let api: jest.Mocked<EndpointsApi>;
-    let route: jest.Mocked<ActivatedRoute>;
-    let start: jest.Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let route: Mocked<ActivatedRoute>;
+    let start: Mocked<StartService>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -159,15 +159,10 @@ describe('DocumentBrowserView', () => {
         expect(component.index()).toBe(1);
     });
 
-    it('adds a favorite to the start page', done => {
+    it('adds a favorite to the start page', async () => {
         start.add.mockReturnValue(true);
         start.save.mockReturnValue(of(void 0));
-        component
-            .addToStart()
-            .pipe(first())
-            .subscribe(() => {
-                expect(start.add).toHaveBeenCalled();
-                done();
-            });
+        await lastValueFrom(component.addToStart().pipe(first()));
+        expect(start.add).toHaveBeenCalled();
     });
 });

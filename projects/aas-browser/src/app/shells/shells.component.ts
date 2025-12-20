@@ -188,7 +188,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     private selectRange(value: ShellsDataItem): ShellsDataItem[] {
-        let items = this.items();
+        const items = this.items();
         const index = items.indexOf(value);
         let begin = index;
         let end = index;
@@ -231,7 +231,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     private deselectRange(value: ShellsDataItem): ShellsDataItem[] {
-        let items = this.items();
+        const items = this.items();
         const index = items.indexOf(value);
         return items.map((item, i) => (i <= index ? { ...item, selected: false } : item));
     }

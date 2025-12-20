@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -52,9 +52,9 @@ export class TestContactInformation {
 describe.skip('ContactInformationsView', () => {
     let component: ContactInformationView;
     let fixture: ComponentFixture<ContactInformationView>;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {

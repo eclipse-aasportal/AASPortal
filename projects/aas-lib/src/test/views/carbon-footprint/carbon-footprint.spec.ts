@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import '@angular/localize/init';
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 
@@ -23,7 +23,7 @@ import carbon_footprint_1_0 from '../../assets/carbon-footprint-1-0.json';
 describe('CarbonFootprint', () => {
     let component: CarbonFootprint;
     let fixture: ComponentFixture<CarbonFootprint>;
-    let window: jest.Mocked<WindowService>;
+    let window: Mocked<WindowService>;
     let document: AASDocument;
 
     beforeEach(async () => {

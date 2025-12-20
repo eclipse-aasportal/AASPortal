@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -29,7 +29,7 @@ describe('AASTreeComponent', () => {
     let component: AASTreeComponent;
     let document: AASDocument;
     let webSocketSubject: Subject<WebSocketData>;
-    let api: jest.Mocked<AASTreeApi>;
+    let api: Mocked<AASTreeApi>;
 
     beforeEach(async () => {
         document = sampleDocument;

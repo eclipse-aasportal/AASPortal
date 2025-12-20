@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { first, of } from 'rxjs';
+import { first, lastValueFrom, of } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
@@ -51,9 +52,9 @@ export class TestCarbonFootprint {
 describe('CarbonFootprintView', () => {
     let component: CarbonFootprintView;
     let fixture: ComponentFixture<CarbonFootprintView>;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -153,15 +154,10 @@ describe('CarbonFootprintView', () => {
         expect(component.index()).toBe(1);
     });
 
-    it('adds a favorite to the start page', done => {
+    it('adds a favorite to the start page', async () => {
         start.add.mockReturnValue(true);
         start.save.mockReturnValue(of(void 0));
-        component
-            .addToStart()
-            .pipe(first())
-            .subscribe(() => {
-                expect(start.add).toHaveBeenCalled();
-                done();
-            });
+        await lastValueFrom(component.addToStart().pipe(first()));
+        expect(start.add).toHaveBeenCalled();
     });
 });

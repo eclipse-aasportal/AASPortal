@@ -59,7 +59,7 @@ const replacements = new Map<string, string>([
     ['@angular/router', 'node_modules/@angular/cli/LICENSE'],
 ]);
 
-const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'aas-jest', 'aas-package']);
+const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'aas-package']);
 
 await main();
 

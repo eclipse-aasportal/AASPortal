@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -18,9 +18,9 @@ import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('FavoriteComponent', () => {
-    let api: jest.Mocked<EndpointsApi>;
-    let auth: jest.Mocked<AuthService>;
-    let start: jest.Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let auth: Mocked<AuthService>;
+    let start: Mocked<StartService>;
 
     beforeEach(async () => {
         auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });

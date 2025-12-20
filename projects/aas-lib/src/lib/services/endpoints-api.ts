@@ -104,24 +104,30 @@ export class EndpointsApi {
     }
 
     /**
-     * Applies a changed AAS document.
-     * @param document The document to apply.
+     * Updates an existing document for a specific endpoint by sending its content to the server.
+     *
+     * @param document - The `AASDocument` object containing the endpoint, document ID, and content to be updated.
+     * @returns An `Observable<void>` that completes when the update operation is successful.
+     * @throws Error if the document content is null or undefined.
      */
-    public putDocument(document: AASDocument): Observable<string[]> {
-        const formData = new FormData();
-        formData.append('content', new Blob([JSON.stringify(document.content)]));
-        return this.http.put<string[]>(
+    public putDocument(document: AASDocument): Observable<void> {
+        if (!document.content) {
+            throw new Error('Document content is null or undefined.');
+        }
+
+        return this.http.put<void>(
             `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}`,
-            formData,
+            document.content,
         );
     }
 
     /**
-     * Returns a page of documents from the specified cursor.
-     * @param cursor The current cursor.
-     * @param filter A filter expression.
-     * @param language The language to used for the filter.
-     * @returns The document page.
+     * Retrieves a paginated list of documents from the API, optionally filtered and localized.
+     *
+     * @param cursor The pagination cursor object used to fetch the desired page of results.
+     * @param filter (Optional) A filter string to narrow down the documents returned.
+     * @param language (Optional) The language code to localize the documents.
+     * @returns An Observable emitting the paginated result of documents. If the result is cached, returns the cached value as an Observable.
      */
     public getDocuments(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
         let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
@@ -148,22 +154,6 @@ export class EndpointsApi {
      */
     public deleteDocument(id: string, url: string): Observable<void> {
         return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
-    }
-
-    /**
-     * Returns a AAS document hierarchy.
-     * @param id The identification of the root AAS document.
-     * @param endpoint The endpoint name of the root AAS document.
-     * @returns The descendants of the root AAS document and the root itself.
-     */
-    public getHierarchy(id: string, endpoint: string): Observable<AASDocument[]> {
-        const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/hierarchy`;
-        const documents: AASDocument[] | undefined = this.cache.get(url);
-        if (documents === undefined) {
-            return this.http.get<AASDocument[]>(url).pipe(tap(data => this.cache.set(url, data)));
-        }
-
-        return of(documents);
     }
 
     /**

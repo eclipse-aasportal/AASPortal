@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -45,10 +45,9 @@ import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document
 class MockURL implements Partial<URL> {
     public static createObjectURL(): string {
         return '';
-    };
-
-    public static revokeObjectURL(): void {
     }
+
+    public static revokeObjectURL(): void {}
 }
 
 @Component({
@@ -76,10 +75,10 @@ class TestAASTreeComponent {
 describe('AASComponent', () => {
     let fixture: ComponentFixture<AASComponent>;
     let component: AASComponent;
-    let dashboard: jest.Mocked<DashboardService>;
+    let dashboard: Mocked<DashboardService>;
     let router: Router;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
     let pages: DashboardPage[];
 
     beforeEach(async () => {
@@ -195,7 +194,7 @@ describe('AASComponent', () => {
     describe('canAddToDashboard', () => {
         it('can add the selected properties to the dashboard', () => {
             component.setSelectedElements([torque, rotationSpeed]);
-            jest.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+            vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
             expect(component.canAddToDashboard()).toBe(true);
             component.addToDashboard(DashboardChartType.BarVertical);
             expect(dashboard.addChart).toHaveBeenCalled();
@@ -213,12 +212,12 @@ describe('AASComponent', () => {
         });
 
         afterEach(() => {
-            jest.clearAllMocks();
+            vi.clearAllMocks();
         });
 
         it('does nothing when there is no document content', () => {
             const dom = TestBed.inject(DOCUMENT) as Document;
-            const createElSpy = jest.spyOn(dom, 'createElement');
+            const createElSpy = vi.spyOn(dom, 'createElement');
             const state = TestBed.inject(AASState);
             state.update({ document: { ...sampleDocument, content: undefined } });
             component.download();
@@ -228,27 +227,27 @@ describe('AASComponent', () => {
 
         it('creates a blob, starts download and revokes the object URL after timeout', () => {
             const dom = TestBed.inject(DOCUMENT) as Document;
-            const fakeAnchor = { setAttribute: jest.fn(), click: jest.fn(), href: '' };
-            const createElSpy = jest.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
-            const createObjectSpy = jest.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
-            const revokeSpy = jest.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const fakeAnchor = { setAttribute: vi.fn(), click: vi.fn(), href: '' };
+            const createElSpy = vi.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
+            const createObjectSpy = vi.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = vi.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
             const state = TestBed.inject(AASState);
             state.update({ document: sampleDocument });
 
-            jest.useFakeTimers();
+            vi.useFakeTimers();
             component.download();
 
             expect(createObjectSpy).toHaveBeenCalled();
             expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${sampleDocument.idShort}.json`);
             expect(fakeAnchor.click).toHaveBeenCalled();
 
-            jest.advanceTimersByTime(1000);
+            vi.advanceTimersByTime(1000);
             expect(revokeSpy).toHaveBeenCalledWith('blob://1');
 
             createElSpy.mockRestore();
             createObjectSpy.mockRestore();
             revokeSpy.mockRestore();
-            jest.useRealTimers();
+            vi.useRealTimers();
         });
 
         it('notifies on error when preparing the download fails', () => {
@@ -262,21 +261,21 @@ describe('AASComponent', () => {
             });
 
             state.update({ document: badDoc as any });
-            const notify = TestBed.inject(NotifyService) as jest.Mocked<NotifyService>;
+            const notify = TestBed.inject(NotifyService) as Mocked<NotifyService>;
             component.download();
             expect(notify.error).toHaveBeenCalled();
         });
 
         it('downloads a submodel', () => {
             const dom = TestBed.inject(DOCUMENT) as Document;
-            const fakeAnchor = { setAttribute: jest.fn(), click: jest.fn(), href: '' };
-            const createElSpy = jest.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
-            const createObjectSpy = jest.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
-            const revokeSpy = jest.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const fakeAnchor = { setAttribute: vi.fn(), click: vi.fn(), href: '' };
+            const createElSpy = vi.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
+            const createObjectSpy = vi.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = vi.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
             const state = TestBed.inject(AASState);
             state.update({ document: sampleDocument });
 
-            jest.useFakeTimers();
+            vi.useFakeTimers();
             const submodel = sampleDocument.content!.submodels[0];
             component.setSelectedElements([submodel]);
             component.download();
@@ -285,14 +284,13 @@ describe('AASComponent', () => {
             expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${submodel.idShort}.json`);
             expect(fakeAnchor.click).toHaveBeenCalled();
 
-            jest.advanceTimersByTime(1000);
+            vi.advanceTimersByTime(1000);
             expect(revokeSpy).toHaveBeenCalledWith('blob://1');
 
             createElSpy.mockRestore();
             createObjectSpy.mockRestore();
             revokeSpy.mockRestore();
-            jest.useRealTimers();
-
+            vi.useRealTimers();
         });
     });
 });

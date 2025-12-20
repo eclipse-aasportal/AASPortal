@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { describe, expect, it } from 'vitest';
 import { SortableHeaderDirective } from '../../../lib/directives/sortable-header.directive';
 
 describe('SortableHeaderDirective', () => {

@@ -60,26 +60,6 @@
     ],
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.eol": "\n",
-    "jest.virtualFolders": [
-        {
-            "name": "aas-lib",
-            "rootPath": "./projects/aas-lib",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
-        },
-        {
-            "name": "aas-portal",
-            "rootPath": "./projects/aas-portal",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=fals"
-        },
-        {
-            "name": "aas-browser",
-            "rootPath": "./projects/aas-browser",
-            "runMode": "on-demand",
-            "jestCommandLine": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache"
-        }
-    ],
     "[scss]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },

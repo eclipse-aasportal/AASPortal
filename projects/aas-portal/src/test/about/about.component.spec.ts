@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -19,9 +19,9 @@ import { AboutApiService } from '../../app/about/about-api.service';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('AboutComponent', () => {
-    let api: jest.Mocked<AboutApiService>;
-    let start: jest.Mocked<StartService>;
-    let indexChange: jest.Mocked<IndexChangeService>;
+    let api: Mocked<AboutApiService>;
+    let start: Mocked<StartService>;
+    let indexChange: Mocked<IndexChangeService>;
 
     beforeEach(async () => {
         const info: AppInfo = {
