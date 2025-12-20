@@ -8,8 +8,7 @@
 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -47,7 +46,7 @@ export type AASTableItem = {
     selector: 'fhg-aas-table',
     templateUrl: './aas-table.html',
     styleUrls: ['./aas-table.scss'],
-    imports: [FormsModule, NgbTooltip, MaxLengthPipe, TranslateDirective, TranslatePipe, RouterLink],
+    imports: [FormsModule, MaxLengthPipe, TranslateDirective, RouterLink],
     providers: [AASTableFilter],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

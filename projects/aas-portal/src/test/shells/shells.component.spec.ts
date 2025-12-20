@@ -45,7 +45,7 @@ class TestAASTable {
     public readonly viewMode = input<ViewMode>(ViewMode.List);
     public readonly documents = input<AASDocument[]>([]);
     public readonly selected = model<AASDocument[]>([]);
-    public readonly filter = input('');
+    public readonly expression = input('');
 }
 
 describe('ShellsComponent', () => {
