@@ -7,10 +7,12 @@
  *****************************************************************************/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { jest } from '@jest/globals';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
-import { noop } from 'aas-core';
 import { Observable, of } from 'rxjs';
+import { Mocked, vi } from 'vitest';
+import { noop } from 'aas-core';
+
+type Func = () => any;
 
 export class FakeLoader extends TranslateLoader {
     public override getTranslation(lang: string): Observable<TranslationObject> {
@@ -18,8 +20,6 @@ export class FakeLoader extends TranslateLoader {
         return of({});
     }
 }
-
-type Func = (...args: any[]) => any;
 
 export type SpyObjMethodNames<T = undefined> = T extends undefined
     ? ReadonlyArray<string> | { [methodName: string]: any }
@@ -32,15 +32,15 @@ export type SpyObjPropertyNames<T = undefined> = T extends undefined
 export function createSpyObj<T extends object>(
     methodNames: SpyObjMethodNames<T>,
     propertyNames?: SpyObjPropertyNames<T>,
-): jest.Mocked<T> {
+): Mocked<T> {
     const obj: { [key: string]: unknown } = {};
     if (Array.isArray(methodNames)) {
         for (const methodName of methodNames) {
-            obj[methodName as string] = jest.fn();
+            obj[methodName as string] = vi.fn();
         }
     } else {
         for (const methodName in methodNames) {
-            obj[methodName] = jest.fn();
+            obj[methodName] = vi.fn();
         }
     }
 
@@ -56,7 +56,5 @@ export function createSpyObj<T extends object>(
         }
     }
 
-    return obj as jest.Mocked<T>;
+    return obj as Mocked<T>;
 }
-
-export type DoneFn = (...args: any[]) => void;

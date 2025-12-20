@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { describe, expect, it } from 'vitest';
 import { MaxLengthPipe } from "../../../lib/pipes/max-length.pipe";
 
 describe('MaxLengthPipe', () => {

@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ScoreComponent } from '../../../lib/components/score/score.component';

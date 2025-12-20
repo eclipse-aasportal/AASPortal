@@ -20,8 +20,6 @@ import {
     AASPagedResult,
     AASEndpoint,
     ApplicationError,
-    getChildren,
-    isReferenceElement,
     AASEndpointSchedule,
     isFile,
     isBlob,
@@ -42,7 +40,6 @@ import { Variable } from '../variable.js';
 import { WSNode } from '../ws-node.js';
 import { ERRORS } from '../errors.js';
 import { Task, TaskHandler } from './task-handler.js';
-import { HierarchicalStructure } from './hierarchical-structure.js';
 import { AASCache } from './aas-cache.js';
 import { urlToEndpoint } from '../configuration.js';
 
@@ -471,20 +468,6 @@ export class AASProvider {
     }
 
     /**
-     * Gets all AAS documents of a hierarchy.
-     * @param endpoint The endpoint name of the root document.
-     * @param id The AAS identifier of the root document.
-     * @returns All AAS documents of a hierarchy.
-     */
-    public async getHierarchy(endpoint: string, id: string): Promise<AASDocument[]> {
-        const document = await this.index.get(endpoint, 'AssetAdministrationShell', id);
-        const root: AASDocument = { ...document, parentId: null, content: null };
-        const nodes: AASDocument[] = [root];
-        await this.collectDescendants(root, nodes);
-        return nodes;
-    }
-
-    /**
      * Starts a scan of the AAS endpoint with the specified name.
      * @param name The name of the endpoint.
      */
@@ -736,62 +719,6 @@ export class AASProvider {
             type: 'AASNodeMessage',
             data: data,
         });
-    }
-
-    private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
-        const content = parent.content ?? (await this.getDocumentContent(parent));
-        for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
-            const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
-            for (const assetId of assetIds) {
-                const child = await this.index.find(undefined, 'Asset', assetId);
-                if (child) {
-                    const node: AASDocument = { ...child, parentId: parent.id, content: null };
-                    nodes.push(node);
-                    await this.collectDescendants(node, nodes);
-                }
-            }
-        }
-
-        for (const reference of this.whereAASReference(content.submodels)) {
-            const childId = reference.keys[0].value;
-            const child =
-                (await this.index.find(parent.endpoint, 'AssetAdministrationShell', childId)) ??
-                (await this.index.find(undefined, 'AssetAdministrationShell', childId));
-
-            if (child) {
-                const node: AASDocument = { ...child, parentId: parent.id, content: null };
-                nodes.push(node);
-                await this.collectDescendants(node, nodes);
-            }
-        }
-    }
-
-    private *whereHierarchicalStructure(submodels: aas.Submodel[]): Generator<aas.Submodel> {
-        for (const submodel of submodels) {
-            if (HierarchicalStructure.isHierarchicalStructure(submodel)) {
-                yield submodel;
-            }
-        }
-    }
-
-    private *whereAASReference(elements: aas.Referable[]): Generator<aas.Reference> {
-        const stack: aas.Referable[][] = [];
-        stack.push(elements);
-        while (stack.length > 0) {
-            const children = stack.pop() as aas.Referable[];
-            for (const child of children) {
-                if (isReferenceElement(child)) {
-                    if (child.value && child.value.keys.some(item => item.type === 'AssetAdministrationShell')) {
-                        yield child.value;
-                    }
-                }
-
-                const children = getChildren(child);
-                if (children.length > 0) {
-                    stack.push(children);
-                }
-            }
-        }
     }
 
     private async getDocumentContent(document: AASDocument): Promise<aas.Environment> {

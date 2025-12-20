@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -17,7 +17,7 @@ import { FavoritesList, FavoritesService } from '../../app/shells/favorites.serv
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('FavoritesFormComponent', () => {
-    let service: jest.Mocked<FavoritesService>;
+    let service: Mocked<FavoritesService>;
 
     beforeEach(async () => {
         service = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save'], {

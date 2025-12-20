@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';

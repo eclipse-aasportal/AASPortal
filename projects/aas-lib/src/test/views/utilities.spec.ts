@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { describe, expect, it } from 'vitest';
 import { aas } from 'aas-core';
 import { NAMEPLATE_3_0, CARBON_FOOTPRINT_1_0, HANDOVER_DOCUMENTATION_2_0 } from '../../lib/views/views-constants';
 import { findRouteForShell, findRouteForSubmodel, hasSpecificView } from '../../lib/utilities';

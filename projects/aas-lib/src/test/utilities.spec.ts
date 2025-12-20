@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TranslateService } from '@ngx-translate/core';
 import { ApplicationError } from 'aas-core';
 import {
@@ -37,7 +38,7 @@ describe('utilities', () => {
     });
 
     describe('messageToString', () => {
-        let translate: jest.Mocked<TranslateService>;
+        let translate: Mocked<TranslateService>;
 
         beforeEach(() => {
             translate = createSpyObj<TranslateService>(['instant', 'getCurrentLang'], {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -24,9 +24,9 @@ import { createSpyObj, FakeLoader } from '../../mocks';
 import { CUSTOMER_FEEDBACK } from '../../../lib/views/views-constants';
 
 describe.skip('CustomerFeedbackView', () => {
-    let start: jest.Mocked<StartService>;
-    let api: jest.Mocked<EndpointsApi>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let start: Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let route: Mocked<ActivatedRoute>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'save']);

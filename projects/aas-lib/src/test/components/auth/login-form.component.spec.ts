@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -60,8 +60,8 @@ describe('LoginFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const result: LoginFormResult = { token: 'a_token', stayLoggedIn: true };
-        jest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
-        jest.spyOn(api, 'login').mockReturnValue(of({ token: 'a_token' }));
+        vitest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
+        vitest.spyOn(api, 'login').mockReturnValue(of({ token: 'a_token' }));
 
         component.userId.set('john.doe@email.com');
         component.password.set('1234.Abcd');
@@ -119,8 +119,8 @@ describe('LoginFormComponent', () => {
         const fixture = TestBed.createComponent(LoginFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        jest.spyOn(modal, 'close').mockReturnValue();
-        jest.spyOn(api, 'login').mockReturnValue(throwError(() => new Error('Unknown user')));
+        vitest.spyOn(modal, 'close').mockReturnValue();
+        vitest.spyOn(api, 'login').mockReturnValue(throwError(() => new Error('Unknown user')));
 
         component.userId.set('unknown.user@email.com');
         component.password.set('1234.abcd');
@@ -133,7 +133,7 @@ describe('LoginFormComponent', () => {
         const fixture = TestBed.createComponent(LoginFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        jest.spyOn(api, 'resetPassword').mockReturnValue(of(void 0));
+        vitest.spyOn(api, 'resetPassword').mockReturnValue(of(void 0));
         component.userId.set('john.doe@email.com');
         await component.resetPassword();
         expect(component.messages().length).toEqual(1);
@@ -164,7 +164,7 @@ describe('LoginFormComponent', () => {
         const fixture = TestBed.createComponent(LoginFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        jest.spyOn(modal, 'close').mockImplementation((...args) =>
+        vitest.spyOn(modal, 'close').mockImplementation((...args) =>
             expect(args[0]).toEqual({ action: 'register' } as LoginFormResult),
         );
 

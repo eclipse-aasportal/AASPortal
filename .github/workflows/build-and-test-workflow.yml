@@ -34,10 +34,10 @@ jobs:
         with:
           name: code-coverage-report
           path: |
-            reports/aas-core.xml
-            reports/aas-package.xml
-            reports/aas-node.xml
-            reports/aas-server.xml
-            reports/aas-lib.xml
-            reports/aas-portal.xml
-            reports/aas-browser.xml
+            coverage/aas-core.xml
+            coverage/aas-package.xml
+            coverage/aas-node.xml
+            coverage/aas-server.xml
+            coverage/aas-lib.xml
+            coverage/aas-portal.xml
+            coverage/aas-browser.xml

@@ -133,7 +133,7 @@ describe('AuthService', function () {
 
         // it('registers a new user, password is send via e-mail', async function () {
         //     userStorage.existAsync.mockReturnValue(new Promise<boolean>(result => result(false)));
-        //     mailer.sendPassword = jest.fn();
+        //     mailer.sendPassword = vi.fn();
         //     const result = await auth.registerUserAsync({
         //         id: 'john.doe@email.com',
         //         name: 'John Doe',

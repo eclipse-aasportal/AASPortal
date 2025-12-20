@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { Component, DOCUMENT, effect, inject, Injectable, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -57,7 +57,7 @@ export class TreeSearch {
     public readonly matchIndex = signal(-1);
 }
 
-@Component({})
+@Component({ template: '<div></div>', standalone: true })
 class TestTreeComponent extends TreeComponent {
     private readonly treeSearch = inject(TreeSearch);
 
@@ -195,18 +195,18 @@ describe('TreeComponent', () => {
     });
 
     it('should highlight "A.2.3.1"', () => {
-        jest.useFakeTimers();
+        vitest.useFakeTimers();
         const A_2_3_1 = 7;
         const document = TestBed.inject(DOCUMENT);
-        jest.spyOn(document, 'getElementById');
+        vitest.spyOn(document, 'getElementById');
         treeSearch.matchIndex.set(10);
         fixture.detectChanges();
-        jest.runAllTimers();
+        vitest.runAllTimers();
         expect(component.nodes()[6].name).toBe('A.2.3.1');
         expect(component.nodes()[6].highlighted).toBe(true);
         expect(component.highlighted()?.name).toBe('A.2.3.1');
         expect(document.getElementById).toHaveBeenCalledWith('A.2.3.1');
-        jest.useRealTimers();
+        vitest.useRealTimers();
     });
 
     it('should select/deselect all node', () => {

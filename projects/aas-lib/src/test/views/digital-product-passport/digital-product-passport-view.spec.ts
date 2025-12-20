@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-import '@angular/localize/init';
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -91,9 +90,9 @@ export class TestHandoverDocumentation {
 }
 
 describe('DigitalProductPassportView', () => {
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
 
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);

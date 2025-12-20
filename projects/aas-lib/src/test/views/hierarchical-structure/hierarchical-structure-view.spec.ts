@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
@@ -50,9 +51,9 @@ export class TestHierarchicalStructure {
 describe('HierarchicalStructureView', () => {
     let component: HierarchicalStructureView;
     let fixture: ComponentFixture<HierarchicalStructureView>;
-    let start: jest.Mocked<StartService>;
-    let api: jest.Mocked<EndpointsApi>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let start: Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {

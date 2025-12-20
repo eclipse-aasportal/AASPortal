@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { aas, AASDocument } from 'aas-core';
@@ -20,7 +21,7 @@ import hierarchicalStructures_1_1 from '../../assets/hierarchical-structures-1-1
 describe('HierarchicalStructure', () => {
     let component: HierarchicalStructure;
     let fixture: ComponentFixture<HierarchicalStructure>;
-    let api: jest.Mocked<EndpointsApi>;
+    let api: Mocked<EndpointsApi>;
     let document: AASDocument;
 
     beforeEach(async () => {
