@@ -52,7 +52,6 @@ export class EndpointsController extends Controller {
      * @returns The number of registered endpoints.
      */
     @Get('count')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
     @OperationId('getCount')
     public async getCount(): Promise<{ count: number }> {
         return { count: await this.aasProvider.getEndpointCount() };
