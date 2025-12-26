@@ -10,4 +10,16 @@
     <fhg-browser [env]="env()" [state]="state"></fhg-browser>
 </div>
 
-<ng-template #aasToolbar></ng-template>
+<ng-template #toolbar>
+    <button type="button" class="btn btn-primary my-1" (click)="copyToClipboard(id())" [disabled]="id() === undefined">
+        <i class="bi bi-clipboard"><span class="ms-2">Submodel ID</span></i>
+    </button>
+    <button
+        type="button"
+        class="btn btn-primary ms-2 my-1"
+        (click)="copyToClipboard(idShortPath())"
+        [disabled]="idShortPath() === undefined"
+    >
+        <i class="bi bi-clipboard"><span class="ms-2">idShortPath</span></i>
+    </button>
+</ng-template>

@@ -8,7 +8,7 @@
 
 import { Database } from './database.js';
 
-export abstract class DatabaseCommand<TResult> {
+export abstract class DatabaseCommand<TResult = void> {
     protected constructor(protected readonly database: Database) {}
 
     public abstract execute(): Promise<TResult>;

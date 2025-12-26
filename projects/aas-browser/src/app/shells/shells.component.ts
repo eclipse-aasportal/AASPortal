@@ -45,9 +45,9 @@ export class ShellsComponent implements OnDestroy {
 
     public constructor() {
         effect(() => {
-            const shellsToolbar = this.shellsToolbar();
-            if (shellsToolbar) {
-                this.toolbar.set(shellsToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
 
@@ -80,7 +80,7 @@ export class ShellsComponent implements OnDestroy {
         this.window.addEventListener('keydown', this.keydown);
     }
 
-    public readonly shellsToolbar = viewChild<TemplateRef<unknown>>('shellsToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public readonly inputFiles = viewChild<ElementRef<HTMLInputElement>>('inputFiles');
 

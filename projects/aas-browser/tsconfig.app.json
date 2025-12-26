@@ -3,7 +3,9 @@
     "compilerOptions": {
         "moduleResolution": "bundler",
         "outDir": "./out-tsc/app",
-        "types": []
+        "types": [
+          "@angular/localize"
+        ]
     },
     "include": [
         "src/**/*.ts"

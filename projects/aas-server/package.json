@@ -1,6 +1,6 @@
 {
     "name": "aas-server",
-    "version": "3.5.0",
+    "version": "3.6.0",
     "description": "AAS v3 API server ",
     "module": "./dist/aas-server.js",
     "author": "IOSB-INA Fraunhofer",

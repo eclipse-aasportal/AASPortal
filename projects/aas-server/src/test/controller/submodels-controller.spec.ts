@@ -47,6 +47,7 @@ describe('SubmodelsController', () => {
             'deleteSubmodelElementAttachment',
             'addSubmodel',
             'getSubmodelElement',
+            'getSubmodelElementValue',
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
@@ -214,5 +215,59 @@ describe('SubmodelsController', () => {
             'core',
             'withoutBlobValue',
         );
+    });
+
+    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/$value returns string', async () => {
+        repository.getSubmodelElementValue.mockResolvedValue('test-value');
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.Property';
+        const response = await request(app)
+            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/$value`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getSubmodelElementValue).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.Property',
+            'deep',
+            'withoutBlobValue',
+        );
+        expect(response.body).toBe('test-value');
+    });
+
+    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/$value returns number', async () => {
+        repository.getSubmodelElementValue.mockResolvedValue(42);
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.Property';
+        const response = await request(app)
+            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/$value?level=core`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getSubmodelElementValue).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.Property',
+            'core',
+            'withoutBlobValue',
+        );
+        expect(response.body).toBe(42);
+    });
+
+    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/$value returns boolean', async () => {
+        repository.getSubmodelElementValue.mockResolvedValue(true);
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.Property';
+        const response = await request(app)
+            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/$value?extent=withBlobValue`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getSubmodelElementValue).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.Property',
+            'deep',
+            'withBlobValue',
+        );
+        expect(response.body).toBe(true);
     });
 });

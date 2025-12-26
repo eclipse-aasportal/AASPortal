@@ -11,10 +11,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
 
 import { Variable } from '../app/variable.js';
-import { createDatabase } from './utilities.js';
 import { ConceptDescriptionRepository } from '../app/concept-description-repository.js';
 import { HttpCache } from '../app/http-cache.js';
-import { createSpyObj } from './mocks.js';
+import { createDatabase, createSpyObj } from './mocks.js';
 
 describe('ConceptDescriptionRepository', () => {
     let variable: Variable;

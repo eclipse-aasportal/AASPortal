@@ -48,6 +48,15 @@ export function isFile(referable: unknown): referable is aas.File {
 }
 
 /**
+ * Determines whether the specified referable represents a `BasicEventElement`.
+ * @param referable The current referable.
+ * @returns `true` if the specified referable represents a `BasicEventElement`; otherwise, `false`.
+ */
+export function isBasicEventElement(referable: unknown): referable is aas.BasicEventElement {
+    return (referable as aas.Referable)?.modelType === 'BasicEventElement';
+}
+
+/**
  * Determines whether the specified referable represents a `Blob`.
  * @param referable The current referable.
  * @returns `true` if the specified referable represents a `Blob`; otherwise, `false`.

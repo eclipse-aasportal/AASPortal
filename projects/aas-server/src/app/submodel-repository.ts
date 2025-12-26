@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import path from 'path';
-import { aas, ApplicationError, isFile, PagedResult, types } from 'aas-core';
+import { aas, ApplicationError, isFile, jsonization, PagedResult, types } from 'aas-core';
 import { FileResult } from 'aas-package';
 
 import { Database } from './db/database.js';
@@ -19,8 +19,9 @@ import { UpdateAttachmentCommand } from './db/commands/update-attachment-command
 import { DeleteAttachmentCommand } from './db/commands/delete-attachment-command.js';
 import { KeyList } from './db/key-list.js';
 import { HttpCache } from './http-cache.js';
-import { processSerializationModifier, selectSubmodelElement } from './utilities.js';
+import { processSerializationModifier, selectSubmodelElement, toValueSerialization } from './utilities.js';
 import { AasxPackage } from './aasx-package.js';
+import { PatchSubmodelElementValueCommand } from './db/commands/patch-submodel-element-value-command.js';
 
 @singleton()
 export class SubmodelRepository {
@@ -111,20 +112,20 @@ export class SubmodelRepository {
     }
 
     public async getSubmodelElement(
-        smId: string,
+        id: string,
         idShortPath: string,
         level: LevelModifier,
         extent: ExtentModifier,
     ): Promise<aas.SubmodelElement> {
-        let element = this.cache.getSubmodelElement(smId, idShortPath, level, extent);
+        let element = this.cache.getSubmodelElement(id, idShortPath, level, extent);
         if (!element) {
-            const submodel = await this.db.getSubmodel(smId);
+            const submodel = await this.db.getSubmodel(id);
             element = selectSubmodelElement(submodel, idShortPath);
             if (!element) {
                 throw new ApplicationError(
                     ERROR.SUBMODEL_ELEMENT_DOES_NOT_EXIST,
                     {
-                        id: smId,
+                        id,
                         idShortPath,
                     },
                     404,
@@ -132,9 +133,49 @@ export class SubmodelRepository {
             }
 
             processSerializationModifier(element, level, extent);
-            this.cache.setSubmodelElement(smId, idShortPath, level, extent, element);
+            this.cache.setSubmodelElement(id, idShortPath, level, extent, element);
         }
 
         return element;
+    }
+
+    /**
+     * Retrieves the value of a submodel element specified by its identifier and path.
+     *
+     * @param id - The unique identifier of the submodel.
+     * @param idShortPath - The path to the submodel element, using idShort notation.
+     * @param level - The level modifier that determines the depth or detail of the retrieval.
+     * @param extent - The extent modifier that specifies the scope of the retrieval.
+     * @returns A promise that resolves to the serialized value of the submodel element as a `JsonValue`.
+     */
+    public async getSubmodelElementValue(
+        id: string,
+        idShortPath: string,
+        level: LevelModifier,
+        extent: ExtentModifier,
+    ): Promise<jsonization.JsonValue> {
+        const element = await this.getSubmodelElement(id, idShortPath, level, extent);
+        return toValueSerialization(element);
+    }
+
+    /**
+     * Updates the value of a specific submodel element identified by its `id` and `idShortPath`.
+     *
+     * This method creates and executes a `PatchSubmodelElementValueCommand` to update the submodel element's value
+     * in the database. After the update, it removes the relevant cache entry for submodels to ensure consistency.
+     *
+     * @param id - The unique identifier of the submodel containing the element to be updated.
+     * @param idShortPath - The path (in idShort format) to the specific submodel element whose value is to be patched.
+     * @param value - The new value to assign to the submodel element, represented as a `JsonValue`.
+     * @returns A promise that resolves when the operation is complete.
+     */
+    public async patchSubmodelElementValue(
+        id: string,
+        idShortPath: string,
+        value: jsonization.JsonValue,
+    ): Promise<void> {
+        const command = new PatchSubmodelElementValueCommand(this.db, id, idShortPath, value);
+        await this.db.execute(command);
+        this.cache.remove('/submodels');
     }
 }

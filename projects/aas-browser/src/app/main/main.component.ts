@@ -8,7 +8,9 @@
 
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NgbNav, NgbNavItem, NgbNavLink } from '@ng-bootstrap/ng-bootstrap/nav';
+import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { noop, WebSocketData } from 'aas-core';
@@ -23,7 +25,6 @@ import {
 
 import { environment } from '../../environments/environment';
 import { Stats } from '../types';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export const enum LinkId {
     SHELLS,
@@ -47,8 +48,10 @@ export interface LinkDescriptor {
         RouterLink,
         RouterLinkActive,
         NgTemplateOutlet,
-        NgbNavModule,
-        NgbCollapseModule,
+        NgbNav,
+        NgbNavItem,
+        NgbNavLink,
+        NgbCollapse,
         AsyncPipe,
         NotifyComponent,
         ProgressComponent,

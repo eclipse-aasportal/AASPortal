@@ -14,9 +14,8 @@ import { fileURLToPath } from 'url';
 import { PackageRepository } from '../app/package-repository.js';
 import { Variable } from '../app/variable.js';
 import { Logger } from '../app/logging/logger.js';
-import { createDatabase } from './utilities.js';
 import { HttpCache } from '../app/http-cache.js';
-import { createSpyObj } from './mocks.js';
+import { createDatabase, createSpyObj } from './mocks.js';
 
 describe('PackageRepository', () => {
     let logger: Mocked<Logger>;

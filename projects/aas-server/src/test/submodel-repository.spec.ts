@@ -11,10 +11,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { resolve } from 'path';
 
 import { Variable } from '../app/variable.js';
-import { createDatabase } from './utilities.js';
 import { SubmodelRepository } from '../app/submodel-repository.js';
 import { HttpCache } from '../app/http-cache.js';
-import { createSpyObj } from './mocks.js';
+import { createDatabase, createSpyObj } from './mocks.js';
+import { fileURLToPath } from 'url';
 
 describe('SubmodelRepository', () => {
     let variable: Variable;
@@ -80,14 +80,14 @@ describe('SubmodelRepository', () => {
     });
 
     describe('updateSubmodelElementAttachment', () => {
-        it.skip('updates a File content', async () => {
+        it('updates a File content', async () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
             await expect(
                 repository.updateSubmodelElementAttachment(
                     'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                     'OperatingManual.DigitalFile_PDF',
-                    resolve('./src/app/test/assets/Test.pdf'),
+                    fileURLToPath(new URL('./assets/Test.pdf', import.meta.url)),
                     'Test.pdf',
                 ),
             ).resolves.toBe(void 0);
@@ -166,6 +166,72 @@ describe('SubmodelRepository', () => {
                     'withoutBlobValue',
                 ),
             ).rejects.toThrow();
+        });
+    });
+
+    describe('getSubmodelElementValue', () => {
+        it('gets a Submodel Element value', async () => {
+            const db = await createDatabase();
+            const repository = new SubmodelRepository(db, cache);
+            const value = await repository.getSubmodelElementValue(
+                'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                'MaxRotationSpeed',
+                'deep',
+                'withoutBlobValue',
+            );
+
+            expect(value).toEqual(5000);
+        });
+
+        it('throws an error if idShortPath is invalid', async () => {
+            const db = await createDatabase();
+            const repository = new SubmodelRepository(db, cache);
+            await expect(
+                repository.getSubmodelElementValue(
+                    'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                    'unknown',
+                    'deep',
+                    'withoutBlobValue',
+                ),
+            ).rejects.toThrowError();
+        });
+    });
+
+    describe('patchSubmodelElementValue', () => {
+        it('updates a Submodel Element value', async () => {
+            const db = await createDatabase();
+            const repository = new SubmodelRepository(db, cache);
+            await expect(
+                repository.patchSubmodelElementValue(
+                    'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                    'MaxRotationSpeed',
+                    6000,
+                ),
+            ).resolves.toBe(void 0);
+        });
+
+        it('throws an error if idShortPath is invalid', async () => {
+            const db = await createDatabase();
+            const repository = new SubmodelRepository(db, cache);
+            await expect(
+                repository.patchSubmodelElementValue(
+                    'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                    'unknown',
+                    6000,
+                ),
+            ).rejects.toThrowError();
+        });
+
+        it('throws an error if value is invalid', async () => {
+            const db = await createDatabase();
+            const repository = new SubmodelRepository(db, cache);
+            await expect(
+                repository.patchSubmodelElementValue(
+                    'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                    'MaxRotationSpeed',
+                    'invalid value',
+                ),
+            ).rejects.toThrowError();
         });
     });
 });
