@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import upperFirst from 'lodash-es/upperFirst';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPagination } from '@ng-bootstrap/ng-bootstrap/pagination';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
 import {
@@ -45,7 +45,7 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
     templateUrl: './browser.component.html',
     styleUrl: './browser.component.scss',
     providers: [BrowserState],
-    imports: [RouterLink, NgbPaginationModule, ConceptDescriptionComponent],
+    imports: [RouterLink, NgbPagination, ConceptDescriptionComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**

@@ -25,6 +25,7 @@ import {
     extensionToMimeType,
     isValidDate,
     normalize,
+    deserializeValue,
 } from '../lib/convert.js';
 
 describe('Convert', () => {
@@ -465,6 +466,47 @@ describe('Convert', () => {
     describe('normalize', () => {
         it('replaces all "\\" with "/"', () => {
             expect(normalize('A:\\hello/world\\john.doe')).toEqual('A:/hello/world/john.doe');
+        });
+    });
+
+    describe('deserializeValue', () => {
+        it('deserializes boolean values', () => {
+            expect(deserializeValue('true', 'xs:boolean')).toBe(true);
+            expect(deserializeValue('false', 'xs:boolean')).toBe(false);
+            expect(deserializeValue('TRUE', 'xs:boolean')).toBe(true);
+            expect(deserializeValue('FALSE', 'xs:boolean')).toBe(false);
+            expect(deserializeValue('TrUe', 'xs:boolean')).toBe(true);
+            expect(deserializeValue('FaLsE', 'xs:boolean')).toBe(false);
+            expect(deserializeValue('not-a-bool', 'xs:boolean')).toBe(false);
+        });
+
+        it('deserializes number values', () => {
+            expect(deserializeValue('42', 'xs:int')).toBe(42);
+            expect(deserializeValue('-128', 'xs:byte')).toBe(-128);
+            expect(deserializeValue('255', 'xs:unsignedByte')).toBe(255);
+            expect(deserializeValue('3.14', 'xs:double')).toBe(3.14);
+            expect(deserializeValue('1.23e3', 'xs:float')).toBe(1230);
+            expect(deserializeValue('not-a-number', 'xs:int')).toBe('NaN');
+        });
+
+        it('deserializes xs:long and xs:unsignedLong as string', () => {
+            expect(deserializeValue('12345678901234567890', 'xs:long')).toBe('12345678901234567890');
+            expect(deserializeValue('-12345678901234567890', 'xs:long')).toBe('-12345678901234567890');
+            expect(deserializeValue('12345678901234567890', 'xs:unsignedLong')).toBe('12345678901234567890');
+        });
+
+        it('deserializes date/time values', () => {
+            expect(deserializeValue('2023-03-22T12:34:56.000Z', 'xs:dateTime')).toBe('2023-03-22T12:34:56.000Z');
+            expect(deserializeValue('2023-03-22', 'xs:date')).toBe('2023-03-22');
+            expect(deserializeValue('13:14:15', 'xs:time')).toBe('13:14:15');
+            expect(deserializeValue('not-a-date', 'xs:dateTime')).toBe('not-a-date');
+        });
+
+        it('deserializes string-like types as string', () => {
+            expect(deserializeValue('hello', 'xs:string')).toBe('hello');
+            expect(deserializeValue('http://example.com', 'xs:anyURI')).toBe('http://example.com');
+            expect(deserializeValue('Zm9vYmFy', 'xs:base64Binary')).toBe('Zm9vYmFy');
+            expect(deserializeValue('deadbeef', 'xs:hexBinary')).toBe('deadbeef');
         });
     });
 });

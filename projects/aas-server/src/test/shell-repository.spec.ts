@@ -12,12 +12,11 @@ import { fileURLToPath } from 'url';
 import { resolve } from 'path';
 
 import { Variable } from '../app/variable.js';
-import { createDatabase } from './utilities.js';
 import { ShellRepository } from '../app/shell-repository.js';
 import { SubmodelRepository } from '../app/submodel-repository.js';
 import { HttpCache } from '../app/http-cache.js';
 import { AasxPackageBuilder } from '../app/aasx-package-builder.js';
-import { createSpyObj } from './mocks.js';
+import { createDatabase, createSpyObj } from './mocks.js';
 
 describe('ShellRepository', () => {
     let variable: Variable;
