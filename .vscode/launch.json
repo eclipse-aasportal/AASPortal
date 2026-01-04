@@ -166,6 +166,17 @@
                 "${fileBasename}",
                 "--coverage=false",
             ]
-        }
+        },
+        {
+            "name": "Debug create-app-info test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/projects/aas-package",
+            "program": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "create-app-info"
+            ]
+        },
     ]
 }

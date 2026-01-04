@@ -21,7 +21,7 @@ describe('ApiClientV3', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['get', 'getResponse', 'post', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['getJson', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
@@ -55,11 +55,11 @@ describe('ApiClientV3', () => {
                 conceptDescriptions: [],
             };
 
-            http.get.mockResolvedValue(aas);
-            http.put.mockResolvedValue('OK');
+            http.getJson.mockResolvedValue(aas);
+            http.put.mockResolvedValue(void 0);
 
             await expect(client.setEnvironment(aas.id, content)).resolves.toBe(void 0);
-            expect(http.get).toHaveBeenCalled();
+            expect(http.getJson).toHaveBeenCalled();
             expect(http.put).toHaveBeenCalled();
         });
 
@@ -71,12 +71,12 @@ describe('ApiClientV3', () => {
                 conceptDescriptions: [],
             };
 
-            http.get.mockRejectedValue(new Error());
-            http.post.mockResolvedValue('OK');
+            http.getJson.mockRejectedValue(new Error());
+            http.postJson.mockResolvedValue('OK');
 
             await expect(client.setEnvironment(aas.id, content)).resolves.toBe(void 0);
-            expect(http.get).toHaveBeenCalled();
-            expect(http.post).toHaveBeenCalled();
+            expect(http.getJson).toHaveBeenCalled();
+            expect(http.postJson).toHaveBeenCalled();
         });
     });
 
@@ -87,7 +87,7 @@ describe('ApiClientV3', () => {
                 success: true,
             };
 
-            http.post.mockResolvedValue(JSON.stringify(result));
+            http.postJson.mockResolvedValue(JSON.stringify(result));
 
             const operation: aas.Operation = {
                 idShort: 'noop',
@@ -107,7 +107,7 @@ describe('ApiClientV3', () => {
                 success: false,
             };
 
-            http.post.mockResolvedValue(JSON.stringify(result));
+            http.postJson.mockResolvedValue(JSON.stringify(result));
 
             const operation: aas.Operation = {
                 idShort: 'noop',

@@ -8,7 +8,6 @@
 
 import 'chart.js/auto';
 
-import isNumber from 'lodash-es/isNumber';
 import { Chart, ChartConfiguration, ChartDataset, ChartType } from 'chart.js';
 import { aas, LiveNode, LiveRequest, parseNumber, WebSocketData } from 'aas-core';
 import { DashboardApiService } from './dashboard-api.service';
@@ -71,8 +70,9 @@ export abstract class Dashboard {
             }
 
             let y = 0;
-            if (isNumber(node.value)) {
-                y = node.value;
+            const value = Number(node.value);
+            if (!isNaN(value)) {
+                y = value;
             } else if (this.isBigInt(node.value)) {
                 y = this.toNumber(node.value);
             }
@@ -92,8 +92,9 @@ export abstract class Dashboard {
         if (tuple) {
             const data = dataset.data as number[];
             let y = 0;
-            if (isNumber(node.value)) {
-                y = node.value;
+            const value = Number(node.value);
+            if (!isNaN(value)) {
+                y = value;
             } else if (this.isBigInt(node.value)) {
                 y = this.toNumber(node.value);
             }
@@ -303,7 +304,11 @@ export abstract class Dashboard {
     }
 
     private isBigInt(y: unknown): y is number[] {
-        return Array.isArray(y) && y.length === 2 && isNumber(y[0]) && isNumber(y[1]);
+        if (!Array.isArray(y) || y.length !== 2) {
+            return false;
+        }
+
+        return !isNaN(Number(y[0])) && !isNaN(Number(y[1]));
     }
 
     private toNumber(value: number[]): number {

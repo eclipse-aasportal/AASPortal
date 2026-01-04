@@ -200,7 +200,7 @@ export class AASProvider {
                     throw new Error('Invalid operation.');
                 }
 
-                stream = await client.openRead(document.address, dataElement);
+                stream = await client.getFile(document.address, dataElement);
                 const extension = dataElement.value ? path.extname(dataElement.value).toLowerCase() : '';
                 const imageOptions = options as { width?: number; height?: number };
                 if (dataElement.contentType.startsWith('image/')) {

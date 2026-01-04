@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
@@ -53,7 +52,7 @@ export class LoginFormComponent {
     public async resetPassword(): Promise<void> {
         this.clearMessages();
         if (!this.newPasswordSent) {
-            if (isEmpty(this.userId())) {
+            if (!this.userId()) {
                 this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
             } else if (!isValidEMail(this.userId())) {
                 this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL, { id: this.userId() }));
@@ -78,11 +77,11 @@ export class LoginFormComponent {
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.userId())) {
+        if (!this.userId()) {
             this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
         } else if (!isValidEMail(this.userId())) {
             this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL));
-        } else if (isEmpty(this.password())) {
+        } else if (!this.password()) {
             this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
         } else if (!isValidPassword(this.password())) {
             this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));

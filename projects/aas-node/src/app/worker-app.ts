@@ -24,7 +24,7 @@ export class WorkerApp {
         parentPort?.on('message', this.parentPortOnMessage);
     }
 
-    private readonly parentPortOnMessage = async (data: WorkerData) => {
+    private readonly parentPortOnMessage = async (data: WorkerData): Promise<void> => {
         if (parentPort === null) {
             return;
         }

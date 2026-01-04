@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-import FormData from 'form-data';
-import { createReadStream } from 'fs';
+import fs from 'fs';
 import { basename } from 'path';
 import { aas, AASEndpoint, ApplicationError, noop, PagedResult } from 'aas-core';
 
@@ -41,6 +40,7 @@ interface OperationResult {
         ];
         success: boolean;
     };
+
     executionState: number;
     inoutputArguments: aasV2.OperationVariable[];
     outputArguments: aasV2.OperationVariable[];
@@ -57,7 +57,7 @@ export class ApiClientV1 extends ApiClient {
     public readonly onlineReady = true;
 
     public async getShells(cursor?: string): Promise<PagedResult<string>> {
-        const result = await this.http.get<aasV2.AssetAdministrationShell[]>(
+        const result = await this.http.getJson<aasV2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
         );
@@ -71,14 +71,14 @@ export class ApiClientV1 extends ApiClient {
     }
 
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
-        return this.http.getResponse(
+        return this.http.getReadable(
             this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
             this.endpoint.headers,
         );
     }
 
     public async getEnvironment(id: string): Promise<aas.Environment> {
-        const shell = await this.http.get<aasV2.AssetAdministrationShell>(
+        const shell = await this.http.getJson<aasV2.AssetAdministrationShell>(
             this.resolve(`shells/${encodeBase64Url(id)}`),
             this.endpoint.headers,
         );
@@ -108,7 +108,7 @@ export class ApiClientV1 extends ApiClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public async openRead(_: string, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public async getFile(_: string, file: aas.File): Promise<NodeJS.ReadableStream> {
         if (!file.path) {
             throw new Error('Invalid argument "file".');
         }
@@ -116,7 +116,7 @@ export class ApiClientV1 extends ApiClient {
         const smId = encodeBase64Url(file.path.id);
         const path = file.path.idShortPath;
         const url = this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}/attachment`);
-        return await this.http.getResponse(url, this.endpoint.headers);
+        return await this.http.getReadable(url, this.endpoint.headers);
     }
 
     public resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
@@ -129,25 +129,27 @@ export class ApiClientV1 extends ApiClient {
 
     public override async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.get(
+        const descriptors: PackageDescriptor[] = await this.http.getJson(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
 
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        return await this.http.getResponse(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        return await this.http.getReadable(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
     public override async insertPackage(file: string): Promise<void> {
         const formData = new FormData();
-        formData.append('file', createReadStream(file));
-        formData.append('fileName', basename(file));
-        await this.http.post(this.resolve(`packages`), formData, this.endpoint.headers);
+        const buffer = await fs.promises.readFile(file);
+        const fileName = basename(file);
+        formData.append('file', new File([buffer], fileName));
+        formData.append('fileName', fileName);
+        await this.http.postFormData(this.resolve(`packages`), formData, this.endpoint.headers);
     }
 
     public override async deletePackage(aasIdentifier: string): Promise<void> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.get(
+        const descriptors: PackageDescriptor[] = await this.http.getJson(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
@@ -174,7 +176,7 @@ export class ApiClientV1 extends ApiClient {
         };
 
         const result: OperationResult = JSON.parse(
-            await this.http.post(
+            await this.http.postJson(
                 this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${idShortPath}/invoke`),
                 request,
                 this.endpoint.headers,
@@ -202,7 +204,7 @@ export class ApiClientV1 extends ApiClient {
         idShortPath: string,
     ): Promise<string | undefined> {
         const smId = encodeBase64Url(submodelId);
-        const blob = await this.http.get<aas.Blob>(
+        const blob = await this.http.getJson<aas.Blob>(
             this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
             this.endpoint.headers,
         );
@@ -221,7 +223,7 @@ export class ApiClientV1 extends ApiClient {
                 const submodelId = encodeBase64Url(reference.keys[0].value);
                 try {
                     submodels.push(
-                        await this.http.get<aasV2.Submodel>(
+                        await this.http.getJson<aasV2.Submodel>(
                             this.resolve(`submodels/${submodelId}/submodel`),
                             this.endpoint.headers,
                         ),
@@ -245,7 +247,7 @@ export class ApiClientV1 extends ApiClient {
                 }
 
                 try {
-                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
+                    const conceptDescription = await this.http.getJson<aas.ConceptDescription>(
                         this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
                         this.endpoint.headers,
                     );

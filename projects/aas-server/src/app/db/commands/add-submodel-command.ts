@@ -9,18 +9,23 @@
 import { aas, ApplicationError, jsonization, toJsonValue, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { DatabaseKey, IdentifiableItem, TablePage } from '../database-types.js';
+import { IdentifiableItem } from '../database-types.js';
 import { ERROR } from '../../error.js';
 import { SubmodelTable } from '../submodel-table.js';
 
-export class AddSubmodelCommand extends DatabaseCommand<types.Submodel> {
+/**
+ * Command to add a Submodel to the database.
+ */
+export class AddSubmodelCommand extends DatabaseCommand {
     private readonly table: SubmodelTable;
 
     public constructor(
         database: Database,
+        resolve: (result: types.Submodel) => void,
+        reject: (reason: Error) => void,
         private readonly submodel: aas.Submodel,
     ) {
-        super(database);
+        super(database, resolve, reject);
 
         this.table = this.database.submodels;
     }
@@ -67,11 +72,5 @@ export class AddSubmodelCommand extends DatabaseCommand<types.Submodel> {
         await this.table.writeFile(sm, key);
 
         return sm;
-    }
-
-    private async getPage(key: DatabaseKey): Promise<TablePage<IdentifiableItem>> {
-        const pageNumber = Math.trunc(key / this.table.pageSize);
-        const page = await this.table.readPage(pageNumber);
-        return page;
     }
 }

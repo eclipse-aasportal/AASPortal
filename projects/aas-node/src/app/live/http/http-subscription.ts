@@ -8,18 +8,16 @@
 
 import { aas, changeType, LiveNode, LiveRequest, noop } from 'aas-core';
 import { HttpSocketItem } from './http-socket-item.js';
-import { Logger } from '../../logging/logger.js';
 import { SocketClient } from '../socket-client.js';
 import { ApiClient } from '../../client/api/api-client.js';
 import { SocketSubscription } from '../socket-subscription.js';
 
 export class HttpSubscription extends SocketSubscription {
     private readonly items: HttpSocketItem[];
-    private timeout = 300;
+    private readonly timeout = 300;
     private timeoutId?: NodeJS.Timeout;
 
     public constructor(
-        private readonly logger: Logger,
         private readonly server: ApiClient,
         private readonly client: SocketClient,
         message: LiveRequest,

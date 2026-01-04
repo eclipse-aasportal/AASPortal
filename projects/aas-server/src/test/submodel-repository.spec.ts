@@ -58,11 +58,11 @@ describe('SubmodelRepository', () => {
         });
     });
 
-    describe('getSubmodelElementAttachment', () => {
+    describe('getFileByPath', () => {
         it('download the file content', async () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
-            const result = await repository.getSubmodelElementAttachment(
+            const result = await repository.getFileByPath(
                 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                 'OperatingManual.DigitalFile_PDF',
             );
@@ -73,18 +73,16 @@ describe('SubmodelRepository', () => {
         it('throws an Error', async () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
-            await expect(
-                repository.getSubmodelElementAttachment('unknown', 'OperatingManual.DigitalFile_PDF'),
-            ).rejects.toThrow();
+            await expect(repository.getFileByPath('unknown', 'OperatingManual.DigitalFile_PDF')).rejects.toThrow();
         });
     });
 
-    describe('updateSubmodelElementAttachment', () => {
+    describe('putFileByPath', () => {
         it('updates a File content', async () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
             await expect(
-                repository.updateSubmodelElementAttachment(
+                repository.putFileByPath(
                     'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                     'OperatingManual.DigitalFile_PDF',
                     fileURLToPath(new URL('./assets/Test.pdf', import.meta.url)),
@@ -97,7 +95,7 @@ describe('SubmodelRepository', () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
             await expect(
-                repository.updateSubmodelElementAttachment(
+                repository.putFileByPath(
                     'unknown',
                     'OperatingManual.DigitalFile_PDF',
                     resolve('./src/app/test/assets/Test.pdf'),
@@ -110,7 +108,7 @@ describe('SubmodelRepository', () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
             await expect(
-                repository.updateSubmodelElementAttachment(
+                repository.putFileByPath(
                     'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                     'OperatingManual.unknown',
                     resolve('./src/app/test/assets/Test.pdf'),
@@ -120,12 +118,12 @@ describe('SubmodelRepository', () => {
         });
     });
 
-    describe('deleteSubmodelElementAttachment', () => {
+    describe('deleteFileByPath', () => {
         it('deletes a File content', async () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
             await expect(
-                repository.deleteSubmodelElementAttachment(
+                repository.deleteFileByPath(
                     'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                     'OperatingManual.DigitalFile_PDF',
                 ),
@@ -135,9 +133,7 @@ describe('SubmodelRepository', () => {
         it('throws an Error', async () => {
             const db = await createDatabase();
             const repository = new SubmodelRepository(db, cache);
-            await expect(
-                repository.deleteSubmodelElementAttachment('unknown', 'OperatingManual.DigitalFile_PDF'),
-            ).rejects.toThrow();
+            await expect(repository.deleteFileByPath('unknown', 'OperatingManual.DigitalFile_PDF')).rejects.toThrow();
         });
     });
 

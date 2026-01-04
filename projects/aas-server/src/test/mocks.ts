@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect, Mocked, vitest } from 'vitest';
+import { Mocked, vitest } from 'vitest';
 import { nanoid } from 'nanoid';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { aas, jsonization } from 'aas-core';
+import { aas } from 'aas-core';
 import { Database } from '../app/db/database.js';
 import { Variable } from '../app/variable.js';
 import { LangString } from 'projects/aas-core/dist/types/aas.js';

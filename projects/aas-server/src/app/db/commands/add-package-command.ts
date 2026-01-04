@@ -19,16 +19,18 @@ import { hasSubmodel, referenceToString } from '../../utilities.js';
 import { ERROR } from '../../error.js';
 import { AasxPackage } from '../../aasx-package.js';
 
-export class AddPackageCommand extends DatabaseCommand<string> {
+export class AddPackageCommand extends DatabaseCommand {
     private readonly table: PackageTable;
 
     public constructor(
         database: Database,
+        resolve: (result: string) => void,
+        reject: (reason: Error) => void,
         private readonly sourceFile: string,
         private readonly filename: string,
         private readonly env?: types.Environment,
     ) {
-        super(database);
+        super(database, resolve, reject);
 
         this.table = database.packages;
     }

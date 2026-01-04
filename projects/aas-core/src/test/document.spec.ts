@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { cloneDeep } from 'lodash-es';
 import { beforeEach, describe, it, expect } from 'vitest';
 import { AASDocument } from '../lib/types.js';
 import * as aas from '../lib/aas.js';
@@ -65,7 +64,7 @@ describe('Document', () => {
         });
 
         it('compares same documents', () => {
-            const aa = cloneDeep(a);
+            const aa = structuredClone(a);
             expect(equalDocument(a, aa)).toBeTruthy();
         });
 

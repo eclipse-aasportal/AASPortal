@@ -27,7 +27,7 @@ export class ApiClientV0 extends ApiClient {
 
     public async getShells(cursor?: string): Promise<PagedResult<string>> {
         noop(cursor);
-        const result = await this.http.get<AASList>(this.resolve('/server/listaas'));
+        const result = await this.http.getJson<AASList>(this.resolve('/server/listaas'));
         return {
             result: result.aaslist.map(entry => {
                 const items = entry.split(' : ');
@@ -42,7 +42,7 @@ export class ApiClientV0 extends ApiClient {
     }
 
     public override async getEnvironment(idShort: string): Promise<aas.Environment> {
-        const sourceEnv = await this.http.get<aasV2.AssetAdministrationShellEnvironment>(
+        const sourceEnv = await this.http.getJson<aasV2.AssetAdministrationShellEnvironment>(
             this.resolve(`/aas/${idShort}/aasenv`),
         );
 
@@ -70,9 +70,9 @@ export class ApiClientV0 extends ApiClient {
         return this.resolve(`/aas/${shell.idShort}/submodels/${smId}/elements/${idShortPath}/value`).href;
     }
 
-    public async openRead(idShort: string, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public override async getFile(idShort: string, file: aas.File): Promise<NodeJS.ReadableStream> {
         const url = await this.getFileUrlAsync(idShort, file.value!);
-        return await this.http.getResponse(url, this.endpoint.headers);
+        return await this.http.getReadable(url, this.endpoint.headers);
     }
 
     public override getPackage(): Promise<NodeJS.ReadableStream> {
@@ -96,7 +96,7 @@ export class ApiClientV0 extends ApiClient {
     }
 
     private async getFileUrlAsync(idShort: string, address: string): Promise<URL> {
-        const listAAS = await this.http.get<AASList>(this.resolve('/server/listaas'));
+        const listAAS = await this.http.getJson<AASList>(this.resolve('/server/listaas'));
         for (const aas of listAAS.aaslist) {
             const items = aas.split(':');
             if (items[1].trim() === idShort) {
@@ -114,7 +114,7 @@ export class ApiClientV0 extends ApiClient {
         }
     }
 
-    private putSubmodel(id: string, submodel: aasV2.Submodel): Promise<string> {
-        return this.http.put(this.resolve('/aas/' + id + '/submodels/'), submodel);
+    private async putSubmodel(id: string, submodel: aasV2.Submodel): Promise<void> {
+        await this.http.put(this.resolve('/aas/' + id + '/submodels/'), submodel);
     }
 }

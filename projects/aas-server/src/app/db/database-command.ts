@@ -8,8 +8,13 @@
 
 import { Database } from './database.js';
 
-export abstract class DatabaseCommand<TResult = void> {
-    protected constructor(protected readonly database: Database) {}
+export abstract class DatabaseCommand {
+    protected constructor(
+        protected readonly database: Database,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        public readonly resolve: (result: void | any) => void,
+        public readonly reject: (reason: Error) => void,
+    ) {}
 
-    public abstract execute(): Promise<TResult>;
+    public abstract execute(): Promise<void | unknown>;
 }

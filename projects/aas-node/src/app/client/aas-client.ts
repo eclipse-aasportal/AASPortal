@@ -92,7 +92,7 @@ export abstract class AASClient {
      * @param address The address of the package in the AAS endpoint.
      * @param file The File element to read the content.
      */
-    public abstract openRead(address: string, file: aas.File): Promise<NodeJS.ReadableStream>;
+    public abstract getFile(address: string, file: aas.File): Promise<NodeJS.ReadableStream>;
 
     public abstract determineAddress(aasxFile: string): Promise<string | undefined>;
 

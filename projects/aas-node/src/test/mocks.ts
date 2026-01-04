@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect, Mocked, vitest } from 'vitest';
+import { Mocked, vi } from 'vitest';
 
 type Func = () => any;
 
@@ -26,11 +26,11 @@ export function createSpyObj<T extends object>(
     const obj: { [key: string]: unknown } = {};
     if (Array.isArray(methodNames)) {
         for (const methodName of methodNames) {
-            obj[methodName as string] = vitest.fn();
+            obj[methodName as string] = vi.fn();
         }
     } else {
         for (const methodName in methodNames) {
-            obj[methodName] = vitest.fn();
+            obj[methodName] = vi.fn();
         }
     }
 
@@ -47,10 +47,4 @@ export function createSpyObj<T extends object>(
     }
 
     return obj as Mocked<T>;
-}
-
-export type DoneFn = () => void;
-
-export function fail(): void {
-    expect(false).toBe(true);
 }
