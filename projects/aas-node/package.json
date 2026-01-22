@@ -31,7 +31,7 @@
         "jimp": "^1.6.0",
         "jsonwebtoken": "^9.0.2",
         "jszip": "^3.10.1",
-        "lodash-es": "^4.17.21",
+        "lodash-es": "^4.17.23",
         "lowdb": "^7.0.1",
         "mongoose": "^8.18.1",
         "morgan": "^1.10.1",
