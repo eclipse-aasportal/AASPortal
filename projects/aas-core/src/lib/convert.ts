@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jsonization, types } from '@aas-core-works/aas-core3.0-typescript';
 import {
     AssetAdministrationShell,
     ConceptDescription,
@@ -15,8 +16,6 @@ import {
     Submodel,
     SubmodelElement,
 } from './aas.js';
-import * as jsonization from './aas-core/jsonization.js';
-import * as types from './aas-core/types.js';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -874,9 +873,18 @@ export function extensionToMimeType(filename: string): string | undefined {
 }
 
 /** Converts the specified value. */
-export function toJsonValue(value: unknown): jsonization.JsonValue {
+export function toJsonValue(value: number | string | boolean | object): jsonization.JsonValue {
     return value as jsonization.JsonValue;
 }
+
+export function toJsonObject(value: object): jsonization.JsonObject {
+    return value as jsonization.JsonObject;
+}
+
+export function toJsonArray(value: unknown[]): jsonization.JsonArray {
+    return value as jsonization.JsonArray;
+}
+
 export function toEnvironment(value: types.Environment): Environment {
     return jsonization.toJsonable(value) as Environment;
 }

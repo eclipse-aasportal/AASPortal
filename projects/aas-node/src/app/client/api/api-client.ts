@@ -93,7 +93,7 @@ export abstract class ApiClient extends AASClient {
         request: LiveRequest,
         env: aas.Environment,
     ): SocketSubscription {
-        return new HttpSubscription(this.logger, this, client, request, env);
+        return new HttpSubscription(this, client, request, env);
     }
 
     /**
@@ -109,7 +109,7 @@ export abstract class ApiClient extends AASClient {
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.get<PropertyValue>(new URL(url), this.endpoint.headers);
+        const property = await this.http.getJson<PropertyValue>(new URL(url), this.endpoint.headers);
         return convertFromString(property.value, valueType);
     }
 

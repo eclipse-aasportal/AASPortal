@@ -1,7 +1,7 @@
 # Getting Started
 ## Prerequisites
 - Visual Studio Code
-- Node.js v22.16.0
+- Node.js v24.12.0
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
@@ -14,7 +14,6 @@
 - **aas-lib**: Angular library containing reusable UI components and services
 - **aas-server**: AAS server application with IDTA Part 2 compliant API
 - **aas-browser**: Frontend application for the AAS server
-- **aas-jest**: Custom Jest configuration utilities
 
 ```txt
 aasportal
@@ -22,8 +21,6 @@ aasportal
   │     ├── aas-core
   │     │     └── package.json
   │     ├── aas-package
-  │     │     └── package.json
-  │     ├── aas-jest
   │     │     └── package.json
   │     ├── aas-lib
   │     │     └── package.json

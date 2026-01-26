@@ -71,6 +71,7 @@ describe('ShellsComponent', () => {
             'getDocuments',
             'downloadPackage',
         ]);
+        
         api.getDocuments.mockReturnValue(
             of({
                 previous: null,

@@ -15,14 +15,16 @@ import { IdentifiableTable } from '../identifiable-table.js';
 import { PackageTable } from '../package-table.js';
 import { KeyList } from '../key-list.js';
 
-export class DeletePackageCommand extends DatabaseCommand<void> {
+export class DeletePackageCommand extends DatabaseCommand {
     private readonly table: PackageTable;
 
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly packageId: string,
     ) {
-        super(database);
+        super(database, resolve, reject);
 
         this.table = this.database.packages;
     }

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
@@ -49,6 +49,12 @@ describe('DashboardComponent', () => {
         webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
         webSocketFactory.create.mockReturnValue(webSocketSubject);
         start = createSpyObj<StartService>(['add', 'save']);
+
+        vi.useFakeTimers
+
+        HTMLCanvasElement.prototype.getContext = () => {
+            return null;
+        };
 
         const pages: DashboardState = DashboardService.fromString(JSON.stringify(data));
 
@@ -115,6 +121,10 @@ describe('DashboardComponent', () => {
                 imports: [ChartEditComponent],
             },
         });
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     it('should create', () => {

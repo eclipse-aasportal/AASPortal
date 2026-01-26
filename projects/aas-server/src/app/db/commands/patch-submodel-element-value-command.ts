@@ -13,16 +13,18 @@ import { SubmodelTable } from '../submodel-table.js';
 import { selectISubmodelElement, serializeValue } from '../../utilities.js';
 import { ERROR } from '../../error.js';
 
-export class PatchSubmodelElementValueCommand extends DatabaseCommand<void> {
+export class PatchSubmodelElementValueCommand extends DatabaseCommand {
     private readonly table: SubmodelTable;
 
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly id: string,
         private readonly idShortPath: string,
         private readonly value: jsonization.JsonValue,
     ) {
-        super(database);
+        super(database, resolve, reject);
 
         this.table = this.database.submodels;
     }

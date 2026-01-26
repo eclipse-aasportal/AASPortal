@@ -130,7 +130,7 @@ export class AASTable {
             id: document.id,
             endpoint: document.endpoint,
             document,
-            state: document.content ? 'loaded' : document.content === null ? 'unavailable' : 'unloaded',
+            state: document.content ? 'loaded' : document.content === null ? 'unloaded' : 'unavailable',
             thumbnail: document.thumbnail ?? '/assets/resources/aas-idta.png',
             selected: signal(selected),
         };

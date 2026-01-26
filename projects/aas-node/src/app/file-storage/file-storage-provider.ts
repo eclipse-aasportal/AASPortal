@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import isEmpty from 'lodash-es/isEmpty.js';
 import { FileStorage } from './file-storage.js';
 import { LocalFileStorage } from './local-file-storage.js';
 import { Variable } from '../variable.js';
@@ -50,11 +49,11 @@ export class FileStorageProvider {
             }
             case 'http:':
             case 'https:':
-                if (isEmpty(url.username)) {
+                if (!url.username) {
                     url.username = this.variable.AAS_NODE_USERNAME;
                 }
 
-                if (isEmpty(url.password)) {
+                if (!url.password) {
                     url.password = this.variable.AAS_NODE_PASSWORD;
                 }
 

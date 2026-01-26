@@ -31,12 +31,15 @@ type Memento = {
 
 type Connection = { data: DatabaseData };
 
+/**
+ * Database class for managing AAS data storage and retrieval.
+ */
 @singleton()
 export class Database {
+    private readonly commandQueue: DatabaseCommand[] = [];
     private readonly connection: Promise<Connection>;
     private _hasDatabase = true;
     private memento?: Memento;
-    private commandActive = false;
     private wsServer?: WSServer;
 
     public constructor(@inject(Variable) private readonly variable: Variable) {
@@ -45,16 +48,34 @@ export class Database {
         this.connection = this.connect();
     }
 
+    /**
+     * The root directory where the database files are stored.
+     */
     public readonly rootDir: string;
 
+    /**
+     * Table for managing packages in the database.
+     */
     public packages!: PackageTable;
 
+    /**
+     * Table for managing Asset Administration Shells in the database.
+     */
     public shells!: AssetAdministrationShellTable;
 
+    /**
+     * Table for managing submodels in the database.
+     */
     public submodels!: SubmodelTable;
 
+    /**
+     * Table for managing concept descriptions in the database.
+     */
     public conceptDescriptions!: ConceptDescriptionTable;
 
+    /**
+     * Temporary directory for intermediate file storage.
+     */
     public readonly tmpDir: string;
 
     public async ready(): Promise<void> {
@@ -71,111 +92,27 @@ export class Database {
         return this._hasDatabase;
     }
 
-    public async begin(): Promise<void> {
-        if (this.commandActive) {
-            throw new Error('Command already active.');
-        }
-
-        this.commandActive = true;
-        await this.connection;
-        this.memento = {
-            addedFiles: [],
-            deletedFiles: [],
-            updatedFiles: [],
-        };
-    }
-
-    public async commit(): Promise<void> {
-        if (!this.commandActive) {
-            throw new Error('No command active.');
-        }
-
-        const data = (await this.connection).data;
-        await this.packages.commit();
-        await this.shells.commit();
-        await this.submodels.commit();
-        await this.conceptDescriptions.commit();
-
-        if (this.memento) {
-            if (this.memento.deletedFiles) {
-                for (const deletedFile of this.memento.deletedFiles) {
-                    try {
-                        await fs.promises.unlink(deletedFile);
-                    } catch {
-                        noop();
-                    }
-                }
-            }
-
-            if (this.memento.updatedFiles) {
-                for (const [backup] of this.memento.updatedFiles) {
-                    try {
-                        await fs.promises.unlink(backup);
-                    } catch {
-                        noop();
-                    }
-                }
-            }
-
-            this.memento = undefined;
-        }
-
-        await this.write(data);
-        this.commandActive = false;
-    }
-
-    public async abort(): Promise<void> {
-        if (!this.commandActive) {
-            return;
-        }
-
-        const connection = await this.connection;
-        connection.data = await this.read();
-        await this.packages.abort();
-        await this.shells.abort();
-        await this.submodels.abort();
-        await this.conceptDescriptions.abort();
-        if (this.memento) {
-            if (this.memento.addedFiles) {
-                for (const addedFile of this.memento.addedFiles) {
-                    try {
-                        await fs.promises.unlink(addedFile);
-                    } catch {
-                        noop();
-                    }
-                }
-
-                if (this.memento.updatedFiles) {
-                    for (const [backup, dest] of this.memento.updatedFiles) {
-                        try {
-                            await fs.promises.copyFile(backup, dest);
-                            await fs.promises.unlink(backup);
-                        } catch {
-                            noop();
-                        }
-                    }
-                }
-            }
-
-            this.memento = undefined;
-        }
-
-        this.commandActive = false;
-    }
-
-    public async execute<TResult>(command: DatabaseCommand<TResult>): Promise<TResult> {
-        try {
-            await this.begin();
-            const result = await command.execute();
-            await this.commit();
-            this.notifyStatsChanged();
-            return result;
-        } catch (error) {
-            await this.abort();
-            throw error;
+    /**
+     * Adds a database command to the execution queue and initiates its execution if the queue was previously empty.
+     *
+     * @param command - The database command to be executed.
+     *
+     * If the command queue is empty before adding the new command, this method immediately starts executing the command.
+     * Otherwise, the command will be executed once all previously queued commands have completed.
+     */
+    public execute(command: DatabaseCommand): void {
+        this.commandQueue.push(command);
+        if (this.commandQueue.length === 1) {
+            this.executeCommand();
         }
     }
 
+    /**
+     * Adds a file to the list of added files in the memento.
+     *
+     * @param file - The path or identifier of the file to add.
+     * @throws {Error} If the `addedFiles` property of the memento is undefined.
+     */
     public fileAdded(file: string): void {
         if (this.memento?.addedFiles === undefined) {
             throw new Error('Invalid operation.');
@@ -184,6 +121,14 @@ export class Database {
         this.memento.addedFiles.push(file);
     }
 
+    /**
+     * Records an updated file by adding a tuple containing the backup and file paths
+     * to the `updatedFiles` array in the `memento` object.
+     *
+     * @param backup - The path to the backup file.
+     * @param file - The path to the updated file.
+     * @throws {Error} If the `updatedFiles` property of `memento` is undefined.
+     */
     public fileUpdated(backup: string, file: string): void {
         if (this.memento?.updatedFiles === undefined) {
             throw new Error('Invalid operation.');
@@ -192,6 +137,12 @@ export class Database {
         this.memento.updatedFiles.push([backup, file]);
     }
 
+    /**
+     * Marks a file as deleted by adding its name to the `deletedFiles` array in the memento.
+     *
+     * @param file - The name or path of the file to mark as deleted.
+     * @throws {Error} If the `deletedFiles` property in the memento is undefined.
+     */
     public fileDeleted(file: string): void {
         if (this.memento?.deletedFiles === undefined) {
             throw new Error('Invalid operation.');
@@ -200,6 +151,14 @@ export class Database {
         this.memento.deletedFiles.push(file);
     }
 
+    /**
+     * Retrieves a paginated list of package descriptions, optionally filtered by Asset Administration Shell (AAS) ID.
+     *
+     * @param limit - The maximum number of packages to return. If not provided, a default limit is used.
+     * @param cursor - An optional cursor for pagination, indicating the starting point for the next page of results.
+     * @param aasId - An optional Asset Administration Shell ID to filter packages associated with a specific AAS.
+     * @returns A promise that resolves to a paged result containing package descriptions.
+     */
     public async getPackages(
         limit?: number,
         cursor?: string,
@@ -216,22 +175,50 @@ export class Database {
         });
     }
 
+    /**
+     * Retrieves a paginated list of Asset Administration Shells.
+     *
+     * @param limit - Optional. The maximum number of shells to return. Defaults to a predefined limit if not specified.
+     * @param cursor - Optional. A pagination cursor indicating the starting point for the next set of results.
+     * @returns A promise that resolves to a paged result containing Asset Administration Shells.
+     */
     public async getShells(limit?: number, cursor?: string): Promise<PagedResult<aas.AssetAdministrationShell>> {
         await this.connection;
         return await this.shells.getPage(limit ?? this.variable.LIMIT, cursor);
     }
 
+    /**
+     * Retrieves an Asset Administration Shell (AAS) by its unique identifier.
+     *
+     * @param id - The unique identifier of the Asset Administration Shell to retrieve.
+     * @returns A promise that resolves to the requested Asset Administration Shell object.
+     * @throws Will throw an error if the shell cannot be found or if there is a database access issue.
+     */
     public async getShell(id: string): Promise<aas.AssetAdministrationShell> {
         await this.connection;
         const key = await this.shells.getKey(id);
         return await this.shells.readJson(key);
     }
 
+    /**
+     * Retrieves a paginated list of submodels from the database.
+     *
+     * @param limit - Optional. The maximum number of submodels to return. If not provided, a default limit is used.
+     * @param cursor - Optional. A pagination cursor indicating the starting point for the next set of results.
+     * @returns A promise that resolves to a paged result containing submodels.
+     */
     public async getSubmodels(limit?: number, cursor?: string): Promise<PagedResult<aas.Submodel>> {
         await this.connection;
         return await this.submodels.getPage(limit ?? this.variable.LIMIT, cursor);
     }
 
+    /**
+     * Retrieves a submodel by its unique identifier.
+     *
+     * @param id - The unique identifier of the submodel to retrieve.
+     * @returns A promise that resolves to the requested {@link aas.Submodel}.
+     * @throws {@link ApplicationError} If the submodel does not exist, with error code {@link ERROR.SUBMODEL_DOES_NOT_EXIST} and HTTP status 404.
+     */
     public async getSubmodel(id: string): Promise<aas.Submodel> {
         await this.connection;
         const key = await this.submodels.findKey(id);
@@ -242,11 +229,25 @@ export class Database {
         return await this.submodels.readJson(key);
     }
 
+    /**
+     * Retrieves a paginated list of ConceptDescription objects from the database.
+     *
+     * @param limit - Optional. The maximum number of ConceptDescription items to return. If not provided, a default limit is used.
+     * @param cursor - Optional. A pagination cursor indicating the starting point for the next page of results.
+     * @returns A promise that resolves to a PagedResult containing ConceptDescription objects.
+     */
     public async getConceptDescriptions(limit?: number, cursor?: string): Promise<PagedResult<aas.ConceptDescription>> {
         await this.connection;
         return await this.conceptDescriptions.getPage(limit ?? this.variable.LIMIT, cursor);
     }
 
+    /**
+     * Retrieves a concept description by its identifier.
+     *
+     * @param id - The unique identifier of the concept description to retrieve.
+     * @returns A promise that resolves to the corresponding `aas.Submodel` object.
+     * @throws {ApplicationError} If the concept description does not exist, with error code `ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST` and HTTP status 404.
+     */
     public async getConceptDescription(id: string): Promise<aas.Submodel> {
         await this.connection;
         const key = await this.conceptDescriptions.findKey(id);
@@ -257,6 +258,16 @@ export class Database {
         return await this.conceptDescriptions.readJson(key);
     }
 
+    /**
+     * Notifies connected WebSocket clients that the statistics have changed.
+     *
+     * Sends a message of type `'stats'` containing the current counts of packages,
+     * shells, submodels, and concept descriptions. The message is only sent if the
+     * WebSocket server (`wsServer`) is available.
+     *
+     * @remarks
+     * The data sent conforms to the `Stats` interface.
+     */
     public notifyStatsChanged(): void {
         this.wsServer?.notify({
             type: 'stats',
@@ -267,6 +278,112 @@ export class Database {
                 conceptDescriptions: this.conceptDescriptions.size,
             } satisfies Stats,
         });
+    }
+
+    private async executeCommand(): Promise<void> {
+        while (this.commandQueue.length > 0) {
+            const command = this.commandQueue.at(0);
+            if (!command) {
+                return;
+            }
+
+            try {
+                await this.begin();
+                const result = await command.execute();
+                await this.commit();
+                this.notifyStatsChanged();
+                command.resolve(result);
+            } catch (error) {
+                await this.abort();
+                command.reject(error);
+            }
+
+            this.commandQueue.shift();
+        }
+    }
+
+    private async begin(): Promise<void> {
+        await this.connection;
+        this.memento = {
+            addedFiles: [],
+            deletedFiles: [],
+            updatedFiles: [],
+        };
+    }
+
+    private async commit(): Promise<void> {
+        const data = (await this.connection).data;
+        await this.packages.commit();
+        await this.shells.commit();
+        await this.submodels.commit();
+        await this.conceptDescriptions.commit();
+
+        if (this.memento) {
+            if (this.memento.deletedFiles) {
+                Promise.all(
+                    this.memento.deletedFiles.map(async deletedFile => {
+                        try {
+                            await fs.promises.unlink(deletedFile);
+                        } catch {
+                            noop();
+                        }
+                    }),
+                );
+            }
+
+            if (this.memento.updatedFiles) {
+                Promise.all(
+                    this.memento.updatedFiles.map(async ([backup]) => {
+                        try {
+                            await fs.promises.unlink(backup);
+                        } catch {
+                            noop();
+                        }
+                    }),
+                );
+            }
+
+            this.memento = undefined;
+        }
+
+        await this.write(data);
+    }
+
+    private async abort(): Promise<void> {
+        const connection = await this.connection;
+        connection.data = await this.read();
+        await this.packages.abort();
+        await this.shells.abort();
+        await this.submodels.abort();
+        await this.conceptDescriptions.abort();
+        if (this.memento) {
+            if (this.memento.addedFiles) {
+                Promise.all(
+                    this.memento.addedFiles.map(async addedFile => {
+                        try {
+                            await fs.promises.unlink(addedFile);
+                        } catch {
+                            noop();
+                        }
+                    }),
+                );
+
+                if (this.memento.updatedFiles) {
+                    Promise.all(
+                        this.memento.updatedFiles.map(async ([backup, dest]) => {
+                            try {
+                                await fs.promises.copyFile(backup, dest);
+                                await fs.promises.unlink(backup);
+                            } catch {
+                                noop();
+                            }
+                        }),
+                    );
+                }
+            }
+
+            this.memento = undefined;
+        }
     }
 
     private async connect(): Promise<Connection> {

@@ -12,7 +12,6 @@ import { Cookie } from 'aas-core';
 import { UserData } from './user-data.js';
 import { UserStorage } from './user-storage.js';
 import { Variable } from '../variable.js';
-import isEmpty from 'lodash-es/isEmpty.js';
 
 export interface UserCookies {
     id: string;
@@ -146,9 +145,9 @@ export class MongoDBUserStorage extends UserStorage {
 
     private connect(): Promise<Mongoose> {
         const url = new URL(this.variable.USER_STORAGE!);
-        const username = isEmpty(url.username) ? this.variable.AAS_NODE_USERNAME : url.username;
-        const password = isEmpty(url.password) ? this.variable.AAS_NODE_PASSWORD : url.password;
-        const dbName = isEmpty(url.pathname) ? 'aasportal-users' : url.pathname.substring(1);
+        const username = url.username ?? this.variable.AAS_NODE_USERNAME;
+        const password = url.password ?? this.variable.AAS_NODE_PASSWORD;
+        const dbName = url.pathname?.substring(1) ?? 'aasportal-users';
         url.username = '';
         url.password = '';
         url.pathname = '';

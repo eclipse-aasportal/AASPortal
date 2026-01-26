@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import cloneDeep from 'lodash-es/cloneDeep';
 import { catchError, EMPTY, map, mergeMap, Observable, of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -72,7 +71,7 @@ export class OperationCallFormComponent {
 
     public initialize(document: AASDocument, operation: aas.Operation): void {
         this.document = document;
-        this.operation = cloneDeep(operation);
+        this.operation = structuredClone(operation);
         delete this.operation.path;
 
         try {

@@ -7,10 +7,11 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'url';
 import { resolve } from 'path';
 
+import { aas } from 'aas-core';
 import { Variable } from '../app/variable.js';
 import { ShellRepository } from '../app/shell-repository.js';
 import { SubmodelRepository } from '../app/submodel-repository.js';
@@ -21,16 +22,21 @@ import { createDatabase, createSpyObj } from './mocks.js';
 describe('ShellRepository', () => {
     let variable: Variable;
     let cache: HttpCache;
-    let packageBuilder: Mocked<AasxPackageBuilder>;
+    let packageBuilder: AasxPackageBuilder;
 
     beforeEach(() => {
         variable = createSpyObj<Variable>(
             {},
-            { DATA: resolve('./src/test/assets/tmp/data'), PAGE_SIZE: 100, CACHE_SIZE: 100 },
+            {
+                DATA: resolve(__dirname, './assets/tmp/data'),
+                PAGE_SIZE: 100,
+                CACHE_SIZE: 100,
+                ASSETS: resolve(__dirname, './assets'),
+            },
         );
 
         cache = new HttpCache(variable);
-        packageBuilder = createSpyObj<AasxPackageBuilder>(['build']);
+        packageBuilder = new AasxPackageBuilder(variable);
     });
 
     describe('getShells', () => {
@@ -138,14 +144,6 @@ describe('ShellRepository', () => {
         });
     });
 
-    // describe('addShell', () => {
-    //     it('adds an AAS', async () => {
-    //         const db = await createDatabase();
-    //         const repository = new ShellRepository(variable, db);
-    //         repository.addShell();
-    //     });
-    // });
-
     describe('getSubmodel', () => {
         it('gets a submodel', async () => {
             const db = await createDatabase();
@@ -218,12 +216,12 @@ describe('ShellRepository', () => {
         });
     });
 
-    describe('getSubmodelElementAttachment', () => {
+    describe('getFileByPath', () => {
         it('download the file content', async () => {
             const db = await createDatabase();
             const repository = new ShellRepository(db, new SubmodelRepository(db, cache), cache, packageBuilder);
 
-            const result = await repository.getSubmodelElementAttachment(
+            const result = await repository.getFileByPath(
                 'http://customer.com/aas/9175_7013_7091_9168',
                 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
                 'OperatingManual.DigitalFile_PDF',
@@ -237,12 +235,58 @@ describe('ShellRepository', () => {
             const repository = new ShellRepository(db, new SubmodelRepository(db, cache), cache, packageBuilder);
 
             await expect(
-                repository.getSubmodelElementAttachment(
+                repository.getFileByPath(
                     'http://customer.com/aas/9175_7013_7091_9168',
                     'unknown',
                     'OperatingManual.DigitalFile_PDF',
                 ),
             ).rejects.toThrow();
+        });
+    });
+
+    describe('addShell', () => {
+        let shell: aas.AssetAdministrationShell;
+
+        beforeEach(() => {
+            shell = {
+                modelType: 'AssetAdministrationShell',
+                id: 'http://customer.com/aas/new_aas',
+                idShort: 'NewAAS',
+                assetInformation: {
+                    assetKind: 'Instance',
+                },
+            };
+        });
+
+        it('adds an AAS and resolves with the added shell', async () => {
+            const db = await createDatabase();
+            const repository = new ShellRepository(db, new SubmodelRepository(db, cache), cache, packageBuilder);
+            const result = await repository.addShell(shell);
+            expect(result).toEqual(shell);
+        });
+    });
+
+    describe('updateShell', () => {
+        let shell: aas.AssetAdministrationShell;
+
+        beforeEach(() => {
+            shell = {
+                modelType: 'AssetAdministrationShell',
+                id: 'http://customer.com/aas/9175_7013_7091_9168',
+                idShort: 'UpdatedIdShort',
+                assetInformation: {
+                    assetKind: 'Instance',
+                    globalAssetId: 'http://customer.com/assets/UPDATED_KHBVZJSQKIY',
+                },
+            };
+        });
+
+        it('updates an AAS and resolves with the updated shell', async () => {
+            const db = await createDatabase();
+            const repository = new ShellRepository(db, new SubmodelRepository(db, cache), cache, packageBuilder);
+            const result = await repository.updateShell(shell);
+            expect(result.administration).toEqual(shell.administration);
+            expect(result.assetInformation).toEqual(shell.assetInformation);
         });
     });
 });

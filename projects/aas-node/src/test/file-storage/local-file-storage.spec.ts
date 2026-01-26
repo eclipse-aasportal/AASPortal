@@ -47,8 +47,8 @@ describe('LocalFileStorage', () => {
 
         beforeEach(() => {
             files = [
-                createSpyObj<Dirent>(['isDirectory'], { name: 'A', path: '/A' }),
-                createSpyObj<Dirent>(['isDirectory'], { name: 'B', path: '/B' }),
+                createSpyObj<Dirent>(['isDirectory'], { name: 'A', parentPath: '/A' }),
+                createSpyObj<Dirent>(['isDirectory'], { name: 'B', parentPath: '/B' }),
             ];
 
             files[0].isDirectory.mockReturnValue(false);
