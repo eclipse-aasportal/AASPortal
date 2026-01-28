@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common';
  *
  *****************************************************************************/
 
-import head from 'lodash-es/head';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +26,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, jsonization, isSubmodel, toJsonValue } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, isSubmodel, toJsonValue, jsonization } from 'aas-core';
 import {
     AASTreeComponent,
     decodeBase64Url,
@@ -104,7 +103,7 @@ export class AASComponent implements OnInit, OnDestroy {
     public readonly readOnly = computed(() => !!this.state.document()?.readonly);
 
     public readonly version = computed(() =>
-        this.versionToString(head(this.state.document()?.content?.assetAdministrationShells)?.administration),
+        this.versionToString(this.state.document()?.content?.assetAdministrationShells?.at(0)?.administration),
     );
 
     public readonly document = this.state.document;

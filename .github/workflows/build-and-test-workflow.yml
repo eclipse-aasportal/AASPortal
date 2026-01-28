@@ -12,18 +12,13 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-
-    # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
-    strategy:
-      matrix:
-        node-version: [22.16.0]
-#
+    
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24.12.0
       - run: npm ci --unsafe-perm=true --allow-root
       - run: npm run build
       # - run: npm run lint

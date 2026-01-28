@@ -6,8 +6,15 @@
  *
  *****************************************************************************/
 
-import isEmpty from 'lodash-es/isEmpty.js';
 import { AASEndpointType, ErrorData } from './types.js';
+import {
+    common,
+    constants,
+    jsonization,
+    stringification,
+    types,
+    verification,
+} from '@aas-core-works/aas-core3.0-typescript';
 
 export * from './document.js';
 export * from './types.js';
@@ -19,12 +26,8 @@ export * from './keyed-list.js';
 export * from './crc32.js';
 export * from './query-parser.js';
 export * from './cache.js';
-export * as common from './aas-core/common.js';
-export * as constants from './aas-core/constants.js';
-export * as jsonization from './aas-core/jsonization.js';
-export * as stringification from './aas-core/stringification.js';
-export * as types from './aas-core/types.js';
-export * as verification from './aas-core/verification.js';
+
+export { common, constants, jsonization, stringification, types, verification };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function noop(...args: unknown[]): void {}
@@ -59,7 +62,7 @@ export function isValidPassword(value: string | undefined): boolean {
  * @param args An object array that contains zero or more objects to format.
  * @returns A copy of format in which the format items have been replaced by the string representation of the corresponding objects in args.
  */
-export function stringFormat(format: string, ...args: unknown[]) {
+export function stringFormat(format: string, ...args: unknown[]): string {
     try {
         return format.replace(/{(\d+)}/g, (match, index) => {
             index = Number(index);
@@ -136,7 +139,7 @@ export function getEndpointName(url: string | URL): string {
 
     const pathname = url.pathname;
     if (pathname) {
-        const names = pathname.split('/').filter(item => !isEmpty(item));
+        const names = pathname.split('/').filter(item => !!item);
         if (names.length > 0) {
             return names[names.length - 1];
         }

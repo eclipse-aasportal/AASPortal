@@ -8,7 +8,6 @@
 
 import { aas, determineType, extensionToMimeType } from 'aas-core';
 import { AASReader } from '../aas-reader.js';
-import cloneDeep from 'lodash-es/cloneDeep.js';
 import { encodeBase64Url } from '../utilities.js';
 
 export class JsonReaderV3 extends AASReader {
@@ -632,11 +631,11 @@ export class JsonReaderV3 extends AASReader {
         }
 
         if (source.displayName) {
-            referable.displayName = cloneDeep(source.displayName);
+            referable.displayName = structuredClone(source.displayName);
         }
 
         if (source.description) {
-            referable.description = cloneDeep(source.description);
+            referable.description = structuredClone(source.description);
         }
 
         return referable;

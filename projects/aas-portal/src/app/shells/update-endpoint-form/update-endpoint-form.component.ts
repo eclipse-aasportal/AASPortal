@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import cloneDeep from 'lodash-es/cloneDeep';
 import { ChangeDetectionStrategy, Component, computed, effect, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbDropdownModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
@@ -161,7 +160,7 @@ export class UpdateEndpointFormComponent {
         }
 
         this.clearMessages();
-        const endpoint = cloneDeep(this.endpoint());
+        const endpoint = structuredClone(this.endpoint());
         const url = this.validateUrl(endpoint.url.trim(), selectedItem.type);
         if (url === undefined) {
             return;

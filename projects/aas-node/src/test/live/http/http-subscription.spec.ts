@@ -6,23 +6,20 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, Mocked, vitest } from 'vitest';
-import { aas, DefaultType, LiveRequest } from 'aas-core';
-import { Logger } from '../../../app/logging/logger.js';
+import { describe, beforeEach, it, expect, Mocked, vi } from 'vitest';
+import { aas, LiveRequest } from 'aas-core';
 import { HttpSubscription } from '../../../app/live/http/http-subscription.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { ApiClient } from '../../../app/client/api/api-client.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
-import { createSpyObj, DoneFn } from '../../mocks.js';
+import { createSpyObj } from '../../mocks.js';
 
 describe('HttpSubscription', function () {
     let aasxServer: Mocked<ApiClient>;
-    let logger: Mocked<Logger>;
     let client: Mocked<SocketClient>;
     let subscription: HttpSubscription;
 
-    beforeEach(function () {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
+    beforeEach(() => {
         client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
         aasxServer = createSpyObj<ApiClient>(['readValue', 'resolveNodeId']);
 
@@ -51,24 +48,20 @@ describe('HttpSubscription', function () {
             ],
         };
 
-        subscription = new HttpSubscription(logger, aasxServer, client, request, aasEnvironment);
+        subscription = new HttpSubscription(aasxServer, client, request, aasEnvironment);
     });
 
-    it('should be created', function () {
+    it('should be created', () => {
         expect(subscription).toBeTruthy();
     });
 
-    it('open/close subscription', (done: DoneFn) => {
-        vitest.useFakeTimers();
-        aasxServer.readValue.mockReturnValue(
-            new Promise<DefaultType>(result => {
-                expect(true).toBeTruthy();
-                result(42);
-                subscription.close();
-                done();
-            }),
-        );
-
+    it('open/close subscription', async () => {
+        vi.useFakeTimers();
+        aasxServer.readValue.mockResolvedValue('42');
         subscription.open();
+        subscription.close();
+        vi.advanceTimersByTime(500);
+        expect(aasxServer.readValue).toHaveBeenCalledTimes(0);
+        vi.useRealTimers();
     });
 });

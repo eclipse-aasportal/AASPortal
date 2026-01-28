@@ -58,6 +58,7 @@ export function createSpyObj<T extends object>(
 
     return obj as Mocked<T>;
 }
+
 export function mockFetchJson(
     data: unknown,
     options?: { ok?: boolean; status?: number; headers?: Record<string, string> },

@@ -18,7 +18,7 @@ await esbuild.build({
     tsconfig: 'tsconfig.app.json',
     packages: 'external',
     minify: true,
-    preserveSymlinks: false
+    preserveSymlinks: false,
 });
 
 await esbuild.build({
@@ -31,5 +31,5 @@ await esbuild.build({
     tsconfig: 'tsconfig.app.json',
     packages: 'external',
     minify: true,
-    preserveSymlinks: false
+    preserveSymlinks: false,
 });

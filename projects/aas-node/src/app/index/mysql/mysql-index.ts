@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { nanoid } from 'nanoid';
-import isEmpty from 'lodash-es/isEmpty.js';
 import mysql, { Connection, ResultSetHeader } from 'mysql2/promise';
 import {
     AASEndpoint,
@@ -361,8 +360,8 @@ export class MySqlIndex extends AASIndex {
     private async getConnection(): Promise<Connection> {
         if (this._connection === undefined) {
             const url = new URL(this.variable.AAS_INDEX!);
-            const username = isEmpty(url.username) ? this.variable.AAS_NODE_USERNAME : url.username;
-            const password = isEmpty(url.password) ? this.variable.AAS_NODE_PASSWORD : url.password;
+            const username = url.username ?? this.variable.AAS_NODE_USERNAME;
+            const password = url.password ?? this.variable.AAS_NODE_PASSWORD;
             this._connection = await mysql.createConnection({
                 host: url.hostname,
                 port: Number(url.port),

@@ -5,8 +5,8 @@
     "scripts": {
         "ng": "ng",
         "serve": "ng serve aas-browser --host=127.0.0.1",
-        "build": "rimraf ./dist && ng build",
-        "build:debug": "rimraf ./dist && ng build --configuration development",
+        "build": "rimraf ./dist && ng build aas-browser",
+        "build:debug": "rimraf ./dist && ng build aas-browser --configuration development",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "watch": "ng test aas-browser --coverage=false",
         "test": "ng test aas-browser --no-watch",

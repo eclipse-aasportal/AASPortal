@@ -14,14 +14,16 @@ import { checkSubmodelIsReferenced, selectISubmodelElement } from '../../utiliti
 import { KeyList } from '../key-list.js';
 import { AasxPackage } from '../../aasx-package.js';
 
-export class DeleteAttachmentCommand extends DatabaseCommand<void> {
+export class DeleteAttachmentCommand extends DatabaseCommand {
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly aasId: string | undefined,
         private readonly smId: string,
         private readonly idShortPath: string,
     ) {
-        super(database);
+        super(database, resolve, reject);
     }
 
     public override async execute(): Promise<void> {

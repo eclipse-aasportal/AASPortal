@@ -42,9 +42,9 @@ describe('SubmodelsController', () => {
         repository = createSpyObj<SubmodelRepository>([
             'getSubmodel',
             'getSubmodels',
-            'getSubmodelElementAttachment',
-            'updateSubmodelElementAttachment',
-            'deleteSubmodelElementAttachment',
+            'getFileByPath',
+            'putFileByPath',
+            'deleteFileByPath',
             'addSubmodel',
             'getSubmodelElement',
             'getSubmodelElementValue',
@@ -126,7 +126,7 @@ describe('SubmodelsController', () => {
         expect(response.body).toEqual(sm);
     });
 
-    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
+    it('GET: /submodels/{id}/submodel-elements/{idShortPath}/attachment', async () => {
         const file = fileURLToPath(new URL('../assets/Test.pdf', import.meta.url));
         const fileResult: FileResult = {
             filename: 'Test.pdf',
@@ -134,22 +134,22 @@ describe('SubmodelsController', () => {
             readable: fs.createReadStream(file),
         };
 
-        repository.getSubmodelElementAttachment.mockResolvedValue(fileResult);
-        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        repository.getFileByPath.mockResolvedValue(fileResult);
+        const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.File';
         const response = await request(app)
-            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/attachment`)
+            .get(`/api/v3/submodels/${id}/submodel-elements/${idShortPath}/attachment`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
-        expect(repository.getSubmodelElementAttachment).toHaveBeenCalledWith(
+        expect(repository.getFileByPath).toHaveBeenCalledWith(
             'http://www.fraunhofer.de/sm/test-submodel',
             'Collection.File',
         );
     });
 
     it('PUT: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        repository.updateSubmodelElementAttachment.mockResolvedValue();
+        repository.putFileByPath.mockResolvedValue();
         const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.File';
         const response = await request(app)
@@ -158,11 +158,11 @@ describe('SubmodelsController', () => {
             .attach('file', fileURLToPath(new URL('../assets/Test.pdf', import.meta.url)));
 
         expect(response.statusCode).toBe(204);
-        expect(repository.updateSubmodelElementAttachment).toHaveBeenCalled();
+        expect(repository.putFileByPath).toHaveBeenCalled();
     });
 
     it('DELETE: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        repository.deleteSubmodelElementAttachment.mockResolvedValue();
+        repository.deleteFileByPath.mockResolvedValue();
         const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.File';
         const response = await request(app)
@@ -170,7 +170,7 @@ describe('SubmodelsController', () => {
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(204);
-        expect(repository.deleteSubmodelElementAttachment).toHaveBeenCalledWith(
+        expect(repository.deleteFileByPath).toHaveBeenCalledWith(
             'http://www.fraunhofer.de/sm/test-submodel',
             'Collection.File',
         );

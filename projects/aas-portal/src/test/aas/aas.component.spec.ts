@@ -91,6 +91,7 @@ describe('AASComponent', () => {
             'download',
             'uploadPackage',
         ]);
+        
         dashboard = createSpyObj<DashboardService>(['addChart'], {
             activePage: signal(pages[0]).asReadonly(),
             pages: signal(pages).asReadonly(),
@@ -204,6 +205,7 @@ describe('AASComponent', () => {
 
     describe('download', () => {
         beforeEach(() => {
+            vi.useFakeTimers();
             Object.defineProperty(globalThis as any, 'URL', {
                 configurable: true,
                 writable: true,
@@ -212,6 +214,7 @@ describe('AASComponent', () => {
         });
 
         afterEach(() => {
+            vi.useRealTimers();
             vi.clearAllMocks();
         });
 
@@ -234,7 +237,6 @@ describe('AASComponent', () => {
             const state = TestBed.inject(AASState);
             state.update({ document: sampleDocument });
 
-            vi.useFakeTimers();
             component.download();
 
             expect(createObjectSpy).toHaveBeenCalled();
@@ -247,7 +249,6 @@ describe('AASComponent', () => {
             createElSpy.mockRestore();
             createObjectSpy.mockRestore();
             revokeSpy.mockRestore();
-            vi.useRealTimers();
         });
 
         it('notifies on error when preparing the download fails', () => {
@@ -275,7 +276,6 @@ describe('AASComponent', () => {
             const state = TestBed.inject(AASState);
             state.update({ document: sampleDocument });
 
-            vi.useFakeTimers();
             const submodel = sampleDocument.content!.submodels[0];
             component.setSelectedElements([submodel]);
             component.download();
@@ -290,7 +290,6 @@ describe('AASComponent', () => {
             createElSpy.mockRestore();
             createObjectSpy.mockRestore();
             revokeSpy.mockRestore();
-            vi.useRealTimers();
         });
     });
 });

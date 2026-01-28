@@ -10,8 +10,8 @@
     "scripts": {
         "ng": "ng",
         "serve": "ng serve aas-portal --host=127.0.0.1",
-        "build": "ng build",
-        "build:debug": "ng build --configuration development",
+        "build": "ng build aas-portal",
+        "build:debug": "ng build aas-portal --configuration development",
         "test": "ng test aas-portal --no-watch",
         "watch": "ng test aas-portal --coverage=false",
         "tsc": "rimraf build && tsc -p tsconfig.json",

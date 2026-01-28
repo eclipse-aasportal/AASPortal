@@ -23,7 +23,7 @@
                         height="40"
                         [src]="item.thumbnail"
                         [alt]="item.idShort"
-                        (error)="item.thumbnail = undefined"
+                        (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
                     />
                     <a class="text-nowrap ms-2" [routerLink]="getLink(item)">{{ item.idShort }}</a>
                     <div class="text-nowrap text-body-tertiary d-none d-lg-block ms-2">

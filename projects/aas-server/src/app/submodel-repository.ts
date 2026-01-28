@@ -62,7 +62,7 @@ export class SubmodelRepository {
         return submodel;
     }
 
-    public async getSubmodelElementAttachment(id: string, idShortPath: string): Promise<FileResult> {
+    public async getFileByPath(id: string, idShortPath: string): Promise<FileResult> {
         const key = await this.db.submodels.getKey(id);
         const item = await this.db.submodels.getItem(key);
         const submodel: aas.Submodel = await this.db.submodels.readJson(key);
@@ -85,30 +85,40 @@ export class SubmodelRepository {
         throw new ApplicationError(ERROR.FILE_HAS_NO_ATTACHMENT, { id, idShortPath }, 404);
     }
 
-    public async updateSubmodelElementAttachment(
-        id: string,
-        idShortPath: string,
-        path: string,
-        filename: string,
-    ): Promise<void> {
-        const command = new UpdateAttachmentCommand(this.db, undefined, id, idShortPath, path, filename);
-        await this.db.execute(command);
-        this.cache.remove('/submodels');
-        this.cache.remove(id);
+    public putFileByPath(id: string, idShortPath: string, path: string, filename: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const command = new UpdateAttachmentCommand(
+                this.db,
+                resolve,
+                reject,
+                undefined,
+                id,
+                idShortPath,
+                path,
+                filename,
+            );
+
+            this.db.execute(command);
+            this.cache.remove('/submodels');
+            this.cache.remove(id);
+        });
     }
 
-    public async deleteSubmodelElementAttachment(id: string, idShortPath: string): Promise<void> {
-        const command = new DeleteAttachmentCommand(this.db, undefined, id, idShortPath);
-        await this.db.execute(command);
-        this.cache.remove('/submodels');
-        this.cache.remove(id);
+    public deleteFileByPath(id: string, idShortPath: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const command = new DeleteAttachmentCommand(this.db, resolve, reject, undefined, id, idShortPath);
+            this.db.execute(command);
+            this.cache.remove('/submodels');
+            this.cache.remove(id);
+        });
     }
 
     public async addSubmodel(submodel: aas.Submodel): Promise<types.Submodel> {
-        const command = new AddSubmodelCommand(this.db, submodel);
-        const result = await this.db.execute(command);
-        this.cache.remove('/submodels');
-        return result;
+        return new Promise((resolve, reject) => {
+            const command = new AddSubmodelCommand(this.db, resolve, reject, submodel);
+            this.db.execute(command);
+            this.cache.remove('/submodels');
+        });
     }
 
     public async getSubmodelElement(
@@ -174,8 +184,10 @@ export class SubmodelRepository {
         idShortPath: string,
         value: jsonization.JsonValue,
     ): Promise<void> {
-        const command = new PatchSubmodelElementValueCommand(this.db, id, idShortPath, value);
-        await this.db.execute(command);
-        this.cache.remove('/submodels');
+        return new Promise((resolve, reject) => {
+            const command = new PatchSubmodelElementValueCommand(this.db, resolve, reject, id, idShortPath, value);
+            this.db.execute(command);
+            this.cache.remove('/submodels');
+        });
     }
 }

@@ -45,16 +45,19 @@ export class ConceptDescriptionRepository {
         return conceptDescription;
     }
 
-    public async addConceptDescription(conceptDescription: aas.ConceptDescription): Promise<types.ConceptDescription> {
-        const command = new AddConceptDescriptionCommand(this.db, conceptDescription);
-        const result = await this.db.execute(command);
-        this.cache.remove('/concept-descriptions');
-        return result;
+    public addConceptDescription(conceptDescription: aas.ConceptDescription): Promise<types.ConceptDescription> {
+        return new Promise((resolve, reject) => {
+            const command = new AddConceptDescriptionCommand(this.db, resolve, reject, conceptDescription);
+            this.db.execute(command);
+            this.cache.remove('/concept-descriptions');
+        });
     }
 
-    public async deleteConceptDescription(id: string): Promise<void> {
-        const command = new DeleteConceptDescriptionCommand(this.db, id);
-        await this.db.execute(command);
-        this.cache.remove('/concept-descriptions');
+    public deleteConceptDescription(id: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const command = new DeleteConceptDescriptionCommand(this.db, resolve, reject, id);
+            this.db.execute(command);
+            this.cache.remove('/concept-descriptions');
+        });
     }
 }

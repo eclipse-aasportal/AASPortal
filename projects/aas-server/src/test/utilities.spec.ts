@@ -8,8 +8,8 @@
 
 import 'reflect-metadata';
 import { describe, expect, it } from 'vitest';
-import { serializeValue, toValueSerialization } from '../app/utilities.js';
 import { types } from 'aas-core';
+import { serializeValue, toValueSerialization } from '../app/utilities.js';
 import {
     mockAnnotatedRelationshipElement,
     mockBasicEventElement,

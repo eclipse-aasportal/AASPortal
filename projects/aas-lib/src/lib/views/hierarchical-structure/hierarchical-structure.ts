@@ -79,13 +79,12 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
 
             const archeType = this.getArcheType(submodel);
             const entryNode = this.getEntryNode(submodel);
-            if (!entryNode || !archeType) {
+            if (!entryNode || !archeType || untracked(this.tree).at(0)?.id === entryNode) {
                 return;
             }
 
-            const tree: Tree<aas.Entity, NodeOptions> = [];
             this.visited.clear();
-            this.createTree(archeType, entryNode, tree);
+            const tree = this.createTree(archeType, entryNode);
             this.update({ tree });
             tree.forEach(item => this.loaded(item));
         });
@@ -233,7 +232,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
             symbolType: 'image',
             symbol: document!.thumbnail,
             type: 'routerLink',
-            name: getDisplayName(shell, document?.content, this.currentLang()),
+            name: getDisplayName(shell, document?.content, this.translate.getCurrentLang()),
             suffix: `[${document?.id}]`,
             options: { ...item.options, document },
         };
@@ -307,9 +306,10 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
         return item;
     }
 
-    private createTree(archeType: ArcheType, entryNode: aas.Entity, tree: Tree<aas.Entity, NodeOptions>): void {
+    private createTree(archeType: ArcheType, entryNode: aas.Entity): Tree<aas.Entity, NodeOptions> {
+        const tree: Tree<aas.Entity, NodeOptions> = [];
         if (!entryNode.globalAssetId || this.visited.has(entryNode.globalAssetId)) {
-            return;
+            return tree;
         }
 
         const rootItem = this.createNode(archeType, null, entryNode, 0, entryNode.idShort);
@@ -325,6 +325,8 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
         } else {
             throw new Error('Not implemented.');
         }
+
+        return tree;
     }
 
     private determineParent(parent: aas.Entity | null, node: aas.Entity): aas.Entity | null {
@@ -410,7 +412,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
     private resolveReference(reference: aas.Reference): aas.Entity | undefined {
         let referable: aas.Referable | undefined;
         if (reference.type === 'ModelReference') {
-            let children = this.submodel()?.submodelElements ?? [];
+            let children = untracked(this.submodel)?.submodelElements ?? [];
             for (const key of reference.keys) {
                 referable = children.find(child => child.idShort === key.value);
                 if (!referable) {

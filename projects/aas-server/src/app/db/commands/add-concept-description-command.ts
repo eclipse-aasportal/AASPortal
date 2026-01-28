@@ -6,21 +6,23 @@
  *
  *****************************************************************************/
 
-import { aas, types, jsonization, toJsonValue, ApplicationError } from 'aas-core';
+import { aas, toJsonValue, ApplicationError, types, jsonization } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { IdentifiableItem } from '../database-types.js';
 import { ERROR } from '../../error.js';
 import { ConceptDescriptionTable } from '../concept-description-table.js';
 
-export class AddConceptDescriptionCommand extends DatabaseCommand<types.ConceptDescription> {
+export class AddConceptDescriptionCommand extends DatabaseCommand {
     private readonly table: ConceptDescriptionTable;
 
     public constructor(
         database: Database,
+        resolve: (result: types.ConceptDescription) => void,
+        reject: (reason: Error) => void,
         private readonly conceptDescription: aas.ConceptDescription,
     ) {
-        super(database);
+        super(database, resolve, reject);
 
         this.table = this.database.conceptDescriptions;
     }

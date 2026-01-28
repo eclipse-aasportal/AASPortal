@@ -67,7 +67,7 @@ describe('PackagesController', () => {
 
         expect(response.statusCode).toBe(201);
         expect(repository.add).toHaveBeenCalled();
-        expect(response.body).toEqual({ packageId: '1' });
+        expect(response.body).toEqual('1');
     });
 
     it('DELETE: /packages/{packageId}', async () => {
