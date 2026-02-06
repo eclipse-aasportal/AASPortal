@@ -12,13 +12,15 @@ import { AASIndex } from '../index/aas-index.js';
 
 type ScanTuple = { reference?: AASDocument; document?: AASDocument; error?: Error };
 
-/** Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells. */
-export abstract class AASServerScan extends EventEmitter {
+/**
+ * Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells.
+ */
+export abstract class EndpointScanner extends EventEmitter {
     /**
-     * Gets all documents of the current container.
+     * Gets all documents of the current endpoint.
      * @param index The AAS index.
      * @param endpoint The endpoint.
-     * */
+     */
     public async scanAsync(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
         try {
             await this.open();
@@ -74,16 +76,16 @@ export abstract class AASServerScan extends EventEmitter {
                 for (const value of map.values()) {
                     if (value.error) {
                         if (value.reference) {
-                            keys.push(value.reference.id);
+                            keys.push(value.reference.address);
                         }
                     } else if (value.reference && value.document) {
-                        keys.push(value.reference.id);
+                        keys.push(value.reference.address);
                         this.emit('compare', value.reference, value.document);
                     } else if (endOfIndex && value.document) {
-                        keys.push(value.document.id);
+                        keys.push(value.document.address);
                         this.emit('add', value.document);
                     } else if (endOfEndpoint && value.reference) {
-                        keys.push(value.reference.id);
+                        keys.push(value.reference.address);
                         this.emit('remove', value.reference);
                     }
                 }
@@ -109,8 +111,14 @@ export abstract class AASServerScan extends EventEmitter {
         }
     }
 
+    /**
+     * Opens the endpoint and prepares it for scanning.
+     */
     protected abstract open(): Promise<void>;
 
+    /**
+     * Closes the endpoint and releases all resources.
+     */
     protected abstract close(): Promise<void>;
 
     protected abstract createDocument(address: string): Promise<AASDocument>;

@@ -10,9 +10,9 @@ import { AttributeIds, BrowseDescriptionLike, QualifiedName, ReferenceDescriptio
 import { AASDocument, noop, PagedResult } from 'aas-core';
 import { OpcuaDataTypeDictionary } from '../client/opcua/opcua-data-type-dictionary.js';
 import { OpcuaClient } from '../client/opcua/opcua-client.js';
-import { AASServerScan } from './aas-server-scan.js';
+import { EndpointScanner } from './endpoint-scanner.js';
 
-export class OpcuaServerScan extends AASServerScan {
+export class OpcuaServerScanner extends EndpointScanner {
     private readonly map = new Map<string, AASDocument>();
 
     public constructor(private readonly client: OpcuaClient) {

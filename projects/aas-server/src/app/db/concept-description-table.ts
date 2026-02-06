@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, ApplicationError, jsonization } from 'aas-core';
+import { aas, ApplicationError, jsonization, types } from 'aas-core';
 import { DatabaseKey, DatabaseTableData } from './database-types.js';
 import { Database } from './database.js';
 import { IdentifiableTable } from './identifiable-table.js';
