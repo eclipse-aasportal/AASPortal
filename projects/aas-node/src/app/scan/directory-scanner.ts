@@ -8,28 +8,37 @@
 
 import { AASDocument, PagedResult } from 'aas-core';
 import { AasxDirectory } from '../client/fs/aasx-directory.js';
-import { AASServerScan } from './aas-server-scan.js';
+import { EndpointScanner } from './endpoint-scanner.js';
 
-export class DirectoryScan extends AASServerScan {
+/**
+ * Defines an automate to scan a directory for new, deleted or updated Asset Administration Shells.
+ */
+export class DirectoryScanner extends EndpointScanner {
     private readonly map = new Map<string, AASDocument>();
 
     public constructor(private readonly client: AasxDirectory) {
         super();
     }
 
-    protected override open(): Promise<void> {
+    protected override async open(): Promise<void> {
         this.map.clear();
-        return this.client.open();
+        await this.client.open();
     }
 
-    protected override close(): Promise<void> {
+    protected override async close(): Promise<void> {
         this.map.clear();
-        return this.client.close();
+        await this.client.close();
     }
 
     protected override createDocument(filename: string): Promise<AASDocument> {
-        const document = this.map.get(filename);
-        return document ? Promise.resolve(document) : Promise.reject(new Error(`${filename} not found.`));
+        return new Promise((resolve, reject) => {
+            const document = this.map.get(filename);
+            if (document) {
+                resolve(document);
+            } else {
+                reject(new Error(`${filename} not found.`));
+            }
+        });
     }
 
     protected override async nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>> {

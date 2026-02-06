@@ -8,9 +8,9 @@
 
 import { AASDocument, PagedResult } from 'aas-core';
 import { ApiClient } from '../client/api/api-client.js';
-import { AASServerScan } from './aas-server-scan.js';
+import { EndpointScanner } from './endpoint-scanner.js';
 
-export class AASApiServerScan extends AASServerScan {
+export class AASServerScanner extends EndpointScanner {
     public constructor(private readonly client: ApiClient) {
         super();
     }

@@ -646,7 +646,11 @@ export class MySqlIndex extends AASIndex {
             return undefined;
         }
 
-        return BigInt(referable.value);
+        try {
+            return BigInt(referable.value);
+        } catch {
+            return undefined;
+        }
     }
 
     private toEndpoint(result: MySqlEndpoint): AASEndpoint {

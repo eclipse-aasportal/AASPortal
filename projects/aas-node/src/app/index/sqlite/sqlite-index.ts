@@ -732,7 +732,11 @@ export class SqliteIndex extends AASIndex {
             return null;
         }
 
-        return BigInt(referable.value).toString();
+        try {
+            return BigInt(referable.value).toString();
+        } catch {
+            return null;
+        }
     }
 
     private toEndpoint(value: Record<string, SQLOutputValue>): AASEndpoint {
