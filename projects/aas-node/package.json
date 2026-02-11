@@ -22,7 +22,7 @@
     "dependencies": {
         "@babel/polyfill": "^7.12.1",
         "@xmldom/xmldom": "^0.8.10",
-        "axios": "^1.12.2",
+        "axios": "^1.13.5",
         "bcryptjs": "^3.0.2",
         "compression": "^1.8.1",
         "cors": "^2.8.5",
