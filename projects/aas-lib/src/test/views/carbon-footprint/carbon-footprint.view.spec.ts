@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
-import { ActivatedRoute, provideRouter } from '@angular/router';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { first, of } from 'rxjs';
+import { first, lastValueFrom, of } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
@@ -18,13 +19,13 @@ import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
 import carbon_footprint_0_9 from '../../assets/carbon-footprint-0-9.json';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint-view';
 import { CarbonFootprint } from '../../../lib/views/carbon-footprint/carbon-footprint';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
+import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../../../lib/views/views-constants';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -51,9 +52,9 @@ export class TestCarbonFootprint {
 describe('CarbonFootprintView', () => {
     let component: CarbonFootprintView;
     let fixture: ComponentFixture<CarbonFootprintView>;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -72,8 +73,10 @@ describe('CarbonFootprintView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
-              queryParams: of({}) },
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
         );
 
         api.getDocument.mockReturnValue(of(document));
@@ -98,7 +101,16 @@ describe('CarbonFootprintView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                        {
+                            path: 'CarbonFootprint',
+                            component: CarbonFootprintView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [CARBON_FOOTPRINT_1_0, CARBON_FOOTPRINT_0_9],
+                            },
+                        },
+                    ],
                 },
                 provideTranslateService({
                     loader: {
@@ -142,15 +154,10 @@ describe('CarbonFootprintView', () => {
         expect(component.index()).toBe(1);
     });
 
-    it('adds a favorite to the start page', done => {
+    it('adds a favorite to the start page', async () => {
         start.add.mockReturnValue(true);
         start.save.mockReturnValue(of(void 0));
-        component
-            .addToStart()
-            .pipe(first())
-            .subscribe(() => {
-                expect(start.add).toHaveBeenCalled();
-                done();
-            });
+        await lastValueFrom(component.addToStart().pipe(first()));
+        expect(start.add).toHaveBeenCalled();
     });
 });

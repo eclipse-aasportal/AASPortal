@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -20,7 +20,7 @@ import data from '../assets/test-pages.json';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ChartEditComponent', () => {
-    let service: jest.Mocked<DashboardService>;
+    let service: Mocked<DashboardService>;
     let pages: DashboardState;
 
     beforeEach(async () => {

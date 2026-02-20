@@ -9,8 +9,7 @@
             "dom"
         ],
         "types": [
-            "@angular/localize",
-            "jest"
+            "@angular/localize"
         ],
         "paths": {}
     },

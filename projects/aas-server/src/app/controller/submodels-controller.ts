@@ -13,6 +13,7 @@ import {
     Delete,
     Get,
     OperationId,
+    Patch,
     Path,
     Post,
     Put,
@@ -24,7 +25,7 @@ import {
     UploadedFile,
 } from 'tsoa';
 
-import { aas, extensionToMimeType, PagedResult, toSubmodel } from 'aas-core';
+import { aas, extensionToMimeType, jsonization, PagedResult, toSubmodel } from 'aas-core';
 
 import { type ExtentModifier, type LevelModifier } from '../types.js';
 import { decodeBase64Url } from '../utilities.js';
@@ -80,18 +81,15 @@ export class SubmodelsController extends Controller {
     }
 
     /**
-     * @summary Downloads file content from a specific submodel element from the Submodel at a specified path.
+     * @summary Returns a specific file from the Submodel at a specified path.
      * @param id The Submodel’s unique id (BASE64-URL encoded).
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      */
     @Get('/{id}/submodel-elements/{idShortPath}/attachment')
     @Security('bearerAuth', ['sme.read'])
-    @OperationId('GetSubmodelElementAttachment')
-    public async getSubmodelElementAttachment(
-        @Path() id: string,
-        @Path() idShortPath: string,
-    ): Promise<NodeJS.ReadableStream> {
-        const { filename, readable, size, contentType } = await this.repository.getSubmodelElementAttachment(
+    @OperationId('GetFileByPath')
+    public async getFileByPath(@Path() id: string, @Path() idShortPath: string): Promise<NodeJS.ReadableStream> {
+        const { filename, readable, size, contentType } = await this.repository.getFileByPath(
             decodeBase64Url(id),
             idShortPath,
         );
@@ -106,37 +104,34 @@ export class SubmodelsController extends Controller {
     }
 
     /**
-     * @summary Uploads file content to an existing submodel element at a specified path.
+     * @summary Replaces the file of an existing submodel element at a specified path within the
+     * submodel element hierarchy.
      * @param id The Submodel’s unique id (BASE64-URL encoded).
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      * @param file File to upload.
      */
     @Put('/{id}/submodel-elements/{idShortPath}/attachment')
     @Security('bearerAuth', ['sme.read'])
-    @OperationId('PutSubmodelElementAttachment')
-    public async updateSubmodelElementAttachment(
+    @OperationId('PutFileByPath')
+    public async putFileByPath(
         @Path() id: string,
         @Path() idShortPath: string,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<void> {
-        await this.repository.updateSubmodelElementAttachment(
-            decodeBase64Url(id),
-            idShortPath,
-            file.path,
-            file.originalname,
-        );
+        await this.repository.putFileByPath(decodeBase64Url(id), idShortPath, file.path, file.originalname);
     }
 
     /**
-     * @summary file content to an existing submodel element at a specified path.
+     * @summary Deletes the file of an existing submodel element at a specified path within the
+     * submodel element hierarchy.
      * @param id The Submodel’s unique id (BASE64-URL encoded).
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      */
     @Delete('/{id}/submodel-elements/{idShortPath}/attachment')
     @Security('bearerAuth', ['sme.read'])
-    @OperationId('DeleteSubmodelElementAttachment')
-    public async deleteSubmodelElementAttachment(@Path() id: string, @Path() idShortPath: string): Promise<void> {
-        await this.repository.deleteSubmodelElementAttachment(decodeBase64Url(id), idShortPath);
+    @OperationId('DeleteFileByPath')
+    public async deleteFileByPath(@Path() id: string, @Path() idShortPath: string): Promise<void> {
+        await this.repository.deleteFileByPath(decodeBase64Url(id), idShortPath);
     }
 
     /**
@@ -169,5 +164,43 @@ export class SubmodelsController extends Controller {
         @Query() extent: ExtentModifier = 'withoutBlobValue',
     ): Promise<aas.SubmodelElement> {
         return await this.repository.getSubmodelElement(decodeBase64Url(id), idShortPath, level, extent);
+    }
+
+    /**
+     * @summary Returns a specific submodel element value from the Submodel at a specified path
+     *          according to the ValueOnly-serialization.
+     * @param id The Submodel’s unique id (BASE64-URL encoded).
+     * @param idShortPath IdShort path to the submodel element (dot-separated).
+     * @param level Determines the structural depth of the respective resource content.
+     * @param extent Determines to which extent the resource is being serialized.
+     * @returns The value of the submodel element.
+     */
+    @Get('/{id}/submodel-elements/{idShortPath}/$value')
+    @Security('bearerAuth', ['reader'])
+    @OperationId('GetSubmodelElementValueByPath')
+    public async getSubmodelElementValueByPath(
+        @Path() id: string,
+        @Path() idShortPath: string,
+        @Query() level: LevelModifier = 'deep',
+        @Query() extent: ExtentModifier = 'withoutBlobValue',
+    ): Promise<jsonization.JsonValue | undefined> {
+        return await this.repository.getSubmodelElementValue(decodeBase64Url(id), idShortPath, level, extent);
+    }
+
+    /**
+     * @summary Sets the value of the submodel element at a ValueOnly-serialization.
+     * @param id The Submodel’s unique id (BASE64-URL encoded).
+     * @param idShortPath IdShort path to the submodel element (dot-separated).
+     * @param value The new value for the submodel element.
+     */
+    @Patch('/{id}/submodel-elements/{idShortPath}/$value')
+    @Security('bearerAuth', ['editor'])
+    @OperationId('PatchSubmodelElementValueByPath')
+    public async patchSubmodelElementValueByPath(
+        @Path() id: string,
+        @Path() idShortPath: string,
+        @Body() value: jsonization.JsonValue,
+    ): Promise<void> {
+        await this.repository.patchSubmodelElementValue(decodeBase64Url(id), idShortPath, value);
     }
 }

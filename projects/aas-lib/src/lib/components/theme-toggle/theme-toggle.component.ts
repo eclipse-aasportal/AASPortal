@@ -7,14 +7,14 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
     selector: 'fhg-theme-toggle',
     templateUrl: './theme-toggle.component.html',
     styleUrls: ['./theme-toggle.component.scss'],
-    imports: [CommonModule],
+    imports: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeToggleComponent {

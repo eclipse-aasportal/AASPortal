@@ -18,4 +18,5 @@ await esbuild.build({
     tsconfig: 'tsconfig.app.json',
     packages: 'external',
     minify: false,
+    preserveSymlinks: false,
 });

@@ -113,7 +113,7 @@ export class OpcuaReader extends AASReader {
             ...this.readHasDataSpecification(component),
         };
 
-        const submodelElements = this.readSubmodelElements(component, [submodel]);
+        const submodelElements = this.readSubmodelElements(component, { id: submodel.id, idShortPath: '' });
         if (submodelElements.length > 0) {
             submodel.submodelElements = submodelElements;
         }
@@ -121,7 +121,7 @@ export class OpcuaReader extends AASReader {
         return submodel;
     }
 
-    private readSubmodelElements(component: OPCUAComponent, ancestors: aas.Referable[]): aas.SubmodelElement[] {
+    private readSubmodelElements(component: OPCUAComponent, path?: aas.ReferablePath): aas.SubmodelElement[] {
         const results = this.where(
             component.hasComponent,
             'AASBlobType',
@@ -140,47 +140,62 @@ export class OpcuaReader extends AASReader {
         );
 
         const submodelElements: aas.SubmodelElement[] = [];
-        for (const component of results) {
-            const submodelElement = this.readSubmodelElement(component, ancestors);
-            if (submodelElement) {
-                submodelElements.push(submodelElement);
+        if (!path) {
+            for (const component of results) {
+                const submodelElement = this.readSubmodelElement(component);
+                if (submodelElement) {
+                    submodelElements.push(submodelElement);
+                }
+            }
+        } else {
+            let idShortPath = path.idShortPath;
+            if (idShortPath.length > 0) {
+                idShortPath += '.';
+            }
+
+            for (const component of results) {
+                const submodelElement = this.readSubmodelElement(component, {
+                    id: path.id,
+                    idShortPath: idShortPath + this.readIdShort(component),
+                });
+
+                if (submodelElement) {
+                    submodelElements.push(submodelElement);
+                }
             }
         }
 
         return submodelElements;
     }
 
-    private readSubmodelElement(
-        component: OPCUAComponent,
-        ancestors: aas.Referable[],
-    ): aas.SubmodelElement | undefined {
+    private readSubmodelElement(component: OPCUAComponent, path?: aas.ReferablePath): aas.SubmodelElement | undefined {
         switch (component.typeDefinition) {
             case 'AASBlobType':
                 break;
             case 'AASCapabilityType':
                 break;
             case 'AASEntityType':
-                return this.readEntity(component, ancestors);
+                return this.readEntity(component, path);
             case 'AASEventType':
                 break;
             case 'AASFileType':
-                return this.readFile(component, ancestors);
+                return this.readFile(component, path);
             case 'AASMultiLanguagePropertyType':
-                return this.readMultiLanguageProperty(component, ancestors);
+                return this.readMultiLanguageProperty(component, path);
             case 'AASOperationType':
-                return this.readOperation(component, ancestors);
+                return this.readOperation(component, path);
             case 'AASOrderedSubmodelElementCollectionType':
-                return this.readSubmodelElementCollection(component, ancestors);
+                return this.readSubmodelElementCollection(component, path);
             case 'AASPropertyType':
-                return this.readProperty(component, ancestors);
+                return this.readProperty(component, path);
             case 'AASRangeType':
                 break;
             case 'AASReferenceElementType':
-                return this.readReferenceElement(component, ancestors);
+                return this.readReferenceElement(component, path);
             case 'AASRelationshipElementType':
                 break;
             case 'AASSubmodelElementCollectionType':
-                return this.readSubmodelElementCollection(component, ancestors);
+                return this.readSubmodelElementCollection(component, path);
         }
 
         return undefined;
@@ -213,10 +228,10 @@ export class OpcuaReader extends AASReader {
 
     private readSubmodelElementCollection(
         component: OPCUAComponent,
-        ancestors: aas.Referable[],
+        path?: aas.ReferablePath,
     ): aas.SubmodelElementCollection {
-        const collection: aas.SubmodelElementCollection = this.readSubmodelElementType(component, ancestors);
-        const value = this.readSubmodelElements(component, [...ancestors, collection]);
+        const collection: aas.SubmodelElementCollection = this.readSubmodelElementType(component, path);
+        const value = this.readSubmodelElements(component, path);
         if (value.length > 0) {
             collection.value = value;
         }
@@ -224,7 +239,7 @@ export class OpcuaReader extends AASReader {
         return collection;
     }
 
-    private readProperty(component: OPCUAComponent, ancestors: aas.Referable[]): aas.Property {
+    private readProperty(component: OPCUAComponent, path?: aas.ReferablePath): aas.Property {
         const value = this.readPropertyValue(component, 'Value');
         let valueType = this.readDataTypeDefXsd(this.readPropertyValue(component, 'ValueType'));
         if (!valueType && value != null) {
@@ -236,7 +251,7 @@ export class OpcuaReader extends AASReader {
         }
 
         const property: aas.Property = {
-            ...this.readSubmodelElementType(component, ancestors),
+            ...this.readSubmodelElementType(component, path),
             valueType: valueType,
             nodeId: this.findProperty(component, 'Value')?.nodeId.toString(),
         };
@@ -248,14 +263,14 @@ export class OpcuaReader extends AASReader {
         return property;
     }
 
-    private readFile(component: OPCUAComponent, ancestors: aas.Referable[]): aas.File {
+    private readFile(component: OPCUAComponent, path?: aas.ReferablePath): aas.File {
         const contentType = this.readStringProperty(component, 'MimeType');
         if (!contentType) {
             throw new Error('File.mimeType');
         }
 
         const file: aas.File = {
-            ...this.readSubmodelElementType(component, ancestors),
+            ...this.readSubmodelElementType(component, path),
             contentType,
         };
 
@@ -272,12 +287,9 @@ export class OpcuaReader extends AASReader {
         return file;
     }
 
-    private readMultiLanguageProperty(
-        component: OPCUAComponent,
-        ancestors: aas.Referable[],
-    ): aas.MultiLanguageProperty {
+    private readMultiLanguageProperty(component: OPCUAComponent, path?: aas.ReferablePath): aas.MultiLanguageProperty {
         const langString = this.readLangStringSet(component, 'Value') ?? [];
-        return { ...this.readSubmodelElementType(component, ancestors), value: langString };
+        return { ...this.readSubmodelElementType(component, path), value: langString };
     }
 
     private readLangStringSet(component: OPCUAComponent, propertyName: string): aas.LangString[] | undefined {
@@ -290,7 +302,7 @@ export class OpcuaReader extends AASReader {
         return langStrings;
     }
 
-    private readEntity(component: OPCUAComponent, ancestors: aas.Referable[]): aas.Entity {
+    private readEntity(component: OPCUAComponent, path?: aas.ReferablePath): aas.Entity {
         const entityType: aas.EntityType | undefined = this.toEntityType(
             this.readPropertyValue(component, 'EntityType'),
         );
@@ -299,7 +311,7 @@ export class OpcuaReader extends AASReader {
         }
 
         const entity: aas.Entity = {
-            ...this.readSubmodelElementType(component, ancestors),
+            ...this.readSubmodelElementType(component, path),
             entityType,
         };
 
@@ -313,19 +325,19 @@ export class OpcuaReader extends AASReader {
         return entity;
     }
 
-    private readReferenceElement(component: OPCUAComponent, ancestors: aas.Referable[]): aas.ReferenceElement {
+    private readReferenceElement(component: OPCUAComponent, path?: aas.ReferablePath): aas.ReferenceElement {
         const value = this.readReference(component, 'Value');
         if (!value) {
             throw new Error('ReferenceElement.value');
         }
 
         return {
-            ...this.readSubmodelElementType(component, ancestors),
+            ...this.readSubmodelElementType(component, path),
             value,
         };
     }
 
-    private readOperation(component: OPCUAComponent, ancestors: aas.Referable[]): aas.Operation {
+    private readOperation(component: OPCUAComponent, path?: aas.ReferablePath): aas.Operation {
         const inputVariables: aas.OperationVariable[] = [];
         const outputVariables: aas.OperationVariable[] = [];
         const inoutputVariables: aas.OperationVariable[] = [];
@@ -352,7 +364,7 @@ export class OpcuaReader extends AASReader {
             }
         }
 
-        const operation: aas.Operation = { ...this.readSubmodelElementType(component, ancestors) };
+        const operation: aas.Operation = { ...this.readSubmodelElementType(component, path) };
 
         if (inputVariables) {
             operation.inputVariables = inputVariables;
@@ -437,9 +449,9 @@ export class OpcuaReader extends AASReader {
         return { value };
     }
 
-    private readSubmodelElementType(component: OPCUAComponent, ancestors: aas.Referable[]): aas.SubmodelElement {
+    private readSubmodelElementType(component: OPCUAComponent, path?: aas.ReferablePath): aas.SubmodelElement {
         return {
-            ...this.readReferable(component, ancestors),
+            ...this.readReferable(component, path),
             ...this.readHasSemantic(component),
             ...this.readHasKind(component),
             ...this.readHasDataSpecification(component),
@@ -454,7 +466,7 @@ export class OpcuaReader extends AASReader {
         }
 
         const id = this.readIdentifier(idComponent)!;
-        const identifiable: aas.Identifiable = { ...this.readReferable(component, []), id };
+        const identifiable: aas.Identifiable = { ...this.readReferable(component), id };
         const adminInfoComponent = this.selectComponent(component, 'Administration');
         if (adminInfoComponent) {
             const administration = this.readAdministrativeInformation(adminInfoComponent);
@@ -482,14 +494,14 @@ export class OpcuaReader extends AASReader {
         return info;
     }
 
-    private readReferable(component: OPCUAComponent, ancestors: aas.Referable[]): aas.Referable {
+    private readReferable(component: OPCUAComponent, path?: aas.ReferablePath): aas.Referable {
         const referable: aas.Referable = {
             idShort: component.browseName,
             modelType: this.readModelType(component),
         };
 
-        if (ancestors && this.createReferenceToParent) {
-            referable.parent = this.createParentReference(ancestors);
+        if (path && this.createPath) {
+            referable.path = path;
         }
 
         const category = this.readCategory(component, 'Category');
@@ -503,6 +515,10 @@ export class OpcuaReader extends AASReader {
         }
 
         return referable;
+    }
+
+    private readIdShort(component: OPCUAComponent): string {
+        return component.browseName;
     }
 
     private readHasSemantic(component: OPCUAComponent): aas.HasSemantics {

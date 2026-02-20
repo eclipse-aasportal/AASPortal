@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { ProgressService } from '../../../lib/components/progress/progress.service';

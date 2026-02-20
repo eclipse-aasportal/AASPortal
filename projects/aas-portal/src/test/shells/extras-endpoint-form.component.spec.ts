@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
@@ -18,7 +18,7 @@ import { ExtrasEndpointService } from '../../app/shells/extras-endpoint-form/ext
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ExtrasEndpointFormComponent', () => {
-    let service: jest.Mocked<ExtrasEndpointService>;
+    let service: Mocked<ExtrasEndpointService>;
 
     beforeEach(async () => {
         service = createSpyObj<ExtrasEndpointService>(['getDocumentCount', 'getEndpoints', 'reset', 'scan']);

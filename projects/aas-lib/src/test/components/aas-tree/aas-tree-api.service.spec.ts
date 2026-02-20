@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -19,7 +19,7 @@ import { createSpyObj } from '../../mocks';
 describe('AASTreeApiService', () => {
     let service: AASTreeApi;
     let httpTestingController: HttpTestingController;
-    let auth: jest.Mocked<AuthService>;
+    let auth: Mocked<AuthService>;
 
     beforeEach(() => {
         auth = createSpyObj<AuthService>(['login']);

@@ -10,7 +10,7 @@
 <div class="card-body">
     <div class="d-flex flex-column">
         <div class="d-flex flex-row mb-2">
-            <fhg-img [height]="128" [src]="thumbnail()" alt="assets/resources/aas-portal.svg" />
+            <img [height]="128" [src]="thumbnail()" alt="assets/resources/aas-portal.svg" />
             <div class="d-flex flex-column ms-2">
                 @for (detail of detailItems(); track detail) {
                 <div class="fs-8 text-body-secondary text-nowrap text-truncate overflow-hidden">{{detail.name | translate}}</div>

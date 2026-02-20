@@ -9,8 +9,8 @@
 import 'reflect-metadata';
 import { MongoDBUserStorage, UserCookies } from '../../app/auth/mongo-db-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { describe, beforeAll, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
-import { createSpyObj } from 'aas-jest';
+import { describe, beforeAll, beforeEach, it, expect, afterEach, vitest } from 'vitest';
+import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
 import mongoose from 'mongoose';
 
@@ -37,12 +37,12 @@ describe('MongoDBUserStorage', () => {
             AAS_NODE_PASSWORD: 'password',
         });
 
-        jest.spyOn(mongoose, 'connect').mockResolvedValue(mongoose);
+        vitest.spyOn(mongoose, 'connect').mockResolvedValue(mongoose);
         userStorage = new MongoDBUserStorage(variable);
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     describe('Users', () => {
@@ -60,17 +60,17 @@ describe('MongoDBUserStorage', () => {
         });
 
         it('indicates that john.doe@email.com exists', async () => {
-            jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
+            vitest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
             await expect(userStorage.exist('john.doe@email.com')).resolves.toBe(true);
         });
 
         it('indicates that unknown@email.com does not exist', async () => {
-            jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify());
+            vitest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify());
             await expect(userStorage.exist('unknown@email.com')).resolves.toBe(false);
         });
 
         it('reads the data of john.doe@email.com', async () => {
-            jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
+            vitest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe));
             const user = (await userStorage.read('john.doe@email.com'))!;
             expect(user).toBeDefined();
             expect(user.id).toEqual(johnDoe.id);
@@ -80,29 +80,30 @@ describe('MongoDBUserStorage', () => {
         });
 
         it('reads "undefined" for an unknown user', async () => {
-            jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify());
+            vitest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify());
             await expect(userStorage.read('unknown@email.com')).resolves.toBe(undefined);
         });
 
         it('updates the data of john.doe@email.com', async () => {
-            const save = jest.fn<() => Promise<void>>();
-            jest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe, save));
+            const save = vitest.fn<() => Promise<void>>();
+            vitest.spyOn(userStorage.userModel, 'findOne').mockReturnValue(getPromisify(johnDoe, save));
             await userStorage.write('john.doe@email.com', { ...johnDoe });
-            expect(save).toHaveBeenCalled;
+            expect(save).toHaveBeenCalled();
         });
 
         it('deletes john.doe@email.com', async () => {
-            jest.spyOn(userStorage.userModel, 'findOneAndDelete').mockReturnValue(getPromisify(johnDoe));
+            vitest.spyOn(userStorage.userModel, 'findOneAndDelete').mockReturnValue(getPromisify(johnDoe));
             await expect(userStorage.delete('john.doe@email.com')).resolves.toBe(true);
         });
 
         function getInstance(user: UserData, save?: () => Promise<void>): UserDataInstance {
             return {
                 ...user,
-                save: save ?? (() => new Promise<void>(resolve => resolve())),
+                save: save ?? ((): Promise<void> => new Promise<void>(resolve => resolve())),
             };
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         function getPromisify(user?: UserData, save?: () => Promise<void>): any {
             if (user) {
                 return {
@@ -137,24 +138,24 @@ describe('MongoDBUserStorage', () => {
 
         describe('checkCookieAsync', () => {
             it('indicates that "Cookie1" for john.doe@email.com exist', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
                 await expect(userStorage.checkCookie('john.doe@email.com', 'Cookie1')).resolves.toBe(true);
             });
 
             it('indicates that "unknown" for john.doe@email.com not exist', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
                 await expect(userStorage.checkCookie('john.doe@email.com', 'unknown')).resolves.toBe(false);
             });
 
             it('indicates that "Cookie1" for jane.doe@email.com not exist', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance());
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance());
                 await expect(userStorage.checkCookie('jane.doe@email.com', 'Cookie1')).resolves.toBe(false);
             });
         });
 
         describe('getCookieAsync', () => {
             it('returns the value of "Cookie1" for john.doe@email.com', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
                 await expect(userStorage.getCookie('john.doe@email.com', 'Cookie1')).resolves.toEqual({
                     name: 'Cookie1',
@@ -163,13 +164,13 @@ describe('MongoDBUserStorage', () => {
             });
 
             it('returns "undefined" for "unknown" for john.doe@email.com', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
                 await expect(userStorage.getCookie('john.doe@email.com', 'unknown')).resolves.toBeUndefined();
             });
 
             it('returns "undefined" for "Cookie1" for jane.doe@email.com', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance());
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance());
 
                 await expect(userStorage.getCookie('jane.doe@email.com', 'unknown')).resolves.toBeUndefined();
             });
@@ -177,7 +178,7 @@ describe('MongoDBUserStorage', () => {
 
         describe('getCookiesAsync', () => {
             it('returns all cookies for john.doe@email.com', async () => {
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies));
 
                 await expect(userStorage.getCookies('john.doe@email.com')).resolves.toEqual([
                     {
@@ -194,16 +195,16 @@ describe('MongoDBUserStorage', () => {
 
         describe('setCookieAsync', () => {
             it('can set a new Cookie3 for john.doe@email.com', async () => {
-                const save = jest.fn<() => Promise<void>>();
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
+                const save = vitest.fn<() => Promise<void>>();
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
 
                 await userStorage.setCookie('john.doe@email.com', 'Cookie3', 'Hello World!');
                 expect(save).toHaveBeenCalled();
             });
 
             it('can update the existing Cookie2 for john.doe@email.com', async () => {
-                const save = jest.fn<() => Promise<void>>();
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
+                const save = vitest.fn<() => Promise<void>>();
+                vitest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(getInstance(userCookies, save));
 
                 await userStorage.setCookie('john.doe@email.com', 'Cookie2', 'Hello World!');
                 expect(save).toHaveBeenCalled();
@@ -212,11 +213,11 @@ describe('MongoDBUserStorage', () => {
 
         describe('deleteCookieAsync', () => {
             it('can delete a cookie', async () => {
-                const save = jest.fn<() => Promise<void>>();
-                const deleteOne = jest.fn<() => Promise<void>>();
-                jest.spyOn(userStorage.cookieModel, 'findOne').mockReturnValue(
-                    getInstance(userCookies, save, deleteOne),
-                );
+                const save = vitest.fn<() => Promise<void>>();
+                const deleteOne = vitest.fn<() => Promise<void>>();
+                vitest
+                    .spyOn(userStorage.cookieModel, 'findOne')
+                    .mockReturnValue(getInstance(userCookies, save, deleteOne));
 
                 await userStorage.deleteCookie('john.doe@email.com', 'Cookie1');
                 expect(save).toHaveBeenCalled();
@@ -226,6 +227,7 @@ describe('MongoDBUserStorage', () => {
             });
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         function getInstance(user?: UserCookies, save?: () => Promise<void>, deleteOne?: () => Promise<void>): any {
             if (user) {
                 return {
@@ -233,8 +235,8 @@ describe('MongoDBUserStorage', () => {
                         new Promise<UserCookiesInstance | undefined>(resolve =>
                             resolve({
                                 ...user,
-                                save: save ?? (() => new Promise<void>(result => result())),
-                                deleteOne: deleteOne ?? (() => new Promise<void>(result => result())),
+                                save: save ?? ((): Promise<void> => new Promise<void>(result => result())),
+                                deleteOne: deleteOne ?? ((): Promise<void> => new Promise<void>(result => result())),
                             }),
                         ),
                 } as Promisify;

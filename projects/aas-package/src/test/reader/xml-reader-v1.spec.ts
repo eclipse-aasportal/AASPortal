@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
+import { describe, beforeAll, beforeEach, it, expect } from 'vitest';
+import { fileURLToPath } from 'node:url';
 import { readFile } from 'fs/promises';
-import { resolve } from 'path/posix';
 import { XmlReaderV1 } from '../../lib/reader/xml-reader-v1.js';
-import { describe, beforeAll, beforeEach, it, expect } from '@jest/globals';
 
 describe('XmlReader', function () {
     describe('with default namespace v2.0', function () {
@@ -18,7 +18,7 @@ describe('XmlReader', function () {
         let path: string;
 
         beforeAll(async function () {
-            path = resolve('./src/test/assets/aas-default-namespace.xml');
+            path = fileURLToPath(new URL('../assets/aas-default-namespace.xml', import.meta.url));
             xml = (await readFile(path)).toString();
         });
 
@@ -42,7 +42,7 @@ describe('XmlReader', function () {
         let path: string;
 
         beforeAll(async function () {
-            path = resolve('./src/test/assets/aas-prefix-namespace.xml');
+            path =  fileURLToPath(new URL('../assets/aas-prefix-namespace.xml', import.meta.url));
             xml = (await readFile(path)).toString();
         });
 

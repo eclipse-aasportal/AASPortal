@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { InjectionToken } from '@angular/core';
 import { Data, Route } from '@angular/router';
 import { aas } from 'aas-core';
 
@@ -120,6 +119,7 @@ export type ViewRouteName =
     | 'CustomerFeedback'
     | 'DigitalProductPassport'
     | 'HandoverDocumentation'
+    | 'HierarchicalStructure'
     | 'Nameplate'
     | 'OperationalData'
     | 'Laser'
@@ -129,8 +129,6 @@ export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;
 
 export type ViewRouteResult = { route?: ViewRoute; map?: ViewRouteMap };
 
-export const VIEW_ROUTES = new InjectionToken<ViewRoute[]>('ViewRoutes');
-
 /**
  * URL resolver.
  */
@@ -139,12 +137,11 @@ export interface ApiUrl {
 
     /**
      * Gets the URL of a File resource.
-     * @param id - The AAS identifier.
-     * @param submodelId - The submodel identifier.
-     * @param idShortPath - The idShort path of the File element.
-     * @param endpoint - Optional the name of the AAS endpoint.
+     * @param endpoint In a multi endpoint environment the name of the endpoint.
+     * @param id The Asset Administration Shell identifier.
+     * @param submodelId The submodel identifier.
+     * @param idShortPath The idShort path of the File element.
+     * @param options Additional request options.
      */
-    getFileUrl(id: string, submodelId: string, idShortPath: string, endpoint?: string): string;
+    getFileUrl(endpoint: string | undefined, id: string, submodelId: string, idShortPath: string): string;
 }
-
-export const API_URL = new InjectionToken<ApiUrl>('API URL');

@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+import { inject, Injectable } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import {
     AASDocument,
     aas,
@@ -28,20 +30,19 @@ import {
 
 export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
 
+@Injectable()
 export class AASTableFilter {
-    private readonly queryParser: QueryParser;
+    private readonly translate = inject(TranslateService);
+    private queryParser?: QueryParser;
 
-    public constructor(
-        expression: string,
-        private readonly language: string,
-    ) {
-        this.queryParser = new QueryParser(expression, language);
+    public start(expression: string): void {
+        this.queryParser = new QueryParser(expression, this.translate.getCurrentLang());
     }
 
     public match(document: AASDocument): boolean {
         try {
             const env = document.content;
-            if (!env) {
+            if (!env || !this.queryParser) {
                 return false;
             }
 
@@ -93,11 +94,12 @@ export class AASTableFilter {
     }
 
     private contains(document: AASDocument, value: string): boolean {
-        value = value.toLocaleLowerCase(this.language);
+        const language = this.translate.getCurrentLang();
+        value = value.toLocaleLowerCase(language);
         return (
-            document.idShort.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
-            document.id.toLocaleLowerCase(this.language).indexOf(value) >= 0 ||
-            document.endpoint.toLocaleLowerCase(this.language).indexOf(value) >= 0
+            document.idShort.toLocaleLowerCase(language).indexOf(value) >= 0 ||
+            document.id.toLocaleLowerCase(language).indexOf(value) >= 0 ||
+            document.endpoint.toLocaleLowerCase(language).indexOf(value) >= 0
         );
     }
 

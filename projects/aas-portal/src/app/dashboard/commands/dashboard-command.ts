@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Command } from '../../types/command';
+import { Command } from '../../../../../aas-lib/src/lib/services/command';
 import { DashboardService } from '../dashboard.service';
 
 export abstract class DashboardCommand extends Command {

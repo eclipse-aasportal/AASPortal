@@ -13,11 +13,11 @@ import morgan from 'morgan';
 import request from 'supertest';
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AppInfo } from 'aas-core';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 
 import { ApplicationInfo } from '../../app/application-info.js';
 import { AuthService } from '../../app/auth/auth-service.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
 import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
@@ -27,10 +27,10 @@ import { errorHandler } from '../assets/error-handler.js';
 describe('AppController', () => {
     let app: Express;
     let logger: Logger;
-    let auth: jest.Mocked<AuthService>;
-    let applicationInfo: jest.Mocked<ApplicationInfo>;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
+    let auth: Mocked<AuthService>;
+    let applicationInfo: Mocked<ApplicationInfo>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);

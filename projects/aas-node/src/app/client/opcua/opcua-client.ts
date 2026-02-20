@@ -141,7 +141,7 @@ export class OpcuaClient extends AASClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override async openRead(nodeId: string, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public override async getFile(nodeId: string, file: aas.File): Promise<NodeJS.ReadableStream> {
         noop(nodeId);
         const session = this.getSession();
         if (!file.nodeId) {

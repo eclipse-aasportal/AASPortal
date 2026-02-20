@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
@@ -53,8 +53,8 @@ class TestNotifyComponent {}
 
 describe('MainComponent', () => {
     let documentSubject: Subject<AASDocument | null>;
-    let toolbar: jest.Mocked<ToolbarService>;
-    let indexChange: jest.Mocked<IndexChangeService>;
+    let toolbar: Mocked<ToolbarService>;
+    let indexChange: Mocked<IndexChangeService>;
 
     beforeEach(async () => {
         documentSubject = new Subject<AASDocument | null>();
@@ -66,8 +66,8 @@ describe('MainComponent', () => {
             changedDocuments: (() => 0) as Signal<number>,
             message: new BehaviorSubject({
                 type: '',
-                data: undefined
-            } satisfies WebSocketData)
+                data: undefined,
+            } satisfies WebSocketData),
         });
 
         await TestBed.configureTestingModule({

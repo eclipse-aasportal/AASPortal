@@ -13,19 +13,10 @@ const data: unknown = {
         {
             idShort: 'ExampleMotor',
             modelType: 'AssetAdministrationShell',
-            category: 'CONSTANT',
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             assetInformation: {
                 assetKind: 'Instance',
-                globalAssetId: {
-                    type: 'ModelReference',
-                    keys: [
-                        {
-                            type: 'GlobalReference',
-                            value: 'http://customer.com/assets/KHBVZJSQKIY',
-                        },
-                    ],
-                },
+                globalAssetId: 'http://customer.com/assets/KHBVZJSQKIY',
             },
             submodels: [
                 {
@@ -71,8 +62,7 @@ const data: unknown = {
         {
             idShort: 'Identification',
             modelType: 'Submodel',
-            category: 'CONSTANT',
-            descriptions: [
+            description: [
                 {
                     language: 'EN',
                     text: 'Identification from Manufacturer',
@@ -88,20 +78,14 @@ const data: unknown = {
                     },
                 ],
             },
-            qualifiers: [],
             kind: 'Instance',
             submodelElements: [
                 {
                     idShort: 'Manufacturer',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
-                            },
-                        ],
+                    path: {
+                        id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                        idShortPath: 'Manufacturer',
                     },
                     category: 'CONSTANT',
                     semanticId: {
@@ -113,21 +97,15 @@ const data: unknown = {
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:string',
                     value: 'CUSTOMER GmbH',
                 },
                 {
                     idShort: 'GLN',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
-                            },
-                        ],
+                    path: {
+                        id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                        idShortPath: 'GLN',
                     },
                     category: 'CONSTANT',
                     semanticId: {
@@ -139,21 +117,15 @@ const data: unknown = {
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:integer',
                     value: '10101010',
                 },
                 {
                     idShort: 'ProductDesignation',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
-                            },
-                        ],
+                    path: {
+                        id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                        idShortPath: 'ProductDesignation',
                     },
                     category: 'CONSTANT',
                     semanticId: {
@@ -165,21 +137,15 @@ const data: unknown = {
                             },
                         ],
                     },
-                    kind: 'Instance',
-                    valueType: 'langString',
+                    valueType: 'xs:string',
                     value: 'I40 Capable Servo Motor (EN)',
                 },
                 {
                     idShort: 'SerialNumber',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
-                            },
-                        ],
+                    path: {
+                        id: 'http://i40.customer.com/type/1/1/F13E8576F6488342',
+                        idShortPath: 'SerialNumber',
                     },
                     category: 'CONSTANT',
                     semanticId: {
@@ -191,7 +157,6 @@ const data: unknown = {
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:string',
                     value: 'P12345678I40',
                 },
@@ -200,7 +165,6 @@ const data: unknown = {
         {
             idShort: 'TechnicalData',
             modelType: 'Submodel',
-            category: 'CONSTANT',
             id: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
             semanticId: {
                 type: 'ExternalReference',
@@ -211,408 +175,88 @@ const data: unknown = {
                     },
                 ],
             },
-            qualifiers: [],
             kind: 'Instance',
             submodelElements: [
                 {
                     idShort: 'MaxRotationSpeed',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
-                            },
-                        ],
+                    path: {
+                        id: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                        idShortPath: 'MaxRotationSpeed',
                     },
                     category: 'PARAMETER',
                     semanticId: {
-                        type: 'ModelReference',
+                        type: 'ExternalReference',
                         keys: [
                             {
-                                type: 'ConceptDescription',
+                                type: 'GlobalReference',
                                 value: '0173-1#02-BAA120#008',
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:integer',
                     value: '5000',
                 },
                 {
                     idShort: 'MaxTorque',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
-                            },
-                        ],
+                    path: {
+                        id: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                        idShortPath: 'MaxTorque',
                     },
                     category: 'PARAMETER',
                     semanticId: {
-                        type: 'ModelReference',
+                        type: 'ExternalReference',
                         keys: [
                             {
-                                type: 'ConceptDescription',
+                                type: 'GlobalReference',
                                 value: '0173-1#02-BAE098#004',
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:float',
                     value: '200',
                 },
                 {
                     idShort: 'CoolingType',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
-                            },
-                        ],
+                    path: {
+                        id: 'http.//i40.customer.com/type/1/1/7A7104BDAB57E184',
+                        idShortPath: 'CoolingType',
                     },
                     category: 'PARAMETER',
-                    descriptions: [
+                    description: [
                         {
                             language: 'EN',
                             text: 'open circuit, external cooling',
                         },
                     ],
                     semanticId: {
-                        type: 'ModelReference',
+                        type: 'ExternalReference',
                         keys: [
                             {
-                                type: 'ConceptDescription',
+                                type: 'GlobalReference',
                                 value: '0173-1#02-BAE122#006',
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:string',
                     value: 'BAB657',
-                },
-            ],
-        },
-        {
-            idShort: 'Documentation',
-            modelType: 'Submodel',
-            category: 'CONSTANT',
-            id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-            semanticId: {
-                type: 'ModelReference',
-                keys: [],
-            },
-            qualifiers: [],
-            kind: 'Instance',
-            submodelElements: [
-                {
-                    idShort: 'OperatingManual',
-                    modelType: 'SubmodelElementCollection',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                            },
-                        ],
-                    },
-                    semanticId: {
-                        type: 'ModelReference',
+                    valueId: {
+                        type: 'ExternalReference',
                         keys: [
                             {
                                 type: 'ConceptDescription',
-                                value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Document',
+                                value: '0173-1#07-BAB657#003 ',
                             },
                         ],
                     },
-                    kind: 'Instance',
-                    value: [
-                        {
-                            idShort: 'DocumentId',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            category: 'CONSTANT',
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentId/Val',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'xs:string',
-                            value: '3 608 870 A47',
-                        },
-                        {
-                            idShort: 'DocumentClassId',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassId',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'xs:string',
-                            value: '03-02',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassId',
-                        },
-                        {
-                            idShort: 'DocumentClassName',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassName',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'langString',
-                            value: 'Operation (EN) Bedienung (DE)',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassName',
-                        },
-                        {
-                            idShort: 'DocumentClassificationSystem',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassificationSystem',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'xs:string',
-                            value: 'VDI2770:2018',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassificationSystem',
-                        },
-                        {
-                            idShort: 'OrganizationName',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationName',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'xs:string',
-                            value: 'CUSTOMER',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationName',
-                        },
-                        {
-                            idShort: 'OrganizationOfficialName',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationOfficialName',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'xs:string',
-                            value: 'CUSTOMER GmbH',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationOfficialName',
-                        },
-                        {
-                            idShort: 'Title',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Description/Title',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'langString',
-                            value: 'Operating Manual Servo Motor',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Title',
-                        },
-                        {
-                            idShort: 'Language',
-                            modelType: 'Property',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentVersion/Language',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            valueType: 'xs:string',
-                            value: 'en-US',
-                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Language',
-                        },
-                        {
-                            idShort: 'DigitalFile_PDF',
-                            modelType: 'File',
-                            parent: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'Submodel',
-                                        value: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
-                                    },
-                                    {
-                                        type: 'SubmodelElementCollection',
-                                        value: 'OperatingManual',
-                                    },
-                                ],
-                            },
-                            category: 'PARAMETER',
-                            semanticId: {
-                                type: 'ModelReference',
-                                keys: [
-                                    {
-                                        type: 'ConceptDescription',
-                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/StoredDocumentRepresentation/DigitalFile',
-                                    },
-                                ],
-                            },
-                            kind: 'Instance',
-                            contentType: 'application/pdf',
-                            value: '/aasx/OperatingManual.pdf',
-                        },
-                    ],
                 },
             ],
         },
         {
             idShort: 'OperationalData',
             modelType: 'Submodel',
-            category: 'VARIABLE',
             id: 'http://i40.customer.com/instance/1/1/AC69B1CB44F07935',
             semanticId: {
                 type: 'ExternalReference',
@@ -623,32 +267,25 @@ const data: unknown = {
                     },
                 ],
             },
-            qualifiers: [],
             kind: 'Instance',
             submodelElements: [
                 {
                     idShort: 'RotationSpeed',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/instance/1/1/AC69B1CB44F07935',
-                            },
-                        ],
+                    path: {
+                        id: 'http://i40.customer.com/instance/1/1/AC69B1CB44F07935',
+                        idShortPath: 'RotationSpeed',
                     },
                     category: 'VARIABLE',
                     semanticId: {
-                        type: 'ModelReference',
+                        type: 'ExternalReference',
                         keys: [
                             {
-                                type: 'ConceptDescription',
+                                type: 'GlobalReference',
                                 value: 'http://customer.com/cd//1/1/18EBD56F6B43D895',
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:integer',
                     value: '4370',
                     nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU#RotationSpeed',
@@ -656,353 +293,319 @@ const data: unknown = {
                 {
                     idShort: 'Torque',
                     modelType: 'Property',
-                    parent: {
-                        type: 'ModelReference',
-                        keys: [
-                            {
-                                type: 'Submodel',
-                                value: 'http://i40.customer.com/instance/1/1/AC69B1CB44F07935',
-                            },
-                        ],
+                    path: {
+                        id: 'http://i40.customer.com/instance/1/1/AC69B1CB44F07935',
+                        idShortPath: 'Torque',
                     },
                     category: 'VARIABLE',
                     semanticId: {
-                        type: 'ModelReference',
+                        type: 'ExternalReference',
                         keys: [
                             {
-                                type: 'ConceptDescription',
+                                type: 'GlobalReference',
                                 value: 'http://customer.com/cd//1/1/18EBD56F6B43D896',
                             },
                         ],
                     },
-                    kind: 'Instance',
                     valueType: 'xs:float',
                     value: '117.4',
                     nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vaW5zdGFuY2UvMS8xL0FDNjlCMUNCNDRGMDc5MzU#Torque',
                 },
-            ],
-        },
-    ],
-    conceptDescriptions: [
-        {
-            idShort: 'Document',
-            modelType: 'ConceptDescription',
-            descriptions: [],
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Document',
-            embeddedDataSpecifications: [
                 {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
+                    idShort: 'TestOperation',
+                    modelType: 'Operation',
+                    path: {
+                        id: 'http://i40.customer.com/instance/1/1/AC69B1CB44F07935',
+                        idShortPath: 'TestOperation',
                     },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'ENTITY',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Feste und geordnete Menge von für die Verwendung durch Personen bestimmte Informationen, die verwaltet und als Einheit zwischen Benutzern und System ausgetauscht werden kann.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'Document',
-                            },
-                        ],
-                        sourceOfDefinition: '[ISO 15519-1:2010]',
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'DocumentIdValue',
-            modelType: 'ConceptDescription',
-            category: 'CONSTANT',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentId/Val',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'STRING',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'die eigentliche Identifikationsnummer',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'DocumentId',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'DocumentClassId',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassId',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'STRING',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Eindeutige ID der Klasse in einer Klassifikation.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'DocumentClassId',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'DocumentClassName',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassName',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'STRING_TRANSLATABLE',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Liste von sprachabhängigen Namen zur ClassId. ',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'DocumentClassName',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'DocumentClassificationSystem',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassificationSystem',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [
-                            {
-                                language: 'EN',
-                                text: 'Classification System',
-                            },
-                            {
-                                language: 'DE',
-                                text: 'Klassifikationssystem',
-                            },
-                        ],
-                        dataType: 'STRING',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Eindeutige Kennung für ein Klassifikationssystem. Für Klassifikationen nach VDI 2770 muss "VDI2770:2018" verwenden werden.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'DocumentClassificationSystem',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'OrganizationName',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationName',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [
-                            {
-                                language: 'DE',
-                                text: 'gebräuchliche Bezeichnung für Organisation',
-                            },
-                            {
-                                language: 'EN',
-                                text: 'organization name',
-                            },
-                        ],
-                        dataType: 'STRING',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Die gebräuchliche Bezeichnung für die Organisation.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'OrganizationName',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'OrganizationOfficialName',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationOfficialName',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [
-                            {
-                                language: 'DE',
-                                text: 'offizieller Name der Organisation',
-                            },
-                            {
-                                language: 'EN',
-                                text: 'official name of the organization',
-                            },
-                        ],
-                        dataType: 'STRING',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Der offizielle Namen der Organisation.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'OrganizationOfficialName',
-                            },
-                        ],
-                    },
-                },
-            ],
-            isCaseOf: [
-                {
-                    type: 'ModelReference',
-                    keys: [
+                    category: 'PARAMETER',
+                    qualifiers: [
                         {
-                            type: 'ConceptDescription',
-                            value: '0173-1#02-AAO677#002',
+                            type: 'Demo',
+                            valueType: 'xs:string',
+                            value: 'true',
+                        },
+                    ],
+                    inputVariables: [
+                        {
+                            value: {
+                                idShort: 'TestInVar',
+                                modelType: 'Property',
+                                category: 'VARIABLE',
+                                valueType: 'xs:integer',
+                                value: '1234',
+                            },
+                        },
+                    ],
+                    inoutputVariables: [
+                        {
+                            value: {
+                                idShort: 'TestInOutVar',
+                                modelType: 'Property',
+                                category: 'VARIABLE',
+                                valueType: 'xs:integer',
+                                value: '5678',
+                            },
+                        },
+                    ],
+                    outputVariables: [
+                        {
+                            value: {
+                                idShort: 'TestOutVar',
+                                modelType: 'Property',
+                                category: 'VARIABLE',
+                                valueType: 'xs:string',
+                            },
                         },
                     ],
                 },
             ],
         },
         {
-            idShort: 'DocumentVersion',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentVersion',
-            embeddedDataSpecifications: [
+            idShort: 'Documentation',
+            modelType: 'Submodel',
+            id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+            kind: 'Instance',
+            submodelElements: [
                 {
-                    dataSpecification: {
+                    idShort: 'OperatingManual',
+                    modelType: 'SubmodelElementCollection',
+                    path: {
+                        id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                        idShortPath: 'OperatingManual',
+                    },
+                    semanticId: {
                         type: 'ExternalReference',
                         keys: [
                             {
                                 type: 'GlobalReference',
-                                value: 'www.admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
+                                value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Document',
                             },
                         ],
+                    },
+                    value: [
+                        {
+                            idShort: 'DocumentId',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.DocumentId',
+                            },
+                            category: 'CONSTANT',
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentId/Val',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: '3 608 870 A47',
+                        },
+                        {
+                            idShort: 'DocumentClassId',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.DocumentClassId',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassId',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: '03-02',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassId',
+                        },
+                        {
+                            idShort: 'DocumentClassName',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.DocumentClassName',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassName',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: 'Operation (EN) Bedienung (DE)',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassName',
+                        },
+                        {
+                            idShort: 'DocumentClassificationSystem',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.DocumentClassificationSystem',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassificationSystem',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: 'VDI2770:2018',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.DocumentClassificationSystem',
+                        },
+                        {
+                            idShort: 'OrganizationName',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.OrganizationName',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationName',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: 'CUSTOMER',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationName',
+                        },
+                        {
+                            idShort: 'OrganizationOfficialName',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.OrganizationOfficialName',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationOfficialName',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: 'CUSTOMER GmbH',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.OrganizationOfficialName',
+                        },
+                        {
+                            idShort: 'Title',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.Title',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Description/Title',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: 'Operating Manual Servo Motor',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Title',
+                        },
+                        {
+                            idShort: 'Language',
+                            modelType: 'Property',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.Language',
+                            },
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentVersion/Language',
+                                    },
+                                ],
+                            },
+                            valueType: 'xs:string',
+                            value: 'en-US',
+                            nodeId: 'aHR0cDovL2k0MC5jdXN0b21lci5jb20vdHlwZS8xLzEvMUE3QjYyQjUyOUYxOTE1Mg#OperatingManual.Language',
+                        },
+                        {
+                            idShort: 'DigitalFile_PDF',
+                            modelType: 'File',
+                            path: {
+                                id: 'http://i40.customer.com/type/1/1/1A7B62B529F19152',
+                                idShortPath: 'OperatingManual.DigitalFile_PDF',
+                            },
+                            category: 'PARAMETER',
+                            semanticId: {
+                                type: 'ExternalReference',
+                                keys: [
+                                    {
+                                        type: 'GlobalReference',
+                                        value: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/StoredDocumentRepresentation/DigitalFile',
+                                    },
+                                ],
+                            },
+                            contentType: 'application/pdf',
+                            value: '/aasx/OperatingManual.pdf',
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    conceptDescriptions: [
+        {
+            idShort: 'ManufacturerName',
+            modelType: 'ConceptDescription',
+            id: '0173-1#02-AAO677#002',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ModelReference',
+                        keys: [],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
-                                language: 'DE',
-                                text: 'Version des Dokuments',
+                                language: 'de',
+                                text: 'Herstellername',
+                            },
+                            {
+                                language: 'en',
+                                text: 'Manufacturer Name',
                             },
                         ],
                         definition: [
                             {
-                                language: 'DE',
-                                text: 'Zu jedem Dokument muss eine Menge von mindestens einer Dokumentenversion existieren. Es können auch mehrere Dokumentenversionen ausgeliefert werden.',
+                                language: 'de',
+                                text: "Bezeichnung für eine natürliche oder juristische Person, die für die Auslegung, Herstellung und Verpackung sowie die Etikettierung eines Produkts im Hinblick auf das 'Inverkehrbringen' im eigenen Namen verantwortlich ist",
+                            },
+                            {
+                                language: 'en',
+                                text: 'legally valid designation of the natural or judicial person which is directly responsible for the design, production, packaging and labeling of a product in respect to its being brought into circulation',
                             },
                         ],
                         shortName: [
                             {
-                                language: 'EN?',
-                                text: 'DocumentVersion',
+                                language: 'en',
+                                text: 'Manufacturer Name',
                             },
                         ],
                     },
@@ -1010,43 +613,41 @@ const data: unknown = {
             ],
         },
         {
-            idShort: 'Language',
+            idShort: 'GLNOfManufacturer',
             modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentVersion/Language',
+            id: '0173-1#02-AAY812#001',
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
+                        type: 'ModelReference',
+                        keys: [],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
-                                language: 'EN',
-                                text: 'Language',
+                                language: 'en',
+                                text: 'GLN of manufacturer',
                             },
                             {
-                                language: 'DE',
-                                text: 'Sprache',
+                                language: 'de',
+                                text: 'GLN des Herstellers',
                             },
                         ],
-                        dataType: 'STRING',
                         definition: [
                             {
-                                language: 'DE',
-                                text: 'Eine Liste der im Dokument verwendeten Sprachen.',
+                                language: 'de',
+                                text: 'international eindeutige Nummer für den Geräte- oder Produkthersteller sowie für den Standort',
+                            },
+                            {
+                                language: 'en',
+                                text: 'internationally unique identification number for the manufacturer of the device or the product and for the physical location',
                             },
                         ],
                         shortName: [
                             {
-                                language: 'EN?',
-                                text: 'Language',
+                                language: 'en',
+                                text: 'GLN of manufacturer',
                             },
                         ],
                     },
@@ -1054,43 +655,42 @@ const data: unknown = {
             ],
         },
         {
-            idShort: 'Title',
+            idShort: 'ManufacturerProductDesignation',
             modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Description/Title',
+            id: '0173-1#02-AAW338#001',
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
+                        type: 'ModelReference',
+                        keys: [],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
-                                language: 'EN',
-                                text: 'Title',
+                                language: 'en',
+                                text: 'Manufacturer product designation',
                             },
                             {
-                                language: 'DE',
-                                text: 'Titel',
+                                language: 'de',
+                                text: 'Herstellerproduktbezeichnung',
                             },
                         ],
                         dataType: 'STRING_TRANSLATABLE',
                         definition: [
                             {
-                                language: 'DE',
-                                text: 'Sprachabhängiger Titel des Dokuments.',
+                                language: 'de',
+                                text: 'Kurze Beschreibung des Produktes (Kurztext)',
+                            },
+                            {
+                                language: 'en',
+                                text: 'Short description of the product (short text)',
                             },
                         ],
                         shortName: [
                             {
-                                language: 'EN?',
-                                text: 'Title',
+                                language: 'en',
+                                text: 'ManufacturerTypName',
                             },
                         ],
                     },
@@ -1098,104 +698,41 @@ const data: unknown = {
             ],
         },
         {
-            idShort: 'Date',
+            idShort: 'SerialNumber',
             modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/LifeCycleStatus/SetDate',
+            id: '0173-1#02-AAM556#002',
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'www.admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
+                        type: 'ModelReference',
+                        keys: [],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'DATE',
+                        preferredName: [
+                            {
+                                language: 'en',
+                                text: 'Serial number',
+                            },
+                            {
+                                language: 'de',
+                                text: 'Seriennummer',
+                            },
+                        ],
                         definition: [
                             {
-                                language: 'DE',
-                                text: 'Datum und Uhrzeit, an dem der Status festgelegt wurde. Es muss das Datumsformat „YYYY-MM-dd“ verwendet werden (Y = Jahr, M = Monat, d = Tag, siehe ISO 8601).',
+                                language: 'de',
+                                text: 'eindeutige Zahlen- und Buchstabenkombination mit der das Gerät nach seiner Herstellung identifiziert ist',
+                            },
+                            {
+                                language: 'en',
+                                text: 'unique combination of numbers and letters used to identify the device once it has been manufactured',
                             },
                         ],
                         shortName: [
                             {
-                                language: 'EN?',
-                                text: 'SetDate',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'DocumentVersionIdValue',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentVersionId/Val',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'www.admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'STRING',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Verschiedene Versionen eines Dokuments müssen eindeutig identifizierbar sein. Die DocumentVersionId stellt eine innerhalb einer Domäne eindeutige Versionsidentifikationsnummer dar.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'DocumentVersionId',
-                            },
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            idShort: 'DigitalFile',
-            modelType: 'ConceptDescription',
-            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/StoredDocumentRepresentation/DigitalFile',
-            embeddedDataSpecifications: [
-                {
-                    dataSpecification: {
-                        type: 'ExternalReference',
-                        keys: [
-                            {
-                                type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
-                            },
-                        ],
-                    },
-                    dataSpecificationContent: {
-                        modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'FILE',
-                        definition: [
-                            {
-                                language: 'DE',
-                                text: 'Eine Datei, die die DocumentVersion repräsentiert. Neben der obligatorischen PDF/A Datei können weitere Dateien angegeben werden.',
-                            },
-                        ],
-                        shortName: [
-                            {
-                                language: 'EN?',
-                                text: 'DigitalFile',
+                                language: 'en',
+                                text: 'InstanceId',
                             },
                         ],
                     },
@@ -1205,17 +742,20 @@ const data: unknown = {
         {
             idShort: 'MaxRotationSpeed',
             modelType: 'ConceptDescription',
-            category: 'PROPERTY',
             id: '0173-1#02-BAA120#008',
             administration: {
-                version: '',
                 revision: '2',
             },
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
-                        type: 'ModelReference',
-                        keys: [],
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
@@ -1229,7 +769,6 @@ const data: unknown = {
                                 text: 'Max. rotation speed',
                             },
                         ],
-                        dataType: 'INTEGER_MEASURE',
                         definition: [
                             {
                                 language: 'de',
@@ -1240,7 +779,12 @@ const data: unknown = {
                                 text: 'Greatest permissible rotation speed with which the motor or feeding unit may be operated',
                             },
                         ],
-                        shortName: [],
+                        shortName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
                         unit: '1/min',
                         unitId: {
                             type: 'ExternalReference',
@@ -1254,23 +798,21 @@ const data: unknown = {
                     },
                 },
             ],
-            isCaseOf: [
-                {
-                    type: 'ModelReference',
-                    keys: [],
-                },
-            ],
         },
         {
             idShort: 'MaxTorque',
             modelType: 'ConceptDescription',
-            category: 'PROPERTY',
             id: '0173-1#02-BAE098#004',
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
-                        type: 'ModelReference',
-                        keys: [],
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
@@ -1280,7 +822,6 @@ const data: unknown = {
                                 text: 'Max. torque',
                             },
                         ],
-                        dataType: 'REAL_MEASURE',
                         definition: [
                             {
                                 language: 'EN',
@@ -1291,7 +832,12 @@ const data: unknown = {
                                 text: 'Größtes mechanisch zulässiges Drehmoment, welches der Motor an der Abtriebswelle abgeben kann',
                             },
                         ],
-                        shortName: [],
+                        shortName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
                         unit: 'Nm',
                         unitId: {
                             type: 'ExternalReference',
@@ -1307,9 +853,55 @@ const data: unknown = {
             ],
         },
         {
+            idShort: 'CoolingType',
+            modelType: 'ConceptDescription',
+            id: '0173-1#02-BAE122#006',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'DE',
+                                text: 'Art der Kühlung',
+                            },
+                            {
+                                language: 'EN',
+                                text: 'Cooling type',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Zusammenfassung verschiedener Kühlarten, um für Suchmerkmale zu einer begrenzten Auswahl zu kommen',
+                            },
+                            {
+                                language: 'EN',
+                                text: 'Summary of various types of cooling, for use as search criteria that limit a selection',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
             idShort: 'RotationSpeed',
             modelType: 'ConceptDescription',
-            category: 'PROPERTY',
             id: 'http://customer.com/cd//1/1/18EBD56F6B43D895',
             embeddedDataSpecifications: [
                 {
@@ -1318,7 +910,7 @@ const data: unknown = {
                         keys: [
                             {
                                 type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
                             },
                         ],
                     },
@@ -1334,7 +926,6 @@ const data: unknown = {
                                 text: 'Actual rotation speed',
                             },
                         ],
-                        dataType: 'INTEGER_MEASURE',
                         definition: [
                             {
                                 language: 'Atkuelle Drehzahl, mit welcher der Motor oder die Speiseinheit betri',
@@ -1343,7 +934,7 @@ const data: unknown = {
                         ],
                         shortName: [
                             {
-                                language: 'EN?',
+                                language: 'EN',
                                 text: 'RotationSpeed',
                             },
                         ],
@@ -1364,7 +955,6 @@ const data: unknown = {
         {
             idShort: 'Torque',
             modelType: 'ConceptDescription',
-            category: 'PROPERTY',
             id: 'http://customer.com/cd//1/1/18EBD56F6B43D896',
             embeddedDataSpecifications: [
                 {
@@ -1373,14 +963,18 @@ const data: unknown = {
                         keys: [
                             {
                                 type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
                             },
                         ],
                     },
                     dataSpecificationContent: {
                         modelType: 'DataSpecificationIec61360',
-                        preferredName: [],
-                        dataType: 'REAL_MEASURE',
+                        preferredName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
                         definition: [
                             {
                                 language: 'EN',
@@ -1393,24 +987,19 @@ const data: unknown = {
                         ],
                         shortName: [
                             {
-                                language: 'EN?',
+                                language: 'EN',
                                 text: 'Torque',
                             },
                         ],
                         unit: 'Nm',
-                        unitId: {
-                            type: 'ModelReference',
-                            keys: [],
-                        },
                     },
                 },
             ],
         },
         {
-            idShort: 'CoolingType',
+            idShort: 'Document',
             modelType: 'ConceptDescription',
-            category: 'PROPERTY',
-            id: '0173-1#02-BAE122#006',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Document',
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
@@ -1418,7 +1007,7 @@ const data: unknown = {
                         keys: [
                             {
                                 type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
                             },
                         ],
                     },
@@ -1426,35 +1015,31 @@ const data: unknown = {
                         modelType: 'DataSpecificationIec61360',
                         preferredName: [
                             {
-                                language: 'DE',
-                                text: 'Art der Kühlung',
-                            },
-                            {
-                                language: 'EN',
-                                text: 'Cooling type',
+                                language: 'en',
+                                text: '',
                             },
                         ],
-                        dataType: 'STRING',
                         definition: [
                             {
                                 language: 'DE',
-                                text: 'Zusammenfassung verschiedener Kühlarten, um für Suchmerkmale zu einer begrenzten Auswahl zu kommen',
-                            },
-                            {
-                                language: 'EN',
-                                text: 'Summary of various types of cooling, for use as search criteria that limit a selection',
+                                text: 'Feste und geordnete Menge von für die Verwendung durch Personen bestimmte Informationen, die verwaltet und als Einheit zwischen Benutzern und System ausgetauscht werden kann.',
                             },
                         ],
-                        shortName: [],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'Document',
+                            },
+                        ],
+                        sourceOfDefinition: '[ISO 15519-1:2010]',
                     },
                 },
             ],
         },
         {
-            idShort: 'BAB657',
+            idShort: 'DocumentIdValue',
             modelType: 'ConceptDescription',
-            category: 'VALUE',
-            id: '0173-1#07-BAB657#003',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentId/Val',
             embeddedDataSpecifications: [
                 {
                     dataSpecification: {
@@ -1462,7 +1047,124 @@ const data: unknown = {
                         keys: [
                             {
                                 type: 'GlobalReference',
-                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'die eigentliche Identifikationsnummer',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'DocumentId',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'DocumentClassId',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassId',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Eindeutige ID der Klasse in einer Klassifikation.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'DocumentClassId',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'DocumentClassName',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassName',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Liste von sprachabhängigen Namen zur ClassId. ',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'DocumentClassName',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'DocumentClassificationSystem',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassificationSystem',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
                             },
                         ],
                     },
@@ -1471,16 +1173,247 @@ const data: unknown = {
                         preferredName: [
                             {
                                 language: 'EN',
-                                text: 'open circuit, external cooling',
+                                text: 'Classification System',
                             },
                             {
                                 language: 'DE',
-                                text: 'offener Kreis, Fremdkühlung ',
+                                text: 'Klassifikationssystem',
                             },
                         ],
-                        dataType: 'STRING',
-                        definition: [],
-                        shortName: [],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Eindeutige Kennung für ein Klassifikationssystem. Für Klassifikationen nach VDI 2770 muss "VDI2770:2018" verwenden werden.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'DocumentClassificationSystem',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'OrganizationName',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationName',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'DE',
+                                text: 'gebräuchliche Bezeichnung für Organisation',
+                            },
+                            {
+                                language: 'EN',
+                                text: 'organization name',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Die gebräuchliche Bezeichnung für die Organisation.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'OrganizationName',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'OrganizationOfficialName',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Organization/OrganizationOfficialName',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'DE',
+                                text: 'offizieller Name der Organisation',
+                            },
+                            {
+                                language: 'EN',
+                                text: 'official name of the organization',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Der offizielle Namen der Organisation.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'OrganizationOfficialName',
+                            },
+                        ],
+                    },
+                },
+            ],
+            isCaseOf: [
+                {
+                    type: 'ModelReference',
+                    keys: [
+                        {
+                            type: 'ConceptDescription',
+                            value: '0173-1#02-AAO677#002',
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            idShort: 'Title',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/Description/Title',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'EN',
+                                text: 'Title',
+                            },
+                            {
+                                language: 'DE',
+                                text: 'Titel',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Sprachabhängiger Titel des Dokuments.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'Title',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'Language',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentVersion/Language',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'EN',
+                                text: 'Language',
+                            },
+                            {
+                                language: 'DE',
+                                text: 'Sprache',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Eine Liste der im Dokument verwendeten Sprachen.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'Language',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            idShort: 'DigitalFile',
+            modelType: 'ConceptDescription',
+            id: 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/StoredDocumentRepresentation/DigitalFile',
+            embeddedDataSpecifications: [
+                {
+                    dataSpecification: {
+                        type: 'ExternalReference',
+                        keys: [
+                            {
+                                type: 'GlobalReference',
+                                value: 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360/3/0',
+                            },
+                        ],
+                    },
+                    dataSpecificationContent: {
+                        modelType: 'DataSpecificationIec61360',
+                        preferredName: [
+                            {
+                                language: 'en',
+                                text: '',
+                            },
+                        ],
+                        definition: [
+                            {
+                                language: 'DE',
+                                text: 'Eine Datei, die die DocumentVersion repräsentiert. Neben der obligatorischen PDF/A Datei können weitere Dateien angegeben werden.',
+                            },
+                        ],
+                        shortName: [
+                            {
+                                language: 'EN',
+                                text: 'DigitalFile',
+                            },
+                        ],
                     },
                 },
             ],

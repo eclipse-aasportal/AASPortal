@@ -14,30 +14,33 @@ import { ERROR } from '../../error.js';
 import { PackageTable } from '../package-table.js';
 import { IdentifiableTable } from '../identifiable-table.js';
 import { KeyList } from '../key-list.js';
+import { AasxPackage } from '../../aasx-package.js';
 
-export class UpdatePackageCommand extends DatabaseCommand<boolean> {
+export class UpdatePackageCommand extends DatabaseCommand {
     private table: PackageTable;
     private packageKey: DatabaseKey = NaN;
 
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly packageId: string,
         private readonly sourceFile: string,
         private readonly filename: string,
-        private readonly environment: types.Environment,
     ) {
-        super(database);
+        super(database, resolve, reject);
 
         this.table = database.packages;
     }
 
-    public override async execute(): Promise<boolean> {
+    public override async execute(): Promise<void> {
+        const aasx = await AasxPackage.createFromFile(this.sourceFile);
+        const env = await aasx.getEnvironment();
         this.packageKey = await this.table.getKey(this.packageId);
         const packageItem = await this.getPackageItem();
         packageItem.filename = this.filename;
-        packageItem.environment = await this.update(packageItem.environment);
+        packageItem.environment = await this.update(env, packageItem.environment);
         this.table.update(this.sourceFile, this.packageKey);
-        return true;
     }
 
     private async getPackageItem(): Promise<PackageItem> {
@@ -50,21 +53,21 @@ export class UpdatePackageCommand extends DatabaseCommand<boolean> {
         return item;
     }
 
-    private async update(state: DatabaseEnvironment): Promise<DatabaseEnvironment> {
+    private async update(environment: types.Environment, state: DatabaseEnvironment): Promise<DatabaseEnvironment> {
         return {
             assetAdministrationShells: await this.updateIdentifiables(
                 this.database.shells,
-                this.environment.assetAdministrationShells ?? [],
+                environment.assetAdministrationShells ?? [],
                 state.assetAdministrationShells,
             ),
             submodels: await this.updateIdentifiables(
                 this.database.submodels,
-                this.environment.submodels ?? [],
+                environment.submodels ?? [],
                 state.submodels,
             ),
             conceptDescriptions: await this.updateIdentifiables(
                 this.database.conceptDescriptions,
-                this.environment.conceptDescriptions ?? [],
+                environment.conceptDescriptions ?? [],
                 state.conceptDescriptions,
             ),
         };

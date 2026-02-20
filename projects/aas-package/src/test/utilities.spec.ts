@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { describe, expect, beforeEach, it } from 'vitest';
 import { decodeBase64Url, encodeBase64Url } from '../lib/utilities.js';
 
 describe('utilities', () => {
@@ -15,6 +16,11 @@ describe('utilities', () => {
                 'aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw',
             );
         });
+
+        it('converts ÄÖÜäöüß to Base64Url string', () => {
+            const b64url = encodeBase64Url('ÄÖÜäöüß');
+            expect(b64url).toEqual('w4TDlsOcw6TDtsO8w58');
+        });
     });
 
     describe('decodeBase64Url', () => {
@@ -22,6 +28,11 @@ describe('utilities', () => {
             expect(
                 decodeBase64Url('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw'),
             ).toEqual('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
+        });
+
+        it('converts Base64Url string of ÄÖÜäöüß to normal string', () => {
+            const str = decodeBase64Url('w4TDlsOcw6TDtsO8w58');
+            expect(str).toEqual('ÄÖÜäöüß');
         });
     });
 });

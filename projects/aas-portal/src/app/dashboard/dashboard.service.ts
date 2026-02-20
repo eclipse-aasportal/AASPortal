@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { Injectable, WritableSignal, computed, signal, untracked } from '@angular/core';
-import { v4 as uuid } from 'uuid';
+import { nanoid } from 'nanoid';
 import { EMPTY, map, mergeMap, Observable, skipWhile, tap } from 'rxjs';
-import { aas, AASDocument, getIdShortPath, getUnit, LiveNode } from 'aas-core';
+import { aas, AASDocument, getUnit, LiveNode } from 'aas-core';
 import { AuthService, encodeBase64Url } from 'aas-lib';
 
 import {
@@ -243,7 +243,7 @@ export class DashboardService {
 
             const item: DashboardChartItem = {
                 label: label,
-                id: uuid(),
+                id: nanoid(),
                 chartType: signal(DashboardChartType.Line),
                 sources: [source],
                 selected: signal(false),
@@ -257,7 +257,7 @@ export class DashboardService {
     private addBarChart(page: DashboardPage, properties: aas.Property[], nodes: LiveNode[] | null): void {
         const item: DashboardChartItem = {
             label: '',
-            id: uuid(),
+            id: nanoid(),
             chartType: signal(DashboardChartType.BarVertical),
             sources: [],
             selected: signal(false),
@@ -289,23 +289,23 @@ export class DashboardService {
 
     private addScatterChart(document: AASDocument, page: DashboardPage, blobs: aas.Blob[]): void {
         for (const blob of blobs) {
-            if (blob.parent) {
+            if (blob.path) {
                 const label = blob.idShort;
                 const name = encodeBase64Url(document.endpoint);
                 const id = encodeBase64Url(document.id);
-                const smId = encodeBase64Url(blob.parent.keys[0].value);
-                const path = getIdShortPath(blob);
+                const smId = encodeBase64Url(blob.path.id);
+                const idShortPath = blob.path.idShortPath;
                 const source: DashboardSource = {
                     label: blob.idShort,
                     color: this.createRandomColor(),
                     element: blob,
                     node: null,
-                    url: `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/blobs/${path}/value`,
+                    url: `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/blobs/${idShortPath}/value`,
                 };
 
                 const item: DashboardChartItem = {
                     label: label,
-                    id: uuid(),
+                    id: nanoid(),
                     chartType: signal(DashboardChartType.TimeSeries),
                     sources: [source],
                     selected: signal(false),

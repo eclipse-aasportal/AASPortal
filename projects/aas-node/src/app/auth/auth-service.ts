@@ -10,7 +10,6 @@ import { inject, singleton } from 'tsyringe';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import isEmpty from 'lodash-es/isEmpty.js';
 import { Mailer } from '../mailer.js';
 import { ERRORS } from '../errors.js';
 import { UserData } from './user-data.js';
@@ -84,7 +83,7 @@ export class AuthService {
             data.password = await bcrypt.hash(profile.password, 10);
         }
 
-        data.name = isEmpty(profile.name) ? getUserNameFromEMail(profile.id) : profile.name;
+        data.name = profile.name ?? getUserNameFromEMail(profile.id);
 
         if (profile.id && id.toLowerCase() === profile.id.toLowerCase()) {
             await this.userStorage.write(id, data);
@@ -115,10 +114,7 @@ export class AuthService {
             throw new ApplicationError(ERRORS.InvalidPassword, undefined, 400);
         }
 
-        let name = profile.name;
-        if (isEmpty(name)) {
-            name = getUserNameFromEMail(profile.id);
-        }
+        const name = profile.name ?? getUserNameFromEMail(profile.id);
 
         const data: UserData = {
             id: profile.id,
@@ -181,7 +177,7 @@ export class AuthService {
         });
     }
 
-    private async checkPassword(password: string, hash: string) {
+    private async checkPassword(password: string, hash: string): Promise<void> {
         if (!(await bcrypt.compare(password, hash))) {
             throw new ApplicationError(ERRORS.InvalidPassword, undefined, 401);
         }

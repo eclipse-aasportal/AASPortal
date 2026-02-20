@@ -6,11 +6,12 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-
-import { ViewState } from '../../app/view/view.state';
 import { provideZonelessChangeDetection, Type } from '@angular/core';
 import { ViewRoute } from 'aas-lib';
+
+import { ViewState } from '../../app/view/view.state';
 
 describe('ViewState', () => {
     let service: ViewState;

@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 /******************************************************************************
  *
  * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
@@ -6,12 +7,11 @@
  *
  *****************************************************************************/
 
-import head from 'lodash-es/head';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { EMPTY, map, mergeMap, Observable, from, of, catchError, first, combineLatest } from 'rxjs';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -22,37 +22,33 @@ import {
     computed,
     effect,
     inject,
+    linkedSignal,
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, jsonization, toJsonValue, isSubmodel } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, isSubmodel, toJsonValue, jsonization } from 'aas-core';
 import {
     AASTreeComponent,
-    AuthService,
     decodeBase64Url,
     NotifyService,
     StartService,
     ToolbarService,
     encodeBase64Url,
     EndpointsApi,
+    findRouteForShell,
+    findRouteForSubmodel,
+    VIEW_ROUTES,
 } from 'aas-lib';
 
-import { CommandHandler } from '../aas/command-handler';
-import { EditElementFormComponent } from './edit-element-form/edit-element-form.component';
-import { UpdateElementCommand } from './commands/update-element-command';
-import { DeleteCommand } from './commands/delete-command';
-import { NewElementCommand } from './commands/new-element-command';
-import { NewElementFormComponent } from './new-element-form/new-element-form.component';
-import { DashboardService } from '../dashboard/dashboard.service';
 import { AASState } from './aas.state';
 import { DashboardChartType, DashboardPage } from '../dashboard/dashboard-types';
-import { JsonValue } from 'projects/aas-core/dist/types/aas-core/jsonization';
+import { DashboardService } from '../dashboard/dashboard.service';
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateModule, FormsModule, AASTreeComponent],
+    imports: [TranslateModule, FormsModule, AASTreeComponent, CommonModule, RouterModule, NgbNavModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
@@ -61,28 +57,23 @@ import { JsonValue } from 'projects/aas-core/dist/types/aas-core/jsonization';
  *
  * @remarks
  * This component provides features including:
- * - Document viewing and modification
  * - Live mode controls (play/stop)
  * - Dashboard integration
  * - Element creation, editing, and deletion
- * - Undo/Redo operations
  * - Search functionality
- * - Document synchronization
  * - Download capabilities
  */
 export class AASComponent implements OnInit, OnDestroy {
     private readonly state = inject(AASState);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly modal = inject(NgbModal);
     private readonly notify = inject(NotifyService);
     private readonly dashboard = inject(DashboardService);
     private readonly api = inject(EndpointsApi);
-    private readonly commandHandler = inject(CommandHandler);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly auth = inject(AuthService);
     private readonly dom = inject(DOCUMENT);
+    private readonly viewRoutes = inject(VIEW_ROUTES);
 
     public constructor() {
         effect(() => {
@@ -99,7 +90,7 @@ export class AASComponent implements OnInit, OnDestroy {
      */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
-    public readonly treeState = this.state.treeState;
+    public readonly aasTree = viewChild<AASTreeComponent>('aasTree');
 
     public readonly address = computed(() => this.state.document()?.address ?? '-');
 
@@ -112,7 +103,7 @@ export class AASComponent implements OnInit, OnDestroy {
     public readonly readOnly = computed(() => !!this.state.document()?.readonly);
 
     public readonly version = computed(() =>
-        this.versionToString(head(this.state.document()?.content?.assetAdministrationShells)?.administration),
+        this.versionToString(this.state.document()?.content?.assetAdministrationShells?.at(0)?.administration),
     );
 
     public readonly document = this.state.document;
@@ -127,10 +118,6 @@ export class AASComponent implements OnInit, OnDestroy {
 
     public readonly selectedElements = this.state.selectedElements;
 
-    public readonly canUndo = this.commandHandler.canUndo;
-
-    public readonly canRedo = this.commandHandler.canRedo;
-
     public readonly canPlay = computed(() => {
         const state = this.state.live();
         return (this.state.document()?.onlineReady ?? false) && state === 'offline';
@@ -141,10 +128,13 @@ export class AASComponent implements OnInit, OnDestroy {
         return (this.state.document()?.onlineReady ?? false) && state === 'online';
     });
 
-    public readonly canSynchronize = computed(() => {
-        const document = this.state.document();
-        return document != null && !document.readonly && document.modified ? document.modified : false;
-    });
+    public getSubmodels(): aas.Submodel[] | undefined {
+        if (!this.state.document()) return [];
+        if (!this.state.document()?.content) return [];
+        if (!this.state.document()?.content?.submodels) return [];
+
+        return this.state.document()?.content?.submodels;
+    }
 
     /**
      * Computed signal that determines if a new element can be created.
@@ -236,6 +226,16 @@ export class AASComponent implements OnInit, OnDestroy {
         return '/assets/resources/aas-idta.png';
     }
 
+    /** The URL of the thumbnail. */
+    public readonly thumbnail = linkedSignal(() => {
+        const document = this.document();
+        if (!document) {
+            return '/assets/resources/aas-idta.png';
+        }
+
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
+    });
+
     /**
      * Clears the thumbnail of the current document by setting it to undefined.
      * This method updates the document state while preserving other document properties.
@@ -253,6 +253,9 @@ export class AASComponent implements OnInit, OnDestroy {
         this.state.update({ live: 'online' });
     }
 
+    /**
+     * Stops the live mode by updating the state to 'offline'.
+     */
     public stop(): void {
         this.state.update({ live: 'offline' });
     }
@@ -291,111 +294,6 @@ export class AASComponent implements OnInit, OnDestroy {
      */
     public setSearchExpression(value: string): void {
         this.state.update({ searchExpression: value });
-    }
-
-    public synchronize(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.state.document()),
-            mergeMap(document => {
-                if (!document) {
-                    return EMPTY;
-                }
-
-                return this.api.putDocument(document).pipe(
-                    map(messages => {
-                        if (messages && messages.length > 0) {
-                            this.notify.info(messages.join('\r\n'));
-                        }
-
-                        this.state.update({ document: { ...document, modified: false } });
-                    }),
-                );
-            }),
-            catchError(error => this.notify.error(error)),
-        );
-    }
-
-    /**
-     * Executes an undo operation using the command handler.
-     * Reverts the last executed command in the command history.
-     */
-    public undo(): void {
-        this.commandHandler.undo();
-    }
-
-    /**
-     * Executes a redo operation on the command handler.
-     * This method restores the state that was undone by the last undo operation.
-     */
-    public redo(): void {
-        this.commandHandler.redo();
-    }
-
-    public newElement(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.state.document()),
-            mergeMap(document => {
-                const selectedElements = this.state.selectedElements();
-                if (!document || selectedElements.length !== 1) {
-                    return EMPTY;
-                }
-
-                return of(this.modal.open(NewElementFormComponent, { backdrop: 'static' })).pipe(
-                    mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(document.content, selectedElements[0]);
-                        return from<Promise<aas.Referable | undefined>>(modalRef.result);
-                    }),
-                    map(result => {
-                        if (result) {
-                            this.commandHandler.execute(
-                                new NewElementCommand(this.state, document, selectedElements[0], result),
-                            );
-                        }
-                    }),
-                );
-            }),
-            catchError(error => this.notify.error(error)),
-        );
-    }
-
-    public editElement(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.state.document()),
-            mergeMap(document => {
-                const selectedElements = this.state.selectedElements();
-                if (!document || selectedElements.length !== 1) {
-                    return EMPTY;
-                }
-
-                return of(this.modal.open(EditElementFormComponent, { backdrop: 'static' })).pipe(
-                    mergeMap(modalRef => {
-                        modalRef.componentInstance.initialize(selectedElements[0]);
-                        return from<Promise<aas.SubmodelElement | undefined>>(modalRef.result);
-                    }),
-                    map(result => {
-                        if (result) {
-                            this.commandHandler.execute(
-                                new UpdateElementCommand(this.state, document, selectedElements[0], result),
-                            );
-                        }
-                    }),
-                );
-            }),
-            catchError(error => this.notify.error(error)),
-        );
-    }
-
-    public deleteElement(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            map(() => this.state.document()),
-            map(document => {
-                const selectedElements = this.state.selectedElements();
-                if (document && selectedElements.length > 0) {
-                    this.commandHandler.execute(new DeleteCommand(this.state, document, selectedElements));
-                }
-            }),
-            catchError(error => this.notify.error(error)),
-        );
     }
 
     /**
@@ -439,17 +337,25 @@ export class AASComponent implements OnInit, OnDestroy {
         this.state.update({ selectedElements });
     }
 
-    private downloadSubmodel(submodel: aas.Submodel) {
+    public findNext(): void {
+        this.aasTree()?.findNext();
+    }
+
+    public findPrevious(): void {
+        this.aasTree()?.findPrevious();
+    }
+
+    private downloadSubmodel(submodel: aas.Submodel): void {
         const sm = jsonization.submodelFromJsonable(toJsonValue(submodel)).mustValue();
         this.downloadJson(submodel.idShort, jsonization.toJsonable(sm));
     }
 
-    private downloadEnvironment(baseName: string, content: aas.Environment) {
+    private downloadEnvironment(baseName: string, content: aas.Environment): void {
         const env = jsonization.environmentFromJsonable(toJsonValue(content)).mustValue();
         this.downloadJson(baseName, jsonization.toJsonable(env));
     }
 
-    private downloadJson(baseName: string, value: JsonValue): void {
+    private downloadJson(baseName: string, value: jsonization.JsonValue): void {
         const contentStr = JSON.stringify(value, null, 4);
         const blob = new Blob([contentStr], { type: 'application/json' });
         const filename = `${baseName}.json`;
@@ -479,7 +385,7 @@ export class AASComponent implements OnInit, OnDestroy {
     }
 
     private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument(id, endpoint).subscribe({
+        this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
             next: document => this.state.update({ document }),
             error: error => console.debug(error),
         });
@@ -501,5 +407,80 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         return version;
+    }
+
+    public getSubmodelSemanticId(submodel: aas.Submodel): string {
+        if (!submodel?.semanticId) return '';
+        if (submodel?.semanticId?.keys?.length <= 0) return '';
+        return submodel.semanticId.keys[0].value;
+    }
+
+    public getSubmodelIcon(submodel: aas.Submodel): string {
+        //find out what type of submodel it is and
+        //return a somewhat fitting thumbnail
+        // Document-related
+        // Nameplate-related
+        // Contact-related
+        // Carbon-related
+        // Data-related
+
+        const semId = this.getSubmodelSemanticId(submodel);
+        if (!semId) return 'bi-question-circle';
+
+        if (semId.toLowerCase().includes('document') || submodel.idShort.toLowerCase().includes('document'))
+            return 'bi-file-earmark-richtext';
+        if (semId.toLowerCase().includes('contact') || submodel.idShort.toLowerCase().includes('contact'))
+            return 'bi-card-text';
+        if (semId.toLowerCase().includes('nameplate') || submodel.idShort.toLowerCase().includes('nameplate'))
+            return 'bi-file-text';
+        if (semId.toLowerCase().includes('carbon') || submodel.idShort.toLowerCase().includes('carbon'))
+            return 'bi-leaf';
+        if (semId.toLowerCase().includes('data') || submodel.idShort.toLowerCase().includes('data'))
+            return 'bi-graph-up';
+        if (semId.toLowerCase().includes('structure') || submodel.idShort.toLowerCase().includes('structure'))
+            return 'bi-diagram-3';
+
+        return 'bi-question-circle';
+    }
+
+    public openShellView(): (string | { endpoint: string; id: string })[] | undefined {
+        const document = this.document();
+        if (document === undefined) return undefined;
+        const tuple = findRouteForShell(this.viewRoutes, document!);
+        const route = tuple.route;
+
+        if (route === undefined) return undefined;
+
+        const endpoint = this.document()?.endpoint;
+        if (endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if (id === undefined) return undefined;
+
+        return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+    }
+
+    public openBrowserView(): (string | { endpoint: string; id: string })[] | undefined {
+        const endpoint = this.document()?.endpoint;
+        if (endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if (id === undefined) return undefined;
+
+        return [`/views/Browser`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+    }
+
+    public openSubmodelView(submodel: aas.Submodel): (string | { endpoint: string; id: string })[] | undefined {
+        const route = findRouteForSubmodel(this.viewRoutes, submodel);
+
+        if (route === undefined) return undefined;
+
+        const endpoint = this.document()?.endpoint;
+        if (endpoint === undefined) return undefined;
+
+        const id = this.document()?.id;
+        if (id === undefined) return undefined;
+
+        return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 }

@@ -6,12 +6,13 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-
-import { TechnicalDataViewState } from '../../../lib/views/technical-data/technical-data-view.state';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
+
+import { TechnicalDataViewState } from '../../../lib/views/technical-data/technical-data-view.state';
 import { FakeLoader } from '../../mocks';
 
 import technicalData from '../../assets/technical-data-1-2.json';

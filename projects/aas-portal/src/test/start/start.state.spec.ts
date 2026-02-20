@@ -6,22 +6,22 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-
-import { StartService } from 'aas-lib';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+
+import { StartService } from 'aas-lib';
 import { StartState } from '../../app/start/start.state';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('StartState', () => {
     let service: StartState;
-    let start: jest.Mocked<StartService>;
-    let sanitizer: jest.Mocked<DomSanitizer>;
+    let start: Mocked<StartService>;
+    let sanitizer: Mocked<DomSanitizer>;
 
     beforeEach(() => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save'], {

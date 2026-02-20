@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from '../app/app.component';

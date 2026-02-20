@@ -7,13 +7,12 @@
  *****************************************************************************/
 
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, Input, input, untracked } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
-import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { CarbonFootprintData, CarbonFootprintState } from './carbon-footprint.state';
+import { CarbonFootprintState } from './carbon-footprint.state';
 import { ChildComponent } from '../../components/child-component';
 
 /**
@@ -25,10 +24,15 @@ import { ChildComponent } from '../../components/child-component';
     templateUrl: './carbon-footprint.html',
     styleUrl: './carbon-footprint.scss',
     providers: [CarbonFootprintState],
-    imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective, DataSheet],
+    imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonFootprintState> {
+export class CarbonFootprint extends ChildComponent {
+    // Determines wether the view is used from inside the dpp view or standalone
+    @Input() public isDigitalProductPassport: boolean = false;
+
+    public showDetails: boolean = this.isDigitalProductPassport;
+
     public constructor() {
         super();
 
@@ -58,7 +62,7 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonF
     /**
      * The state of the carbon footprint component.
      */
-    public override readonly state = input.required<CarbonFootprintState>();
+    public readonly state = input.required<CarbonFootprintState>();
 
     /**
      * The total product carbon footprint.
@@ -93,5 +97,45 @@ export class CarbonFootprint extends ChildComponent<CarbonFootprintData, CarbonF
      */
     public setIndex(index: number): void {
         this.state().update({ index });
+    }
+
+    public getTotalPCFValue(): string | string[] {
+        const result = this.totalPcfCO2eq();
+        const splitResult = result.split(' ');
+        if (!splitResult || splitResult.length <= 0) return '';
+        return splitResult[0];
+    }
+
+    public getTotalPCFUnit(): string | string[] {
+        const result = this.totalPcfCO2eq();
+        const splitResult = result.split(' ');
+        if (!splitResult || splitResult.length <= 1) return '';
+        return splitResult[1];
+    }
+
+    public getValueFromDataSheet(name: string): string | string[] | undefined {
+        const datasheet = this.item();
+        const result = datasheet.items.find(element => element.idShort === name);
+        if (!result) return '-1';
+        return result.value;
+    }
+
+    public getFilenameExplanation(): string | string[] | undefined {
+        const datasheet = this.item();
+        const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
+        if (!result || !result.value) return '';
+        return result.value;
+    }
+
+    public openFile(): void {
+        const datasheet = this.item();
+        const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
+        if (!result || !result.url) return;
+
+        window.open(result.url, '_blank');
+    }
+
+    public toggleDetailView(): void {
+        this.showDetails = !this.showDetails;
     }
 }

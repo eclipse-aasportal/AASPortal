@@ -15,7 +15,6 @@ import {
     getLocaleValue,
     getPreferredName,
     AASDocument,
-    getIdShortPath,
     isSubmodelElementCollection,
     getReferable,
     isProperty,
@@ -28,9 +27,19 @@ import {
     getChildren,
     getSemanticId,
     isErrorData,
+    isSubmodel,
+    isEnvironment,
 } from 'aas-core';
 
-import { DataSheetData, DataSheetItem, DataSheetItemOptions, DataSheetOptions } from './types';
+import {
+    DataSheetData,
+    DataSheetItem,
+    DataSheetItemOptions,
+    DataSheetOptions,
+    ViewRoute,
+    ViewRouteMap,
+    ViewRouteResult,
+} from './types';
 
 /**
  * Converts a message to a localized text.
@@ -91,8 +100,11 @@ export function extension(path: string): string | undefined {
  * @param s The string to encode.
  * @returns The encoded string.
  */
-export function encodeBase64Url(s: string): string {
-    return window.btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+export function encodeBase64Url(str: string): string {
+    const utf8Bytes = new TextEncoder().encode(str);
+    let binary = '';
+    utf8Bytes.forEach(b => (binary += String.fromCharCode(b)));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /**
@@ -100,14 +112,15 @@ export function encodeBase64Url(s: string): string {
  * @param s The encoded string.
  * @returns The decoded string.
  */
-export function decodeBase64Url(s: string): string {
-    let data = s.replace(/-/g, '+').replace(/_/g, '/');
-    const padding = s.length % 4;
-    if (padding > 0) {
-        data = (data + '===').slice(0, s.length + 4 - padding);
+export function decodeBase64Url(str: string): string {
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (str.length % 4) {
+        str += '=';
     }
 
-    return window.atob(data);
+    const binary = atob(str);
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
 }
 
 /**
@@ -127,7 +140,7 @@ export function isBase64(s: string): boolean {
 export function convertBlobToBase64Async(blob: Blob): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = (): void => {
             const base64WithDataUrlPrefix = reader.result as string;
             const index = base64WithDataUrlPrefix.indexOf(';base64,');
             const base64 = base64WithDataUrlPrefix.substring(index + 8);
@@ -188,18 +201,24 @@ export function hashCode(value: string): number {
 }
 
 /**
+ * Converts an `aas.Reference` object to its string representation by joining the values
+ * of its keys with a dot separator.
  *
- * @param value
- * @returns
+ * @param value - The `aas.Reference` object to convert.
+ * @returns The string representation of the reference, with key values joined by dots.
  */
 export function referenceToString(value: aas.Reference): string {
     return value.keys.map(key => key.value).join('.');
 }
 
 /**
+ * Type guard to check if a given value is an array of `aas.LangString` objects.
  *
- * @param value
- * @returns
+ * This function verifies that the input is a non-empty array and that the first element
+ * has both `language` and `text` properties of type `string`.
+ *
+ * @param value - The value to check.
+ * @returns `true` if the value is an array of `aas.LangString`, otherwise `false`.
  */
 export function isLangString(value: unknown): value is aas.LangString[] {
     if (!Array.isArray(value) || value.length === 0) {
@@ -217,17 +236,12 @@ export function isLangString(value: unknown): value is aas.LangString[] {
  * @returns The URL to the content of the specified file.
  */
 export function getUrl(document: AASDocument, file: aas.File | undefined): string | undefined {
-    if (file === undefined || file.value === undefined) {
+    if (file === undefined || file.value === undefined || !file.path) {
         return undefined;
     }
 
-    let smId = file.parent?.keys.at(0)?.value;
-    if (!smId) {
-        return undefined;
-    }
-
-    smId = encodeBase64Url(smId);
-    const path = getIdShortPath(file);
+    const smId = encodeBase64Url(file.path.id);
+    const path = file.path.idShortPath;
     const name = encodeBase64Url(document.endpoint);
     const id = encodeBase64Url(document.id);
     return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
@@ -641,4 +655,143 @@ export function findSubmodel(document: AASDocument, semanticIds: string[]): aas.
 
         return semanticIds.indexOf(semanticId) >= 0;
     });
+}
+
+/**
+ * Returns the route that corresponds to the specified Submodel.
+ * @param viewRoutes The available view routes.
+ * @param submodel The current Submodel.
+ * @param defaultRoute Indicates to return the default route.
+ * @returns The route or `undefined`.
+ */
+export function findRouteForSubmodel(
+    viewRoutes: ViewRoute[],
+    submodel: aas.Submodel,
+    defaultRoute = true,
+): ViewRoute | undefined {
+    const semanticId = getSemanticId(submodel);
+    for (const route of viewRoutes) {
+        if (route.data.type !== 'Leaf') {
+            continue;
+        }
+
+        if (semanticId && route.data.semanticIds) {
+            if (route.data.semanticIds.indexOf(semanticId) >= 0) {
+                return route;
+            }
+        }
+
+        if (route.data.idShorts) {
+            for (const idShort of route.data.idShorts) {
+                if (submodel.idShort === idShort) {
+                    return route;
+                }
+            }
+        }
+    }
+
+    return defaultRoute ? viewRoutes.find(item => item.data.type === 'Default') : undefined;
+}
+
+/**
+ * Returns the route that corresponds to the specified AAS document or AAS environment.
+ * @param viewRoutes The available view routes.
+ * @param arg The current AAS document or AAS environment.
+ * @param defaultRoute Indicates to return the default route.
+ * @returns The route or `undefined`.
+ */
+export function findRouteForShell(
+    viewRoutes: ViewRoute[],
+    arg: AASDocument | aas.Environment,
+    defaultRoute = true,
+): ViewRouteResult {
+    const env = isEnvironment(arg) ? arg : arg.content;
+    if (!env) {
+        return {};
+    }
+
+    const { route, map } = findCompositionRoute(env);
+    if (route) {
+        return { route, map };
+    }
+
+    return defaultRoute ? { route: viewRoutes.find(item => item.data.type === 'Default') } : {};
+
+    function findCompositionRoute(env: aas.Environment): ViewRouteResult {
+        const leafRoutes = new Map<string, ViewRoute>(
+            viewRoutes.filter(route => route.data.type === 'Leaf').map(route => [route.path!, route]),
+        );
+
+        const submodelSemanticIds = new Map<string, aas.Submodel>();
+        for (const submodel of env.submodels) {
+            const semanticId = getSemanticId(submodel);
+            if (semanticId) {
+                submodelSemanticIds.set(semanticId, submodel);
+            }
+        }
+
+        const map: ViewRouteMap = {};
+        for (const route of viewRoutes) {
+            if (route.data.type !== 'Composition') {
+                continue;
+            }
+
+            for (const path of route.data.routes) {
+                const leafRoute = leafRoutes.get(path);
+                if (!leafRoute) {
+                    return {};
+                }
+
+                if (leafRoute.data.type !== 'Leaf') {
+                    continue;
+                }
+
+                const data = leafRoute.data;
+                if (data.semanticIds && data.semanticIds.length) {
+                    const semanticId = data.semanticIds.find(id => submodelSemanticIds.has(id));
+                    if (!semanticId) {
+                        return {};
+                    }
+
+                    map[leafRoute.path!] = submodelSemanticIds.get(semanticId)!;
+                }
+
+                if (data.idShorts) {
+                    let submodel: aas.Submodel | undefined;
+                    for (const idShort of data.idShorts) {
+                        const submodel = env.submodels.find(submodel => submodel.idShort === idShort);
+
+                        if (submodel) {
+                            break;
+                        }
+                    }
+
+                    if (!submodel) {
+                        return {};
+                    }
+
+                    map[leafRoute.path!] = submodel;
+                }
+            }
+
+            return { route, map };
+        }
+
+        return {};
+    }
+}
+
+/**
+ * Determine whether the specified Submodel, AAS document or AAS environment has a specific view.
+ * @param viewRoutes The available view routes.
+ * @param arg The current Submodel, AAS document or AAS environment.
+ * @returns `true` if a specific view exists; otherwise; `false`.
+ */
+export function hasSpecificView(viewRoutes: ViewRoute[], arg: aas.Submodel | AASDocument | aas.Environment): boolean {
+    if (isSubmodel(arg)) {
+        return findRouteForSubmodel(viewRoutes, arg, false) !== undefined;
+    }
+
+    const { route } = findRouteForShell(viewRoutes, arg, false);
+    return route !== undefined;
 }

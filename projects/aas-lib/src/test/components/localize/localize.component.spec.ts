@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -16,8 +16,8 @@ import { WINDOW, WindowService } from '../../../lib/services/window.service';
 import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('LocalizeComponent', () => {
-    let window: jest.Mocked<WindowService>;
-    let localStorage: jest.Mocked<Storage>;
+    let window: Mocked<WindowService>;
+    let localStorage: Mocked<Storage>;
 
     beforeEach(async () => {
         localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);

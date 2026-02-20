@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import { OrExpression, QueryParser } from '../lib/query-parser.js';
 
 describe('QueryParser', () => {

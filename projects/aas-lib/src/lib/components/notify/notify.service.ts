@@ -44,7 +44,7 @@ export class NotifyService {
         this._messages.update(values => [
             ...values,
             {
-                header: this.translate.instant('CAPTION_ERROR'),
+                header: this.translate.instant('Notify.CAPTION_ERROR'),
                 text,
                 classname: 'bg-danger',
                 autohide: false,
@@ -65,7 +65,7 @@ export class NotifyService {
         this._messages.update(values => [
             ...values,
             {
-                header: this.translate.instant('CAPTION_INFO'),
+                header: this.translate.instant('Notify.CAPTION_INFO'),
                 text: this.translate.instant(message, args),
                 classname: 'bg-info',
                 autohide: true,
@@ -78,7 +78,7 @@ export class NotifyService {
      * Removes the specified message.
      * @param message The message to remove.
      */
-    public remove(message: MessageEntry) {
+    public remove(message: MessageEntry): void {
         this._messages.update(values => values.filter(value => value !== message));
     }
 

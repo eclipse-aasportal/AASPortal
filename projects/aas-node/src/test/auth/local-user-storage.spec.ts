@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, afterEach, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, afterEach, beforeEach, it, expect, vitest } from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path/posix';
@@ -15,7 +15,7 @@ import { Cookie } from 'aas-core';
 import { UserStorage } from '../../app/auth/user-storage.js';
 import { LocalUserStorage } from '../../app/auth/local-user-storage.js';
 import { UserData } from '../../app/auth/user-data.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../mocks.js';
 import { Logger } from '../../app/logging/logger.js';
 import { slash } from '../../app/utilities.js';
 
@@ -39,26 +39,26 @@ describe('LocaleUserStorage', function () {
         });
 
         afterEach(() => {
-            jest.restoreAllMocks();
+            vitest.restoreAllMocks();
         });
 
         describe('existsSync', function () {
             it('indicates that john.doe@email.com exists', async () => {
-                jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
+                vitest.spyOn(fs, 'existsSync').mockImplementation(() => true);
                 await expect(userStorage.exist('john.doe@email.com')).resolves.toBe(true);
             });
 
             it('indicates that unknown@email.com does not exist', async () => {
-                jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
+                vitest.spyOn(fs, 'existsSync').mockImplementation(() => false);
                 await expect(userStorage.exist('unknown@email.com')).resolves.toBe(false);
             });
         });
 
         describe('writeAsync', function () {
             it('writes a new user', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-                jest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
-                jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(false);
+                vitest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
+                vitest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
                 await userStorage.write('jane.doe@email.com', {
                     id: 'jane.doe@email.com',
                     name: 'Jane Doe',
@@ -75,27 +75,27 @@ describe('LocaleUserStorage', function () {
 
         describe('readAsync', function () {
             it('reads the data of john.doe@email.com', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(JSON.stringify(johnDoe)));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(JSON.stringify(johnDoe)));
                 await expect(userStorage.read('john.doe@email.com')).resolves.toEqual(johnDoe);
             });
 
             it('reads "undefined" for an unknown user', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(false);
                 await expect(userStorage.read('unknown@email.com')).resolves.toBeUndefined();
             });
         });
 
         describe('deleteAsync', function () {
             it('john.doe@email.com', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'rm').mockImplementation(() => new Promise<void>(resolve => resolve()));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'rm').mockImplementation(() => new Promise<void>(resolve => resolve()));
                 await expect(userStorage.delete('john.doe@email.com')).resolves.toBe(true);
                 expect(fs.promises.rm).toHaveBeenCalled();
             });
 
             it('indicates that an unknown user was not deleted', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(false);
                 await expect(userStorage.delete('unknown@email.com')).resolves.toBe(false);
             });
         });
@@ -106,7 +106,7 @@ describe('LocaleUserStorage', function () {
         let usersDir: string;
 
         afterEach(() => {
-            jest.restoreAllMocks();
+            vitest.restoreAllMocks();
         });
 
         beforeEach(async () => {
@@ -129,27 +129,27 @@ describe('LocaleUserStorage', function () {
 
         describe('checkCookieAsync', () => {
             it('indicates that "Cookie1" for john.doe@email.com exist', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
                 await expect(userStorage.checkCookie('john.doe@email.com', 'Cookie1')).resolves.toBe(true);
             });
 
             it('indicates that "unknown" for john.doe@email.com not exist', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
                 await expect(userStorage.checkCookie('john.doe@email.com', 'unknown')).resolves.toBe(false);
             });
 
             it('indicates that "Cookie1" for jane.doe@email.com not exist', async () => {
-                jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
+                vitest.spyOn(fs, 'existsSync').mockImplementation(() => false);
                 await expect(userStorage.checkCookie('jane.doe@email.com', 'Cookie1')).resolves.toBe(false);
             });
         });
 
         describe('getCookieAsync', () => {
             beforeEach(() => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
             });
 
             it('returns the value of "Cookie1" for john.doe@email.com', async () => {
@@ -170,8 +170,8 @@ describe('LocaleUserStorage', function () {
 
         describe('getCookiesAsync', () => {
             beforeEach(() => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
             });
 
             it('returns all cookies for john.doe@email.com', async () => {
@@ -190,12 +190,12 @@ describe('LocaleUserStorage', function () {
 
         describe('setCookieAsync', () => {
             beforeEach(() => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
             });
 
             it('can set a new Cookie3 for john.doe@email.com', async () => {
-                jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+                vitest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
                 await userStorage.setCookie('john.doe@email.com', 'Cookie3', 'Hello World!');
                 expect(fs.promises.writeFile).toHaveBeenCalledWith(
                     path.join(usersDir, 'john.doe@email.com', 'cookies.json'),
@@ -217,7 +217,7 @@ describe('LocaleUserStorage', function () {
             });
 
             it('can update the existing Cookie2 for john.doe@email.com', async () => {
-                jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+                vitest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
                 await userStorage.setCookie('john.doe@email.com', 'Cookie2', 'Hello World!');
                 expect(fs.promises.writeFile).toHaveBeenCalledWith(
                     path.join(usersDir, 'john.doe@email.com', 'cookies.json'),
@@ -237,9 +237,9 @@ describe('LocaleUserStorage', function () {
 
         describe('deleteAsync', () => {
             it('can delete a cookie', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
-                jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(Buffer.from(cookies));
+                vitest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
                 await userStorage.deleteCookie('john.doe@email.com', 'Cookie1');
                 expect(fs.promises.writeFile).toHaveBeenCalledWith(
                     path.join(usersDir, 'john.doe@email.com', 'cookies.json'),
@@ -253,8 +253,8 @@ describe('LocaleUserStorage', function () {
             });
 
             it('removes the cookies file on empty cookies', async () => {
-                jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-                jest.spyOn(fs.promises, 'readFile').mockResolvedValue(
+                vitest.spyOn(fs, 'existsSync').mockReturnValue(true);
+                vitest.spyOn(fs.promises, 'readFile').mockResolvedValue(
                     Buffer.from(
                         JSON.stringify([
                             {
@@ -265,7 +265,7 @@ describe('LocaleUserStorage', function () {
                     ),
                 );
 
-                jest.spyOn(fs.promises, 'unlink').mockResolvedValue();
+                vitest.spyOn(fs.promises, 'unlink').mockResolvedValue();
                 await userStorage.deleteCookie('john.doe@email.com', 'Cookie2');
                 expect(fs.promises.unlink).toHaveBeenCalled();
             });

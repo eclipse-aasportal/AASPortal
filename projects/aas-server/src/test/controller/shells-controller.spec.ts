@@ -7,46 +7,49 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import os from 'os';
 import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import multer from 'multer';
-import { resolve } from 'path';
 import fs from 'fs';
-import { aas, jsonization, toJsonValue } from 'aas-core';
+import { fileURLToPath } from 'url';
+import { aas } from 'aas-core';
+import { FileResult } from 'aas-package';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
-import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { ShellRepository } from '../../app/shell-repository.js';
+import { createSpyObj } from '../mocks.js';
 
 describe('ShellsController', () => {
     let app: Express;
     let logger: Logger;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
-    let repository: jest.Mocked<ShellRepository>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
+    let repository: Mocked<ShellRepository>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
         repository = createSpyObj<ShellRepository>([
-            'getShells',
-            'getShell',
-            'getAssetInformation',
-            'getThumbnail',
-            'updateThumbnail',
+            'addShell',
             'deleteThumbnail',
+            'getAssetInformation',
+            'getFileByPath',
+            'getShell',
+            'getShells',
             'getSubmodel',
             'getSubmodelElement',
-            'addShell',
+            'getThumbnail',
+            'updateShell',
+            'updateThumbnail',
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
@@ -107,7 +110,7 @@ describe('ShellsController', () => {
     });
 
     it('GET: /shells/{id}/asset-information/thumbnail', async () => {
-        const file = resolve('./src/test/assets/MotorI40.JPG');
+        const file = fileURLToPath(new URL('../assets/MotorI40.JPG', import.meta.url));
         repository.getThumbnail.mockResolvedValue({
             filename: 'MotorI40.JPG',
             value: 'MotorI40.JPG',
@@ -125,7 +128,7 @@ describe('ShellsController', () => {
     });
 
     it('PUT: /shells/{id}/asset-information/thumbnail', async () => {
-        const file = resolve('./src/test/assets/thumbnail.png');
+        const file = fileURLToPath(new URL('../assets/thumbnail.png', import.meta.url));
         repository.updateThumbnail.mockResolvedValue();
         const response = await request(app)
             .put('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw/asset-information/thumbnail')
@@ -171,7 +174,7 @@ describe('ShellsController', () => {
         expect(response.body).toEqual(sm);
     });
 
-    it('GET: /shells/{aasId}/submodels/{smId}/submodel-elements/{idShortPath}', async () => {
+    it('GET: /shells/{id}/submodels/{smId}/submodel-elements/{idShortPath}', async () => {
         const property: aas.Property = {
             valueType: 'xs:string',
             idShort: 'name',
@@ -179,11 +182,11 @@ describe('ShellsController', () => {
         };
 
         repository.getSubmodelElement.mockResolvedValue(property);
-        const aasId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw';
+        const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw';
         const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.Property';
         const response = await request(app)
-            .get(`/api/v3/shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}?level=core`)
+            .get(`/api/v3/shells/${id}/submodels/${smId}/submodel-elements/${idShortPath}?level=core`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
@@ -207,8 +210,7 @@ describe('ShellsController', () => {
             submodels: [],
         };
 
-        const coreAAS = jsonization.assetAdministrationShellFromJsonable(toJsonValue(aas)).mustValue();
-        repository.addShell.mockResolvedValue(coreAAS);
+        repository.addShell.mockResolvedValue(aas);
         const response = await request(app)
             .post('/api/v3/shells')
             .set('Authorization', `Bearer ${getToken()}`)
@@ -216,5 +218,50 @@ describe('ShellsController', () => {
 
         expect(response.statusCode).toBe(201);
         expect(repository.addShell).toHaveBeenCalled();
+    });
+
+    it('PUT: /shells', async () => {
+        const aas: aas.AssetAdministrationShell = {
+            assetInformation: {
+                assetKind: 'Instance',
+            },
+            id: 'http://www.fraunhofer.de/sm/test-aas',
+            idShort: 'TestAAS',
+            modelType: 'AssetAdministrationShell',
+            submodels: [],
+        };
+
+        repository.updateShell.mockResolvedValue(aas);
+        const response = await request(app)
+            .put('/api/v3/shells')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .send(aas);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.updateShell).toHaveBeenCalled();
+    });
+
+    it('GET: /shells/{id}/submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
+        const file = fileURLToPath(new URL('../assets/Test.pdf', import.meta.url));
+        const fileResult: FileResult = {
+            filename: 'Test.pdf',
+            value: 'Test.pdf',
+            readable: fs.createReadStream(file),
+        };
+
+        repository.getFileByPath.mockResolvedValue(fileResult);
+        const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw';
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.File';
+        const response = await request(app)
+            .get(`/api/v3/shells/${id}/submodels/${smId}/submodel-elements/${idShortPath}/attachment`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getFileByPath).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/aas/test-aas',
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.File',
+        );
     });
 });

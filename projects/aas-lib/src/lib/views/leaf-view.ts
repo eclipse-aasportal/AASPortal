@@ -6,45 +6,35 @@
  *
  *****************************************************************************/
 
-import { computed, Signal } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { Component, computed } from '@angular/core';
+import { Params } from '@angular/router';
 import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
 
 import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
-import { EndpointsApi } from '../services/endpoints-api';
-import { ViewRoute, ViewRouteName } from '../types';
 import { View } from './view';
-import { LeafViewData, LeafViewState } from './leaf-view-state';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-/**
- * Represents a specific view for a submodel.
- */
-export abstract class LeafView<TState extends LeafViewState<LeafViewData>> extends View {
+@Component({ selector: 'awp-leaf-view', template: '' })
+export abstract class LeafView extends View {
     private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 
-    protected constructor(
-        route: ActivatedRoute,
-        api: EndpointsApi,
-        viewRoutes: ViewRoute[],
-        viewRouteName: ViewRouteName,
-        protected readonly state: TState,
-    ) {
-        super(route, api, viewRoutes, viewRouteName);
-
-        this.tuples = this.state.tuples;
-    }
-
-    /** The current active AAS document. */
+    /**
+     * The current active AAS document.
+     */
     public override readonly document = computed(() => {
         const item = this.tuple();
         return item ? item[0] : undefined;
     });
 
-    /** The number of available AAS documents. */
+    /**
+     * The number of available AAS documents.
+     */
     public override readonly count = computed(() => this.tuples().length);
 
-    /** The version of the current active submodel. */
+    /**
+     * The version of the current active submodel.
+     */
     public override readonly version = computed(() => {
         const item = this.tuple();
         if (!item) {
@@ -65,49 +55,57 @@ export abstract class LeafView<TState extends LeafViewState<LeafViewData>> exten
         return undefined;
     });
 
-    /** The current active submodel. */
+    /**
+     * The current active submodel.
+     */
     public readonly submodel = computed(() => {
         const item = this.tuple();
         return item ? item[1] : undefined;
     });
 
-    /** The submodels and the corresponding AAS documents. */
-    protected readonly tuples: Signal<[AASDocument, aas.Submodel][]>;
+    /**
+     * A reactive signal containing an array of filtered document tuples.
+     *
+     * This signal is derived from the current route parameters and is populated as follows:
+     * - If the route contains an `id`, it fetches a single document using the decoded `id` and optional `endpoint`.
+     * - If the route contains `docs`, it parses the decoded JSON array of `[endpoint, id]` pairs and fetches each document.
+     * - If neither is present, it resolves to an empty array.
+     *
+     * The resulting documents are filtered using the `filter` method before being emitted.
+     * The signal is initialized with an empty array.
+     */
+    protected readonly tuples = toSignal(
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())]).pipe(
+            map(([routeParams, queryParams]) => {
+                return routeParams.id || routeParams.docs ? routeParams : queryParams;
+            }),
+            mergeMap(params => {
+                return this.documentsFromParams(params);
+            }),
+            map(documents => {
+                return [...this.filter(documents)];
+            }),
+        ),
+        { initialValue: [] },
+    );
 
-    /** Initializes the current view. */
-    protected onInit(): void {
-        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
-            .pipe(
-                map(([routeParams, queryParams]) => {
-                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
-                }),
-                mergeMap(params => this.documentsFromParams(params)),
-                first(),
-            )
-            .subscribe(documents => {
-                if (!documents) {
-                    return;
-                }
-
-                this.state.update({ tuples: [...this.filter(documents)] });
-            });
-    }
-
-    private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
+    private documentsFromParams(params: Params): Observable<AASDocument[]> {
         if (params?.id) {
             const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-            return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+            return this.api
+                .getDocument('AssetAdministrationShell', decodeBase64Url(params.id), endpoint)
+                .pipe(toArray());
         }
 
         if (params?.docs) {
             const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
             return from(docs).pipe(
-                mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                mergeMap(([endpoint, id]) => this.api.getDocument('AssetAdministrationShell', id, endpoint)),
                 toArray(),
             );
         }
 
-        return of(undefined);
+        return of([]);
     }
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {

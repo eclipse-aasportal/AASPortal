@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -66,8 +66,8 @@ describe('RegisterFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         const result: RegisterFormResult = { stayLoggedIn: true, token: token };
-        jest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
-        jest.spyOn(api, 'register').mockReturnValue(of({ token }));
+        vitest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
+        vitest.spyOn(api, 'register').mockReturnValue(of({ token }));
 
         component.userId.set('john.doe@email.com');
         component.name.set('John Doe');

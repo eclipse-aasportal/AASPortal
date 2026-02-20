@@ -21,7 +21,6 @@ import { Variable } from './variable.js';
 import { LOGGER, Logger } from './logging/logger.js';
 import { RegisterRoutes } from './routes/routes.js';
 import { errorHandler } from './error-handler.js';
-import axios from 'axios';
 import { generateCodeChallenge, generateRandomString } from './utilities.js';
 
 const shutdownTime = 15000;
@@ -119,25 +118,28 @@ export class App {
 
             this.verifiers.delete(state);
 
-            // Exchange the authorization code for tokens
-            const tokenResponse = await axios.post(
-                this.variable.KEYCLOAK_TOKEN_URL,
-                new URLSearchParams({
+            // Exchange the authorization code for tokens using fetch
+            const response = await fetch(this.variable.KEYCLOAK_TOKEN_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
                     grant_type: 'authorization_code',
                     code: code,
                     redirect_uri: this.variable.REDIRECT_URI,
                     client_id: this.variable.CLIENT_ID,
                     code_verifier: code_verifier,
                 }),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                },
-            );
+            });
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { access_token, id_token, refresh_token } = tokenResponse.data;
+            if (!response.ok) {
+                res.status(500).send('Failed to exchange authorization code for tokens');
+                return;
+            }
+
+            const data = (await response.json()) as Record<string, unknown>;
+            const { access_token, id_token } = data;
 
             // Store tokens in cookies or session
             res.cookie('access_token', access_token, { httpOnly: true, secure: true });
@@ -158,11 +160,11 @@ export class App {
         this.app.use(this.notFoundHandler);
     }
 
-    private getIndex = (req: Request, res: Response) => {
+    private getIndex = (req: Request, res: Response): void => {
         res.sendFile(this.variable.WEB_ROOT + '/index.html');
     };
 
-    private notFoundHandler = (_req: Request, res: Response) => {
+    private notFoundHandler = (_req: Request, res: Response): void => {
         res.status(404).send({
             message: 'Not Found',
         });

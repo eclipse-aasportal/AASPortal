@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, expect, it } from '@jest/globals';
+import { describe, beforeEach, expect, it } from 'vitest';
+import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
-import { resolve } from 'path/posix';
 import { aas, isMultiLanguageProperty } from 'aas-core';
 import { XmlReaderV3 } from '../../lib/reader/xml-reader-v3.js';
 
@@ -20,7 +20,7 @@ describe('XmlReaderV3', () => {
     describe('v3.0', () => {
         describe('read Operation', () => {
             beforeEach(async () => {
-                path = resolve('./src/test/assets/xml/v3/0/operation.xml');
+                path = fileURLToPath(new URL('../assets/xml/v3/0/operation.xml', import.meta.url));
                 xml = (await readFile(path)).toString();
                 reader = new XmlReaderV3(xml);
             });
@@ -39,7 +39,7 @@ describe('XmlReaderV3', () => {
     describe('v3.1', () => {
         describe('read MultiLanguageProperty', () => {
             beforeEach(async () => {
-                path = resolve('./src/test/assets/xml/v3/1/multi-language-property.xml');
+                path = fileURLToPath(new URL('../assets/xml/v3/1/multi-language-property.xml', import.meta.url));
                 xml = (await readFile(path)).toString();
                 reader = new XmlReaderV3(xml);
             });
