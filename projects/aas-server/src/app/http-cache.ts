@@ -7,10 +7,9 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { aas, PagedResult } from 'aas-core';
+import { aas, Cache, PackageDescription, PagedResult } from 'aas-core';
 
-import { Cache } from './cache.js';
-import { ExtentModifier, LevelModifier, PackageDescription } from './types.js';
+import { ExtentModifier, LevelModifier } from './types.js';
 import { Variable } from './variable.js';
 
 export type CacheValue = aas.Referable | PagedResult<aas.Referable | PackageDescription>;

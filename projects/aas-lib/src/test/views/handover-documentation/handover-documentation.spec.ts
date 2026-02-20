@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -38,7 +38,7 @@ describe('HandoverDocumentation', () => {
         state = {
             items: signal([]).asReadonly(),
             document: signal(null).asReadonly(),
-            update: jest.fn(),
+            update: vitest.fn(),
         };
 
         await TestBed.configureTestingModule({

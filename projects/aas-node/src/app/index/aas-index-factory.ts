@@ -8,16 +8,13 @@
 
 import { DependencyContainer } from 'tsyringe';
 import path from 'path/posix';
-import { JSONFile } from 'lowdb/node';
-import { Low } from 'lowdb';
 import { AASIndex } from './aas-index.js';
-import { LowDbIndex } from './lowdb/lowdb-index.js';
 import { Variable } from '../variable.js';
-import { LowDbData } from './lowdb/lowdb-types.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
 import { LOGGER, Logger } from '../logging/logger.js';
 import { urlToString } from '../utilities.js';
 import { KeywordDirectory } from './keyword-directory.js';
+import { SqliteIndex } from './sqlite/sqlite-index.js';
 
 export class AASIndexFactory {
     public constructor(private readonly container: DependencyContainer) {}
@@ -39,8 +36,7 @@ export class AASIndexFactory {
             }
         }
 
-        const dbFile = path.join(variable.CONTENT_ROOT, 'db.json');
-        const db = new Low<LowDbData>(new JSONFile(dbFile), { documents: [], endpoints: [], elements: [] });
-        return new LowDbIndex(logger, variable, db, keywordDirectory);
+        const dbFile = path.join(variable.CONTENT_ROOT, 'aas-index.db');
+        return new SqliteIndex(logger, keywordDirectory, dbFile);
     }
 }

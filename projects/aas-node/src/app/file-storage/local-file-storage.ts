@@ -38,7 +38,7 @@ export class LocalFileStorage extends FileStorage {
     public override async readDir(path: string): Promise<FileStorageEntry[]> {
         return (await fs.promises.readdir(this.resolve(path), { withFileTypes: true })).map(entry => ({
             name: entry.name,
-            path: sep + relative(this.root, entry.path),
+            path: sep + relative(this.root, entry.parentPath),
             type: entry.isDirectory() ? 'directory' : 'file',
         }));
     }

@@ -6,94 +6,133 @@
  *
  *****************************************************************************/
 
-import { NgClass, NgStyle } from '@angular/common';
-import { Route, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Route, RouterLinkWithHref } from '@angular/router';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import {
     ChangeDetectionStrategy,
     Component,
-    OnDestroy,
-    computed,
     effect,
-    input,
-    output,
-    DOCUMENT,
-    untracked,
     inject,
+    input,
+    model,
+    signal,
+    untracked,
+    WritableSignal,
 } from '@angular/core';
 
 import {
     aas,
-    LiveNode,
-    LiveRequest,
-    WebSocketData,
     AASDocument,
     convertToString,
-    selectSubmodel,
-    getIdShortPath,
-    isFile,
-    isBlob,
-    isReferenceElement,
-    isOperation,
-    isSubmodel,
+    extensionToMimeType,
+    getAbbreviation,
+    getChildren,
+    getLocaleValue,
+    getSemanticId,
+    isAnnotatedRelationshipElement,
     isAssetAdministrationShell,
+    isBlob,
+    isEntity,
+    isFile,
+    isMultiLanguageProperty,
+    isOperation,
+    isProperty,
+    isRange,
+    isReferenceElement,
+    isSubmodel,
+    isSubmodelElementCollection,
+    isSubmodelElementList,
+    LiveNode,
+    LiveRequest,
+    noop,
+    normalize,
+    toDisplayValue,
+    WebSocketData,
 } from 'aas-core';
 
-import { AASTree, AASTreeNode, getValue } from './aas-tree-node';
-import { LiveState } from '../../types';
 import { AASTreeSearch } from './aas-tree-search';
-import { encodeBase64Url } from '../../utilities';
-import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
-import { LogType, NotifyService } from '../notify/notify.service';
-import { findRouteForShell, findRouteForSubmodel } from '../../views/views-routes';
-
 import { AASTreeApi } from './aas-tree-api';
-import { WINDOW } from '../../services/window.service';
-import { FormsModule } from '@angular/forms';
-import { AASTreeData, AASTreeState } from './aas-tree.state';
-import { ChildComponent } from '../child-component';
+import { LiveState } from '../../types';
+import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } from '../../utilities';
+import { VIEW_ROUTES } from '../../views/views-routes';
+import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
+import { NotifyService } from '../notify/notify.service';
+import { MaxLengthPipe } from '../../pipes/max-length.pipe';
+import {
+    Tree,
+    TreeComponent,
+    TreeData,
+    TreeNode,
+    TreeResult,
+    TreeSymbolType,
+    TreeType,
+    TreeValueType,
+} from '../tree/tree.component';
+
+export type AASNodeOptions = {
+    index: number;
+};
+
+export type AASNode = TreeNode<aas.Referable, AASNodeOptions>;
+
+export type AASTree = Tree<aas.Referable, AASNodeOptions>;
+
+export type AASTreeResult = TreeResult<aas.Referable, AASNodeOptions>;
+
+export type AASTreeData = {
+    document: AASDocument | null;
+} & TreeData<aas.Referable, AASNodeOptions>;
+
+const initialState: AASTreeData = {
+    document: null,
+    matchIndex: -1,
+    selectionDisabled: false,
+    tree: [],
+};
 
 /**
  * Presents the contents of an Asset Administration Shell as a tree.
  */
 @Component({
     selector: 'fhg-aas-tree',
-    templateUrl: './aas-tree.component.html',
-    styleUrls: ['./aas-tree.component.scss'],
-    imports: [FormsModule, RouterLink, NgClass, NgStyle],
-    providers: [AASTreeSearch, AASTreeApi, AASTreeState],
+    imports: [FormsModule, RouterLinkWithHref, MaxLengthPipe],
+    templateUrl: '../tree/tree.component.html',
+    styleUrl: '../tree/tree.component.scss',
+    providers: [AASTreeSearch, AASTreeApi],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> implements OnDestroy {
-    private readonly liveNodes: LiveNode[] = [];
-    private readonly map = new Map<string, AASTreeNode>();
+export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOptions> {
     private readonly search = inject(AASTreeSearch);
-    private readonly window = inject(WINDOW);
-    private readonly dom = inject(DOCUMENT);
+    private readonly viewRoutes = inject(VIEW_ROUTES);
     private readonly notify = inject(NotifyService);
+    private readonly document$ = signal(initialState.document);
     private readonly webSocketFactory = inject(WebSocketFactoryService);
-    private shiftKey = false;
-    private altKey = false;
+    private readonly map = new Map<string, TreeNode>();
+    private readonly liveNodes: LiveNode[] = [];
     private webSocketSubject?: WebSocketSubject<WebSocketData>;
 
     public constructor() {
         super();
 
         effect(() => {
-            this.search.start(untracked(this.state().contents), this.searchExpression());
-        });
-
-        effect(() => {
             const document = this.document();
-            const value = untracked(this.state().document);
-            if (value === null || document?.endpoint !== value.endpoint || document?.id !== value.id) {
-                this.update(document);
+            const env = document?.content;
+            const shell = env?.assetAdministrationShells.at(0);
+            if (!document || !env || !shell) {
+                this.update({ tree: [], document: null });
+                return;
             }
+
+            const tree = this.createTree(env, shell);
+            this.update({ tree });
         });
 
         effect(() => {
-            const currentLang = this.currentLang();
-            untracked(this.state().contents).forEach(node => node.value.set(getValue(node.element, currentLang)));
+            const matchIndex = this.search.matchIndex();
+            if (!untracked(this.selectionDisabled)) {
+                this.update({ matchIndex });
+            }
         });
 
         effect(() => {
@@ -103,211 +142,67 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
                 this.goOffline();
             }
         });
-
-        effect(() => {
-            const contents = this.state().contents();
-            this.selected.emit(contents.filter(node => node.selected).map(item => item.element));
-        });
-
-        effect(() => {
-            const matchIndex = this.search.matchIndex();
-            this.highlightNode(matchIndex);
-        });
-
-        effect(() => {
-            const row = this.matchNode();
-            if (!row) {
-                return;
-            }
-
-            setTimeout(() => {
-                const element = this.dom.getElementById(row.id);
-                element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            });
-        });
-
-        this.window.addEventListener('keyup', this.keyup);
-        this.window.addEventListener('keydown', this.keydown);
     }
 
-    /** The state management service. */
-    public override readonly state = input.required<AASTreeState>();
-
-    /** The AAS document. */
+    /**
+     * The current AAS document.
+     */
     public readonly document = input<AASDocument | null>(null);
 
-    /** The current live status. */
-    public readonly live = input<LiveState>('offline');
+    /**
+     * The current live status.
+     */
+    public readonly live = model<LiveState>('offline');
 
-    /** The current search expression. */
-    public readonly searchExpression = input<string>('');
+    /**
+     * Finds and navigates to the next search result in the tree.
+     * Delegates to the underlying search service to advance to the next match.
+     */
+    public findNext(): void {
+        this.search.findNext();
+    }
 
-    /** The selected AAS structure elements. */
-    public readonly selected = output<aas.Referable[]>();
+    /**
+     * Finds the previous search result in the tree.
+     * Delegates to the underlying search service to navigate to the previous matching item.
+     */
+    public findPrevious(): void {
+        this.search.findPrevious();
+    }
 
-    /** Indicates whether the current AAS can provide live data. */
-    public readonly onlineReady = computed(() => this.document()?.onlineReady ?? false);
-
-    /** Indicates whether the current AAS can be edited. */
-    public readonly readonly = computed(() => this.document()?.readonly ?? true);
-
-    /** Indicates whether the AAS is modified. */
-    public readonly modified = computed(() => this.document()?.modified ?? false);
-
-    /** Indicates whether at least one node is selected, but not all nodes. */
-    public readonly someSelected = computed(() => {
-        const contents = this.state().contents();
-        return contents.length > 0 && contents.some(node => node.selected) && !contents.every(row => row.selected);
-    });
-
-    /** Indicates whether all nodes are selected. */
-    public readonly everySelected = computed(() => {
-        const contents = this.state().contents();
-        return contents.length > 0 && contents.every(node => node.selected);
-    });
-
-    /** The visible nodes of the tree. */
-    public readonly nodes = computed(() => this.state().nodes());
-
-    /** Indicates whether the tree is fully expanded. */
-    public readonly expanded = computed(() => this.state().expanded());
-
-    /** The index of the current node that matches a search expression. */
-    public readonly matchIndex = this.search.matchIndex;
-
-    /** The current node that matches a search expression. */
-    public readonly matchNode = computed(() => {
-        const matchIndex = this.search.matchIndex();
-        const contents = untracked(this.state().contents);
-        return matchIndex >= 0 ? contents[matchIndex] : undefined;
-    });
-
-    public readonly message = computed(() => {
-        const document = this.document();
-        if (document) {
-            if (document.content) {
-                return '';
-            }
-
-            return this.translate.instant('Info.AAS_OFFLINE', {
-                timestamp: new Date(document.timestamp).toLocaleString(untracked(this.currentLang)),
-            });
-        }
-
-        return this.translate.instant('Info.NO_SHELL_AVAILABLE');
-    });
-
-    public ngOnDestroy(): void {
+    public override ngOnDestroy(): void {
         this.webSocketSubject?.unsubscribe();
-        this.window.removeEventListener('keyup', this.keyup);
-        this.window.removeEventListener('keydown', this.keydown);
+        super.ngOnDestroy();
     }
 
-    public visualState(node: AASTreeNode): string {
-        let state = '';
-        if (node.selected) {
-            state = 'table-primary';
-            if (node.highlighted) {
-                state += ' table-success';
-            }
-        } else if (node.highlighted) {
-            state = 'table-success';
+    public override getUrl(node: AASNode): string | undefined {
+        if (isFile(node.id)) {
+            return this.getFileURL(node.id);
         }
 
-        return state;
-    }
-
-    public expand(node?: AASTreeNode): void {
-        if (node) {
-            if (!node.expanded) {
-                this.expandNode(node);
-            }
-        } else {
-            this.expandAll();
-            this.state().update({ expanded: true });
-        }
-    }
-
-    public collapse(node?: AASTreeNode): void {
-        if (node) {
-            if (node.expanded) {
-                this.collapseRow(node);
-            }
-        } else {
-            this.collapseAll();
-            this.state().update({ expanded: false });
-        }
-    }
-
-    public toggleSelections(): void {
-        const tree = new AASTree(this.state().contents());
-        tree.toggleSelections();
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-        });
-    }
-
-    public toggleSelection(node: AASTreeNode): void {
-        const tree = new AASTree(this.state().contents());
-        tree.toggleSelected(node, this.altKey, this.shiftKey);
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-        });
-    }
-
-    public getReferenceUrl(reference: aas.Reference | string | undefined): string | undefined {
-        if (!reference || this.live() === 'online') {
-            return undefined;
+        if (isBlob(node.id)) {
+            return this.getBlobUrl(node.id);
         }
 
-        if (typeof reference === 'string') {
-            return `/aas?id=${encodeBase64Url(reference)}`;
-        }
-
-        if (reference.keys.length === 0) {
-            return undefined;
-        }
-
-        if (reference.type === 'ExternalReference') {
-            return `/aas?id=${encodeBase64Url(reference.keys[0].value)}`;
+        if (isReferenceElement(node.id)) {
+            return this.getReferenceUrl(node.id.value);
         }
 
         return undefined;
     }
 
-    public getUrl(node: AASTreeNode): string | undefined {
-        if (isFile(node.element)) {
-            return this.getFileURL(node.element);
-        }
-        if (isBlob(node.element)) {
-            return this.getBlobUrl(node.element);
-        }
-
-        if (isReferenceElement(node.element)) {
-            return this.getReferenceUrl(node.element.value);
-        }
-
-        if (isOperation(node.element)) {
-            return undefined; // this.openOperation(node.element);
-        }
-
-        return undefined;
-    }
-
-    public getRouterLink(node: AASTreeNode): unknown[] | undefined {
+    public override getRouterLink(node: TreeNode): unknown[] | undefined {
         const document = this.document();
-        const identifiable = node.element;
-        if (node === undefined || this.live() === 'online' || document === null) {
+        const identifiable = node.id;
+        if (node === undefined || document === null) {
             return undefined;
         }
 
         let route: Route | undefined;
         if (isSubmodel(identifiable)) {
-            route = findRouteForSubmodel(identifiable);
+            route = findRouteForSubmodel(this.viewRoutes, identifiable);
         } else if (isAssetAdministrationShell(identifiable)) {
-            const tuple = findRouteForShell(document);
+            const tuple = findRouteForShell(this.viewRoutes, document);
             route = tuple.route;
         }
 
@@ -321,89 +216,223 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
         ];
     }
 
-    public findNext(): void {
-        this.search.findNext();
+    protected override start(nodes: AASNode[], searchExpression: string | undefined): void {
+        this.search.start(nodes, searchExpression);
     }
 
-    public findPrevious(): void {
-        this.search.findPrevious();
-    }
+    protected override loadChildren(node: AASNode): AASTreeResult | undefined {
+        const parent = node.id;
+        const children: AASNode[] = [];
+        const level = node.level + 1;
+        if (isAssetAdministrationShell(parent)) {
+            const env = untracked(this.document)?.content;
+            if (!env) {
+                return undefined;
+            }
 
-    // public toString(value: aas.Reference | undefined): string {
-    //     if (!value) {
-    //         return '-';
-    //     }
-
-    //     return value.keys.map(key => key.value).join('.');
-    // }
-
-    private expandNode(node: AASTreeNode): void {
-        const tree = new AASTree(untracked(this.state().contents));
-        tree.expand(node);
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-        });
-    }
-
-    private highlightNode(matchIndex: number): void {
-        const tree = new AASTree(untracked(this.state().contents));
-        if (matchIndex >= 0) {
-            tree.expand(matchIndex);
-        }
-
-        tree.highlight(matchIndex);
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-            matchIndex,
-        });
-    }
-
-    private collapseRow(row: AASTreeNode): void {
-        const tree = new AASTree(untracked(this.state().contents));
-        tree.collapse(row);
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-        });
-    }
-
-    private collapseAll(): void {
-        const tree = new AASTree(untracked(this.state().contents));
-        tree.collapse();
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-        });
-    }
-
-    private expandAll(): void {
-        const tree = new AASTree(untracked(this.state().contents));
-        tree.expand();
-        this.state().update({
-            contents: tree.contents,
-            nodes: tree.nodes,
-        });
-    }
-
-    private update(document: AASDocument | null): void {
-        if (document) {
-            const tree = AASTree.from(document, untracked(this.currentLang));
-            this.state().update({
-                document,
-                matchIndex: -1,
-                contents: tree.contents,
-                nodes: tree.nodes,
-            });
+            let index = 0;
+            for (const child of getChildren(parent, env)) {
+                children.push(this.createNode(child, parent, level, index++, node.path));
+            }
         } else {
-            this.state().update({
-                document: null,
-                matchIndex: -1,
-                contents: [],
-                nodes: [],
-            });
+            let index = 0;
+            for (const child of getChildren(parent)) {
+                children.push(this.createNode(child, parent, level, index++, node.path));
+            }
         }
+
+        return { parent: node, children };
+    }
+
+    protected override loaded(node: AASNode): void {
+        noop(node);
+    }
+
+    protected override update(newState: Partial<AASTreeData>): void {
+        super.update(newState);
+
+        if (newState.document !== undefined) {
+            this.document$.set(newState.document);
+        }
+    }
+
+    private createTree(env: aas.Environment, shell: aas.AssetAdministrationShell): AASTree {
+        return [this.createNode(shell, null, 0, 0, '')];
+    }
+
+    private createNode(
+        referable: aas.Referable,
+        parent: aas.Referable | null,
+        level: number,
+        index: number,
+        path: string,
+    ): AASNode {
+        if (this.isLeaf(referable)) {
+            return this.createLeaf(referable, parent, level, index, path);
+        }
+
+        return this.createComposite(referable, parent, level, index, path);
+    }
+
+    private createLeaf(
+        referable: aas.Referable,
+        parent: aas.Referable | null,
+        level: number,
+        index: number,
+        path: string,
+    ): AASNode {
+        const { value, valueType } = this.getValue(referable);
+        const idShort = referable.idShort ?? index.toString();
+        return {
+            id: referable,
+            parentId: parent,
+            name: this.createName(parent, referable, index),
+            suffix: this.getSuffix(referable),
+            path: path ? `${path}.${idShort}` : idShort,
+            symbolType: 'text',
+            symbol: getAbbreviation(referable.modelType),
+            type: 'text',
+            level,
+            isLeaf: true,
+            selected: false,
+            highlighted: false,
+            value,
+            valueType,
+            options: { index },
+        };
+    }
+
+    private createComposite(
+        referable: aas.Referable,
+        parent: aas.Referable | null,
+        level: number,
+        index: number,
+        path: string,
+    ): AASNode {
+        let hasChildren: boolean;
+        let symbolType: TreeSymbolType;
+        let symbol: string | undefined;
+        const idShort = referable.idShort ?? index.toString();
+        if (isAssetAdministrationShell(referable)) {
+            hasChildren = referable.submodels !== undefined && referable.submodels.length > 0;
+            symbolType = 'image';
+            symbol = untracked(this.document)?.thumbnail ?? 'assets/resources/aas-idta.png';
+        } else {
+            hasChildren = getChildren(referable).length > 0;
+            symbolType = 'text';
+            symbol = getAbbreviation(referable.modelType);
+        }
+
+        return {
+            id: referable,
+            parentId: parent,
+            name: this.createName(parent, referable, index),
+            suffix: this.getSuffix(referable),
+            path: path ? `${path}.${idShort}` : idShort,
+            symbolType,
+            symbol,
+            type: this.determineType(referable),
+            level,
+            isLeaf: false,
+            expanded: false,
+            selected: false,
+            highlighted: false,
+            hasChildren,
+            loaded: false,
+            options: { index },
+        };
+    }
+
+    private createName(parent: aas.Referable | null, referable: aas.Referable, index: number): string {
+        if (parent?.modelType === 'SubmodelElementList') {
+            return referable.idShort ? `[${index} : ${referable.idShort}]` : `[${index}]`;
+        }
+
+        return referable.idShort;
+    }
+
+    private determineType(referable: aas.Referable): TreeType {
+        if (isSubmodel(referable)) {
+            if (findRouteForSubmodel(this.viewRoutes, referable, false)) {
+                return 'routerLink';
+            }
+        }
+
+        if (isAssetAdministrationShell(referable)) {
+            const document = untracked(this.document);
+            if (document) {
+                if (findRouteForShell(this.viewRoutes, document, false)) {
+                    return 'routerLink';
+                }
+            }
+        }
+
+        return 'text';
+    }
+
+    private isLeaf(referable: aas.Referable): boolean {
+        switch (referable.modelType) {
+            case 'AssetAdministrationShell':
+            case 'Submodel':
+            case 'SubmodelElementCollection':
+            case 'SubmodelElementList':
+            case 'AnnotatedRelationshipElement':
+            case 'Entity':
+            case 'Operation':
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    private getSuffix(referable: aas.Referable | null): string {
+        let suffix: string | undefined;
+        if (!referable) {
+            suffix = '';
+        } else if (isAssetAdministrationShell(referable)) {
+            suffix = referable.id;
+        } else if (isMultiLanguageProperty(referable)) {
+            if (referable && Array.isArray(referable.value)) {
+                suffix = `${referable.value.map(item => item.language).join(', ')}`;
+            }
+        } else if (isSubmodel(referable)) {
+            const sid = getSemanticId(referable);
+            suffix = sid ? `sematicId: ${sid}` : `id: ${referable.id}`;
+        } else if (isProperty(referable)) {
+            const valueType = (referable as aas.Property).valueType;
+            if (valueType) {
+                suffix = valueType.startsWith('xs:') ? valueType.substring(3) : valueType;
+            }
+        } else if (isBlob(referable)) {
+            suffix = referable.contentType;
+        } else if (isFile(referable)) {
+            if (referable.contentType) {
+                suffix = referable.contentType;
+            } else if (referable.value) {
+                suffix = extensionToMimeType(referable.value);
+            }
+        } else if (isRange(referable)) {
+            const valueType = (referable as aas.Property).valueType;
+            if (valueType) {
+                suffix = valueType.startsWith('xs:') ? valueType.substring(3) : valueType;
+            }
+        } else if (isSubmodelElementCollection(referable)) {
+            suffix = referable.value ? `${referable.value.length}` : '0';
+        } else if (isSubmodelElementList(referable)) {
+            suffix = referable.value ? `${referable.value.length}` : '0';
+        } else if (isAnnotatedRelationshipElement(referable)) {
+            suffix = referable.annotations ? `${referable.annotations.length}` : '0';
+        } else if (isEntity(referable)) {
+            suffix = referable.statements ? `${referable.statements.length}` : '0';
+        } else if (isOperation(referable)) {
+            suffix = (
+                (referable.inputVariables?.length ?? 0) +
+                (referable.inoutputVariables?.length ?? 0) +
+                (referable.outputVariables?.length ?? 0)
+            ).toString();
+        }
+
+        return suffix ? '[' + suffix + ']' : '';
     }
 
     private getFileURL(file: aas.File): string | undefined {
@@ -412,17 +441,12 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
         }
 
         const document = this.document();
-        if (!document?.content || !file.value) {
+        if (!document?.content || !file.value || !file.path) {
             return undefined;
         }
 
-        const submodel = selectSubmodel(document.content, file);
-        if (!submodel) {
-            return undefined;
-        }
-
-        const smId = encodeBase64Url(submodel.id);
-        const path = getIdShortPath(file);
+        const smId = encodeBase64Url(file.path.id);
+        const path = file.path.idShortPath;
         const name = encodeBase64Url(document.endpoint);
         const id = encodeBase64Url(document.id);
         return `/api/v1/endpoints/${name}/documents/${id}/submodels/${smId}/submodel-elements/${path}/value`;
@@ -430,30 +454,92 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
 
     private getBlobUrl(blob: aas.Blob): string | undefined {
         const document = this.document();
-        if (!document || !blob.parent || this.live() === 'online') {
+        if (!document || !blob.path || this.live() === 'online') {
             return undefined;
         }
 
-        const smId = blob.parent.keys[0].value;
-        const idShortPath = getIdShortPath(blob);
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/submodels/${encodeBase64Url(smId)}/submodel-elements/${idShortPath}/value`;
+        const smId = encodeBase64Url(blob.path.id);
+        const idShortPath = blob.path.idShortPath;
+        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/submodels/${smId}/submodel-elements/${idShortPath}/value`;
+    }
+
+    private getReferenceUrl(reference: aas.Reference | undefined): string | undefined {
+        if (!reference || this.live() === 'online') {
+            return undefined;
+        }
+
+        if (reference.keys.length === 0) {
+            return undefined;
+        }
+
+        if (reference.type === 'ExternalReference') {
+            return `/aas?id=${encodeBase64Url(reference.keys[0].value)}`;
+        }
+
+        return undefined;
+    }
+
+    private getValue(referable: aas.Referable | null): {
+        value?: string | undefined;
+        valueType?: TreeValueType;
+    } {
+        if (!referable) {
+            return {};
+        }
+
+        if (isBlob(referable)) {
+            return referable.value
+                ? { value: `${referable.value.length}`, valueType: 'url' }
+                : { value: '-', valueType: 'text' };
+        }
+
+        if (isFile(referable)) {
+            return referable.value
+                ? { value: basename(normalize(referable.value)), valueType: 'url' }
+                : { value: '-', valueType: 'text' };
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            return {
+                value: getLocaleValue(referable.value, this.translate.getCurrentLang()) ?? '-',
+                valueType: 'text',
+            };
+        }
+
+        if (isProperty(referable)) {
+            return { value: this.getPropertyValue(referable), valueType: 'text' };
+        }
+
+        if (isRange(referable)) {
+            return {
+                value: `${convertToString(referable.min, this.translate.getCurrentLang())} ... ${convertToString(referable.max, this.translate.getCurrentLang())}`,
+                valueType: 'text',
+            };
+        }
+
+        if (isReferenceElement(referable)) {
+            return { value: this.referenceToString(referable.value), valueType: 'text' };
+        }
+
+        return {};
+    }
+
+    private getPropertyValue(property: aas.Property): string | undefined {
+        return toDisplayValue(property.value, property.valueType, this.translate.getCurrentLang());
+    }
+
+    private referenceToString(reference: aas.Reference | undefined): string {
+        return reference?.keys.map(key => key.value).join('.') ?? '-';
     }
 
     private goOnline(): void {
         try {
-            this.prepareOnline(
-                this.state()
-                    .contents()
-                    .filter(node => node.selected),
-            );
+            this.prepareOnline();
             this.play();
         } catch {
-            this.stop();
+            this.live.set('offline');
+            this.goOffline();
         }
-    }
-
-    private goOffline(): void {
-        this.stop();
     }
 
     private play(): void {
@@ -469,29 +555,52 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
         }
     }
 
-    private stop(): void {
+    private goOffline(): void {
+        this.prepareOffline();
+        this.map.clear();
+        this.liveNodes.splice(0, this.liveNodes.length);
+
         if (this.webSocketSubject) {
             this.webSocketSubject.unsubscribe();
             this.webSocketSubject = undefined;
         }
     }
 
-    private prepareOnline(rows: AASTreeNode[]): void {
+    private prepareOffline(): void {
+        const nodes = new Set(this.map.values());
+        const tree = untracked(this.tree).map(node => {
+            if (nodes.has(node)) {
+                const { value, valueType } = this.getValue(node.id);
+                return { ...node, value, valueType };
+            }
+
+            return node;
+        });
+
+        this.update({ tree, selectionDisabled: false });
+    }
+
+    private prepareOnline(): void {
         this.liveNodes.splice(0, this.liveNodes.length);
         this.map.clear();
-        for (const row of rows) {
-            if (row.selected) {
-                const property = row.element as aas.Property;
+        const tree: AASTree = untracked(this.tree).map(node => {
+            if (node.selected && isProperty(node.id)) {
+                const property = node.id;
                 if (property.nodeId) {
                     this.liveNodes.push({
                         nodeId: property.nodeId,
                         valueType: property.valueType ?? 'undefined',
                     });
 
-                    this.map.set(property.nodeId, row);
+                    node = { ...node, value: signal(property.value), valueType: 'signal' };
+                    this.map.set(property.nodeId, node);
                 }
             }
-        }
+
+            return node;
+        });
+
+        this.update({ tree, selectionDisabled: true });
     }
 
     private createMessage(document: AASDocument): WebSocketData {
@@ -509,27 +618,15 @@ export class AASTreeComponent extends ChildComponent<AASTreeData, AASTreeState> 
         const currentLang = untracked(this.currentLang);
         for (const liveNode of data.data as LiveNode[]) {
             const node = this.map.get(liveNode.nodeId);
-            if (node === undefined) {
+            if (node === undefined || node.valueType !== 'signal' || !node.value) {
                 continue;
             }
 
-            node.value.set(
-                typeof liveNode.value === 'boolean' ? liveNode.value : convertToString(liveNode.value, currentLang),
-            );
+            (node.value as WritableSignal<string>).set(convertToString(liveNode.value, currentLang));
         }
     };
 
     private onError = (error: unknown): void => {
-        this.notify.log(LogType.Error, error);
-    };
-
-    private keyup = () => {
-        this.shiftKey = false;
-        this.altKey = false;
-    };
-
-    private keydown = (event: KeyboardEvent) => {
-        this.shiftKey = event.shiftKey;
-        this.altKey = event.altKey;
+        this.notify.error(error);
     };
 }

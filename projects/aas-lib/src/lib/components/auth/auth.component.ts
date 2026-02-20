@@ -8,15 +8,15 @@
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NotifyService } from '../notify/notify.service';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective } from '@ngx-translate/core';
+import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
 import { AuthService } from './auth.service';
 
 @Component({
     selector: 'fhg-auth',
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
-    imports: [NgbModule, TranslateDirective],
+    imports: [NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {

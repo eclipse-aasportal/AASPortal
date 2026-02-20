@@ -6,22 +6,22 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { Connection } from 'mysql2/promise';
-import { createSpyObj } from 'aas-jest';
 import { AASEndpoint } from 'aas-core';
 import { MySqlIndex } from '../../../app/index/mysql/mysql-index.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { Variable } from '../../../app/variable.js';
 import { KeywordDirectory } from '../../../app/index/keyword-directory.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from '../../../app/index/mysql/mysql-types.js';
+import { createSpyObj } from '../../mocks.js';
 
 describe('MySqlIndex', () => {
     let index: MySqlIndex;
-    let logger: jest.Mocked<Logger>;
-    let variable: jest.Mocked<Variable>;
-    let connection: jest.Mocked<Connection>;
-    let keywords: jest.Mocked<KeywordDirectory>;
+    let logger: Mocked<Logger>;
+    let variable: Mocked<Variable>;
+    let connection: Mocked<Connection>;
+    let keywords: Mocked<KeywordDirectory>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'info']);
@@ -166,7 +166,7 @@ describe('MySqlIndex', () => {
                 type: 'AAS_API',
             };
 
-            await expect(index.addEndpoint(endpoint)).resolves.toEqual(void 0);
+            await expect(index.insertEndpoint(endpoint)).resolves.toEqual(void 0);
             expect(connection.query).toHaveBeenCalledWith(
                 'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
                 [endpoint.name, endpoint.url, endpoint.type, undefined, undefined, undefined],
@@ -247,7 +247,7 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockImplementation(impl);
-            await expect(index.removeEndpoint('Endpoint 1')).resolves.toEqual(true);
+            await expect(index.deleteEndpoint('Endpoint 1')).resolves.toEqual(true);
             expect(connection.query).toHaveBeenCalledTimes(4);
         });
     });
@@ -260,7 +260,7 @@ describe('MySqlIndex', () => {
         it('selects the first page', async () => {
             const results: MySqlDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
-            await expect(index.nextPage('Endpoint 1', undefined, 10)).resolves.toEqual({
+            await expect(index.getPage('Endpoint 1', undefined, 10)).resolves.toEqual({
                 paging_metadata: { cursor: undefined },
                 result: [],
             });
@@ -331,7 +331,7 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockImplementation(impl);
-            await expect(index.remove('Endpoint 1', 'http://document/aas')).resolves.toEqual(true);
+            await expect(index.delete('Endpoint 1', 'http://document/aas')).resolves.toEqual(true);
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.commit).toHaveBeenCalled();
         });
@@ -344,7 +344,6 @@ describe('MySqlIndex', () => {
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.query).toHaveBeenNthCalledWith(1, 'DELETE FROM `elements`;');
             expect(connection.query).toHaveBeenNthCalledWith(2, 'DELETE FROM `documents`;');
-            expect(connection.query).toHaveBeenNthCalledWith(3, 'DELETE FROM `endpoints`;');
             expect(connection.commit).toHaveBeenCalled();
         });
     });

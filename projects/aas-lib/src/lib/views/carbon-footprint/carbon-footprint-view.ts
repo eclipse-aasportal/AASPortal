@@ -8,51 +8,44 @@
 
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { of, Observable } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    inject,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../services/toolbar.service';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from './carbon-footprint';
 import { LeafView } from '../leaf-view';
-import { VIEW_ROUTES } from '../../types';
 import { CarbonFootprintViewState } from './carbon-footprint-view.state';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 /**
  * Provides a view for a submodel that belongs to the IDTA specification "Carbon Footprint".
  */
 @Component({
     selector: 'fhg-carbon-footprint-view',
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, CarbonFootprint],
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'CarbonFootprint' }],
+    imports: [
+        TranslateDirective,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        ThumbnailQRCode,
+        CarbonFootprint,
+        RouterModule,
+    ],
     templateUrl: './carbon-footprint-view.html',
     styleUrl: './carbon-footprint-view.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarbonFootprintView extends LeafView<CarbonFootprintViewState> implements OnInit, OnDestroy {
+export class CarbonFootprintView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly state = inject(CarbonFootprintViewState);
 
     public constructor() {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'CarbonFootprint',
-            inject(CarbonFootprintViewState),
-        );
+        super();
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -67,10 +60,6 @@ export class CarbonFootprintView extends LeafView<CarbonFootprintViewState> impl
 
     /** The state of the carbon footprint component. */
     public readonly carbonFootprintState = this.state.carbonFootprintState;
-
-    public ngOnInit(): void {
-        this.onInit();
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

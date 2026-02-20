@@ -30,7 +30,7 @@ const initialState: NameplateData = {
  * Manages the state of the Nameplate component.
  */
 @Injectable()
-export class NameplateState extends ChildState<NameplateData> {
+export class NameplateState extends ChildState {
     private readonly document$ = signal(initialState.document);
     private readonly submodel$ = signal(initialState.submodel);
     private readonly dataSheets$ = signal(initialState.dataSheets);
@@ -48,7 +48,6 @@ export class NameplateState extends ChildState<NameplateData> {
             if (!submodel) {
                 return;
             }
-
             this.update({ submodel, dataSheets: this.createDataSheets(document, submodel) });
         });
 
@@ -74,7 +73,7 @@ export class NameplateState extends ChildState<NameplateData> {
      * Updates the state.
      * @param newState The new state.
      */
-    public override update(newState: Partial<NameplateData>): void {
+    public update(newState: Partial<NameplateData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }
@@ -103,7 +102,12 @@ export class NameplateState extends ChildState<NameplateData> {
                 {
                     type: 'format',
                     idShortPath: 'AddressInformation',
-                    format: '{Street}, {NationalCode}-{ZipCode} {CityTown}',
+                    format: '{Street} {NationalCode}-{ZipCode} {CityTown}',
+                },
+                {
+                    type: 'format',
+                    idShortPath: 'PhysicalAddress',
+                    format: '{Street} {CountryCode}-{Zip} {CityTown}',
                 },
             ],
         });

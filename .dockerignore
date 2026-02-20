@@ -5,6 +5,6 @@
 .vscode
 .angular
 node_modules
-reports
+coverage
 build
 dist

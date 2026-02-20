@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (rows().length > 0) {
+@if (items().length > 0) {
     <div class="table-responsive">
         <table class="table table-sm table-hover table-striped">
             <thead>
@@ -17,8 +17,8 @@
                             type="checkbox"
                             class="form-check-input"
                             [indeterminate]="someSelected()"
-                            [checked]="everySelected()"
-                            (change)="toggleSelections()"
+                            [ngModel]="everySelected()"
+                            (ngModelChange)="toggleSelected($event)"
                         />
                     </th>
                     <th scope="col" class="th-w-icon">
@@ -36,28 +36,28 @@
                 </tr>
             </thead>
             <tbody>
-                @for (row of rows(); track row.trackId) {
+                @for (item of items(); track item) {
                     <tr class="align-middle">
                         <td>
                             <input
                                 type="checkbox"
                                 class="form-check-input"
-                                [ngModel]="row.selected()"
-                                (ngModelChange)="toggleSelected(row, $event)"
-                                [name]="row.name"
+                                [ngModel]="item.selected()"
+                                (ngModelChange)="toggleSelected($event, item)"
+                                [name]="item.name"
                             />
                         </td>
                         <td>
-                            @switch (row.state) {
+                            @switch (item.state) {
                                 @case ('unloaded') {
                                     <div class="position-relative">
                                         <img
-                                            class="img-fluid opacity-50"
+                                            class="object-fit-contain opacity-50"
                                             width="40"
                                             height="40"
-                                            [src]="getThumbnail(row)"
-                                            [alt]="row.name"
-                                            (error)="row.thumbnail = undefined"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
                                         />
                                         <div
                                             class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
@@ -69,11 +69,12 @@
                                 @case ('unavailable') {
                                     <div class="position-relative">
                                         <img
-                                            class="img-fluid opacity-50"
+                                            class="object-fit-contain opacity-50"
                                             width="40"
                                             height="40"
-                                            [src]="row.thumbnail"
-                                            [alt]="row.name"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
                                         />
                                         <div
                                             class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
@@ -85,26 +86,26 @@
                                 @default {
                                     <div>
                                         <img
-                                            class="img-fluid"
+                                            class="object-fit-contain"
                                             width="40"
                                             height="40"
-                                            [src]="getThumbnail(row)"
-                                            [alt]="row.name"
-                                            (error)="row.thumbnail = undefined"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
                                         />
                                     </div>
                                 }
                             }
                         </td>
                         <td>
-                            <a [routerLink]="getRouterLink(row)">{{ row.name | max: 60 }}</a>
+                            <a [routerLink]="getRouterLink(item)">{{ item.name | max: 60 }}</a>
                         </td>
                         <td>
-                            <div>{{ row.endpoint }}</div>
+                            <div class="text-nowrap">{{ item.endpoint }}</div>
                         </td>
                         <td>
-                            <div class="text-nowrap" placement="top" [ngbTooltip]="getToolTip(row)">
-                                {{ row.id | max: 80 }}
+                            <div class="text-nowrap" placement="top">
+                                {{ item.id | max: 80 }}
                             </div>
                         </td>
                     </tr>
@@ -113,7 +114,5 @@
         </table>
     </div>
 } @else {
-    <div class="alert alert-info text-center mt-2" role="alert">
-        {{ 'AASTable.INFO_NO_SHELLS_AVAILABLE' | translate }}
-    </div>
+    <div class="alert alert-info text-center mt-2" role="alert" translate>AASTable.INFO_NO_SHELLS_AVAILABLE</div>
 }

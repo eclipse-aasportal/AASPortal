@@ -6,41 +6,20 @@
  !
  !---------------------------------------------------------------------------->
 
-<div ngbAccordion>
-    <div ngbAccordionItem [collapsed]="collapsed()">
-        <h2 ngbAccordionHeader>
-            <button ngbAccordionButton translate>DigitalProductPassport.DOCUMENTATION</button>
-        </h2>
-        <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-                <ng-template>
-                    <table class="table table-sm table-striped table-borderless">
-                        <tbody>
-                            @for (item of items(); track item.title) {
-                                <tr class="align-middle">
-                                    <td>
-                                        <img
-                                            [src]="getPreviewSource(item)"
-                                            height="48"
-                                            (error)="item.preview = undefined"
-                                        />
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            @for (file of item.files; track file.name) {
-                                                <a [href]="file.url" target="_blank">{{ file.name }}</a>
-                                            }
-                                        </div>
-                                    </td>
-                                    <td>{{ item.title }}</td>
-                                    <td>{{ item.version }}</td>
-                                    <td>{{ item.status }}</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </ng-template>
+<div class="container">
+
+    <div class="d-flex flex-wrap align-content-stretch" #flexContainer>
+        @for (item of items(); track item.title) {
+            <div class="p-3 m-2 bg-body-tertiary border rounded text-center flex-item d-flex flex-column justify-content-evenly">
+                <label class="label flex-grow-1">{{getDocumentTitle(item)}}</label>
+                <img [src]="getPreviewSource(item)"
+                    class="img-fluid"
+                    (error)="item.preview = undefined" />
+                <button type="button" class="btn btn-secondary mt-2" (click)="openModal(item)">Details</button>
+                <button type="button" class="btn btn-primary mt-2" (click)="openFile(item)">Download</button>
             </div>
-        </div>
+        }
     </div>
 </div>
+<ng-template #modal>
+</ng-template>

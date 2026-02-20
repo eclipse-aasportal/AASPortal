@@ -331,13 +331,18 @@ export interface Range extends DataElement {
     valueType: DataTypeDefXsd;
 }
 
+export type ReferablePath = {
+    id: string;
+    idShortPath: string;
+};
+
 export interface Referable extends HasExtensions {
     category?: string;
     description?: LangString[];
     displayName?: LangString[];
     idShort: string;
     modelType: ModelType;
-    parent?: Reference;
+    path?: ReferablePath;
 }
 
 export interface Reference {

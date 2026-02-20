@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { first, of } from 'rxjs';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -45,18 +45,18 @@ class TestAASTable {
     public readonly viewMode = input<ViewMode>(ViewMode.List);
     public readonly documents = input<AASDocument[]>([]);
     public readonly selected = model<AASDocument[]>([]);
-    public readonly filter = input('');
+    public readonly expression = input('');
 }
 
 describe('ShellsComponent', () => {
     let fixture: ComponentFixture<ShellsComponent>;
     let component: ShellsComponent;
-    let localStorage: jest.Mocked<Storage>;
-    let api: jest.Mocked<EndpointsApi>;
-    let favorites: jest.Mocked<FavoritesService>;
-    let auth: jest.Mocked<AuthService>;
-    let start: jest.Mocked<StartService>;
-    let indexChange: jest.Mocked<IndexChangeService>;
+    let localStorage: Mocked<Storage>;
+    let api: Mocked<EndpointsApi>;
+    let favorites: Mocked<FavoritesService>;
+    let auth: Mocked<AuthService>;
+    let start: Mocked<StartService>;
+    let indexChange: Mocked<IndexChangeService>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -68,10 +68,10 @@ describe('ShellsComponent', () => {
             'getEndpoints',
             'removeEndpoint',
             'getContent',
-            'getHierarchy',
             'getDocuments',
             'downloadPackage',
         ]);
+        
         api.getDocuments.mockReturnValue(
             of({
                 previous: null,

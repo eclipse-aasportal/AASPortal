@@ -10,13 +10,13 @@ import { readFileSync } from 'fs';
 
 main();
 
-function main() {
-    const aasCoreSummary = read('./reports/aas-core/coverage-summary.json');
-    const aasNodeSummary = read('./reports/aas-node/coverage-summary.json');
-    const aasLibSummary = read('./reports/aas-lib/coverage-summary.json');
-    const aasPortalSummary = read('./reports/aas-portal/coverage-summary.json');
-    const aasServerSummary = read('./reports/aas-server/coverage-summary.json');
-    const aasBrowserSummary = read('./reports/aas-browser/coverage-summary.json');
+function main(): void {
+    const aasCoreSummary = read('./coverage/aas-core/coverage-summary.json');
+    const aasNodeSummary = read('./coverage/aas-node/coverage-summary.json');
+    const aasLibSummary = read('./coverage/aas-lib/coverage-summary.json');
+    const aasPortalSummary = read('./coverage/aas-portal/coverage-summary.json');
+    const aasServerSummary = read('./coverage/aas-server/coverage-summary.json');
+    const aasBrowserSummary = read('./coverage/aas-browser/coverage-summary.json');
 
     const statementsTotal =
         aasCoreSummary.total.statements.total +

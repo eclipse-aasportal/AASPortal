@@ -6,15 +6,15 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { WebSocket } from 'ws';
 import { SocketClient } from '../../app/live/socket-client.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../mocks.js';
 import { SocketSubscription } from '../../app/live/socket-subscription.js';
 
 describe('SocketClient', function () {
     let client: SocketClient;
-    let ws: jest.Mocked<WebSocket>;
+    let ws: Mocked<WebSocket>;
 
     beforeEach(function () {
         ws = createSpyObj<WebSocket>(['on', 'send']);

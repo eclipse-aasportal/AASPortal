@@ -49,7 +49,7 @@ export enum ScanResultKind {
 
 /** The result of an endpoint scan. */
 export interface ScanResult {
-    type: 'ScanEndResult' | 'ScanEndpointResult' | 'ScanTemplatesResult';
+    type: 'ScanEndResult' | 'ScanEndpointResult';
     kind: ScanResultKind;
     taskId: number;
 }
@@ -67,16 +67,12 @@ export interface ScanTemplatesResult extends ScanResult {
 
 export interface WorkerData {
     taskId: number;
-    type: 'ScanEndpointData' | 'ScanTemplatesData';
+    type: 'ScanEndpointData';
 }
 
 export interface ScanEndpointData extends WorkerData {
     type: 'ScanEndpointData';
     endpoint: AASEndpoint;
-}
-
-export interface ScanTemplatesData extends WorkerData {
-    type: 'ScanTemplatesData';
 }
 
 export type EventListener = (...args: unknown[]) => void;

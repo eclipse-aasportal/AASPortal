@@ -13,14 +13,16 @@ import { Database } from '../database.js';
 import { KeyList } from '../key-list.js';
 import { AasxPackage } from '../../aasx-package.js';
 
-export class UpdateThumbnailCommand extends DatabaseCommand<void> {
+export class UpdateThumbnailCommand extends DatabaseCommand {
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly aasId: string,
         private readonly path: string,
         private readonly filename: string,
     ) {
-        super(database);
+        super(database, resolve, reject);
     }
 
     public override async execute(): Promise<void> {

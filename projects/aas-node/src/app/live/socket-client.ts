@@ -28,7 +28,7 @@ export class SocketClient extends EventEmitter {
         return this.subscriptions.has(name);
     }
 
-    public subscribe(name: string, subscription: SocketSubscription) {
+    public subscribe(name: string, subscription: SocketSubscription): void {
         subscription.open();
         this.subscriptions.set(name, subscription);
     }

@@ -6,6 +6,9 @@
  *
  *****************************************************************************/
 
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { HttpEventType } from '@angular/common/http';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -16,15 +19,13 @@ import {
     inject,
     ElementRef,
     model,
+    OnDestroy,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { encodeBase64Url, NotifyService, ProgressService, ToolbarService } from 'aas-lib';
+import { encodeBase64Url, NotifyService, ProgressService, ToolbarService, WINDOW } from 'aas-lib';
 
 import { ShellsDataItem, ShellsService } from './shells.service';
 import { MaxLengthPipe } from '../max-length.pipe';
 import { catchError, concatMap, EMPTY, map, Observable, of } from 'rxjs';
-import { HttpEventType } from '@angular/common/http';
 
 @Component({
     selector: 'fhg-shells',
@@ -33,17 +34,20 @@ import { HttpEventType } from '@angular/common/http';
     imports: [MaxLengthPipe, FormsModule, RouterLink],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShellsComponent {
+export class ShellsComponent implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly state = inject(ShellsService);
     private readonly progress = inject(ProgressService);
     private readonly notify = inject(NotifyService);
+    private readonly window = inject(WINDOW);
+    private shiftKey = false;
+    private altKey = false;
 
     public constructor() {
         effect(() => {
-            const shellsToolbar = this.shellsToolbar();
-            if (shellsToolbar) {
-                this.toolbar.set(shellsToolbar);
+            const template = this.toolbarTemplate();
+            if (template) {
+                this.toolbar.set(template);
             }
         });
 
@@ -71,9 +75,12 @@ export class ShellsComponent {
                 },
             });
         });
+
+        this.window.addEventListener('keyup', this.keyup);
+        this.window.addEventListener('keydown', this.keydown);
     }
 
-    public readonly shellsToolbar = viewChild<TemplateRef<unknown>>('shellsToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public readonly inputFiles = viewChild<ElementRef<HTMLInputElement>>('inputFiles');
 
@@ -82,68 +89,155 @@ export class ShellsComponent {
      */
     public readonly files = model<string[]>();
 
+    /**
+     * Indicates whether at least one item in the current items list is selected.
+     *
+     * @returns `true` when there is at least one selected item and the items list contains one or more entries; otherwise `false`.
+     */
     public readonly someSelected = computed(() => {
-        return false;
+        const items = this.items();
+        return items.length > 0 && items.some(item => item.selected);
     });
 
-    public readonly items = this.state.page.value;
+    public readonly items = this.state.items;
 
     public readonly limit = this.state.limit;
 
+    /**
+     * Indicates whether the current page is the first page.
+     *
+     * @returns `true` when the current page has no previous page.
+     */
     public readonly isFirstPage = computed(() => {
-        const current = this.state.page.value().cursor;
+        const current = this.state.current();
         return current?.previous == null;
     });
 
+    /**
+     * Indicates whether the currently selected page is the last page.
+     *
+     * @returns `true` when the current page has no next page.
+     */
     public readonly isLastPage = computed(() => {
-        const current = this.state.page.value().cursor;
+        const current = this.state.current();
         return current?.next == null;
     });
 
+    public ngOnDestroy(): void {
+        this.window.removeEventListener('keyup', this.keyup);
+        this.window.removeEventListener('keydown', this.keydown);
+    }
+
     public getFirstPage(): void {
-        this.state.cursor.set({});
+        this.state.cursor.set({ next: undefined, previous: undefined });
     }
 
     public getPreviousPage(): void {
-        const current = this.state.page.value().cursor;
+        const current = this.state.current();
         if (!current?.previous) {
             return;
         }
 
-        this.state.cursor.set({ previous: current.previous });
+        this.state.cursor.set({ previous: current.previous, next: undefined });
     }
 
     public getNextPage(): void {
-        const current = this.state.page.value().cursor;
+        const current = this.state.current();
         if (!current?.next) {
             return;
         }
 
-        this.state.cursor.set({ next: current.next });
+        this.state.cursor.set({ next: current.next, previous: undefined });
     }
 
     public getLastPage(): void {
         this.state.cursor.set({ next: null, previous: null });
     }
 
-    public getThumbnailSource(item: ShellsDataItem): string {
-        if (item.thumbnail) {
-            return item.thumbnail;
+    public setSelected(value: ShellsDataItem, selected: boolean): void {
+        let items: ShellsDataItem[] = [];
+        if (this.altKey) {
+            items = this.singleSelect(value, selected);
+        } else if (this.shiftKey) {
+            if (selected) {
+                items = this.selectRange(value);
+            } else {
+                items = this.deselectRange(value);
+            }
+        } else {
+            items = this.items().map(item => (value === item ? { ...item, selected } : item));
         }
 
-        return '/assets/aas-idta.png';
+        this.state.update({ items });
     }
 
     public getLink(item: ShellsDataItem): string {
         return `/shells/${encodeBase64Url(item.id)}`;
     }
 
-    public downloadPackages(): void {
-        throw new Error('Method not implemented.');
+    public downloadPackages(): Observable<void> {
+        return of(...this.items().filter(item => item.selected)).pipe(
+            concatMap(item => this.state.downloadPackage(item.id)),
+        );
     }
 
-    public deletePackages(): void {
-        throw new Error('Method not implemented.');
+    public deletePackages(): Observable<void> {
+        return of(...this.items().filter(item => item.selected)).pipe(
+            concatMap(item => this.state.deletePackage(item.id)),
+        );
+    }
+
+    private selectRange(value: ShellsDataItem): ShellsDataItem[] {
+        const items = this.items();
+        const index = items.indexOf(value);
+        let begin = index;
+        let end = index;
+        const last = this.findLastSelectedIndex(items);
+        if (last >= 0) {
+            if (last > index) {
+                begin = index;
+                end = last;
+            } else if (last < index) {
+                begin = this.findFirstSelectedIndex(items);
+                end = index;
+            }
+        }
+
+        return items.map((item, index) => {
+            if (index >= begin && index <= end) {
+                return item.selected ? item : { ...item, selected: true };
+            }
+
+            return item.selected ? { ...item, selected: false } : item;
+        });
+    }
+
+    private findFirstSelectedIndex(items: ShellsDataItem[]): number {
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].selected) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private findLastSelectedIndex(items: ShellsDataItem[]): number {
+        for (let i = items.length - 1; i >= 0; i--) {
+            if (items[i].selected) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private deselectRange(value: ShellsDataItem): ShellsDataItem[] {
+        const items = this.items();
+        const index = items.indexOf(value);
+        return items.map((item, i) => (i <= index ? { ...item, selected: false } : item));
+    }
+
+    private singleSelect(value: ShellsDataItem, selected: boolean): ShellsDataItem[] {
+        return this.items().map(item => (value === item ? { ...item, selected } : { ...item, selected: false }));
     }
 
     private uploadPackages(files: File[]): Observable<void> {
@@ -170,4 +264,14 @@ export class ShellsComponent {
             }),
         );
     }
+
+    private keyup = (): void => {
+        this.shiftKey = false;
+        this.altKey = false;
+    };
+
+    private keydown = (event: KeyboardEvent): void => {
+        this.shiftKey = event.shiftKey;
+        this.altKey = event.altKey;
+    };
 }

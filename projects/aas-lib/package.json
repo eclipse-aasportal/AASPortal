@@ -1,12 +1,12 @@
 {
     "name": "aas-lib",
-    "version": "3.0.0",
+    "version": "3.6.0",
     "sideEffects": false,
     "type": "module",
     "scripts": {
         "ng": "ng",
-        "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
-        "watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=false --watch",
+        "test": "ng test aas-lib --no-watch",
+        "watch": "ng test aas-lib --coverage=false",
         "build": "ng build aas-lib",
         "build:debug": "ng build aas-lib --configuration development",
         "tsc": "rimraf build && tsc -p tsconfig.json",

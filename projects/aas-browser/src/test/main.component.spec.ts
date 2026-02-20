@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
-import { jest } from '@jest/globals';
 import { ToolbarService, WebSocketFactoryService, WINDOW, WindowService } from 'aas-lib';
 
 import { MainComponent } from '../app/main/main.component';
@@ -20,7 +20,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 describe('MainComponent', () => {
     let fixture: ComponentFixture<MainComponent>;
     let component: MainComponent;
-    let location: jest.Mocked<Location>;
+    let location: Mocked<Location>;
 
     beforeEach(async () => {
         location = createSpyObj<Location>(['toString'], { origin: 'http://localhost/aas/server' });
@@ -38,7 +38,7 @@ describe('MainComponent', () => {
                 },
                 {
                     provide: WebSocketFactoryService,
-                    useValue: { create: jest.fn(() => new Subject()) },
+                    useValue: { create: vi.fn(() => new Subject()) },
                 },
                 provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
                 provideRouter([]),

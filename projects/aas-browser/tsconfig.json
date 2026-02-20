@@ -8,14 +8,15 @@
             "dom"
         ],
         "types": [
-            "@angular/localize",
-            "jest"
+            "@angular/localize"
         ],
         "paths": {
             "aas-lib": [
                 "projects/aas-lib/src/public-api"
             ],
-            "@app/*": ["src/app/*"]
+            "@app/*": [
+                "src/app/*"
+            ]
         }
     },
     "angularCompilerOptions": {

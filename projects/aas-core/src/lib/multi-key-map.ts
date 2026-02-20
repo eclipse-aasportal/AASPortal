@@ -22,7 +22,7 @@ export class MultiKeyMap<TKey, TValue> {
         return this._keyMap.keys();
     }
 
-    public set(key: TKey, value: TValue) {
+    public set(key: TKey, value: TValue): void {
         if (this._valueMap.has(value)) {
             throw new Error(`The value ${value} already exists.`);
         }

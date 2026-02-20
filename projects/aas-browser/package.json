@@ -1,17 +1,17 @@
 {
     "name": "aas-browser",
-    "version": "1.0.0",
+    "version": "3.6.0",
     "type": "module",
     "scripts": {
         "ng": "ng",
         "serve": "ng serve aas-browser --host=127.0.0.1",
-        "build": "rimraf ./dist && ng build",
-        "build:debug": "rimraf ./dist && ng build --configuration development",
+        "build": "rimraf ./dist && ng build aas-browser",
+        "build:debug": "rimraf ./dist && ng build aas-browser --configuration development",
         "tsc": "rimraf build && tsc -p tsconfig.json",
-        "watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=false --watch",
-        "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
-        "lint": "ng lint",
-        "format": "ng lint --fix"
+        "watch": "ng test aas-browser --coverage=false",
+        "test": "ng test aas-browser --no-watch",
+        "lint": "ng lint aas-browser",
+        "format": "ng lint aas-browser --fix"
     },
     "private": true
 }

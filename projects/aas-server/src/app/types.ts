@@ -28,11 +28,6 @@ export type JWTPayload = {
     roles?: string[];
 };
 
-export type PackageDescription = {
-    aasIds?: string[];
-    packageId: string;
-};
-
 /**
  * Represents the current position in the table.
  * - if previous and next are undefined, this indicates that the cursor is at the beginning.

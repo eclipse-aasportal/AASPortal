@@ -1,6 +1,6 @@
 {
     "name": "aas-portal",
-    "version": "3.0.0",
+    "version": "3.6.0",
     "author": "Fraunhofer IOSB-INA",
     "description": "Web-based visualization and control of asset administration shells.",
     "homepage": "https://www.iosb-ina.fraunhofer.de/",
@@ -10,10 +10,10 @@
     "scripts": {
         "ng": "ng",
         "serve": "ng serve aas-portal --host=127.0.0.1",
-        "build": "ng build",
-        "build:debug": "ng build --configuration development",
-        "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache",
-        "watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts --no-cache --coverage=false --watch",
+        "build": "ng build aas-portal",
+        "build:debug": "ng build aas-portal --configuration development",
+        "test": "ng test aas-portal --no-watch",
+        "watch": "ng test aas-portal --coverage=false",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "ng lint aas-portal",
         "format": "ng lint aas-portal --fix",

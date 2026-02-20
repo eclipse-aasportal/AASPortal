@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-import { v4 } from 'uuid';
-import isEmpty from 'lodash-es/isEmpty.js';
+import { nanoid } from 'nanoid';
 import mysql, { Connection, ResultSetHeader } from 'mysql2/promise';
 import {
     AASEndpoint,
@@ -19,6 +18,12 @@ import {
     isIdentifiable,
     AASPagedResult,
     PagedResult,
+    isProperty,
+    baseType,
+    toBoolean,
+    isValidDate,
+    parseDate,
+    parseNumber,
 } from 'aas-core';
 
 import { AASIndex } from '../aas-index.js';
@@ -28,6 +33,8 @@ import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { Logger } from '../../logging/logger.js';
 import { urlToString } from '../../utilities.js';
+
+const LIMIT = 100;
 
 export class MySqlIndex extends AASIndex {
     private _connection!: Connection;
@@ -96,7 +103,7 @@ export class MySqlIndex extends AASIndex {
         return this.toEndpoint(results[0]);
     }
 
-    public override async addEndpoint(endpoint: AASEndpoint): Promise<void> {
+    public override async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
         const connection = await this.getConnection();
         await connection.query<ResultSetHeader>(
             'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
@@ -123,8 +130,6 @@ export class MySqlIndex extends AASIndex {
                 throw new Error(`An endpoint with the name "${endpoint.name}" does not exist.`);
             }
 
-            const old = this.toEndpoint(results[0]);
-
             await connection.query<ResultSetHeader>(
                 'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [
@@ -137,14 +142,14 @@ export class MySqlIndex extends AASIndex {
                 ],
             );
             await connection.commit();
-            return old;
+            return this.toEndpoint(results[0]);
         } catch (error) {
             await connection.rollback();
             throw error;
         }
     }
 
-    public override async removeEndpoint(endpointName: string): Promise<boolean> {
+    public override async deleteEndpoint(endpointName: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -187,13 +192,13 @@ export class MySqlIndex extends AASIndex {
         return this.getLastPage(connection, cursor.limit, query);
     }
 
-    public override async nextPage(
-        endpointName: string,
+    public override async getPage(
+        endpoint: string,
         cursor: string | undefined,
-        limit: number = 100,
+        limit: number = LIMIT,
     ): Promise<PagedResult<AASDocument>> {
         let sql: string;
-        const values: unknown[] = [endpointName];
+        const values: unknown[] = [endpoint];
         if (cursor) {
             values.push(cursor);
             sql = 'SELECT * FROM `documents` WHERE endpoint = ? AND id >= ? ORDER BY id ASC LIMIT ?;';
@@ -244,11 +249,11 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async add(document: AASDocument): Promise<void> {
+    public override async insert(document: AASDocument): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-            const uuid = v4();
+            const uuid = nanoid();
             await connection.query<ResultSetHeader>(
                 'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
                 [
@@ -275,11 +280,16 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async find(endpoint: string | undefined, id: string): Promise<AASDocument | undefined> {
+    public override async find(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument | undefined> {
         const connection = await this.getConnection();
         const document = endpoint
-            ? await this.selectEndpointDocument(connection, endpoint, id)
-            : await this.selectDocument(connection, id);
+            ? await this.selectEndpointDocument(connection, endpoint, modelType, id)
+            : await this.selectDocument(connection, modelType, id);
+
         if (!document) {
             return undefined;
         }
@@ -287,7 +297,7 @@ export class MySqlIndex extends AASIndex {
         return this.toDocument(document);
     }
 
-    public override async remove(endpointName: string, id: string): Promise<boolean> {
+    public override async delete(endpointName: string, id: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -305,31 +315,39 @@ export class MySqlIndex extends AASIndex {
             await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE uuid = ?;', [uuid]);
             await connection.commit();
             return true;
-        } catch {
+        } catch (error) {
             await connection.rollback();
-            return false;
+            throw error;
         }
     }
 
-    public override async clear(endpointName?: string): Promise<void> {
+    public override async clear(endpoint?: string): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-            if (endpointName === undefined) {
+            if (endpoint === undefined) {
                 await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
                 await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
-                await connection.query<ResultSetHeader>('DELETE FROM `endpoints`;');
             } else {
-                const documents = (
-                    await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?;', [
-                        endpointName,
-                    ])
-                )[0];
+                let loop = true;
+                while (loop) {
+                    const documents = (
+                        await connection.query<MySqlDocument[]>(
+                            'SELECT * FROM `documents` WHERE endpoint = ? LIMIT ?;',
+                            [endpoint, LIMIT],
+                        )
+                    )[0];
 
-                await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);
+                    await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpoint]);
+                    for (const document of documents) {
+                        await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [
+                            document.uuid,
+                        ]);
+                    }
 
-                for (const document of documents) {
-                    await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
+                    if (documents.length < LIMIT) {
+                        loop = false;
+                    }
                 }
             }
             await connection.commit();
@@ -342,8 +360,8 @@ export class MySqlIndex extends AASIndex {
     private async getConnection(): Promise<Connection> {
         if (this._connection === undefined) {
             const url = new URL(this.variable.AAS_INDEX!);
-            const username = isEmpty(url.username) ? this.variable.AAS_NODE_USERNAME : url.username;
-            const password = isEmpty(url.password) ? this.variable.AAS_NODE_PASSWORD : url.password;
+            const username = url.username ?? this.variable.AAS_NODE_USERNAME;
+            const password = url.password ?? this.variable.AAS_NODE_PASSWORD;
             this._connection = await mysql.createConnection({
                 host: url.hostname,
                 port: Number(url.port),
@@ -378,15 +396,15 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY endpoint ASC, id ASC LIMIT ?;';
+                    ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY endpoint ASC, id ASC LIMIT ?;';
+                    ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -414,15 +432,16 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY documents.endpoint ASC, documents.id ASC LIMIT ?;';
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY endpoint ASC, id ASC LIMIT ?;';
+                    ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY endpoint ASC, id ASC LIMIT ?;';
+            sql =
+                'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -450,15 +469,16 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY documents.endpoint DESC, documents.id DESC LIMIT ?;';
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? AND (' +
                     query.createSql(values) +
-                    ') ORDER BY endpoint DESC, id DESC LIMIT ?;';
+                    ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? ORDER BY endpoint DESC, id DESC LIMIT ?;';
+            sql =
+                'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -466,7 +486,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
@@ -480,15 +500,15 @@ export class MySqlIndex extends AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY documents.endpoint DESC, documents.id DESC LIMIT ?;';
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY endpoint DESC, id DESC LIMIT ?;';
+                    ' ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
             }
         } else {
-            sql = 'SELECT * FROM `documents` ORDER BY endpoint DESC, id DESC LIMIT ?;';
+            sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -496,7 +516,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[0]) : null,
+            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };
@@ -505,11 +525,14 @@ export class MySqlIndex extends AASIndex {
     private async selectEndpointDocument(
         connection: Connection,
         endpoint: string,
+        modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
     ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
-            'SELECT * FROM `documents` WHERE endpoint = ? AND (id = ? OR assetId = ?)',
-            [endpoint, id, id],
+            modelType === 'AssetAdministrationShell'
+                ? 'SELECT * FROM `documents` WHERE endpoint = ? AND id = ?'
+                : 'SELECT * FROM `documents` WHERE endpoint = ? AND assetId = ?',
+            [endpoint, id],
         );
 
         if (results.length === 0) {
@@ -519,10 +542,16 @@ export class MySqlIndex extends AASIndex {
         return results[0];
     }
 
-    private async selectDocument(connection: Connection, id: string): Promise<MySqlDocument | undefined> {
+    private async selectDocument(
+        connection: Connection,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
-            'SELECT * FROM `documents` WHERE (id = ? OR assetId = ?)',
-            [id, id],
+            modelType === 'AssetAdministrationShell'
+                ? 'SELECT * FROM `documents` WHERE id = ?'
+                : 'SELECT * FROM `documents` WHERE assetId = ?',
+            [id],
         );
 
         if (results.length === 0) {
@@ -557,6 +586,71 @@ export class MySqlIndex extends AASIndex {
                 this.toBigintValue(referable),
             ],
         );
+    }
+
+    private toStringValue(referable: aas.Referable, max: number = 512): string | undefined {
+        switch (referable.modelType) {
+            case 'Property': {
+                const property = referable as aas.Property;
+                if (baseType(property.valueType) === 'string') {
+                    return this.preprocessString(property.value, max);
+                }
+
+                return undefined;
+            }
+            case 'MultiLanguageProperty':
+                return this.preprocessString((referable as aas.MultiLanguageProperty).value);
+            case 'File':
+                return (referable as aas.File).value;
+            case 'Blob':
+                return (referable as aas.Blob).contentType;
+            case 'Range':
+            case 'ReferenceElement':
+            default:
+                return undefined;
+        }
+    }
+
+    private toNumberValue(referable: aas.Referable): number | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'number') {
+            return undefined;
+        }
+
+        const value = parseNumber(referable.value);
+        if (Number.isNaN(value)) {
+            return undefined;
+        }
+
+        return value;
+    }
+
+    private toDateValue(referable: aas.Referable): Date | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'Date') {
+            return undefined;
+        }
+
+        const value = parseDate(referable.value);
+        return isValidDate(value) ? value : undefined;
+    }
+
+    private toBooleanValue(referable: aas.Referable): boolean | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'boolean') {
+            return undefined;
+        }
+
+        return toBoolean(referable.value);
+    }
+
+    private toBigintValue(referable: aas.Referable): bigint | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'bigint') {
+            return undefined;
+        }
+
+        try {
+            return BigInt(referable.value);
+        } catch {
+            return undefined;
+        }
     }
 
     private toEndpoint(result: MySqlEndpoint): AASEndpoint {

@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { DigitalProductPassportViewState } from '../../../lib/views/digital-product-passport/digital-product-passport-view.state';

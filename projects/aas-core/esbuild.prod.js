@@ -11,11 +11,12 @@ import * as esbuild from 'esbuild';
 await esbuild.build({
     entryPoints: ['./src/lib/index.ts'],
     outfile: './dist/aas-core.js',
+    mainFields: ['module'],
     bundle: true,
     platform: 'neutral',
     format: 'esm',
     target: 'es2022',
     tsconfig: 'tsconfig.lib.json',
-    minify: true,
     external: ['lodash-es'],
+    minify: true,
 });

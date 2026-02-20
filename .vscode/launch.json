@@ -1,7 +1,6 @@
 {
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "Launch aas-portal",
             "type": "chrome",
@@ -13,7 +12,9 @@
         {
             "name": "Launch aas-node",
             "type": "node",
-            "args": [],
+            "args": [
+                "--experimental-sqlite"
+            ],
             "request": "launch",
             "preLaunchTask": "build-aas-node",
             "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
@@ -31,9 +32,7 @@
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
                 "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
-                "USER_STORAGE": "mongodb://aas-node:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users",
-                "TEMPLATE_STORAGE": "http://aas-node:5w0vmrkzrwDIDyZs@localhost:8080/templates",
-                "AAS_INDEX": "mysql://aas-node:60PYRe6Vd8C99u4n@localhost:3306",
+                "USER_STORAGE": "mongodb://aas-node:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users"
             }
         },
         {
@@ -55,7 +54,7 @@
                 "AAS_SERVER_PORT": "50010",
                 "CONTENT_ROOT": "projects/aas-server/build",
                 "WEB_ROOT": "projects/aas-browser/dist/browser",
-                "ASSETS": "projects/aas-server/src/assets",
+                "ASSETS": "projects/aas-server/src/assets"
             }
         },
         {
@@ -76,7 +75,8 @@
                 "test",
                 "-w",
                 "aas-node",
-                "--testPathPattern",
+                "--",
+                "--testNamePattern",
                 "${fileBasename}",
                 "--coverage=false"
             ],
@@ -92,90 +92,91 @@
                 "test",
                 "-w",
                 "aas-core",
-                "--testPathPattern",
+                "--",
+                "--testNamePattern",
                 "${fileBasename}",
                 "--coverage=false"
             ]
         },
         {
-            "name": "Debug current aas-package test",
+            "name": "Debug single aas-package test",
             "type": "node",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
+            "cwd": "${workspaceFolder}/projects/aas-package",
+            "program": "npm",
             "runtimeArgs": [
                 "run-script",
                 "test",
                 "-w",
                 "aas-package",
-                "--testPathPattern",
+                "--",
+                "--testNamePattern",
                 "${fileBasename}",
                 "--coverage=false"
             ]
         },
         {
-            "name": "Debug current aas-lib test",
+            "name": "Debug single aas-lib test",
             "type": "node",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
+            "cwd": "${workspaceFolder}/projects/aas-lib",
+            "runtimeExecutable": "ng",
+            "args": [
                 "test",
-                "-w",
                 "aas-lib",
-                "--testPathPattern",
-                "${fileBasename}",
-                "--coverage=false"
-            ]
+                "--debug",
+            ],
         },
         {
-            "name": "Debug current aas-portal test",
+            "name": "Debug single aas-portal test",
             "type": "node",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
+            "cwd": "${workspaceFolder}/projects/aas-portal",
+            "runtimeExecutable": "ng",
+            "args": [
                 "test",
-                "-w",
                 "aas-portal",
-                "--testPathPattern",
-                "${fileBasename}",
-                "--coverage=false"
-            ]
+                "--debug",
+            ],
         },
         {
-            "name": "Debug current aas-browser test",
+            "name": "Debug single aas-browser test",
             "type": "node",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
+            "cwd": "${workspaceFolder}/projects/aas-browser",
+            "runtimeExecutable": "ng",
+            "args": [
                 "test",
-                "-w",
                 "aas-browser",
-                "--testPathPatterns",
-                "${fileBasename}",
-                "--coverage=false",
-            ]
+                "--debug",
+            ],
         },
         {
             "name": "Debug current aas-server test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "npm",
+            "runtimeExecutable": "node",
             "runtimeArgs": [
                 "run-script",
                 "test",
                 "-w",
                 "aas-server",
-                "--testPathPatterns",
+                "--testNamePattern",
                 "${fileBasename}",
                 "--coverage=false",
             ]
-        }
+        },
+        {
+            "name": "Debug create-app-info test",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/projects/aas-package",
+            "program": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "create-app-info"
+            ]
+        },
     ]
 }

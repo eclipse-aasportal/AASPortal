@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -19,7 +19,7 @@ import { of } from 'rxjs';
 import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
 import { ERRORS } from '../../../lib/messages';
 import { ProfileFormComponent } from '../../../lib/components/auth/profile-form/profile-form.component';
-import { DoneFn, FakeLoader } from '../../mocks';
+import { FakeLoader } from '../../mocks';
 
 describe('ProfileFormComponent', () => {
     let modal: NgbActiveModal;
@@ -54,16 +54,15 @@ describe('ProfileFormComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('updates a user profile', (done: DoneFn) => {
+    it('updates a user profile', async () => {
         const fixture = TestBed.createComponent(ProfileFormComponent);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        jest.spyOn(modal, 'close').mockImplementation((...args) => {
+        vi.spyOn(modal, 'close').mockImplementation((...args) => {
             expect(args[0]).toEqual({ token: 'new_token' });
-            done();
         });
 
-        jest.spyOn(api, 'updateProfile').mockReturnValue(of({ token: 'new_token' } as AuthResult));
+        vi.spyOn(api, 'updateProfile').mockReturnValue(of({ token: 'new_token' } as AuthResult));
 
         component.initialize({ name: 'John', id: 'john.doe@email.com' });
         component.name.set('John Doe');

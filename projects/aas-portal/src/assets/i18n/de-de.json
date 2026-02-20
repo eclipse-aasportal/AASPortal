@@ -11,9 +11,6 @@
     "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",
     "CAPTION_NEW_ELEMENT": "Neu hinzufügen",
     "CAPTION_EDIT_ELEMENT": "Bearbeiten",
-    "CAPTION_ERROR": "Fehler",
-    "CAPTION_INFO": "Info",
-    "CAPTION_WARNING": "Warnung",
     "CAPTION_UPLOAD_FILE": "AASX-Datei hochladen",
     "CMD_OK": "OK",
     "CMD_OPEN_AAS": "VWS öffnen",
@@ -110,6 +107,11 @@
     "ALERT_FAILED": "Fehlgeschlagen!",
     "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
     "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
+    "Notify": {
+        "CAPTION_ERROR": "Fehler",
+        "CAPTION_INFO": "Info",
+        "CAPTION_WARNING": "Warnung"
+    },
     "Error": {
         "AAS_ALREADY_EXISTS": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert bereits.",
         "AAS_DOES_NOT_EXIST": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert nicht.",
@@ -163,22 +165,23 @@
         "EMPTY": "Die START-Seite ist leer."
     },
     "Shells": {
-        "FAVORITES": "Alle Verwaltungsschalen",
-        "ENDPOINT": "Endpunkt",
         "ADD_ENDPOINT": "Hinzufügen...",
-        "UPDATE_ENDPOINT": "Bearbeiten...",
-        "REMOVE_ENDPOINT": "Entfernen...",
-        "EXTRAS": "Extras...",
-        "PLACEHOLDER_FILTER": "Filter",
-        "DigitalProductPassport": "Produktpass",
-        "CustomerFeedback": "Nutzer-Feedback",
-        "Nameplate": "Typenschild",
-        "HandoverDocumentation": "Übergabedokumentation",
-        "OperationalData": "Operative Daten",
         "Browser": "Browser",
-        "ContactInformations": "Kontaktinformationen",
         "CarbonFootprint": "CO2-Fußabdruck",
-        "TechnicalData": "Technische Daten"
+        "ContactInformation": "Kontaktinformationen",
+        "CustomerFeedback": "Nutzer-Feedback",
+        "DigitalProductPassport": "Produktpass",
+        "ENDPOINT": "Endpunkt",
+        "EXTRAS": "Extras...",
+        "FAVORITES": "Alle Verwaltungsschalen",
+        "HandoverDocumentation": "Übergabedokumentation",
+        "HierarchicalStructure": "Hierarchische Strukturen",
+        "Nameplate": "Typenschild",
+        "OperationalData": "Operative Daten",
+        "PLACEHOLDER_FILTER": "Filter",
+        "REMOVE_ENDPOINT": "Entfernen...",
+        "TechnicalData": "Technische Daten",
+        "UPDATE_ENDPOINT": "Bearbeiten..."
     },
     "AAS": {
         "PLACEHOLDER_SEARCH": "Suche"
@@ -307,8 +310,14 @@
     },
     "CarbonFootprint": {
         "TITLE": "CO2-Fußabdruck",
-        "CARBON_FOOTPRINT_DATA": "CO2-Fußabdruck",
-        "TOTAL_PSFCO2EQ": "GWP100"
+        "CARBON_FOOTPRINT": "CO2-Fußabdruck",
+        "CARBON_FOOTPRINTS": "CO2-Fußabdrücke",
+        "LIFE_CYCLES": "Lebenszyklen",
+        "CALCULATION": "Berechnung",
+        "METHODS": "Methoden",
+        "UNIT": "Genutzte Einheit",
+        "QUANTITY": "Genutzte Menge",
+        "EXPLANATION": "Erklärung"
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
@@ -339,13 +348,26 @@
         "TITLE": "Übergabedocumentation",
         "EMPTY": "Keine Übergabedokumente verfügbar."
     },
+    "HandoverDocumentationPopup": {
+        "LANGUAGE": "Sprache",
+        "SUMMARY": "Inhalt",
+        "KEYWORDS": "Stichwörter",
+        "ORGANIZATION": "Organisation"
+    },
     "Browser": {
         "TITLE": "AAS-Browser",
         "EMPTY": "Keine Verwalungsschale verfügbar."
     },
     "Nameplate": {
         "GENERAL": "Allgemein",
-        "TITLE": "Digitales Typenschild"
+        "TITLE": "Digitales Typenschild",
+        "SERIAL_NUMBER": "Seriennummer",
+        "YEAR_OF_CONSTRUCTION": "Baujahr",
+        "DATE_OF_MANUFACTURE": "Herstellungsdatum",
+        "PRODUCT_TYPE": "Produkttyp",
+        "PRODUCT_FAMILY": "Produktgruppe",
+        "MANUFACTURER": "Hersteller",
+        "MANUFACTURER_ADDRESS": "Herstelleradresse"
     },
     "TechnicalData": {
         "TITLE": "Technische Daten"
@@ -355,5 +377,8 @@
     },
     "OperationalData": {
         "TITLE": "Betriebsdaten"
+    },
+    "HierarchicalStructure": {
+        "TITLE": "Hierarchische Strukturen"
     }
 }

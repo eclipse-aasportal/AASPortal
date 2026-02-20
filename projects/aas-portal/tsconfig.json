@@ -7,9 +7,6 @@
             "ES2022",
             "dom"
         ],
-        "types": [
-            "jest"
-        ],
         "paths": {
             "aas-lib": [
                 "projects/aas-lib/src/public-api"
