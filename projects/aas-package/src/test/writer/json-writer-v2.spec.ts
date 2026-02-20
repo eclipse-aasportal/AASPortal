@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect } from '@jest/globals';
+import { describe, beforeEach, it, expect } from 'vitest';
 import { JsonWriterV2 } from '../../lib/writer/json-writer-v2.js';
 import { aasEnvironment } from '../assets/aas-environment.js';
 

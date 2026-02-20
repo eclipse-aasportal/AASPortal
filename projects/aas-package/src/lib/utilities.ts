@@ -24,7 +24,7 @@ import { JsonReaderV3 } from './reader/json-reader-v3.js';
  * @returns The decoded ASCII string
  */
 export function decodeBase64Url(data: string): string {
-    return Buffer.from(data, 'base64url').toString('ascii');
+    return Buffer.from(data, 'base64url').toString('utf-8');
 }
 
 /**

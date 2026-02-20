@@ -28,7 +28,7 @@ export class ApiUrlService implements ApiUrl {
         return url.toString();
     }
 
-    public getFileUrl(id: string, submodelId: string, idShortPath: string, endpoint: string): string {
+    public getFileUrl(endpoint: string, id: string, submodelId: string, idShortPath: string): string {
         return this.join(
             `endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/submodels/${encodeBase64Url(submodelId)}/submodel-elements/${idShortPath}/value`,
         );

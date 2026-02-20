@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import { MySqlQuery } from '../../../app/index/mysql/mysql-query.js';
 
 describe('MySqlQuery', () => {

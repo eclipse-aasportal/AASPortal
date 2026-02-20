@@ -16,17 +16,15 @@ import {
     WebSocketData,
     AASNodeMessage,
     aas,
-    selectElement,
     AASCursor,
     AASPagedResult,
     AASEndpoint,
     ApplicationError,
-    getChildren,
-    isReferenceElement,
     AASEndpointSchedule,
     isFile,
     isBlob,
     convertToString,
+    selectReferable,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -42,7 +40,6 @@ import { Variable } from '../variable.js';
 import { WSNode } from '../ws-node.js';
 import { ERRORS } from '../errors.js';
 import { Task, TaskHandler } from './task-handler.js';
-import { HierarchicalStructure } from './hierarchical-structure.js';
 import { AASCache } from './aas-cache.js';
 import { urlToEndpoint } from '../configuration.js';
 
@@ -118,24 +115,30 @@ export class AASProvider {
 
     /**
      * Gets the AAS document with the specified identifier.
-     * @param id The AAS identifier.
-     * @param endpointName The endpoint name.
+     *
+     * @param endpoint The AAS endpoint name (optional).
+     * @param modelType The model type to which `id` belongs.
+     * @param id Depending on the model type the AAS or Asset identifier.
      * @returns The AAS document with the specified identifier.
      */
-    public async getDocument(id: string, endpointName?: string): Promise<AASDocument> {
-        const document = await this.index.get(endpointName, id);
+    public async getDocument(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument> {
+        const document = await this.index.get(endpoint, modelType, id);
         document.content = await this.getDocumentContent(document);
         return document;
     }
 
     /**
      * Gets the AAS environment for the specified AAS document.
-     * @param endpointName The endpoint name.
+     * @param endpoint The endpoint name.
      * @param id The AAS identifier.
      * @returns The AAS environment.
      */
-    public async getContent(endpointName: string, id: string): Promise<aas.Environment> {
-        const document = await this.index.get(endpointName, id);
+    public async getContent(endpoint: string, id: string): Promise<aas.Environment> {
+        const document = await this.index.get(endpoint, 'AssetAdministrationShell', id);
         return await this.getDocumentContent(document);
     }
 
@@ -147,7 +150,7 @@ export class AASProvider {
      */
     public async getThumbnail(endpointName: string, id: string): Promise<NodeJS.ReadableStream | undefined> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
@@ -174,7 +177,7 @@ export class AASProvider {
         options?: object,
     ): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         let stream: NodeJS.ReadableStream;
         const client = this.clientFactory.create(endpoint);
         try {
@@ -187,7 +190,7 @@ export class AASProvider {
                 }
             }
 
-            const dataElement: aas.DataElement | undefined = selectElement(document.content, smId, idShortPath);
+            const dataElement: aas.DataElement | undefined = selectReferable(document.content, smId, idShortPath);
             if (!dataElement) {
                 throw new Error('DataElement not found.');
             }
@@ -197,7 +200,7 @@ export class AASProvider {
                     throw new Error('Invalid operation.');
                 }
 
-                stream = await client.openRead(document.address, dataElement);
+                stream = await client.getFile(document.address, dataElement);
                 const extension = dataElement.value ? path.extname(dataElement.value).toLowerCase() : '';
                 const imageOptions = options as { width?: number; height?: number };
                 if (dataElement.contentType.startsWith('image/')) {
@@ -231,7 +234,7 @@ export class AASProvider {
      */
     public async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.clientFactory.testAsync(endpoint);
-        await this.index.addEndpoint(endpoint);
+        await this.index.insertEndpoint(endpoint);
         this.wsServer.notify('IndexChange', {
             type: 'AASNodeMessage',
             data: {
@@ -286,7 +289,7 @@ export class AASProvider {
     public async removeEndpoint(endpointName: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
-            await this.index.removeEndpoint(endpoint.name);
+            await this.index.deleteEndpoint(endpoint.name);
             const task = this.taskHandler.find(endpointName, 'ScanEndpoint');
             if (task) {
                 this.taskHandler.delete(task.id);
@@ -314,7 +317,13 @@ export class AASProvider {
         this.resetRequested = true;
         await this.index.clear();
         this.cache.clear();
-        for (const task of [...this.taskHandler.tasks]) {
+        const tasks = [...this.taskHandler.tasks];
+        if (tasks.length === 0) {
+            await this.restart();
+            return;
+        }
+
+        for (const task of tasks) {
             if (task.state === 'idle' && task.owner === this) {
                 this.taskHandler.delete(task.id);
             }
@@ -336,7 +345,7 @@ export class AASProvider {
      */
     public async updateDocument(endpointName: string, id: string, content: aas.Environment): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         if (!document) {
             throw new Error(`The destination document ${id} is not available.`);
         }
@@ -358,7 +367,7 @@ export class AASProvider {
      */
     public async getPackage(endpointName: string, id: string): Promise<NodeJS.ReadableStream> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
@@ -405,7 +414,7 @@ export class AASProvider {
             const address = await client.determineAddress(aasxFile);
             if (address) {
                 const document = await client.createDocument(address);
-                await this.index.add(document);
+                await this.index.insert(document);
                 this.notify({ type: 'Added', document });
             }
         } finally {
@@ -420,12 +429,12 @@ export class AASProvider {
      */
     public async deletePackage(endpointName: string, id: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         if (document) {
             const client = this.clientFactory.create(endpoint);
             try {
                 await client.deletePackage(document.id, document.address);
-                await this.index.remove(endpointName, id);
+                await this.index.delete(endpointName, id);
                 this.notify({ type: 'Removed', document: { ...document, content: null } });
             } finally {
                 await client.close();
@@ -442,7 +451,7 @@ export class AASProvider {
      */
     public async invoke(endpointName: string, id: string, operation: aas.Operation): Promise<aas.Operation> {
         const endpoint = await this.index.getEndpoint(endpointName);
-        const document = await this.index.get(endpointName, id);
+        const document = await this.index.get(endpointName, 'AssetAdministrationShell', id);
         const client = this.clientFactory.create(endpoint);
         try {
             await client.open();
@@ -456,20 +465,6 @@ export class AASProvider {
         } finally {
             await client.close();
         }
-    }
-
-    /**
-     * Gets all AAS documents of a hierarchy.
-     * @param endpoint The endpoint name of the root document.
-     * @param id The AAS identifier of the root document.
-     * @returns All AAS documents of a hierarchy.
-     */
-    public async getHierarchy(endpoint: string, id: string): Promise<AASDocument[]> {
-        const document = await this.index.get(endpoint, id);
-        const root: AASDocument = { ...document, parentId: null, content: null };
-        const nodes: AASDocument[] = [root];
-        await this.collectDescendants(root, nodes);
-        return nodes;
     }
 
     /**
@@ -503,7 +498,6 @@ export class AASProvider {
     private async restart(): Promise<void> {
         this.resetRequested = false;
         await this.initializeIndex();
-        this.cache.clear();
         await this.startScan();
         this.logger.info('AASNode configuration restored.');
     }
@@ -515,7 +509,7 @@ export class AASProvider {
 
         for (const endpoint of this.variable.ENDPOINTS.map(endpoint => urlToEndpoint(endpoint))) {
             try {
-                await this.index.addEndpoint(endpoint);
+                await this.index.insertEndpoint(endpoint);
                 this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) added.`);
                 this.wsServer.notify('IndexChange', {
                     type: 'AASNodeMessage',
@@ -551,7 +545,7 @@ export class AASProvider {
 
     private async createSubscription(message: LiveRequest, socket: SocketClient): Promise<SocketSubscription> {
         const endpoint = await this.index.getEndpoint(message.endpoint);
-        const document = await this.index.get(message.endpoint, message.id);
+        const document = await this.index.get(message.endpoint, 'AssetAdministrationShell', message.id);
         const client = this.clientFactory.create(endpoint);
         await client.open();
         let env = this.cache.get(document.endpoint, document.id);
@@ -603,7 +597,7 @@ export class AASProvider {
         return this.variable.SCAN_ENDPOINT_TIMEOUT;
     }
 
-    private scanEndpoint = (task: Task, endpoint: AASEndpoint) => {
+    private scanEndpoint = (task: Task, endpoint: AASEndpoint): void => {
         const data: ScanEndpointData = {
             type: 'ScanEndpointData',
             taskId: task.id,
@@ -615,7 +609,7 @@ export class AASProvider {
         this.parallel.execute(data);
     };
 
-    private parallelOnMessage = async (result: ScanResult) => {
+    private parallelOnMessage = async (result: ScanResult): Promise<void> => {
         try {
             if (this.isScanEndpointResult(result)) {
                 switch (result.kind) {
@@ -639,7 +633,7 @@ export class AASProvider {
         return result.type === 'ScanEndpointResult';
     }
 
-    private parallelOnEnd = async (result: ScanResult) => {
+    private parallelOnEnd = async (result: ScanResult): Promise<void> => {
         const task = this.taskHandler.get(result.taskId);
         if (task === undefined || task.owner !== this) {
             return;
@@ -675,12 +669,16 @@ export class AASProvider {
             return;
         }
 
-        await this.index.update(document);
-        if (document.content && this.cache.has(document.endpoint, document.id)) {
-            this.cache.set(document.endpoint, document.id, document.content);
-        }
+        try {
+            await this.index.update(document);
+            if (document.content && this.cache.has(document.endpoint, document.id)) {
+                this.cache.set(document.endpoint, document.id, document.content);
+            }
 
-        this.sendMessage({ type: 'Update', document: { ...document, content: null } });
+            this.sendMessage({ type: 'Update', document: { ...document, content: null } });
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     private async onAdded(result: ScanEndpointResult): Promise<void> {
@@ -690,9 +688,13 @@ export class AASProvider {
             return;
         }
 
-        await this.index.add(document);
-        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
-        this.sendMessage({ type: 'Added', document });
+        try {
+            await this.index.insert(document);
+            this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
+            this.sendMessage({ type: 'Added', document });
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     private async onRemoved(result: ScanEndpointResult): Promise<void> {
@@ -702,72 +704,21 @@ export class AASProvider {
         }
 
         const document = result.document;
-        await this.index.remove(result.endpoint.name, document.id);
-        this.cache.remove(document.endpoint, document.id);
-        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
-        this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
+        try {
+            await this.index.delete(result.endpoint.name, document.id);
+            this.cache.remove(document.endpoint, document.id);
+            this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
+            this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
-    private sendMessage(data: AASNodeMessage) {
+    private sendMessage(data: AASNodeMessage): void {
         this.wsServer.notify('IndexChange', {
             type: 'AASNodeMessage',
             data: data,
         });
-    }
-
-    private async collectDescendants(parent: AASDocument, nodes: AASDocument[]): Promise<void> {
-        const content = parent.content ?? (await this.getDocumentContent(parent));
-        for (const submodel of this.whereHierarchicalStructure(content.submodels)) {
-            const assetIds = await new HierarchicalStructure(parent, content, submodel).getChildren();
-            for (const assetId of assetIds) {
-                const child = await this.index.find(undefined, assetId);
-                if (child) {
-                    const node: AASDocument = { ...child, parentId: parent.id, content: null };
-                    nodes.push(node);
-                    await this.collectDescendants(node, nodes);
-                }
-            }
-        }
-
-        for (const reference of this.whereAASReference(content.submodels)) {
-            const childId = reference.keys[0].value;
-            const child =
-                (await this.index.find(parent.endpoint, childId)) ?? (await this.index.find(undefined, childId));
-
-            if (child) {
-                const node: AASDocument = { ...child, parentId: parent.id, content: null };
-                nodes.push(node);
-                await this.collectDescendants(node, nodes);
-            }
-        }
-    }
-
-    private *whereHierarchicalStructure(submodels: aas.Submodel[]): Generator<aas.Submodel> {
-        for (const submodel of submodels) {
-            if (HierarchicalStructure.isHierarchicalStructure(submodel)) {
-                yield submodel;
-            }
-        }
-    }
-
-    private *whereAASReference(elements: aas.Referable[]): Generator<aas.Reference> {
-        const stack: aas.Referable[][] = [];
-        stack.push(elements);
-        while (stack.length > 0) {
-            const children = stack.pop() as aas.Referable[];
-            for (const child of children) {
-                if (isReferenceElement(child)) {
-                    if (child.value && child.value.keys.some(item => item.type === 'AssetAdministrationShell')) {
-                        yield child.value;
-                    }
-                }
-
-                const children = getChildren(child);
-                if (children.length > 0) {
-                    stack.push(children);
-                }
-            }
-        }
     }
 
     private async getDocumentContent(document: AASDocument): Promise<aas.Environment> {

@@ -6,31 +6,21 @@
  *
  *****************************************************************************/
 
-import { computed, Signal } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { Component, computed } from '@angular/core';
+import { Params } from '@angular/router';
 import { combineLatest, first, from, mergeMap, of, toArray, map, Observable } from 'rxjs';
 
 import { aas, AASDocument, getReferable, getSemanticId } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
-import { EndpointsApi } from '../services/endpoints-api';
-import { ViewRoute, ViewRouteMap, ViewRouteName } from '../types';
+import { ViewRoute, ViewRouteMap } from '../types';
 import { View } from './view';
-import { CompositeViewData, CompositeViewState } from './composite-view-state';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 /** Provides a view for an Asset Asset Administration with a set of specific submodels. */
-export abstract class CompositeView<TState extends CompositeViewState<CompositeViewData>> extends View {
-    private readonly tuples: Signal<[AASDocument, ViewRouteMap][]>;
-
-    protected constructor(
-        route: ActivatedRoute,
-        api: EndpointsApi,
-        viewRoutes: ViewRoute[],
-        viewRouteName: ViewRouteName,
-        protected readonly state: TState,
-    ) {
-        super(route, api, viewRoutes, viewRouteName);
-
-        this.tuples = state.tuples;
+@Component({ selector: 'awp-composite-view', template: '' })
+export abstract class CompositeView extends View {
+    protected constructor() {
+        super();
     }
 
     protected readonly tuple = computed(() => this.tuples().at(this.index() - 1));
@@ -72,35 +62,36 @@ export abstract class CompositeView<TState extends CompositeViewState<CompositeV
 
     public override readonly count = computed(() => this.tuples().length);
 
-    protected onInit(): void {
-        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
-            .pipe(
-                map(([routeParams, queryParams]) => {
-                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
-                }),
-                mergeMap(params => this.documentsFromParams(params)),
-                first(),
-            )
-            .subscribe(documents => {
+    protected readonly tuples = toSignal(
+        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())]).pipe(
+            map(([routeParams, queryParams]) => {
+                return routeParams.id || routeParams.docs ? routeParams : queryParams;
+            }),
+            mergeMap(params => this.documentsFromParams(params)),
+            first(),
+            map(documents => {
                 if (!documents) {
-                    return;
+                    return [];
                 }
 
-                const tuples: [AASDocument, ViewRouteMap][] = [...this.filter(documents)];
-                this.state.update({ tuples });
-            });
-    }
+                return [...this.filter(documents)];
+            }),
+        ),
+        { initialValue: [] },
+    );
 
     private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
         if (params?.id) {
             const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
-            return this.api.getDocument(decodeBase64Url(params.id), endpoint).pipe(toArray());
+            return this.api
+                .getDocument('AssetAdministrationShell', decodeBase64Url(params.id), endpoint)
+                .pipe(toArray());
         }
 
         if (params?.docs) {
             const docs: [string, string][] = JSON.parse(decodeBase64Url(params.docs));
             return from(docs).pipe(
-                mergeMap(([endpoint, id]) => this.api.getDocument(id, endpoint)),
+                mergeMap(([endpoint, id]) => this.api.getDocument('AssetAdministrationShell', id, endpoint)),
                 toArray(),
             );
         }

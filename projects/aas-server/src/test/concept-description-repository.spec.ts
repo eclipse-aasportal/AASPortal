@@ -7,14 +7,13 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it } from '@jest/globals';
-import { resolve } from 'path';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { fileURLToPath } from 'node:url';
 
-import { createSpyObj } from './create-spy-obj.js';
 import { Variable } from '../app/variable.js';
-import { createDatabase } from './utilities.js';
 import { ConceptDescriptionRepository } from '../app/concept-description-repository.js';
 import { HttpCache } from '../app/http-cache.js';
+import { createDatabase, createSpyObj } from './mocks.js';
 
 describe('ConceptDescriptionRepository', () => {
     let variable: Variable;
@@ -23,7 +22,7 @@ describe('ConceptDescriptionRepository', () => {
     beforeEach(() => {
         variable = createSpyObj<Variable>(
             {},
-            { DATA: resolve('./src/test/assets/tmp/data'), PAGE_SIZE: 100, CACHE_SIZE: 100 },
+            { DATA: fileURLToPath(new URL('./assets/tmp/data', import.meta.url)), PAGE_SIZE: 100, CACHE_SIZE: 100 },
         );
 
         cache = new HttpCache(variable);

@@ -11,17 +11,6 @@ import { AASDocument, AASAbbreviation } from './types.js';
 
 const DataSpecificationIEC61360 = 'http://admin-shell.io/DataSpecificationTemplates/DataSpecificationIEC61360';
 
-/** Represents a difference. */
-export interface DifferenceItem {
-    type: 'deleted' | 'inserted' | 'changed' | 'moved';
-    sourceParent?: aas.Referable;
-    sourceElement?: aas.Referable;
-    sourceIndex?: number;
-    destinationParent?: aas.Referable;
-    destinationElement?: aas.Referable;
-    destinationIndex?: number;
-}
-
 /**
  * Determines whether the specified referable represents an `AssetAdministrationShell`.
  * @param referable The current referable.
@@ -56,6 +45,15 @@ export function isProperty(referable: unknown): referable is aas.Property {
  */
 export function isFile(referable: unknown): referable is aas.File {
     return (referable as aas.Referable)?.modelType === 'File';
+}
+
+/**
+ * Determines whether the specified referable represents a `BasicEventElement`.
+ * @param referable The current referable.
+ * @returns `true` if the specified referable represents a `BasicEventElement`; otherwise, `false`.
+ */
+export function isBasicEventElement(referable: unknown): referable is aas.BasicEventElement {
+    return (referable as aas.Referable)?.modelType === 'BasicEventElement';
 }
 
 /**
@@ -205,17 +203,23 @@ export function isSubmodelElement(value: unknown): value is aas.SubmodelElement 
         default:
             return false;
     }
-
-    return false;
 }
 
-/** Indicates whether the specified value if of type `Environment`. */
+/**
+ * Indicates whether the specified value if of type `Environment`.
+ */
 export function isEnvironment(value: unknown): value is aas.Environment {
-    return (
-        Array.isArray((value as aas.Environment).assetAdministrationShells) &&
-        Array.isArray((value as aas.Environment).submodels) &&
-        Array.isArray((value as aas.Environment).conceptDescriptions)
-    );
+    if (typeof value !== 'object') {
+        return false;
+    }
+
+    for (const name in value) {
+        if (name !== 'assetAdministrationShells' && name !== 'submodels' && name !== 'conceptDescriptions') {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -264,16 +268,6 @@ export function equalDocument(a: AASDocument | null, b: AASDocument | null): boo
 }
 
 /**
- * Gets the parent of the specified element.
- * @param env The Asset Administration Shell environment.
- * @param referable The element to check.
- * @returns The parent element or `undefined` if element is the root.
- */
-export function getParent(env: aas.Environment, referable: aas.Referable): aas.Referable | undefined {
-    return referable.parent ? selectReferable(env, referable.parent) : undefined;
-}
-
-/**
  * Determines the submodel to which the specified  referable belongs.
  * @param env The AAS environment.
  * @param referable An element of the AAS.
@@ -284,29 +278,12 @@ export function selectSubmodel(env: aas.Environment, referable: aas.Referable): 
         return referable as aas.Submodel;
     }
 
-    if (env.submodels && referable.parent && referable.parent.keys[0].type === 'Submodel') {
-        const id = referable.parent.keys[0].value;
-        return env.submodels.find(item => item.id === id);
+    if (!env.submodels || !referable.path) {
+        return undefined;
     }
 
-    return undefined;
-}
-
-/**
- * Determines wether the specified element is a descendant of the given ancestor.
- * @param env The AAS environment.
- * @param ancestor An ancestor element.
- * @param element An element to check.
- * @returns `true` if the element is a descendant of the given ancestor; otherwise, `false`.
- */
-export function isDescendant(env: aas.Environment, ancestor: aas.Referable, element: aas.Referable): boolean {
-    for (let referable = getParent(env, element); referable; referable = getParent(env, referable)) {
-        if (referable === ancestor) {
-            return true;
-        }
-    }
-
-    return false;
+    const id = referable.path.id;
+    return env.submodels.find(item => item.id === id);
 }
 
 /**
@@ -467,62 +444,27 @@ export function getModelTypeFromAbbreviation(abbreviation: AASAbbreviation): aas
 }
 
 /**
- * Selects the referable that belongs to the specified reference.
- * @param env The AAS environment.
- * @param reference The reference.
- * @returns The referenced referable or `undefined`.
- */
-export function selectReferable<T extends aas.Referable>(
-    env: aas.Environment,
-    reference: aas.Reference,
-): T | undefined {
-    let referable: aas.Referable | undefined;
-    for (const key of reference.keys) {
-        switch (key.type) {
-            case 'AssetAdministrationShell':
-                referable = env.assetAdministrationShells.find(item => item.id === key.value);
-                break;
-            case 'ConceptDescription':
-                referable = env.conceptDescriptions.find(item => item.id === key.value);
-                break;
-            case 'Submodel':
-                referable = env.submodels.find(item => item.id === key.value);
-                break;
-            default:
-                referable = referable && getChildren(referable).find(item => item.idShort === key.value);
-                break;
-        }
-
-        if (!referable) {
-            break;
-        }
-    }
-
-    return referable as T;
-}
-
-/**
  * Selects the referable with the specified path in the given AAS environment.
  * @param env The Asset Administration Shell environment.
- * @param submodel The name (idShort or identifier) of the submodel.
+ * @param id The name (idShort or identifier) of the submodel.
  * @param idShortPath The path to the submodel element.
  * @returns The `Referable` at the specified path.
  */
-export function selectElement<T extends aas.Referable>(
+export function selectReferable<T extends aas.Referable = aas.Referable>(
     env: aas.Environment,
-    submodel: string,
+    id: string,
     idShortPath?: string,
 ): T | undefined {
-    const sm = env.submodels.find(sm => sm.idShort === submodel || sm.id === submodel);
-    if (!sm) {
+    const submodel = env.submodels.find(sm => sm.id === id || sm.idShort === id);
+    if (!submodel) {
         return undefined;
     }
 
     if (!idShortPath) {
-        return sm as unknown as T;
+        return submodel as unknown as T;
     }
 
-    return getReferable(sm, idShortPath);
+    return getReferable(submodel, idShortPath);
 }
 
 /**
@@ -547,7 +489,7 @@ export function getIEC61360Content(
     const hasDataSpecification = referable as aas.HasDataSpecification;
     if (hasDataSpecification.embeddedDataSpecifications) {
         for (const item of hasDataSpecification.embeddedDataSpecifications) {
-            if (getPath(item.dataSpecification).startsWith(DataSpecificationIEC61360)) {
+            if (item.dataSpecification.keys.at(0)?.value.startsWith(DataSpecificationIEC61360)) {
                 return item.dataSpecificationContent as aas.DataSpecificationIec61360;
             }
         }
@@ -618,51 +560,6 @@ export function getChildren(parent: aas.Referable, env?: aas.Environment): aas.R
 }
 
 /**
- * Returns the absolute path of the specified referable. The path starts with identifier of the Submodel
- * followed by the names (idShort) up to the specified referable.
- * @param referable The referable that is a descendant of a submodel.
- * @returns An array where the first element is the identifier of the submodel.
- */
-export function getAbsolutePath(referable: aas.Referable): string[] {
-    if (!referable.parent) {
-        throw new Error('Argument undefined.');
-    }
-
-    const path = referable.parent.keys.map(key => key.value);
-    path.push(referable.idShort);
-    return path;
-}
-
-/**
- * Gets the idShort path of the specified
- * @param referable The current referable.
- * @returns The idShort path of the specified referable.
- */
-export function getIdShortPath(referable: aas.Referable): string {
-    if (!referable.parent) {
-        throw new Error('Invalid operation');
-    }
-
-    let idShortPath = '';
-    const keys = referable.parent.keys;
-    for (let i = 1, n = keys.length; i < n; i++) {
-        idShortPath += keys[i].value + '.';
-    }
-
-    idShortPath += referable.idShort;
-    return idShortPath;
-}
-
-/**
- * Gets the path of the specified reference.
- * @param reference The current reference.
- * @returns A path that represents the specified reference.
- */
-export function getPath(reference: aas.Reference): string {
-    return reference.keys.map(key => key.value).join('.');
-}
-
-/**
  * Compares two AAS references for equality.
  * @param a The first reference.
  * @param b The second reference.
@@ -696,17 +593,22 @@ export function equalReference(a?: aas.Reference, b?: aas.Reference): boolean {
 
 /**
  * Gets the referable that is a descendant of the specified submodel.
- * @param element The current submodel or submodel element.
+ * @param current The current referable.
  * @param idShortPath The idShort path of the referable.
  * @returns The corresponding referable or `undefined`.
  */
-export function getReferable<T extends aas.Referable>(
-    element: aas.Submodel | aas.SubmodelElement,
-    idShortPath: string,
-): T | undefined {
-    let referable: aas.Referable | undefined = element;
-    for (const idShort of idShortPath.split('.')) {
+export function getReferable<T extends aas.Referable>(current: aas.Referable, idShortPath: string): T | undefined {
+    let referable: aas.Referable | undefined = current;
+    for (const idShort of splitIdShortPath(idShortPath)) {
         const children = getChildren(referable);
+        if (isSubmodelElementList(referable)) {
+            const index = Number(idShort);
+            if (!isNaN(index) && index >= 0) {
+                referable = children[index];
+                continue;
+            }
+        }
+
         referable = children.find(child => child.idShort === idShort);
         if (referable === undefined) {
             return undefined;
@@ -717,6 +619,52 @@ export function getReferable<T extends aas.Referable>(
 }
 
 /**
+ * Splits an idShortPath.
+ * @param idShortPath The current idShortPath.
+ * @returns A
+ */
+export function splitIdShortPath(idShortPath: string): string[] {
+    if (!idShortPath) {
+        return [];
+    }
+
+    const result: string[] = [];
+    let i = 0;
+    const n = idShortPath.length;
+    while (i < n) {
+        const ch = idShortPath[i];
+        if (ch === '.') {
+            i++;
+            continue;
+        }
+
+        if (ch === '[') {
+            i++;
+            const start = i;
+            while (i < n && idShortPath[i] !== ']') {
+                i++;
+            }
+
+            result.push(idShortPath.slice(start, i));
+            i++;
+            continue;
+        }
+
+        const start = i;
+        while (i < n && idShortPath[i] !== '.' && idShortPath[i] !== '[') {
+            i++;
+        }
+
+        const name = idShortPath.slice(start, i);
+        if (name) {
+            result.push(name);
+        }
+    }
+
+    return result;
+}
+
+/**
  * Gets the concept description with the specified identifier from the given AAS environment.
  * @param env The AAS environment.
  * @param id The identifier of the concept description to get.
@@ -724,4 +672,39 @@ export function getReferable<T extends aas.Referable>(
  */
 export function getConceptDescription(env: aas.Environment, id: string): aas.ConceptDescription | undefined {
     return env.conceptDescriptions.find(item => item.id === id);
+}
+
+/**
+ * Gets the referenced referable.
+ * @param env The current AAS environment.
+ * @param reference The current reference.
+ * @returns The referenced referable or `undefined`.
+ */
+export function getReferenced<T extends aas.Referable = aas.Referable>(
+    env: aas.Environment,
+    reference: aas.Reference,
+): T | undefined {
+    let referable: aas.Referable | undefined;
+    for (const key of reference.keys) {
+        switch (key.type) {
+            case 'AssetAdministrationShell':
+                referable = env.assetAdministrationShells.find(item => item.id === key.value);
+                break;
+            case 'ConceptDescription':
+                referable = env.conceptDescriptions.find(item => item.id === key.value);
+                break;
+            case 'Submodel':
+                referable = env.submodels.find(item => item.id === key.value);
+                break;
+            default:
+                referable = referable && getChildren(referable).find(item => item.idShort === key.value);
+                break;
+        }
+
+        if (!referable) {
+            break;
+        }
+    }
+
+    return referable as T;
 }

@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
+export * from './lib/api-url';
 export * from './lib/components/aas-table/aas-table';
-export * from './lib/components/aas-tree/aas-tree-node';
 export * from './lib/components/aas-tree/aas-tree-search';
 export * from './lib/components/aas-tree/aas-tree.component';
-export * from './lib/components/aas-tree/aas-tree.state';
 export * from './lib/components/auth/auth-api.service';
 export * from './lib/components/auth/auth.component';
 export * from './lib/components/auth/auth.interceptor';
@@ -33,11 +32,12 @@ export * from './lib/components/notify/notify.service';
 export * from './lib/components/progress/progress.component';
 export * from './lib/components/progress/progress.service';
 export * from './lib/components/score/score.component';
-export * from './lib/components/secured-image/secured-image.component';
 export * from './lib/components/theme-toggle/theme-toggle.component';
 export * from './lib/directives/sortable-header.directive';
 export * from './lib/pipes/max-length.pipe';
 export * from './lib/services/cache.service';
+export * from './lib/services/command-handler';
+export * from './lib/services/command';
 export * from './lib/services/endpoints-api';
 export * from './lib/services/index-change.service';
 export * from './lib/services/start.service';
@@ -63,6 +63,8 @@ export * from './lib/views/handover-documentation/handover-documentation-view';
 export * from './lib/views/handover-documentation/handover-documentation-view';
 export * from './lib/views/handover-documentation/handover-documentation';
 export * from './lib/views/handover-documentation/handover-documentation';
+export * from './lib/views/hierarchical-structure/hierarchical-structure-view';
+export * from './lib/views/hierarchical-structure/hierarchical-structure';
 export * from './lib/views/leaf-view';
 export * from './lib/views/nameplate/nameplate-view';
 export * from './lib/views/nameplate/nameplate';
@@ -70,6 +72,7 @@ export * from './lib/views/operational-data/operational-data-view';
 export * from './lib/views/technical-data/technical-data-view';
 export * from './lib/views/technical-data/technical-data';
 export * from './lib/views/thumbnail-qrcode/thumbnail-qrcode';
+export * from './lib/views/view-route-config';
 export * from './lib/views/view';
 export * from './lib/views/views-constants';
 export * from './lib/views/views-routes';

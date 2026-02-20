@@ -11,12 +11,14 @@ import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { KeyList } from '../key-list.js';
 
-export class DeleteThumbnailCommand extends DatabaseCommand<void> {
+export class DeleteThumbnailCommand extends DatabaseCommand {
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly aasId: string,
     ) {
-        super(database);
+        super(database, resolve, reject);
     }
 
     public override async execute(): Promise<void> {

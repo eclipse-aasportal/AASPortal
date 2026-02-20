@@ -1,6 +1,6 @@
 # Dockerfile to build client app
 ARG NGINX_IMAGE=nginx:latest
-ARG NODE_IMAGE=node:22.16.0-alpine
+ARG NODE_IMAGE=node:24.12.0-alpine
 
 FROM $NODE_IMAGE AS build
 WORKDIR /usr/src/app
@@ -13,7 +13,7 @@ FROM $NGINX_IMAGE AS aas-portal
 RUN apt-get update -y && apt-get install -y netcat-openbsd
 COPY --from=build /usr/src/app/projects/aas-portal/dist/browser/ /usr/share/nginx/html/
 COPY --from=build /usr/src/app/welcome/ /usr/share/nginx/html/assets/welcome/
-COPY --from=build /usr/src/app/projects/aas-portal/src/config.js /usr/share/nginx/html/config.js
+COPY --from=build /usr/src/app/projects/aas-portal/src/config.js /usr/share/nginx/html/config.js.template
 COPY --from=build /usr/src/app/projects/aas-portal/nginx.conf /etc/nginx/nginx.conf
 COPY docker-entrypoint-aas-portal.sh /docker-entrypoint-aas-portal.sh
 RUN chmod +x /docker-entrypoint-aas-portal.sh

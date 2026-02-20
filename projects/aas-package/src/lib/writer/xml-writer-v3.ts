@@ -375,7 +375,7 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeAnnotatedRelationshipElement(relationship: aas.AnnotatedRelationshipElement, node: Node) {
+    private writeAnnotatedRelationshipElement(relationship: aas.AnnotatedRelationshipElement, node: Node): void {
         this.writeRelationshipElement(relationship, node);
 
         if (relationship.annotations) {
@@ -386,7 +386,7 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeBasicEventElement(event: aas.BasicEventElement, node: Node) {
+    private writeBasicEventElement(event: aas.BasicEventElement, node: Node): void {
         this.writeReference(event.observed, this.appendChild(node, 'observed'));
         this.writeTextNode(node, 'direction', event.direction);
         this.writeTextNode(node, 'state', event.state);
@@ -401,16 +401,16 @@ export class XmlWriterV3 extends AASWriter {
         this.writeTextNode(node, 'maxInterval', event.maxInterval);
     }
 
-    private writeBlob(blob: aas.Blob, node: Node) {
+    private writeBlob(blob: aas.Blob, node: Node): void {
         this.writeTextNode(node, 'contentType', blob.contentType);
         this.writeTextNode(node, 'value', blob.value);
     }
 
-    private writeCapability(capability: aas.Capability, node: Node) {
+    private writeCapability(capability: aas.Capability, node: Node): void {
         noop(capability, node);
     }
 
-    private writeEntity(entity: aas.Entity, node: Node) {
+    private writeEntity(entity: aas.Entity, node: Node): void {
         this.writeTextNode(node, 'entityType', entity.entityType);
         this.writeTextNode(node, 'globalAssetId', entity.globalAssetId);
 
@@ -429,12 +429,12 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeFile(file: aas.File, node: Node) {
+    private writeFile(file: aas.File, node: Node): void {
         this.writeTextNode(node, 'contentType', file.contentType);
         this.writeTextNode(node, 'value', file.value);
     }
 
-    private writeMultiLanguageProperty(property: aas.MultiLanguageProperty, node: Node) {
+    private writeMultiLanguageProperty(property: aas.MultiLanguageProperty, node: Node): void {
         const valueNode = this.appendChild(node, 'value');
         this.writeLangStrings(property.value, valueNode, 'langStringTextType');
 
@@ -449,7 +449,7 @@ export class XmlWriterV3 extends AASWriter {
         this.writeSubmodelElement(variable.value, modelTypeNode);
     }
 
-    private writeOperation(operation: aas.Operation, node: Node) {
+    private writeOperation(operation: aas.Operation, node: Node): void {
         if (operation.inputVariables) {
             const variablesNode = this.appendChild(node, 'inputVariables');
             for (const variable of operation.inputVariables) {
@@ -472,7 +472,7 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeProperty(property: aas.Property, node: Node) {
+    private writeProperty(property: aas.Property, node: Node): void {
         this.writeTextNode(node, 'valueType', property.valueType);
         this.writeTextNode(node, 'value', property.value);
 
@@ -481,19 +481,19 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeRange(range: aas.Range, node: Node) {
+    private writeRange(range: aas.Range, node: Node): void {
         this.writeTextNode(node, 'valueType', range.valueType);
         this.writeTextNode(node, 'min', range.min);
         this.writeTextNode(node, 'max', range.max);
     }
 
-    private writeReferenceElement(reference: aas.ReferenceElement, node: Node) {
+    private writeReferenceElement(reference: aas.ReferenceElement, node: Node): void {
         if (reference.value) {
             this.writeReference(reference.value, this.appendChild(node, 'value'));
         }
     }
 
-    private writeRelationshipElement(relationship: aas.RelationshipElement, node: Node) {
+    private writeRelationshipElement(relationship: aas.RelationshipElement, node: Node): void {
         if (relationship.first) {
             this.writeReference(relationship.first, this.appendChild(node, 'first'));
         }
@@ -503,7 +503,7 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeSubmodelElementCollection(collection: aas.SubmodelElementCollection, node: Node) {
+    private writeSubmodelElementCollection(collection: aas.SubmodelElementCollection, node: Node): void {
         if (collection.value) {
             const valueNode = this.appendChild(node, 'value');
             for (const value of collection.value) {
@@ -513,7 +513,7 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeSubmodelElementList(list: aas.SubmodelElementList, node: Node) {
+    private writeSubmodelElementList(list: aas.SubmodelElementList, node: Node): void {
         if (typeof list.orderRelevant === 'boolean') {
             this.writeTextNode(node, 'orderRelevant', list.orderRelevant ? 'true' : 'false');
         }
@@ -562,7 +562,7 @@ export class XmlWriterV3 extends AASWriter {
         }
     }
 
-    private writeTextNode(node: Node, localName: string, value?: string) {
+    private writeTextNode(node: Node, localName: string, value?: string): void {
         if (value !== undefined && value !== null) {
             node.appendChild(this.document.createElement(localName)).textContent = value;
         }

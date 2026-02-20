@@ -440,7 +440,7 @@ npm run build -ws
 ### Backend Testing (Jest)
 - **Unit Tests**: `aas-core`, `aas-node`, `aas-jest`
 - **Test Location**: `src/**/*.spec.ts`
-- **Coverage**: Reports generated in `reports/`
+- **Coverage**: Reports generated in `coverage/`
 
 ### Frontend Testing (Karma + Jasmine)
 - **Unit Tests**: `aas-portal`, `aas-lib`

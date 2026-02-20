@@ -7,19 +7,20 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { createSpyObj } from 'aas-jest';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { KeywordDirectory } from '../../app/index/keyword-directory.js';
 import { Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
+import { createSpyObj } from '../mocks.js';
+import { fileURLToPath } from 'url';
 
 describe('KeywordDirectory', () => {
     let keywords: KeywordDirectory;
-    let logger: jest.Mocked<Logger>;
-    let variable: jest.Mocked<Variable>;
+    let logger: Mocked<Logger>;
+    let variable: Mocked<Variable>;
 
     beforeEach(async () => {
-        variable = createSpyObj<Variable>({}, { ASSETS: './src/test/assets' });
+        variable = createSpyObj<Variable>({}, { ASSETS: fileURLToPath(new URL('../assets', import.meta.url)) });
         logger = createSpyObj<Logger>(['error', 'info']);
         keywords = new KeywordDirectory(variable, logger);
         await keywords.wait;

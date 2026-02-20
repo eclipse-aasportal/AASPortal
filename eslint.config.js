@@ -11,6 +11,8 @@ export default [
             '@typescript-eslint/no-unused-vars': 'error',
             '@typescript-eslint/prefer-for-of': 'error',
             '@typescript-eslint/explicit-member-accessibility': 'error',
+            '@typescript-eslint/explicit-function-return-type': 'error',
+            '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true }],
         },
     },
     pluginJs.configs.recommended,

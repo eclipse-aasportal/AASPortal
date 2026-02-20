@@ -79,6 +79,7 @@ $theme-colors: map-merge($theme-colors, $custom-colors);
 @import "../../../node_modules/bootstrap/scss/utilities";
 
 // 8. Add additional custom code here
+
 th[sortable] {
     cursor: pointer;
     user-select: none;
@@ -125,4 +126,12 @@ th[sortable].desc:before {
 
 .fhg-w-4 {
     width: 1rem;
+}
+
+:root[data-bs-theme="dark"] .bg-primary {
+  background-color: rgba(0, 147, 116, 0.8) !important;
+}
+
+:root[data-bs-theme="dark"] .btn-primary {
+  background-color: rgba(0, 147, 116, 0.8) !important;
 }

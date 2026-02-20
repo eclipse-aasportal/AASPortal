@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -14,14 +14,14 @@ import { BrowserComponent } from '../../../lib/components/browser/browser.compon
 import { BrowserState } from '../../../lib/components/browser/browser.state';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
+import { API_URL } from '../../../lib/api-url';
 
 import sampleDocument from '../../assets/sample-document.json';
-import { API_URL } from '../../../lib/types';
 
 describe('BrowserComponent', () => {
     let fixture: ComponentFixture<BrowserComponent>;
     let component: BrowserComponent;
-    let api: jest.Mocked<EndpointsApi>;
+    let api: Mocked<EndpointsApi>;
     let browserState: BrowserState;
 
     beforeEach(async () => {
@@ -38,8 +38,8 @@ describe('BrowserComponent', () => {
                 {
                     provide: API_URL,
                     useValue: {
-                        join: jest.fn(),
-                        getFileUrl: jest.fn(),
+                        join: vitest.fn(),
+                        getFileUrl: vitest.fn(),
                     }
                 },
                 provideTranslateService({

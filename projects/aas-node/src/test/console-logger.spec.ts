@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, jest, expect } from '@jest/globals';
-import { createSpyObj } from 'aas-jest';
+import { describe, beforeEach, it, expect, Mocked, vitest } from 'vitest';
+import { createSpyObj } from './mocks.js';
 import { ConsoleLogger } from '../app/logging/console-logger.js';
 
 describe('ConsoleLogger', () => {
-    let console: jest.Mocked<Console>;
+    let console: Mocked<Console>;
 
     beforeEach(() => {
         console = createSpyObj<Console>(['error', 'warn', 'info']);
@@ -26,31 +26,31 @@ describe('ConsoleLogger', () => {
         });
 
         it('logs an info', () => {
-            jest.spyOn(console, 'info');
+            vitest.spyOn(console, 'info');
             logger.info('This is an info.');
             expect(console.info).toHaveBeenCalled();
         });
 
         it('logs a format info', () => {
-            jest.spyOn(console, 'info');
+            vitest.spyOn(console, 'info');
             logger.info('This is an {0}.', 'info');
             expect(console.info).toHaveBeenCalled();
         });
 
         it('does not log an empty info', () => {
-            jest.spyOn(console, 'info');
+            vitest.spyOn(console, 'info');
             logger.info('');
             expect(console.info).not.toHaveBeenCalled();
         });
 
         it('logs a warning', () => {
-            jest.spyOn(console, 'warn');
+            vitest.spyOn(console, 'warn');
             logger.warning('This is a warning.');
             expect(console.warn).toHaveBeenCalled();
         });
 
         it('logs an error', () => {
-            jest.spyOn(console, 'error');
+            vitest.spyOn(console, 'error');
             logger.error('This is an error.');
             expect(console.error).toHaveBeenCalled();
         });
@@ -64,31 +64,31 @@ describe('ConsoleLogger', () => {
         });
 
         it('logs an info', () => {
-            jest.spyOn(console, 'info');
+            vitest.spyOn(console, 'info');
             logger.info('This is an info.');
             expect(console.info).not.toHaveBeenCalled();
         });
 
         it('logs a warning', () => {
-            jest.spyOn(console, 'warn');
+            vitest.spyOn(console, 'warn');
             logger.warning('This is a warning.');
             expect(console.warn).toHaveBeenCalled();
         });
 
         it('logs a format warning', () => {
-            jest.spyOn(console, 'warn');
+            vitest.spyOn(console, 'warn');
             logger.warning('This is a {0}.', 'warning');
             expect(console.warn).toHaveBeenCalled();
         });
 
         it('does not log an empty warning', () => {
-            jest.spyOn(console, 'warn');
+            vitest.spyOn(console, 'warn');
             logger.info('');
             expect(console.warn).not.toHaveBeenCalled();
         });
 
         it('logs an error', () => {
-            jest.spyOn(console, 'error');
+            vitest.spyOn(console, 'error');
             logger.error('This is an error.');
             expect(console.error).toHaveBeenCalled();
         });
@@ -102,37 +102,37 @@ describe('ConsoleLogger', () => {
         });
 
         it('logs an info', () => {
-            jest.spyOn(console, 'info');
+            vitest.spyOn(console, 'info');
             logger.warning('This is an info.');
             expect(console.info).not.toHaveBeenCalled();
         });
 
         it('logs a warning', () => {
-            jest.spyOn(console, 'warn');
+            vitest.spyOn(console, 'warn');
             logger.warning('This is a warning.');
             expect(console.warn).not.toHaveBeenCalled();
         });
 
         it('logs an error', () => {
-            jest.spyOn(console, 'error');
+            vitest.spyOn(console, 'error');
             logger.error('This is an error.');
             expect(console.error).toHaveBeenCalled();
         });
 
         it('logs a format error', () => {
-            jest.spyOn(console, 'error');
+            vitest.spyOn(console, 'error');
             logger.error('This is an {0}.', 'error');
             expect(console.error).toHaveBeenCalled();
         });
 
         it('does not log an empty error', () => {
-            jest.spyOn(console, 'error');
+            vitest.spyOn(console, 'error');
             logger.error('');
             expect(console.error).not.toHaveBeenCalled();
         });
 
         it('logs an Error', () => {
-            jest.spyOn(console, 'error');
+            vitest.spyOn(console, 'error');
             logger.error(new Error('This is an error.'));
             expect(console.error).toHaveBeenCalled();
         });

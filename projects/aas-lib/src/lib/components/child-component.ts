@@ -6,13 +6,12 @@
  *
  *****************************************************************************/
 
-import { Component, computed, inject, InputSignal, Signal } from '@angular/core';
-import { ChildState } from './child-state';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-@Component({ template: '' })
-export abstract class ChildComponent<TData, TState extends ChildState<TData>> {
+@Component({ selector: 'awp-child', template: '' })
+export abstract class ChildComponent {
     protected constructor() {
         const langChange = toSignal(this.translate.onLangChange);
         this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
@@ -23,7 +22,4 @@ export abstract class ChildComponent<TData, TState extends ChildState<TData>> {
 
     /** The current active language. */
     protected readonly currentLang: Signal<string>;
-
-    /** The state handler instance. */
-    protected abstract readonly state: InputSignal<TState>;
 }

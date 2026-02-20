@@ -6,11 +6,30 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="d-flex flex-row justify-content-around align-items-center mb-2">
-    <div class="me-1">
-        <img [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height" (error)="thumbnail.set('/assets/resources/aas-idta.png')">
-    </div>
-    <div class="ms-1">
-        <canvas #qrCode></canvas>
+<div class="container mb-2">
+    <div class="d-flex flex-row flex-wrap justify-content-around">
+        <div class="">
+            <img
+                class="border border-primary border-2"
+                [src]="thumbnail()"
+                alt="thumbnail"
+                [height]="qrCode.height"
+                (error)="thumbnail.set('/assets/resources/aas-idta.png')"
+            />
+        </div>
+        <div class="">
+            <canvas class="border border-primary border-2" #qrCode></canvas>
+        </div>
     </div>
 </div>
+
+<!-- <div class="container mb-2">
+    <div class="row">
+        <div class="col-md-6">
+            <img class="border border-primary border-2" [src]="thumbnail()" alt="thumbnail" [height]="qrCode.height" (error)="thumbnail.set('/assets/resources/aas-idta.png')">
+        </div>
+        <div class="col-md-6 mt-2 mt-md-0">
+            <canvas class="border border-primary border-2" #qrCode></canvas>
+        </div>
+    </div>
+</div> -->

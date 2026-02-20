@@ -12,7 +12,7 @@ import { LOGGER, Logger } from './logging/logger.js';
 import { AASDocument } from 'aas-core';
 import { ScanEndpointData, ScanEndpointResult, ScanResultKind } from './types.js';
 import { toUint8Array } from './utilities.js';
-import { AASServerScanFactory } from './scan/aas-server-scan-factory.js';
+import { EndpointScannerFactory } from './scan/endpoint-scanner-factory.js';
 import { Variable } from './variable.js';
 import { AAS_INDEX, AASIndex } from './index/aas-index.js';
 
@@ -23,7 +23,7 @@ export class EndpointScan {
     public constructor(
         @inject(LOGGER) private readonly logger: Logger,
         @inject(AAS_INDEX) private readonly index: AASIndex,
-        @inject(AASServerScanFactory) private readonly factory: AASServerScanFactory,
+        @inject(EndpointScannerFactory) private readonly factory: EndpointScannerFactory,
         @inject(Variable) private readonly variable: Variable,
     ) {}
 
@@ -35,7 +35,6 @@ export class EndpointScan {
             scan.on('remove', this.postRemove);
             scan.on('add', this.postAdd);
             scan.on('error', this.onError);
-            await this.index.hack();
             await scan.scanAsync(this.index, data.endpoint);
         } finally {
             scan.off('compare', this.compare);

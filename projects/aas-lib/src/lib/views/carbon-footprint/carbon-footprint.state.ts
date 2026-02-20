@@ -49,7 +49,7 @@ const initialState: CarbonFootprintData = {
  * The state of the Carbon Footprint component.
  */
 @Injectable()
-export class CarbonFootprintState extends ChildState<CarbonFootprintData> {
+export class CarbonFootprintState extends ChildState {
     private readonly document$ = signal(initialState.document);
     private readonly submodel$ = signal(initialState.submodel);
     private readonly index$ = signal(initialState.index);
@@ -120,7 +120,7 @@ export class CarbonFootprintState extends ChildState<CarbonFootprintData> {
             : this.totalPcfCO2eq_1_0(env, submodel);
     }
 
-    public override update(newState: Partial<CarbonFootprintData>): void {
+    public update(newState: Partial<CarbonFootprintData>): void {
         if (newState.index !== undefined) {
             this.index$.set(newState.index);
         }

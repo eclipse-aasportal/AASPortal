@@ -6,8 +6,7 @@
  *
  *****************************************************************************/
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { jest } from '@jest/globals';
+import { Mocked, vi } from 'vitest';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
 import { noop } from 'aas-core';
 import { Observable, of } from 'rxjs';
@@ -32,15 +31,15 @@ export type SpyObjPropertyNames<T = undefined> = T extends undefined
 export function createSpyObj<T extends object>(
     methodNames: SpyObjMethodNames<T>,
     propertyNames?: SpyObjPropertyNames<T>,
-): jest.Mocked<T> {
+): Mocked<T> {
     const obj: { [key: string]: unknown } = {};
     if (Array.isArray(methodNames)) {
         for (const methodName of methodNames) {
-            obj[methodName as string] = jest.fn();
+            obj[methodName as string] = vi.fn();
         }
     } else {
         for (const methodName in methodNames) {
-            obj[methodName] = jest.fn();
+            obj[methodName] = vi.fn();
         }
     }
 
@@ -56,17 +55,15 @@ export function createSpyObj<T extends object>(
         }
     }
 
-    return obj as jest.Mocked<T>;
+    return obj as Mocked<T>;
 }
-
-export type DoneFn = (...args: any[]) => void;
 
 export const createMockFileList = (files: File[]): FileList => {
     const a: FileList = {
         length: 0,
         item: function (index: number): File | null {
             throw new Error('Function not implemented.');
-        }
+        },
     };
 
     const fileList = {

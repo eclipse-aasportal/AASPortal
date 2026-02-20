@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import isEmpty from 'lodash-es/isEmpty';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
@@ -68,11 +67,11 @@ export class ProfileFormComponent {
 
     public submit(): void {
         this.clearMessages();
-        if (isEmpty(this.id())) {
+        if (!this.id()) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
         } else if (!isValidEMail(this.id())) {
             this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (!isEmpty(this.password1())) {
+        } else if (this.password1()) {
             if (!isValidPassword(this.password1())) {
                 this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
             } else if (this.password1() !== this.password2()) {

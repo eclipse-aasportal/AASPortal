@@ -24,7 +24,7 @@ import {
     UploadedFile,
 } from 'tsoa';
 
-import { aas, extensionToMimeType, PagedResult, toAssetAdministrationShell } from 'aas-core';
+import { aas, extensionToMimeType, PagedResult } from 'aas-core';
 
 import { type LevelModifier, type ExtentModifier } from '../types.js';
 import { ShellRepository } from '../shell-repository.js';
@@ -59,42 +59,42 @@ export class ShellsController extends Controller {
 
     /**
      * @summary Returns a specific Asset Administration Shell.
-     * @param aasId The Asset Administration Shell’s unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell’s unique id (BASE64-URL encoded).
      * @param level Determines the structural depth of the respective resource content.
      * @param extent Determines to which extent the resource is being serialized.
      * @returns Requested Asset Administration Shell.
      */
-    @Get('/{aasId}')
+    @Get('/{id}')
     @Security('bearerAuth', ['aas.read'])
     @OperationId('GetAssetAdministrationShellById')
-    public async getShellById(@Path() aasId: string): Promise<aas.AssetAdministrationShell> {
-        return await this.repository.getShell(decodeBase64Url(aasId));
+    public async getShellById(@Path() id: string): Promise<aas.AssetAdministrationShell> {
+        return await this.repository.getShell(decodeBase64Url(id));
     }
 
     /**
      * @summary Returns the Asset Information.
-     * @param aasId The Asset Administration Shell’s unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell’s unique id (BASE64-URL encoded).
      * @returns Requested Asset Information.
      */
-    @Get('/{aasId}/asset-information')
+    @Get('/{id}/asset-information')
     @Security('bearerAuth', ['aas.read'])
     @OperationId('GetAssetInformation')
     @SuccessResponse(200)
-    public async getAssetInformation(@Path() aasId: string): Promise<aas.AssetInformation> {
-        return await this.repository.getAssetInformation(decodeBase64Url(aasId));
+    public async getAssetInformation(@Path() id: string): Promise<aas.AssetInformation> {
+        return await this.repository.getAssetInformation(decodeBase64Url(id));
     }
 
     /**
      * @summary Returns the thumbnail file.
-     * @param aasId The Asset Administration Shell’s unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell’s unique id (BASE64-URL encoded).
      * @returns Requested thumbnail file.
      */
-    @Get('/{aasId}/asset-information/thumbnail')
+    @Get('/{id}/asset-information/thumbnail')
     @Security('bearerAuth', ['aas.read'])
     @OperationId('GetThumbnail')
     @SuccessResponse(200)
-    public async getThumbnail(@Path() aasId: string): Promise<NodeJS.ReadableStream> {
-        const { filename, readable, size, contentType } = await this.repository.getThumbnail(decodeBase64Url(aasId));
+    public async getThumbnail(@Path() id: string): Promise<NodeJS.ReadableStream> {
+        const { filename, readable, size, contentType } = await this.repository.getThumbnail(decodeBase64Url(id));
         this.setHeader('Content-Type', contentType ?? extensionToMimeType(filename));
         this.setHeader('Content-Disposition', `attachment; filename=${filename}`);
         if (size) {
@@ -106,25 +106,25 @@ export class ShellsController extends Controller {
 
     /**
      * @summary Replaces the thumbnail file.
-     * @param aasId The Asset Administration Shell’s unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell’s unique id (BASE64-URL encoded).
      * @param file Thumbnail file.
      */
-    @Put('/{aasId}/asset-information/thumbnail')
-    @Security('bearerAuth', ['aas.update'])
+    @Put('/{id}/asset-information/thumbnail')
+    @Security('bearerAuth', ['editor'])
     @OperationId('PostThumbnail')
-    public async updateThumbnail(@Path() aasId: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-        await this.repository.updateThumbnail(decodeBase64Url(aasId), file.path, file.originalname);
+    public async updateThumbnail(@Path() id: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
+        await this.repository.updateThumbnail(decodeBase64Url(id), file.path, file.originalname);
     }
 
     /**
      * @summary Delete the thumbnail file.
-     * @param aasId The Asset Administration Shell’s unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell’s unique id (BASE64-URL encoded).
      */
-    @Delete('/{aasId}/asset-information/thumbnail')
-    @Security('bearerAuth', ['aas.update'])
+    @Delete('/{id}/asset-information/thumbnail')
+    @Security('bearerAuth', ['editor'])
     @OperationId('DeleteThumbnail')
-    public async deleteThumbnail(@Path() aasId: string): Promise<void> {
-        await this.repository.deleteThumbnail(decodeBase64Url(aasId));
+    public async deleteThumbnail(@Path() id: string): Promise<void> {
+        await this.repository.deleteThumbnail(decodeBase64Url(id));
     }
 
     /**
@@ -134,11 +134,11 @@ export class ShellsController extends Controller {
      * @returns Created Asset Administration Shell.
      */
     @Post('')
-    @Security('bearerAuth', ['sm.create'])
+    @Security('bearerAuth', ['editor'])
     @OperationId('PostAssetAdministrationShell')
     @SuccessResponse('201', 'Created')
     public async addShell(@Body() aas: aas.AssetAdministrationShell): Promise<aas.AssetAdministrationShell> {
-        return toAssetAdministrationShell(await this.repository.addShell(aas));
+        return await this.repository.addShell(aas);
     }
 
     /**
@@ -146,8 +146,8 @@ export class ShellsController extends Controller {
      * @param aas Asset Administration Shell object.
      * @returns Replaced Asset Administration Shell.
      */
-    @Put('/{aasId}')
-    @Security('bearerAuth', ['sm.create'])
+    @Put('')
+    @Security('bearerAuth', ['editor'])
     @OperationId('PutAssetAdministrationShell')
     public async updateShell(@Body() aas: aas.AssetAdministrationShell): Promise<aas.AssetAdministrationShell> {
         return await this.repository.updateShell(aas);
@@ -155,42 +155,42 @@ export class ShellsController extends Controller {
 
     /**
      * @summary Returns a specific Submodel.
-     * @param aasId The Asset Administration Shell's unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell's unique id (BASE64-URL encoded).
      * @param smId The Submodel’s unique id (BASE64-URL encoded).
      * @returns Requested Submodel.
      */
-    @Get('/{aasId}/submodels/{smId}')
+    @Get('/{id}/submodels/{smId}')
     @Security('bearerAuth', ['sm.read'])
     @OperationId('GetSubmodelById')
     public async getSubmodel(
-        @Path() aasId: string,
+        @Path() id: string,
         @Path() smId: string,
         @Query() level: LevelModifier = 'deep',
         @Query() extent: ExtentModifier = 'withoutBlobValue',
     ): Promise<aas.Submodel> {
-        return await this.repository.getSubmodel(decodeBase64Url(aasId), decodeBase64Url(smId), level, extent);
+        return await this.repository.getSubmodel(decodeBase64Url(id), decodeBase64Url(smId), level, extent);
     }
 
     /**
      * @summary Returns a specific submodel element from the Submodel at a specified path.
-     * @param aasId The Asset Administration Shell's unique id (BASE64-URL encoded).
+     * @param id The Asset Administration Shell's unique id (BASE64-URL encoded).
      * @param smId The Submodel’s unique id (BASE64-URL encoded).
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      * @param level Determines the structural depth of the respective resource content.
      * @param extent Determines to which extent the resource is being serialized.
      */
-    @Get('/{aasId}/submodels/{smId}/submodel-elements/{idShortPath}')
+    @Get('/{id}/submodels/{smId}/submodel-elements/{idShortPath}')
     @Security('bearerAuth', ['sm.create'])
     @OperationId('GetSubmodelElementByPath')
     public async getSubmodelElement(
-        @Path() aasId: string,
+        @Path() id: string,
         @Path() smId: string,
         @Path() idShortPath: string,
         @Query() level: LevelModifier = 'deep',
         @Query() extent: ExtentModifier = 'withoutBlobValue',
     ): Promise<aas.SubmodelElement> {
         return await this.repository.getSubmodelElement(
-            decodeBase64Url(aasId),
+            decodeBase64Url(id),
             decodeBase64Url(smId),
             idShortPath,
             level,
@@ -199,21 +199,21 @@ export class ShellsController extends Controller {
     }
 
     /**
-     * @summary Downloads file content from a specific submodel element from the Submodel at a specified path.
-     * @param aasId The Asset Administration Shell's unique id (BASE64-URL encoded).
+     * @summary Returns a specific file from the Submodel at a specified path.
+     * @param id The Asset Administration Shell's unique id (BASE64-URL encoded).
      * @param smId The Submodel’s unique id (BASE64-URL encoded).
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      */
-    @Get('/{aasId}/submodels/{smId}/submodel-elements/{idShortPath}/attachment')
+    @Get('/{id}/submodels/{smId}/submodel-elements/{idShortPath}/attachment')
     @Security('bearerAuth', ['sme.read'])
-    @OperationId('GetSubmodelElementAttachment')
-    public async getSubmodelElementAttachment(
-        @Path() aasId: string,
+    @OperationId('GetFileByPath')
+    public async getFileByPath(
+        @Path() id: string,
         @Path() smId: string,
         @Path() idShortPath: string,
     ): Promise<NodeJS.ReadableStream> {
-        const { filename, readable, size, contentType } = await this.repository.getSubmodelElementAttachment(
-            decodeBase64Url(aasId),
+        const { filename, readable, size, contentType } = await this.repository.getFileByPath(
+            decodeBase64Url(id),
             decodeBase64Url(smId),
             idShortPath,
         );

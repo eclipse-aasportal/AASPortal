@@ -7,14 +7,14 @@
  *****************************************************************************/
 
 import * as aas from '../../lib/aas.js';
-import { selectElement } from '../../lib/document.js';
+import { selectReferable } from '../../lib/document.js';
 import { aasEnvironment } from './aas-environment.js';
 
-export const testSubmodel: aas.Submodel = selectElement(aasEnvironment, 'TechnicalData')!;
+export const testSubmodel: aas.Submodel = selectReferable(aasEnvironment, 'TechnicalData')!;
 
-export const testProperty: aas.Property = selectElement(aasEnvironment, 'TechnicalData', 'MaxRotationSpeed')!;
+export const testProperty: aas.Property = selectReferable(aasEnvironment, 'TechnicalData', 'MaxRotationSpeed')!;
 
-export const testSubmodelElementCollection: aas.SubmodelElementCollection = selectElement(
+export const testSubmodelElementCollection: aas.SubmodelElementCollection = selectReferable(
     aasEnvironment,
     'Documentation',
     'OperatingManual',

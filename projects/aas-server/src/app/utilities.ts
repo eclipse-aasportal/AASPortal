@@ -10,11 +10,22 @@ import { Readable } from 'stream';
 import {
     aas,
     ApplicationError,
+    deserializeValue,
     isAnnotatedRelationshipElement,
+    isBasicEventElement,
+    isBlob,
     isEntity,
+    isFile,
+    isMultiLanguageProperty,
+    isProperty,
+    isRange,
+    isReferenceElement,
+    isRelationshipElement,
     isSubmodel,
     isSubmodelElementCollection,
     isSubmodelElementList,
+    jsonization,
+    splitIdShortPath,
     types,
 } from 'aas-core';
 
@@ -196,7 +207,7 @@ export function processSerializationModifier(
  */
 export function selectSubmodelElement(submodel: aas.Submodel, idShortPath: string): aas.SubmodelElement | undefined {
     let current: aas.SubmodelElement | undefined = submodel;
-    const items = idShortPath.split('.').reverse();
+    const items = splitIdShortPath(idShortPath).reverse();
     while (items.length > 0) {
         const idShort = items.pop()!;
         switch (current.modelType) {
@@ -208,13 +219,26 @@ export function selectSubmodelElement(submodel: aas.Submodel, idShortPath: strin
                     element => element.idShort === idShort,
                 );
                 break;
-            case 'SubmodelElementList':
+            case 'SubmodelElementList': {
+                const value = (current as aas.SubmodelElementList).value ?? [];
+                const index = parseInt(idShort, 10);
+                if (index >= 0) {
+                    current = value[index];
+                    if (current) {
+                        break;
+                    }
+                }
+
                 current = (current as aas.SubmodelElementList).value?.find(element => element.idShort === idShort);
                 break;
+            }
             case 'AnnotatedRelationshipElement':
                 current = (current as aas.AnnotatedRelationshipElement).annotations?.find(
                     element => element.idShort === idShort,
                 );
+                break;
+            case 'Entity':
+                current = (current as aas.Entity).statements?.find(element => element.idShort === idShort);
                 break;
         }
 
@@ -237,7 +261,7 @@ export function selectISubmodelElement(
     idShortPath: string,
 ): types.ISubmodelElement | undefined {
     let current: types.ISubmodelElement | undefined = submodel;
-    const items = idShortPath.split('.').reverse();
+    const items = splitIdShortPath(idShortPath).reverse();
     while (items.length > 0) {
         const idShort = items.pop()!;
         switch (current.modelType()) {
@@ -249,9 +273,19 @@ export function selectISubmodelElement(
                     element => element.idShort === idShort,
                 );
                 break;
-            case types.ModelType.SubmodelElementList:
+            case types.ModelType.SubmodelElementList: {
+                const value = (current as types.SubmodelElementList).value ?? [];
+                const index = parseInt(idShort, 10);
+                if (index >= 0) {
+                    current = value[index];
+                    if (current) {
+                        break;
+                    }
+                }
+
                 current = (current as types.SubmodelElementList).value?.find(element => element.idShort === idShort);
                 break;
+            }
             case types.ModelType.AnnotatedRelationshipElement:
                 current = (current as types.AnnotatedRelationshipElement).annotations?.find(
                     element => element.idShort === idShort,
@@ -265,4 +299,255 @@ export function selectISubmodelElement(
     }
 
     return current;
+}
+
+/**
+ * Serializes an AAS SubmodelElement into a primitive value, object, or array suitable for value transfer.
+ *
+ * The serialization logic depends on the specific type of the provided submodel element:
+ * - For properties, deserializes the value according to its value type.
+ * - For files and blobs, returns an object with `contentType` and `value`.
+ * - For multi-language properties, returns the element as-is.
+ * - For ranges, returns an object with deserialized `min` and `max` values.
+ * - For reference elements, serializes the reference value.
+ * - For relationship elements, serializes both `first` and `second` references.
+ * - For basic event elements, serializes the observed reference.
+ * - For submodel element collections, returns an object mapping `idShort` to serialized child values.
+ * - For submodel element lists, returns an array of serialized child values.
+ * - For entities, returns an object with `entityType`, `globalAssetId`, and serialized statements.
+ * - For annotated relationship elements, serializes both references and all annotations.
+ *
+ * Returns `undefined` if the element type is not recognized.
+ *
+ * @param element - The AAS SubmodelElement to serialize.
+ * @returns The serialized value, which may be a primitive, object, array, or `undefined`.
+ */
+export function toValueSerialization(element: aas.SubmodelElement): jsonization.JsonValue {
+    if (isProperty(element)) {
+        return element.value !== undefined ? deserializeValue(element.value, element.valueType) : '';
+    }
+
+    if (isFile(element)) {
+        if (element.value) {
+            return { contentType: element.contentType, value: element.value };
+        } else {
+            return '';
+        }
+    }
+
+    if (isMultiLanguageProperty(element)) {
+        let value: jsonization.JsonArray;
+        if (Array.isArray(element.value)) {
+            value = element.value.map(item => ({ language: item.language, text: item.text }));
+        } else {
+            value = [];
+        }
+
+        return value;
+    }
+
+    if (isBlob(element)) {
+        const value: jsonization.JsonObject = { contentType: element.contentType };
+        if (element.value !== undefined) {
+            value.value = element.value;
+        }
+
+        return value;
+    }
+
+    if (isRange(element)) {
+        const value: jsonization.JsonObject = {};
+        if (element.min !== undefined) {
+            value.min = deserializeValue(element.min, element.valueType);
+        }
+
+        if (element.max !== undefined) {
+            value.max = deserializeValue(element.max, element.valueType);
+        }
+
+        return value;
+    }
+
+    if (isReferenceElement(element)) {
+        return element.value !== undefined ? referenceToValueSerialization(element.value) : {};
+    }
+
+    if (isRelationshipElement(element)) {
+        const value: jsonization.JsonObject = {};
+        if (element.first !== undefined) {
+            value.first = referenceToValueSerialization(element.first);
+        }
+
+        if (element.second !== undefined) {
+            value.second = referenceToValueSerialization(element.second);
+        }
+
+        return value;
+    }
+
+    if (isBasicEventElement(element)) {
+        return {
+            observed: referenceToValueSerialization(element.observed),
+        };
+    }
+
+    if (isSubmodelElementCollection(element)) {
+        const value: jsonization.JsonObject = {};
+        for (const child of element.value ?? []) {
+            value[child.idShort] = toValueSerialization(child);
+        }
+
+        return value;
+    }
+
+    if (isSubmodelElementList(element)) {
+        return element.value !== undefined ? element.value.map(child => toValueSerialization(child)) : [];
+    }
+
+    if (isEntity(element)) {
+        const value: jsonization.JsonObject = {};
+        if (element.globalAssetId !== undefined) {
+            value.globalAssetId = element.globalAssetId;
+        }
+
+        if (element.entityType !== undefined) {
+            value.entityType = element.entityType;
+        }
+
+        if (element.statements !== undefined) {
+            const statements: jsonization.JsonObject = {};
+            for (const child of element.statements ?? []) {
+                statements[child.idShort] = toValueSerialization(child);
+            }
+
+            value.statements = statements;
+        }
+
+        return value;
+    }
+
+    if (isAnnotatedRelationshipElement(element)) {
+        const value: jsonization.JsonObject = {};
+        if (element.annotations !== undefined) {
+            const annotations: jsonization.JsonObject = {};
+            for (const child of element.annotations ?? []) {
+                annotations[child.idShort] = toValueSerialization(child);
+            }
+
+            value.annotations = annotations;
+        }
+
+        if (element.first !== undefined) {
+            value.first = referenceToValueSerialization(element.first);
+        }
+
+        if (element.second !== undefined) {
+            value.second = referenceToValueSerialization(element.second);
+        }
+
+        return value;
+    }
+
+    throw new Error(ERROR.INVALID_OPERATION);
+}
+
+/**
+ * Converts a value to its string representation according to the AAS specification (IDTA-01001-3-1-2, Part 1,
+ * section "Data type to value mapping").
+ * The function maps the input value and its data type to the correct string as specified.
+ * @param value The value to convert.
+ * @param dataType The AAS data type (XSD type string).
+ * @returns The string representation of the value.
+ */
+export function serializeValue(value: unknown, dataType: types.DataTypeDefXsd): string | null {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    switch (dataType) {
+        case types.DataTypeDefXsd.AnyUri:
+        case types.DataTypeDefXsd.String:
+        case types.DataTypeDefXsd.Base64Binary:
+        case types.DataTypeDefXsd.HexBinary:
+            if (typeof value !== 'string') {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'string', actual: typeof value });
+            }
+
+            return value;
+
+        case types.DataTypeDefXsd.Boolean:
+            if (typeof value !== 'boolean') {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'boolean', actual: typeof value });
+            }
+
+            return value ? 'true' : 'false';
+
+        case types.DataTypeDefXsd.Byte:
+        case types.DataTypeDefXsd.Int:
+        case types.DataTypeDefXsd.Integer:
+        case types.DataTypeDefXsd.NegativeInteger:
+        case types.DataTypeDefXsd.NonNegativeInteger:
+        case types.DataTypeDefXsd.NonPositiveInteger:
+        case types.DataTypeDefXsd.PositiveInteger:
+        case types.DataTypeDefXsd.Short:
+        case types.DataTypeDefXsd.UnsignedByte:
+        case types.DataTypeDefXsd.UnsignedInt:
+        case types.DataTypeDefXsd.UnsignedShort:
+            if (typeof value !== 'number') {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'number', actual: typeof value });
+            }
+
+            if (!Number.isInteger(value)) {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'integer', actual: typeof value });
+            }
+
+            return value.toString();
+
+        case types.DataTypeDefXsd.Long:
+        case types.DataTypeDefXsd.UnsignedLong:
+            if (typeof value !== 'string') {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'string', actual: typeof value });
+            }
+
+            return value;
+
+        case types.DataTypeDefXsd.Decimal:
+        case types.DataTypeDefXsd.Double:
+        case types.DataTypeDefXsd.Float:
+            if (typeof value !== 'number') {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'number', actual: typeof value });
+            }
+
+            return value.toString();
+
+        case types.DataTypeDefXsd.Date:
+        case types.DataTypeDefXsd.DateTime:
+        case types.DataTypeDefXsd.Time:
+        case types.DataTypeDefXsd.Duration:
+        case types.DataTypeDefXsd.GDay:
+        case types.DataTypeDefXsd.GMonth:
+        case types.DataTypeDefXsd.GMonthDay:
+        case types.DataTypeDefXsd.GYear:
+        case types.DataTypeDefXsd.GYearMonth:
+            if (typeof value !== 'string') {
+                throw new ApplicationError(ERROR.INVALID_VALUE_TYPE, { expected: 'string', actual: typeof value });
+            }
+            return value;
+
+        default: {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const invalid: never = dataType;
+            throw new Error(`Unknown data type: ${dataType}`);
+        }
+    }
+}
+
+function referenceToValueSerialization(value: aas.Reference): jsonization.JsonObject {
+    return {
+        type: value.type,
+        keys: value.keys.map(key => ({
+            type: key.type,
+            value: key.value,
+        })),
+    };
 }

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { HttpSocketItem } from '../../../app/live/http/http-socket-item.js';
 
 describe('HttpSocketItem', function () {

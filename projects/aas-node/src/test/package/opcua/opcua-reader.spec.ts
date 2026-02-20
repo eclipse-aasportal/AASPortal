@@ -6,16 +6,16 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
-import { createSpyObj } from 'aas-jest';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
+import { createSpyObj } from '../../mocks.js';
 import { OpcuaReader } from '../../../app/client/opcua/opcua-reader.js';
 import { OPCUAComponent } from '../../../app/client/opcua/opcua.js';
 import { OpcuaDataTypeDictionary } from '../../../app/client/opcua/opcua-data-type-dictionary.js';
 
 describe('OpcuaReader', () => {
     let reader: OpcuaReader;
-    let origin: jest.Mocked<OPCUAComponent>;
-    let dataTypes: jest.Mocked<OpcuaDataTypeDictionary>;
+    let origin: Mocked<OPCUAComponent>;
+    let dataTypes: Mocked<OpcuaDataTypeDictionary>;
 
     beforeEach(() => {
         origin = createSpyObj<OPCUAComponent>({}, ['displayName', 'hasProperty', 'nodeClass']);

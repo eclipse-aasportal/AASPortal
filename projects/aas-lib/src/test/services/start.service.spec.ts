@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from '../../lib/components/auth/auth.service';
@@ -31,7 +31,7 @@ export class TestCardComponent {}
 
 describe('StartService', () => {
     let service: StartService;
-    let auth: jest.Mocked<AuthService>;
+    let auth: Mocked<AuthService>;
 
     beforeEach(() => {
         auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
@@ -58,7 +58,7 @@ describe('StartService', () => {
                 provideZonelessChangeDetection(),
             ],
         });
-        
+
         service = TestBed.inject(StartService);
     });
 
@@ -115,13 +115,11 @@ describe('StartService', () => {
     });
 
     describe('save', () => {
-        it('should save the tiles', done => {
+        it('should save the tiles', async () => {
             auth.setCookie.mockReturnValue(of(void 0));
             service.add('TestCard', 'new', {});
-            service.save().subscribe(() => {
-                expect(auth.setCookie).toHaveBeenCalled();
-                done();
-            });
+            await lastValueFrom(service.save());
+            expect(auth.setCookie).toHaveBeenCalled();
         });
     });
 });

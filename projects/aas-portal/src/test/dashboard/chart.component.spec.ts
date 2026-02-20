@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -16,8 +16,8 @@ import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('ChartComponent', () => {
-    let webSocketFactory: jest.Mocked<WebSocketFactoryService>;
-    let api: jest.Mocked<DashboardApiService>;
+    let webSocketFactory: Mocked<WebSocketFactoryService>;
+    let api: Mocked<DashboardApiService>;
 
     beforeEach(async () => {
         webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);

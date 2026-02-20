@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { first, of } from 'rxjs';
+import { first, lastValueFrom, of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
@@ -18,13 +18,13 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { HandoverDocumentationView } from '../../../lib/views/handover-documentation/handover-documentation-view';
 import { HandoverDocumentation } from '../../../lib/views/handover-documentation/handover-documentation';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { HandoverDocumentationState } from '../../../lib/views/handover-documentation/handover-documentation.state';
+import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../../../lib/views/views-constants';
 
 import handoverDocumentation_1_2 from '../../assets/handover-documentation-1-2.json';
 
@@ -47,15 +47,15 @@ export class TestThumbnailQRCode {
 export class TestHandoverDocumentation {
     public readonly document = input<AASDocument>();
     public readonly collapsed = input<boolean>();
-    public readonly state = input<HandoverDocumentationState>()
+    public readonly state = input<HandoverDocumentationState>();
 }
 
 describe('HandoverDocumentationView', () => {
     let fixture: ComponentFixture<HandoverDocumentationView>;
     let component: HandoverDocumentationView;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -74,8 +74,10 @@ describe('HandoverDocumentationView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
-              queryParams: of({}) },
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
         );
 
         api.getDocument.mockReturnValue(of(document));
@@ -100,7 +102,16 @@ describe('HandoverDocumentationView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                        {
+                            path: 'HandoverDocumentation',
+                            component: HandoverDocumentationView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [HANDOVER_DOCUMENTATION_2_0, HANDOVER_DOCUMENTATION_1_2],
+                            },
+                        },
+                    ],
                 },
                 provideTranslateService({
                     loader: {
@@ -110,9 +121,7 @@ describe('HandoverDocumentationView', () => {
                 }),
                 provideZonelessChangeDetection(),
             ],
-            imports: [
-                HandoverDocumentationView,
-            ],
+            imports: [HandoverDocumentationView],
         }).compileComponents();
 
         TestBed.overrideComponent(HandoverDocumentationView, {
@@ -145,15 +154,10 @@ describe('HandoverDocumentationView', () => {
         expect(component.index()).toBe(1);
     });
 
-    it('adds a favorite to the start page', done => {
+    it('adds a favorite to the start page', async () => {
         start.add.mockReturnValue(true);
         start.save.mockReturnValue(of(void 0));
-        component
-            .addToStart()
-            .pipe(first())
-            .subscribe(() => {
-                expect(start.add).toHaveBeenCalled();
-                done();
-            });
+        await lastValueFrom(component.addToStart().pipe(first()));
+        expect(start.add).toHaveBeenCalled();
     });
 });

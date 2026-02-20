@@ -6,9 +6,10 @@
  *
  *****************************************************************************/
 
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { NotifyComponent } from '../../../lib/components/notify/notify.component';
@@ -17,20 +18,18 @@ import { createSpyObj, FakeLoader } from '../../mocks';
 describe('NotifyComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [
-                NotifyComponent,
-                TranslateModule.forRoot({
+            imports: [NotifyComponent],
+            providers: [
+                {
+                    provide: NotifyService,
+                    useValue: createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([]) }),
+                },
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
-            ],
-            providers: [
-                {
-                    provide: NotifyService,
-                    useValue: createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([])}),
-                },
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();

@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import '@angular/localize/init';
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
@@ -19,8 +18,7 @@ import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { DigitalProductPassportView } from '../../../lib/views/digital-product-passport/digital-product-passport-view';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { createSpyObj, FakeLoader } from '../../mocks';
@@ -30,6 +28,19 @@ import { HandoverDocumentation } from '../../../lib/views/handover-documentation
 import { NameplateState } from '../../../lib/views/nameplate/nameplate.state';
 import { CarbonFootprintState } from '../../../lib/views/carbon-footprint/carbon-footprint.state';
 import { HandoverDocumentationState } from '../../../lib/views/handover-documentation/handover-documentation.state';
+import { NameplateView } from '../../../lib/views/nameplate/nameplate-view';
+import { HandoverDocumentationView } from '../../../lib/views/handover-documentation/handover-documentation-view';
+import { CarbonFootprintView } from '../../../lib/views/carbon-footprint/carbon-footprint-view';
+import {
+    CARBON_FOOTPRINT_0_9,
+    CARBON_FOOTPRINT_1_0,
+    HANDOVER_DOCUMENTATION_1_2,
+    HANDOVER_DOCUMENTATION_2_0,
+    NAMEPLATE_2_0,
+    NAMEPLATE_3_0,
+    NAMEPLATE_FHG,
+    NAMEPLATE_HSU,
+} from '../../../lib/views/views-constants';
 
 import sample from '../../assets/dpp-sample.json';
 
@@ -51,7 +62,7 @@ export class TestThumbnailQRCode {
 })
 export class TestNameplate {
     public readonly document = input<AASDocument>();
-    public readonly state = input<NameplateState>()
+    public readonly state = input<NameplateState>();
 }
 
 @Component({
@@ -62,7 +73,8 @@ export class TestNameplate {
 })
 export class TestCarbonFootprint {
     public readonly document = input<AASDocument>();
-    public readonly state = input<CarbonFootprintState>()
+    public readonly state = input<CarbonFootprintState>();
+    public readonly isDigitalProductPassport = input<boolean>();
 }
 
 @Component({
@@ -74,21 +86,23 @@ export class TestCarbonFootprint {
 export class TestHandoverDocumentation {
     public readonly document = input<AASDocument>();
     public readonly collapsed = input<boolean>();
-    public readonly state = input<HandoverDocumentationState>()
+    public readonly state = input<HandoverDocumentationState>();
 }
 
 describe('DigitalProductPassportView', () => {
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
 
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = createSpyObj<StartService>(['add', 'save']);
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url(sample.endpoint), id: encodeBase64Url(sample.id) }),
-              queryParams: of({}) },
+            {
+                params: of({ endpoint: encodeBase64Url(sample.endpoint), id: encodeBase64Url(sample.id) }),
+                queryParams: of({}),
+            },
         );
 
         api.getDocument.mockReturnValue(of(sample as AASDocument));
@@ -113,7 +127,40 @@ describe('DigitalProductPassportView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                        {
+                            path: 'CarbonFootprint',
+                            component: CarbonFootprintView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [CARBON_FOOTPRINT_1_0, CARBON_FOOTPRINT_0_9],
+                            },
+                        },
+                        {
+                            path: 'DigitalProductPassport',
+                            component: DigitalProductPassportView,
+                            data: {
+                                type: 'Composition',
+                                routes: ['Nameplate', 'CarbonFootprint', 'HandoverDocumentation'],
+                            },
+                        },
+                        {
+                            path: 'Nameplate',
+                            component: NameplateView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [NAMEPLATE_2_0, NAMEPLATE_FHG, NAMEPLATE_HSU, NAMEPLATE_3_0],
+                            },
+                        },
+                        {
+                            path: 'HandoverDocumentation',
+                            component: HandoverDocumentationView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [HANDOVER_DOCUMENTATION_2_0, HANDOVER_DOCUMENTATION_1_2],
+                            },
+                        },
+                    ],
                 },
                 provideTranslateService({
                     loader: {

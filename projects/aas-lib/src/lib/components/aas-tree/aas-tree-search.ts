@@ -20,7 +20,7 @@ import {
     parseNumber,
 } from 'aas-core';
 
-import { AASTreeNode } from './aas-tree-node';
+import { TreeNode } from '../tree/tree.component';
 
 type Operator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
@@ -45,17 +45,17 @@ export class AASTreeSearch {
     private readonly loop = true;
     private terms: SearchTerm[] = [];
     private matchIndex$ = signal(-1);
-    private nodes: AASTreeNode[] = [];
+    private nodes: TreeNode[] = [];
 
     /** Marks a hit if the value is greater or equal to zero. */
-    public matchIndex = this.matchIndex$.asReadonly();
+    public readonly matchIndex = this.matchIndex$.asReadonly();
 
     /**
      * Starts the search for nodes that match the specified search expression.
      * @param nodes The nodes to be searched for.
      * @param value The search expression.
      */
-    public start(nodes: AASTreeNode[], value: string): void {
+    public start(nodes: TreeNode[], value: string | undefined): void {
         this.nodes = nodes;
 
         if (!value) {
@@ -264,29 +264,34 @@ export class AASTreeSearch {
         }
     }
 
-    private match(row: AASTreeNode): boolean {
+    private match(node: TreeNode): boolean {
         let match = false;
+        const element = node.id as aas.Referable;
+        if (!element) {
+            return false;
+        }
+
         for (const term of this.terms) {
             if (term.query) {
-                if (row.element.modelType === term.query.modelType) {
+                if (element.modelType === term.query.modelType) {
                     if (term.query.name) {
-                        if (this.containsString(row.name, term.query.name)) {
+                        if (this.containsString(node.name, term.query.name)) {
                             if (term.query.value) {
-                                match = this.matchValue(row.element!, term.query.value, term.query.operator);
+                                match = this.matchValue(element, term.query.value, term.query.operator);
                             } else {
                                 match = true;
                             }
                         }
                     } else if (term.query.value) {
-                        match = this.matchValue(row.element!, term.query.value, term.query.operator);
+                        match = this.matchValue(element, term.query.value, term.query.operator);
                     } else {
                         match = true;
                     }
                 }
             } else if (term.text) {
                 match =
-                    row.name.toLocaleLowerCase(this.translate.currentLang).indexOf(term.text) >= 0 ||
-                    this.contains(row.element, term.text);
+                    node.name.toLocaleLowerCase(this.translate.getCurrentLang()).indexOf(term.text) >= 0 ||
+                    this.contains(element, term.text);
             }
 
             if (match) {

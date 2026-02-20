@@ -13,7 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 /**
  * Represents the state of a child component.
  */
-export abstract class ChildState<TData> {
+export abstract class ChildState {
     protected constructor(protected readonly translate: TranslateService) {
         const langChange = toSignal(this.translate.onLangChange);
         this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
@@ -21,10 +21,4 @@ export abstract class ChildState<TData> {
 
     /** The current language. */
     protected readonly currentLang: Signal<string>;
-
-    /**
-     * Updates the state.
-     * @param newState The new state.
-     */
-    public abstract update(newState: Partial<TData>): void;
 }

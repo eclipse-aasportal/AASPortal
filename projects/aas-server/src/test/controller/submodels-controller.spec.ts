@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { resolve } from 'path';
 import fs from 'fs';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import os from 'os';
 import { container } from 'tsyringe';
+import { fileURLToPath } from 'url';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
@@ -23,18 +23,18 @@ import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
-import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { SubmodelRepository } from '../../app/submodel-repository.js';
 import { encodeBase64Url } from '../../app/utilities.js';
+import { createSpyObj } from '../mocks.js';
 
 describe('SubmodelsController', () => {
     let app: Express;
     let logger: Logger;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
-    let repository: jest.Mocked<SubmodelRepository>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
+    let repository: Mocked<SubmodelRepository>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -42,11 +42,12 @@ describe('SubmodelsController', () => {
         repository = createSpyObj<SubmodelRepository>([
             'getSubmodel',
             'getSubmodels',
-            'getSubmodelElementAttachment',
-            'updateSubmodelElementAttachment',
-            'deleteSubmodelElementAttachment',
+            'getFileByPath',
+            'putFileByPath',
+            'deleteFileByPath',
             'addSubmodel',
             'getSubmodelElement',
+            'getSubmodelElementValue',
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
@@ -125,43 +126,43 @@ describe('SubmodelsController', () => {
         expect(response.body).toEqual(sm);
     });
 
-    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        const file = resolve('./src/test/assets/Test.pdf');
+    it('GET: /submodels/{id}/submodel-elements/{idShortPath}/attachment', async () => {
+        const file = fileURLToPath(new URL('../assets/Test.pdf', import.meta.url));
         const fileResult: FileResult = {
             filename: 'Test.pdf',
             value: 'Test.pdf',
             readable: fs.createReadStream(file),
         };
 
-        repository.getSubmodelElementAttachment.mockResolvedValue(fileResult);
-        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        repository.getFileByPath.mockResolvedValue(fileResult);
+        const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.File';
         const response = await request(app)
-            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/attachment`)
+            .get(`/api/v3/submodels/${id}/submodel-elements/${idShortPath}/attachment`)
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);
-        expect(repository.getSubmodelElementAttachment).toHaveBeenCalledWith(
+        expect(repository.getFileByPath).toHaveBeenCalledWith(
             'http://www.fraunhofer.de/sm/test-submodel',
             'Collection.File',
         );
     });
 
     it('PUT: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        repository.updateSubmodelElementAttachment.mockResolvedValue();
+        repository.putFileByPath.mockResolvedValue();
         const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.File';
         const response = await request(app)
             .put(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/attachment`)
             .set('Authorization', `Bearer ${getToken()}`)
-            .attach('file', resolve('./src/test/assets/Test.pdf'));
+            .attach('file', fileURLToPath(new URL('../assets/Test.pdf', import.meta.url)));
 
         expect(response.statusCode).toBe(204);
-        expect(repository.updateSubmodelElementAttachment).toHaveBeenCalled();
+        expect(repository.putFileByPath).toHaveBeenCalled();
     });
 
     it('DELETE: /submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        repository.deleteSubmodelElementAttachment.mockResolvedValue();
+        repository.deleteFileByPath.mockResolvedValue();
         const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
         const idShortPath = 'Collection.File';
         const response = await request(app)
@@ -169,7 +170,7 @@ describe('SubmodelsController', () => {
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(204);
-        expect(repository.deleteSubmodelElementAttachment).toHaveBeenCalledWith(
+        expect(repository.deleteFileByPath).toHaveBeenCalledWith(
             'http://www.fraunhofer.de/sm/test-submodel',
             'Collection.File',
         );
@@ -214,5 +215,59 @@ describe('SubmodelsController', () => {
             'core',
             'withoutBlobValue',
         );
+    });
+
+    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/$value returns string', async () => {
+        repository.getSubmodelElementValue.mockResolvedValue('test-value');
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.Property';
+        const response = await request(app)
+            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/$value`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getSubmodelElementValue).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.Property',
+            'deep',
+            'withoutBlobValue',
+        );
+        expect(response.body).toBe('test-value');
+    });
+
+    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/$value returns number', async () => {
+        repository.getSubmodelElementValue.mockResolvedValue(42);
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.Property';
+        const response = await request(app)
+            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/$value?level=core`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getSubmodelElementValue).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.Property',
+            'core',
+            'withoutBlobValue',
+        );
+        expect(response.body).toBe(42);
+    });
+
+    it('GET: /submodels/{smId}/submodel-elements/{idShortPath}/$value returns boolean', async () => {
+        repository.getSubmodelElementValue.mockResolvedValue(true);
+        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
+        const idShortPath = 'Collection.Property';
+        const response = await request(app)
+            .get(`/api/v3/submodels/${smId}/submodel-elements/${idShortPath}/$value?extent=withBlobValue`)
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(repository.getSubmodelElementValue).toHaveBeenCalledWith(
+            'http://www.fraunhofer.de/sm/test-submodel',
+            'Collection.Property',
+            'deep',
+            'withBlobValue',
+        );
+        expect(response.body).toBe(true);
     });
 });

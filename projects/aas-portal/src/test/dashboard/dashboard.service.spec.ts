@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -19,7 +19,7 @@ import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;
-    let auth: jest.Mocked<AuthService>;
+    let auth: Mocked<AuthService>;
 
     beforeEach(() => {
         auth = createSpyObj<AuthService>(['getCookie'], { ready: of(true) });

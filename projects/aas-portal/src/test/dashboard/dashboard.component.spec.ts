@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
@@ -39,16 +39,22 @@ export class TestChartEditComponent {
 
 describe('DashboardComponent', () => {
     let webSocketSubject: WebSocketSubject<WebSocketData>;
-    let webSocketFactory: jest.Mocked<WebSocketFactoryService>;
-    let start: jest.Mocked<StartService>;
-    let service: jest.Mocked<DashboardService>;
-    let window: jest.Mocked<WindowService>;
+    let webSocketFactory: Mocked<WebSocketFactoryService>;
+    let start: Mocked<StartService>;
+    let service: Mocked<DashboardService>;
+    let window: Mocked<WindowService>;
 
     beforeEach(async () => {
         webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
         webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
         webSocketFactory.create.mockReturnValue(webSocketSubject);
         start = createSpyObj<StartService>(['add', 'save']);
+
+        vi.useFakeTimers
+
+        HTMLCanvasElement.prototype.getContext = () => {
+            return null;
+        };
 
         const pages: DashboardState = DashboardService.fromString(JSON.stringify(data));
 
@@ -115,6 +121,10 @@ describe('DashboardComponent', () => {
                 imports: [ChartEditComponent],
             },
         });
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     it('should create', () => {

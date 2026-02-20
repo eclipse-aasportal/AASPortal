@@ -6,10 +6,8 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, jest, afterEach } from '@jest/globals';
-import { IncomingMessage } from 'http';
-import { Socket } from 'net';
-import { aas, selectElement } from 'aas-core';
+import { describe, beforeEach, it, expect, afterEach, Mocked, vitest } from 'vitest';
+import { aas, selectReferable } from 'aas-core';
 import { ApiClient } from '../../../app/client/api/api-client.js';
 import listaas from '../../assets/test-aas/listaas.js';
 import becher1 from '../../assets/test-aas/cuna-cup-becher1.js';
@@ -20,17 +18,18 @@ import customerFeedback from '../../assets/test-aas/customer-feedback-becher1.js
 import { ApiClientV0 } from '../../../app/client/api/api-client-v0.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { aasEnvironment } from '../../assets/aas-environment.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../../mocks.js';
 import { HttpClient } from '../../../app/http-client.js';
+import { Readable } from 'stream';
 
 describe('ApiClientV0', function () {
-    let logger: jest.Mocked<Logger>;
+    let logger: Mocked<Logger>;
     let client: ApiClient;
-    let http: jest.Mocked<HttpClient>;
+    let http: Mocked<HttpClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['get', 'getResponse']);
+        http = createSpyObj<HttpClient>(['getJson', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV0(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
@@ -39,12 +38,12 @@ describe('ApiClientV0', function () {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     describe('getShells', () => {
         it('returns the AAS list', async () => {
-            http.get.mockResolvedValue(listaas);
+            http.getJson.mockResolvedValue(listaas);
             const result = await client.getShells();
             expect(result.result).toEqual([
                 'AssistanceSystem_Dte',
@@ -57,7 +56,7 @@ describe('ApiClientV0', function () {
 
     describe('getEnvironment', () => {
         it('gets the AAS with the specified idShort', async () => {
-            http.get.mockImplementation(url => {
+            http.getJson.mockImplementation(url => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let value: any;
                 switch (url.pathname) {
@@ -87,26 +86,27 @@ describe('ApiClientV0', function () {
 
     describe('openRead', () => {
         it('can open a file', async () => {
-            const stream = new IncomingMessage(new Socket());
-            stream.push(
-                JSON.stringify({
-                    aaslist: ['0 : ExampleMotor : [IRI] http://customer.com/aas/9175_7013_7091_9168 : '],
-                }),
-            );
+            const stream: NodeJS.ReadableStream = new Readable({
+                read(): void {
+                    this.push(
+                        JSON.stringify({
+                            aaslist: ['0 : ExampleMotor : [IRI] http://customer.com/aas/9175_7013_7091_9168 : '],
+                        }),
+                    );
 
-            stream.push(null);
-            stream.statusCode = 200;
-            stream.statusMessage = 'OK';
+                    this.push(null);
+                },
+            });
 
-            http.get.mockResolvedValue({
+            http.getJson.mockResolvedValue({
                 aaslist: ['0 : ExampleMotor : [IRI] http://customer.com/aas/9175_7013_7091_9168 : '],
             });
 
-            http.getResponse.mockResolvedValue(stream);
+            http.getReadable.mockResolvedValue(stream);
             await expect(
-                client.openRead(
+                client.getFile(
                     aasEnvironment.assetAdministrationShells[0].idShort,
-                    selectElement(aasEnvironment, 'Documentation', 'OperatingManual.DigitalFile_PDF')!,
+                    selectReferable(aasEnvironment, 'Documentation', 'OperatingManual.DigitalFile_PDF')!,
                 ),
             ).resolves.toBeTruthy();
         });
@@ -114,13 +114,13 @@ describe('ApiClientV0', function () {
 
     describe('readValue', () => {
         it('reads the current value of a data element', async () => {
-            http.get.mockResolvedValue({ value: '42' });
+            http.getJson.mockResolvedValue({ value: '42' });
             await expect(client.readValue('http://localhost:1234', 'xs:int')).resolves.toBe(42);
         });
     });
 
     describe('resolveNodeId', function () {
-        let shell: jest.Mocked<aas.AssetAdministrationShell>;
+        let shell: Mocked<aas.AssetAdministrationShell>;
 
         beforeEach(function () {
             shell = createSpyObj<aas.AssetAdministrationShell>({}, { idShort: 'aas1' });

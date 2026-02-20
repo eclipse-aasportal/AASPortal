@@ -59,6 +59,18 @@ export class DocumentsController extends Controller {
     @Get('{id}')
     @OperationId('getDocument')
     public async getDocument(@Path() id: string): Promise<AASDocument> {
-        return await this.aasProvider.getDocument(decodeBase64Url(id));
+        return await this.aasProvider.getDocument(undefined, 'AssetAdministrationShell', decodeBase64Url(id));
+    }
+
+    /**
+     * @summary Gets the AAS document that provides an Asset with the specified identifier from the specified endpoint.
+     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @param id The Asset identifier (Base64-URL encoded).
+     * @returns The AAS document
+     */
+    @Get('asset/{id}')
+    @OperationId('getDocumentByAsset')
+    public async getDocumentByAsset(@Path() id: string): Promise<AASDocument> {
+        return await this.aasProvider.getDocument(undefined, 'Asset', decodeBase64Url(id));
     }
 }

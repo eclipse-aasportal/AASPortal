@@ -1,4 +1,8 @@
-# AASPortal [![Documentation Status](https://readthedocs.org/projects/aasportal/badge/?version=latest "Documentation Status")](https://aasportal.readthedocs.io/en/latest/?badge=latest)
+# AASPortal 
+[![Docs](https://readthedocs.org/projects/aasportal/badge/?version=latest "Documentation Status")](https://aasportal.readthedocs.io/en/latest/?badge=latest)
+[![Build & Test](https://github.com/eclipse-aasportal/AASPortal/actions/workflows/build-and-test-workflow.yml/badge.svg "GitHub Actions Build & Test")](https://github.com/eclipse-aasportal/AASPortal/actions/workflows/build-and-test-workflow.yml)
+[![Docker Hub](https://img.shields.io/docker/pulls/fraunhoferiosb/aasportal_aio.svg "Docker Hub pulls")](https://hub.docker.com/r/fraunhoferiosb/aasportal_aio)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg "Apache-2.0 License")](LICENSE)
 
 ![AASPortal Logo <](./read-the-docs/source/images/AASPortal_mid.png "AASPortal Logo")
 
@@ -9,7 +13,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 **AASPortal is under active development and we are looking forward to your active contributions!**
 
 ## Prerequisites
-- **Node.js v22.16.0** (required for development)
+- **Node.js v24.12.0** (required for development)
 - **Visual Studio Code** (recommended IDE)
 - **Docker Desktop 4.x OR Podman Desktop** (for containerized development)
 - **Git** (for version control)
@@ -171,9 +175,9 @@ http://127.0.0.1:5001                      # Container's loopback
 
 ### Common Development Issues
 
-**Build fails**: Ensure Node.js v22.16.0 is installed
+**Build fails**: Ensure Node.js v24.12.0 is installed
 ```bash
-node --version  # Should output v22.16.0
+node --version  # Should output v24.12.0
 ```
 
 **Tests fail**: Run tests individually to isolate issues

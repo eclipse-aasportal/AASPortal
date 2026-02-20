@@ -1,7 +1,7 @@
 # Getting Started
 ## Prerequisites
 - Visual Studio Code
-- Node.js v22.16.0
+- Node.js v24.12.0
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
@@ -14,7 +14,6 @@
 - **aas-lib**: Angular library containing reusable UI components and services
 - **aas-server**: AAS server application with IDTA Part 2 compliant API
 - **aas-browser**: Frontend application for the AAS server
-- **aas-jest**: Custom Jest configuration utilities
 
 ```txt
 aasportal
@@ -22,8 +21,6 @@ aasportal
   │     ├── aas-core
   │     │     └── package.json
   │     ├── aas-package
-  │     │     └── package.json
-  │     ├── aas-jest
   │     │     └── package.json
   │     ├── aas-lib
   │     │     └── package.json
@@ -156,7 +153,6 @@ AASNode provides a user management. Authentication of a user is based on Json We
 | MAX_WORKERS      | Number of background worker that scan AAS containers.                 | 8                                              |
 | AAS_NODE_PORT | The port number where AASNode is listening.                         | 80                                             |
 | USER_STORAGE     | URL of the user database.                                             | './users'                                      |
-| TEMPLATE_STORAGE | URL of the template storage                                           |                                                |
 | TIMEOUT          | Timeout until a new scan starts (ms).                                 | 5000                                           |
 | WEB_ROOT         | The root directory for static file resources.                         | './wwwroot'                                    |
 

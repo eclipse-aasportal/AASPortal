@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, it, expect } from '@jest/globals';
+import { beforeEach, describe, it, expect } from 'vitest';
 import { KeyList } from '../app/db/key-list.js';
 import { KeyListItem } from '../app/db/database-types.js';
 

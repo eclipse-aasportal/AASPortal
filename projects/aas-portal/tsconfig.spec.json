@@ -5,7 +5,7 @@
         "isolatedModules": false,
         "module": "ES2022",
         "types": [
-            "jest",
+            "vitest/globals",
             "node"
         ],
     },

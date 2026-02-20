@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
@@ -17,8 +17,8 @@ import { createSpyObj, FakeLoader } from '../mocks';
 import { StartState, StartTileItem } from '../../app/start/start.state';
 
 describe('StartComponent', () => {
-    let start: jest.Mocked<StartService>;
-    let sanitizer: jest.Mocked<DomSanitizer>;
+    let start: Mocked<StartService>;
+    let sanitizer: Mocked<DomSanitizer>;
     let state: Partial<StartState>;
     let favorites: StartTileItem[];
     let fixture: ComponentFixture<StartComponent>;
