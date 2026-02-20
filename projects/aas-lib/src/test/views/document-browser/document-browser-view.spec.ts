@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
-import { first, of } from 'rxjs';
+import { first, lastValueFrom, of } from 'rxjs';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
@@ -19,8 +19,7 @@ import { encodeBase64Url } from '../../../lib/utilities';
 import { BrowserComponent } from '../../../lib/components/browser/browser.component';
 import { StartService } from '../../../lib/services/start.service';
 import { ToolbarService } from '../../../lib/services/toolbar.service';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { DocumentBrowserView } from '../../../lib/views/document-browser/document-browser-view';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { BrowserState } from '../../../lib/components/browser/browser.state';
@@ -46,16 +45,16 @@ export class TestThumbnailQRCode {
 })
 export class TestBrowserComponent {
     public readonly env = input<aas.Environment | null | undefined>(undefined);
-    public readonly endpoint = input<string | null>(null)
+    public readonly endpoint = input<string | null>(null);
     public readonly state = input<BrowserState>();
 }
 
 describe('DocumentBrowserView', () => {
     let fixture: ComponentFixture<DocumentBrowserView>;
     let component: DocumentBrowserView;
-    let api: jest.Mocked<EndpointsApi>;
-    let route: jest.Mocked<ActivatedRoute>;
-    let start: jest.Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let route: Mocked<ActivatedRoute>;
+    let start: Mocked<StartService>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -63,24 +62,27 @@ describe('DocumentBrowserView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url('endpoint'), id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168') }),
-              queryParams: of({}) },
+            {
+                params: of({
+                    endpoint: encodeBase64Url('endpoint'),
+                    id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168'),
+                }),
+                queryParams: of({}),
+            },
         );
 
-        document ={
-                address: '',
-                crc32: 0,
-                idShort: 'ExampleMotor',
-                readonly: false,
-                timestamp: 0,
-                id: 'http://customer.com/aas/9175_7013_7091_9168',
-                endpoint: 'endpoint',
-                content: sampleDocument as aas.Environment,
-            };
+        document = {
+            address: '',
+            crc32: 0,
+            idShort: 'ExampleMotor',
+            readonly: false,
+            timestamp: 0,
+            id: 'http://customer.com/aas/9175_7013_7091_9168',
+            endpoint: 'endpoint',
+            content: sampleDocument as aas.Environment,
+        };
 
-        api.getDocument.mockReturnValue(
-            of(document)
-        );
+        api.getDocument.mockReturnValue(of(document));
 
         await TestBed.configureTestingModule({
             providers: [
@@ -102,7 +104,15 @@ describe('DocumentBrowserView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                        {
+                            path: 'Browser',
+                            component: DocumentBrowserView,
+                            data: {
+                                type: 'Default',
+                            },
+                        },
+                    ],
                 },
                 provideTranslateService({
                     loader: {
@@ -149,12 +159,10 @@ describe('DocumentBrowserView', () => {
         expect(component.index()).toBe(1);
     });
 
-    it('adds a favorite to the start page', (done) => {
+    it('adds a favorite to the start page', async () => {
         start.add.mockReturnValue(true);
         start.save.mockReturnValue(of(void 0));
-        component.addToStart().pipe(first()).subscribe(() => {
-            expect(start.add).toHaveBeenCalled();
-            done();
-        })
+        await lastValueFrom(component.addToStart().pipe(first()));
+        expect(start.add).toHaveBeenCalled();
     });
 });

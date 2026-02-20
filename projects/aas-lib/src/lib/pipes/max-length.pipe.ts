@@ -11,14 +11,18 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({
     name: 'max',
     standalone: true,
+    pure: true,
 })
 export class MaxLengthPipe implements PipeTransform {
     private max = 80;
 
-    public transform(value: string, max = 80): string {
+    public transform(value: string | undefined, max = 80): string {
         this.max = Math.max(5, Number(max));
+        if (!value) {
+            return '';
+        }
 
-        return value && value.length <= this.max ? value : this.shortenText(value);
+        return value.length <= this.max ? value : this.shortenText(value);
     }
 
     private shortenText(value: string): string {

@@ -16,7 +16,7 @@
     <script>
         // Set base href dynamically from config
         (function() {
-            const baseHref = (window.__env__ && window.__env__.BASE_HREF) || '/';
+            const baseHref = window.__env__?.BASE_HREF || '/';
             document.write('<base href="' + baseHref + '">');
         })();
     </script>

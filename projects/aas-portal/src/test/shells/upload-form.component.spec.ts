@@ -6,14 +6,15 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { UploadFormComponent } from '../../app/shells/upload-form/upload-form.component';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideHttpClient } from '@angular/common/http';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('UploadFormComponent', () => {

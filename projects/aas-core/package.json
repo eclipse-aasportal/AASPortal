@@ -1,6 +1,6 @@
 {
     "name": "aas-core",
-    "version": "3.0.0",
+    "version": "3.6.0",
     "description": "Common types and utilities for the Web-AAS project",
     "module": "./dist/aas-core.js",
     "main": "./dist/aas-core.js",
@@ -10,8 +10,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.ts",
-        "test:watch": "node --experimental-vm-modules --no-warnings ../../node_modules/jest/bin/jest.js -c jest.config.js --watch --coverage=false",
+        "test": "vitest --run",
+        "watch": "vitest --watch --coverage=false",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
         "build:debug": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",

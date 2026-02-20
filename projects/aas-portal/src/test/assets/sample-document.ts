@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASDocument, selectElement } from 'aas-core'
+import { aas, AASDocument, selectReferable } from 'aas-core'
 
 const content: object = {
     "assetAdministrationShells": [
@@ -2983,8 +2983,8 @@ export const aasNoTechnicalData: AASDocument = {
 
 export const submodelTechnicalData: aas.Submodel = technicalData as aas.Submodel;
 
-export const rotationSpeed: aas.Property = selectElement(sampleDocument.content!, 'OperationalData', 'RotationSpeed')!;
+export const rotationSpeed: aas.Property = selectReferable(sampleDocument.content!, 'OperationalData', 'RotationSpeed')!;
 
-export const torque: aas.Property = selectElement(sampleDocument.content!, 'OperationalData', 'Torque')!;
+export const torque: aas.Property = selectReferable(sampleDocument.content!, 'OperationalData', 'Torque')!;
 
-export const maxRotationSpeed: aas.Property = selectElement(sampleDocument.content!, 'TechnicalData', 'MaxRotationSpeed')!;
+export const maxRotationSpeed: aas.Property = selectReferable(sampleDocument.content!, 'TechnicalData', 'MaxRotationSpeed')!;

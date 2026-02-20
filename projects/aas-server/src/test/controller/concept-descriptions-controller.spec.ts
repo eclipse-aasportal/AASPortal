@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import os from 'os';
 import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
@@ -19,19 +19,19 @@ import { aas, jsonization, toJsonValue } from 'aas-core';
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
-import { createSpyObj } from '../create-spy-obj.js';
 import { errorHandler } from '../../app/error-handler.js';
 import { getToken } from '../json-web-token.js';
 import { ConceptDescriptionRepository } from '../../app/concept-description-repository.js';
 import { encodeBase64Url } from '../../app/utilities.js';
 import { Authentication } from '../../app/controller/authentication.js';
+import { createSpyObj } from '../mocks.js';
 
 describe('ConceptDescriptionsController', () => {
     let app: Express;
     let logger: Logger;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
-    let repository: jest.Mocked<ConceptDescriptionRepository>;
+    let variable: Mocked<Variable>;
+    let authentication:Mocked<Authentication>;
+    let repository: Mocked<ConceptDescriptionRepository>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -105,7 +105,7 @@ describe('ConceptDescriptionsController', () => {
         repository.addConceptDescription.mockResolvedValue(
             jsonization.conceptDescriptionFromJsonable(toJsonValue(cd)).mustValue(),
         );
-        
+
         const response = await request(app)
             .post('/api/v3/concept-descriptions')
             .set('Authorization', `Bearer ${getToken()}`)

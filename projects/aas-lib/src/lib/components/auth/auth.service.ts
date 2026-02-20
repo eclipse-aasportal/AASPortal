@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { Inject, Injectable, computed, signal } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { inject, Injectable, computed, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { ApplicationError, Credentials, stringFormat, UserProfile, UserRole, JWTPayload, toBoolean } from 'aas-core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap/modal';
 
 import { ERRORS } from '../../messages';
 import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-form.component';
@@ -24,16 +24,15 @@ import { WINDOW } from '../../services/window.service';
     providedIn: 'root',
 })
 export class AuthService {
+    private readonly modal = inject(NgbModal);
+    private readonly translate = inject(TranslateService);
+    private readonly api = inject(AuthApiService);
+    private readonly window = inject(WINDOW);
     private readonly token$ = signal<string | undefined>(undefined);
     private readonly payload$ = signal<JWTPayload | undefined>(undefined);
     private readonly ready$ = new BehaviorSubject(false);
 
-    public constructor(
-        private modal: NgbModal,
-        private translate: TranslateService,
-        private api: AuthApiService,
-        @Inject(WINDOW) private window: Window,
-    ) {
+    public constructor() {
         const stayLoggedIn = toBoolean(this.window.localStorage.getItem('.StayLoggedIn'));
         const token = this.window.localStorage.getItem('.Token');
         if (stayLoggedIn && token && this.isValid(token)) {

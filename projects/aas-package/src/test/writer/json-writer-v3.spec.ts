@@ -8,7 +8,7 @@
 
 import { JsonWriterV3 } from '../../lib/writer/json-writer-v3.js';
 import { aasEnvironment } from '../assets/aas-environment.js';
-import { describe, beforeEach, it, expect } from '@jest/globals';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('JsonWriter', function () {
     describe('writeEnvironment', function () {

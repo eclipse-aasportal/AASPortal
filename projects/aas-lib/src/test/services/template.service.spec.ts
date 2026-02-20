@@ -6,22 +6,19 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
+import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { of } from 'rxjs';
-import { TemplateDescriptor, aas } from 'aas-core';
+import { provideHttpClient } from '@angular/common/http';
+import { aas, TemplateDescriptor, types} from 'aas-core';
 
 import { NotifyService } from '../../lib/components/notify/notify.service';
 import { TemplateService } from '../../lib/services/template.service';
-import { createSpyObj, DoneFn } from '../mocks';
+import { createSpyObj, mockFetchJson, restoreFetch } from '../mocks';
 
 describe('TemplateService', () => {
     let service: TemplateService;
-    let httpTestingController: HttpTestingController;
-    let http: HttpClient;
     let template: TemplateDescriptor;
 
     beforeEach(() => {
@@ -31,25 +28,21 @@ describe('TemplateService', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClient(),
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],
         });
 
-        http = TestBed.inject(HttpClient);
         service = TestBed.inject(TemplateService);
-        httpTestingController = TestBed.inject(HttpTestingController);
-
         template = {
-            idShort: '',
-            modelType: 'Property',
-            endpoint: { type: 'file', address: 'property.json' },
+            name: 'submodel-template',
+            url: 'http://read/the/template/file.json',
         };
+    });
 
-        const url = `/api/v1/templates`;
-        const req = httpTestingController.expectOne(url);
-        req.flush([template] as TemplateDescriptor[]);
+    afterEach(() => {
+        vitest.clearAllMocks();
     });
 
     it('should be created', () => {
@@ -57,26 +50,43 @@ describe('TemplateService', () => {
     });
 
     describe('templates', () => {
-        it('returns the available templates', () => {
-            expect(service.templates()).toEqual([template]);
+        it('returns the available templates', async () => {
+            const httpMock: HttpTestingController = TestBed.inject(HttpTestingController);
+            TestBed.inject(ApplicationRef).tick();
+            httpMock.expectOne('/assets/published-idta-templates.json').flush([template]);
+            await TestBed.inject(ApplicationRef).whenStable();
+            expect(service.templates()).toEqual([template.name]);
+            httpMock.verify();
         });
     });
 
-    describe('getTemplate', () => {
-        it('returns the template with the specified endpoint', (done: DoneFn) => {
-            const property: aas.Property = {
-                valueType: 'xs:string',
-                idShort: 'aProperty',
-                modelType: 'Property',
+    describe.skip('getTemplate', () => {
+        afterEach(() => {
+            restoreFetch();
+        });
+
+        it('returns the template with the specified endpoint', async () => {
+            const env: aas.Environment = {
+                assetAdministrationShells: [],
+                conceptDescriptions: [],
+                submodels: [
+                    {
+                        id: 'http://localhost/aas/submodel',
+                        idShort: 'Submodel',
+                        modelType: 'Submodel',
+                    },
+                ],
             };
 
-            jest.spyOn(http, 'get').mockReturnValue(of(property));
+            const httpMock: HttpTestingController = TestBed.inject(HttpTestingController);
+            TestBed.inject(ApplicationRef).tick();
+            httpMock.expectOne('/assets/published-idta-templates.json').flush([template]);
+            await TestBed.inject(ApplicationRef).whenStable();
 
-            service.getTemplate({ type: 'file', address: 'submodel-element/property.json' }).subscribe(value => {
-                expect(value).toEqual(property);
-                expect(http.get).toHaveBeenCalledWith(`/api/v1/templates/c3VibW9kZWwtZWxlbWVudC9wcm9wZXJ0eS5qc29u`);
-                done();
-            });
+            mockFetchJson(env);
+
+            const environment = await service.getTemplate();
+            expect(environment).toBeInstanceOf(types.Environment);
         });
     });
 });

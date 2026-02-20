@@ -61,7 +61,7 @@ export class LocalizeComponent implements OnInit, OnDestroy {
         }
     }
 
-    public ngOnDestroy() {
+    public ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
 

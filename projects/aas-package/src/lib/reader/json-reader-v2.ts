@@ -6,16 +6,16 @@
  *
  *****************************************************************************/
 
-import { determineType, aas, isIdentifiable } from 'aas-core';
+import { determineType, aas } from 'aas-core';
 import { AASReader } from '../aas-reader.js';
-import { encodeBase64Url } from '../utilities.js';
 import * as aasv2 from '../aas-v2.js';
+import { encodeBase64Url } from '../utilities.js';
 
 export class JsonReaderV2 extends AASReader {
     private readonly origin: aasv2.AssetAdministrationShellEnvironment;
 
-    public constructor(origin?: aasv2.AssetAdministrationShellEnvironment | string, createReferenceToParent?: boolean) {
-        super(createReferenceToParent);
+    public constructor(origin?: aasv2.AssetAdministrationShellEnvironment | string, createPath?: boolean) {
+        super(createPath);
 
         if (origin) {
             this.origin = typeof origin === 'string' ? JSON.parse(origin) : origin;
@@ -40,7 +40,7 @@ export class JsonReaderV2 extends AASReader {
             case 'Submodel':
                 return this.readSubmodel(source as aasv2.Submodel);
             default:
-                return this.readSubmodelElement(source as aasv2.SubmodelElement, []);
+                return this.readSubmodelElement(source as aasv2.SubmodelElement);
         }
     }
 
@@ -148,55 +148,64 @@ export class JsonReaderV2 extends AASReader {
         };
 
         if (source.submodelElements) {
-            submodel.submodelElements = this.readSubmodelElements(source.submodelElements, [submodel]);
+            submodel.submodelElements = this.readSubmodelElements(source.submodelElements, {
+                id: submodel.id,
+                idShortPath: '',
+            });
         }
 
         return submodel;
     }
 
-    private readSubmodelElements(sources: aasv2.SubmodelElement[], ancestors: aas.Referable[]): aas.SubmodelElement[] {
-        const submodelElements: aas.SubmodelElement[] = [];
-        for (const source of sources) {
-            submodelElements.push(this.readSubmodelElement(source, ancestors));
+    private readSubmodelElements(sources: aasv2.SubmodelElement[], path?: aas.ReferablePath): aas.SubmodelElement[] {
+        if (!path) {
+            return sources.map(source => this.readSubmodelElement(source));
         }
 
-        return submodelElements;
+        let idShortPath = path.idShortPath;
+        if (idShortPath.length > 0) {
+            idShortPath += '.';
+        }
+
+        return sources.map(source =>
+            this.readSubmodelElement(source, { id: path.id, idShortPath: idShortPath + source.idShort }),
+        );
     }
 
-    private readSubmodelElement(source: aasv2.SubmodelElement, ancestors: aas.Referable[]): aas.SubmodelElement {
+    private readSubmodelElement(source: aasv2.SubmodelElement, path?: aas.ReferablePath): aas.SubmodelElement {
         switch (source.modelType.name) {
             case 'AnnotatedRelationshipElement':
-                return this.readAnnotatedRelationshipElement(source as aasv2.AnnotatedRelationshipElement, ancestors);
+                return this.readAnnotatedRelationshipElement(source as aasv2.AnnotatedRelationshipElement, path);
             case 'BasicEvent':
-                return this.readBasicEvent(source as aasv2.BasicEvent, ancestors);
+                return this.readBasicEvent(source as aasv2.BasicEvent, path);
             case 'Blob':
-                return this.readBlob(source as aasv2.Blob, ancestors);
+                return this.readBlob(source as aasv2.Blob, path);
             case 'Entity':
-                return this.readEntity(source as aasv2.Entity, ancestors);
+                return this.readEntity(source as aasv2.Entity, path);
             case 'File':
-                return this.readFile(source as aasv2.File, ancestors);
+                return this.readFile(source as aasv2.File, path);
             case 'MultiLanguageProperty':
-                return this.readMultiLanguageProperty(source as aasv2.MultiLanguageProperty, ancestors);
+                return this.readMultiLanguageProperty(source as aasv2.MultiLanguageProperty, path);
             case 'Operation':
-                return this.readOperation(source as aasv2.Operation, ancestors);
+                return this.readOperation(source as aasv2.Operation, path);
             case 'Property':
-                return this.readProperty(source as aasv2.Property, ancestors);
+                return this.readProperty(source as aasv2.Property, path);
             case 'Range':
-                return this.readRange(source as aasv2.Range, ancestors);
+                return this.readRange(source as aasv2.Range, path);
             case 'ReferenceElement':
-                return this.readReferenceElement(source as aasv2.ReferenceElement, ancestors);
+                return this.readReferenceElement(source as aasv2.ReferenceElement, path);
             case 'RelationshipElement':
-                return this.readRelationshipElement(source as aasv2.RelationshipElement, ancestors);
+                return this.readRelationshipElement(source as aasv2.RelationshipElement, path);
             case 'SubmodelElementCollection':
-                return this.readSubmodelElementCollection(source as aasv2.SubmodelElementCollection, ancestors);
+                return this.readSubmodelElementCollection(source as aasv2.SubmodelElementCollection, path);
             default:
-                return this.readSubmodelElementType(source, ancestors);
+                return this.readSubmodelElementType(source, path);
         }
     }
 
-    private readSubmodelElementType(source: aasv2.SubmodelElement, ancestors: aas.Referable[]): aas.SubmodelElement {
+    private readSubmodelElementType(source: aasv2.SubmodelElement, path?: aas.ReferablePath): aas.SubmodelElement {
         return {
-            ...this.readReferable(source, ancestors),
+            ...this.readReferable(source, path),
             ...this.readHasSemantic(source),
             ...this.readHasKind(source),
             ...this.readHasDataSpecification(source),
@@ -206,28 +215,26 @@ export class JsonReaderV2 extends AASReader {
 
     private readAnnotatedRelationshipElement(
         source: aasv2.AnnotatedRelationshipElement,
-        ancestors: aas.Referable[],
+        path?: aas.ReferablePath,
     ): aas.AnnotatedRelationshipElement {
         const relationship: aas.AnnotatedRelationshipElement = {
-            ...this.readRelationshipElement(source, ancestors),
+            ...this.readRelationshipElement(source, path),
         };
 
         if (source.annotation) {
-            relationship.annotations = source.annotation.map(item =>
-                this.readSubmodelElementType(item, [...ancestors, relationship]),
-            );
+            relationship.annotations = this.readSubmodelElements(source.annotation, path);
         }
 
         return relationship;
     }
 
-    private readBasicEvent(source: aasv2.BasicEvent, ancestors: aas.Referable[]): aas.BasicEventElement {
+    private readBasicEvent(source: aasv2.BasicEvent, path?: aas.ReferablePath): aas.BasicEventElement {
         if (!source.observed) {
             throw new Error('BasicEvent.observed');
         }
 
         const basicEvent: aas.BasicEventElement = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             observed: this.readReference(source.observed),
             direction: 'input',
             state: 'off',
@@ -236,7 +243,7 @@ export class JsonReaderV2 extends AASReader {
         return basicEvent;
     }
 
-    private readProperty(source: aasv2.Property, ancestors: aas.Referable[]): aas.Property {
+    private readProperty(source: aasv2.Property, path?: aas.ReferablePath): aas.Property {
         let valueType = this.readValueTypeDef(source.valueType);
         if (!valueType && source.value != null) {
             valueType = determineType(source.value);
@@ -247,7 +254,7 @@ export class JsonReaderV2 extends AASReader {
         }
 
         const property: aas.Property = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             valueType,
         };
 
@@ -255,11 +262,8 @@ export class JsonReaderV2 extends AASReader {
             property.value = source.value;
         }
 
-        if (ancestors && (!property.category || property.category === 'VARIABLE')) {
-            const smId = encodeBase64Url((ancestors[0] as aas.Submodel).id);
-            const idShortPath = ancestors.map(ancestor => ancestor.idShort).slice(1);
-            idShortPath.push(property.idShort);
-            property.nodeId = `${smId}#${idShortPath.join('.')}`;
+        if (path && (!property.category || property.category === 'VARIABLE')) {
+            property.nodeId = `${encodeBase64Url(path.id)}#${path.idShortPath}`;
         }
 
         return property;
@@ -267,25 +271,25 @@ export class JsonReaderV2 extends AASReader {
 
     private readMultiLanguageProperty(
         source: aasv2.MultiLanguageProperty,
-        ancestors: aas.Referable[],
+        path?: aas.ReferablePath,
     ): aas.MultiLanguageProperty {
         const value = this.readLangStringSet(source.value.langString);
         const property: aas.MultiLanguageProperty = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             value,
         };
 
         return property;
     }
 
-    private readFile(source: aasv2.File, ancestors: aas.Referable[]): aas.File {
+    private readFile(source: aasv2.File, path?: aas.ReferablePath): aas.File {
         let contentType = source.mimeType;
         if (!contentType) {
             contentType = '';
         }
 
         const file: aas.File = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             contentType,
         };
 
@@ -296,14 +300,14 @@ export class JsonReaderV2 extends AASReader {
         return file;
     }
 
-    private readBlob(source: aasv2.Blob, ancestors: aas.Referable[]): aas.Blob {
+    private readBlob(source: aasv2.Blob, path?: aas.ReferablePath): aas.Blob {
         let contentType = source.mimeType;
         if (!contentType) {
             contentType = '';
         }
 
         const blob: aas.Blob = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             contentType,
         };
 
@@ -316,26 +320,26 @@ export class JsonReaderV2 extends AASReader {
 
     private readSubmodelElementCollection(
         source: aasv2.SubmodelElementCollection,
-        ancestors: aas.Referable[],
+        path?: aas.ReferablePath,
     ): aas.SubmodelElementCollection {
         const collection: aas.SubmodelElementCollection = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
         };
 
         if (source.value) {
-            collection.value = this.readSubmodelElements(source.value, [...ancestors, collection]);
+            collection.value = this.readSubmodelElements(source.value, path);
         }
 
         return collection;
     }
 
-    private readReferenceElement(source: aasv2.ReferenceElement, ancestors: aas.Referable[]): aas.ReferenceElement {
+    private readReferenceElement(source: aasv2.ReferenceElement, path?: aas.ReferablePath): aas.ReferenceElement {
         if (!source.value) {
             throw new Error('ReferenceElement.value');
         }
 
         const reference: aas.ReferenceElement = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             value: this.readReference(source.value),
         };
 
@@ -344,9 +348,9 @@ export class JsonReaderV2 extends AASReader {
 
     private readRelationshipElement(
         source: aasv2.RelationshipElement,
-        ancestors: aas.Referable[],
+        path?: aas.ReferablePath,
     ): aas.RelationshipElement {
-        const relationship: aas.RelationshipElement = this.readSubmodelElementType(source, ancestors);
+        const relationship: aas.RelationshipElement = this.readSubmodelElementType(source, path);
         if (source.first) {
             relationship.first = this.readReference(source.first);
         }
@@ -358,40 +362,38 @@ export class JsonReaderV2 extends AASReader {
         return relationship;
     }
 
-    private readOperation(source: aasv2.Operation, ancestors: aas.Referable[]): aas.Operation {
+    private readOperation(source: aasv2.Operation, path?: aas.ReferablePath): aas.Operation {
         const operation: aas.Operation = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
         };
 
         if (source.inputVariable) {
-            operation.inputVariables = source.inputVariable.map(item =>
-                this.readOperationVariable(item, [...ancestors, operation]),
-            );
+            operation.inputVariables = this.readOperationVariables(source.inputVariable);
         }
 
         if (source.inoutputVariable) {
-            operation.inoutputVariables = source.inoutputVariable.map(item =>
-                this.readOperationVariable(item, [...ancestors, operation]),
-            );
+            operation.inoutputVariables = this.readOperationVariables(source.inoutputVariable);
         }
 
         if (source.outputVariable) {
-            operation.outputVariables = source.outputVariable.map(item =>
-                this.readOperationVariable(item, [...ancestors, operation]),
-            );
+            operation.outputVariables = this.readOperationVariables(source.outputVariable);
         }
 
         return operation;
     }
 
-    private readOperationVariable(source: aasv2.OperationVariable, ancestors: aas.Referable[]): aas.OperationVariable {
+    private readOperationVariables(variables: aasv2.OperationVariable[]): aas.OperationVariable[] {
+        return variables.map(item => this.readOperationVariable(item));
+    }
+
+    private readOperationVariable(source: aasv2.OperationVariable, path?: aas.ReferablePath): aas.OperationVariable {
         let value: aas.SubmodelElement | undefined;
         if (this.isSubmodelElement(source.value)) {
-            value = this.readSubmodelElement(source.value, ancestors);
+            value = this.readSubmodelElement(source.value, path);
         } else if ('submodelElement' in source.value) {
             const submodelElement = (source.value as { submodelElement: aasv2.SubmodelElement }).submodelElement;
             if (this.isSubmodelElement(submodelElement)) {
-                value = this.readSubmodelElement(submodelElement, ancestors);
+                value = this.readSubmodelElement(submodelElement, path);
             }
         }
 
@@ -402,13 +404,13 @@ export class JsonReaderV2 extends AASReader {
         return { value };
     }
 
-    private readEntity(source: aasv2.Entity, ancestors: aas.Referable[]): aas.Entity {
+    private readEntity(source: aasv2.Entity, path?: aas.ReferablePath): aas.Entity {
         if (source.entityType == null) {
             throw new Error('Entity.entityType');
         }
 
         const entity: aas.Entity = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             entityType: source.entityType,
         };
 
@@ -417,19 +419,19 @@ export class JsonReaderV2 extends AASReader {
         }
 
         if (source.statements) {
-            entity.statements = this.readSubmodelElements(source.statements, [...ancestors, entity]);
+            entity.statements = this.readSubmodelElements(source.statements, path);
         }
 
         return entity;
     }
 
-    private readRange(source: aasv2.Range, ancestors: aas.Referable[]): aas.Range {
+    private readRange(source: aasv2.Range, path?: aas.ReferablePath): aas.Range {
         if (source.valueType == null) {
             throw new Error('Range.valueType');
         }
 
         const range: aas.Range = {
-            ...this.readSubmodelElementType(source, ancestors),
+            ...this.readSubmodelElementType(source, path),
             valueType: this.readDataTypeDefXsd(source.valueType.dataObjectType.name) as aas.DataTypeDefXsd,
         };
 
@@ -498,7 +500,7 @@ export class JsonReaderV2 extends AASReader {
         return qualifier;
     }
 
-    private readReferable(source: aasv2.Referable, ancestors?: aas.Referable[]): aas.Referable {
+    private readReferable(source: aasv2.Referable, path?: aas.ReferablePath): aas.Referable {
         const idShort = source.idShort ?? '';
         if (!source.modelType?.name) {
             throw Error(`Referable.modelType.name.`);
@@ -509,23 +511,8 @@ export class JsonReaderV2 extends AASReader {
             modelType: this.readModelType(source.modelType.name) as aas.ModelType,
         };
 
-        if (ancestors && this.createReferenceToParent) {
-            referable.parent = {
-                type: 'ModelReference',
-                keys: ancestors.map(ancestor => {
-                    if (isIdentifiable(ancestor)) {
-                        return {
-                            type: ancestor.modelType,
-                            value: ancestor.id,
-                        } as aas.Key;
-                    } else {
-                        return {
-                            type: ancestor.modelType,
-                            value: ancestor.idShort,
-                        } as aas.Key;
-                    }
-                }),
-            };
+        if (path && this.createPath) {
+            referable.path = path;
         }
 
         if (source.category) {
@@ -534,10 +521,6 @@ export class JsonReaderV2 extends AASReader {
 
         if (source.descriptions) {
             referable.description = this.readLangStringSet(source.descriptions);
-        }
-
-        if (source.parent) {
-            referable.parent = this.readReference(source.parent);
         }
 
         return referable;

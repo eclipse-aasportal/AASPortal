@@ -9,15 +9,16 @@
 import 'reflect-metadata';
 import os from 'os';
 import { container } from 'tsyringe';
-import { describe, beforeEach, it, expect, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import { Readable } from 'stream';
-import { resolve } from 'path/posix';
 import request from 'supertest';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
 import { aas, AASEndpoint } from 'aas-core';
-import { createSpyObj } from 'aas-jest';
 
+import { createSpyObj } from '../mocks.js';
 import { sampleDocument } from '../assets/sample-document.js';
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { AuthService } from '../../app/auth/auth-service.js';
@@ -27,15 +28,14 @@ import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
-import multer from 'multer';
 
 describe('EndpointsController', () => {
     let app: Express;
     let logger: Logger;
-    let auth: jest.Mocked<AuthService>;
-    let aasProvider: jest.Mocked<AASProvider>;
-    let variable: jest.Mocked<Variable>;
-    let authentication: jest.Mocked<Authentication>;
+    let auth: Mocked<AuthService>;
+    let aasProvider: Mocked<AASProvider>;
+    let variable: Mocked<Variable>;
+    let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -202,7 +202,7 @@ describe('EndpointsController', () => {
         const response = await request(app)
             .post('/api/v1/endpoints/U2FtcGxl/packages')
             .set('Authorization', `Bearer ${getToken('John')}`)
-            .attach('file', resolve('./src/test/assets/samples/example-motor.aasx'));
+            .attach('file', fileURLToPath(new URL('../assets/samples/example-motor.aasx', import.meta.url)));
 
         expect(response.statusCode).toBe(204);
         expect(aasProvider.insertPackages).toHaveBeenCalled();
@@ -222,6 +222,17 @@ describe('EndpointsController', () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
         const response = await request(app)
             .get('/api/v1/endpoints/U2FtcGxl/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
+            .set('Authorization', `Bearer ${getToken()}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(sampleDocument);
+        expect(aasProvider.getDocument).toHaveBeenCalled();
+    });
+
+    it('GET: /api/v1/endpoints/{name}/documents/asset/{id}', async () => {
+        aasProvider.getDocument.mockResolvedValue(sampleDocument);
+        const response = await request(app)
+            .get('/api/v1/endpoints/U2FtcGxl/documents/asset/aHR0cDovL2N1c3RvbWVyLmNvbS9hc3NldHMvS0hCVlpKU1FLSVk')
             .set('Authorization', `Bearer ${getToken()}`);
 
         expect(response.statusCode).toBe(200);

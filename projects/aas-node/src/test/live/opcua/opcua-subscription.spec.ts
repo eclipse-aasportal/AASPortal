@@ -6,18 +6,18 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { OpcuaSubscription } from '../../../app/live/opcua/opcua-subscription.js';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../../mocks.js';
 import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { OpcuaClient } from '../../../app/client/opcua/opcua-client.js';
 
 describe('OpcuaSubscription', function () {
     let subscription: OpcuaSubscription;
-    let logger: jest.Mocked<Logger>;
-    let client: jest.Mocked<SocketClient>;
-    let server: jest.Mocked<OpcuaClient>;
+    let logger: Mocked<Logger>;
+    let client: Mocked<SocketClient>;
+    let server: Mocked<OpcuaClient>;
 
     beforeEach(function () {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -19,13 +19,13 @@ import { ToolbarService } from '../../../lib/services/toolbar.service';
 import { StartService } from '../../../lib/services/start.service';
 import { EndpointsApi } from '../../../lib/services/endpoints-api';
 import { encodeBase64Url } from '../../../lib/utilities';
-import { VIEW_ROUTES } from '../../../lib/types';
-import { viewRoutes } from '../../../lib/views/views-routes';
+import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 import { ThumbnailQRCode } from '../../../lib/views/thumbnail-qrcode/thumbnail-qrcode';
 import { ContactInformationView } from '../../../lib/views/contact-information/contact-information-view';
 import { ContactInformation } from '../../../lib/views/contact-information/contact-information';
 import { ContactInformationState } from '../../../lib/views/contact-information/contact-information.state';
 import { createSpyObj, FakeLoader } from '../../mocks';
+import { CONTACT_INFORMATION_1_0 } from '../../../lib/views/views-constants';
 
 import contactInformation from '../../assets/contact-information-1-0.json';
 
@@ -52,9 +52,9 @@ export class TestContactInformation {
 describe.skip('ContactInformationsView', () => {
     let component: ContactInformationView;
     let fixture: ComponentFixture<ContactInformationView>;
-    let api: jest.Mocked<EndpointsApi>;
-    let start: jest.Mocked<StartService>;
-    let route: jest.Mocked<ActivatedRoute>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
     let document: AASDocument;
 
     beforeEach(async () => {
@@ -98,7 +98,17 @@ describe.skip('ContactInformationsView', () => {
                 },
                 {
                     provide: VIEW_ROUTES,
-                    useValue: viewRoutes,
+                    useValue: [
+                            {
+                                path: 'ContactInformation',
+                                component: ContactInformationView,
+                                data: {
+                                    type: 'Leaf',
+                                    semanticIds: [CONTACT_INFORMATION_1_0],
+                                },
+                            },
+                        
+                    ],
                 },
                 provideTranslateService({
                     loader: {

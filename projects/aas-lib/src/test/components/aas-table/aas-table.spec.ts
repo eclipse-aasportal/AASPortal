@@ -6,9 +6,10 @@
  *
  *****************************************************************************/
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTable } from '../../../lib/components/aas-table/aas-table';
@@ -62,6 +63,6 @@ describe('AASTable', () => {
         const component = fixture.componentInstance;
         fixture.componentRef.setInput('documents', [document1, document2, document3]);
         fixture.detectChanges();
-        expect(component.rows()).toBeTruthy();
+        expect(component.items()).toBeTruthy();
     });
 });

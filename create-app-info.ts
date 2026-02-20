@@ -46,21 +46,20 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nodeModulesFolder = join(__dirname, 'node_modules');
 
 const replacements = new Map<string, string>([
-    ['@angular/animations', 'oss/@angular/LICENSE.txt'],
-    ['@angular/common', 'oss/@angular/LICENSE.txt'],
-    ['@angular/compiler', 'oss/@angular/LICENSE.txt'],
-    ['@angular/compiler-cli', 'oss/@angular/LICENSE.txt'],
-    ['@angular/core', 'oss/@angular/LICENSE.txt'],
-    ['@angular/forms', 'oss/@angular/LICENSE.txt'],
-    ['@angular/localize', 'oss/@angular/LICENSE.txt'],
-    ['@angular/platform-browser', 'oss/@angular/LICENSE.txt'],
-    ['@angular/platform-browser-dynamic', 'oss/@angular/LICENSE.txt'],
-    ['@angular/router', 'oss/@angular/LICENSE.txt'],
-    ['@ngx-translate/core', 'oss/@ngx-translate/core/LICENSE.txt'],
-    ['@ngx-translate/http-loader', 'oss/@ngx-translate/http-loader/LICENSE.txt'],
+    ['@angular/animations', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/common', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/compiler', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/compiler-cli', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/core', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/elements', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/forms', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/localize', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/platform-browser', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/platform-browser-dynamic', 'node_modules/@angular/cli/LICENSE'],
+    ['@angular/router', 'node_modules/@angular/cli/LICENSE'],
 ]);
 
-const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'aas-jest']);
+const exclude = new Set(['aas-core', 'aas-lib', 'aas-portal', 'aas-node', 'aas-package']);
 
 await main();
 
@@ -98,11 +97,13 @@ async function readLibrariesAsync(project: Package): Promise<Library[]> {
     const libraries: Library[] = [];
     if (existsSync(nodeModulesFolder)) {
         for (const name in project.dependencies) {
-            await readLibraryAsync(name, libraries);
+            const version = getRawVersion(project.dependencies[name]);
+            await readLibraryAsync(name, version, libraries);
         }
 
         for (const name in project.devDependencies) {
-            await readLibraryAsync(name, libraries);
+            const version = getRawVersion(project.devDependencies[name]);
+            await readLibraryAsync(name, version, libraries);
         }
     }
 
@@ -111,7 +112,12 @@ async function readLibrariesAsync(project: Package): Promise<Library[]> {
     return libraries;
 }
 
-async function readLibraryAsync(name: string, libraries: Library[]): Promise<void> {
+function getRawVersion(value: string): string {
+    const c = value.charAt(0);
+    return c < '0' || c > '9' ? value.substring(1) : value;
+}
+
+async function readLibraryAsync(name: string, version: string, libraries: Library[]): Promise<void> {
     if (exclude.has(name)) {
         return;
     }
@@ -122,7 +128,7 @@ async function readLibraryAsync(name: string, libraries: Library[]): Promise<voi
             const pkg = JSON.parse((await readFile(packageFile)).toString());
             libraries.push({
                 name: pkg.name,
-                version: pkg.version,
+                version,
                 description: pkg.description,
                 license: pkg.license,
                 licenseText: await loadLicenseText(nodeModulesFolder, name),
@@ -143,7 +149,7 @@ async function loadLicenseText(nodeModulesFolder: string, packageName: string): 
         for (const file of await readdir(folder, { withFileTypes: true, recursive: true })) {
             if (file.isFile()) {
                 if (path.basename(file.name, path.extname(file.name)).toLowerCase() === 'license') {
-                    return (await readFile(join(file.path, file.name))).toString();
+                    return (await readFile(join(file.parentPath, file.name))).toString();
                 }
             }
         }

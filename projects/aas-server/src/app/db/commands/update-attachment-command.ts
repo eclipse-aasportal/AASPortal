@@ -17,16 +17,18 @@ import { ERROR } from '../../error.js';
 import { KeyList } from '../key-list.js';
 import { AasxPackage } from '../../aasx-package.js';
 
-export class UpdateAttachmentCommand extends DatabaseCommand<void> {
+export class UpdateAttachmentCommand extends DatabaseCommand {
     public constructor(
         database: Database,
+        resolve: () => void,
+        reject: (reason: Error) => void,
         private readonly aasId: string | undefined,
         private readonly smId: string,
         private readonly idShortPath: string,
         private readonly path: string,
         private readonly filename: string,
     ) {
-        super(database);
+        super(database, resolve, reject);
     }
 
     public override async execute(): Promise<void> {

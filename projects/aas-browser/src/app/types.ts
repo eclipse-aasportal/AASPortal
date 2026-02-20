@@ -22,8 +22,8 @@ export interface Environment {
  * - if previous and or next are `null`, this indicates that the cursor is at the end.
  */
 export type Cursor = {
-    previous?: string | null;
-    next?: string | null;
+    previous: string | null | undefined;
+    next: string | null | undefined;
 };
 
 export interface Stats {

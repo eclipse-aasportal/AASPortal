@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, afterEach, jest } from '@jest/globals';
+import { describe, beforeEach, it, expect, afterEach, Mocked, vitest } from 'vitest';
 import { WebDAVStorage } from '../../app/file-storage/webdav-storage.js';
 import { FileStat, WebDAVClient } from 'webdav';
-import { createSpyObj } from 'aas-jest';
+import { createSpyObj } from '../mocks.js';
 
 describe('WebDAVStorage', () => {
     let storage: WebDAVStorage;
-    let client: jest.Mocked<WebDAVClient>;
+    let client: Mocked<WebDAVClient>;
 
     beforeEach(() => {
         client = createSpyObj<WebDAVClient>(['exists', 'getDirectoryContents', 'getFileContents']);
@@ -21,7 +21,7 @@ describe('WebDAVStorage', () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     it('should create', () => {

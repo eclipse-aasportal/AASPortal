@@ -33,7 +33,7 @@ class WorkerTask extends EventEmitter {
         return this._worker;
     }
 
-    public execute(worker: Worker) {
+    public execute(worker: Worker): void {
         this._worker = worker;
 
         worker.on('message', this.workerOnMessage);
@@ -50,7 +50,7 @@ class WorkerTask extends EventEmitter {
         }
     }
 
-    private workerOnMessage = (value: Uint8Array) => {
+    private workerOnMessage = (value: Uint8Array): void => {
         const result: ScanResult = JSON.parse(Buffer.from(value).toString());
         switch (result.kind) {
             case ScanResultKind.End:
@@ -62,11 +62,11 @@ class WorkerTask extends EventEmitter {
         }
     };
 
-    private workerOnError = (error: Error) => {
+    private workerOnError = (error: Error): void => {
         this.emit('error', error, this);
     };
 
-    private workerOnExit = (code: number) => {
+    private workerOnExit = (code: number): void => {
         this.emit('exit', code, this);
     };
 }
@@ -125,11 +125,11 @@ export class Parallel extends EventEmitter {
         return undefined;
     }
 
-    private taskOnMessage = (result: ScanResult) => {
+    private taskOnMessage = (result: ScanResult): void => {
         this.emit('message', result);
     };
 
-    private taskOnEnd = (result: ScanResult, task: WorkerTask) => {
+    private taskOnEnd = (result: ScanResult, task: WorkerTask): void => {
         this.emit('end', result);
 
         if (task) {
@@ -151,7 +151,7 @@ export class Parallel extends EventEmitter {
         }
     };
 
-    private taskOnError = (error: Error, task: WorkerTask) => {
+    private taskOnError = (error: Error, task: WorkerTask): void => {
         this.logger.error(error);
 
         try {

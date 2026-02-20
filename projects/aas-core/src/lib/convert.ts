@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { jsonization, types } from '@aas-core-works/aas-core3.0-typescript';
 import {
     AssetAdministrationShell,
     ConceptDescription,
@@ -15,8 +16,6 @@ import {
     Submodel,
     SubmodelElement,
 } from './aas.js';
-import * as jsonization from './aas-core/jsonization.js';
-import * as types from './aas-core/types.js';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -530,7 +529,7 @@ export function parseDate(s: string | undefined, localeId?: string): Date | unde
  * @param value The date value.
  * @returns `true` if the date value is valid; otherwise, `false`.
  */
-export function isValidDate(value: Date | undefined): boolean {
+export function isValidDate(value: Date | undefined): value is Date {
     if (value === undefined) {
         return false;
     }
@@ -874,9 +873,18 @@ export function extensionToMimeType(filename: string): string | undefined {
 }
 
 /** Converts the specified value. */
-export function toJsonValue(value: unknown): jsonization.JsonValue {
+export function toJsonValue(value: number | string | boolean | object): jsonization.JsonValue {
     return value as jsonization.JsonValue;
 }
+
+export function toJsonObject(value: object): jsonization.JsonObject {
+    return value as jsonization.JsonObject;
+}
+
+export function toJsonArray(value: unknown[]): jsonization.JsonArray {
+    return value as jsonization.JsonArray;
+}
+
 export function toEnvironment(value: types.Environment): Environment {
     return jsonization.toJsonable(value) as Environment;
 }
@@ -932,12 +940,55 @@ export function normalize(path: string): string {
 }
 
 /**
- * Converts a string representation of a boolean value into a boolean.
- * This function checks if the input string, when converted to lower case,
- * is equal to 'true'. If it is, the function returns `true`; otherwise, it returns `false`.
- * @param value The string representation of a boolean.
- * @returns The boolean value corresponding to the string.
+ * Deserializes a value according to the AAS specification (IDTA-01001-3-1-2, Part 1, section "Data type to value mapping").
+ * The function maps the input value and its data type to the correct JSON type as specified.
+ * @param value The property value to serialize.
+ * @param dataType The AAS data type (XSD type string).
+ * @returns The deserialized value as a JSON-compatible type (string, number, boolean, or null).
  */
+export function deserializeValue(value: string, dataType: DataTypeDefXsd): string | number | boolean {
+    if (value === undefined || value === null) {
+        return '';
+    }
+
+    switch (dataType) {
+        case 'xs:boolean':
+            return value.toLowerCase() === 'true';
+        case 'xs:byte':
+        case 'xs:unsignedByte':
+        case 'xs:short':
+        case 'xs:unsignedShort':
+        case 'xs:int':
+        case 'xs:unsignedInt':
+        case 'xs:integer':
+        case 'xs:negativeInteger':
+        case 'xs:nonNegativeInteger':
+        case 'xs:nonPositiveInteger':
+        case 'xs:positiveInteger':
+        case 'xs:float':
+        case 'xs:double':
+        case 'xs:decimal': {
+            const n = Number(value);
+            return isNaN(n) ? 'NaN' : n;
+        }
+        case 'xs:long':
+        case 'xs:unsignedLong':
+            return value;
+        case 'xs:date':
+        case 'xs:dateTime':
+        case 'xs:duration':
+        case 'xs:time':
+            return value;
+        case 'xs:anyURI':
+        case 'xs:string':
+        case 'xs:base64Binary':
+        case 'xs:hexBinary':
+            return value;
+        default:
+            return typeof value === 'object' ? JSON.stringify(value) : String(value);
+    }
+}
+
 function stringToBoolean(value: string): boolean {
     return value?.toLocaleLowerCase() === 'true';
 }

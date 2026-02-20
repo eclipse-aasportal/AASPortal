@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, getReferable, isFile } from 'aas-core';
-import { ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -19,14 +19,12 @@ import {
     effect,
     inject,
     OnDestroy,
-    OnInit,
     Signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
 
 import { encodeBase64Url, getUrl, toString } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
@@ -34,8 +32,8 @@ import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { Nameplate } from '../nameplate/nameplate';
 import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
 import { CompositeView } from '../composite-view';
-import { VIEW_ROUTES } from '../../types';
 import { DigitalProductPassportViewState } from './digital-product-passport-view.state';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 export type MainData = {
     uriOfTheProduct: string;
@@ -53,6 +51,7 @@ const emptyMainData: MainData = {
     selector: 'fhg-device-passport-portal',
     templateUrl: './digital-product-passport-view.html',
     styleUrl: './digital-product-passport-view.scss',
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'DigitalProductPassport' }],
     imports: [
         TranslatePipe,
         TranslateDirective,
@@ -62,26 +61,19 @@ const emptyMainData: MainData = {
         CarbonFootprint,
         Nameplate,
         HandoverDocumentation,
+        RouterModule,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DigitalProductPassportView
-    extends CompositeView<DigitalProductPassportViewState>
-    implements OnInit, OnDestroy
-{
+export class DigitalProductPassportView extends CompositeView implements OnDestroy {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly state = inject(DigitalProductPassportViewState);
 
     public constructor() {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'DigitalProductPassport',
-            inject(DigitalProductPassportViewState),
-        );
+        super();
 
         const translate = inject(TranslateService);
         this.langChange = toSignal(translate.onLangChange);
@@ -146,10 +138,6 @@ export class DigitalProductPassportView
             serialNumber: toString(nameplate, 'SerialNumber', currentLang),
         };
     });
-
-    public ngOnInit(): void {
-        this.onInit();
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

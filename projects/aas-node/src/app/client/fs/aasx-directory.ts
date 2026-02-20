@@ -94,7 +94,7 @@ export class AasxDirectory extends AASClient {
         (await this.openAasxPackage(filename)).setEnvironment(env);
     }
 
-    public override async openRead(filename: string, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public override async getFile(filename: string, file: aas.File): Promise<NodeJS.ReadableStream> {
         if (!file.value) {
             throw new Error('Invalid empty file.value.');
         }

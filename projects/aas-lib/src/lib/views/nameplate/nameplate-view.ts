@@ -9,7 +9,7 @@
 import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -18,7 +18,6 @@ import {
     effect,
     inject,
     OnDestroy,
-    OnInit,
     Signal,
     TemplateRef,
     viewChild,
@@ -28,13 +27,12 @@ import { aas, AASDocument, getReferable } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
 import { encodeBase64Url, getDisplayName, getDisplayValue } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { Nameplate } from './nameplate';
-import { VIEW_ROUTES } from '../../types';
 import { LeafView } from '../leaf-view';
 import { NameplateViewState } from './nameplate-view.state';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 /**
  * Provides a view for submodels that belong to the IDTA specification "Digital Nameplate for industrial equipment".
@@ -43,23 +41,19 @@ import { NameplateViewState } from './nameplate-view.state';
     selector: 'fhg-nameplate-view',
     templateUrl: './nameplate-view.html',
     styleUrls: ['./nameplate-view.scss'],
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate],
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Nameplate' }],
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate, RouterModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NameplateView extends LeafView<NameplateViewState> implements OnInit, OnDestroy {
+export class NameplateView extends LeafView implements OnDestroy {
     private readonly langChange: Signal<LangChangeEvent | undefined>;
     private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly state = inject(NameplateViewState);
 
     public constructor(translate: TranslateService) {
-        super(
-            inject(ActivatedRoute),
-            inject(EndpointsApi),
-            inject(VIEW_ROUTES),
-            'Nameplate',
-            inject(NameplateViewState),
-        );
+        super();
 
         this.langChange = toSignal(translate.onLangChange);
         this.currentLang = computed(() => this.langChange()?.lang ?? translate.getCurrentLang());
@@ -82,12 +76,13 @@ export class NameplateView extends LeafView<NameplateViewState> implements OnIni
      */
     public readonly nameplateState = this.state.nameplateState;
 
-    public ngOnInit(): void {
-        this.onInit();
-    }
-
     public ngOnDestroy(): void {
         this.toolbar.clear();
+    }
+
+    public getSemanticId(): string | undefined {
+        if (!this.submodel()) return '';
+        return this.submodel()?.semanticId?.keys[0].value;
     }
 
     /**

@@ -23,9 +23,8 @@ import {
     UploadedFile,
 } from 'tsoa';
 
-import { noop, PagedResult } from 'aas-core';
+import { noop, PackageDescription, PagedResult } from 'aas-core';
 
-import { PackageDescription } from '../types.js';
 import { decodeBase64Url } from '../utilities.js';
 import { PackageRepository } from '../package-repository.js';
 
@@ -92,10 +91,9 @@ export class PackagesController extends Controller {
         @UploadedFile() file: Express.Multer.File,
         @Query() filename?: string,
         @Query() aasIds?: string[],
-    ): Promise<{ packageId: string }> {
+    ): Promise<string> {
         noop(aasIds);
-        const packageId = await this.repository.add(file.path, filename || file.originalname);
-        return { packageId };
+        return await this.repository.add(file.path, filename ?? file.originalname);
     }
 
     /**
@@ -115,7 +113,7 @@ export class PackagesController extends Controller {
         @Query() aasIds?: string[],
     ): Promise<void> {
         noop(aasIds);
-        return this.repository.update(decodeBase64Url(packageId), file.path, filename || file.originalname);
+        return this.repository.update(decodeBase64Url(packageId), file.path, filename ?? file.originalname);
     }
 
     /**
