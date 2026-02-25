@@ -115,7 +115,7 @@ export class App {
         this.app.use(this.notFoundHandler);
     }
 
-    private notFoundHandler = (req: Request, res: Response) => {
+    private notFoundHandler = (req: Request, res: Response): void => {
         this.logger.warning(
             `[NotFound] ${req.method} ${req.originalUrl} (path: ${req.path}) (accept: ${req.headers.accept ?? 'n/a'})`,
         );
@@ -124,7 +124,7 @@ export class App {
         });
     };
 
-    private getIndex = (req: Request, res: Response) => {
+    private getIndex = (req: Request, res: Response): void => {
         this.logger.info(`[SPA] Serving index.html for ${req.method} ${req.originalUrl} (path: ${req.path})`);
         res.sendFile(this.variable.WEB_ROOT + '/index.html');
     };

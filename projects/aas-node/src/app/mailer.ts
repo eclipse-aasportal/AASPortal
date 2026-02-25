@@ -40,7 +40,7 @@ export class Mailer {
      * @param email The e-mail of the new user.
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public sendPassword(email: string, password: string) {
+    public sendPassword(email: string, password: string): void {
         throw new Error('Sending e-mails not implemented');
     }
 }

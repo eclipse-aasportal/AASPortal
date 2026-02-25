@@ -14,13 +14,7 @@ import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { noop, WebSocketData } from 'aas-core';
-import {
-    NotifyComponent,
-    ProgressComponent,
-    ToolbarService,
-    WebSocketFactoryService,
-    WINDOW,
-} from 'aas-lib';
+import { NotifyComponent, ProgressComponent, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
 import { Stats } from '../types';

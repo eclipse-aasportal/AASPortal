@@ -23,8 +23,10 @@ export const appConfig: ApplicationConfig = {
             useFactory: (window: WindowService) => new ApiUrlService(window),
             deps: [WINDOW],
         },
-        { 
-            provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true,
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: CacheInterceptor,
+            multi: true,
         },
         provideTranslateService({
             fallbackLang: 'en-us',

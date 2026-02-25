@@ -21,7 +21,7 @@ export class CacheInterceptor extends Cache<string, HttpEvent<unknown>> implemen
         super(100);
     }
 
-    public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    public intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
         if (req.method !== 'GET') {
             return next.handle(req);
         }

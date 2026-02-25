@@ -9,7 +9,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { catchError, filter, from, map, mergeMap, Observable, of, tap, toArray } from 'rxjs';
+import { catchError, filter, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
 import { aas, getSemanticId, PagedResult, traverse } from 'aas-core';
 import { API_URL, encodeBase64Url } from 'aas-lib';
 
@@ -86,9 +86,7 @@ export class AASApi {
 
     private getValueOrNull<T>(url: string): Observable<T | null> {
         url = this.apiUrl.join(url);
-        return this.http.get<T>(url).pipe(
-            catchError(() => of(null)),
-        );
+        return this.http.get<T>(url).pipe(catchError(() => of(null)));
     }
 
     private getSemanticIds(submodels: aas.Submodel[]): string[] {
