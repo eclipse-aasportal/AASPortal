@@ -14,14 +14,7 @@ import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { noop, WebSocketData } from 'aas-core';
-import {
-    CacheService,
-    NotifyComponent,
-    ProgressComponent,
-    ToolbarService,
-    WebSocketFactoryService,
-    WINDOW,
-} from 'aas-lib';
+import { NotifyComponent, ProgressComponent, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
 import { Stats } from '../types';
@@ -61,7 +54,6 @@ export interface LinkDescriptor {
 export class MainComponent implements OnInit {
     private readonly toolbar = inject(ToolbarService);
     private readonly window = inject(WINDOW);
-    private readonly cache = inject(CacheService);
 
     private readonly subject: WebSocketSubject<WebSocketData>;
     private readonly stats$ = signal<Stats>({ packages: NaN, shells: NaN, submodels: NaN, conceptDescriptions: NaN });
@@ -72,7 +64,6 @@ export class MainComponent implements OnInit {
         this.subject.pipe(takeUntilDestroyed()).subscribe(data => {
             if (data.type === 'stats') {
                 this.stats$.set(data.data as Stats);
-                this.cache.clear();
             }
         });
     }

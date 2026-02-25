@@ -14,7 +14,6 @@ import {
     ChangeDetectionStrategy,
     Component,
     ElementRef,
-    Inject,
     OnDestroy,
     TemplateRef,
     computed,
@@ -79,7 +78,7 @@ import { INFO } from '../messages';
  * - Modal dialogs for user interactions
  */
 export class ShellsComponent implements OnDestroy {
-    @Inject(WINDOW) private readonly window = inject(WINDOW);
+    private readonly window = inject(WINDOW);
     private readonly state = inject(ShellsState);
     private readonly router = inject(Router);
     private readonly modal = inject(NgbModal);
@@ -126,8 +125,15 @@ export class ShellsComponent implements OnDestroy {
         });
     }
 
+    /**
+     * Reference to the toolbar template defined in the component's HTML.
+     * This template is used to populate the application's toolbar when this component is active.
+     */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
+    /**
+     * Reference to the file input element used for uploading AASX package files.
+     */
     public readonly inputFiles = viewChild<ElementRef<HTMLInputElement>>('inputFiles');
 
     /**
@@ -169,17 +175,17 @@ export class ShellsComponent implements OnDestroy {
     /**
      * Indicates whether the pagination is currently on the first page.
      */
-    public readonly isFirstPage = computed(() => this.state.previous() === null);
+    public readonly isFirstPage = this.state.isFirstPage;
 
     /**
      * Indicates whether the pagination is currently on the last page.
      */
-    public readonly isLastPage = computed(() => this.state.next() === null);
+    public readonly isLastPage = this.state.isLastPage;
 
     /**
      * The visible documents.
      */
-    public readonly documents = this.state.documents;
+    public readonly documents = this.state.documents.asReadonly();
 
     /**
      * The selected documents.
@@ -215,7 +221,7 @@ export class ShellsComponent implements OnDestroy {
      * @param limit - The number of items to display per page
      */
     public setLimit(limit: number): void {
-        this.state.update({ pageOptions: { limit, filterText: this.filterText() } });
+        this.state.update({ limit });
     }
 
     /**
@@ -361,7 +367,6 @@ export class ShellsComponent implements OnDestroy {
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
                     this.favorites.remove(this.state.selected(), activeFavorites);
-                    this.removeFavorites([...this.state.selected()]);
                     return this.favorites.save();
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
@@ -416,9 +421,9 @@ export class ShellsComponent implements OnDestroy {
                 filterText = '';
             }
 
-            this.state.update({ pageOptions: { limit: this.state.limit(), filterText } });
+            this.state.update({ filterText });
             if (!this.favorites.active()) {
-                this.state.getFirstPage(filterText);
+                this.state.getFirstPage();
             }
         } catch (error) {
             this.notify.error(error);
@@ -506,17 +511,5 @@ export class ShellsComponent implements OnDestroy {
                 );
             }),
         );
-    }
-
-    private removeFavorites(favorites: AASDocument[]): void {
-        if (!this.favorites.active()) {
-            return;
-        }
-
-        const documents = this.documents().filter(document =>
-            favorites.every(favorite => document.endpoint !== favorite.endpoint || document.id !== favorite.id),
-        );
-
-        this.state.update({ documents });
     }
 }

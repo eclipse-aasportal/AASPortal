@@ -14,6 +14,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import {
     API_URL,
     AuthInterceptor,
+    CacheInterceptor,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
     START_TILE_TYPES,
@@ -39,6 +40,7 @@ export const appConfig: ApplicationConfig = {
             loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
         }),
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true },
         {
             provide: START_TILE_TYPES,
             useValue: [

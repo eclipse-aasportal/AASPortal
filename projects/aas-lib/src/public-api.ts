@@ -35,7 +35,7 @@ export * from './lib/components/score/score.component';
 export * from './lib/components/theme-toggle/theme-toggle.component';
 export * from './lib/directives/sortable-header.directive';
 export * from './lib/pipes/max-length.pipe';
-export * from './lib/services/cache.service';
+export * from './lib/services/cache.interceptor';
 export * from './lib/services/command-handler';
 export * from './lib/services/command';
 export * from './lib/services/endpoints-api';

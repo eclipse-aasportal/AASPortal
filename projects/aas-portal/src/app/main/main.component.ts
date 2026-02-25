@@ -14,7 +14,6 @@ import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
 import {
     AuthComponent,
-    CacheService,
     IndexChangeService,
     LocalizeComponent,
     NotifyComponent,
@@ -24,7 +23,6 @@ import {
 } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export const enum LinkId {
     START = 0,
@@ -68,13 +66,6 @@ export class MainComponent {
     protected readonly route = inject(ActivatedRoute);
     private readonly toolbar = inject(ToolbarService);
     private readonly indexChange = inject(IndexChangeService);
-    private readonly cache = inject(CacheService);
-
-    public constructor() {
-        this.indexChange.message.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.cache.clear();
-        });
-    }
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 

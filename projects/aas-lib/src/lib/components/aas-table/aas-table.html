@@ -36,7 +36,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (item of items(); track item) {
+                @for (item of items(); track getTrackId(item)) {
                     <tr class="align-middle">
                         <td>
                             <input

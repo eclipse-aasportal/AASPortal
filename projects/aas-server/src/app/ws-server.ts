@@ -127,7 +127,7 @@ export class WSServer {
         this.logger.error(`WebSocket server error: ${error?.message}`);
     };
 
-    private readonly shutdownHandler = (signal: unknown) => {
+    private readonly shutdownHandler = (signal: unknown): void => {
         this.logger.info(`Caught ${signal}, gracefully shutting down`);
         this.app.online = false;
         container.dispose();
