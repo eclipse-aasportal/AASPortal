@@ -11,7 +11,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { catchError, filter, from, map, mergeMap, Observable, of, tap, toArray } from 'rxjs';
 import { aas, getSemanticId, PagedResult, traverse } from 'aas-core';
-import { API_URL, CacheService, encodeBase64Url } from 'aas-lib';
+import { API_URL, encodeBase64Url } from 'aas-lib';
 
 import { Cursor } from '../types';
 
@@ -20,7 +20,6 @@ import { Cursor } from '../types';
 export class AASApi {
     private readonly http = inject(HttpClient);
     private readonly apiUrl = inject(API_URL);
-    private readonly cache = inject(CacheService);
 
     /** The identifier of the AAS to get the environment. */
     public readonly aasId = signal<string | undefined>(undefined);
@@ -82,24 +81,13 @@ export class AASApi {
 
     private getValue<T>(url: string, queryParams?: Record<string, string>): Observable<T> {
         url = this.apiUrl.join(url, queryParams);
-        const value = this.cache.get<T>(url);
-        if (value) {
-            return of(value);
-        }
-
-        return this.http.get<T>(url).pipe(tap(value => this.cache.set(url, value)));
+        return this.http.get<T>(url);
     }
 
     private getValueOrNull<T>(url: string): Observable<T | null> {
         url = this.apiUrl.join(url);
-        const value = this.cache.get<T>(url);
-        if (value) {
-            return of(value);
-        }
-
         return this.http.get<T>(url).pipe(
             catchError(() => of(null)),
-            tap(value => this.cache.set(url, value)),
         );
     }
 

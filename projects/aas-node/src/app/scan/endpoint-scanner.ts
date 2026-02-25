@@ -33,10 +33,10 @@ export abstract class EndpointScanner extends EventEmitter {
                 if (!endOfIndex) {
                     const result = await index.getPage(endpoint.name, indexCursor);
                     for (const reference of result.result) {
-                        let value = map.get(reference.id);
+                        let value = map.get(reference.address);
                         if (value === undefined) {
                             value = { reference };
-                            map.set(reference.id, value);
+                            map.set(reference.address, value);
                         } else if (value.reference === undefined) {
                             value.reference = reference;
                         }

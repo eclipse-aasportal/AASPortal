@@ -9,6 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
@@ -19,14 +20,13 @@ import {
     signal,
 } from '@angular/core';
 
-import { AASDocument, WebSocketData, aas } from 'aas-core';
+import { AASDocument, aas } from 'aas-core';
 import {
     ViewMode,
     AuthService,
     NotifyService,
     AASTable,
     StartService,
-    IndexChangeService,
     EndpointsApi,
     ToolbarService,
 } from 'aas-lib';
@@ -34,6 +34,7 @@ import {
 import { ShellsComponent } from '../../app/shells/shells.component';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
 import { createSpyObj, FakeLoader } from '../mocks';
+import { ShellsState } from '../../app/shells/shells.state';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -56,7 +57,8 @@ describe('ShellsComponent', () => {
     let favorites: Mocked<FavoritesService>;
     let auth: Mocked<AuthService>;
     let start: Mocked<StartService>;
-    let indexChange: Mocked<IndexChangeService>;
+    let httpClient: Mocked<HttpClient>;
+    let state: ShellsState;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -68,17 +70,8 @@ describe('ShellsComponent', () => {
             'getEndpoints',
             'removeEndpoint',
             'getContent',
-            'getDocuments',
             'downloadPackage',
         ]);
-        
-        api.getDocuments.mockReturnValue(
-            of({
-                previous: null,
-                next: null,
-                documents: [],
-            }),
-        );
 
         api.getContent.mockReturnValue(
             of({
@@ -88,10 +81,12 @@ describe('ShellsComponent', () => {
             } as aas.Environment),
         );
 
-        favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+        favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save', 'setActive'], {
             active: signal(''),
-            items: signal<FavoritesList[]>([]),
+            items: signal<FavoritesList[]>([{ name: 'List 1', documents: [] }, { name: 'List 2', documents: [] }]),
         });
+
+        favorites.save.mockReturnValue(of(void 0));
 
         auth = createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
             ready: of(true),
@@ -100,18 +95,16 @@ describe('ShellsComponent', () => {
         auth.getCookie.mockReturnValue(of(undefined));
         auth.setCookie.mockReturnValue(of(undefined));
 
-        indexChange = createSpyObj<IndexChangeService>(
-            {},
-            {
-                message: of({
-                    type: 'IndexChange',
-                    data: null,
-                } satisfies WebSocketData),
-            },
-        );
+        httpClient = createSpyObj<HttpClient>(['get', 'post', 'put', 'delete', 'request']);
+        httpClient.get.mockReturnValue(of({}));
+        httpClient.request.mockReturnValue(of({}));
 
         await TestBed.configureTestingModule({
             providers: [
+                { 
+                    provide: HttpClient, 
+                    useValue: httpClient 
+                },
                 {
                     provide: EndpointsApi,
                     useValue: api,
@@ -136,10 +129,6 @@ describe('ShellsComponent', () => {
                     provide: StartService,
                     useValue: start,
                 },
-                {
-                    provide: IndexChangeService,
-                    useValue: indexChange,
-                },
                 provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
@@ -163,13 +152,14 @@ describe('ShellsComponent', () => {
         fixture = TestBed.createComponent(ShellsComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        state = TestBed.inject(ShellsState);
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
         expect(component.files()).toBeUndefined();
         expect(component.limit()).toBe(10);
-        expect(component.favoritesLists()).toEqual(['']);
+        expect(component.favoritesLists()).toEqual(['', 'List 1', 'List 2']);
         expect(component.activeFavoritesList()).toBe('');
         expect(component.selected()).toEqual([]);
         expect(component.someSelected()).toBe(false);
@@ -179,5 +169,29 @@ describe('ShellsComponent', () => {
         expect(component.documents()).toEqual([]);
         expect(component.isFirstPage()).toBe(true);
         expect(component.isLastPage()).toBe(true);
+    });
+
+    it('should update filter', () => {
+        component.setFilterText('test');
+        expect(component.filterText()).toBe('test');
+    });
+
+    it('should update limit', () => {
+        component.setLimit(20);
+        expect(component.limit()).toBe(20);
+    });
+
+    it('should update selected documents', () => {
+        const doc1: AASDocument = { id: '1', idShort: 'Doc 1' } as AASDocument;
+        const doc2: AASDocument = { id: '2', idShort: 'Doc 2' } as AASDocument;
+        component.setSelected([doc1, doc2]);
+        expect(component.selected()).toEqual([doc1, doc2]);
+        expect(component.someSelected()).toBe(true);
+    });
+
+    it('select favorites list', () => {
+        component.setActiveFavoriteList('List 1');
+        expect(favorites.setActive).toHaveBeenCalledWith('List 1');
+        expect(favorites.save).toHaveBeenCalled();
     });
 });

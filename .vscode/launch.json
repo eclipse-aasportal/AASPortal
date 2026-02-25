@@ -31,6 +31,30 @@
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
                 "ASSETS": "projects/aas-node/src/assets",
+            }
+        },
+        {
+            "name": "Launch aas-node (1)",
+            "type": "node",
+            "args": [
+                "--experimental-sqlite"
+            ],
+            "request": "launch",
+            "preLaunchTask": "build-aas-node",
+            "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/projects/aas-node/build/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "AAS_NODE_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-node/build",
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "USER_STORAGE": "mongodb://aas-node:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users"
             }

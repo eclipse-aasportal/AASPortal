@@ -8,12 +8,12 @@
 
 import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
+import { API_URL, CacheInterceptor, WINDOW, WindowService } from 'aas-lib';
 import { routes } from './app.routes';
-import { API_URL, WINDOW, WindowService } from 'aas-lib';
 import { ApiUrlService } from './api-url.service';
 
 export const appConfig: ApplicationConfig = {
@@ -23,11 +23,13 @@ export const appConfig: ApplicationConfig = {
             useFactory: (window: WindowService) => new ApiUrlService(window),
             deps: [WINDOW],
         },
+        { 
+            provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true,
+        },
         provideTranslateService({
             fallbackLang: 'en-us',
             loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
         }),
-
         provideZonelessChangeDetection(),
         provideRouter(routes),
         provideHttpClient(withInterceptorsFromDi()),
