@@ -30,7 +30,7 @@
         "jwks-rsa": "^3.2.0",
         "lodash-es": "^4.17.22",
         "morgan": "^1.10.1",
-        "multer": "^2.0.2",
+        "multer": "^2.1.0",
         "nanoid": "^5.1.6",
         "reflect-metadata": "^0.2.2",
         "swagger-ui-express": "^5.0.1",
