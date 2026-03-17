@@ -8,7 +8,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { Mocked, vi } from 'vitest';
 import { noop } from 'aas-core';
 
@@ -91,5 +91,21 @@ export function restoreFetch() {
         delete (global as any).fetch;
     } catch {
         (global as any).fetch = undefined;
+    }
+}
+
+export class MockWebSocketService {
+    private mockSubject = new Subject<any>();
+
+    public sendMessage(message: any): void {
+        this.mockSubject.next({ data: message });
+    }
+
+    public getMessages(): Observable<any> {
+        return this.mockSubject.asObservable();
+    }
+
+    public closeConnection(): void {
+        this.mockSubject.complete();
     }
 }

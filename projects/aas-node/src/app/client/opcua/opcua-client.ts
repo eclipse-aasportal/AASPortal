@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import fs from 'fs';
-import { OpaqueStructure } from 'node-opcua-extension-object';
 import { Readable } from 'stream';
-import { AASEndpoint, LiveRequest, aas, noop } from 'aas-core';
+import { OpaqueStructure } from 'node-opcua-extension-object';
+import { AASDocument, AASEndpoint, LiveRequest, PagedResult, aas, noop } from 'aas-core';
 import {
     AttributeIds,
+    BrowseDescriptionLike,
     ClientSession,
     ConnectionStrategyOptions,
     DataType,
@@ -20,6 +21,8 @@ import {
     NodeId,
     OPCUAClient,
     OPCUAClientOptions,
+    QualifiedName,
+    ReferenceDescription,
     SecurityPolicy,
     StatusCodes,
     VariantArrayType,
@@ -121,6 +124,24 @@ export class OpcuaClient extends AASClient {
         }
     }
 
+    public override async getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>> {
+        noop(cursor);
+        const documents: AASDocument[] = [];
+        const dataTypes = new OpcuaDataTypeDictionary();
+        await dataTypes.initializeAsync(this.getSession());
+        for (const description of await this.browseAsync('ObjectsFolder')) {
+            const nodeId = description.nodeId.toString();
+            try {
+                const document = await this.createDocument(nodeId);
+                documents.push(document);
+            } catch (error) {
+                noop(error);
+            }
+        }
+
+        return { result: documents, paging_metadata: {} };
+    }
+
     public override createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {
         return new OpcuaSubscription(this.logger, client, this, message.nodes);
     }
@@ -204,6 +225,47 @@ export class OpcuaClient extends AASClient {
 
     public override getBlobValue(): Promise<string | undefined> {
         return Promise.reject(new Error('Not implemented.'));
+    }
+
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+        return Promise.reject(new Error('Not implemented.'));
+    }
+
+    private async browseAsync(
+        nodeToBrowse: BrowseDescriptionLike,
+        descriptions: ReferenceDescription[] = [],
+    ): Promise<ReferenceDescription[]> {
+        const session = this.getSession();
+        const result = await session.browse(nodeToBrowse);
+        if (result.references) {
+            for (const obj of result.references) {
+                if (await this.isAASTypeAsync(obj)) {
+                    descriptions.push(obj);
+                } else if (await this.isFolderAsync(obj)) {
+                    await this.browseAsync(obj.nodeId.toString(), descriptions);
+                }
+            }
+        }
+
+        return descriptions;
+    }
+
+    private async isFolderAsync(obj: ReferenceDescription): Promise<boolean> {
+        const type = (await this.readQualifiedName(obj)).name;
+        return type === 'FolderType' || type === 'AASEnvironmentType' || obj.browseName.name === 'AASEnvironment';
+    }
+
+    private async isAASTypeAsync(obj: ReferenceDescription): Promise<boolean> {
+        return (await this.readQualifiedName(obj))?.name === 'AASAssetAdministrationShellType';
+    }
+
+    private async readQualifiedName(obj: ReferenceDescription): Promise<QualifiedName> {
+        const node = await this.getSession().read({
+            nodeId: obj.typeDefinition,
+            attributeId: AttributeIds.BrowseName,
+        });
+
+        return node.value.value as QualifiedName;
     }
 
     private resolveOpcuaClientOptions(options: OPCUAClientOptions): OPCUAClientOptions {

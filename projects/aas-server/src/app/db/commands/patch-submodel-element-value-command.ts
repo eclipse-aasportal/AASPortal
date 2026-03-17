@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationError, jsonization, types } from 'aas-core';
+import { ApplicationError, jsonization, toSubmodel, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { SubmodelTable } from '../submodel-table.js';
@@ -43,7 +43,7 @@ export class PatchSubmodelElementValueCommand extends DatabaseCommand {
 
         this.patchValue(element, this.value, this.idShortPath);
 
-        await this.table.writeFile(submodel, key);
+        await this.table.writeObject(toSubmodel(submodel), key);
     }
 
     private patchValue(element: types.ISubmodelElement, value: jsonization.JsonValue, idShortPath: string): void {

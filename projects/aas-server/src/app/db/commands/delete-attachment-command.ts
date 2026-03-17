@@ -6,20 +6,17 @@
  *
  *****************************************************************************/
 
-import { ApplicationError, types } from 'aas-core';
+import { ApplicationError, toSubmodel, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { ERROR } from '../../error.js';
-import { checkSubmodelIsReferenced, selectISubmodelElement } from '../../utilities.js';
-import { KeyList } from '../key-list.js';
-import { AasxPackage } from '../../aasx-package.js';
+import { selectISubmodelElement } from '../../utilities.js';
 
 export class DeleteAttachmentCommand extends DatabaseCommand {
     public constructor(
         database: Database,
         resolve: () => void,
         reject: (reason: Error) => void,
-        private readonly aasId: string | undefined,
         private readonly smId: string,
         private readonly idShortPath: string,
     ) {
@@ -27,13 +24,7 @@ export class DeleteAttachmentCommand extends DatabaseCommand {
     }
 
     public override async execute(): Promise<void> {
-        if (this.aasId) {
-            const aas = await this.database.getShell(this.aasId);
-            checkSubmodelIsReferenced(aas, this.smId);
-        }
-
         const key = await this.database.submodels.getKey(this.smId);
-        const item = await this.database.submodels.getItem(key);
         const submodel = await this.database.submodels.readSubmodel(key);
         const element = selectISubmodelElement(submodel, this.idShortPath);
         if (!(element instanceof types.File)) {
@@ -47,13 +38,9 @@ export class DeleteAttachmentCommand extends DatabaseCommand {
 
         element.value = null;
         element.contentType = '';
-        await this.database.submodels.writeFile(submodel, key);
-
-        for (const packageKey of new KeyList(item.packageKeys)) {
-            const aasxFile = await this.database.packages.createBackup(packageKey);
-            const aasx = await AasxPackage.createFromFile(aasxFile);
-            aasx.remove(value);
-            await aasx.save();
+        await this.database.submodels.writeObject(toSubmodel(submodel), key);
+        if (element.value) {
+            await this.database.submodels.deleteAsset(key, element.value);
         }
     }
 }

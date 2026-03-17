@@ -91,12 +91,10 @@ export interface AASDocument extends AASDocumentId {
     modified?: boolean;
     /** Indicates whether communication can be established with the system represented by the AAS. */
     onlineReady?: boolean;
-    /** The identifier of the parent AAS in a hierarchy. */
-    parentId?: string | null;
     /** Indicates whether the document can be edited. */
     readonly: boolean;
     /** A thumbnail. */
-    thumbnail?: string;
+    thumbnail?: string | null;
     /** The time at which the document was created. */
     timestamp: number;
 }
@@ -206,14 +204,7 @@ export interface WebSocketData {
 }
 
 /** Defines the message types. */
-export type AASNodeMessageType =
-    | 'Added'
-    | 'Removed'
-    | 'Update'
-    | 'Offline'
-    | 'EndpointAdded'
-    | 'EndpointRemoved'
-    | 'Reset';
+export type AASNodeMessageType = 'Added' | 'Removed' | 'Update' | 'EndpointAdded' | 'EndpointRemoved' | 'Reset';
 
 /** Server message. */
 export type AASNodeMessage = {
@@ -224,7 +215,7 @@ export type AASNodeMessage = {
           type: 'Reset';
       }
     | {
-          type: 'Added' | 'Removed' | 'Update' | 'Offline';
+          type: 'Added' | 'Removed' | 'Update';
           document: AASDocument;
       }
     | {

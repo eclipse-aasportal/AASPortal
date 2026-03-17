@@ -35,7 +35,13 @@ export class EndpointScan {
             scan.on('remove', this.postRemove);
             scan.on('add', this.postAdd);
             scan.on('error', this.onError);
+            this.logger.info(`Start scanning endpoint ${data.endpoint.name} with task id ${data.taskId}.`);
+            const start = Date.now();
             await scan.scanAsync(this.index, data.endpoint);
+            const duration = (Date.now() - start) / 1000;
+            this.logger.info(
+                `Finished scanning endpoint ${data.endpoint.name} with task id ${data.taskId} in ${duration} s.`,
+            );
         } finally {
             scan.off('compare', this.compare);
             scan.off('remove', this.postRemove);
@@ -44,9 +50,9 @@ export class EndpointScan {
         }
     }
 
-    private compare = (reference: AASDocument, document: AASDocument): void => {
-        if (this.documentChanged(document, reference)) {
-            this.postUpdate(document);
+    private compare = (a: AASDocument, b: AASDocument): void => {
+        if (this.documentChanged(a, b)) {
+            this.postUpdate(b);
         }
     };
 
@@ -93,10 +99,11 @@ export class EndpointScan {
         parentPort?.postMessage(array, [array.buffer]);
     };
 
-    private documentChanged(document: AASDocument, reference: AASDocument): boolean {
+    private documentChanged(a: AASDocument, b: AASDocument): boolean {
         if (
-            document.crc32 === reference.crc32 &&
-            (!reference.timestamp || Date.now() - reference.timestamp <= this.variable.AAS_EXPIRES_IN)
+            a.crc32 === b.crc32 &&
+            a.thumbnail === b.thumbnail &&
+            (!b.timestamp || Date.now() - b.timestamp <= this.variable.AAS_EXPIRES_IN)
         ) {
             return false;
         }

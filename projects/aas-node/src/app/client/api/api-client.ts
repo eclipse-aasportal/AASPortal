@@ -6,16 +6,7 @@
  *
  *****************************************************************************/
 
-import {
-    aas,
-    AASEndpoint,
-    convertFromString,
-    DefaultType,
-    getSemanticId,
-    LiveRequest,
-    PagedResult,
-    traverse,
-} from 'aas-core';
+import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
 
 import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
@@ -95,12 +86,6 @@ export abstract class ApiClient extends AASClient {
     ): SocketSubscription {
         return new HttpSubscription(this, client, request, env);
     }
-
-    /**
-     * Gets the names of the Asset Administration Shells contained in the current AASX server.
-     * @returns The names of the AASs contained in the current AASX server.
-     */
-    public abstract getShells(cursor?: string): Promise<PagedResult<string>>;
 
     /**
      * Reads the current value from a submodel element.

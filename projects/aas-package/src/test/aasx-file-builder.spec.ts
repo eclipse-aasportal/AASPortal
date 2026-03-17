@@ -55,9 +55,9 @@ describe('AasxFileBuilder', () => {
     });
 
     describe('build', () => {
-        it ('builds an AasxPackage file', async () => {
+        it('builds an AasxPackage file', async () => {
             const aasx = await builder.build(zipFile);
             expect(aasx).toBeInstanceOf(AasxPackage);
-        })
+        });
     });
 });

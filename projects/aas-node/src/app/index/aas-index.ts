@@ -95,21 +95,21 @@ export abstract class AASIndex {
     /**
      * Gets a page of AAS documents.
      *
-     * @param cursor The cursor that specifies the page to get.
+     * @param cursor The cursor that specifies the page to get (first, previous, next, last).
      * @param query An optional query expression.
      * @param language Optional the
      */
     public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult>;
 
     /**
-     * Gets a page of AAS documents.
+     * Gets the documents of the specified endpoint.
      *
      * @param endpoint The name of the AAS endpoint.
      * @param cursor The cursor to get the next page or the first page if `cursor` is `undefined`.
      * @param limit The maximum number of items in the result.
      * @returns The next page.
      */
-    public abstract getPage(
+    public abstract getEndpointDocuments(
         endpoint: string,
         cursor: string | undefined,
         limit?: number,

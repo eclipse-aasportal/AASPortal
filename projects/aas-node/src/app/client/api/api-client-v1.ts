@@ -8,9 +8,10 @@
 
 import fs from 'fs';
 import { basename } from 'path';
-import { aas, AASEndpoint, ApplicationError, noop, PagedResult } from 'aas-core';
 
+import { aas, AASDocument, AASEndpoint, ApplicationError, noop, PagedResult } from 'aas-core';
 import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2 } from 'aas-package';
+
 import { ApiClient } from './api-client.js';
 import { Logger } from '../../logging/logger.js';
 import { ERRORS } from '../../errors.js';
@@ -56,7 +57,7 @@ export class ApiClientV1 extends ApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShells(cursor?: string): Promise<PagedResult<string>> {
+    public async getDocuments(cursor?: string): Promise<PagedResult<AASDocument>> {
         const result = await this.http.getJson<aasV2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
@@ -65,7 +66,7 @@ export class ApiClientV1 extends ApiClient {
         noop(cursor);
 
         return {
-            result: result.map(shell => shell.identification.id),
+            result: result.map(shell => this.toDocument(shell)),
             paging_metadata: {},
         };
     }
@@ -216,6 +217,10 @@ export class ApiClientV1 extends ApiClient {
         return blob.value;
     }
 
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+        return Promise.reject(new Error('Not implemented.'));
+    }
+
     private async readSubmodels(shell: aasV2.AssetAdministrationShell): Promise<aasV2.Submodel[]> {
         const submodels: aasV2.Submodel[] = [];
         if (shell.submodels) {
@@ -235,6 +240,20 @@ export class ApiClientV1 extends ApiClient {
         }
 
         return submodels;
+    }
+    private toDocument(shell: aasV2.AssetAdministrationShell): AASDocument {
+        return {
+            address: shell.identification.id,
+            assetId: shell.asset.keys.at(0)?.value,
+            content: null,
+            crc32: 0,
+            endpoint: this.endpoint.name,
+            id: shell.identification.id,
+            idShort: shell.idShort,
+            readonly: false,
+            onlineReady: true,
+            timestamp: Date.now(),
+        };
     }
 
     private async readConceptDescriptions(submodels: aasV2.Submodel[]): Promise<aasV2.ConceptDescription[]> {

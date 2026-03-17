@@ -192,7 +192,7 @@ export class MySqlIndex extends AASIndex {
         return this.getLastPage(connection, cursor.limit, query);
     }
 
-    public override async getPage(
+    public override async getEndpointDocuments(
         endpoint: string,
         cursor: string | undefined,
         limit: number = LIMIT,

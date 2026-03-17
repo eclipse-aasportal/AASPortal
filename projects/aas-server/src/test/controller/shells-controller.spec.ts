@@ -17,14 +17,12 @@ import multer from 'multer';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { aas } from 'aas-core';
-import { FileResult } from 'aas-package';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../../app/error-handler.js';
-import { getToken } from '../json-web-token.js';
 import { ShellRepository } from '../../app/shell-repository.js';
 import { createSpyObj } from '../mocks.js';
 
@@ -37,23 +35,20 @@ describe('ShellsController', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
+        variable = createSpyObj<Variable>({}, {});
         repository = createSpyObj<ShellRepository>([
             'addShell',
             'deleteThumbnail',
             'getAssetInformation',
-            'getFileByPath',
             'getShell',
             'getShells',
-            'getSubmodel',
-            'getSubmodelElement',
             'getThumbnail',
             'updateShell',
             'updateThumbnail',
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({});
+        authentication.expressAuthentication.mockResolvedValue({ owner: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
@@ -72,7 +67,7 @@ describe('ShellsController', () => {
 
     it('GET: /shells', async () => {
         repository.getShells.mockResolvedValue({ result: [], paging_metadata: {} });
-        const response = await request(app).get('/api/v3/shells').set('Authorization', `Bearer ${getToken()}`);
+        const response = await request(app).get('/api/v3/shells').set('x-api-key', 'this-is-an-api-key');
         expect(response.statusCode).toBe(200);
         expect(repository.getShells).toHaveBeenCalled();
         expect(response.body).toEqual({ result: [], paging_metadata: {} });
@@ -91,7 +86,7 @@ describe('ShellsController', () => {
         repository.getShell.mockResolvedValue(shell);
         const response = await request(app)
             .get('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw')
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
         expect(repository.getShell).toHaveBeenCalledWith('http://www.fraunhofer.de/aas/test-aas');
@@ -103,7 +98,7 @@ describe('ShellsController', () => {
         repository.getAssetInformation.mockResolvedValue(info);
         const response = await request(app)
             .get('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw/asset-information')
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
         expect(repository.getAssetInformation).toHaveBeenCalledWith('http://www.fraunhofer.de/aas/test-aas');
@@ -120,7 +115,7 @@ describe('ShellsController', () => {
 
         const response = await request(app)
             .get('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw/asset-information/thumbnail')
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
         expect(response.headers['content-type']).toEqual('image/jpeg');
@@ -132,7 +127,7 @@ describe('ShellsController', () => {
         repository.updateThumbnail.mockResolvedValue();
         const response = await request(app)
             .put('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw/asset-information/thumbnail')
-            .set('Authorization', `Bearer ${getToken()}`)
+            .set('x-api-key', 'this-is-an-api-key')
             .attach('file', file);
 
         expect(response.statusCode).toBe(204);
@@ -143,60 +138,10 @@ describe('ShellsController', () => {
         repository.deleteThumbnail.mockResolvedValue();
         const response = await request(app)
             .delete('/api/v3/shells/aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw/asset-information/thumbnail')
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(204);
         expect(repository.deleteThumbnail).toHaveBeenCalled();
-    });
-
-    it('GET: /shells/{aasId}/submodels/{smId}', async () => {
-        const sm: aas.Submodel = {
-            id: 'http://www.fraunhofer.de/sm/test-submodel',
-            idShort: 'test-submodel',
-            modelType: 'Submodel',
-        };
-
-        repository.getSubmodel.mockResolvedValue(sm);
-        const aasId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw';
-        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
-        const response = await request(app)
-            .get(`/api/v3/shells/${aasId}/submodels/${smId}`)
-            .set('Authorization', `Bearer ${getToken()}`);
-
-        expect(response.statusCode).toBe(200);
-        expect(repository.getSubmodel).toHaveBeenCalledWith(
-            'http://www.fraunhofer.de/aas/test-aas',
-            'http://www.fraunhofer.de/sm/test-submodel',
-            'deep',
-            'withoutBlobValue',
-        );
-
-        expect(response.body).toEqual(sm);
-    });
-
-    it('GET: /shells/{id}/submodels/{smId}/submodel-elements/{idShortPath}', async () => {
-        const property: aas.Property = {
-            valueType: 'xs:string',
-            idShort: 'name',
-            modelType: 'Property',
-        };
-
-        repository.getSubmodelElement.mockResolvedValue(property);
-        const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw';
-        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
-        const idShortPath = 'Collection.Property';
-        const response = await request(app)
-            .get(`/api/v3/shells/${id}/submodels/${smId}/submodel-elements/${idShortPath}?level=core`)
-            .set('Authorization', `Bearer ${getToken()}`);
-
-        expect(response.statusCode).toBe(200);
-        expect(repository.getSubmodelElement).toHaveBeenCalledWith(
-            'http://www.fraunhofer.de/aas/test-aas',
-            'http://www.fraunhofer.de/sm/test-submodel',
-            'Collection.Property',
-            'core',
-            'withoutBlobValue',
-        );
     });
 
     it('POST: /shells', async () => {
@@ -211,10 +156,7 @@ describe('ShellsController', () => {
         };
 
         repository.addShell.mockResolvedValue(aas);
-        const response = await request(app)
-            .post('/api/v3/shells')
-            .set('Authorization', `Bearer ${getToken()}`)
-            .send(aas);
+        const response = await request(app).post('/api/v3/shells').set('x-api-key', 'this-is-an-api-key').send(aas);
 
         expect(response.statusCode).toBe(201);
         expect(repository.addShell).toHaveBeenCalled();
@@ -232,36 +174,9 @@ describe('ShellsController', () => {
         };
 
         repository.updateShell.mockResolvedValue(aas);
-        const response = await request(app)
-            .put('/api/v3/shells')
-            .set('Authorization', `Bearer ${getToken()}`)
-            .send(aas);
+        const response = await request(app).put('/api/v3/shells').set('x-api-key', 'this-is-an-api-key').send(aas);
 
         expect(response.statusCode).toBe(200);
         expect(repository.updateShell).toHaveBeenCalled();
-    });
-
-    it('GET: /shells/{id}/submodels/{smId}/submodel-elements/{idShortPath}/attachment', async () => {
-        const file = fileURLToPath(new URL('../assets/Test.pdf', import.meta.url));
-        const fileResult: FileResult = {
-            filename: 'Test.pdf',
-            value: 'Test.pdf',
-            readable: fs.createReadStream(file),
-        };
-
-        repository.getFileByPath.mockResolvedValue(fileResult);
-        const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2Fhcy90ZXN0LWFhcw';
-        const smId = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL3NtL3Rlc3Qtc3VibW9kZWw';
-        const idShortPath = 'Collection.File';
-        const response = await request(app)
-            .get(`/api/v3/shells/${id}/submodels/${smId}/submodel-elements/${idShortPath}/attachment`)
-            .set('Authorization', `Bearer ${getToken()}`);
-
-        expect(response.statusCode).toBe(200);
-        expect(repository.getFileByPath).toHaveBeenCalledWith(
-            'http://www.fraunhofer.de/aas/test-aas',
-            'http://www.fraunhofer.de/sm/test-submodel',
-            'Collection.File',
-        );
     });
 });

@@ -16,7 +16,6 @@ import {
     AASDocument,
     ApplicationError,
     AASEndpointType,
-    noop,
     AASDocumentId,
     aas,
     flat,
@@ -34,6 +33,7 @@ import { KeywordDirectory } from '../keyword-directory.js';
 import { Logger } from '../../logging/logger.js';
 import { ERRORS } from '../../errors.js';
 import { SqliteQuery } from './sqlite-query.js';
+import { isMainThread } from 'worker_threads';
 
 const LIMIT = 100;
 const initDatabase = `
@@ -105,8 +105,9 @@ export class SqliteIndex extends AASIndex {
     ) {
         super(keywords);
 
-        this.db = new DatabaseSync(file);
+        this.db = new DatabaseSync(file, { readOnly: !isMainThread, timeout: 5000 });
         this.db.exec(initDatabase);
+        this.db.exec('PRAGMA journal_mode = WAL');
 
         this.getCountAll = this.db.prepare('SELECT COUNT(*) FROM documents');
         this.getCountEndpoint = this.db.prepare('SELECT COUNT(*) FROM documents WHERE endpoint = ?');
@@ -228,7 +229,7 @@ export class SqliteIndex extends AASIndex {
     public override async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
         await new Promise<void>((resolve, reject) => {
             try {
-                const result = this.insertEndpointSql.run(
+                this.insertEndpointSql.run(
                     endpoint.name,
                     endpoint.url,
                     endpoint.type,
@@ -237,7 +238,6 @@ export class SqliteIndex extends AASIndex {
                     endpoint.schedule ? JSON.stringify(endpoint.schedule) : null,
                 );
 
-                noop(result);
                 resolve();
             } catch (error) {
                 reject(error);
@@ -255,7 +255,7 @@ export class SqliteIndex extends AASIndex {
                     return;
                 }
 
-                const result = this.updateEndpointSql.run(
+                this.updateEndpointSql.run(
                     endpoint.url,
                     endpoint.type,
                     endpoint.version ?? null,
@@ -264,7 +264,6 @@ export class SqliteIndex extends AASIndex {
                     endpoint.name,
                 );
 
-                noop(result);
                 this.db.exec('COMMIT');
                 resolve(this.toEndpoint(value));
             } catch (error) {
@@ -277,10 +276,13 @@ export class SqliteIndex extends AASIndex {
     public override async deleteEndpoint(endpoint: string): Promise<boolean> {
         return await new Promise((resolve, reject) => {
             try {
-                const result = this.deleteEndpointSql.run(endpoint);
-                noop(result);
+                this.db.exec('BEGIN');
+                this.deleteDocuments(endpoint);
+                this.deleteEndpointSql.run(endpoint);
+                this.db.exec('COMMIT');
                 resolve(true);
             } catch (error) {
+                this.db.exec('ROLLBACK');
                 reject(error);
             }
         });
@@ -316,7 +318,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async getPage(
+    public override async getEndpointDocuments(
         endpoint: string,
         cursor: string | undefined,
         limit: number = LIMIT,
@@ -465,18 +467,7 @@ export class SqliteIndex extends AASIndex {
                     this.deleteAllElementsSql.run();
                     this.deleteAllDocumentsSql.run();
                 } else {
-                    let loop = true;
-                    while (loop) {
-                        const values = this.selectEndpointDocumentsSql.all(endpoint, LIMIT);
-                        this.deleteEndpointDocumentsSql.run(endpoint);
-                        for (const value of values) {
-                            this.deleteElementsSql.run(String(value.uuid));
-                        }
-
-                        if (values.length < LIMIT) {
-                            loop = false;
-                        }
-                    }
+                    this.deleteDocuments(endpoint);
                 }
                 this.db.exec('COMMIT');
                 resolve();
@@ -485,6 +476,21 @@ export class SqliteIndex extends AASIndex {
                 reject(error);
             }
         });
+    }
+
+    private deleteDocuments(endpoint: string): void {
+        let loop = true;
+        while (loop) {
+            const values = this.selectEndpointDocumentsSql.all(endpoint, LIMIT);
+            this.deleteEndpointDocumentsSql.run(endpoint);
+            for (const value of values) {
+                this.deleteElementsSql.run(String(value.uuid));
+            }
+
+            if (values.length < LIMIT) {
+                loop = false;
+            }
+        }
     }
 
     public override async destroy(): Promise<void> {

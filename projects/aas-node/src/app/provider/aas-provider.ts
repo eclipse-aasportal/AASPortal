@@ -40,12 +40,11 @@ import { Variable } from '../variable.js';
 import { WSNode } from '../ws-node.js';
 import { ERRORS } from '../errors.js';
 import { Task, TaskHandler } from './task-handler.js';
-import { AASCache } from './aas-cache.js';
 import { urlToEndpoint } from '../configuration.js';
+import { createThumbnail } from '../utilities.js';
 
 @singleton()
 export class AASProvider {
-    private readonly cache = new AASCache();
     private wsServer!: WSNode;
     private resetRequested = false;
 
@@ -76,6 +75,7 @@ export class AASProvider {
 
     /**
      * Gets all registered AAS container endpoints.
+     * @return An array of registered AAS endpoints.
      */
     public getEndpoints(): Promise<AASEndpoint[]> {
         return this.index.getEndpoints();
@@ -83,6 +83,7 @@ export class AASProvider {
 
     /**
      * Gets the number of registered AAS endpoints.
+     * @returns The number of registered AAS endpoints.
      */
     public getEndpointCount(): Promise<number> {
         return this.index.getEndpointCount();
@@ -115,7 +116,6 @@ export class AASProvider {
 
     /**
      * Gets the AAS document with the specified identifier.
-     *
      * @param endpoint The AAS endpoint name (optional).
      * @param modelType The model type to which `id` belongs.
      * @param id Depending on the model type the AAS or Asset identifier.
@@ -126,9 +126,27 @@ export class AASProvider {
         modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
     ): Promise<AASDocument> {
-        const document = await this.index.get(endpoint, modelType, id);
-        document.content = await this.getDocumentContent(document);
-        return document;
+        const document = await this.index.find(endpoint, modelType, id);
+        if (document) {
+            const client = this.clientFactory.create(await this.index.getEndpoint(document.endpoint));
+            try {
+                await client.open();
+                document.content = await client.getEnvironment(document.address);
+                if (document.thumbnail === null) {
+                    document.thumbnail = await createThumbnail(await client.getThumbnail(document.address));
+                }
+
+                return document;
+            } finally {
+                await client.close();
+            }
+        }
+
+        if (!endpoint) {
+            throw new ApplicationError(ERRORS.AASNotFound, { id }, 404);
+        }
+
+        return await this.getDocumentById(endpoint, modelType, id);
     }
 
     /**
@@ -139,7 +157,13 @@ export class AASProvider {
      */
     public async getContent(endpoint: string, id: string): Promise<aas.Environment> {
         const document = await this.index.get(endpoint, 'AssetAdministrationShell', id);
-        return await this.getDocumentContent(document);
+        const client = this.clientFactory.create(await this.index.getEndpoint(endpoint));
+        try {
+            await client.open();
+            return await client.getEnvironment(document.address);
+        } finally {
+            await client.close();
+        }
     }
 
     /**
@@ -183,11 +207,7 @@ export class AASProvider {
         try {
             await client.open();
             if (!document.content) {
-                document.content = this.cache.get(document.endpoint, document.id);
-                if (!document.content) {
-                    document.content = await client.getEnvironment(document.address);
-                    this.cache.set(document.endpoint, document.id, document.content);
-                }
+                document.content = await client.getEnvironment(document.address);
             }
 
             const dataElement: aas.DataElement | undefined = selectReferable(document.content, smId, idShortPath);
@@ -316,7 +336,6 @@ export class AASProvider {
 
         this.resetRequested = true;
         await this.index.clear();
-        this.cache.clear();
         const tasks = [...this.taskHandler.tasks];
         if (tasks.length === 0) {
             await this.restart();
@@ -333,7 +352,7 @@ export class AASProvider {
             type: 'AASNodeMessage',
             data: {
                 type: 'Reset',
-            } as AASNodeMessage,
+            } satisfies AASNodeMessage,
         });
     }
 
@@ -458,7 +477,6 @@ export class AASProvider {
             let env = document.content;
             if (!env) {
                 env = await client.getEnvironment(document.address);
-                this.cache.set(document.endpoint, document.id, env);
             }
 
             return await client.invoke(env, operation);
@@ -548,12 +566,7 @@ export class AASProvider {
         const document = await this.index.get(message.endpoint, 'AssetAdministrationShell', message.id);
         const client = this.clientFactory.create(endpoint);
         await client.open();
-        let env = this.cache.get(document.endpoint, document.id);
-        if (!env) {
-            env = await client.getEnvironment(document.address);
-            this.cache.set(document.endpoint, document.id, env);
-        }
-
+        const env = await client.getEnvironment(document.address);
         return client.createSubscription(socket, message, env);
     }
 
@@ -671,10 +684,6 @@ export class AASProvider {
 
         try {
             await this.index.update(document);
-            if (document.content && this.cache.has(document.endpoint, document.id)) {
-                this.cache.set(document.endpoint, document.id, document.content);
-            }
-
             this.sendMessage({ type: 'Update', document: { ...document, content: null } });
         } catch (error) {
             this.logger.error(error);
@@ -706,7 +715,6 @@ export class AASProvider {
         const document = result.document;
         try {
             await this.index.delete(result.endpoint.name, document.id);
-            this.cache.remove(document.endpoint, document.id);
             this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
             this.sendMessage({ type: 'Removed', document: { ...document, content: null } });
         } catch (error) {
@@ -721,19 +729,25 @@ export class AASProvider {
         });
     }
 
-    private async getDocumentContent(document: AASDocument): Promise<aas.Environment> {
-        let env = this.cache.get(document.endpoint, document.id);
-        if (env) {
-            return env;
-        }
-
-        const endpoint = await this.index.getEndpoint(document.endpoint);
-        const client = this.clientFactory.create(endpoint);
+    private async getDocumentById(
+        endpoint: string,
+        modelType: 'Asset' | 'AssetAdministrationShell',
+        id: string,
+    ): Promise<AASDocument> {
+        const client = this.clientFactory.create(await this.index.getEndpoint(endpoint));
         try {
             await client.open();
-            env = await client.getEnvironment(document.address);
-            this.cache.set(document.endpoint, document.id, env);
-            return env;
+            let address: string | undefined;
+            if (modelType === 'AssetAdministrationShell') {
+                address = id;
+            } else {
+                address = (await client.getAllAssetAdministrationShellIdsByAssetLink(id)).at(0);
+                if (!address) {
+                    throw new ApplicationError(ERRORS.AASNotFoundByAssetLink, { assetId: id }, 404);
+                }
+            }
+
+            return await client.createDocument(address);
         } finally {
             await client.close();
         }

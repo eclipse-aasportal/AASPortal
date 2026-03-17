@@ -7,8 +7,7 @@
  *****************************************************************************/
 
 import 'chart.js/auto';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { EMPTY, first, Observable } from 'rxjs';
+import { EMPTY, first, Observable, Subscription } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -29,7 +28,7 @@ import {
 } from '@angular/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
-import { CommandHandler, NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import { CommandHandler, NotifyService, StartService, ToolbarService, WebSocketService, WINDOW } from 'aas-lib';
 
 import { MovePreviousCommand } from './commands/move-previous-command';
 import { MoveNextCommand } from './commands/move-next-command';
@@ -62,13 +61,13 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private readonly service = inject(DashboardService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly translate = inject(TranslateService);
-    private readonly webServiceFactory = inject(WebSocketFactoryService);
+    private readonly webSocket = inject(WebSocketService);
     private readonly notify = inject(NotifyService);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly commandHandler = inject(CommandHandler);
     private readonly charts = new Map<string, ChartConfigurationTuple>();
-    private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
+    private webSocketSubscription?: Subscription;
     private live = false;
 
     public constructor() {
@@ -335,9 +334,9 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                 const chartContainers = this.chartContainers();
                 if (chartContainers) {
                     this.createCharts(chartContainers);
-                    if (this.webSocketSubject) {
+                    if (this.webSocketSubscription) {
                         for (const request of this.activePage().requests) {
-                            this.webSocketSubject.next(this.createMessage(request));
+                            this.webSocket.sendMessage(this.createMessage(request));
                         }
                     }
                 }
@@ -350,8 +349,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private openWebSocket(): void {
         const page = this.activePage();
         if (page && page.requests && page.requests.length > 0) {
-            this.webSocketSubject = this.webServiceFactory.create();
-            this.webSocketSubject.subscribe({
+            this.webSocketSubscription = this.webSocket.getMessages().subscribe({
                 next: this.socketOnMessage,
                 error: this.socketOnError,
             });
@@ -359,9 +357,9 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     }
 
     private closeWebSocket(): void {
-        if (this.webSocketSubject) {
-            this.webSocketSubject.unsubscribe();
-            this.webSocketSubject = null;
+        if (this.webSocketSubscription) {
+            this.webSocketSubscription.unsubscribe();
+            this.webSocketSubscription = undefined;
         }
     }
 

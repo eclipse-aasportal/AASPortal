@@ -28,4 +28,5 @@ export const ERRORS = {
     InvalidEndpointUrl: 'Error.INVALID_ENDPOINT_URL',
     InvokeOperationFailed: 'Error.INVOKE_OPERATION_FAILED',
     UploadAasxFileFailed: 'Error.UPLOAD_AASX_FILE_FAILED',
+    AASNotFoundByAssetLink: 'Error.AAS_NOT_FOUND_BY_ASSET_LINK',
 };

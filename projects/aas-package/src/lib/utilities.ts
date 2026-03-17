@@ -8,6 +8,7 @@
 
 import { DOMParser } from '@xmldom/xmldom';
 import { Crc32, aas, flat } from 'aas-core';
+
 import * as aasV2 from './aas-v2.js';
 import { XmlReaderV1 } from './reader/xml-reader-v1.js';
 import { XmlReaderV2 } from './reader/xml-reader-v2.js';

@@ -26,9 +26,9 @@ import {
 } from 'tsoa';
 
 import { aas, extensionToMimeType, jsonization, PagedResult, toSubmodel } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
 import { type ExtentModifier, type LevelModifier } from '../types.js';
-import { decodeBase64Url } from '../utilities.js';
 import { SubmodelRepository } from '../submodel-repository.js';
 
 /**
@@ -51,7 +51,7 @@ export class SubmodelsController extends Controller {
      * @returns List of Submodels.
      */
     @Get('')
-    @Security('bearerAuth')
+    @Security({ api_key: [] })
     @OperationId('GetAllSubmodels ')
     public getSubmodels(
         @Query() limit?: number,
@@ -70,7 +70,7 @@ export class SubmodelsController extends Controller {
      * @returns Requested Submodel.
      */
     @Get('/{id}')
-    @Security('bearerAuth', ['sm.read'])
+    @Security({ api_key: [] })
     @OperationId('GetSubmodelById')
     public async getSubmodel(
         @Path() id: string,
@@ -86,7 +86,7 @@ export class SubmodelsController extends Controller {
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      */
     @Get('/{id}/submodel-elements/{idShortPath}/attachment')
-    @Security('bearerAuth', ['sme.read'])
+    @Security({ api_key: [] })
     @OperationId('GetFileByPath')
     public async getFileByPath(@Path() id: string, @Path() idShortPath: string): Promise<NodeJS.ReadableStream> {
         const { filename, readable, size, contentType } = await this.repository.getFileByPath(
@@ -111,7 +111,7 @@ export class SubmodelsController extends Controller {
      * @param file File to upload.
      */
     @Put('/{id}/submodel-elements/{idShortPath}/attachment')
-    @Security('bearerAuth', ['sme.read'])
+    @Security({ api_key: [] })
     @OperationId('PutFileByPath')
     public async putFileByPath(
         @Path() id: string,
@@ -128,7 +128,7 @@ export class SubmodelsController extends Controller {
      * @param idShortPath IdShort path to the submodel element (dot-separated).
      */
     @Delete('/{id}/submodel-elements/{idShortPath}/attachment')
-    @Security('bearerAuth', ['sme.read'])
+    @Security({ api_key: [] })
     @OperationId('DeleteFileByPath')
     public async deleteFileByPath(@Path() id: string, @Path() idShortPath: string): Promise<void> {
         await this.repository.deleteFileByPath(decodeBase64Url(id), idShortPath);
@@ -140,7 +140,7 @@ export class SubmodelsController extends Controller {
      * @returns Created Created Submodel.
      */
     @Post('')
-    @Security('bearerAuth', ['sm.create'])
+    @Security({ api_key: [] })
     @OperationId('PostSubmodel')
     @SuccessResponse('201', 'Created')
     public async addSubmodel(@Body() submodel: aas.Submodel): Promise<aas.Submodel> {
@@ -155,7 +155,7 @@ export class SubmodelsController extends Controller {
      * @param extent Determines to which extent the resource is being serialized.
      */
     @Get('/{id}/submodel-elements/{idShortPath}')
-    @Security('bearerAuth', ['sm.create'])
+    @Security({ api_key: [] })
     @OperationId('GetSubmodelElementByPath')
     public async getSubmodelElement(
         @Path() id: string,
@@ -176,7 +176,7 @@ export class SubmodelsController extends Controller {
      * @returns The value of the submodel element.
      */
     @Get('/{id}/submodel-elements/{idShortPath}/$value')
-    @Security('bearerAuth', ['reader'])
+    @Security({ api_key: [] })
     @OperationId('GetSubmodelElementValueByPath')
     public async getSubmodelElementValueByPath(
         @Path() id: string,
@@ -194,7 +194,7 @@ export class SubmodelsController extends Controller {
      * @param value The new value for the submodel element.
      */
     @Patch('/{id}/submodel-elements/{idShortPath}/$value')
-    @Security('bearerAuth', ['editor'])
+    @Security({ api_key: [] })
     @OperationId('PatchSubmodelElementValueByPath')
     public async patchSubmodelElementValueByPath(
         @Path() id: string,

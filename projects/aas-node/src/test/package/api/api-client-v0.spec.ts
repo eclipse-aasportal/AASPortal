@@ -41,16 +41,18 @@ describe('ApiClientV0', function () {
         vitest.restoreAllMocks();
     });
 
-    describe('getShells', () => {
+    describe('getDocuments', () => {
         it('returns the AAS list', async () => {
-            http.getJson.mockResolvedValue(listaas);
-            const result = await client.getShells();
-            expect(result.result).toEqual([
-                'AssistanceSystem_Dte',
-                'CunaCup_Becher1',
-                'CunaCup_Becher2',
-                'DTOrchestrator',
-            ]);
+            http.getJson.mockImplementation(async url => {
+                if (url.href.endsWith('/server/listaas')) {
+                    return listaas;
+                }
+
+                return becher1;
+            });
+
+            const result = await client.getDocuments(undefined);
+            expect(result.result.length).toBe(4);
         });
     });
 
@@ -86,7 +88,7 @@ describe('ApiClientV0', function () {
 
     describe('openRead', () => {
         it('can open a file', async () => {
-            const stream: NodeJS.ReadableStream = new Readable({
+            const stream: Readable = new Readable({
                 read(): void {
                     this.push(
                         JSON.stringify({

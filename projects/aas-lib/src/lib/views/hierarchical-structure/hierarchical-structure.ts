@@ -230,7 +230,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
         const update: HierarchicalNode = {
             ...item,
             symbolType: 'image',
-            symbol: document!.thumbnail,
+            symbol: document?.thumbnail ?? undefined,
             type: 'routerLink',
             name: getDisplayName(shell, document?.content, this.translate.getCurrentLang()),
             suffix: `[${document?.id}]`,

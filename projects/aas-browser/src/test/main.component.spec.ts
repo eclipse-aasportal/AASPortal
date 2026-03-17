@@ -6,15 +6,14 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Subject } from 'rxjs';
-import { ToolbarService, WebSocketFactoryService, WINDOW, WindowService } from 'aas-lib';
+import { ToolbarService, WebSocketService, WINDOW, WindowService } from 'aas-lib';
 
 import { MainComponent } from '../app/main/main.component';
-import { createSpyObj, FakeLoader } from './mocks';
+import { createSpyObj, FakeLoader, MockWebSocketService } from './mocks';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 describe('MainComponent', () => {
@@ -37,8 +36,8 @@ describe('MainComponent', () => {
                     useValue: createSpyObj<WindowService>([], { location }),
                 },
                 {
-                    provide: WebSocketFactoryService,
-                    useValue: { create: vi.fn(() => new Subject()) },
+                    provide: WebSocketService,
+                    useValue: new MockWebSocketService(),
                 },
                 provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
                 provideRouter([]),

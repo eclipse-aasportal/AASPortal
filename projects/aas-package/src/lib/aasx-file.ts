@@ -93,7 +93,7 @@ export abstract class AasxFile {
      * @returns A readable stream.
      */
     public read(path: string): NodeJS.ReadableStream {
-        const stream = this.zip.file(this.normalize(path))?.nodeStream();
+        const stream = this.zip.file(this.normalize(path))?.nodeStream() as NodeJS.ReadableStream | undefined;
         if (!stream) {
             throw Error(`ZIP entry '${path}' could not be opened.`);
         }
@@ -241,7 +241,7 @@ export abstract class AasxFile {
         const value = (await this.getTargetAttr(dom, thumbnailNS))?.value;
         if (value) {
             const filename = this.normalize(value);
-            readable = await this.zip.file(filename)?.nodeStream();
+            readable = (await this.zip.file(filename)?.nodeStream()) as NodeJS.ReadableStream | undefined;
             if (readable) {
                 return {
                     filename: basename(filename),

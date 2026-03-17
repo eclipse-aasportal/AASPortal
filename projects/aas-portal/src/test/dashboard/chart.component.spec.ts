@@ -10,24 +10,22 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { WebSocketFactoryService } from 'aas-lib';
 import { ChartComponent } from '../../app/dashboard/chart/chart.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
-import { createSpyObj, FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader, MockWebSocketService } from '../mocks';
+import { WebSocketService } from 'aas-lib';
 
 describe('ChartComponent', () => {
-    let webSocketFactory: Mocked<WebSocketFactoryService>;
     let api: Mocked<DashboardApiService>;
 
     beforeEach(async () => {
-        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
         api = createSpyObj<DashboardApiService>(['getBlobValue']);
 
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: WebSocketFactoryService,
-                    useValue: webSocketFactory,
+                    provide: WebSocketService,
+                    useValue: new MockWebSocketService(),
                 },
                 {
                     provide: DashboardApiService,

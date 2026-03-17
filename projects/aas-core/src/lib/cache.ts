@@ -7,54 +7,74 @@
  *****************************************************************************/
 
 /**
- * Provides a cache with a 2nd chance strategy.
+ * Provides a cache with a remove oldest item strategy.
  */
 export abstract class Cache<TKey, TValue> {
-    private first = new Map<TKey, TValue>();
-    private second = new Map<TKey, TValue>();
+    private map = new Map<TKey, [TValue, number]>();
 
-    public constructor(private readonly size: number = 100) {}
+    public constructor(
+        private readonly size: number = 100,
+        private readonly expiration: number = 60 * 1000,
+    ) {}
 
     public clear(): void {
-        this.first.clear();
-        this.second.clear();
-    }
-
-    protected hasItem(key: TKey): boolean {
-        return this.first.has(key) || this.second.has(key);
+        this.map.clear();
     }
 
     protected getItem(key: TKey): TValue | undefined {
-        let value = this.first.get(key);
+        const value = this.map.get(key);
         if (!value) {
-            value = this.second.get(key);
+            return undefined;
         }
 
-        return value;
+        if (Date.now() - value[1] > this.expiration) {
+            this.map.delete(key);
+            return undefined;
+        }
+
+        value[1] = Date.now();
+        return value[0];
     }
 
     protected setItem(key: TKey, value: TValue): void {
-        if (this.first.has(key)) {
-            this.first.set(key, value);
-        } else if (this.second.has(key)) {
-            this.second.set(key, value);
+        if (this.map.has(key)) {
+            this.map.set(key, [value, Date.now()]);
         } else {
-            if (this.first.size >= this.size) {
-                this.second = this.first;
-                this.first = new Map<TKey, TValue>();
+            while (this.map.size >= this.size) {
+                let oldestKey: TKey | undefined;
+                let min = Number.MAX_SAFE_INTEGER;
+                for (const [k, [, t]] of this.map.entries()) {
+                    if (min > t) {
+                        oldestKey = k;
+                        min = t;
+                    }
+                }
+
+                this.map.delete(oldestKey!);
             }
 
-            this.first.set(key, value);
+            this.map.set(key, [value, Date.now()]);
         }
     }
 
     protected removeItem(key: TKey): boolean {
-        if (this.first.has(key)) {
-            return this.first.delete(key);
-        } else if (this.second.has(key)) {
-            return this.second.delete(key);
-        }
+        return this.map.delete(key);
+    }
+}
 
-        return false;
+/**
+ * Provides a generic cache with a remove oldest item strategy.
+ */
+export class GenericCache<TKey, TValue> extends Cache<TKey, TValue> {
+    public get(key: TKey): TValue | undefined {
+        return this.getItem(key);
+    }
+
+    public set(key: TKey, value: TValue): void {
+        this.setItem(key, value);
+    }
+
+    public delete(key: TKey): boolean {
+        return this.removeItem(key);
     }
 }

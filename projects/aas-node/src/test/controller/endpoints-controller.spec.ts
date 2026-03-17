@@ -180,7 +180,7 @@ describe('EndpointsController', () => {
 
     it('GET: /api/v1/endpoints/{name}/packages/{id}', async () => {
         aasProvider.getPackage.mockReturnValue(
-            new Promise<NodeJS.ReadableStream>(resolve => {
+            new Promise<Readable>(resolve => {
                 const s = new Readable();
                 s.push('Hello World!');
                 s.push(null);
@@ -258,7 +258,7 @@ describe('EndpointsController', () => {
     describe('getDataElementValue: /api/v1/endpoints/{name}/documents/{id}/submodels/:smId/submodel-elements/{path}/value', () => {
         it('gets the value of a File that represents an image', async () => {
             aasProvider.getDataElementValue.mockReturnValue(
-                new Promise<NodeJS.ReadableStream>(resolve => {
+                new Promise<Readable>(resolve => {
                     const s = new Readable();
                     s.push('Hello World!');
                     s.push(null);
@@ -278,7 +278,7 @@ describe('EndpointsController', () => {
 
         it('gets the value of a File', async () => {
             aasProvider.getDataElementValue.mockReturnValue(
-                new Promise<NodeJS.ReadableStream>(resolve => {
+                new Promise<Readable>(resolve => {
                     const s = new Readable();
                     s.push('Hello World!');
                     s.push(null);
@@ -299,7 +299,7 @@ describe('EndpointsController', () => {
 
         it('gets the value of a Blob', async () => {
             aasProvider.getDataElementValue.mockReturnValue(
-                new Promise<NodeJS.ReadableStream>(resolve => {
+                new Promise<Readable>(resolve => {
                     const s = new Readable();
                     s.push(Buffer.from('Hello world!').toString('base64'));
                     s.push(null);

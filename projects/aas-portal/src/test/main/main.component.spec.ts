@@ -21,7 +21,7 @@ import {
 } from '@angular/core';
 
 import { AASDocument, WebSocketData } from 'aas-core';
-import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
+import { AuthComponent, IndexChange, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
 import { createSpyObj, FakeLoader } from '../mocks';
@@ -54,20 +54,16 @@ class TestNotifyComponent {}
 describe('MainComponent', () => {
     let documentSubject: Subject<AASDocument | null>;
     let toolbar: Mocked<ToolbarService>;
-    let indexChange: Mocked<IndexChangeService>;
+    let indexChange: Mocked<IndexChange>;
 
     beforeEach(async () => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
         toolbar = createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
-        indexChange = createSpyObj<IndexChangeService>(['clear'], {
+        indexChange = createSpyObj<IndexChange>(['clear'], {
             documentCount: (() => 42) as Signal<number>,
             endpointCount: (() => 1) as Signal<number>,
             changedDocuments: (() => 0) as Signal<number>,
-            message: new BehaviorSubject({
-                type: '',
-                data: undefined,
-            } satisfies WebSocketData),
         });
 
         await TestBed.configureTestingModule({
@@ -77,7 +73,7 @@ describe('MainComponent', () => {
                     useValue: toolbar,
                 },
                 {
-                    provide: IndexChangeService,
+                    provide: IndexChange,
                     useValue: indexChange,
                 },
                 provideTranslateService({
