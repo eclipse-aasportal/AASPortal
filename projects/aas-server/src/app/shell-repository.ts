@@ -12,18 +12,13 @@ import { aas, ApplicationError, extensionToMimeType, PagedResult } from 'aas-cor
 import { FileResult } from 'aas-package';
 
 import { Database } from './db/database.js';
-import { ExtentModifier, LevelModifier } from './types.js';
 import { ERROR } from './error.js';
 import { UpdateThumbnailCommand } from './db/commands/update-thumbnail-command.js';
 import { DeleteThumbnailCommand } from './db/commands/delete-thumbnail-command.js';
-import { KeyList } from './db/key-list.js';
-import { SubmodelRepository } from './submodel-repository.js';
-import { HttpCache } from './http-cache.js';
 import { UpdateShellCommand } from './db/commands/update-shell-command.js';
-import { checkSubmodelIsReferenced } from './utilities.js';
-import { AasxPackage } from './aasx-package.js';
 import { AasxPackageBuilder } from './aasx-package-builder.js';
 import { AddShellCommand } from './db/commands/add-shell-command.js';
+import { Variable } from './variable.js';
 
 /**
  * Asset Administration Shell Repository.
@@ -31,9 +26,8 @@ import { AddShellCommand } from './db/commands/add-shell-command.js';
 @singleton()
 export class ShellRepository {
     public constructor(
+        @inject(Variable) private readonly variable: Variable,
         @inject(Database) private readonly db: Database,
-        @inject(SubmodelRepository) private readonly submodelRepository: SubmodelRepository,
-        @inject(HttpCache) private readonly cache: HttpCache,
         @inject(AasxPackageBuilder) private packageBuilder: AasxPackageBuilder,
     ) {}
 
@@ -48,14 +42,7 @@ export class ShellRepository {
      * @returns A promise that resolves to a paged result containing Asset Administration Shells.
      */
     public async getShells(limit?: number, cursor?: string): Promise<PagedResult<aas.AssetAdministrationShell>> {
-        const query = `?cursor=${cursor}&limit=${limit}`;
-        let result = this.cache.getResult<aas.AssetAdministrationShell>('/shells', query);
-        if (!result) {
-            result = await this.db.getShells(limit, cursor);
-            this.cache.setResult('/shells', query, result);
-        }
-
-        return result;
+        return await this.db.shells.getPage(limit ?? this.variable.LIMIT, cursor);
     }
 
     /**
@@ -69,14 +56,8 @@ export class ShellRepository {
      * @returns A promise that resolves to the requested `aas.AssetAdministrationShell`.
      */
     public async getShell(id: string): Promise<aas.AssetAdministrationShell> {
-        const query = '';
-        let aas = this.cache.getIdentifiable<aas.AssetAdministrationShell>(id, query);
-        if (!aas) {
-            aas = await this.db.getShell(id);
-            this.cache.setIdentifiable(query, aas);
-        }
-
-        return aas;
+        const key = await this.db.shells.getKey(id);
+        return await this.db.shells.readObject(key);
     }
 
     /**
@@ -99,27 +80,21 @@ export class ShellRepository {
      * @throws {ApplicationError} If the thumbnail does not exist for the shell.
      */
     public async getThumbnail(id: string): Promise<FileResult> {
-        const key = await this.db.shells.getKey(id);
-        const item = await this.db.shells.getItem(key);
-        const packageId = new KeyList(item.packageKeys).at(0);
-        if (packageId === undefined) {
-            throw new Error('Invalid operation.');
-        }
-
-        const shell = await this.getShell(id);
-        const file = shell.assetInformation.defaultThumbnail?.path;
-        if (!file) {
+        const table = this.db.shells;
+        const key = await table.getKey(id);
+        const shell = await table.readObject(key);
+        const thumbnail = shell.assetInformation.defaultThumbnail;
+        if (!thumbnail) {
             throw new ApplicationError(ERROR.THUMBNAIL_DOES_NOT_EXIST, { id }, 404);
         }
 
-        let contentType = shell.assetInformation.defaultThumbnail?.contentType;
+        let contentType = thumbnail.contentType;
         if (!contentType) {
-            contentType = extensionToMimeType(path.extname(file));
+            contentType = extensionToMimeType(path.extname(thumbnail.path));
         }
 
-        const aasx = await AasxPackage.createFromFile(this.db.packages.getFilePath(packageId));
-        const readable = aasx.read(file);
-        return { filename: path.basename(file), value: file, readable, contentType };
+        const readable = table.readAsset(key, thumbnail.path);
+        return { filename: path.basename(thumbnail.path), value: thumbnail.path, readable, contentType };
     }
 
     /**
@@ -134,8 +109,6 @@ export class ShellRepository {
         return new Promise((resolve, reject) => {
             const command = new UpdateThumbnailCommand(this.db, resolve, reject, aasId, path, filename);
             this.db.execute(command);
-            this.cache.remove(aasId);
-            this.cache.remove('/shells');
         });
     }
 
@@ -149,8 +122,6 @@ export class ShellRepository {
         return new Promise<void>((resolve, reject) => {
             const command = new DeleteThumbnailCommand(this.db, resolve, reject, aasId);
             this.db.execute(command);
-            this.cache.remove(aasId);
-            this.cache.remove('/shells');
         });
     }
 
@@ -164,7 +135,6 @@ export class ShellRepository {
         return new Promise((resolve, reject) => {
             const command = new AddShellCommand(this.db, resolve, reject, this.packageBuilder, aas);
             this.db.execute(command);
-            this.cache.clear();
         });
     }
 
@@ -179,62 +149,5 @@ export class ShellRepository {
             const command = new UpdateShellCommand(this.db, resolve, reject, aas);
             this.db.execute(command);
         });
-    }
-
-    /**
-     * Retrieves a specific Submodel.
-     *
-     * @param id The Asset Administration Shell's unique identifier.
-     * @param smId The Submodel’s unique identifier.
-     * @param level The structural depth of the respective resource content.
-     * @param extent The extent to which the resource is being serialized.
-     * @returns The requested Submodel.
-     */
-    public async getSubmodel(
-        id: string,
-        smId: string,
-        level: LevelModifier,
-        extent: ExtentModifier,
-    ): Promise<aas.Submodel> {
-        const shell = await this.db.getShell(id);
-        checkSubmodelIsReferenced(shell, smId);
-        return await this.submodelRepository.getSubmodel(smId, level, extent);
-    }
-
-    /**
-     * Retrieves a specific submodel element from the Submodel at a specified path.
-     *
-     * @param id The Asset Administration Shell's unique identifier.
-     * @param smId The Submodel’s unique identifier.
-     * @param idShortPath The IdShort path to the submodel element (dot-separated).
-     * @param level The structural depth of the respective resource content.
-     * @param extent The extent to which the resource is being serialized.
-     * @returns The requested Submodel Element.
-     */
-    public async getSubmodelElement(
-        id: string,
-        smId: string,
-        idShortPath: string,
-        level: LevelModifier,
-        extent: ExtentModifier,
-    ): Promise<aas.SubmodelElement> {
-        const shell = await this.db.getShell(id);
-        checkSubmodelIsReferenced(shell, smId);
-        return await this.submodelRepository.getSubmodelElement(smId, idShortPath, level, extent);
-    }
-
-    /**
-     * Retrieves a file from a submodel by its path.
-     *
-     * @param id - The identifier of the Asset Administration Shell.
-     * @param smId - The identifier of the submodel.
-     * @param idShortPath - The path to the file within the submodel.
-     * @returns A promise that resolves to a `FileResult` containing the file data.
-     * @throws If the submodel is not referenced by the shell.
-     */
-    public async getFileByPath(id: string, smId: string, idShortPath: string): Promise<FileResult> {
-        const shell = await this.db.getShell(id);
-        checkSubmodelIsReferenced(shell, smId);
-        return await this.submodelRepository.getFileByPath(smId, idShortPath);
     }
 }

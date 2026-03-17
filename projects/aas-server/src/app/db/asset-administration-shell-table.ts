@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { aas, ApplicationError, jsonization, types } from 'aas-core';
-import { DatabaseKey, DatabaseTableData } from './database-types.js';
+import { DatabaseKey, DatabaseTableData, Table } from './database-types.js';
 import { Database } from './database.js';
 import { IdentifiableTable } from './identifiable-table.js';
 import { ERROR } from '../error.js';
@@ -17,7 +17,9 @@ export class AssetAdministrationShellTable extends IdentifiableTable<aas.AssetAd
         super('AssetAdministrationShellTable', database, data, clusterSize, dir);
     }
 
-    public async getKey(id: string): Promise<DatabaseKey> {
+    public override readonly index = Table.AAS_TABLE;
+
+    public override async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
             throw new ApplicationError(ERROR.AAS_DOES_NOT_EXIST, { id }, 400);
@@ -28,7 +30,7 @@ export class AssetAdministrationShellTable extends IdentifiableTable<aas.AssetAd
 
     public async readShell(key: DatabaseKey): Promise<types.AssetAdministrationShell> {
         return jsonization
-            .assetAdministrationShellFromJsonable((await this.readJson(key)) as unknown as jsonization.JsonValue)
+            .assetAdministrationShellFromJsonable((await this.readObject(key)) as unknown as jsonization.JsonValue)
             .mustValue();
     }
 }

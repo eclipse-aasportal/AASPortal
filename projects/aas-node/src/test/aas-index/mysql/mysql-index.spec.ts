@@ -260,7 +260,7 @@ describe('MySqlIndex', () => {
         it('selects the first page', async () => {
             const results: MySqlDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
-            await expect(index.getPage('Endpoint 1', undefined, 10)).resolves.toEqual({
+            await expect(index.getEndpointDocuments('Endpoint 1', undefined, 10)).resolves.toEqual({
                 paging_metadata: { cursor: undefined },
                 result: [],
             });

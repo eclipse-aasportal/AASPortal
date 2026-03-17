@@ -11,20 +11,20 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 
-import { IndexChangeService } from 'aas-lib';
+import { IndexChange } from 'aas-lib';
 import { AboutCardComponent } from '../../app/about/about-card.component';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('AboutCardComponent', () => {
-    let indexChange: Mocked<IndexChangeService>;
+    let indexChange: Mocked<IndexChange>;
 
     beforeEach(async () => {
-        indexChange = createSpyObj<IndexChangeService>({}, { documentCount: signal(42), endpointCount: signal(2) });
+        indexChange = createSpyObj<IndexChange>({}, { documentCount: signal(42), endpointCount: signal(2) });
 
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: IndexChangeService,
+                    provide: IndexChange,
                     useValue: indexChange,
                 },
                 provideZonelessChangeDetection(),

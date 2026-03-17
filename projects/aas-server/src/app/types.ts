@@ -42,7 +42,6 @@ export type Cursor = {
 export type ListenerFn = (...args: any[]) => void;
 
 export type Stats = {
-    packages: number;
     shells: number;
     submodels: number;
     conceptDescriptions: number;

@@ -6,12 +6,13 @@
  *
  *****************************************************************************/
 
-import { AasxPackage } from '../../aasx-package.js';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { KeyList } from '../key-list.js';
+import { AssetAdministrationShellTable } from '../asset-administration-shell-table.js';
 
 export class DeleteThumbnailCommand extends DatabaseCommand {
+    private readonly table: AssetAdministrationShellTable;
+
     public constructor(
         database: Database,
         resolve: () => void,
@@ -19,20 +20,16 @@ export class DeleteThumbnailCommand extends DatabaseCommand {
         private readonly aasId: string,
     ) {
         super(database, resolve, reject);
+
+        this.table = this.database.shells;
     }
 
     public override async execute(): Promise<void> {
-        const key = await this.database.shells.getKey(this.aasId);
-        const item = await this.database.shells.get(key);
-        if (!item) {
-            throw new Error('Invalid operation.');
-        }
-
-        for (const packageKey of new KeyList(item.packageKeys)) {
-            const aasxFile = await this.database.packages.createBackup(packageKey);
-            const aasx = await AasxPackage.createFromFile(aasxFile);
-            await aasx.removeThumbnail();
-            await aasx.save();
+        const key = await this.table.getKey(this.aasId);
+        const shell = await this.table.readObject(key);
+        const path = shell.assetInformation.defaultThumbnail?.path;
+        if (path) {
+            await this.table.deleteAsset(key, path);
         }
     }
 }

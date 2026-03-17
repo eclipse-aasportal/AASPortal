@@ -15,14 +15,13 @@ import morgan from 'morgan';
 import request from 'supertest';
 import multer from 'multer';
 import { aas, jsonization, toJsonValue } from 'aas-core';
+import { encodeBase64Url } from 'aas-package';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { errorHandler } from '../../app/error-handler.js';
-import { getToken } from '../json-web-token.js';
 import { ConceptDescriptionRepository } from '../../app/concept-description-repository.js';
-import { encodeBase64Url } from '../../app/utilities.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { createSpyObj } from '../mocks.js';
 
@@ -35,7 +34,7 @@ describe('ConceptDescriptionsController', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
+        variable = createSpyObj<Variable>({}, {});
         repository = createSpyObj<ConceptDescriptionRepository>([
             'getConceptDescriptions',
             'getConceptDescription',
@@ -44,7 +43,7 @@ describe('ConceptDescriptionsController', () => {
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({});
+        authentication.expressAuthentication.mockResolvedValue({ owner: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
@@ -67,7 +66,7 @@ describe('ConceptDescriptionsController', () => {
         const response = await request(app)
             .get('/api/v3/concept-descriptions')
             .query({ limit: 123, cursor })
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
         expect(repository.getConceptDescriptions).toHaveBeenCalledWith(123, cursor);
@@ -85,7 +84,7 @@ describe('ConceptDescriptionsController', () => {
         const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2NkL3Rlc3QtY29uY2VwdC1kZXNjcmlwdGlvbg';
         const response = await request(app)
             .get(`/api/v3/concept-descriptions/${id}`)
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
         expect(repository.getConceptDescription).toHaveBeenCalledWith(
@@ -108,7 +107,7 @@ describe('ConceptDescriptionsController', () => {
 
         const response = await request(app)
             .post('/api/v3/concept-descriptions')
-            .set('Authorization', `Bearer ${getToken()}`)
+            .set('x-api-key', 'this-is-an-api-key')
             .send(cd);
 
         expect(response.statusCode).toBe(201);
@@ -121,7 +120,7 @@ describe('ConceptDescriptionsController', () => {
         const id = 'aHR0cDovL3d3dy5mcmF1bmhvZmVyLmRlL2NkL3Rlc3QtY29uY2VwdC1kZXNjcmlwdGlvbg';
         const response = await request(app)
             .delete(`/api/v3/concept-descriptions/${id}`)
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(204);
         expect(repository.deleteConceptDescription).toHaveBeenCalledWith(

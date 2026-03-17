@@ -14,7 +14,6 @@ import { fileURLToPath } from 'url';
 import { aas } from 'aas-core';
 import { Database } from '../app/db/database.js';
 import { Variable } from '../app/variable.js';
-import { LangString } from 'projects/aas-core/dist/types/aas.js';
 
 type Func = () => any;
 
@@ -80,7 +79,7 @@ export const mockFile = (contentType: string, value: string): aas.File => ({
     value,
 } as aas.File);
 
-export const mockMultiLanguageProperty = (value: LangString[]): aas.MultiLanguageProperty => ({
+export const mockMultiLanguageProperty = (value: aas.LangString[]): aas.MultiLanguageProperty => ({
     modelType: 'MultiLanguageProperty',
     value,
 } as aas.MultiLanguageProperty);

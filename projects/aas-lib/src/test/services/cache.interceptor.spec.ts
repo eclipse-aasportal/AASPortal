@@ -7,17 +7,37 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
+import { WebSocketSubject } from 'rxjs/webSocket';
 import { HttpRequest } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
 
-import { createSpyObj } from '../mocks';
+import { WebSocketData } from 'aas-core';
+import { createSpyObj, MockWebSocketService } from '../mocks';
 import { CacheInterceptor } from '../../lib/services/cache.interceptor';
+import { WebSocketService } from '../../lib/services/web-socket.service';
 
-describe('CacheService', () => {
+describe('CacheInterceptor', () => {
     let interceptor: CacheInterceptor;
+    let webSubject: Mocked<WebSocketSubject<WebSocketData>>;
+    let subscription: Mocked<Subscription>;
 
     beforeEach(() => {
-        interceptor = new CacheInterceptor();
+        webSubject = createSpyObj<WebSocketSubject<WebSocketData>>(['subscribe', 'unsubscribe', 'next'])
+        subscription = createSpyObj<Subscription>(['unsubscribe']);
+        webSubject.subscribe.mockReturnValue(subscription);
+
+        TestBed.configureTestingModule({
+            providers: [
+                CacheInterceptor,
+                {
+                    provide: WebSocketService,
+                    useValue: new MockWebSocketService(),
+                }
+            ],
+        });
+
+        interceptor = TestBed.inject(CacheInterceptor);
     });
 
     it('should be created', () => {

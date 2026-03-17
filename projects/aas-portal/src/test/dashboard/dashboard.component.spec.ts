@@ -14,7 +14,7 @@ import { EMPTY, Subject } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketData } from 'aas-core';
-import { NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
+import { NotifyService, StartService, WebSocketService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
@@ -23,7 +23,7 @@ import { DashboardChartItem, DashboardState } from '../../app/dashboard/dashboar
 import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
 
 import data from '../assets/test-pages.json';
-import { createSpyObj, FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader, MockWebSocketService } from '../mocks';
 
 @Component({
     selector: 'fhg-chart-edit',
@@ -38,16 +38,11 @@ export class TestChartEditComponent {
 }
 
 describe('DashboardComponent', () => {
-    let webSocketSubject: WebSocketSubject<WebSocketData>;
-    let webSocketFactory: Mocked<WebSocketFactoryService>;
     let start: Mocked<StartService>;
     let service: Mocked<DashboardService>;
     let window: Mocked<WindowService>;
 
     beforeEach(async () => {
-        webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
-        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
-        webSocketFactory.create.mockReturnValue(webSocketSubject);
         start = createSpyObj<StartService>(['add', 'save']);
 
         vi.useFakeTimers
@@ -73,8 +68,8 @@ describe('DashboardComponent', () => {
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: WebSocketFactoryService,
-                    useValue: webSocketFactory,
+                    provide: WebSocketService,
+                    useValue: new MockWebSocketService(),
                 },
                 {
                     provide: NotifyService,

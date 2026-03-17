@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { computed, EventEmitter, Injectable, OnDestroy, signal } from '@angular/core';
+import { computed, EventEmitter, inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { AASNodeMessage, WebSocketData } from 'aas-core';
-import { WebSocketFactoryService } from './web-socket-factory.service';
+import { WebSocketService } from './web-socket.service';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
 import { AuthService } from '../components/auth/auth.service';
@@ -19,24 +19,26 @@ type State = {
     changedDocuments: number;
 };
 
+/**
+ * Service to track changes in the index of the AASNode application.
+ * It listens to WebSocket messages and updates the state accordingly.
+ */
 @Injectable({
     providedIn: 'root',
 })
-export class IndexChangeService implements OnDestroy {
-    private subscription?: Subscription;
+export class IndexChange implements OnDestroy {
+    private readonly http = inject(HttpClient);
+    private readonly auth = inject(AuthService);
+    private readonly webSocket = inject(WebSocketService);
+    private readonly subscription: Subscription;
     private readonly state = signal<State>({
         documentCount: 0,
         endpointCount: 0,
         changedDocuments: 0,
     });
 
-    public constructor(
-        private readonly http: HttpClient,
-        private readonly webSocketFactory: WebSocketFactoryService,
-        private readonly auth: AuthService,
-    ) {
-        const message = this.webSocketFactory.create();
-        this.subscription = message.subscribe({
+    public constructor() {
+        this.subscription = this.webSocket.getMessages().subscribe({
             next: (data: WebSocketData): void => {
                 if (data.type === 'AASNodeMessage') {
                     this.update(data.data as AASNodeMessage);
@@ -47,34 +49,44 @@ export class IndexChangeService implements OnDestroy {
             },
         });
 
-        message.next(this.createMessage());
-        this.message = message.asObservable();
+        this.webSocket.sendMessage({
+            type: 'IndexChange',
+            data: null,
+        } satisfies WebSocketData);
 
         this.auth.ready
             .pipe(
                 first(ready => ready === true),
-                mergeMap(() =>
-                    zip(
-                        this.http.get<{ count: number }>('/api/v1/endpoints/count'),
-                        this.http.get<{ count: number }>('/api/v1/documents/count'),
-                    ).pipe(map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count])),
-                ),
+                mergeMap(() => this.clear()),
             )
-            .subscribe(([endpointCount, documentCount]) => {
-                this.state.update(state => ({ ...state, endpointCount, documentCount }));
-            });
+            .subscribe();
     }
 
+    /**
+     * Event emitted when a reset message is received, indicating that the index has been reset and
+     * the state should be cleared.
+     */
     public readonly reset = new EventEmitter();
 
-    public readonly message: Observable<WebSocketData>;
-
+    /**
+     * Observable that emits the current count of documents in the index.
+     */
     public readonly documentCount = computed(() => this.state().documentCount);
 
+    /**
+     * Observable that emits the current count of endpoints in the index.
+     */
     public readonly endpointCount = computed(() => this.state().endpointCount);
 
+    /**
+     * Observable that emits the count of changed documents since the last reset.
+     */
     public readonly changedDocuments = computed(() => this.state().changedDocuments);
 
+    /**
+     * Clears the state of the service by fetching the current counts of endpoints and documents from the API.
+     * @returns An Observable that completes when the state has been updated.
+     */
     public clear(): Observable<void> {
         return zip(
             this.http.get<{ count: number }>('/api/v1/endpoints/count'),
@@ -88,14 +100,7 @@ export class IndexChangeService implements OnDestroy {
     }
 
     public ngOnDestroy(): void {
-        this.subscription?.unsubscribe();
-    }
-
-    private createMessage(): WebSocketData {
-        return {
-            type: 'IndexChange',
-            data: null,
-        } satisfies WebSocketData;
+        this.subscription.unsubscribe();
     }
 
     private update(data: AASNodeMessage): void {
@@ -117,7 +122,7 @@ export class IndexChangeService implements OnDestroy {
                 break;
             case 'Reset':
                 this.reset.emit();
-                this.state.set({ changedDocuments: 0, documentCount: 0, endpointCount: 0 });
+                this.clear().pipe(first()).subscribe();
                 break;
         }
     }

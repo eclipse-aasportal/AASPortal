@@ -14,7 +14,7 @@ import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
 import {
     AuthComponent,
-    IndexChangeService,
+    IndexChange,
     LocalizeComponent,
     NotifyComponent,
     ProgressComponent,
@@ -65,7 +65,7 @@ export interface LinkDescriptor {
 export class MainComponent {
     protected readonly route = inject(ActivatedRoute);
     private readonly toolbar = inject(ToolbarService);
-    private readonly indexChange = inject(IndexChangeService);
+    private readonly indexChange = inject(IndexChange);
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 

@@ -8,15 +8,18 @@
 
 import net from 'net';
 import { Readable } from 'stream';
-import { ReadableStream } from 'stream/web';
 import { singleton } from 'tsyringe';
+import { ApplicationError } from 'aas-core';
 import { parseUrl } from './utilities.js';
+import { HttpCache } from './http-cache.js';
 
 /**
  * A simple HTTP client for making requests to servers.
  */
 @singleton()
 export class HttpClient {
+    private readonly cache = new HttpCache(200);
+
     /**
      * Gets an object of type `T` from a server.
      * @template T The type of the object.
@@ -25,41 +28,47 @@ export class HttpClient {
      * @returns The requested object.
      */
     public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
-        return await new Promise<T>((resolve, reject) => {
-            fetch(url.toString(), { method: 'GET', headers })
-                .then(response => {
-                    if (!response.ok) {
-                        reject(new Error(`GET failed: ${response.statusText} (${response.status})`));
-                    }
+        let response = this.cache.get(url.toString());
+        if (response) {
+            return (await response.json()) as T;
+        }
 
-                    response
-                        .json()
-                        .then(data => resolve(data as T))
-                        .catch(err => reject(err));
-                })
-                .catch(err => reject(err));
-        });
+        response = await fetch(url.toString(), { method: 'GET', headers });
+        if (!response.ok) {
+            throw new ApplicationError(response.statusText, {}, response.status);
+        }
+
+        this.cache.set(url.toString(), response);
+        return (await response.json()) as T;
     }
 
     /**
      * Sends a GET request to the specified URL and returns the response body as a Node.js ReadableStream.
-     *
      * @param url - The URL to send the GET request to.
      * @param headers - Optional HTTP headers to include in the request.
      * @returns A promise that resolves to a Node.js ReadableStream containing the response body.
      * @throws If the response status is not OK (status code outside the 200–299 range).
      */
     public async getReadable(url: URL, headers?: Record<string, string>): Promise<NodeJS.ReadableStream> {
-        const response = await fetch(url.toString(), {
-            method: 'GET',
-            headers,
-        });
+        let response = this.cache.get(url.toString());
+        if (!response) {
+            response = await fetch(url.toString(), {
+                method: 'GET',
+                headers,
+            });
 
-        if (!response.ok) {
-            throw new Error(`GET readable failed: ${response.statusText} (${response.status})`);
+            this.cache.set(url.toString(), response.clone());
         }
 
-        return this.webToNodeReadable(response.body);
+        if (!response.ok) {
+            throw new ApplicationError(response.statusText, {}, response.status);
+        }
+
+        if (!response.body) {
+            throw new ApplicationError('Response body is null', {}, 400);
+        }
+
+        return Readable.fromWeb(response.body);
     }
 
     /**
@@ -82,7 +91,7 @@ export class HttpClient {
         });
 
         if (!response.ok) {
-            throw new Error(`PUT failed: ${response.statusText} (${response.status})`);
+            throw new ApplicationError(response.statusText, {}, response.status);
         }
     }
 
@@ -98,7 +107,7 @@ export class HttpClient {
         });
 
         if (!response.ok) {
-            throw new Error(`DELETE failed: ${response.statusText} (${response.status})`);
+            throw new ApplicationError(response.statusText, {}, response.status);
         }
     }
 
@@ -133,7 +142,6 @@ export class HttpClient {
 
     /**
      * Sends a POST request with a JSON payload to the specified URL.
-     *
      * @param url - The target URL to which the POST request will be sent.
      * @param obj - The object to be serialized as JSON and sent in the request body.
      * @param headers - Optional additional headers to include in the request.
@@ -151,7 +159,7 @@ export class HttpClient {
         });
 
         if (!response.ok) {
-            throw new Error(`POST JSON failed: ${response.statusText} (${response.status})`);
+            throw new ApplicationError(response.statusText, {}, response.status);
         }
 
         return await response.text();
@@ -159,7 +167,6 @@ export class HttpClient {
 
     /**
      * Sends a POST request with multipart/form-data using the provided FormData object.
-     *
      * @param url - The endpoint URL to which the form data will be posted.
      * @param formData - The FormData object containing the data to be sent in the request body.
      * @param headers - Optional additional headers to include in the request.
@@ -174,33 +181,7 @@ export class HttpClient {
         });
 
         if (!response.ok) {
-            throw new Error(`POST FormData failed: ${response.statusText} (${response.status})`);
+            throw new ApplicationError(response.statusText, {}, response.status);
         }
-    }
-
-    private webToNodeReadable(stream: ReadableStream<Uint8Array> | null): Readable {
-        if (!stream) {
-            return new Readable({
-                read(): void {
-                    this.push(null);
-                },
-            });
-        }
-
-        const reader = stream.getReader();
-        return new Readable({
-            read(): void {
-                reader
-                    .read()
-                    .then(({ done, value }) => {
-                        if (done) {
-                            this.push(null);
-                        } else {
-                            this.push(Buffer.from(value));
-                        }
-                    })
-                    .catch(err => this.destroy(err));
-            },
-        });
     }
 }

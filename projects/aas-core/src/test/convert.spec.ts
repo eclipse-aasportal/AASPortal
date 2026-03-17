@@ -101,6 +101,10 @@ describe('Convert', () => {
             expect(convertToString([1, 2])).toEqual('[1, 2]');
         });
 
+        it('converts an Error', () => {
+            expect(convertToString(new Error('This is an error.'))).toBe('This is an error.');
+        });
+
         it('converts an object', () => {
             expect(convertToString({ text: 'Hello world!', number: 42 })).toEqual(
                 JSON.stringify({ text: 'Hello world!', number: 42 }, undefined, 2),

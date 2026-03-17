@@ -6,10 +6,9 @@
  *
  *****************************************************************************/
 
-import { aas, toJsonValue, ApplicationError, types, jsonization } from 'aas-core';
+import { aas, toJsonValue, ApplicationError, types, jsonization, toConceptDescription } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { IdentifiableItem } from '../database-types.js';
 import { ERROR } from '../../error.js';
 import { ConceptDescriptionTable } from '../concept-description-table.js';
 
@@ -41,33 +40,12 @@ export class AddConceptDescriptionCommand extends DatabaseCommand {
     }
 
     private async add(cd: types.ConceptDescription): Promise<types.ConceptDescription> {
-        let key = await this.table.findKey(cd.id);
+        const key = await this.table.findKey(cd.id);
         if (key) {
             throw new ApplicationError(ERROR.CONCEPT_DESCRIPTION_ALREADY_EXISTS, { id: cd.id }, 409);
         }
 
-        key = this.table.createKey();
-        const page = await this.table.getEditablePage(key);
-        const item: IdentifiableItem = {
-            key,
-            id: cd.id,
-            idShort: cd.idShort,
-            packageKeys: [],
-        };
-
-        const index = key % this.table.pageSize;
-        ++page.count;
-        if (index < page.items.length) {
-            page.items[index] = item;
-        } else if (index === page.items.length) {
-            page.items.push(item);
-        } else {
-            throw new Error('Invalid operation.');
-        }
-
-        await this.table.setKey(cd.id, key);
-        await this.table.writeFile(cd, key);
-
+        await this.table.insert(toConceptDescription(cd));
         return cd;
     }
 }

@@ -6,18 +6,15 @@
  *
  *****************************************************************************/
 
-import { aas, jsonization, toAssetAdministrationShell, toJsonObject, types } from 'aas-core';
-import { AssetAdministrationShellTable } from '../asset-administration-shell-table.js';
+import { aas, ApplicationError, jsonization, toAssetAdministrationShell, toJsonObject } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { DatabaseKey } from '../database-types.js';
+import { ERROR } from '../../error.js';
 
 /**
  * Command to update an Asset Administration Shell in the database.
  */
 export class UpdateShellCommand extends DatabaseCommand {
-    private readonly table: AssetAdministrationShellTable;
-
     public constructor(
         database: Database,
         resolve: (result: aas.AssetAdministrationShell) => void,
@@ -25,26 +22,17 @@ export class UpdateShellCommand extends DatabaseCommand {
         private readonly shell: aas.AssetAdministrationShell,
     ) {
         super(database, resolve, reject);
-
-        this.table = database.shells;
     }
 
     public override async execute(): Promise<aas.AssetAdministrationShell> {
-        const key = await this.table.getKey(this.shell.id);
-        const value = await this.updateAssetAdministrationShell(key);
-        return toAssetAdministrationShell(value);
-    }
-
-    private async updateAssetAdministrationShell(key: DatabaseKey): Promise<types.AssetAdministrationShell> {
-        const currentShell = await this.table.readJson(key);
-        const updatedShell = { ...this.shell, submodels: currentShell.submodels };
-        const result = jsonization.assetAdministrationShellFromJsonable(toJsonObject(updatedShell));
-        if (result.error) {
-            throw result.error;
+        const result = jsonization.assetAdministrationShellFromJsonable(toJsonObject(this.shell));
+        const obj = toAssetAdministrationShell(result.mustValue());
+        const key = await this.database.shells.findKey(this.shell.id);
+        if (key === undefined) {
+            throw new ApplicationError(ERROR.AAS_DOES_NOT_EXIST, { id: this.shell.id }, 404);
         }
 
-        const value = result.mustValue();
-        await this.table.writeFile(value, key);
-        return value;
+        await this.database.shells.update(key, obj);
+        return obj;
     }
 }

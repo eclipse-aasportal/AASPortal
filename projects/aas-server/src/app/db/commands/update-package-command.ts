@@ -6,19 +6,17 @@
  *
  *****************************************************************************/
 
-import { aas, ApplicationError, types } from 'aas-core';
-import { DatabaseCommand } from '../database-command.js';
-import { DatabaseEnvironment, DatabaseKey, IdentifiableItem, PackageItem } from '../database-types.js';
-import { Database } from '../database.js';
-import { ERROR } from '../../error.js';
-import { PackageTable } from '../package-table.js';
-import { IdentifiableTable } from '../identifiable-table.js';
-import { KeyList } from '../key-list.js';
-import { AasxPackage } from '../../aasx-package.js';
+import { ApplicationError, noop, toAssetAdministrationShell, toConceptDescription, toSubmodel, types } from 'aas-core';
 
-export class UpdatePackageCommand extends DatabaseCommand {
-    private table: PackageTable;
-    private packageKey: DatabaseKey = NaN;
+import { Database } from '../database.js';
+import { AasxPackage } from '../../aasx-package.js';
+import { ERROR } from '../../error.js';
+import { DatabaseIndex } from '../database-index.js';
+import { PackageCommand } from './package-command.js';
+import { DatabaseKey, Table } from '../database-types.js';
+
+export class UpdatePackageCommand extends PackageCommand {
+    private readonly packageIndex: DatabaseIndex;
 
     public constructor(
         database: Database,
@@ -30,112 +28,135 @@ export class UpdatePackageCommand extends DatabaseCommand {
     ) {
         super(database, resolve, reject);
 
-        this.table = database.packages;
+        this.packageIndex = this.database.packageIndex;
     }
 
     public override async execute(): Promise<void> {
-        const aasx = await AasxPackage.createFromFile(this.sourceFile);
-        const env = await aasx.getEnvironment();
-        this.packageKey = await this.table.getKey(this.packageId);
-        const packageItem = await this.getPackageItem();
-        packageItem.filename = this.filename;
-        packageItem.environment = await this.update(env, packageItem.environment);
-        this.table.update(this.sourceFile, this.packageKey);
-    }
-
-    private async getPackageItem(): Promise<PackageItem> {
-        const page = await this.table.getEditablePage(this.packageKey);
-        const item = page.items[this.packageKey % this.table.pageSize];
-        if (item === null) {
-            throw new ApplicationError(ERROR.AASX_PACKAGE_DOES_NOT_EXIST, { packageId: this.packageId }, 404);
+        const packageKey = await this.packageIndex.findKey(this.packageId);
+        if (packageKey === undefined) {
+            throw new ApplicationError(ERROR.INVALID_PACKAGE_ID, {}, 404);
         }
 
-        return item;
-    }
+        this.packageKey = packageKey;
+        const oldIndex = [...(await this.packageIndex.getTableRefs(packageKey))];
+        const newIndex: [Table, DatabaseKey][] = [];
 
-    private async update(environment: types.Environment, state: DatabaseEnvironment): Promise<DatabaseEnvironment> {
-        return {
-            assetAdministrationShells: await this.updateIdentifiables(
-                this.database.shells,
-                environment.assetAdministrationShells ?? [],
-                state.assetAdministrationShells,
-            ),
-            submodels: await this.updateIdentifiables(
-                this.database.submodels,
-                environment.submodels ?? [],
-                state.submodels,
-            ),
-            conceptDescriptions: await this.updateIdentifiables(
-                this.database.conceptDescriptions,
-                environment.conceptDescriptions ?? [],
-                state.conceptDescriptions,
-            ),
-        };
-    }
-
-    private async updateIdentifiables(
-        table: IdentifiableTable<aas.Identifiable>,
-        identifiables: types.IIdentifiable[],
-        keys: DatabaseKey[],
-    ): Promise<DatabaseKey[]> {
-        const result: DatabaseKey[] = [];
-        for (const identifiable of identifiables) {
-            if (identifiable === null) {
-                continue;
-            }
-
-            let key = await table.findKey(identifiable.id);
-            if (key === undefined) {
-                key = table.createKey();
-                const page = await table.getEditablePage(key);
-                const item: IdentifiableItem = {
-                    key,
-                    id: identifiable.id,
-                    idShort: identifiable.idShort,
-                    packageKeys: [this.packageKey],
-                };
-
-                const index = key % this.table.pageSize;
-                ++page.count;
-                if (index < page.items.length) {
-                    page.items[index] = item;
-                } else if (index === page.items.length) {
-                    page.items.push(item);
+        this.aasx = await AasxPackage.createFromFile(this.sourceFile);
+        const env = await this.aasx.getEnvironment();
+        if (env.assetAdministrationShells) {
+            for (const shell of env.assetAdministrationShells) {
+                let shellKey = await this.database.shells.findKey(shell.id);
+                if (shellKey === undefined) {
+                    shellKey = await this.addShell(shell);
                 } else {
-                    throw new Error('Invalid operation.');
+                    await this.updateShell(shellKey, shell);
                 }
 
-                await this.table.setKey(identifiable.id, key);
-                table.writeFile(identifiable, key);
-                result.push(key);
-            } else {
-                const page = await table.getEditablePage(key);
-                const item = page.items[key % this.table.pageSize];
-                if (item === null) {
-                    throw new Error('Invalid operation.');
-                }
-
-                item.idShort = identifiable.idShort;
-                new KeyList(item.packageKeys).add(key);
-                table.writeFile(identifiable, key);
-
-                result.push(item.key);
-                keys = keys.filter(item => item !== key);
+                newIndex.push([Table.AAS_TABLE, shellKey]);
             }
         }
 
-        for (const key of keys) {
-            const page = await table.getEditablePage(key);
-            const itemIndex = key % this.table.pageSize;
-            const item = page.items[itemIndex];
-            if (item === null) {
-                continue;
-            }
+        if (env.submodels) {
+            for (const submodel of env.submodels) {
+                let submodelKey = await this.database.submodels.findKey(submodel.id);
+                if (submodelKey === undefined) {
+                    submodelKey = await this.addSubmodel(submodel);
+                } else {
+                    await this.updateSubmodel(submodelKey, submodel);
+                }
 
-            page.items[itemIndex] = null;
-            await table.deleteFile(key);
+                newIndex.push([Table.SUBMODEL_TABLE, submodelKey]);
+            }
         }
 
-        return result;
+        if (env.conceptDescriptions) {
+            for (const conceptDescription of env.conceptDescriptions) {
+                let conceptDescriptionKey = await this.database.conceptDescriptions.findKey(conceptDescription.id);
+                if (conceptDescriptionKey === undefined) {
+                    conceptDescriptionKey = await this.addConceptDescription(conceptDescription);
+                } else {
+                    await this.updateConceptDescription(conceptDescriptionKey, conceptDescription);
+                }
+
+                newIndex.push([Table.CONCEPT_DESCRIPTION_TABLE, conceptDescriptionKey]);
+            }
+        }
+
+        for (const [table, key] of oldIndex) {
+            if (!newIndex.some(([t, k]) => table === t && key === k)) {
+                this.packageIndex.remove(packageKey, table, key);
+            }
+        }
+    }
+
+    private async updateShell(key: DatabaseKey, shell: types.AssetAdministrationShell): Promise<void> {
+        const table = this.database.shells;
+        const assetIndex = this.database.assetIndex;
+        const globalAssetId = await this.getGlobalAssetId(key);
+        if (shell.assetInformation.globalAssetId !== globalAssetId) {
+            if (globalAssetId !== null) {
+                const assetKey = (await assetIndex.findKey(globalAssetId))!;
+                await assetIndex.remove(assetKey, table.index, key);
+            }
+        }
+
+        await table.update(key, toAssetAdministrationShell(shell), true);
+
+        if (shell.assetInformation.globalAssetId !== globalAssetId) {
+            if (shell.assetInformation.globalAssetId !== null) {
+                let assetKey = await assetIndex.findKey(shell.assetInformation.globalAssetId);
+                if (assetKey === undefined) {
+                    assetKey = await assetIndex.create(shell.assetInformation.globalAssetId);
+                }
+
+                await assetIndex.add(assetKey, table, key);
+            }
+        }
+
+        const thumbnail = await this.aasx.getThumbnailName();
+        if (thumbnail) {
+            await table.writeAsset(key, thumbnail, await this.aasx.getThumbnail());
+        }
+
+        await this.packageIndex.add(this.packageKey, table, key);
+    }
+
+    private async updateSubmodel(key: DatabaseKey, submodel: types.Submodel): Promise<void> {
+        const table = this.database.submodels;
+        await table.update(key, toSubmodel(submodel), true);
+        for (const file of this.selectFiles(submodel)) {
+            if (file.value) {
+                try {
+                    await table.writeAsset(key, file.value, this.aasx.read(file.value));
+                } catch (error) {
+                    noop(error);
+                }
+            }
+        }
+
+        await this.packageIndex.add(this.packageKey, table, key);
+    }
+
+    private async updateConceptDescription(
+        key: DatabaseKey,
+        conceptDescription: types.ConceptDescription,
+    ): Promise<void> {
+        const table = this.database.conceptDescriptions;
+        await table.update(key, toConceptDescription(conceptDescription), true);
+        await this.packageIndex.add(this.packageKey, table, key);
+    }
+
+    private async getGlobalAssetId(key: DatabaseKey): Promise<string | null> {
+        const assetIndex = this.database.assetIndex;
+        const refs = await this.database.shells.getIndexRefs(key, assetIndex.index);
+        if (refs.length > 1) {
+            throw new Error('Invalid operation.');
+        }
+
+        if (refs.length === 0) {
+            return null;
+        }
+
+        return (await assetIndex.getItem(refs[0][1])).id;
     }
 }

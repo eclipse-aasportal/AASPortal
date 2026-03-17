@@ -92,7 +92,6 @@ export abstract class AasxFileBuilder<T extends AasxFile> {
         zip.file('aasx/_rels/aasx-origin.rels', this.aasxRels);
         zip.file('aasx/data.xml', xml);
         zip.file('aasx/aasx-origin', 'Intentionally empty.');
-        zip.folder('aasx/suppl');
         await aasx.save();
         return aasx;
     }

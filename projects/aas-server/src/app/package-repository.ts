@@ -9,18 +9,29 @@
 import path from 'path';
 import fs from 'fs';
 import { inject, singleton } from 'tsyringe';
-import { PackageDescription, PagedResult, types } from 'aas-core';
+import {
+    noop,
+    PackageDescription,
+    PagedResult,
+    types,
+    ApplicationError,
+    fromAssetAdministrationShell,
+    fromSubmodel,
+    fromConceptDescription,
+} from 'aas-core';
+
 import { FileResult } from 'aas-package';
 
 import { Database } from './db/database.js';
 import { Variable } from './variable.js';
 import { LOGGER, Logger } from './logging/logger.js';
-import { DatabaseEnvironment } from './db/database-types.js';
 import { AddPackageCommand } from './db/commands/add-package-command.js';
 import { UpdatePackageCommand } from './db/commands/update-package-command.js';
 import { DeletePackageCommand } from './db/commands/delete-package-command.js';
-import { HttpCache } from './http-cache.js';
-import { AasxPackage } from './aasx-package.js';
+import { AasxPackageBuilder } from './aasx-package-builder.js';
+import { ERROR } from './error.js';
+import { Table } from './db/database-types.js';
+import { getFiles } from './utilities.js';
 
 @singleton()
 export class PackageRepository {
@@ -28,7 +39,7 @@ export class PackageRepository {
         @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
         @inject(Database) private readonly db: Database,
-        @inject(HttpCache) private readonly cache: HttpCache,
+        @inject(AasxPackageBuilder) private readonly aasxBuilder: AasxPackageBuilder,
     ) {}
 
     public async start(): Promise<void> {
@@ -39,43 +50,95 @@ export class PackageRepository {
     }
 
     public async getPackages(
-        limit?: number,
+        limit: number = 100,
         cursor?: string,
         aasId?: string,
     ): Promise<PagedResult<PackageDescription>> {
-        const query = `?cursor=${cursor}&limit=${limit}&aasId=${aasId}`;
-        let result = this.cache.getResult<PackageDescription>('/packages', query);
-        if (!result) {
-            result = await this.db.getPackages(limit, cursor, aasId);
-            this.cache.setResult('/packages', query, result);
+        noop(aasId);
+        const start = cursor ? JSON.parse(cursor) : 0;
+        const result: PackageDescription[] = [];
+        for await (const item of this.db.packageIndex.getItems(start)) {
+            if (result.length >= limit) {
+                return { result, paging_metadata: { cursor: JSON.stringify(item.key) } };
+            }
+
+            const aasIds: string[] = [];
+            for (const [table, key] of item.tableRefs) {
+                const linkedItem = await this.db.getTable(table).get(key);
+                if (linkedItem) {
+                    aasIds.push(linkedItem.id);
+                }
+            }
+
+            result.push({ packageId: item.id, aasIds });
         }
 
-        return result;
+        return { result, paging_metadata: {} };
     }
 
     public async getPackage(packageId: string): Promise<FileResult> {
-        const key = await this.db.packages.getKey(packageId);
-        const item = await this.db.packages.getItem(key);
-        const file = this.db.packages.getFilePath(key);
-        const tmpFile = path.join(this.db.tmpDir, path.basename(file));
-        await fs.promises.copyFile(file, tmpFile);
-        const env = await this.createEnvironment(item.environment);
-        const aasx = await AasxPackage.createFromFile(tmpFile);
-        await aasx.setEnvironment(env);
-        await aasx.save();
+        const key = await this.db.packageIndex.findKey(packageId);
+        if (key === undefined) {
+            throw new ApplicationError(ERROR.INVALID_PACKAGE_ID, {}, 400);
+        }
 
-        const filename = item.filename;
-        const value = item.filename;
+        const item = await this.db.packageIndex.getItem(key);
+        const filename = item.filename ? String(item.filename) : `${item.id}.aasx`;
+        const tmpFile = path.join(this.db.tmpDir, filename);
+
+        const shells: types.AssetAdministrationShell[] = [];
+        const submodels: types.Submodel[] = [];
+        const conceptDescriptions: types.ConceptDescription[] = [];
+        for (const [table, key] of item.tableRefs) {
+            switch (table) {
+                case Table.AAS_TABLE:
+                    shells.push(fromAssetAdministrationShell(await this.db.shells.readObject(key)));
+                    break;
+                case Table.SUBMODEL_TABLE:
+                    submodels.push(fromSubmodel(await this.db.submodels.readObject(key)));
+                    break;
+                case Table.CONCEPT_DESCRIPTION_TABLE:
+                    conceptDescriptions.push(fromConceptDescription(await this.db.conceptDescriptions.readObject(key)));
+                    break;
+            }
+        }
+
+        const aasx = await this.aasxBuilder.build(
+            tmpFile,
+            new types.Environment(shells, submodels, conceptDescriptions),
+        );
+
+        for (const shell of shells) {
+            const key = await this.db.shells.getKey(shell.id);
+            const dir = this.db.shells.getAssetsDir(key);
+            const files = await getFiles(dir);
+            for (const file of files) {
+                const filePath = path.join(file.parentPath, file.name);
+                const name = path.relative(dir, filePath);
+                await aasx.write(name, fs.createReadStream(filePath));
+            }
+        }
+
+        for (const submodel of submodels) {
+            const key = await this.db.submodels.getKey(submodel.id);
+            const dir = this.db.submodels.getAssetsDir(key);
+            const files = await getFiles(dir);
+            for (const file of files) {
+                const filePath = path.join(file.parentPath, file.name);
+                const name = path.relative(dir, filePath);
+                await aasx.write(name, fs.createReadStream(filePath));
+            }
+        }
+
         const readable = fs.createReadStream(tmpFile);
         const size = (await fs.promises.stat(tmpFile)).size;
-        return { filename, value, readable, size };
+        return { filename, value: filename, readable, size };
     }
 
     public add(sourceFile: string, filename: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             const command = new AddPackageCommand(this.db, resolve, reject, sourceFile, filename);
             this.db.execute(command);
-            this.cache.clear();
         });
     }
 
@@ -83,7 +146,6 @@ export class PackageRepository {
         return new Promise<void>((resolve, reject) => {
             const command = new UpdatePackageCommand(this.db, resolve, reject, packageId, path, filename);
             this.db.execute(command);
-            this.cache.clear();
         });
     }
 
@@ -91,7 +153,6 @@ export class PackageRepository {
         await new Promise<void>((resolve, reject) => {
             const command = new DeletePackageCommand(this.db, resolve, reject, packageId);
             this.db.execute(command);
-            this.cache.clear();
         });
     }
 
@@ -101,40 +162,16 @@ export class PackageRepository {
             return;
         }
 
-        const files = (await fs.promises.readdir(dir, { withFileTypes: true })).filter(
-            entry => entry.isFile() && entry.name.endsWith('.aasx'),
-        );
-
-        try {
-            await Promise.all(
-                files.map(async file => {
-                    try {
-                        await this.add(path.join(file.parentPath, file.name), file.name);
-                        this.logger.info(`${file.name} imported.`);
-                    } catch (error) {
-                        this.logger.error(error);
-                    }
-                }),
-            );
-        } catch (error) {
-            this.logger.error(`Error during import: ${error}`);
+        const files = await getFiles(dir);
+        for (const file of files) {
+            if (file.name.endsWith('.aasx')) {
+                try {
+                    await this.add(path.join(file.parentPath, file.name), file.name);
+                    this.logger.info(`${file.name} imported.`);
+                } catch (error) {
+                    this.logger.error(error);
+                }
+            }
         }
-    }
-
-    private async createEnvironment(item: DatabaseEnvironment): Promise<types.Environment> {
-        const env = new types.Environment([], [], []);
-        for (const key of item.assetAdministrationShells) {
-            env.assetAdministrationShells!.push(await this.db.shells.readShell(key));
-        }
-
-        for (const key of item.submodels) {
-            env.submodels!.push(await this.db.submodels.readSubmodel(key));
-        }
-
-        for (const key of item.conceptDescriptions) {
-            env.conceptDescriptions!.push(await this.db.conceptDescriptions.readConceptDescription(key));
-        }
-
-        return env;
     }
 }

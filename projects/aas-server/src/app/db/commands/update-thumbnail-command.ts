@@ -6,12 +6,9 @@
  *
  *****************************************************************************/
 
-import fs from 'fs';
-import { extensionToMimeType, types } from 'aas-core';
+import { extensionToMimeType, toAssetAdministrationShell, types } from 'aas-core';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { KeyList } from '../key-list.js';
-import { AasxPackage } from '../../aasx-package.js';
 
 export class UpdateThumbnailCommand extends DatabaseCommand {
     public constructor(
@@ -34,13 +31,7 @@ export class UpdateThumbnailCommand extends DatabaseCommand {
 
         const shell = await this.database.shells.readShell(key);
         shell.assetInformation.defaultThumbnail = new types.Resource(this.path, extensionToMimeType(this.path));
-        this.database.shells.writeFile(shell, key);
-
-        for (const packageKey of new KeyList(item.packageKeys)) {
-            const aasxFile = await this.database.packages.createBackup(packageKey);
-            const aasx = await AasxPackage.createFromFile(aasxFile);
-            await aasx.setThumbnail(this.filename, fs.createReadStream(this.path));
-            await aasx.save();
-        }
+        await this.database.shells.writeObject(toAssetAdministrationShell(shell), key);
+        await this.database.shells.writeAsset(key, this.filename, this.path);
     }
 }

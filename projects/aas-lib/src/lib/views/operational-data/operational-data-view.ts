@@ -8,10 +8,9 @@
 
 import { RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { WebSocketSubject } from 'rxjs/webSocket';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, Subscription } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -44,7 +43,7 @@ import {
 
 import { getDisplayName, getUrl } from '../../utilities';
 import { ToolbarService } from '../../services/toolbar.service';
-import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
+import { WebSocketService } from '../../services/web-socket.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { LeafView } from '../leaf-view';
 import { OperationalDataViewState } from './operational-data-view.state';
@@ -73,11 +72,11 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
 export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GroupItem>();
     private readonly toolbar = inject(ToolbarService);
-    private readonly webSocketFactory = inject(WebSocketFactoryService);
+    private readonly webSocket = inject(WebSocketService);
     private readonly state = inject(OperationalDataViewState);
     private readonly currentLang: Signal<string>;
     private liveNodes: LiveNode[] = [];
-    private webSocketSubject?: WebSocketSubject<WebSocketData>;
+    private webSocketSubscription?: Subscription;
 
     public constructor() {
         super();
@@ -130,7 +129,7 @@ export class OperationalDataView extends LeafView implements OnDestroy {
     });
 
     public ngOnDestroy(): void {
-        this.webSocketSubject?.unsubscribe();
+        this.webSocketSubscription?.unsubscribe();
         this.toolbar.clear();
     }
 
@@ -204,19 +203,18 @@ export class OperationalDataView extends LeafView implements OnDestroy {
             return;
         }
 
-        this.webSocketSubject = this.webSocketFactory.create();
-        this.webSocketSubject.subscribe({
+        this.webSocketSubscription = this.webSocket.getMessages().subscribe({
             next: this.onMessage,
             error: this.onError,
         });
 
-        this.webSocketSubject.next(this.createMessage(document));
+        this.webSocket.sendMessage(this.createMessage(document));
     }
 
     private stop(): void {
-        if (this.webSocketSubject) {
-            this.webSocketSubject.unsubscribe();
-            this.webSocketSubject = undefined;
+        if (this.webSocketSubscription) {
+            this.webSocketSubscription.unsubscribe();
+            this.webSocketSubscription = undefined;
         }
     }
 
