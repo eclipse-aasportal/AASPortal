@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { computed, EventEmitter, inject, Injectable, OnDestroy, signal } from '@angular/core';
-import { AASNodeMessage, WebSocketData } from 'aas-core';
+import { AASNodeMessage, AASNodeMessageType, WebSocketData } from 'aas-core';
 import { WebSocketService } from './web-socket.service';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
@@ -40,8 +40,8 @@ export class IndexChange implements OnDestroy {
     public constructor() {
         this.subscription = this.webSocket.getMessages().subscribe({
             next: (data: WebSocketData): void => {
-                if (data.type === 'AASNodeMessage') {
-                    this.update(data.data as AASNodeMessage);
+                if (data.type === 'AASNodeMessage[]') {
+                    this.update(data.data as AASNodeMessage[]);
                 }
             },
             error: (error): void => {
@@ -103,47 +103,41 @@ export class IndexChange implements OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    private update(data: AASNodeMessage): void {
-        switch (data.type) {
-            case 'Added':
-                this.documentAdded();
-                break;
-            case 'Removed':
-                this.documentRemoved();
-                break;
-            case 'Update':
-                this.documentUpdate();
-                break;
-            case 'EndpointAdded':
-                this.endpointAdded();
-                break;
-            case 'EndpointRemoved':
-                this.endpointRemoved();
-                break;
-            case 'Reset':
-                this.reset.emit();
-                this.clear().pipe(first()).subscribe();
-                break;
+    private update(messages: AASNodeMessage[]): void {
+        const groupBy = messages.reduce<Record<string, number>>((group, message) => {
+            const type = message.type;
+            if (group[type] === undefined) {
+                group[type] = 0;
+            } else {
+                group[type]++;
+            }
+
+            return group;
+        }, {});
+
+        for (const type in groupBy) {
+            const count = groupBy[type];
+            switch (type as AASNodeMessageType) {
+                case 'Added':
+                    this.state.update(state => ({ ...state, documentCount: state.documentCount + count }));
+                    break;
+                case 'Removed':
+                    this.state.update(state => ({ ...state, documentCount: state.documentCount - count }));
+                    break;
+                case 'Update':
+                    this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + count }));
+                    break;
+                case 'EndpointAdded':
+                    this.state.update(state => ({ ...state, endpointCount: state.endpointCount + count }));
+                    break;
+                case 'EndpointRemoved':
+                    this.state.update(state => ({ ...state, endpointCount: state.endpointCount - count }));
+                    break;
+                case 'Reset':
+                    this.state.update(state => ({ ...state, documentCount: 0, changedDocuments: 0 }));
+                    this.reset.emit();
+                    break;
+            }
         }
-    }
-
-    private documentAdded(): void {
-        this.state.update(state => ({ ...state, documentCount: state.documentCount + 1 }));
-    }
-
-    private documentRemoved(): void {
-        this.state.update(state => ({ ...state, documentCount: state.documentCount - 1 }));
-    }
-
-    private documentUpdate(): void {
-        this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + 1 }));
-    }
-
-    private endpointAdded(): void {
-        this.state.update(state => ({ ...state, endpointCount: state.endpointCount + 1 }));
-    }
-
-    private endpointRemoved(): void {
-        this.state.update(state => ({ ...state, endpointCount: state.endpointCount - 1 }));
     }
 }

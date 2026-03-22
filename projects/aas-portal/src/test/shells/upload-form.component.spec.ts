@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -21,8 +21,8 @@ describe('UploadFormComponent', () => {
     let component: UploadFormComponent;
     let fixture: ComponentFixture<UploadFormComponent>;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: NgbActiveModal,
@@ -38,7 +38,8 @@ describe('UploadFormComponent', () => {
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],
-        });
+            imports: [UploadFormComponent],
+        }).compileComponents();
 
         fixture = TestBed.createComponent(UploadFormComponent);
         component = fixture.componentInstance;

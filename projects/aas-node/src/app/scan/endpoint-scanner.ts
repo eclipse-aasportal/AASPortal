@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -50,7 +50,7 @@ export abstract class EndpointScanner extends EventEmitter {
                 indexCursor = result.paging_metadata.cursor;
             } while (indexCursor);
         } catch (error) {
-            this.emit('error', `Scanning endpoint "${endpoint}" failed: ${convertToString(error)}`);
+            this.emit('error', `Scanning endpoint "${endpoint.name}" failed: ${convertToString(error)}`);
         } finally {
             await this.close();
         }

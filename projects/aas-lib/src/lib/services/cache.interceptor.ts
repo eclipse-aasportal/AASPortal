@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,7 @@
 
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { inject, Injectable, OnDestroy } from '@angular/core';
-import { Cache, WebSocketData } from 'aas-core';
+import { AASNodeMessage, Cache, WebSocketData } from 'aas-core';
 import { Observable, of, Subscription, tap } from 'rxjs';
 import { WebSocketService } from './web-socket.service';
 
@@ -22,12 +22,18 @@ export class CacheInterceptor extends Cache<string, HttpEvent<unknown>> implemen
     private readonly subscription: Subscription;
 
     public constructor() {
-        super(100);
+        super(100, 5 * 60 * 1000); // Cache size of 100 items and expiration time of 5 minutes
 
         this.subscription = this.webSocket.getMessages().subscribe({
             next: (data: WebSocketData): void => {
-                if (data.type === 'AASNodeMessage') {
-                    this.clear();
+                if (data.type === 'AASNodeMessage[]') {
+                    if (
+                        (data.data as AASNodeMessage[]).some(message =>
+                            ['Reset', 'Removed', 'Update', 'EndpointRemoved'].includes(message.type),
+                        )
+                    ) {
+                        this.clear();
+                    }
                 }
             },
             error: (error): void => {

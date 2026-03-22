@@ -72,7 +72,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem = DataTableItem,
         predicate?: (item: TItem) => boolean,
     ): Promise<PagedResult<TObject>> {
         const { previous, next } = toCursor(cursor);
-        if (next !== null && !previous) {
+        if (next !== null) {
             return await this.getNextPage(limit, next, predicate);
         }
 
@@ -360,7 +360,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem = DataTableItem,
 
         return {
             result,
-            paging_metadata: cursor.next ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
+            paging_metadata: cursor.next !== undefined ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
         };
     }
 
@@ -393,7 +393,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem = DataTableItem,
 
         return {
             result: result.reverse(),
-            paging_metadata: cursor.previous ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
+            paging_metadata: cursor.previous !== undefined ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
         };
     }
 

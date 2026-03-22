@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -47,7 +47,7 @@ describe('IndexChange', () => {
                 {
                     provide: AuthService,
                     useValue: auth,
-                }
+                },
             ],
         });
 
@@ -72,14 +72,16 @@ describe('IndexChange', () => {
     describe.skip('websocket messages', () => {
         it('should update the state on AASNodeMessage', async () => {
             const message = {
-                type: 'AASNodeMessage',
-                data: { 
-                    type: 'Added',
-                },
+                type: 'AASNodeMessage[]',
+                data: [
+                    {
+                        type: 'Added',
+                    },
+                ],
             } satisfies WebSocketData;
 
             webSubject.next(message);
-            await lastValueFrom(webSubject)
+            await lastValueFrom(webSubject);
             expect(service.documentCount()).toBe(43);
             expect(service.endpointCount()).toBe(42);
             expect(service.changedDocuments()).toBe(0);
