@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -20,7 +20,7 @@ import {
     signal,
 } from '@angular/core';
 
-import { AASDocument, WebSocketData } from 'aas-core';
+import { AASDocument } from 'aas-core';
 import { AuthComponent, IndexChange, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
@@ -85,7 +85,7 @@ describe('MainComponent', () => {
                 provideRouter([]),
                 provideZonelessChangeDetection(),
             ],
-            imports: [],
+            imports: [MainComponent],
         }).compileComponents();
 
         TestBed.overrideComponent(MainComponent, {

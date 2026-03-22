@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AppInfo } from 'aas-core';
@@ -60,17 +60,15 @@ describe('AboutComponent', () => {
                     provide: IndexChange,
                     useValue: indexChange,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                AboutComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [AboutComponent],
         }).compileComponents();
     });
 

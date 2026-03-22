@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { WorkerApp } from './worker-app.js';
+import { ScanApp } from './scan-app.js';
 import { AASIndexFactory } from './index/aas-index-factory.js';
 import { LOGGER } from './logging/logger.js';
 import { ConsoleLogger } from './logging/console-logger.js';
@@ -23,5 +23,5 @@ parentPort?.on('close', () => {
 container.register(LOGGER, { useFactory: c => new ConsoleLogger(c.resolve(Variable).LOG_LEVEL) });
 container.register(AAS_INDEX, { useFactory: c => new AASIndexFactory(c).create() });
 
-const app = container.resolve(WorkerApp);
+const app = container.resolve(ScanApp);
 app.run();

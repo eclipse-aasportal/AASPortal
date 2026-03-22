@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,12 +9,12 @@
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { LOGGER, Logger } from './logging/logger.js';
-import { ScanResult, ScanResultKind, WorkerData } from './types.js';
-import { isScanEndpointData, toUint8Array } from './utilities.js';
+import { isScanEndpointData, ScanResult, ScanResultKind, WorkerData } from './types.js';
+import { toUint8Array } from './utilities.js';
 import { EndpointScan } from './endpoint-scan.js';
 
 @singleton()
-export class WorkerApp {
+export class ScanApp {
     public constructor(
         @inject(LOGGER) private readonly logger: Logger,
         @inject(EndpointScan) private readonly endpointScan: EndpointScan,

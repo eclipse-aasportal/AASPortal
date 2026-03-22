@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,10 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest'
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { EMPTY, Subject } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { WebSocketData } from 'aas-core';
 import { NotifyService, StartService, WebSocketService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
@@ -45,7 +43,7 @@ describe('DashboardComponent', () => {
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'save']);
 
-        vi.useFakeTimers
+        vi.useFakeTimers();
 
         HTMLCanvasElement.prototype.getContext = () => {
             return null;

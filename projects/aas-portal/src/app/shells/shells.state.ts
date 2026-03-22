@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { computed, inject, Injectable, linkedSignal, signal, untracked } from '@
 import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { httpResource } from '@angular/common/http';
-import { catchError, from, map, mergeMap, Observable, of, skipWhile, Subject } from 'rxjs';
+import { catchError, from, map, mergeMap, Observable, of, skipWhile, Subject, switchMap } from 'rxjs';
 import { AASCursor, AASDocument, AASDocumentId, AASPagedResult } from 'aas-core';
 import { AuthService, encodeBase64Url, EndpointsApi } from 'aas-lib';
 import { FavoritesService } from './favorites.service';
@@ -86,7 +86,7 @@ export class ShellsState {
         this.subject
             .pipe(
                 takeUntilDestroyed(),
-                mergeMap(documents => this.loadContents(documents)),
+                switchMap(documents => this.loadContents(documents)),
             )
             .subscribe(documents => {
                 this.documents.set(documents);

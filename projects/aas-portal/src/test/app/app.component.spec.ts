@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from '../../app/app.component';
 import { MainComponent } from '../../app/main/main.component';
 
@@ -22,6 +22,9 @@ import { MainComponent } from '../../app/main/main.component';
 class TestMainComponent {}
 
 describe('AppComponent', () => {
+    let fixture: ComponentFixture<AppComponent>;
+    let component: AppComponent;
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             providers: [provideZonelessChangeDetection()],
@@ -36,11 +39,12 @@ describe('AppComponent', () => {
                 imports: [TestMainComponent],
             },
         });
+
+        fixture = TestBed.createComponent(AppComponent);
+        component = fixture.componentInstance;
     });
 
     it('should create the app', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        const app = fixture.componentInstance;
-        expect(app).toBeTruthy();
+        expect(component).toBeTruthy();
     });
 });

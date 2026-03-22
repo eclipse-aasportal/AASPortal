@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -28,17 +28,18 @@ export class HttpClient {
      * @returns The requested object.
      */
     public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
-        let response = this.cache.get(url.toString());
+        const href = url.href;
+        let response = this.cache.get(href);
         if (response) {
             return (await response.json()) as T;
         }
 
-        response = await fetch(url.toString(), { method: 'GET', headers });
+        response = await fetch(href, { method: 'GET', headers });
         if (!response.ok) {
             throw new ApplicationError(response.statusText, {}, response.status);
         }
 
-        this.cache.set(url.toString(), response);
+        this.cache.set(href, response);
         return (await response.json()) as T;
     }
 
@@ -50,14 +51,11 @@ export class HttpClient {
      * @throws If the response status is not OK (status code outside the 200–299 range).
      */
     public async getReadable(url: URL, headers?: Record<string, string>): Promise<NodeJS.ReadableStream> {
-        let response = this.cache.get(url.toString());
+        const href = url.href;
+        let response = this.cache.get(href);
         if (!response) {
-            response = await fetch(url.toString(), {
-                method: 'GET',
-                headers,
-            });
-
-            this.cache.set(url.toString(), response.clone());
+            response = await fetch(href, { method: 'GET', headers });
+            this.cache.set(href, response.clone());
         }
 
         if (!response.ok) {
@@ -81,7 +79,7 @@ export class HttpClient {
      * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
      */
     public async put(url: URL, obj: object, headers: Record<string, string> = {}): Promise<void> {
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url.href, {
             method: 'PUT',
             headers: {
                 ...headers,
@@ -101,7 +99,7 @@ export class HttpClient {
      * @param headers Additional outgoing http headers.
      */
     public async delete(url: URL, headers?: Record<string, string>): Promise<void> {
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url.href, {
             method: 'DELETE',
             headers,
         });
@@ -149,7 +147,7 @@ export class HttpClient {
      * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
      */
     public async postJson(url: URL, obj: object, headers: Record<string, string> = {}): Promise<string> {
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url.href, {
             method: 'POST',
             headers: {
                 ...headers,
@@ -174,7 +172,7 @@ export class HttpClient {
      * @throws {Error} If the response status is not OK (i.e., not in the 2xx range).
      */
     public async postFormData(url: URL, formData: FormData, headers: Record<string, string> = {}): Promise<void> {
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url.href, {
             method: 'POST',
             headers,
             body: formData,
