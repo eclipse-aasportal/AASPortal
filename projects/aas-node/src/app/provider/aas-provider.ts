@@ -276,6 +276,11 @@ export class AASProvider {
      */
     public async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
         const old = await this.index.updateEndpoint(endpoint);
+        this.sender.send({
+            type: 'EndpointUpdate',
+            endpoint: endpoint,
+        });
+
         let task = this.taskHandler.find(endpoint.name, 'ScanEndpoint');
         if (task) {
             if (task.handle) {

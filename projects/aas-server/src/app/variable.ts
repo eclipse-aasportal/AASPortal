@@ -8,6 +8,7 @@
 
 import path from 'path';
 import { singleton } from 'tsyringe';
+import { fileURLToPath } from 'url';
 
 @singleton()
 export class Variable {
@@ -32,7 +33,7 @@ export class Variable {
         : '*';
 
     /** The URL of the database. */
-    public readonly DATA = path.resolve(process.env.DATA ?? './data');
+    public readonly DATA = fileURLToPath(new URL(process.env.DATA ?? './data', import.meta.url));
 
     /** Enables serving static files by AAS Server. If the value is `true`, the AASBrowser web application is activated. */
     public readonly ENABLE_STATIC_FILES = Boolean(process.env.ENABLE_STATIC_FILES);
@@ -50,10 +51,10 @@ export class Variable {
     public readonly LIMIT = Number(process.env.LIMIT ?? '100');
 
     /** The number of items in a page. */
-    public readonly PAGE_SIZE = Number(process.env.CLUSTER_SIZE ?? 100);
+    public readonly PAGE_SIZE = Number(process.env.PAGE_SIZE ?? 100);
 
     /** The root directory for static files. */
-    public readonly WEB_ROOT = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
+    public readonly WEB_ROOT = fileURLToPath(new URL(process.env.WEB_ROOT ?? './wwwroot', import.meta.url));
 
     /** The logging level. */
     public readonly LOG_LEVEL: 'Error' | 'Warning' | 'Info' =

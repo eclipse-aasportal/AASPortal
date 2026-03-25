@@ -30,7 +30,11 @@ export class DirectoryScanner extends EndpointScanner {
         return await this.client.getDocuments(cursor);
     }
 
-    protected override getDocument(address: string): Promise<AASDocument | undefined> {
-        return this.client.createDocument(address);
+    protected override async getDocument(address: string): Promise<AASDocument | undefined> {
+        try {
+            return await this.client.createDocument(address);
+        } catch {
+            return undefined;
+        }
     }
 }

@@ -29,18 +29,19 @@ export class HttpClient {
      */
     public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const href = url.href;
-        let response = this.cache.get(href);
-        if (response) {
-            return (await response.json()) as T;
+        let value = this.cache.get(href) as T | undefined;
+        if (value !== undefined) {
+            return value;
         }
 
-        response = await fetch(href, { method: 'GET', headers });
+        const response = await fetch(href, { method: 'GET', headers });
         if (!response.ok) {
             throw new ApplicationError(response.statusText, {}, response.status);
         }
 
-        this.cache.set(href, response);
-        return (await response.json()) as T;
+        value = (await response.json()) as T;
+        this.cache.set(href, value);
+        return value;
     }
 
     /**
@@ -51,13 +52,7 @@ export class HttpClient {
      * @throws If the response status is not OK (status code outside the 200–299 range).
      */
     public async getReadable(url: URL, headers?: Record<string, string>): Promise<NodeJS.ReadableStream> {
-        const href = url.href;
-        let response = this.cache.get(href);
-        if (!response) {
-            response = await fetch(href, { method: 'GET', headers });
-            this.cache.set(href, response.clone());
-        }
-
+        const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
             throw new ApplicationError(response.statusText, {}, response.status);
         }

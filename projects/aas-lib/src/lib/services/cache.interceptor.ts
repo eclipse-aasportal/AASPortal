@@ -29,7 +29,14 @@ export class CacheInterceptor extends Cache<string, HttpEvent<unknown>> implemen
                 if (data.type === 'AASNodeMessage[]') {
                     if (
                         (data.data as AASNodeMessage[]).some(message =>
-                            ['Reset', 'Removed', 'Update', 'EndpointRemoved'].includes(message.type),
+                            [
+                                'Reset',
+                                'Removed',
+                                'Update',
+                                'EndpointAdded',
+                                'EndpointRemoved',
+                                'EndpointUpdate',
+                            ].includes(message.type),
                         )
                     ) {
                         this.clear();

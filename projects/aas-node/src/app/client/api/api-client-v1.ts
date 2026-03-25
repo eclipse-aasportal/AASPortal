@@ -241,6 +241,7 @@ export class ApiClientV1 extends ApiClient {
 
         return submodels;
     }
+
     private toDocument(shell: aasV2.AssetAdministrationShell): AASDocument {
         return {
             address: shell.identification.id,

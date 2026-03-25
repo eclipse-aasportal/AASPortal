@@ -305,7 +305,10 @@ export class ApiClientV3 extends ApiClient {
             }),
         );
 
-        return result.filter(item => item.status === 'fulfilled').map(item => item.value);
+        return result
+            .filter(item => item.status === 'fulfilled')
+            .map(item => item.value)
+            .sort((a, b) => a.id.localeCompare(b.id));
     }
 
     private async readConceptDescriptions(submodels: aas.Submodel[]): Promise<aas.ConceptDescription[]> {
@@ -343,7 +346,7 @@ export class ApiClientV3 extends ApiClient {
             }
         }
 
-        return conceptDescriptions;
+        return conceptDescriptions.sort((a, b) => a.id.localeCompare(b.id));
     }
 
     private async hasShell(shell: aas.AssetAdministrationShell): Promise<boolean> {
