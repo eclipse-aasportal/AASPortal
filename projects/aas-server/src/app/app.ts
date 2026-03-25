@@ -16,6 +16,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 
 import { Variable } from './variable.js';
 import { LOGGER, Logger } from './logging/logger.js';
@@ -67,6 +68,7 @@ export class App {
             }),
         );
 
+        this.app.use(compression());
         this.app.use(cookieParser());
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
@@ -86,7 +88,6 @@ export class App {
 
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
-        this.app.get('/', this.getIndex);
         if (this.variable.ENABLE_STATIC_FILES) {
             this.app.use(express.static(this.variable.WEB_ROOT));
         }
@@ -94,10 +95,6 @@ export class App {
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
     }
-
-    private getIndex = (req: Request, res: Response): void => {
-        res.sendFile(this.variable.WEB_ROOT + '/index.html');
-    };
 
     private notFoundHandler = (_req: Request, res: Response): void => {
         res.status(404).send({

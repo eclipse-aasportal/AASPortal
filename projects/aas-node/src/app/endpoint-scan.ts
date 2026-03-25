@@ -51,7 +51,11 @@ export class EndpointScan {
     }
 
     private compare = (a: AASDocument, b: AASDocument): void => {
-        if (this.documentChanged(a, b)) {
+        if (
+            a.crc32 !== b.crc32 ||
+            a.thumbnail !== b.thumbnail ||
+            (b.timestamp && Date.now() - b.timestamp > this.variable.AAS_EXPIRES_IN)
+        ) {
             this.postUpdate(b);
         }
     };
@@ -98,16 +102,4 @@ export class EndpointScan {
         const array = toUint8Array(value);
         parentPort?.postMessage(array, [array.buffer]);
     };
-
-    private documentChanged(a: AASDocument, b: AASDocument): boolean {
-        if (
-            a.crc32 === b.crc32 &&
-            a.thumbnail === b.thumbnail &&
-            (!b.timestamp || Date.now() - b.timestamp <= this.variable.AAS_EXPIRES_IN)
-        ) {
-            return false;
-        }
-
-        return true;
-    }
 }

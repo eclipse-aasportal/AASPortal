@@ -70,47 +70,7 @@ export class App {
 
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
-        const spaRoutes = [
-            '/',
-            '/start',
-            '/shells',
-            '/aas',
-            '/views',
-            '/dashboard',
-            '/about',
-            '/views/CustomerFeedback',
-            '/views/Nameplate',
-            '/views/DigitalProductPassport',
-            '/views/HandoverDocumentation',
-            '/views/Browser',
-            '/views/Laser',
-        ];
-
-        this.app.get(spaRoutes, this.getIndex);
-
         this.app.use(express.static(this.variable.WEB_ROOT));
-
-        this.app.get(/^\/(?!api|assets|media).*/, (req, res, next) => {
-            const acceptsHtml = (req.headers.accept ?? '').includes('text/html');
-
-            if (!acceptsHtml) {
-                return next();
-            }
-
-            if (req.originalUrl.includes(';')) {
-                this.logger.info(
-                    `[SPA] Matrix params detected for ${req.method} ${req.originalUrl} (path: ${req.path})`,
-                );
-                return this.getIndex(req, res);
-            }
-
-            if (spaRoutes.some(route => req.path.startsWith(route))) {
-                return this.getIndex(req, res);
-            }
-
-            return next();
-        });
-
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
     }
@@ -122,10 +82,5 @@ export class App {
         res.status(404).send({
             message: 'Not Found',
         });
-    };
-
-    private getIndex = (req: Request, res: Response): void => {
-        this.logger.info(`[SPA] Serving index.html for ${req.method} ${req.originalUrl} (path: ${req.path})`);
-        res.sendFile(this.variable.WEB_ROOT + '/index.html');
     };
 }

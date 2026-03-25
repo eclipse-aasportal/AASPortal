@@ -35,6 +35,8 @@ export abstract class EndpointScanner extends EventEmitter {
                 endpointCursor = result.paging_metadata.cursor;
             } while (endpointCursor);
 
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             let indexCursor: string | undefined;
             do {
                 const result = await index.getEndpointDocuments(endpoint.name, indexCursor);

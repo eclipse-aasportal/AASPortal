@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASDocument, PagedResult } from 'aas-core';
+import { AASDocument, noop, PagedResult } from 'aas-core';
 import { ApiClient } from '../client/api/api-client.js';
 import { EndpointScanner } from './endpoint-scanner.js';
 
@@ -37,11 +37,16 @@ export class AASServerScanner extends EndpointScanner {
      * @param cursor The cursor for pagination. If undefined, the first page will be returned.
      * @returns A page of AAS identifiers.
      */
-    protected override getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>> {
+    protected override async getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>> {
         return this.client.getDocuments(cursor);
     }
 
-    protected override getDocument(address: string): Promise<AASDocument | undefined> {
-        return this.client.createDocument(address);
+    protected override async getDocument(address: string): Promise<AASDocument | undefined> {
+        try {
+            return await this.client.createDocument(address);
+        } catch (error) {
+            noop(error);
+            return undefined;
+        }
     }
 }

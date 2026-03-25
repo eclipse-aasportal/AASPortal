@@ -8,9 +8,9 @@
 
 import { computed, EventEmitter, inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { AASNodeMessage, AASNodeMessageType, WebSocketData } from 'aas-core';
-import { WebSocketService } from './web-socket.service';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
+import { WebSocketService } from './web-socket.service';
 import { AuthService } from '../components/auth/auth.service';
 
 type State = {
@@ -108,10 +108,9 @@ export class IndexChange implements OnDestroy {
             const type = message.type;
             if (group[type] === undefined) {
                 group[type] = 0;
-            } else {
-                group[type]++;
             }
 
+            group[type]++;
             return group;
         }, {});
 
