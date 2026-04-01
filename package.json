@@ -62,7 +62,7 @@
         "@ngx-translate/core": "^17.0.0",
         "@ngx-translate/http-loader": "^17.0.0",
         "@popperjs/core": "^2.11.8",
-        "@xmldom/xmldom": "^0.8.10",
+        "@xmldom/xmldom": "^0.8.12",
         "bcryptjs": "^3.0.3",
         "bootstrap": "^5.3.8",
         "bootstrap-icons": "^1.13.1",
