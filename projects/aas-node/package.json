@@ -34,7 +34,7 @@
         "multer": "^2.0.2",
         "mysql2": "^3.16.0",
         "nanoid": "^5.1.6",
-        "node-opcua": "^2.159.0",
+        "node-opcua": "^2.168.0",
         "node-opcua-client-crawler": "^2.127.1",
         "nodemailer": "^7.0.12",
         "reflect-metadata": "^0.2.2",
