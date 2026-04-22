@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
@@ -66,7 +66,7 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     templateUrl: './operational-data-view.html',
     styleUrl: './operational-data-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'OperationalData' }],
-    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterModule],
+    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterLink],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationalDataView extends LeafView implements OnDestroy {
@@ -101,7 +101,7 @@ export class OperationalDataView extends LeafView implements OnDestroy {
         });
     }
 
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('laserToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public readonly groups = computed<Group[]>(() => {
         this.map.clear();

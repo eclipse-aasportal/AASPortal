@@ -17,6 +17,7 @@ import { NameplateView } from './nameplate/nameplate-view';
 import { OperationalDataView } from './operational-data/operational-data-view';
 import { TechnicalDataView } from './technical-data/technical-data-view';
 import { HierarchicalStructureView } from './hierarchical-structure/hierarchical-structure-view';
+import { ServiceRequestNotification } from './service-request-notification/service-request-notification';
 import {
     CARBON_FOOTPRINT_0_9,
     CARBON_FOOTPRINT_1_0,
@@ -112,6 +113,14 @@ export const viewRoutes: ViewRoute[] = [
         data: {
             type: 'Leaf',
             idShorts: ['OperationalData'],
+        },
+    },
+    {
+        path: 'ServiceRequestNotification',
+        component: ServiceRequestNotification,
+        data: {
+            type: 'Leaf',
+            idShorts: ['ServiceRequestNotification'],
         },
     },
     {

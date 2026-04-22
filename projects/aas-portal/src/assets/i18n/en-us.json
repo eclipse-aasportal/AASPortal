@@ -382,5 +382,8 @@
     },
     "HierarchicalStructure": {
         "TITLE": "Hierarchical Structures"
+    },
+    "ServiceRequestNotification": {
+        "TITLE": "Service Request Notification"
     }
 }

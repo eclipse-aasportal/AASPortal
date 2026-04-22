@@ -98,7 +98,8 @@
                 "test",
                 "aas-lib",
                 "--debug",
-                "--include ${file}"
+                "--include",
+                "${file}"
             ],
         },
         {
