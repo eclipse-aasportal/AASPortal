@@ -58,7 +58,6 @@ describe('NameplateView', () => {
     let document: AASDocument;
 
     beforeEach(async () => {
-        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
@@ -79,6 +78,7 @@ describe('NameplateView', () => {
             },
         );
 
+        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         api.getDocument.mockReturnValue(of(document));
 
         await TestBed.configureTestingModule({

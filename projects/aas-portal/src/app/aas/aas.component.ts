@@ -421,7 +421,6 @@ export class AASComponent implements OnInit, OnDestroy {
         // Data-related
 
         const semId = this.getSubmodelSemanticId(submodel);
-        if (!semId) return 'bi-question-circle';
 
         if (semId.toLowerCase().includes('document') || submodel.idShort.toLowerCase().includes('document'))
             return 'bi-file-earmark-richtext';
@@ -435,6 +434,10 @@ export class AASComponent implements OnInit, OnDestroy {
             return 'bi-graph-up';
         if (semId.toLowerCase().includes('structure') || submodel.idShort.toLowerCase().includes('structure'))
             return 'bi-diagram-3';
+        if (semId.toLowerCase().includes('assetstatus') || submodel.idShort.toLowerCase().includes('assetstatus'))
+            return 'bi-info-circle';
+        if (semId.toLowerCase().includes('servicerequest') || submodel.idShort.toLowerCase().includes('servicerequest'))
+            return 'bi-person-gear';
 
         return 'bi-question-circle';
     }

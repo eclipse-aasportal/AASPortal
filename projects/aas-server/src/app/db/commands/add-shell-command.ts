@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import { nanoid } from 'nanoid';
 import { aas, ApplicationError, jsonization, toAssetAdministrationShell, toJsonValue, types } from 'aas-core';
 
 import { DatabaseCommand } from '../database-command.js';

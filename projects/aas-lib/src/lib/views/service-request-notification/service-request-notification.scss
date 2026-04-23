@@ -6,14 +6,6 @@
  *
  *****************************************************************************/
 
-export type FileResult = {
-    filename: string;
-    value: string;
-    readable: NodeJS.ReadableStream;
-    size?: number;
-    contentType?: string;
-};
-
-export interface HTMLDocumentElement extends HTMLElement {
-    _nsMap: { [key: string]: string };
+ .label {
+    font-size: 15px;
 }
