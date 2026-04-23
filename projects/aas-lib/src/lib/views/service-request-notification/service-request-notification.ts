@@ -25,7 +25,7 @@ import { encodeBase64Url, toString } from '../../utilities';
 import { StartService } from '../../services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
-import { LangChangeEvent, TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -177,8 +177,4 @@ export class ServiceRequestNotification extends LeafView implements OnDestroy {
 
         return toString(submodel, 'ReportedBy.ContactInformation.Phone', this.currentLang());
     });
-
-    
-
-
 }
