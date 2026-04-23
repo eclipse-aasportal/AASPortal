@@ -10,7 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { inject, singleton } from 'tsyringe';
-import express, { Express, Request, Response, json, urlencoded } from 'express';
+import express, { Express, NextFunction, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
@@ -71,6 +71,13 @@ export class App {
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
         this.app.use(express.static(this.variable.WEB_ROOT));
+        this.app.use((req: Request, res: Response, next: NextFunction) => {
+            if (!req.path.startsWith('/api/') && req.accepts('html')) {
+                res.sendFile(path.join(this.variable.WEB_ROOT, 'index.html'));
+            } else {
+                next();
+            }
+        });
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
     }
