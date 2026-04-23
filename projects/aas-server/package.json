@@ -20,7 +20,7 @@
         "start": "docker build -f Dockerfile -t aasserver . && docker run -d --name AASServer -p 50010:50010 --restart=always aasserver"
     },
     "dependencies": {
-        "@xmldom/xmldom": "^0.8.10",
+        "@xmldom/xmldom": "^0.8.13",
         "bcryptjs": "^3.0.3",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
